@@ -3,7 +3,6 @@
   "description": "Official PHP client SDK for AXIAM IAM",
   "type": "library",
   "license": "Apache-2.0",
-  "version": "0.0.0",
   "require": {
     "php": ">=8.1",
     "guzzlehttp/guzzle": "^7.13",
@@ -48,12 +47,18 @@
   },
   "scripts": {
     "test": "phpunit",
-    "test-unit": "phpunit --testsuite=unit"
+    "test-unit": "phpunit --testsuite=unit",
+    "phpstan": "phpstan analyse --memory-limit=512M",
+    "docblock-coverage": "@php tools/docblock-coverage.php",
+    "grpc-gen": "@php tools/grpc-gen.php"
+  },
+  "scripts-descriptions": {
+    "grpc-gen": "Regenerate the committed protobuf message stubs in src/Grpc/Gen/ from proto/ (requires protoc on PATH)."
   },
   "keywords": ["axiam", "iam", "auth", "authentication", "authorization"],
-  "homepage": "https://github.com/ilpanich/axiam",
+  "homepage": "https://github.com/ilpanich/axiam-php-sdk",
   "support": {
-    "source": "https://github.com/ilpanich/axiam/tree/main/sdks/php",
-    "issues": "https://github.com/ilpanich/axiam/issues"
+    "source": "https://github.com/ilpanich/axiam-php-sdk",
+    "issues": "https://github.com/ilpanich/axiam-php-sdk/issues"
   }
 }

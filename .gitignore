@@ -4,3 +4,11 @@ composer.lock
 
 # phpDocumentor build cache/output (generated in CI, never committed)
 .phpdoc/
+_docs_out/
+
+# Coverage report (generated in CI, uploaded to Coveralls)
+coverage.xml
+
+# protoc scratch space for `composer grpc-gen` — the stubs it produces are
+# relocated into src/Grpc/Gen/ and committed from there.
+/build/
