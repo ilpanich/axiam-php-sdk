@@ -1,0 +1,174 @@
+name: SDK CI — PHP
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  scaffold-check:
+    name: SDK Scaffold Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - name: Verify LICENSE file
+        run: test -f LICENSE
+
+  build-test:
+    name: Build, test, TLS-bypass gate
+    # No event-name restriction: this job runs BOTH on a pull_request AND on
+    # a tag push (vX.Y.Z) — the publish job below is gated behind it via
+    # `needs:`, so a tag can only publish after validate/install/test/the
+    # SC#4 TLS-bypass grep gate have all passed on that exact tagged commit.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      # NOTE: shivammathur/setup-php has no pre-existing pin anywhere else in
+      # this repository's workflows to reuse (unlike actions/checkout, which
+      # is SHA-pinned repo-wide) and this environment has no GitHub network
+      # egress to source a new commit SHA (RESEARCH.md environment
+      # constraint). Using the major-version tag is a documented,
+      # narrowly-scoped exception.
+      # maintainer: repin to a commit SHA once GitHub network egress is
+      # available in this environment.
+      # PHP 8.2 is the TEST runtime, not the SDK's minimum. The package itself
+      # still supports `php: >=8.1` (all four runtime deps — guzzle,
+      # php-amqplib, php-jwt, psr/log — resolve on 8.1), but the require-dev
+      # framework bridges do not: illuminate/support ^11 and symfony/* ^7 both
+      # require PHP ^8.2, so `composer install` (which installs dev deps) is
+      # unsatisfiable on 8.1 and the job died before running a single test.
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2.37.2
+        with:
+          php-version: '8.2'
+          extensions: sodium
+          coverage: none
+
+      # SC#5: composer validate + install + the full PHPUnit suite — SC#2
+      # single-flight refresh (SingleFlightRefreshTest), CR-04 redaction
+      # (SensitiveRedactionTest), the AMQP HMAC verify-before-handler matrix
+      # (HmacVerifyTest), JWKS EdDSA verification (JwksVerifierTest), the
+      # extension_loaded('grpc') REST-fallback proof
+      # (AuthzDispatcherFallbackTest), and both framework-bridge tests
+      # (LaravelMiddlewareTest, SymfonyAuthSubscriberTest).
+      #
+      # --strict (not --no-check-publish): this repository IS the Packagist
+      # source, so the manifest must satisfy every publish-time requirement on
+      # every PR — not just at tag time, when a failure would be too late.
+      - name: composer validate (SC#5)
+        run: composer validate --strict
+
+      - name: composer install
+        run: composer install --no-interaction --prefer-dist
+
+      - name: composer test (SC#5)
+        run: composer test
+
+      - name: Dependency vulnerability scan (CI-03)
+        run: composer audit --no-interaction
+
+      # PHPStan level 6 (phpstan.neon.dist, excludes generated src/Grpc/Gen).
+      - name: PHPStan level 6
+        run: vendor/bin/phpstan analyse --memory-limit=512M
+
+      # Docblock-coverage gate. phpstan checks what a docblock SAYS but never that
+      # one EXISTS, so without this the published API reference (phpDocumentor)
+      # silently rots as new public methods land undocumented. Generated protobuf
+      # stubs (src/Grpc/Gen) are excluded — see the script's header.
+      - name: Docblock coverage (public API must be 100% documented)
+        run: php tools/docblock-coverage.php
+
+      # D-12/SC#4: strict TLS is always on; the ONLY escape hatch is the
+      # additive `customCa` CA-bundle-path pattern — there must be no Guzzle
+      # `verify => false` (or equivalent TLS-verification-disable) surface
+      # anywhere in the SDK's OWN source tree, including examples and tests.
+      # `vendor/` is excluded — by this point in the job `composer install`
+      # (above) has populated it with third-party dependency test/demo fixtures
+      # (e.g. php-amqplib's SSLConnectionTest, Guzzle's own test suite) that
+      # legitimately use `verify_peer`/`verify => false` in their OWN test
+      # code; the gate's purpose is to police this SDK's shipped surface, not
+      # third-party dependencies bundled for local development.
+      - name: TLS-bypass gate — no TLS-bypass patterns (D-12/SC#4)
+        run: |
+          set +e
+          matches=$(grep -rn 'verify.*=>.*false' . --include=*.php --exclude-dir=vendor | grep -v customCa)
+          set -e
+          if [ -n "$matches" ]; then
+            echo "::error::TLS-bypass gate failed — disallowed 'verify => false' usage found (only the additive customCa CA-bundle pattern is permitted):"
+            echo "$matches"
+            exit 1
+          fi
+          echo "TLS-bypass gate passed — no disallowed usage found."
+
+  # Publishing to a public registry is IRREVERSIBLE — Packagist, like crates.io,
+  # npm, PyPI, Maven Central and NuGet, refuses to re-use a version number. Git
+  # tags are NOT branch-scoped, so without this gate a release tag cut on a
+  # feature branch would ship unreviewed code to the world under a version that
+  # can never be reclaimed. The publish job below `needs:` this.
+  verify-tag-on-main:
+    name: Verify tag is on main
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Assert the tagged commit is an ancestor of origin/main
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} points at ${GITHUB_SHA}, which is NOT on origin/main. Release tags must be cut from main."
+            exit 1
+          fi
+          echo "OK: ${GITHUB_REF_NAME} (${GITHUB_SHA}) is on origin/main."
+
+  publish:
+    name: Publish to Packagist
+    # Manual-on-tag job: only runs when a maintainer pushes a vX.Y.Z tag, and
+    # only after build-test (validate/install/test/PHPStan/TLS-gate) has passed
+    # on that exact tagged commit.
+    #
+    # There is NO push step and NO secret here, by design. Packagist does not
+    # accept an upload — it PULLS. This repository is registered on Packagist as
+    # the source of `axiam/axiam-sdk`, and Packagist's GitHub webhook fires on
+    # the tag push, at which point Packagist reads composer.json at the tag and
+    # derives the version from the tag name itself. (That is also why
+    # composer.json carries no `version` field: a hardcoded one would override
+    # the tag and publish every release as the same version.)
+    #
+    # This job's remaining job is therefore to be the last gate before that
+    # webhook's effect becomes permanent: assert the manifest is publishable.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [build-test, verify-tag-on-main]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2.37.2
+        with:
+          php-version: '8.2'
+          extensions: sodium
+          coverage: none
+
+      - name: composer validate --strict (manifest must be publishable)
+        run: composer validate --strict
+
+      - name: Packagist picks up the tag via its GitHub webhook
+        run: |
+          set -euo pipefail
+          echo "Tag ${GITHUB_REF_NAME} is on main and build-test passed on ${GITHUB_SHA}."
+          echo "Packagist auto-updates https://packagist.org/packages/axiam/axiam-sdk from this"
+          echo "repository's registered GitHub webhook — no push, no API key, no secret is needed."
+          echo "If the release does not appear within a few minutes, check that the repository is"
+          echo "submitted on packagist.org and that Settings -> Webhooks shows a green delivery."

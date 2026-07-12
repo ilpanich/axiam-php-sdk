@@ -1,0 +1,49 @@
+name: Coverage
+
+# Line coverage for the PHPUnit suite, reported to Coveralls.
+#
+# `coverage: pcov` on setup-php is load-bearing: sdk-ci-php.yml deliberately sets
+# `coverage: none` (no driver = a measurably faster test run), and with no driver
+# installed PHPUnit does not fail — it prints "No code coverage driver available"
+# and writes an EMPTY report, which Coveralls would happily ingest as 0%. pcov is
+# chosen over xdebug because it is coverage-only and several times faster; nothing
+# here needs xdebug's debugger/profiler.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    name: PHPUnit coverage -> Coveralls
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+
+      # See sdk-ci-php.yml for why this action is pinned to a tag-derived SHA and
+      # why the test runtime is 8.2 rather than the package minimum of 8.1.
+      - name: Set up PHP 8.2 (with pcov)
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2.37.2
+        with:
+          php-version: '8.2'
+          extensions: sodium
+          coverage: pcov
+
+      - name: composer install
+        run: composer install --no-interaction --prefer-dist
+
+      # phpunit.xml.dist's <coverage><include> already scopes measurement to src/.
+      - name: PHPUnit with Clover coverage
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b  # v2.3.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          format: clover
+          file: coverage.xml
