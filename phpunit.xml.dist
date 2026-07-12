@@ -12,7 +12,9 @@
         <testsuite name="unit">
             <directory suffix="Test.php">tests</directory>
             <exclude>tests/LaravelMiddlewareTest.php</exclude>
+            <exclude>tests/LaravelAuthMiddlewareTest.php</exclude>
             <exclude>tests/SymfonyAuthSubscriberTest.php</exclude>
+            <exclude>tests/SymfonyAuthEdgeSubscriberTest.php</exclude>
         </testsuite>
         <!-- Laravel/Symfony bridge tests (wave-5 plans) require the dev-only
              illuminate/* and symfony/* packages declared in require-dev. -->
