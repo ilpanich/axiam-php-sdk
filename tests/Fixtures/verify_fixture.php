@@ -11,7 +11,7 @@ declare(strict_types=1);
  * `ed25519_jwks.json` via firebase/php-jwt: parses the JWKS with `JWK::parseKeySet`,
  * decodes the JWT, and prints the `tenant_id` claim. Exits non-zero on any failure.
  *
- * Run: `cd sdks/php && php tests/Fixtures/verify_fixture.php`
+ * Run: `php tests/Fixtures/verify_fixture.php`
  */
 
 require __DIR__ . '/../../vendor/autoload.php';

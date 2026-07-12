@@ -367,7 +367,7 @@ final class AxiamClient
     /**
      * Maps a `LoginSuccessResponse` (HTTP 200) or `MfaRequiredResponse` (HTTP 202) — the two
      * non-error outcomes of both `POST /api/v1/auth/login` and `POST /api/v1/auth/mfa/verify`
-     * (sdks/openapi.json) — to a typed {@see LoginResult}. Any other status is a mapped error.
+     * (openapi.json) — to a typed {@see LoginResult}. Any other status is a mapped error.
      */
     private function handleLoginResponse(ResponseInterface $response): LoginResult
     {

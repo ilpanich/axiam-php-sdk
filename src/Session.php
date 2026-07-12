@@ -99,8 +99,8 @@ final class Session
     /**
      * The current access token, read live from the shared cookie jar's `axiam_access`
      * entry rather than cached separately — avoids a second, potentially-stale, copy
-     * of the token (mirrors `sdks/java`'s `SessionState::cachedAccessToken()` and
-     * `sdks/go`'s `cookieValue()` helper).
+     * of the token (mirrors the Java SDK's `SessionState::cachedAccessToken()` and
+     * the Go SDK's `cookieValue()` helper).
      */
     public function accessToken(): ?string
     {
@@ -157,7 +157,7 @@ final class Session
     }
 
     /**
-     * Builds the `/api/v1/auth/refresh` request per `sdks/openapi.json`'s
+     * Builds the `/api/v1/auth/refresh` request per `openapi.json`'s
      * `RefreshRequest` schema (`{tenant_id, org_id}`, both UUIDs — there is no
      * `tenant` slug field on this endpoint). Both identifiers are resolved from the
      * CURRENT access token's unverified claims (mirrors the C# sibling's

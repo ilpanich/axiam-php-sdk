@@ -7,6 +7,8 @@ Identity and Authorization Management.
 
 - **Packagist package:** `axiam/axiam-sdk`
 - **Registry:** [packagist.org/packages/axiam/axiam-sdk](https://packagist.org/packages/axiam/axiam-sdk) _(reserved, not yet published)_
+- **Source:** [github.com/ilpanich/axiam-php-sdk](https://github.com/ilpanich/axiam-php-sdk)
+- **API reference:** [ilpanich.github.io/axiam-php-sdk](https://ilpanich.github.io/axiam-php-sdk/)
 - **License:** Apache-2.0
 - **PHP:** `>=8.1`
 
@@ -84,7 +86,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`../CONTRACT.md`](../CONTRACT.md) §1–§10 — the binding,
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§10 — the binding,
 cross-language behavioral contract every AXIAM SDK implements: camelCase method names
 (§1), the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2), non-browser
 `X-CSRF-Token` response-header capture (§3), a shared Guzzle `CookieJar` (§4), a required
@@ -167,3 +169,22 @@ composer test
 Runs the full PHPUnit suite: single-flight refresh concurrency (SC#2), `Sensitive`
 redaction (CR-04), AMQP HMAC verification, JWKS/EdDSA verification, the
 `extension_loaded('grpc')` REST-fallback guard, and both framework-bridge tests.
+
+## Regenerating the gRPC stubs
+
+The protobuf message classes under `src/Grpc/Gen/` are `protoc` output, generated from
+[`proto/axiam/v1/authorization.proto`](proto/axiam/v1/authorization.proto) and **committed
+to this repository** — that is what lets `composer require axiam/axiam-sdk` work with no
+protobuf toolchain on your machine, and what keeps gRPC a `suggest` rather than a hard
+dependency. Unlike the other AXIAM SDKs, PHP does not use `buf` (D-03); it invokes `protoc`
+directly.
+
+You only need this when `proto/` changes:
+
+```bash
+composer grpc-gen    # requires protoc on PATH; no grpc_php_plugin needed
+git diff src/Grpc/Gen
+```
+
+The service client (`src/Grpc/AuthzGrpcClient.php`) is hand-written against
+`\Grpc\BaseStub` and is **not** generated — do not overwrite it.

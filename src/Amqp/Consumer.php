@@ -12,7 +12,7 @@ use Psr\Log\NullLogger;
 
 /**
  * php-amqplib blocking consume loop with HMAC verify-before-handler
- * (sdks/CONTRACT.md §8, D-04).
+ * (CONTRACT.md §8, D-04).
  *
  * This is NOT a web-request path — `consume()` blocks on `$channel->wait()`
  * for the lifetime of the process. It is meant to run on a long-running

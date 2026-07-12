@@ -31,7 +31,7 @@ use Psr\Http\Message\ResponseInterface;
  * Deliberately does NOT use firebase/php-jwt's `CachedKeySet` convenience class — it
  * requires a PSR-18 client + PSR-17 request factory + PSR-6 cache pool, a dependency
  * chain D-07 explicitly avoids. This hand-rolled TTL cache mirrors every sibling SDK's
- * own JWKS-cache shape (e.g. `sdks/python/src/axiam_sdk/_jwks.py`).
+ * own JWKS-cache shape (e.g. the Python SDK's `_jwks.py`).
  *
  * `verify()` never throws on attacker-controlled token input — malformed/short/
  * non-3-part tokens, unknown algorithms, unknown kids, and bad signatures all return

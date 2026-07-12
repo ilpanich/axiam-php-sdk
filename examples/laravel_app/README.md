@@ -28,7 +28,7 @@ mechanism reads this package's `composer.json`:
 and registers `Axiam\Sdk\Laravel\AxiamServiceProvider` automatically. You do **not**
 need to add anything to `config/app.php`'s `providers` array, and you do **not** need a
 `bootstrap/providers.php` entry (Laravel 11+) either. This is the accurate half of D-01's
-"first-class, auto-discovered bridges" — the Symfony bridge (`sdks/php/src/Symfony/`) has
+"first-class, auto-discovered bridges" — the Symfony bridge (`src/Symfony/`) has
 no equivalent zero-config mechanism without a published Flex recipe, and its README says
 so explicitly; do not assume Symfony gets the same experience.
 
@@ -87,11 +87,11 @@ bundle a bootable Laravel application). To try it against a real Laravel install
 ```bash
 composer create-project laravel/laravel axiam-laravel-demo
 cd axiam-laravel-demo
-composer config repositories.axiam-sdk path ../axiam/sdks/php
+composer config repositories.axiam-sdk path ../axiam-php-sdk
 composer require axiam/axiam-sdk:@dev
 
 # Copy this example's routes into your app:
-cat ../axiam/sdks/php/examples/laravel_app/routes.php >> routes/web.php
+cat ../axiam-php-sdk/examples/laravel_app/routes.php >> routes/web.php
 
 # Configure the client:
 echo 'AXIAM_BASE_URL=https://localhost:8443' >> .env
@@ -110,4 +110,4 @@ hatch (§6/D-12).
 
 ## Contract conformance
 
-This SDK conforms to CONTRACT.md §1–§10. See [`../../../CONTRACT.md`](../../../CONTRACT.md).
+This SDK conforms to CONTRACT.md §1–§10. See [`../../CONTRACT.md`](../../CONTRACT.md).

@@ -6,7 +6,7 @@ namespace Axiam\Sdk\Amqp;
 
 /**
  * HMAC-SHA256 verify-before-handler primitive for inbound AMQP messages
- * (sdks/CONTRACT.md §8).
+ * (CONTRACT.md §8).
  *
  * Byte-for-byte port of crates/axiam-amqp/src/messages.rs::verify_payload.
  * Never throws — malformed input verifies as false (strict-mode default, §8.3).

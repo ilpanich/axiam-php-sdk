@@ -17,7 +17,7 @@ use Psr\Http\Message\ResponseInterface;
  * no path that stores the raw `$response` object (or any wrapped exception that might
  * itself carry one) as this exception's message, cause, or any other property — this
  * structurally prevents the token-leak-via-error class of bug first found in the
- * TypeScript sibling SDK (Phase 17 CR-04, `sdks/typescript/src/core/errorMapper.ts`
+ * TypeScript sibling SDK (Phase 17 CR-04, its `src/core/errorMapper.ts`
  * `sanitizeAxiosError`) and mirrored by every later sibling SDK's `NetworkError`.
  */
 final class NetworkError extends AxiamException

@@ -130,10 +130,10 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
         /**
          * Bearer header first, cookie fallback second — the SAME ordering as every
          * sibling SDK's own auth middleware/subscriber (e.g. this SDK's own
-         * `Laravel\AxiamMiddleware::extractToken()`, `sdks/python/src/axiam_sdk/django/
-         * middleware.py`'s `_extract_token`, `sdks/go/middleware/nethttp.go`'s
-         * `extractToken`), a Shared Pattern documented across every framework bridge in
-         * this repository.
+         * `Laravel\AxiamMiddleware::extractToken()`, the Python SDK's
+         * `django/middleware.py` `_extract_token`, the Go SDK's
+         * `middleware/nethttp.go` `extractToken`), a Shared Pattern documented across
+         * every framework bridge in every AXIAM SDK.
          *
          * Returns which source the credential came from so {@see self::onKernelRequest()}
          * can gate state-changing cookie-sourced requests behind the CSRF double-submit

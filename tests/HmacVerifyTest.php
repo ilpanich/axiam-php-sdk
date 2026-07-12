@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Proves Hmac::verify reproduces the server's byte-for-byte wire-order
- * canonical JSON HMAC-SHA256 (sdks/CONTRACT.md §8) against the real,
+ * canonical JSON HMAC-SHA256 (CONTRACT.md §8) against the real,
  * Rust-signed tests/Fixtures/amqp_hmac_vectors.json vectors.
  */
 final class HmacVerifyTest extends TestCase

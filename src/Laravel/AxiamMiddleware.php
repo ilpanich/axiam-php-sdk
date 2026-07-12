@@ -121,8 +121,8 @@ final class AxiamMiddleware
 
     /**
      * Bearer header first, cookie fallback second — the SAME ordering as every sibling
-     * SDK's own auth middleware (e.g. `sdks/python/src/axiam_sdk/django/middleware.py`'s
-     * `_extract_token`, `sdks/go/middleware/nethttp.go`'s `extractToken`), a Shared
+     * SDK's own auth middleware (e.g. the Python SDK's `django/middleware.py`
+     * `_extract_token`, the Go SDK's `middleware/nethttp.go` `extractToken`), a Shared
      * Pattern documented across every framework bridge in this repository.
      *
      * Returns which source the credential came from so {@see self::handle()} can gate

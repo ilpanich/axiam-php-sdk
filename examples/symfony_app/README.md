@@ -135,7 +135,7 @@ bundle a bootable Symfony kernel). To try it against a real Symfony installation
 composer create-project symfony/skeleton axiam-symfony-demo
 cd axiam-symfony-demo
 composer require symfony/security-bundle
-composer config repositories.axiam-sdk path ../axiam/sdks/php
+composer config repositories.axiam-sdk path ../axiam-php-sdk
 composer require axiam/axiam-sdk:@dev
 
 # Manual step 1 (Pitfall 5): add the bundle entry from bundles.php to your own
@@ -161,4 +161,4 @@ hatch (§6/D-12).
 
 ## Contract conformance
 
-This SDK conforms to CONTRACT.md §1–§10. See [`../../../CONTRACT.md`](../../../CONTRACT.md).
+This SDK conforms to CONTRACT.md §1–§10. See [`../../CONTRACT.md`](../../CONTRACT.md).

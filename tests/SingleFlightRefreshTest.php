@@ -37,7 +37,7 @@ use PHPUnit\Framework\TestCase;
  * Also asserts the refresh request BODY (not just the call count): the fixture access
  * token seeded into the shared cookie jar carries `tenant_id`/`org_id` claims, and the
  * captured `/api/v1/auth/refresh` request must send exactly `{tenant_id, org_id}` per
- * `sdks/openapi.json`'s `RefreshRequest` schema — never a bare `tenant` slug field
+ * `openapi.json`'s `RefreshRequest` schema — never a bare `tenant` slug field
  * (the pre-fix defect: see `Session::refreshIfNeeded()`'s doc comment).
  */
 final class SingleFlightRefreshTest extends TestCase
@@ -147,12 +147,12 @@ final class SingleFlightRefreshTest extends TestCase
         self::assertSame(
             self::FIXTURE_TENANT_ID,
             $refreshBody['tenant_id'] ?? null,
-            'refresh request body must carry tenant_id resolved from the access token claims (sdks/openapi.json RefreshRequest)',
+            'refresh request body must carry tenant_id resolved from the access token claims (openapi.json RefreshRequest)',
         );
         self::assertSame(
             self::FIXTURE_ORG_ID,
             $refreshBody['org_id'] ?? null,
-            'refresh request body must carry org_id resolved from the access token claims (sdks/openapi.json RefreshRequest)',
+            'refresh request body must carry org_id resolved from the access token claims (openapi.json RefreshRequest)',
         );
         self::assertArrayNotHasKey(
             'tenant',
