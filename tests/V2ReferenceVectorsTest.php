@@ -41,7 +41,18 @@ use PHPUnit\Framework\TestCase;
  */
 final class V2ReferenceVectorsTest extends TestCase
 {
-    private const FIXTURE_PATH = __DIR__ . '/../../../crates/axiam-amqp/tests/fixtures/v2_reference_vectors.json';
+    /**
+     * Vendored from the AXIAM server's own AMQP test fixtures
+     * (crates/axiam-amqp/tests/fixtures/v2_reference_vectors.json in
+     * ilpanich/axiam). While this SDK lived inside that monorepo the test read
+     * the server's copy directly across the tree; a standalone repository has no
+     * such path, so the vectors are committed here instead.
+     *
+     * These are CROSS-LANGUAGE reference vectors: their whole purpose is that the
+     * server and every SDK independently reproduce the same bytes. Re-copy this
+     * file from the server whenever CONTRACT.md §8's wire format changes.
+     */
+    private const FIXTURE_PATH = __DIR__ . '/Fixtures/v2_reference_vectors.json';
 
     /** @return array<string, mixed> */
     private static function loadFixture(): array
