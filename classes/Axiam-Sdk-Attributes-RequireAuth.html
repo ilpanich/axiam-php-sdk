@@ -64,7 +64,7 @@
 </h4>
     <ul class="phpdocumentor-list">
                     <li>
-                <a href="namespaces/axiam-sdk.html" class="-active">Sdk</a>
+                <a href="namespaces/axiam-sdk.html" class="">Sdk</a>
                 
             </li>
             </ul>
@@ -95,51 +95,81 @@
                                 <section>
                                         <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-attributes.html">Attributes</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -namespace">
-        <h2 class="phpdocumentor-content__title">Sdk</h2>
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    RequireAuth
 
-        
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
+
+<div class="phpdocumentor-label-line">
+
+    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
+
+
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Attributes/RequireAuth.php"><a href="files/src-attributes-requireauth.html"><abbr title="src/Attributes/RequireAuth.php">RequireAuth.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">26</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">Declarative &quot;endpoint requires an authenticated AXIAM identity&quot; marker (CONTRACT.md
+§11, canonical `require_auth`). Pure sugar over the CONTRACT.md §10 authentication
+guard for frameworks (Laravel, Symfony) where that guard is applied per-route rather
+than globally: placing this attribute on a controller method or class does not itself
+perform any verification — it is read by the framework-specific enforcement listener
+({@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener},
+{@see \Axiam\Sdk\Laravel\AxiamAccessMiddleware}) which delegates the actual check to
+{@see \Axiam\Sdk\AccessEnforcer::enforceAuth()}.</p>
+
+
+    <section class="phpdocumentor-description"><p>Zero framework dependency — this class has no constructor arguments and imports
+nothing beyond the built-in <code class="prettyprint">Attribute</code> class, so it is safe to reference from any
+PHP ≥8.1 codebase regardless of which (if any) web framework is installed.</p>
+<p>A missing/invalid/expired identity is a 401 <code class="prettyprint">authentication_failed</code> response
+(CONTRACT.md §11.2.5) — never a silent pass-through.</p>
+</section>
+
+
+
+    
+            <section class="phpdocumentor-attributes">
+            <h5 class="phpdocumentor-elements__header" id="attributes">
+                Attributes <a href="classes/Axiam-Sdk-Attributes-RequireAuth.html#attributes" class="headerlink"><i class="fas fa-link"></i></a>
+
+            </h5>
+                            <dl class="phpdocumentor-argument-list">
+    <dt class="phpdocumentor-argument-list__entry">
+        #[<abbr title="\Attribute">Attribute</abbr>]
+    </dt>
+        <dd class="phpdocumentor-argument-list__entry">
+        \Attribute::TARGET_METHOD | \Attribute::TARGET_CLASS
+    </dd>
+    </dl>
+                    </section>
+    
 <h3 id="toc">
     Table of Contents
-    <a href="namespaces/axiam-sdk.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Attributes-RequireAuth.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
 
-<h4 id="namespaces">
-    Namespaces
-    <a href="namespaces/axiam-sdk.html#namespaces" class="headerlink"><i class="fas fa-link"></i></a>
-
-</h4>
-<dl class="phpdocumentor-table-of-contents">
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-amqp.html"><abbr title="\Axiam\Sdk\Amqp">Amqp</abbr></a></dt>
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-attributes.html"><abbr title="\Axiam\Sdk\Attributes">Attributes</abbr></a></dt>
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-auth.html"><abbr title="\Axiam\Sdk\Auth">Auth</abbr></a></dt>
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-core.html"><abbr title="\Axiam\Sdk\Core">Core</abbr></a></dt>
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-grpc.html"><abbr title="\Axiam\Sdk\Grpc">Grpc</abbr></a></dt>
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-laravel.html"><abbr title="\Axiam\Sdk\Laravel">Laravel</abbr></a></dt>
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-rest.html"><abbr title="\Axiam\Sdk\Rest">Rest</abbr></a></dt>
-            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-symfony.html"><abbr title="\Axiam\Sdk\Symfony">Symfony</abbr></a></dt>
-    </dl>
-
-
-    <h4 id="toc-classes">
-        Classes
-        <a href="namespaces/axiam-sdk.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a></dt><dd>The single CONTRACT.md §11 (&quot;Declarative Authorization Helpers&quot;) enforcement
-implementation, shared by BOTH framework bridges
-({@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener} and
-{@see \Axiam\Sdk\Laravel\AxiamAccessMiddleware}) so the `#[RequireAuth]` /
-`#[RequireAccess]` / `#[RequireRole]` semantics can never drift between the two
-integrations. Neither bridge re-implements resource resolution, subject propagation,
-or the error-mapping table below — both call into this class exclusively.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AuthzDispatcher.html"><abbr title="\Axiam\Sdk\AuthzDispatcher">AuthzDispatcher</abbr></a></dt><dd>Transparent REST/gRPC authz transport selection (CONTRACT.md §1, D-03, SC#3).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a></dt><dd>The AXIAM PHP SDK&#039;s public REST entry point (CONTRACT.md §1–§9, SC#1).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Session.html"><abbr title="\Axiam\Sdk\Session">Session</abbr></a></dt><dd>Per-`AxiamClient` session state (CONTRACT.md §3/§4/§5/§9): owns the shared Guzzle
-`CookieJar` (§4), captures/exposes the non-browser CSRF token (§3), and is the
-single-flight home for the shared refresh `Promise` (§9, D-06).</dd>    </dl>
 
 
 
@@ -147,6 +177,11 @@ single-flight home for the shared refresh `Promise` (§9, D-06).</dd>    </dl>
 
 
 
+
+
+
+
+        
 
         
 
@@ -155,7 +190,7 @@ single-flight home for the shared refresh `Promise` (§9, D-06).</dd>    </dl>
     </article>
                                 </section>
                 <section class="phpdocumentor-on-this-page__sidebar">
-                            
+                                
     <section class="phpdocumentor-on-this-page__content">
         <strong class="phpdocumentor-on-this-page__title">On this page</strong>
 
@@ -163,10 +198,9 @@ single-flight home for the shared refresh `Promise` (§9, D-06).</dd>    </dl>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                    <li><a href="namespaces/axiam-sdk.html#toc-classes">Classes</a></li>
-                                                                                                                    </ul>
+                                                                            </ul>
             </li>
-
+            
             
                     </ul>
     </section>
@@ -185,7 +219,7 @@ single-flight home for the shared refresh `Promise` (§9, D-06).</dd>    </dl>
     </section>
 </section>
         </div>
-        <a href="namespaces/axiam-sdk.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Attributes-RequireAuth.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

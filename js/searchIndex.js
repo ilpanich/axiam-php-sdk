@@ -1,6 +1,31 @@
 Search.appendIndex(
     [
                 {
+            "fqsen": "\\Axiam\\Sdk\\AccessEnforcer",
+            "name": "AccessEnforcer",
+            "summary": "The\u0020single\u0020CONTRACT.md\u0020\u00A711\u0020\u0028\u0022Declarative\u0020Authorization\u0020Helpers\u0022\u0029\u0020enforcement\nimplementation,\u0020shared\u0020by\u0020BOTH\u0020framework\u0020bridges\n\u0028\u007B\u0040see\u0020\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u007D\u0020and\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware\u007D\u0029\u0020so\u0020the\u0020\u0060\u0023\u005BRequireAuth\u005D\u0060\u0020\/\n\u0060\u0023\u005BRequireAccess\u005D\u0060\u0020\/\u0020\u0060\u0023\u005BRequireRole\u005D\u0060\u0020semantics\u0020can\u0020never\u0020drift\u0020between\u0020the\u0020two\nintegrations.\u0020Neither\u0020bridge\u0020re\u002Dimplements\u0020resource\u0020resolution,\u0020subject\u0020propagation,\nor\u0020the\u0020error\u002Dmapping\u0020table\u0020below\u0020\u2014\u0020both\u0020call\u0020into\u0020this\u0020class\u0020exclusively.",
+            "url": "classes/Axiam-Sdk-AccessEnforcer.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AccessEnforcer\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-AccessEnforcer.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceAuth\u0028\u0029",
+            "name": "enforceAuth",
+            "summary": "\u0060require_auth\u0060\u0020\u0028CONTRACT.md\u0020\u00A711.1\u0029\u003A\u0020the\u0020endpoint\u0020requires\u0020an\u0020authenticated\u0020AXIAM\nidentity\u0020\u2014\u0020nothing\u0020more.\u0020Pure\u0020sugar\u0020over\u0020the\u0020CONTRACT.md\u0020\u00A710\u0020guard\u0020for\u0020a\u0020route\nwhere\u0020that\u0020guard\u0020is\u0020applied\u0020per\u002Dendpoint\u0020rather\u0020than\u0020globally.",
+            "url": "classes/Axiam-Sdk-AccessEnforcer.html#method_enforceAuth"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceRole\u0028\u0029",
+            "name": "enforceRole",
+            "summary": "\u0060require_role\u0060\u0020\u0028CONTRACT.md\u0020\u00A711.1,\u0020MAY\u002Dlevel\u0029\u003A\u0020a\u0020LOCAL\u0020check\u0020\u0028no\u0020server\nround\u002Dtrip,\u0020CONTRACT.md\u0020\u00A711.2.9\u0029\u0020that\u0020the\u0020identity\u0027s\u0020already\u002Dverified\u0020\u0060roles\u0060\nintersect\u0020with\u0020at\u0020least\u0020one\u0020of\u0020\u007B\u0040see\u0020RequireRole\u003A\u003A\u0024roles\u007D.\u0020Requires\u0020an\nauthenticated\u0020identity\u0020first\u0020\u0028a\u0020role\u0020check\u0020needs\u0020somewhere\u0020to\u0020read\u0020roles\u0020from\u0029,\nso\u0020an\u0020unauthenticated\u0020caller\u0020still\u0020gets\u0020401,\u0020not\u0020403.",
+            "url": "classes/Axiam-Sdk-AccessEnforcer.html#method_enforceRole"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceAccess\u0028\u0029",
+            "name": "enforceAccess",
+            "summary": "\u0060require_access\u0060\u0020\u0028CONTRACT.md\u0020\u00A711.1\u0029\u003A\u0020the\u0020endpoint\u0020requires\u0020the\u0020authenticated\ncaller\u0020to\u0020pass\u0020an\u0020AXIAM\u0020authorization\u0020check\u0020for\u0020\u0060\u0024attribute\u002D\u003Eaction\u0060\u0020on\u0020a\nresource\u0020resolved\u0020from\u0020the\u0020request.\u0020This\u0020is\u0020the\u0020ONE\u0020codepath\u0020both\u0020framework\nbridges\u0020call\u0020for\u0020\u0060\u0023\u005BRequireAccess\u005D\u0060\u0020enforcement\u0020\u2014\u0020see\u0020this\u0020class\u0027s\u0020own\u0020docblock\nfor\u0020the\u0020full\u0020resource\u002Dresolution\u0020and\u0020error\u002Dmapping\u0020tables.",
+            "url": "classes/Axiam-Sdk-AccessEnforcer.html#method_enforceAccess"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpDropMessage",
             "name": "AmqpDropMessage",
             "summary": "Poison\u002Dmessage\u0020sentinel.\u0020Application\u0020handlers\u0020throw\u0020this\u0020to\u0020signal\u0020that\u0020a\nmessage\u0020is\u0020unprocessable\u0020and\u0020must\u0020NOT\u0020be\u0020requeued\u0020\u0028e.g.\u0020a\u0020permanently\nmalformed\u0020or\u0020unsupported\u0020event\u0029\u0020\u2014\u0020distinct\u0020from\u0020a\u0020transient\u0020failure,\u0020which\nshould\u0020be\u0020requeued\u0020for\u0020retry.",
@@ -65,6 +90,56 @@ Search.appendIndex(
             "name": "DEFAULT_SKEW_SECONDS",
             "summary": "Default\u0020freshness\u0020window\u0020\u0028seconds\u0029\u0020applied\u0020to\u0020\u0060issued_at\u0060,\u0020matching\nthe\u0020server\u0027s\u0020DEFAULT_FRESHNESS_SKEW_SECS\u0020\u003D\u0020300\u0020\/\nAXIAM__AMQP__REPLAY_SKEW_SECS\u0020\u0028CONTRACT.md\u0020\u00A78\u0020v2\u0029.",
             "url": "classes/Axiam-Sdk-Amqp-ReplayGuard.html#constant_DEFAULT_SKEW_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAccess",
+            "name": "RequireAccess",
+            "summary": "Declarative\u0020per\u002Dendpoint\u0020authorization\u0020requirement\u0020\u0028CONTRACT.md\u0020\u00A711,\u0020canonical\n\u0060require_access\u0028action,\u0020resource\u005B,\u0020scope\u005D\u0029\u0060\u0029.\u0020Placing\u0020this\u0020attribute\u0020on\u0020a\u0020controller\nmethod\u0020or\u0020class\u0020does\u0020not\u0020itself\u0020perform\u0020any\u0020check\u0020\u2014\u0020it\u0020is\u0020metadata\u0020read\u0020by\u0020the\nframework\u002Dspecific\u0020enforcement\u0020listener\n\u0028\u007B\u0040see\u0020\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u007D,\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware\u007D\u0029,\u0020which\u0020resolves\u0020the\u0020target\u0020resource\nand\u0020delegates\u0020the\u0020actual\u0020authorization\u0020decision\u0020to\n\u007B\u0040see\u0020\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceAccess\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-Attributes-RequireAccess.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAccess\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireAccess.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAccess\u003A\u003A\u0024action",
+            "name": "action",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireAccess.html#property_action"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAccess\u003A\u003A\u0024resourceId",
+            "name": "resourceId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireAccess.html#property_resourceId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAccess\u003A\u003A\u0024resourceParam",
+            "name": "resourceParam",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireAccess.html#property_resourceParam"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAccess\u003A\u003A\u0024scope",
+            "name": "scope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireAccess.html#property_scope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAuth",
+            "name": "RequireAuth",
+            "summary": "Declarative\u0020\u0022endpoint\u0020requires\u0020an\u0020authenticated\u0020AXIAM\u0020identity\u0022\u0020marker\u0020\u0028CONTRACT.md\n\u00A711,\u0020canonical\u0020\u0060require_auth\u0060\u0029.\u0020Pure\u0020sugar\u0020over\u0020the\u0020CONTRACT.md\u0020\u00A710\u0020authentication\nguard\u0020for\u0020frameworks\u0020\u0028Laravel,\u0020Symfony\u0029\u0020where\u0020that\u0020guard\u0020is\u0020applied\u0020per\u002Droute\u0020rather\nthan\u0020globally\u003A\u0020placing\u0020this\u0020attribute\u0020on\u0020a\u0020controller\u0020method\u0020or\u0020class\u0020does\u0020not\u0020itself\nperform\u0020any\u0020verification\u0020\u2014\u0020it\u0020is\u0020read\u0020by\u0020the\u0020framework\u002Dspecific\u0020enforcement\u0020listener\n\u0028\u007B\u0040see\u0020\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u007D,\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware\u007D\u0029\u0020which\u0020delegates\u0020the\u0020actual\u0020check\u0020to\n\u007B\u0040see\u0020\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceAuth\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-Attributes-RequireAuth.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireRole",
+            "name": "RequireRole",
+            "summary": "Declarative\u0020local\u0020role\u0020check\u0020\u0028CONTRACT.md\u0020\u00A711,\u0020canonical\u0020\u0060require_role\u0028role...\u0029\u0060,\nMAY\u002Dlevel\u0020helper\u0029.\u0020Placing\u0020this\u0020attribute\u0020on\u0020a\u0020controller\u0020method\u0020or\u0020class\u0020does\u0020not\nitself\u0020perform\u0020any\u0020check\u0020\u2014\u0020it\u0020is\u0020metadata\u0020read\u0020by\u0020the\u0020framework\u002Dspecific\u0020enforcement\nlistener\u0020\u0028\u007B\u0040see\u0020\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u007D,\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware\u007D\u0029,\u0020which\u0020delegates\u0020to\n\u007B\u0040see\u0020\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceRole\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-Attributes-RequireRole.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireRole\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireRole.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireRole\u003A\u003A\u0024roles",
+            "name": "roles",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireRole.html#property_roles"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier",
             "name": "JwksVerifier",
@@ -306,6 +381,21 @@ Search.appendIndex(
             "summary": "\u0060BatchCheckAccess\u0060\u0020\u0028CONTRACT.md\u0020\u00A71\u0029\u0020\u2014\u0020results\u0020preserve\u0020input\u0020order.",
             "url": "classes/Axiam-Sdk-Grpc-AuthzGrpcClient.html#method_batchCheckAccess"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware",
+            "name": "AxiamAccessMiddleware",
+            "summary": "Laravel\u0020CONTRACT.md\u0020\u00A711\u0020declarative\u002Dauthorization\u0020enforcement\u0020middleware,\u0020registered\nunder\u0020the\u0020\u0060axiam.access\u0060\u0020alias\u0020\u0028D\u002D02\u0029.\u0020Supports\u0020BOTH\u0020developer\u002Dexperience\u0020styles\u0020the\nplan\u0020calls\u0020for,\u0020from\u0020the\u0020SAME\u0020class,\u0020delegating\u0020every\u0020actual\u0020decision\u0020to\u0020the\u0020shared\n\u007B\u0040see\u0020AccessEnforcer\u007D\u0020\u0028never\u0020re\u002Dimplementing\u0020resource\u0020resolution,\u0020subject\npropagation,\u0020or\u0020the\u0020error\u002Dmapping\u0020table\u0020itself\u0029\u003A",
+            "url": "classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware\u003A\u003Ahandle\u0028\u0029",
+            "name": "handle",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html#method_handle"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamGate",
             "name": "AxiamGate",
             "summary": "Laravel\u0020authorization\u0020gate\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A71\/\u00A710\u0029\u003A\u0020a\u0020one\u002Dline\u0020delegation\u0020to\n\u007B\u0040see\u0020AxiamClient\u003A\u003Acan\u0028\u0029\u007D\u0020\u2014\u0020the\u0020server\u0027s\u0020additive\u002Donly\u0020RBAC\u0020engine\u0020\u0028allow\u002Dwins,\ndefault\u002Ddeny,\u0020no\u0020explicit\u0020deny\u002Doverride\u0029\u0020is\u0020ALWAYS\u0020the\u0020authoritative\u0020decision\u002Dmaker.",
@@ -383,7 +473,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Rest\\AuthzRestClient\u003A\u003AcheckAccess\u0028\u0029",
             "name": "checkAccess",
-            "summary": "\u0060checkAccess\u0060\u0020\u0028CONTRACT.md\u0020\u00A71\u0029\u003A\u0020\u0060POST\u0020\/api\/v1\/authz\/check\u0060.\u0020Returns\u0020the\u0020decoded\n\u0060allowed\u0060\u0020boolean\u003B\u0020non\u002D2xx\u0020responses\u0020are\u0020translated\u0020via\u0020\u007B\u0040see\u0020ErrorMapper\u007D\u0020\u0028403\u0020\u002D\u003E\n\u0060AuthzError\u0060,\u0020401\u0020\u002D\u003E\u0020\u0060AuthError\u0060,\u0020everything\u0020else\u0020\u002D\u003E\u0020\u0060NetworkError\u0060\u0029.",
+            "summary": "\u0060checkAccess\u0060\u0020\u0028CONTRACT.md\u0020\u00A71\u0029.\u0020\u0060POST\u0020\/api\/v1\/authz\/check\u0060.\u0020Returns\u0020the\u0020decoded\n\u0060allowed\u0060\u0020boolean\u003B\u0020non\u002D2xx\u0020responses\u0020are\u0020translated\u0020via\u0020\u007B\u0040see\u0020ErrorMapper\u007D\u0020\u0028403\u0020\u002D\u003E\n\u0060AuthzError\u0060,\u0020401\u0020\u002D\u003E\u0020\u0060AuthError\u0060,\u0020everything\u0020else\u0020\u002D\u003E\u0020\u0060NetworkError\u0060\u0029.",
             "url": "classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_checkAccess"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Rest\\AuthzRestClient\u003A\u003Acan\u0028\u0029",
@@ -456,6 +546,26 @@ Search.appendIndex(
             "summary": "Returns\u0020the\u0020SAME\u0020\u0060PromiseInterface\u0060\u0020to\u0020every\u0020caller\u0020until\u0020it\u0020resolves\u0020\u0028SC\u00232,\nD\u002D06\u0029.\u0020On\u0020success\u003A\u0020captures\u0020the\u0020\u0060X\u002DCSRF\u002DToken\u0060\u0020response\u0020header,\u0020then\u0020clears\u0020the\nstored\u0020promise.\u0020On\u0020failure\u003A\u0020clears\u0020the\u0020stored\u0020promise\u0020and\u0020rejects\u0020with\n\u0060AuthError\u0060\u0020\u2014\u0020no\u0020retry\u0020loop\u0020\u0028\u00A79.3\u0029.\u0020Clear\u002Don\u002Dboth\u002Dpaths\u0020bookkeeping\u0020and\u0020the\nfailure\u002Dto\u002D\u0060AuthError\u0060\u0020translation\u0020are\u0020factored\u0020into\u0020\u007B\u0040see\u0020RefreshGuard\u003A\u003Asettle\u0028\u0029\u007D\nso\u0020REST\u0020and\u0020\u0028later\u0029\u0020gRPC\u0020never\u0020re\u002Dimplement\u0020\u2014\u0020or\u0020drift\u0020on\u0020\u2014\u0020that\u0020one\u0020mechanism\u003B\n\u007B\u0040see\u0020RefreshGuard\u003A\u003Asettle\u0028\u0029\u007D\u0027s\u0020\u0060\u0024onClear\u0060\u0020closure\u0020below\u0020is\u0020invoked\u0020on\u0020EITHER\noutcome,\u0020never\u0020on\u0020both,\u0020never\u0020on\u0020neither.",
             "url": "classes/Axiam-Sdk-Session.html#method_refreshIfNeeded"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener",
+            "name": "AxiamAccessAttributeListener",
+            "summary": "Symfony\u0020CONTRACT.md\u0020\u00A711\u0020declarative\u002Dauthorization\u0020enforcement\u0020listener\u003A\u0020an\n\u0060EventSubscriberInterface\u0060\u0020on\u0020\u0060KernelEvents\u003A\u003ACONTROLLER\u0060\u0020\u2014\u0020the\u0020SAME\u0020extension\npoint\u0020Symfony\u0027s\u0020own\u0020\u0060\u0023\u005BIsGranted\u005D\u0060\u0020attribute\u0020is\u0020enforced\u0020from\n\u0028\u0060Symfony\\Component\\Security\\Http\\EventListener\\IsGrantedAttributeListener\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Symfony-AxiamAccessAttributeListener.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Symfony-AxiamAccessAttributeListener.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u003A\u003AgetSubscribedEvents\u0028\u0029",
+            "name": "getSubscribedEvents",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Symfony-AxiamAccessAttributeListener.html#method_getSubscribedEvents"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u003A\u003AonKernelController\u0028\u0029",
+            "name": "onKernelController",
+            "summary": "Reflects\u0020the\u0020resolved\u0020controller\u0020for\u0020\u0060\u0023\u005BRequireAuth\u005D\u0060\/\u0060\u0023\u005BRequireRole\u005D\u0060\/\n\u0060\u0023\u005BRequireAccess\u005D\u0060\u0020and,\u0020when\u0020any\u0020are\u0020present,\u0020enforces\u0020them\u0020via\n\u007B\u0040see\u0020AccessEnforcer\u007D\u0020\u2014\u0020replacing\u0020the\u0020controller\u0020with\u0020a\u0020closure\u0020returning\u0020the\nerror\u0020response\u0020on\u0020the\u0020first\u0020failing\u0020check.\u0020Checks\u0020are\u0020evaluated\u0020in\u0020the\u0020order\nauth\u0020\u002D\u003E\u0020role\u0020\u002D\u003E\u0020access\u0020\u0028each\u0020of\u0020\u007B\u0040see\u0020AccessEnforcer\u007D\u0027s\u0020own\u0020methods\u0020re\u002Dchecks\nauthentication\u0020internally\u0020too,\u0020so\u0020this\u0020ordering\u0020only\u0020affects\u0020which\u0020message\u0020a\ncaller\u0020sees\u0020first,\u0020never\u0020the\u0020correctness\u0020of\u0020the\u0020final\u0020decision\u0029.",
+            "url": "classes/Axiam-Sdk-Symfony-AxiamAccessAttributeListener.html#method_onKernelController"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAuthSubscriber",
             "name": "AxiamAuthSubscriber",
             "summary": "Symfony\u0020authentication\u0020subscriber\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020listens\u0020to\n\u0060kernel.request\u0060,\u0020extracts\u0020the\u0020bearer\/cookie\u0020token,\u0020verifies\u0020it\u0020via\n\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocallyOrFallback\u0028\u0029\u007D\u0020\u2014\u0020local\u0020JWKS\u0020verification\u0020first,\nfalling\u0020back\u0020to\u0020the\u0020shared\u0020single\u002Dflight\u0020refresh\u0020\u0028\u00A79,\u0020D\u002D06\u0029\u0020\u2014\u0020and\u0020populates\u0020the\n\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\u0020\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\u0020on\u0020success.",
@@ -478,7 +588,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamBundle",
             "name": "AxiamBundle",
-            "summary": "The\u0020Symfony\u0020bundle\u0020bootstrap.\u0020This\u0020class\u0020intentionally\u0020carries\u0020no\u0020container\nextension\u0020of\u0020its\u0020own\u0020\u2014\u0020\u0060AxiamAuthSubscriber\u0060\u0020\u0028\u0060kernel.event_subscriber\u0060\u0029\u0020and\n\u0060AxiamVoter\u0060\u0020\u0028\u0060security.voter\u0060\u0029\u0020are\u0020wired\u0020via\u0020the\u0020consuming\u0020application\u0027s\u0020OWN\n\u0060config\/services.yaml\u0060\u0020\u0028manual\u0020registration,\u0020Pitfall\u00205\u0029,\u0020exactly\u0020like\u0020the\n\u0060config\/bundles.php\u0060\u0020entry\u0020that\u0020registers\u0020this\u0020bundle\u0020itself.\u0020Registering\u0020this\nclass\u0020is\u0020what\u0020tells\u0020Symfony\u0027s\u0020kernel\u0020the\u0020AXIAM\u0020SDK\u0020bundle\u0020is\u0020present\u003B\u0020it\u0020performs\nno\u0020additional\u0020auto\u002Dwiring\u0020beyond\u0020that\u0020on\u0020its\u0020own.",
+            "summary": "The\u0020Symfony\u0020bundle\u0020bootstrap.\u0020This\u0020class\u0020intentionally\u0020carries\u0020no\u0020container\nextension\u0020of\u0020its\u0020own\u0020\u2014\u0020\u0060AxiamAuthSubscriber\u0060\u0020\u0028\u0060kernel.event_subscriber\u0060\u0029,\n\u0060AxiamVoter\u0060\u0020\u0028\u0060security.voter\u0060\u0029,\u0020and\u0020\u0060AxiamAccessAttributeListener\u0060\n\u0028\u0060kernel.event_subscriber\u0060,\u0020CONTRACT.md\u0020\u00A711\u0020declarative\u0020authorization\u0020helpers\u0029\nare\u0020all\u0020wired\u0020via\u0020the\u0020consuming\u0020application\u0027s\u0020OWN\u0020\u0060config\/services.yaml\u0060\u0020\u0028manual\nregistration,\u0020Pitfall\u00205\u0029,\u0020exactly\u0020like\u0020the\u0020\u0060config\/bundles.php\u0060\u0020entry\u0020that\nregisters\u0020this\u0020bundle\u0020itself.\u0020Registering\u0020this\u0020class\u0020is\u0020what\u0020tells\u0020Symfony\u0027s\nkernel\u0020the\u0020AXIAM\u0020SDK\u0020bundle\u0020is\u0020present\u003B\u0020it\u0020performs\u0020no\u0020additional\u0020auto\u002Dwiring\nbeyond\u0020that\u0020on\u0020its\u0020own.",
             "url": "classes/Axiam-Sdk-Symfony-AxiamBundle.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamVoter",
@@ -496,16 +606,6 @@ Search.appendIndex(
             "summary": "",
             "url": "namespaces/default.html"
         },                {
-            "fqsen": "\\Axiam\\Sdk\\Amqp",
-            "name": "Amqp",
-            "summary": "",
-            "url": "namespaces/axiam-sdk-amqp.html"
-        },                {
-            "fqsen": "\\Axiam\\Sdk\\Auth",
-            "name": "Auth",
-            "summary": "",
-            "url": "namespaces/axiam-sdk-auth.html"
-        },                {
             "fqsen": "\\Axiam\\Sdk",
             "name": "Sdk",
             "summary": "",
@@ -515,6 +615,21 @@ Search.appendIndex(
             "name": "Axiam",
             "summary": "",
             "url": "namespaces/axiam.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp",
+            "name": "Amqp",
+            "summary": "",
+            "url": "namespaces/axiam-sdk-amqp.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes",
+            "name": "Attributes",
+            "summary": "",
+            "url": "namespaces/axiam-sdk-attributes.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth",
+            "name": "Auth",
+            "summary": "",
+            "url": "namespaces/axiam-sdk-auth.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Core",
             "name": "Core",

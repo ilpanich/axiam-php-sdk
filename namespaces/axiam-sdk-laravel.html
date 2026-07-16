@@ -117,7 +117,11 @@
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a></dt><dd>Laravel authorization gate (D-02, CONTRACT.md §1/§10): a one-line delegation to
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamAccessMiddleware">AxiamAccessMiddleware</abbr></a></dt><dd>Laravel CONTRACT.md §11 declarative-authorization enforcement middleware, registered
+under the `axiam.access` alias (D-02). Supports BOTH developer-experience styles the
+plan calls for, from the SAME class, delegating every actual decision to the shared
+{@see AccessEnforcer} (never re-implementing resource resolution, subject
+propagation, or the error-mapping table itself):</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a></dt><dd>Laravel authorization gate (D-02, CONTRACT.md §1/§10): a one-line delegation to
 {@see AxiamClient::can()} — the server&#039;s additive-only RBAC engine (allow-wins,
 default-deny, no explicit deny-override) is ALWAYS the authoritative decision-maker.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a></dt><dd>Laravel authentication middleware (D-02, CONTRACT.md §10): extracts the bearer/cookie
 token, verifies it via {@see AxiamClient::verifyLocallyOrFallback()} — local JWKS

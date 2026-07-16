@@ -96,16 +96,13 @@
                                         <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-laravel.html">Laravel</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-attributes.html">Attributes</a></li>
     </ul>
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    AxiamServiceProvider
+    RequireRole
 
-        <span class="phpdocumentor-element__extends">
-        extends <abbr title="\Illuminate\Support\ServiceProvider">ServiceProvider</abbr>
-    </span>
     
             <div class="phpdocumentor-element__package">
             in package
@@ -125,37 +122,56 @@
 </div>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Attributes/RequireRole.php"><a href="files/src-attributes-requirerole.html"><abbr title="src/Attributes/RequireRole.php">RequireRole.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">33</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Auto-discovered Laravel bridge entry point (D-01): listed under `composer.json`
-`extra.laravel.providers`, so a Laravel consumer gets this provider registered
-with ZERO manual wiring beyond `composer require axiam/axiam-sdk` (true
-zero-config auto-discovery, unlike the Symfony bridge which has no equivalent
-mechanism without a published Flex recipe).</p>
+            <p class="phpdocumentor-summary">Declarative local role check (CONTRACT.md §11, canonical `require_role(role...)`,
+MAY-level helper). Placing this attribute on a controller method or class does not
+itself perform any check — it is metadata read by the framework-specific enforcement
+listener ({@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener},
+{@see \Axiam\Sdk\Laravel\AxiamAccessMiddleware}), which delegates to
+{@see \Axiam\Sdk\AccessEnforcer::enforceRole()}.</p>
 
 
-    <section class="phpdocumentor-description"><p><code class="prettyprint">register()</code> binds a singleton <a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a> configured from
-<code class="prettyprint">config('axiam.*')</code> (falling back to <code class="prettyprint">AXIAM_*</code> environment variables so a
-consumer never needs to publish a config file to get started). <code class="prettyprint">boot()</code>
-registers the <code class="prettyprint">axiam.auth</code> middleware alias (<a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a>) and the
-<code class="prettyprint">axiam</code> Gate ability (<a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a>, D-02) — <code class="prettyprint">can:axiam,&lt;resource&gt;,&lt;action&gt;</code>
-route middleware then works out of the box — plus the <code class="prettyprint">axiam.access</code> middleware
-alias (<a href="classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamAccessMiddleware">AxiamAccessMiddleware</abbr></a>, backed by <a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a>, CONTRACT.md
-§11) for the declarative <code class="prettyprint">#[RequireAuth]</code>/<code class="prettyprint">#[RequireAccess]</code>/<code class="prettyprint">#[RequireRole]</code>
-helpers.</p>
+    <section class="phpdocumentor-description"><p>Zero framework dependency — this class has no runtime dependency beyond the built-in
+<code class="prettyprint">Attribute</code> class.</p>
+<p><strong>This is a LOCAL check only</strong> (CONTRACT.md §11.2.9): it reads the <code class="prettyprint">roles</code> already
+present in the verified identity injected by the CONTRACT.md §10 authentication
+guard (the <code class="prettyprint">axiam_user</code> request attribute) and never makes a server round-trip.
+Passes when the identity's roles intersect with ANY of <abbr title="\Axiam\Sdk\Attributes\self::$roles">self::$roles</abbr> (logical
+OR, matching the shared cross-SDK semantics). Role names are tenant-defined and this
+check is intentionally coarse — <a href="classes/Axiam-Sdk-Attributes-RequireAccess.html"><abbr title="\Axiam\Sdk\Attributes\RequireAccess">RequireAccess</abbr></a> (backed by
+the server's authoritative RBAC engine) is the ONLY check that should gate access to
+a specific resource; do not use <code class="prettyprint">RequireRole</code> as a substitute for it.</p>
+<p>An unauthenticated request is a 401 <code class="prettyprint">authentication_failed</code> response (a role check
+requires an identity to read roles from); a request whose identity's roles do not
+intersect <abbr title="\Axiam\Sdk\Attributes\self::$roles">self::$roles</abbr> is a 403 <code class="prettyprint">authorization_denied</code> response.</p>
 </section>
 
 
 
     
+            <section class="phpdocumentor-attributes">
+            <h5 class="phpdocumentor-elements__header" id="attributes">
+                Attributes <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#attributes" class="headerlink"><i class="fas fa-link"></i></a>
+
+            </h5>
+                            <dl class="phpdocumentor-argument-list">
+    <dt class="phpdocumentor-argument-list__entry">
+        #[<abbr title="\Attribute">Attribute</abbr>]
+    </dt>
+        <dd class="phpdocumentor-argument-list__entry">
+        \Attribute::TARGET_METHOD | \Attribute::TARGET_CLASS
+    </dd>
+    </dl>
+                    </section>
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -167,25 +183,30 @@ helpers.</p>
 
 
 
+<h4 id="toc-properties">
+    Properties
+    <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Attributes-RequireRole.html#property_roles">$roles</a>
+    <span>
+                        &nbsp;: array&lt;int, string&gt;            </span>
+</dt>
+
+    </dl>
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a>
+    <a class="" href="classes/Axiam-Sdk-Attributes-RequireRole.html#method___construct">__construct()</a>
     <span>
-                                &nbsp;: void    </span>
-</dt>
-<dd>Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a>
-    <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: mixed    </span>
 </dt>
 
     </dl>
@@ -195,11 +216,55 @@ helpers.</p>
         
 
         
+    <section class="phpdocumentor-properties">
+        <h3 class="phpdocumentor-elements__header" id="properties">
+            Properties
+            <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_roles">
+        $roles
+        <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#property_roles" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Attributes/RequireRole.php"><a href="files/src-attributes-requirerole.html"><abbr title="src/Attributes/RequireRole.php">RequireRole.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">37</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">array&lt;int, string&gt;</span>
+    <span class="phpdocumentor-signature__name">$roles</span>
+    </code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+            </section>
 
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -208,64 +273,41 @@ helpers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_boot">
-        boot()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method___construct">
+        __construct()
+        <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Attributes/RequireRole.php"><a href="files/src-attributes-requirerole.html"><abbr title="src/Attributes/RequireRole.php">RequireRole.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">88</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">boot</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-    
-    
-
-        
-    
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_register">
-        register()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">43</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">register</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__variadic-operator">...</span><span class="phpdocumentor-signature__argument__name">$roles</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
     
-    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$roles</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>One or more tenant-defined role names; the check passes
+when the identity holds at least one of them.</p>
+</section>
+
+            </dd>
+            </dl>
+
     
 
         
@@ -286,16 +328,22 @@ helpers.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods">Methods</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Attributes-RequireRole.html#toc-properties">Properties</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Attributes-RequireRole.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
+                            <li class="phpdocumentor-on-this-page-section__title">Properties</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Attributes-RequireRole.html#property_roles">$roles</a></li>
+                                            </ul>
+                </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Attributes-RequireRole.html#method___construct">__construct()</a></li>
                                     </ul>
             </li>
                     </ul>
@@ -315,7 +363,7 @@ helpers.</p>
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Attributes-RequireRole.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

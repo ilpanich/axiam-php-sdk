@@ -115,14 +115,39 @@
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-AmqpDropMessage.html"><abbr title="\Axiam\Sdk\Amqp\AmqpDropMessage">AmqpDropMessage</abbr></a></dt><dd>Poison-message sentinel. Application handlers throw this to signal that a
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a></dt><dd>The single CONTRACT.md §11 (&quot;Declarative Authorization Helpers&quot;) enforcement
+implementation, shared by BOTH framework bridges
+({@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener} and
+{@see \Axiam\Sdk\Laravel\AxiamAccessMiddleware}) so the `#[RequireAuth]` /
+`#[RequireAccess]` / `#[RequireRole]` semantics can never drift between the two
+integrations. Neither bridge re-implements resource resolution, subject propagation,
+or the error-mapping table below — both call into this class exclusively.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-AmqpDropMessage.html"><abbr title="\Axiam\Sdk\Amqp\AmqpDropMessage">AmqpDropMessage</abbr></a></dt><dd>Poison-message sentinel. Application handlers throw this to signal that a
 message is unprocessable and must NOT be requeued (e.g. a permanently
 malformed or unsupported event) — distinct from a transient failure, which
 should be requeued for retry.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-Consumer.html"><abbr title="\Axiam\Sdk\Amqp\Consumer">Consumer</abbr></a></dt><dd>php-amqplib blocking consume loop with HMAC verify-before-handler
 (CONTRACT.md §8, D-04).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-Hmac.html"><abbr title="\Axiam\Sdk\Amqp\Hmac">Hmac</abbr></a></dt><dd>HMAC-SHA256 verify-before-handler primitive for inbound AMQP messages
 (CONTRACT.md §8).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard">ReplayGuard</abbr></a></dt><dd>NEW-4 (CONTRACT.md §8 &quot;v2 — Replay Protection&quot;, hard cutover) validation
 gates, checked ONLY AFTER a delivery&#039;s HMAC signature has already
-verified (see Hmac::verify / Consumer::verifyAndDispatch).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html"><abbr title="\Axiam\Sdk\Auth\JwksVerifier">JwksVerifier</abbr></a></dt><dd>Local EdDSA/Ed25519 JWKS verification (CONTRACT.md D-08).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-LoginResult.html"><abbr title="\Axiam\Sdk\Auth\LoginResult">LoginResult</abbr></a></dt><dd>Result of `AxiamClient::login()` (CONTRACT.md §1, D-09).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-RefreshGuard.html"><abbr title="\Axiam\Sdk\Auth\RefreshGuard">RefreshGuard</abbr></a></dt><dd>Shared-promise clear-on-both-paths helper (CONTRACT.md §9, D-06).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AuthzDispatcher.html"><abbr title="\Axiam\Sdk\AuthzDispatcher">AuthzDispatcher</abbr></a></dt><dd>Transparent REST/gRPC authz transport selection (CONTRACT.md §1, D-03, SC#3).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a></dt><dd>The AXIAM PHP SDK&#039;s public REST entry point (CONTRACT.md §1–§9, SC#1).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></dt><dd>Authentication failure: wrong credentials, expired session, MFA failure, or a 401
+verified (see Hmac::verify / Consumer::verifyAndDispatch).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Attributes-RequireAccess.html"><abbr title="\Axiam\Sdk\Attributes\RequireAccess">RequireAccess</abbr></a></dt><dd>Declarative per-endpoint authorization requirement (CONTRACT.md §11, canonical
+`require_access(action, resource[, scope])`). Placing this attribute on a controller
+method or class does not itself perform any check — it is metadata read by the
+framework-specific enforcement listener
+({@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener},
+{@see \Axiam\Sdk\Laravel\AxiamAccessMiddleware}), which resolves the target resource
+and delegates the actual authorization decision to
+{@see \Axiam\Sdk\AccessEnforcer::enforceAccess()}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Attributes-RequireAuth.html"><abbr title="\Axiam\Sdk\Attributes\RequireAuth">RequireAuth</abbr></a></dt><dd>Declarative &quot;endpoint requires an authenticated AXIAM identity&quot; marker (CONTRACT.md
+§11, canonical `require_auth`). Pure sugar over the CONTRACT.md §10 authentication
+guard for frameworks (Laravel, Symfony) where that guard is applied per-route rather
+than globally: placing this attribute on a controller method or class does not itself
+perform any verification — it is read by the framework-specific enforcement listener
+({@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener},
+{@see \Axiam\Sdk\Laravel\AxiamAccessMiddleware}) which delegates the actual check to
+{@see \Axiam\Sdk\AccessEnforcer::enforceAuth()}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Attributes-RequireRole.html"><abbr title="\Axiam\Sdk\Attributes\RequireRole">RequireRole</abbr></a></dt><dd>Declarative local role check (CONTRACT.md §11, canonical `require_role(role...)`,
+MAY-level helper). Placing this attribute on a controller method or class does not
+itself perform any check — it is metadata read by the framework-specific enforcement
+listener ({@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener},
+{@see \Axiam\Sdk\Laravel\AxiamAccessMiddleware}), which delegates to
+{@see \Axiam\Sdk\AccessEnforcer::enforceRole()}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html"><abbr title="\Axiam\Sdk\Auth\JwksVerifier">JwksVerifier</abbr></a></dt><dd>Local EdDSA/Ed25519 JWKS verification (CONTRACT.md D-08).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-LoginResult.html"><abbr title="\Axiam\Sdk\Auth\LoginResult">LoginResult</abbr></a></dt><dd>Result of `AxiamClient::login()` (CONTRACT.md §1, D-09).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-RefreshGuard.html"><abbr title="\Axiam\Sdk\Auth\RefreshGuard">RefreshGuard</abbr></a></dt><dd>Shared-promise clear-on-both-paths helper (CONTRACT.md §9, D-06).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AuthzDispatcher.html"><abbr title="\Axiam\Sdk\AuthzDispatcher">AuthzDispatcher</abbr></a></dt><dd>Transparent REST/gRPC authz transport selection (CONTRACT.md §1, D-03, SC#3).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a></dt><dd>The AXIAM PHP SDK&#039;s public REST entry point (CONTRACT.md §1–§9, SC#1).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></dt><dd>Authentication failure: wrong credentials, expired session, MFA failure, or a 401
 on refresh (CONTRACT.md §2). Always constructed via {@see ErrorMapper} so REST and
 gRPC transports cannot drift on the error taxonomy.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-AuthzError.html"><abbr title="\Axiam\Sdk\Core\AuthzError">AuthzError</abbr></a></dt><dd>Authorization failure: the caller is authenticated but lacks permission for the
 requested operation (CONTRACT.md §2). Always constructed via {@see ErrorMapper} so
@@ -133,7 +158,11 @@ subtype — no other class in the SDK is permitted to hand-roll this branching:
 (400/408/429/5xx/transport) → {@see NetworkError}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a></dt><dd>Transport-level failure: connection refused, timeout, TLS error, DNS failure, or a
 server-side 5xx (CONTRACT.md §2).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a></dt><dd>Wraps a token-carrying value so it can never be accidentally exposed via
 `__toString()`, `var_export()`/`print_r()`, or JSON serialization
-(CONTRACT.md §7, D-11).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Grpc-AuthzGrpcClient.html"><abbr title="\Axiam\Sdk\Grpc\AuthzGrpcClient">AuthzGrpcClient</abbr></a></dt><dd>gRPC authorization transport (CONTRACT.md §1/§6/§9, D-03/D-06/D-12).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a></dt><dd>Laravel authorization gate (D-02, CONTRACT.md §1/§10): a one-line delegation to
+(CONTRACT.md §7, D-11).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Grpc-AuthzGrpcClient.html"><abbr title="\Axiam\Sdk\Grpc\AuthzGrpcClient">AuthzGrpcClient</abbr></a></dt><dd>gRPC authorization transport (CONTRACT.md §1/§6/§9, D-03/D-06/D-12).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamAccessMiddleware">AxiamAccessMiddleware</abbr></a></dt><dd>Laravel CONTRACT.md §11 declarative-authorization enforcement middleware, registered
+under the `axiam.access` alias (D-02). Supports BOTH developer-experience styles the
+plan calls for, from the SAME class, delegating every actual decision to the shared
+{@see AccessEnforcer} (never re-implementing resource resolution, subject
+propagation, or the error-mapping table itself):</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a></dt><dd>Laravel authorization gate (D-02, CONTRACT.md §1/§10): a one-line delegation to
 {@see AxiamClient::can()} — the server&#039;s additive-only RBAC engine (allow-wins,
 default-deny, no explicit deny-override) is ALWAYS the authoritative decision-maker.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a></dt><dd>Laravel authentication middleware (D-02, CONTRACT.md §10): extracts the bearer/cookie
 token, verifies it via {@see AxiamClient::verifyLocallyOrFallback()} — local JWKS
@@ -162,17 +191,22 @@ one {@see Session} share the SAME refresh `PromiseInterface`
 ({@see Session::refreshIfNeeded()}), so N concurrent expired-token requests still
 result in exactly one `/api/v1/auth/refresh` call.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Session.html"><abbr title="\Axiam\Sdk\Session">Session</abbr></a></dt><dd>Per-`AxiamClient` session state (CONTRACT.md §3/§4/§5/§9): owns the shared Guzzle
 `CookieJar` (§4), captures/exposes the non-browser CSRF token (§3), and is the
-single-flight home for the shared refresh `Promise` (§9, D-06).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a></dt><dd>Symfony authentication subscriber (D-02, CONTRACT.md §10): listens to
+single-flight home for the shared refresh `Promise` (§9, D-06).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamAccessAttributeListener.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAccessAttributeListener">AxiamAccessAttributeListener</abbr></a></dt><dd>Symfony CONTRACT.md §11 declarative-authorization enforcement listener: an
+`EventSubscriberInterface` on `KernelEvents::CONTROLLER` — the SAME extension
+point Symfony&#039;s own `#[IsGranted]` attribute is enforced from
+(`Symfony\Component\Security\Http\EventListener\IsGrantedAttributeListener`).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a></dt><dd>Symfony authentication subscriber (D-02, CONTRACT.md §10): listens to
 `kernel.request`, extracts the bearer/cookie token, verifies it via
 {@see AxiamClient::verifyLocallyOrFallback()} — local JWKS verification first,
 falling back to the shared single-flight refresh (§9, D-06) — and populates the
 `axiam_user` request attribute with `user_id`/`tenant_id`/`roles` on success.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamBundle.html"><abbr title="\Axiam\Sdk\Symfony\AxiamBundle">AxiamBundle</abbr></a></dt><dd>The Symfony bundle bootstrap. This class intentionally carries no container
-extension of its own — `AxiamAuthSubscriber` (`kernel.event_subscriber`) and
-`AxiamVoter` (`security.voter`) are wired via the consuming application&#039;s OWN
-`config/services.yaml` (manual registration, Pitfall 5), exactly like the
-`config/bundles.php` entry that registers this bundle itself. Registering this
-class is what tells Symfony&#039;s kernel the AXIAM SDK bundle is present; it performs
-no additional auto-wiring beyond that on its own.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamVoter.html"><abbr title="\Axiam\Sdk\Symfony\AxiamVoter">AxiamVoter</abbr></a></dt><dd>Symfony authorization voter (D-02, CONTRACT.md §1/§10): a one-line delegation to
+extension of its own — `AxiamAuthSubscriber` (`kernel.event_subscriber`),
+`AxiamVoter` (`security.voter`), and `AxiamAccessAttributeListener`
+(`kernel.event_subscriber`, CONTRACT.md §11 declarative authorization helpers)
+are all wired via the consuming application&#039;s OWN `config/services.yaml` (manual
+registration, Pitfall 5), exactly like the `config/bundles.php` entry that
+registers this bundle itself. Registering this class is what tells Symfony&#039;s
+kernel the AXIAM SDK bundle is present; it performs no additional auto-wiring
+beyond that on its own.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamVoter.html"><abbr title="\Axiam\Sdk\Symfony\AxiamVoter">AxiamVoter</abbr></a></dt><dd>Symfony authorization voter (D-02, CONTRACT.md §1/§10): a one-line delegation to
 {@see AxiamClient::can()} — the server&#039;s additive-only RBAC engine (allow-wins,
 default-deny, no explicit deny-override) is ALWAYS the authoritative
 decision-maker. This class never caches a decision beyond the token&#039;s own TTL and

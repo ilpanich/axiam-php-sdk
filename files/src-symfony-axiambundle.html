@@ -122,12 +122,14 @@
     </h4>
     <dl class="phpdocumentor-table-of-contents">
                     <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamBundle.html"><abbr title="\Axiam\Sdk\Symfony\AxiamBundle">AxiamBundle</abbr></a></dt><dd>The Symfony bundle bootstrap. This class intentionally carries no container
-extension of its own — `AxiamAuthSubscriber` (`kernel.event_subscriber`) and
-`AxiamVoter` (`security.voter`) are wired via the consuming application&#039;s OWN
-`config/services.yaml` (manual registration, Pitfall 5), exactly like the
-`config/bundles.php` entry that registers this bundle itself. Registering this
-class is what tells Symfony&#039;s kernel the AXIAM SDK bundle is present; it performs
-no additional auto-wiring beyond that on its own.</dd>    </dl>
+extension of its own — `AxiamAuthSubscriber` (`kernel.event_subscriber`),
+`AxiamVoter` (`security.voter`), and `AxiamAccessAttributeListener`
+(`kernel.event_subscriber`, CONTRACT.md §11 declarative authorization helpers)
+are all wired via the consuming application&#039;s OWN `config/services.yaml` (manual
+registration, Pitfall 5), exactly like the `config/bundles.php` entry that
+registers this bundle itself. Registering this class is what tells Symfony&#039;s
+kernel the AXIAM SDK bundle is present; it performs no additional auto-wiring
+beyond that on its own.</dd>    </dl>
 
 
 

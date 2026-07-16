@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">27</span>
+    <span class="phpdocumentor-element-found-in__line">35</span>
 
     </aside>
 
@@ -139,9 +139,17 @@ they do to every other REST call — this class never re-implements any of that.
 
     <section class="phpdocumentor-description"><p>Wire field names match <code class="prettyprint">crates/axiam-api-rest/src/handlers/authz_check.rs</code> exactly:
 <code class="prettyprint">action</code>, <code class="prettyprint">resource_id</code> (camelCase <code class="prettyprint">resourceId</code> on the PHP call surface, snake_case on
-the wire), optional <code class="prettyprint">scope</code>. <code class="prettyprint">tenant_id</code>/<code class="prettyprint">subject_id</code> are never sent in the body — the
-server derives identity from the verified JWT (SEC-003); this client mirrors that by
-never accepting a tenant/subject parameter itself.</p>
+the wire), optional <code class="prettyprint">scope</code>. <code class="prettyprint">tenant_id</code> is never sent in the body — the server
+derives it from the verified JWT (SEC-003). <code class="prettyprint">subject_id</code> is likewise omitted by
+default (the server falls back to deriving the subject from the same verified JWT,
+i.e. whichever session's Bearer token is attached to the request) — but CONTRACT.md
+§11.2.2 (declarative authorization helpers) requires an explicit, additive
+<code class="prettyprint">subject_id</code> override: <a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a> calls a shared AXIAM client
+on behalf of the REQUEST's authenticated end user, which is a <em>different</em> identity
+than whatever session the shared client itself is authenticated as (typically a
+service account) — omitting <code class="prettyprint">subject_id</code> in that scenario would silently check the
+service account's permissions instead of the end user's. See
+<abbr title="\Axiam\Sdk\Rest\self::checkAccess()">self::checkAccess()</abbr>'s <code class="prettyprint">$subjectId</code> parameter.</p>
 </section>
 
 
@@ -199,7 +207,7 @@ alias for `check_access`&quot;).</dd>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>`checkAccess` (CONTRACT.md §1): `POST /api/v1/authz/check`. Returns the decoded
+<dd>`checkAccess` (CONTRACT.md §1). `POST /api/v1/authz/check`. Returns the decoded
 `allowed` boolean; non-2xx responses are translated via {@see ErrorMapper} (403 -&gt;
 `AuthzError`, 401 -&gt; `AuthError`, everything else -&gt; `NetworkError`).</dd>
 
@@ -231,7 +239,7 @@ alias for `check_access`&quot;).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -275,7 +283,7 @@ alias for `check_access`&quot;).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">77</span>
 
     </aside>
 
@@ -327,7 +335,7 @@ booleans preserves input order exactly, matching
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">48</span>
+    <span class="phpdocumentor-element-found-in__line">63</span>
 
     </aside>
 
@@ -385,17 +393,17 @@ alias for `check_access`&quot;).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">53</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">`checkAccess` (CONTRACT.md §1): `POST /api/v1/authz/check`. Returns the decoded
+        <p class="phpdocumentor-summary">`checkAccess` (CONTRACT.md §1). `POST /api/v1/authz/check`. Returns the decoded
 `allowed` boolean; non-2xx responses are translated via {@see ErrorMapper} (403 -&gt;
 `AuthzError`, 401 -&gt; `AuthError`, everything else -&gt; `NetworkError`).</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">checkAccess</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$action</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+                    <span class="phpdocumentor-signature__name">checkAccess</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$action</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -423,6 +431,20 @@ alias for `check_access`&quot;).</p>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$subjectId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Additive, optional (CONTRACT.md §11.2.2): when
+given, sent on the wire as <code class="prettyprint">subject_id</code> so the server evaluates the
+check for THIS subject rather than whichever identity the calling
+client's own Bearer token represents. <code class="prettyprint">null</code> (the default) preserves the
+pre-§11 behavior exactly — no <code class="prettyprint">subject_id</code> field is sent, and the server
+derives the subject from the verified JWT as before.</p>
+</section>
+
             </dd>
             </dl>
 
