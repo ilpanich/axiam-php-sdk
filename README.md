@@ -86,14 +86,15 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§10 — the binding,
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§11 — the binding,
 cross-language behavioral contract every AXIAM SDK implements: camelCase method names
 (§1), the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2), non-browser
 `X-CSRF-Token` response-header capture (§3), a shared Guzzle `CookieJar` (§4), a required
 `tenant` constructor parameter with no default (§5), strict TLS with `customCa` as the only
 escape hatch (§6), `Sensitive`-wrapped token redaction (§7), HMAC-SHA256-verified AMQP
-messages (§8), single-flight refresh concurrency safety (§9), and framework
-middleware/subscriber integration (§10).
+messages (§8), single-flight refresh concurrency safety (§9), framework
+middleware/subscriber integration (§10), and declarative per-endpoint authorization
+helpers (§11, see below).
 
 ## Framework integration
 
@@ -129,6 +130,51 @@ different (not lesser) developer experience than Laravel's — do not expect
 `config/bundles.php`/`config/services.yaml` snippets and a runnable
 401/403/200 controller example are in
 [`examples/symfony_app/README.md`](examples/symfony_app/README.md).
+
+## Declarative authorization helpers
+
+CONTRACT.md §11 adds a per-endpoint authorization layer on top of the §10
+authentication guard above: three PHP 8 attributes in `Axiam\Sdk\Attributes` —
+`#[RequireAuth]`, `#[RequireAccess(action: ..., resourceParam: ...)]`, and
+`#[RequireRole(...)]` — enforced by a single shared `Axiam\Sdk\AccessEnforcer` that
+BOTH framework bridges delegate to, so Laravel and Symfony applications get
+byte-identical semantics.
+
+```php
+use Axiam\Sdk\Attributes\RequireAccess;
+
+final class DocumentController
+{
+    // Resolves the resource UUID from the {id} route parameter, checks 'read' for
+    // the REQUEST'S authenticated user (never the shared AxiamClient's own session),
+    // and returns 401/400/403/503 automatically on failure.
+    #[RequireAccess(action: 'read', resourceParam: 'id')]
+    public function show(string $id) { /* ... */ }
+}
+```
+
+- **Symfony**: tag `Axiam\Sdk\Symfony\AxiamAccessAttributeListener`
+  (`kernel.event_subscriber`) in `config/services.yaml`, alongside
+  `AxiamAuthSubscriber`/`AxiamVoter` — see
+  [`examples/symfony_app/services.yaml`](examples/symfony_app/services.yaml) and
+  [`examples/symfony_app/DocumentController.php`](examples/symfony_app/DocumentController.php).
+- **Laravel**: the `axiam.access` route-middleware alias (registered automatically by
+  `AxiamServiceProvider`, same as `axiam.auth`) supports the attribute style above AND
+  a string-param style needing no attribute at all —
+  `->middleware('axiam.access:read')` (`action`, then optional `scope`,
+  `resourceParam`, defaulting to `'id'`) — see
+  [`examples/laravel_app/routes.php`](examples/laravel_app/routes.php).
+
+Semantics (identical in both bridges, CONTRACT.md §11.2): `require_access` runs
+strictly AFTER authentication — a missing identity is 401, never a second token
+verification. The resource id is a UUID resolved from (in order) a static literal, a
+route parameter, or a resolver callback; unresolvable is 400, never a silent allow. A
+denied check is 403; a transport failure fails CLOSED with 503 (never allows).
+`checkAccess` is always called with the REQUEST's authenticated `user_id` as the
+subject — not whatever session the shared `AxiamClient` itself might separately hold.
+`#[RequireRole(...)]` is a LOCAL, no-server-round-trip check against the verified
+identity's roles — coarser than `#[RequireAccess]` and not a substitute for it. No
+decision is ever cached, and no token material appears in any error output.
 
 ## TLS policy
 

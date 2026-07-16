@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Laravel;
 
+use Axiam\Sdk\AccessEnforcer;
 use Axiam\Sdk\AxiamClient;
 
 // D-01: the entire class definition is wrapped in a `class_exists` guard so that
@@ -27,7 +28,10 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
      * consumer never needs to publish a config file to get started). `boot()`
      * registers the `axiam.auth` middleware alias ({@see AxiamMiddleware}) and the
      * `axiam` Gate ability ({@see AxiamGate}, D-02) — `can:axiam,<resource>,<action>`
-     * route middleware then works out of the box.
+     * route middleware then works out of the box — plus the `axiam.access` middleware
+     * alias ({@see AxiamAccessMiddleware}, backed by {@see AccessEnforcer}, CONTRACT.md
+     * §11) for the declarative `#[RequireAuth]`/`#[RequireAccess]`/`#[RequireRole]`
+     * helpers.
      */
     final class AxiamServiceProvider extends \Illuminate\Support\ServiceProvider
     {
@@ -65,6 +69,16 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
             $this->app->singleton(AxiamGate::class, static fn ($app): AxiamGate => new AxiamGate(
                 $app->make(AxiamClient::class),
             ));
+
+            // CONTRACT.md §11: one shared AccessEnforcer, reused by both the
+            // axiam.access middleware here and (independently) the Symfony bridge.
+            $this->app->singleton(AccessEnforcer::class, static fn ($app): AccessEnforcer => new AccessEnforcer(
+                $app->make(AxiamClient::class),
+            ));
+
+            $this->app->singleton(AxiamAccessMiddleware::class, static fn ($app): AxiamAccessMiddleware => new AxiamAccessMiddleware(
+                $app->make(AccessEnforcer::class),
+            ));
         }
 
         /**
@@ -76,6 +90,12 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
             // Route middleware alias — `->middleware('axiam.auth')` (D-02, §10).
             if ($this->app->bound('router')) {
                 $this->app->make('router')->aliasMiddleware('axiam.auth', AxiamMiddleware::class);
+
+                // CONTRACT.md §11: ->middleware('axiam.access:ACTION,SCOPE,RESOURCE_PARAM')
+                // (SCOPE and RESOURCE_PARAM optional) or, with no params,
+                // attribute-reflection off the resolved controller (see
+                // AxiamAccessMiddleware's own docblock for both styles).
+                $this->app->make('router')->aliasMiddleware('axiam.access', AxiamAccessMiddleware::class);
             }
 
             // The `axiam` Gate ability — `can:axiam,<resource>,<action>` route

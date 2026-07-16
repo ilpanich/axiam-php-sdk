@@ -125,6 +125,42 @@ final class DocumentController extends AbstractController
   throws, Symfony's security layer returns **403**.
 - A valid token and an allowed check → `200` with the document body.
 
+## CONTRACT.md §11 — declarative authorization helpers
+
+[`DocumentController.php`](DocumentController.php) in this directory shows the
+alternative, declarative style: `#[RequireAuth]`/`#[RequireAccess]` PHP 8 attributes
+instead of a manual `denyAccessUnlessGranted()` call in the method body.
+
+```php
+#[Route('/documents/{id}', methods: ['GET'])]
+#[RequireAuth]
+#[RequireAccess(action: 'read', resourceParam: 'id')]
+public function show(string $id): JsonResponse
+{
+    // AxiamAuthSubscriber (kernel.request) already verified the token, and
+    // AxiamAccessAttributeListener (kernel.controller) already confirmed
+    // checkAccess('read', $id) for the REQUEST's authenticated user — no manual
+    // check needed in this method body.
+    return $this->json(['id' => $id, 'title' => 'Q3 Compliance Report']);
+}
+```
+
+`Axiam\Sdk\Symfony\AxiamAccessAttributeListener` — a THIRD `services.yaml` entry
+alongside `AxiamAuthSubscriber`/`AxiamVoter` (see [`services.yaml`](services.yaml)),
+also manually tagged (`kernel.event_subscriber`, Pitfall 5, same as the other two) —
+reflects the resolved controller for these attributes on `kernel.controller` and
+delegates to `Axiam\Sdk\AccessEnforcer` (shared with the Laravel bridge's
+`axiam.access` middleware, so both frameworks apply the identical resource-resolution
+and error-mapping rules): 401 `authentication_failed` if unauthenticated, 400
+`invalid_request` if the resource UUID can't be resolved, 403 `authorization_denied` on
+a denied check, 503 `authz_unavailable` (fail closed) on a transport failure. The check
+is always made for the REQUEST's authenticated user (`subject_id`), never for
+whatever session `AxiamClient` itself might separately hold.
+
+`#[RequireRole('admin', ...)]` is also available as a LOCAL, no-server-round-trip
+check against the verified identity's `roles` — coarser than `#[RequireAccess]` and
+not a substitute for it (CONTRACT.md §11.2.9).
+
 ## Running this against a real Symfony app
 
 This directory ships as illustrative, `php -l`-clean source (the core `axiam/axiam-sdk`
@@ -161,4 +197,4 @@ hatch (§6/D-12).
 
 ## Contract conformance
 
-This SDK conforms to CONTRACT.md §1–§10. See [`../../CONTRACT.md`](../../CONTRACT.md).
+This SDK conforms to CONTRACT.md §1–§11. See [`../../CONTRACT.md`](../../CONTRACT.md).

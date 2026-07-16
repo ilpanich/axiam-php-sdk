@@ -78,6 +78,49 @@ A second route in the same file (`/documents/{id}/standalone-gate`) shows
 applications that prefer not to depend on Laravel's `illuminate/auth` Gate/`Authorize`
 middleware pipeline at all, it returns the `403` `JsonResponse` itself.
 
+## CONTRACT.md §11 — declarative authorization helpers
+
+`AxiamServiceProvider::boot()` also registers the **`axiam.access`** route-middleware
+alias → `Axiam\Sdk\Laravel\AxiamAccessMiddleware`, backed by the SAME
+`Axiam\Sdk\AccessEnforcer` the Symfony bridge's `AxiamAccessAttributeListener` uses (so
+both frameworks apply identical resource-resolution and error-mapping rules). It
+supports two interchangeable styles, both shown in [`routes.php`](routes.php):
+
+```php
+// String-param style — no attribute needed: action, scope (optional), resourceParam
+// (optional, defaults to 'id').
+Route::get('/documents/{id}/require-access', function (string $id) {
+    return response()->json(['id' => $id, 'title' => 'Q3 Compliance Report']);
+})->middleware(['axiam.auth', 'axiam.access:read']);
+
+// Attribute style — #[RequireAccess] on the controller method, reflected by
+// axiam.access (called with no string params) off the route's resolved action.
+final class DocumentApiController
+{
+    #[RequireAccess(action: 'read', resourceParam: 'id')]
+    public function show(string $id)
+    {
+        return response()->json(['id' => $id, 'title' => 'Q3 Compliance Report']);
+    }
+}
+
+Route::get('/documents/{id}/require-access-attribute', [DocumentApiController::class, 'show'])
+    ->middleware(['axiam.auth', 'axiam.access']);
+```
+
+`axiam.auth` must still run first — `axiam.access` never extracts or verifies a token
+itself (CONTRACT.md §11.2.1); it only reads the `axiam_user` request attribute
+`axiam.auth` already populated. The check is always made for the REQUEST's
+authenticated user (`subject_id`), never for whatever session `AxiamClient` itself
+might separately hold. Error mapping: 401 `authentication_failed` if unauthenticated,
+400 `invalid_request` if the resource UUID can't be resolved, 403
+`authorization_denied` on a denied check, 503 `authz_unavailable` (fail closed) on a
+transport failure.
+
+`#[RequireRole('admin', ...)]` is also available as a LOCAL, no-server-round-trip
+check against the verified identity's `roles` — coarser than `#[RequireAccess]` and
+not a substitute for it (CONTRACT.md §11.2.9).
+
 ## Running this against a real Laravel app
 
 This directory ships as illustrative, `php -l`-clean source (the core `axiam/axiam-sdk`
@@ -110,4 +153,4 @@ hatch (§6/D-12).
 
 ## Contract conformance
 
-This SDK conforms to CONTRACT.md §1–§10. See [`../../CONTRACT.md`](../../CONTRACT.md).
+This SDK conforms to CONTRACT.md §1–§11. See [`../../CONTRACT.md`](../../CONTRACT.md).
