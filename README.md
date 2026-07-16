@@ -1,5 +1,12 @@
 # axiam/axiam-sdk (PHP)
 
+[![CI](https://github.com/ilpanich/axiam-php-sdk/actions/workflows/sdk-ci-php.yml/badge.svg?branch=main)](https://github.com/ilpanich/axiam-php-sdk/actions/workflows/sdk-ci-php.yml)
+[![Coverage Status](https://coveralls.io/repos/github/ilpanich/axiam-php-sdk/badge.svg?branch=main)](https://coveralls.io/github/ilpanich/axiam-php-sdk?branch=main)
+[![Packagist Version](https://img.shields.io/packagist/v/axiam/axiam-sdk.svg)](https://packagist.org/packages/axiam/axiam-sdk)
+[![PHP Version](https://img.shields.io/packagist/php-v/axiam/axiam-sdk.svg)](https://packagist.org/packages/axiam/axiam-sdk)
+[![Docs](https://img.shields.io/badge/docs-phpDocumentor-blue.svg)](https://ilpanich.github.io/axiam-php-sdk/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
 Official PHP client SDK for [AXIAM](https://github.com/ilpanich/axiam) — Access eXtended
 Identity and Authorization Management.
 
