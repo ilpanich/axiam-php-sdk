@@ -58,8 +58,19 @@ final class AuthzDispatcher
     ) {
     }
 
-    /** `checkAccess` (CONTRACT.md §1). */
-    public function checkAccess(string $action, string $resourceId, ?string $scope = null): bool
+    /**
+     * `checkAccess` (CONTRACT.md §1).
+     *
+     * @param string|null $subjectId Additive, optional (CONTRACT.md §11.2.2 —
+     *        declarative authorization helpers): when given, the check is evaluated
+     *        for THIS subject rather than whichever identity the dispatcher's own
+     *        configured session represents. `null` (the default) preserves the
+     *        pre-§11 behavior exactly on both transports — REST omits `subject_id`
+     *        from the wire body (server derives it from the verified JWT) and gRPC
+     *        falls back to {@see self::currentSubjectId()} (the dispatcher's own
+     *        session subject), exactly as before this parameter was added.
+     */
+    public function checkAccess(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): bool
     {
         if (!$this->restOnly && extension_loaded('grpc')) {
             // Class referenced ONLY inside this guarded branch (Pitfall 4 / T-22-16) —
@@ -68,7 +79,7 @@ final class AuthzDispatcher
             // autoloaded.
             $response = $this->grpcClient()->checkAccess(
                 $this->tenantId ?? '',
-                $this->currentSubjectId(),
+                $subjectId ?? $this->currentSubjectId(),
                 $action,
                 $resourceId,
                 $scope,
@@ -78,7 +89,7 @@ final class AuthzDispatcher
         }
 
         // D-03: authz ALWAYS works — transparent fallback, not a degraded mode.
-        return $this->restClient->checkAccess($action, $resourceId, $scope);
+        return $this->restClient->checkAccess($action, $resourceId, $scope, $subjectId);
     }
 
     /** `can` (CONTRACT.md §1) — the browser/UI-scenario alias for {@see self::checkAccess()}. */

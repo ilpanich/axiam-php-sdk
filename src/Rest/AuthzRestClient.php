@@ -20,9 +20,17 @@ use GuzzleHttp\Exception\RequestException;
  *
  * Wire field names match `crates/axiam-api-rest/src/handlers/authz_check.rs` exactly:
  * `action`, `resource_id` (camelCase `resourceId` on the PHP call surface, snake_case on
- * the wire), optional `scope`. `tenant_id`/`subject_id` are never sent in the body — the
- * server derives identity from the verified JWT (SEC-003); this client mirrors that by
- * never accepting a tenant/subject parameter itself.
+ * the wire), optional `scope`. `tenant_id` is never sent in the body — the server
+ * derives it from the verified JWT (SEC-003). `subject_id` is likewise omitted by
+ * default (the server falls back to deriving the subject from the same verified JWT,
+ * i.e. whichever session's Bearer token is attached to the request) — but CONTRACT.md
+ * §11.2.2 (declarative authorization helpers) requires an explicit, additive
+ * `subject_id` override: {@see \Axiam\Sdk\AccessEnforcer} calls a shared AXIAM client
+ * on behalf of the REQUEST's authenticated end user, which is a *different* identity
+ * than whatever session the shared client itself is authenticated as (typically a
+ * service account) — omitting `subject_id` in that scenario would silently check the
+ * service account's permissions instead of the end user's. See
+ * {@see self::checkAccess()}'s `$subjectId` parameter.
  */
 final class AuthzRestClient
 {
@@ -31,13 +39,20 @@ final class AuthzRestClient
     }
 
     /**
-     * `checkAccess` (CONTRACT.md §1): `POST /api/v1/authz/check`. Returns the decoded
+     * `checkAccess` (CONTRACT.md §1). `POST /api/v1/authz/check`. Returns the decoded
      * `allowed` boolean; non-2xx responses are translated via {@see ErrorMapper} (403 ->
      * `AuthzError`, 401 -> `AuthError`, everything else -> `NetworkError`).
+     *
+     * @param string|null $subjectId Additive, optional (CONTRACT.md §11.2.2): when
+     *        given, sent on the wire as `subject_id` so the server evaluates the
+     *        check for THIS subject rather than whichever identity the calling
+     *        client's own Bearer token represents. `null` (the default) preserves the
+     *        pre-§11 behavior exactly — no `subject_id` field is sent, and the server
+     *        derives the subject from the verified JWT as before.
      */
-    public function checkAccess(string $action, string $resourceId, ?string $scope = null): bool
+    public function checkAccess(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): bool
     {
-        return $this->decodeAllowed($this->postCheck($action, $resourceId, $scope));
+        return $this->decodeAllowed($this->postCheck($action, $resourceId, $scope, $subjectId));
     }
 
     /**
@@ -100,13 +115,14 @@ final class AuthzRestClient
     }
 
     /** `POST /api/v1/authz/check` — shared by {@see self::checkAccess()} and {@see self::can()}. */
-    private function postCheck(string $action, string $resourceId, ?string $scope): \Psr\Http\Message\ResponseInterface
+    private function postCheck(string $action, string $resourceId, ?string $scope, ?string $subjectId = null): \Psr\Http\Message\ResponseInterface
     {
         $body = array_filter(
             [
                 'action' => $action,
                 'resource_id' => $resourceId,
                 'scope' => $scope,
+                'subject_id' => $subjectId,
             ],
             static fn (mixed $value): bool => $value !== null,
         );

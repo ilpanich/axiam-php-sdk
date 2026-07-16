@@ -279,10 +279,22 @@ final class AxiamClient
     // Authz (CONTRACT.md §1, FND-04, D-03) — transparent REST/gRPC delegation
     // ------------------------------------------------------------------
 
-    /** `checkAccess` — delegates to {@see AuthzDispatcher} (REST default, gRPC when available). */
-    public function checkAccess(string $action, string $resourceId, ?string $scope = null): bool
+    /**
+     * `checkAccess` — delegates to {@see AuthzDispatcher} (REST default, gRPC when available).
+     *
+     * @param string|null $subjectId Additive, optional (CONTRACT.md §11.2.2 —
+     *        declarative authorization helpers): when given, the check is evaluated
+     *        for THIS subject (a UUID) rather than whichever identity this client's
+     *        own session represents. This matters for a framework bridge sharing ONE
+     *        `AxiamClient` instance (typically authenticated as a service account, or
+     *        not authenticated at all) to authorize each inbound HTTP request's OWN
+     *        end user: passing `subjectId: $endUserId` here checks the end user's
+     *        permissions, never the shared client's. `null` (the default) preserves
+     *        this method's pre-§11 behavior exactly.
+     */
+    public function checkAccess(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): bool
     {
-        return $this->authzDispatcher->checkAccess($action, $resourceId, $scope);
+        return $this->authzDispatcher->checkAccess($action, $resourceId, $scope, $subjectId);
     }
 
     /**

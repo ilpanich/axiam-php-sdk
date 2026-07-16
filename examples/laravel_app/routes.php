@@ -32,6 +32,7 @@ declare(strict_types=1);
  * story, required env vars, and how to run this against a real Laravel installation.
  */
 
+use Axiam\Sdk\Attributes\RequireAccess;
 use Axiam\Sdk\Laravel\AxiamGate;
 use Illuminate\Support\Facades\Route;
 
@@ -52,3 +53,35 @@ Route::get('/documents/{id}/standalone-gate', function (string $id, AxiamGate $g
 
     return response()->json(['id' => $id, 'title' => 'Q3 Compliance Report']);
 })->middleware(['axiam.auth']);
+
+// --- CONTRACT.md §11 declarative authorization helpers -------------------------------
+//
+// The axiam.access middleware (Axiam\Sdk\Laravel\AxiamAccessMiddleware, registered by
+// AxiamServiceProvider::boot() exactly like axiam.auth/can:axiam above) supports TWO
+// styles; both delegate to the SAME Axiam\Sdk\AccessEnforcer, so they behave
+// identically (subject propagation, resource-UUID resolution, the 401/403/400/503
+// error mapping — see CONTRACT.md §11).
+
+// --- Option C: string-param style — no controller attribute needed at all. The
+//     middleware argument order is action, scope (optional), resourceParam (optional,
+//     defaults to 'id'); {id} in the route already matches the default. ---------------
+Route::get('/documents/{id}/require-access', function (string $id) {
+    return response()->json(['id' => $id, 'title' => 'Q3 Compliance Report']);
+})->middleware(['axiam.auth', 'axiam.access:read']);
+
+// --- Option D: attribute style — #[RequireAccess] on the controller method, reflected
+//     by axiam.access (called with NO string params) off the route's resolved
+//     controller action. The SAME #[RequireAccess] attribute class this example uses
+//     is also read by the Symfony bridge's AxiamAccessAttributeListener (see
+//     ../symfony_app/DocumentController.php) — one attribute, both frameworks. --------
+final class DocumentApiController
+{
+    #[RequireAccess(action: 'read', resourceParam: 'id')]
+    public function show(string $id)
+    {
+        return response()->json(['id' => $id, 'title' => 'Q3 Compliance Report']);
+    }
+}
+
+Route::get('/documents/{id}/require-access-attribute', [DocumentApiController::class, 'show'])
+    ->middleware(['axiam.auth', 'axiam.access']);

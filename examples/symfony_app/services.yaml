@@ -38,3 +38,19 @@ services:
         arguments:
             $client: '@Axiam\Sdk\AxiamClient'
         tags: ['security.voter']
+
+    # CONTRACT.md §11 declarative authorization helpers: ONE shared enforcement
+    # service (resource resolution, subject propagation, the §11 error-mapping table)
+    # used by the listener below.
+    Axiam\Sdk\AccessEnforcer:
+        arguments:
+            $client: '@Axiam\Sdk\AxiamClient'
+
+    # #[RequireAuth] / #[RequireAccess] / #[RequireRole] enforcement: a
+    # kernel.controller listener that reflects the resolved controller for these
+    # attributes and delegates to AccessEnforcer above. MUST be tagged manually --
+    # no auto-discovery, same as AxiamAuthSubscriber/AxiamVoter.
+    Axiam\Sdk\Symfony\AxiamAccessAttributeListener:
+        arguments:
+            $enforcer: '@Axiam\Sdk\AccessEnforcer'
+        tags: ['kernel.event_subscriber']

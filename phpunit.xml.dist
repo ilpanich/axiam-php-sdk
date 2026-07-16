@@ -15,12 +15,19 @@
             <exclude>tests/LaravelAuthMiddlewareTest.php</exclude>
             <exclude>tests/SymfonyAuthSubscriberTest.php</exclude>
             <exclude>tests/SymfonyAuthEdgeSubscriberTest.php</exclude>
+            <exclude>tests/LaravelAccessMiddlewareTest.php</exclude>
+            <exclude>tests/SymfonyAccessAttributeListenerTest.php</exclude>
         </testsuite>
-        <!-- Laravel/Symfony bridge tests (wave-5 plans) require the dev-only
+        <!-- Laravel/Symfony bridge tests (wave-5 plans, plus the CONTRACT.md §11
+             declarative-authorization listener/middleware) require the dev-only
              illuminate/* and symfony/* packages declared in require-dev. -->
         <testsuite name="integration">
             <directory suffix="MiddlewareTest.php">tests</directory>
             <directory suffix="SubscriberTest.php">tests</directory>
+            <!-- Does not match either suffix pattern above (it is a kernel.controller
+                 LISTENER, not a middleware/subscriber) but has the exact same
+                 dev-only-symfony-package dependency, so it is listed explicitly. -->
+            <file>tests/SymfonyAccessAttributeListenerTest.php</file>
         </testsuite>
     </testsuites>
 
