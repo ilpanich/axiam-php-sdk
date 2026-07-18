@@ -93,12 +93,13 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§11 — the binding,
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§11 (including §6.1 mTLS) — the binding,
 cross-language behavioral contract every AXIAM SDK implements: camelCase method names
 (§1), the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2), non-browser
 `X-CSRF-Token` response-header capture (§3), a shared Guzzle `CookieJar` (§4), a required
 `tenant` constructor parameter with no default (§5), strict TLS with `customCa` as the only
-escape hatch (§6), `Sensitive`-wrapped token redaction (§7), HMAC-SHA256-verified AMQP
+server-verification escape hatch (§6) plus optional client-certificate mutual TLS (§6.1),
+`Sensitive`-wrapped token redaction (§7), HMAC-SHA256-verified AMQP
 messages (§8), single-flight refresh concurrency safety (§9), framework
 middleware/subscriber integration (§10), and declarative per-endpoint authorization
 helpers (§11, see below).
@@ -191,6 +192,35 @@ Guzzle's `verify` option is **always `true`** (strict TLS, system trust roots) u
 path anywhere in this SDK's source, examples, or tests; CI enforces this with a dedicated
 grep gate (`.github/workflows/sdk-ci-php.yml`) that fails the build if any TLS-bypass
 pattern (other than the `customCa` exception) is ever introduced.
+
+### mTLS / client certificates (CONTRACT.md §6.1)
+
+For IoT devices and service accounts that authenticate by **mutual TLS**, supply an X.509
+client identity (signed by the tenant's organization CA) via the `clientCert`/`clientKey`
+constructor parameters — both **PEM strings** (`clientCert` is the certificate chain,
+`clientKey` its private key, PKCS#8 or PKCS#1):
+
+```php
+use Axiam\Sdk\AxiamClient;
+
+$client = new AxiamClient(
+    baseUrl: 'https://api.axiam.example',
+    tenant:  'acme',
+    clientCert: file_get_contents('/secure/device.crt.pem'),
+    clientKey:  file_get_contents('/secure/device.key.pem'),
+);
+```
+
+The identity is applied to **both transports** of that client instance: the REST Guzzle
+clients (as `cert`/`ssl_key`) and any gRPC channel (via
+`\Grpc\ChannelCredentials::createSsl(rootCerts, privateKey, certChain)`). mTLS is **opt-in**;
+omitting it leaves the default bearer-cookie behavior unchanged. Presenting a client
+certificate is strictly **additive** — it **never** relaxes server verification, so the
+strict-TLS policy above still holds. `clientCert` and `clientKey` are **all-or-nothing**:
+supplying exactly one, or a non-PEM value, throws `InvalidArgumentException` at construction.
+The private key is secret material (§7): it is held behind `Sensitive`, written only to a
+short-lived `0600` temp file cURL reads, cleaned up when the client is destroyed, and never
+appears in any log, exception, or debug output.
 
 ## Sensitive value redaction
 

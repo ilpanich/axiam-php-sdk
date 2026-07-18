@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk;
 
+use Axiam\Sdk\Core\Sensitive;
 use Axiam\Sdk\Rest\AuthzRestClient;
 
 /**
@@ -46,6 +47,12 @@ final class AuthzDispatcher
      *        user's subject UUID — the gRPC wire contract (unlike REST) requires
      *        `subject_id` explicitly, cross-validated server-side against the verified
      *        JWT (SEC-003); required only for the gRPC path.
+     * @param string|null $clientCertPem §6.1 (mTLS): PEM client-certificate chain the gRPC
+     *        channel presents for mutual TLS; `null` leaves the channel using bearer-token
+     *        auth only. Ignored on the REST path (Guzzle receives its own file-based copy).
+     * @param Sensitive|null $clientKey §6.1/§7 (mTLS): the matching private key, wrapped in
+     *        {@see Sensitive} so it never leaks; revealed only when building the gRPC channel
+     *        credentials. Must be present iff `$clientCertPem` is.
      */
     public function __construct(
         private readonly AuthzRestClient $restClient,
@@ -55,6 +62,8 @@ final class AuthzDispatcher
         private readonly mixed $tokenAccessor = null,
         private readonly mixed $subjectIdAccessor = null,
         private readonly ?string $customCaPem = null,
+        private readonly ?string $clientCertPem = null,
+        private readonly ?Sensitive $clientKey = null,
     ) {
     }
 
@@ -156,6 +165,8 @@ final class AuthzDispatcher
                 'AuthzDispatcher: tenantId must be configured to use the gRPC transport',
             ),
             $this->customCaPem,
+            $this->clientCertPem,
+            $this->clientKey,
         );
     }
 

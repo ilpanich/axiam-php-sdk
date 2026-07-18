@@ -47,6 +47,13 @@ use Axiam\Sdk\Grpc\Gen\CheckAccessResponse;
  * factory with the custom CA bytes — the ONLY escape hatch (§6). There is no
  * insecure-channel construction path anywhere in this class.
  *
+ * §6.1 (mTLS): when a client identity (`$clientCertPem` + `$clientKey`) is configured it is
+ * passed to the SAME `createSsl(rootCerts, privateKey, certChain)` factory, so the channel
+ * presents a client certificate for mutual TLS. This is strictly additive — it changes only
+ * what the CLIENT presents, never how the server is verified (§6.1.2). The private key arrives
+ * wrapped in {@see Sensitive} and is revealed only at the `createSsl()` call site; it is never
+ * stored in plaintext, logged, or exposed.
+ *
  * §5: `x-tenant-id` metadata is injected on EVERY RPC; `authorization` metadata is
  * injected whenever `$tokenAccessor` returns a non-empty token.
  */
@@ -60,6 +67,12 @@ final class AuthzGrpcClient extends \Grpc\BaseStub
      * @param string $tenantId Injected as the `x-tenant-id` metadata key on every RPC (§5).
      * @param string|null $customCaPem PEM-encoded custom CA bundle (§6's ONLY escape
      *        hatch); omit to use the system trust roots.
+     * @param string|null $clientCertPem §6.1 (mTLS): PEM client-certificate chain this
+     *        channel presents for mutual TLS; omit for bearer-token-only auth. Must be
+     *        present together with `$clientKey`.
+     * @param \Axiam\Sdk\Core\Sensitive|null $clientKey §6.1/§7 (mTLS): the matching private
+     *        key, wrapped in {@see \Axiam\Sdk\Core\Sensitive} so it never leaks; revealed only
+     *        to build the channel credentials, never retained in plaintext.
      * @param array<string, mixed> $options Additional `\Grpc\BaseStub` constructor
      *        options (e.g. a caller-supplied per-call deadline); `credentials` is always
      *        set by this constructor and cannot be overridden via `$options`.
@@ -69,11 +82,17 @@ final class AuthzGrpcClient extends \Grpc\BaseStub
         private readonly mixed $tokenAccessor,
         private readonly string $tenantId,
         private readonly ?string $customCaPem = null,
+        ?string $clientCertPem = null,
+        ?\Axiam\Sdk\Core\Sensitive $clientKey = null,
         array $options = [],
     ) {
-        $credentials = $this->customCaPem !== null
-            ? \Grpc\ChannelCredentials::createSsl($this->customCaPem)
-            : \Grpc\ChannelCredentials::createSsl();
+        // §6.1.4: the client identity (when configured) rides on the SAME strict-TLS
+        // createSsl() factory used for server verification — presenting a client cert never
+        // relaxes how the server is verified (§6.1.2). `$rootCerts = null` keeps the system
+        // trust roots; a private key is revealed from Sensitive only here, at the point of use.
+        $rootCerts = $this->customCaPem;
+        $privateKey = $clientKey?->reveal();
+        $credentials = \Grpc\ChannelCredentials::createSsl($rootCerts, $privateKey, $clientCertPem);
 
         parent::__construct($hostname, array_merge($options, [
             'credentials' => $credentials,

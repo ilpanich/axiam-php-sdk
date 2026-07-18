@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Client-certificate / mutual-TLS (mTLS) support (CONTRACT.md §6.1): two new optional
+  `AxiamClient` constructor parameters, `clientCert` and `clientKey` (both PEM strings — the
+  certificate chain and its private key). When supplied together the client presents that
+  X.509 identity for mutual TLS on **both** transports — the REST Guzzle clients (`cert`/
+  `ssl_key`) and any gRPC channel (`\Grpc\ChannelCredentials::createSsl(rootCerts, privateKey,
+  certChain)`). The feature is opt-in and strictly additive: server verification is never
+  relaxed (the strict-TLS `verify` policy is untouched). The two parameters are all-or-nothing
+  and PEM-only — supplying exactly one, or a non-PEM value, throws `InvalidArgumentException`
+  at construction. The private key is treated as secret material (§7): held behind `Sensitive`,
+  materialized only into a `0600` temp file (removed when the client is destroyed), and never
+  logged, displayed, or exposed via a getter. Conformance statement updated to note §6.1.
+
 ## [1.0.0-alpha2] - 2026-07-16
 
 ### Added
