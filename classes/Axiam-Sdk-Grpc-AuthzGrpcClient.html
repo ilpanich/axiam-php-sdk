@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Grpc/AuthzGrpcClient.php"><a href="files/src-grpc-authzgrpcclient.html"><abbr title="src/Grpc/AuthzGrpcClient.php">AuthzGrpcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">53</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
@@ -162,6 +162,12 @@ whether to retry.</p>
 (strict TLS, system trust roots) or, when <code class="prettyprint">$customCaPem</code> is supplied, that same
 factory with the custom CA bytes — the ONLY escape hatch (§6). There is no
 insecure-channel construction path anywhere in this class.</p>
+<p>§6.1 (mTLS): when a client identity (<code class="prettyprint">$clientCertPem</code> + <code class="prettyprint">$clientKey</code>) is configured it is
+passed to the SAME <code class="prettyprint">createSsl(rootCerts, privateKey, certChain)</code> factory, so the channel
+presents a client certificate for mutual TLS. This is strictly additive — it changes only
+what the CLIENT presents, never how the server is verified (§6.1.2). The private key arrives
+wrapped in <abbr title="\Axiam\Sdk\Grpc\Sensitive">Sensitive</abbr> and is revealed only at the <code class="prettyprint">createSsl()</code> call site; it is never
+stored in plaintext, logged, or exposed.</p>
 <p>§5: <code class="prettyprint">x-tenant-id</code> metadata is injected on EVERY RPC; <code class="prettyprint">authorization</code> metadata is
 injected whenever <code class="prettyprint">$tokenAccessor</code> returns a non-empty token.</p>
 </section>
@@ -241,14 +247,14 @@ metadata (SEC-003) — a mismatch is rejected server-side with `PERMISSION_DENIE
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Grpc/AuthzGrpcClient.php"><a href="files/src-grpc-authzgrpcclient.html"><abbr title="src/Grpc/AuthzGrpcClient.php">AuthzGrpcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">67</span>
+    <span class="phpdocumentor-element-found-in__line">80</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$hostname</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): Array&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tokenAccessor</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCaPem</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$options</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$hostname</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): Array&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tokenAccessor</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCaPem</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientCertPem</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$options</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -296,6 +302,28 @@ hatch); omit to use the system trust roots.</p>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientCertPem</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>§6.1 (mTLS): PEM client-certificate chain this
+channel presents for mutual TLS; omit for bearer-token-only auth. Must be
+present together with <code class="prettyprint">$clientKey</code>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientKey</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>§6.1/§7 (mTLS): the matching private
+key, wrapped in <a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a> so it never leaks; revealed only
+to build the channel credentials, never retained in plaintext.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$options</span>
                 : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
@@ -328,7 +356,7 @@ set by this constructor and cannot be overridden via <code class="prettyprint">$
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Grpc/AuthzGrpcClient.php"><a href="files/src-grpc-authzgrpcclient.html"><abbr title="src/Grpc/AuthzGrpcClient.php">AuthzGrpcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">112</span>
+    <span class="phpdocumentor-element-found-in__line">131</span>
 
     </aside>
 
@@ -377,7 +405,7 @@ set by this constructor and cannot be overridden via <code class="prettyprint">$
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Grpc/AuthzGrpcClient.php"><a href="files/src-grpc-authzgrpcclient.html"><abbr title="src/Grpc/AuthzGrpcClient.php">AuthzGrpcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">88</span>
+    <span class="phpdocumentor-element-found-in__line">107</span>
 
     </aside>
 

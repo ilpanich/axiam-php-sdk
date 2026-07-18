@@ -123,7 +123,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">72</span>
 
     </aside>
 
@@ -162,6 +162,15 @@ authz call transparently triggers the shared single-flight refresh-and-retry-onc
 <code class="prettyprint">$customCa</code> (a CA bundle FILE PATH) is supplied, in which case <code class="prettyprint">verify</code> is set to that path —
 the ONLY escape hatch. There is no code path in this class that sets <code class="prettyprint">verify</code> to <code class="prettyprint">false</code> or
 any other TLS-bypass value.</p>
+<p>§6.1 (mTLS): supplying <code class="prettyprint">$clientCert</code> + <code class="prettyprint">$clientKey</code> (both PEM strings) makes this client
+present an X.509 client identity for mutual TLS on BOTH transports — the REST Guzzle clients
+(via <code class="prettyprint">cert</code>/<code class="prettyprint">ssl_key</code>) and any gRPC channel (via
+<code class="prettyprint">\Grpc\ChannelCredentials::createSsl(rootCerts, privateKey, certChain)</code>). This is strictly
+ADDITIVE to §6: presenting a client certificate NEVER relaxes server verification — <code class="prettyprint">verify</code>
+is untouched by this code path (contract rule §6.1.2). The private key is secret (§7): it is
+held behind <a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>, written only to a <code class="prettyprint">0600</code> temp file consumed by cURL, and never
+appears in any debug/log/exception output. Both PEM strings must be supplied together;
+supplying exactly one is a construction-time <abbr title="\InvalidArgumentException">InvalidArgumentException</abbr>.</p>
 </section>
 
 
@@ -196,6 +205,15 @@ any other TLS-bypass value.</p>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method___destruct">__destruct()</a>
+    <span>
+                                &nbsp;: mixed    </span>
+</dt>
+<dd>§6.1: cleans up the `0600` temp files backing the client-certificate identity when this
+client is destroyed, so no PEM material (least of all the private key) outlives the
+object on disk. A no-op when mTLS was not configured.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_batchCheck">batchCheck()</a>
     <span>
                                 &nbsp;: array&lt;int, bool&gt;    </span>
@@ -218,6 +236,18 @@ relative to the rest of the SDK family).</dd>
                                 &nbsp;: bool    </span>
 </dt>
 <dd>`checkAccess` — delegates to {@see AuthzDispatcher} (REST default, gRPC when available).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_debugClientCertOptions">debugClientCertOptions()</a>
+    <span>
+                                &nbsp;: array{cert: string|null, ssl_key: string|null}    </span>
+</dt>
+<dd>Test-only seam (not part of the public API contract, mirroring {@see self::debugVerifyOption()}):
+exposes the §6.1 client-identity options (`cert` = certificate-chain file, `ssl_key` =
+private-key file) actually configured on this client&#039;s authz Guzzle transport, so tests
+can assert the mTLS wiring without performing a live TLS handshake. Both entries are
+`null` when mTLS was not configured. The values are FILE PATHS, never the PEM bytes —
+this seam never surfaces the private key itself.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_debugVerifyOption">debugVerifyOption()</a>
@@ -299,14 +329,14 @@ public surface).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">121</span>
+    <span class="phpdocumentor-element-found-in__line">156</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenant</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgSlug</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCa</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restOnly</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cacheTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">300</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grpcTarget</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$transportHandler</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenant</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgSlug</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCa</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientCert</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restOnly</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cacheTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">300</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grpcTarget</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$transportHandler</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -364,6 +394,33 @@ constructor options).</p>
                     <section class="phpdocumentor-description"><p>A CA bundle FILE PATH (PEM-encoded) — the ONLY TLS escape
 hatch (§6/D-12). Never pass a value here to disable TLS verification; there is no
 such option on this class.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientCert</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>§6.1 (mTLS): the client's X.509 identity certificate
+CHAIN as a PEM STRING (not a path). When supplied together with <code class="prettyprint">$clientKey</code>, this
+client presents that certificate for mutual TLS on both the REST and gRPC
+transports. Purely additive — server verification is never relaxed (§6.1.2). Must
+be a PEM value; a non-PEM string is rejected at construction. <code class="prettyprint">null</code> (default)
+leaves the default bearer-cookie behavior unchanged (§6.1.5).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientKey</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>§6.1/§7 (mTLS): the PEM STRING of the private key matching
+<code class="prettyprint">$clientCert</code> (PKCS#8 or PKCS#1). Secret material — it is held behind
+<a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a> and never logged, displayed, or exposed via a getter. <code class="prettyprint">$clientCert</code>
+and <code class="prettyprint">$clientKey</code> are all-or-nothing: supplying exactly one throws
+<abbr title="\InvalidArgumentException">InvalidArgumentException</abbr>.</p>
 </section>
 
             </dd>
@@ -439,6 +496,43 @@ internal seam, adapted to Guzzle's own documented
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method___destruct">
+        __destruct()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method___destruct" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">274</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">§6.1: cleans up the `0600` temp files backing the client-certificate identity when this
+client is destroyed, so no PEM material (least of all the private key) outlives the
+object on disk. A no-op when mTLS was not configured.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">__destruct</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_batchCheck">
         batchCheck()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_batchCheck" class="headerlink"><i class="fas fa-link"></i></a>
@@ -447,7 +541,7 @@ internal seam, adapted to Guzzle's own documented
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">317</span>
+    <span class="phpdocumentor-element-found-in__line">461</span>
 
     </aside>
 
@@ -496,7 +590,7 @@ internal seam, adapted to Guzzle's own documented
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">306</span>
+    <span class="phpdocumentor-element-found-in__line">450</span>
 
     </aside>
 
@@ -555,7 +649,7 @@ relative to the rest of the SDK family).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">295</span>
+    <span class="phpdocumentor-element-found-in__line">439</span>
 
     </aside>
 
@@ -627,6 +721,50 @@ this method's pre-§11 behavior exactly.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_debugClientCertOptions">
+        debugClientCertOptions()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_debugClientCertOptions" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">344</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Test-only seam (not part of the public API contract, mirroring {@see self::debugVerifyOption()}):
+exposes the §6.1 client-identity options (`cert` = certificate-chain file, `ssl_key` =
+private-key file) actually configured on this client&#039;s authz Guzzle transport, so tests
+can assert the mTLS wiring without performing a live TLS handshake. Both entries are
+`null` when mTLS was not configured. The values are FILE PATHS, never the PEM bytes —
+this seam never surfaces the private key itself.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">debugClientCertOptions</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{cert: string|null, ssl_key: string|null}</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{cert: string|null, ssl_key: string|null}</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_debugVerifyOption">
         debugVerifyOption()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_debugVerifyOption" class="headerlink"><i class="fas fa-link"></i></a>
@@ -635,7 +773,7 @@ this method's pre-§11 behavior exactly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">206</span>
+    <span class="phpdocumentor-element-found-in__line">329</span>
 
     </aside>
 
@@ -677,7 +815,7 @@ this method's pre-§11 behavior exactly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">220</span>
+    <span class="phpdocumentor-element-found-in__line">364</span>
 
     </aside>
 
@@ -735,7 +873,7 @@ challenge (HTTP 202) is an expected outcome, not an exception: callers MUST chec
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">260</span>
+    <span class="phpdocumentor-element-found-in__line">404</span>
 
     </aside>
 
@@ -773,7 +911,7 @@ authorization decision, mirroring the Python/C# sibling SDKs).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">248</span>
+    <span class="phpdocumentor-element-found-in__line">392</span>
 
     </aside>
 
@@ -810,7 +948,7 @@ reactively on a `401`. A failure surfaces as {@see AuthError} with no retry (§9
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">337</span>
+    <span class="phpdocumentor-element-found-in__line">481</span>
 
     </aside>
 
@@ -877,7 +1015,7 @@ itself, since callers use the result for an authorization decision.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">233</span>
+    <span class="phpdocumentor-element-found-in__line">377</span>
 
     </aside>
 
@@ -945,9 +1083,11 @@ public surface).</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method___destruct">__destruct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_batchCheck">batchCheck()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_can">can()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_checkAccess">checkAccess()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_debugClientCertOptions">debugClientCertOptions()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_debugVerifyOption">debugVerifyOption()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_login">login()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_logout">logout()</a></li>

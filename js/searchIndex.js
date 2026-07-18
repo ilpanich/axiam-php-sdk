@@ -231,10 +231,20 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method___construct"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003A__destruct\u0028\u0029",
+            "name": "__destruct",
+            "summary": "\u00A76.1\u003A\u0020cleans\u0020up\u0020the\u0020\u00600600\u0060\u0020temp\u0020files\u0020backing\u0020the\u0020client\u002Dcertificate\u0020identity\u0020when\u0020this\nclient\u0020is\u0020destroyed,\u0020so\u0020no\u0020PEM\u0020material\u0020\u0028least\u0020of\u0020all\u0020the\u0020private\u0020key\u0029\u0020outlives\u0020the\nobject\u0020on\u0020disk.\u0020A\u0020no\u002Dop\u0020when\u0020mTLS\u0020was\u0020not\u0020configured.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method___destruct"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AdebugVerifyOption\u0028\u0029",
             "name": "debugVerifyOption",
             "summary": "",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_debugVerifyOption"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AdebugClientCertOptions\u0028\u0029",
+            "name": "debugClientCertOptions",
+            "summary": "Test\u002Donly\u0020seam\u0020\u0028not\u0020part\u0020of\u0020the\u0020public\u0020API\u0020contract,\u0020mirroring\u0020\u007B\u0040see\u0020self\u003A\u003AdebugVerifyOption\u0028\u0029\u007D\u0029\u003A\nexposes\u0020the\u0020\u00A76.1\u0020client\u002Didentity\u0020options\u0020\u0028\u0060cert\u0060\u0020\u003D\u0020certificate\u002Dchain\u0020file,\u0020\u0060ssl_key\u0060\u0020\u003D\nprivate\u002Dkey\u0020file\u0029\u0020actually\u0020configured\u0020on\u0020this\u0020client\u0027s\u0020authz\u0020Guzzle\u0020transport,\u0020so\u0020tests\ncan\u0020assert\u0020the\u0020mTLS\u0020wiring\u0020without\u0020performing\u0020a\u0020live\u0020TLS\u0020handshake.\u0020Both\u0020entries\u0020are\n\u0060null\u0060\u0020when\u0020mTLS\u0020was\u0020not\u0020configured.\u0020The\u0020values\u0020are\u0020FILE\u0020PATHS,\u0020never\u0020the\u0020PEM\u0020bytes\u0020\u2014\nthis\u0020seam\u0020never\u0020surfaces\u0020the\u0020private\u0020key\u0020itself.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_debugClientCertOptions"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Alogin\u0028\u0029",
             "name": "login",
