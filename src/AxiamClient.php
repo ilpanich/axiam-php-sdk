@@ -58,6 +58,16 @@ use Psr\Log\NullLogger;
  * `$customCa` (a CA bundle FILE PATH) is supplied, in which case `verify` is set to that path —
  * the ONLY escape hatch. There is no code path in this class that sets `verify` to `false` or
  * any other TLS-bypass value.
+ *
+ * §6.1 (mTLS): supplying `$clientCert` + `$clientKey` (both PEM strings) makes this client
+ * present an X.509 client identity for mutual TLS on BOTH transports — the REST Guzzle clients
+ * (via `cert`/`ssl_key`) and any gRPC channel (via
+ * `\Grpc\ChannelCredentials::createSsl(rootCerts, privateKey, certChain)`). This is strictly
+ * ADDITIVE to §6: presenting a client certificate NEVER relaxes server verification — `verify`
+ * is untouched by this code path (contract rule §6.1.2). The private key is secret (§7): it is
+ * held behind {@see Sensitive}, written only to a `0600` temp file consumed by cURL, and never
+ * appears in any debug/log/exception output. Both PEM strings must be supplied together;
+ * supplying exactly one is a construction-time {@see \InvalidArgumentException}.
  */
 final class AxiamClient
 {
@@ -86,6 +96,20 @@ final class AxiamClient
     private readonly AuthzDispatcher $authzDispatcher;
 
     /**
+     * §6.1: absolute path to the `0600` temp file holding the client-certificate chain PEM
+     * that BOTH Guzzle clients present as `cert`, or `null` when mTLS is not configured.
+     */
+    private readonly ?string $clientCertFile;
+
+    /**
+     * §6.1/§7: absolute path to the `0600` temp file holding the client PRIVATE KEY PEM that
+     * BOTH Guzzle clients present as `ssl_key`, or `null` when mTLS is not configured. The key
+     * lives on disk only in this short-lived, owner-only-readable file (deleted in
+     * {@see self::__destruct()}); it is never retained as a plaintext property.
+     */
+    private readonly ?string $clientKeyFile;
+
+    /**
      * @param string $baseUrl The AXIAM server's base URL (e.g. `https://api.axiam.example`).
      * @param string $tenant The tenant slug — REQUIRED, no nullable default anywhere on this
      *        signature (D-13, §5). There is no default tenant; constructing this client
@@ -99,6 +123,17 @@ final class AxiamClient
      * @param string|null $customCa A CA bundle FILE PATH (PEM-encoded) — the ONLY TLS escape
      *        hatch (§6/D-12). Never pass a value here to disable TLS verification; there is no
      *        such option on this class.
+     * @param string|null $clientCert §6.1 (mTLS): the client's X.509 identity certificate
+     *        CHAIN as a PEM STRING (not a path). When supplied together with `$clientKey`, this
+     *        client presents that certificate for mutual TLS on both the REST and gRPC
+     *        transports. Purely additive — server verification is never relaxed (§6.1.2). Must
+     *        be a PEM value; a non-PEM string is rejected at construction. `null` (default)
+     *        leaves the default bearer-cookie behavior unchanged (§6.1.5).
+     * @param string|null $clientKey §6.1/§7 (mTLS): the PEM STRING of the private key matching
+     *        `$clientCert` (PKCS#8 or PKCS#1). Secret material — it is held behind
+     *        {@see Sensitive} and never logged, displayed, or exposed via a getter. `$clientCert`
+     *        and `$clientKey` are all-or-nothing: supplying exactly one throws
+     *        {@see \InvalidArgumentException}.
      * @param LoggerInterface|null $logger Injectable logger (D-15: diagnostic-only — status
      *        codes and operation names, NEVER a token/credential value). Defaults to a silent
      *        {@see NullLogger}.
@@ -124,6 +159,8 @@ final class AxiamClient
         ?string $orgSlug = null,
         ?string $orgId = null,
         ?string $customCa = null,
+        ?string $clientCert = null,
+        ?string $clientKey = null,
         ?LoggerInterface $logger = null,
         ?bool $restOnly = null,
         int $cacheTtlSeconds = 300,
@@ -141,11 +178,37 @@ final class AxiamClient
         if ($orgSlug !== null && $orgId !== null) {
             throw new \InvalidArgumentException('orgSlug and orgId are mutually exclusive — supply at most one');
         }
+        // §6.1.1: PEM cert + PEM key are all-or-nothing. Presenting a half-configured client
+        // identity is never valid, so reject exactly one at construction (clear, early error).
+        if (($clientCert === null) !== ($clientKey === null)) {
+            throw new \InvalidArgumentException(
+                'clientCert and clientKey must be supplied together — mTLS needs both the certificate chain and its private key (CONTRACT.md §6.1)'
+            );
+        }
 
         $this->tenant = $tenant;
         $this->orgSlug = $orgSlug;
         $this->orgId = $orgId;
         $this->logger = $logger ?? new NullLogger();
+
+        // §6.1/§7: hold the private key behind Sensitive so it can never leak via debug/log
+        // output; the certificate chain is public material and needs no wrapping.
+        $clientKeySensitive = $clientKey !== null ? new Sensitive($clientKey) : null;
+
+        // §6.1.1: reject a non-PEM cert/key BEFORE any temp file is written, so a bad key can
+        // never leave an orphaned cert temp file behind (a throwing constructor never runs
+        // __destruct). §6.1: Guzzle/cURL consumes the client identity as FILES, so the
+        // validated PEM strings are then materialized into short-lived `0600` temp files held
+        // for this client's lifetime.
+        if ($clientCert !== null && $clientKeySensitive !== null) {
+            self::assertPem($clientCert, 'cert');
+            self::assertPem($clientKeySensitive->reveal(), 'key');
+            $this->clientCertFile = self::writeClientPemFile($clientCert);
+            $this->clientKeyFile = self::writeClientPemFile($clientKeySensitive->reveal());
+        } else {
+            $this->clientCertFile = null;
+            $this->clientKeyFile = null;
+        }
 
         $cookieJar = new CookieJar();
         // §6/D-12: verify is ALWAYS true unless a customCa bundle PATH is supplied — never a
@@ -157,6 +220,12 @@ final class AxiamClient
             'cookies' => $cookieJar, // §4: the ONE cookie jar every REST-facing client shares
             'verify' => $verify,
         ];
+        // §6.1.4: apply the client identity to BOTH Guzzle clients alongside (never in place
+        // of) `verify` — mutual TLS is additive to strict server verification (§6.1.2).
+        if ($this->clientCertFile !== null && $this->clientKeyFile !== null) {
+            $commonConfig['cert'] = $this->clientCertFile;
+            $commonConfig['ssl_key'] = $this->clientKeyFile;
+        }
 
         // $plainHttp: AuthMiddleware only, no RefreshMiddleware — handed to Session below for
         // its own refresh POST (so a 401 on the refresh call itself can never recursively
@@ -192,7 +261,61 @@ final class AxiamClient
             tokenAccessor: fn (): ?string => $this->session->accessToken(),
             subjectIdAccessor: fn (): string => $this->currentSubjectId(),
             customCaPem: $customCa,
+            clientCertPem: $clientCert,
+            clientKey: $clientKeySensitive,
         );
+    }
+
+    /**
+     * §6.1: cleans up the `0600` temp files backing the client-certificate identity when this
+     * client is destroyed, so no PEM material (least of all the private key) outlives the
+     * object on disk. A no-op when mTLS was not configured.
+     */
+    public function __destruct()
+    {
+        foreach ([$this->clientCertFile, $this->clientKeyFile] as $file) {
+            if ($file !== null && is_file($file)) {
+                @unlink($file);
+            }
+        }
+    }
+
+    /**
+     * §6.1.1: asserts that `$pem` looks like a PEM value (has a `-----BEGIN ...` block),
+     * throwing an {@see \InvalidArgumentException} at construction time otherwise — consistent
+     * with §6's PEM-only rule. `$kind` (`cert`|`key`) only shapes the error wording; the raw
+     * private-key PEM is never placed in any message (§7).
+     */
+    private static function assertPem(string $pem, string $kind): void
+    {
+        if (!str_contains($pem, '-----BEGIN ')) {
+            throw new \InvalidArgumentException(sprintf(
+                'client %s must be a PEM string (expected a "-----BEGIN ..." block) — a non-PEM value is rejected (CONTRACT.md §6.1.1)',
+                $kind === 'key' ? 'private key' : 'certificate',
+            ));
+        }
+    }
+
+    /**
+     * §6.1/§7: writes an already-validated PEM string to a fresh owner-only (`0600`) temp file,
+     * returning the absolute path cURL reads the client identity from. The file is chmod-ed to
+     * `0600` BEFORE the (possibly secret) bytes are written, and is removed in
+     * {@see self::__destruct()}.
+     */
+    private static function writeClientPemFile(string $pem): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'axiam-mtls-');
+        if ($path === false) {
+            throw new \RuntimeException('unable to create a temp file for the mTLS client identity');
+        }
+        // Restrict to owner read/write BEFORE writing the (possibly secret) bytes.
+        @chmod($path, 0600);
+        if (file_put_contents($path, $pem) === false) {
+            @unlink($path);
+            throw new \RuntimeException('unable to write the mTLS client identity to its temp file');
+        }
+
+        return $path;
     }
 
     // ------------------------------------------------------------------
@@ -206,6 +329,27 @@ final class AxiamClient
     public function debugVerifyOption(): string|bool
     {
         return $this->authzHttp->getConfig('verify');
+    }
+
+    /**
+     * Test-only seam (not part of the public API contract, mirroring {@see self::debugVerifyOption()}):
+     * exposes the §6.1 client-identity options (`cert` = certificate-chain file, `ssl_key` =
+     * private-key file) actually configured on this client's authz Guzzle transport, so tests
+     * can assert the mTLS wiring without performing a live TLS handshake. Both entries are
+     * `null` when mTLS was not configured. The values are FILE PATHS, never the PEM bytes —
+     * this seam never surfaces the private key itself.
+     *
+     * @return array{cert: string|null, ssl_key: string|null}
+     */
+    public function debugClientCertOptions(): array
+    {
+        $cert = $this->authzHttp->getConfig('cert');
+        $sslKey = $this->authzHttp->getConfig('ssl_key');
+
+        return [
+            'cert' => is_string($cert) ? $cert : null,
+            'ssl_key' => is_string($sslKey) ? $sslKey : null,
+        ];
     }
 
     // ------------------------------------------------------------------

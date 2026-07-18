@@ -51,8 +51,11 @@ namespace Grpc {
 
     final class ChannelCredentials
     {
-        public static function createSsl(?string $pemRootCerts = null): self
-        {
+        public static function createSsl(
+            ?string $pemRootCerts = null,
+            ?string $pemPrivateKey = null,
+            ?string $pemCertChain = null,
+        ): self {
             throw new \LogicException('stub only');
         }
     }
