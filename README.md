@@ -34,10 +34,14 @@ use Axiam\Sdk\AxiamClient;
 use Axiam\Sdk\Core\AuthError;
 
 // `tenant` is a REQUIRED constructor argument — AXIAM is multi-tenant and there is no
-// default tenant. There is no overload that lets you omit it.
+// default tenant. There is no overload that lets you omit it. `login()`/`refresh()` also
+// require ORGANIZATION context (CONTRACT.md §5.1): a tenant slug is only unique WITHIN an
+// organization, so supply `orgSlug` (or the org UUID via `orgId`) — the server rejects a
+// login without one (HTTP 400 "must provide org_id or org_slug").
 $client = new AxiamClient(
     baseUrl: 'https://your-axiam-instance',
     tenant: 'acme',
+    orgSlug: 'acme',
 );
 
 try {

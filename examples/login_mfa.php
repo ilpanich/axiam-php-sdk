@@ -33,6 +33,11 @@ function envOr(string $key, string $fallback): string
 
 $baseUrl = envOr('AXIAM_BASE_URL', 'https://localhost:8443');
 $tenant = envOr('AXIAM_TENANT', 'acme'); // §5/D-13: tenant is a REQUIRED constructor arg
+// CONTRACT.md §5.1: login/refresh also require ORGANIZATION context — a tenant slug is
+// only unique WITHIN an organization, so the server rejects a login body with tenant but
+// no org identifier (HTTP 400 "must provide org_id or org_slug"). Supply the org slug
+// (or, alternatively, the org UUID via the constructor's `orgId` parameter).
+$orgSlug = envOr('AXIAM_ORG_SLUG', 'acme');
 $email = envOr('AXIAM_EMAIL', 'alice@acme.test');
 $password = envOr('AXIAM_PASSWORD', 'correct horse battery staple');
 
@@ -44,6 +49,7 @@ $customCa = getenv('AXIAM_CUSTOM_CA') ?: null;
 $client = new AxiamClient(
     baseUrl: $baseUrl,
     tenant: $tenant, // required, no default (D-13) — this line alone proves SC#1
+    orgSlug: $orgSlug, // CONTRACT.md §5.1: org context is required for login()/refresh()
     customCa: $customCa,
 );
 
