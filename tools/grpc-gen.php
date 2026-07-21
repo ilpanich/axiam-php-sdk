@@ -26,16 +26,21 @@ declare(strict_types=1);
  * Usage: composer grpc-gen   (or: php tools/grpc-gen.php)
  */
 
-const PROTO_FILE = 'axiam/v1/authorization.proto';
+const PROTO_FILES = [
+    'axiam/v1/authorization.proto',
+    'axiam/v1/userinfo.proto',
+];
 const BUILD_DIR = 'build/grpc-gen';
 const NAMESPACE_PREFIX = 'Axiam/Sdk/Grpc/Gen';
 const TARGET_DIR = 'src/Grpc/Gen';
 
 chdir(dirname(__DIR__));
 
-if (!is_file('proto/' . PROTO_FILE)) {
-    fwrite(STDERR, sprintf("grpc-gen: proto/%s not found\n", PROTO_FILE));
-    exit(1);
+foreach (PROTO_FILES as $protoFile) {
+    if (!is_file('proto/' . $protoFile)) {
+        fwrite(STDERR, sprintf("grpc-gen: proto/%s not found\n", $protoFile));
+        exit(1);
+    }
 }
 
 $protoc = trim((string) shell_exec('command -v protoc 2>/dev/null'));
@@ -53,7 +58,7 @@ $command = sprintf(
     '%s --proto_path=proto --php_out=%s %s 2>&1',
     escapeshellarg($protoc),
     escapeshellarg(BUILD_DIR),
-    escapeshellarg(PROTO_FILE)
+    implode(' ', array_map('escapeshellarg', PROTO_FILES))
 );
 
 exec($command, $output, $status);
@@ -93,6 +98,6 @@ foreach ($entries as $entry) {
     ++$copied;
 }
 
-printf("Regenerated %d stub(s) in %s from proto/%s\n", $copied, TARGET_DIR, PROTO_FILE);
+printf("Regenerated %d stub(s) in %s from %s\n", $copied, TARGET_DIR, implode(', ', PROTO_FILES));
 printf("Review `git diff %s` before committing — protoc's output varies by compiler version.\n", TARGET_DIR);
 exit(0);
