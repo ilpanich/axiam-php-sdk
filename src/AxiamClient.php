@@ -6,6 +6,7 @@ namespace Axiam\Sdk;
 
 use Axiam\Sdk\Auth\JwksVerifier;
 use Axiam\Sdk\Auth\LoginResult;
+use Axiam\Sdk\Auth\UserInfo;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
@@ -263,6 +264,9 @@ final class AxiamClient
             customCaPem: $customCa,
             clientCertPem: $clientCert,
             clientKey: $clientKeySensitive,
+            // §1.1.4: getUserInfo's gRPC UNAUTHENTICATED retry drives the SAME single-flight
+            // refresh guard (§9, D-06) the REST 401 path uses — never a second mechanism.
+            refreshAccessor: fn (): mixed => $this->session->refreshIfNeeded()->wait(),
         );
     }
 
@@ -461,6 +465,28 @@ final class AxiamClient
     public function batchCheck(array $checks): array
     {
         return $this->authzDispatcher->batchCheck($checks);
+    }
+
+    /**
+     * `getUserInfo` — the gRPC-ONLY OIDC-style userinfo operation (CONTRACT.md §1.1,
+     * contract 1.3): returns the authenticated caller's identity claims from
+     * `axiam.v1.UserInfoService/GetUserInfo`, the low-latency counterpart of the server's
+     * REST `GET /oauth2/userinfo`. Delegates to {@see AuthzDispatcher} — this class never
+     * hand-rolls the gRPC transport (D-03).
+     *
+     * Identity is derived server-side from the current bearer token; the request is empty.
+     * `sub`/`tenantId`/`orgId` are always populated on the returned {@see UserInfo};
+     * `email` is present only with the "email" token scope and `preferredUsername` only with
+     * "profile" (the server gates them exactly as the REST endpoint does). Requires a prior
+     * successful {@see self::login()} — calling it with no token raises {@see AuthError}
+     * before any wire call (§1.1.3) — and, being gRPC-only (§1.1.6), requires the `grpc` PECL
+     * extension plus a configured `grpcTarget`; there is NO REST fallback, so on a REST-only
+     * runtime it raises {@see NetworkError} rather than degrading. A gRPC `UNAUTHENTICATED`
+     * response drives the shared single-flight refresh (§9) and retries once (§1.1.4).
+     */
+    public function getUserInfo(): UserInfo
+    {
+        return $this->authzDispatcher->getUserInfo();
     }
 
     // ------------------------------------------------------------------

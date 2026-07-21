@@ -33,6 +33,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- gRPC-only `getUserInfo()` operation (CONTRACT.md §1.1, adopting contract 1.3):
+  `AxiamClient::getUserInfo()` invokes `axiam.v1.UserInfoService/GetUserInfo` — the
+  low-latency counterpart of the server's REST `GET /oauth2/userinfo` — over the SDK's
+  existing gRPC channel (via the `AuthzDispatcher`), carrying the same
+  `authorization: Bearer` + `x-tenant-id` metadata as the gRPC `checkAccess` path. It
+  returns a typed `Axiam\Sdk\Auth\UserInfo` value object (`sub`, `tenantId`, `orgId`, and
+  the scope-gated optionals `?email` / `?preferredUsername`, present only when the token
+  carries the `email` / `profile` scope). Unlike `checkAccess`/`can`/`batchCheck` it is
+  **gRPC-only with no REST fallback** (§1.1.6): on a runtime without the `grpc` extension
+  (or with `restOnly: true`) it raises `NetworkError`. It requires a prior successful
+  `login()` — calling it with no token raises `AuthError` before any wire call (§1.1.3) —
+  and a gRPC `UNAUTHENTICATED` response drives the shared single-flight refresh (§9) and
+  retries the RPC once (§1.1.4). The new `proto/axiam/v1/userinfo.proto` message stubs are
+  committed under `src/Grpc/Gen/`; the `UserInfoService` client
+  (`src/Grpc/UserInfoGrpcClient.php`) is hand-written against `\Grpc\BaseStub`, mirroring
+  `AuthzGrpcClient` (no `grpc_php_plugin` required).
 - Client-certificate / mutual-TLS (mTLS) support (CONTRACT.md §6.1): two new optional
   `AxiamClient` constructor parameters, `clientCert` and `clientKey` (both PEM strings — the
   certificate chain and its private key). When supplied together the client presents that
