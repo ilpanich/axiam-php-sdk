@@ -107,6 +107,7 @@ use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Grpc\Gen\GetUserInfoRequest;
 use Axiam\Sdk\Grpc\Gen\GetUserInfoResponse;
 use Axiam\Sdk\Grpc\UserInfoGrpcClient;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit-tests the gRPC userinfo transport ({@see UserInfoGrpcClient}, CONTRACT.md
