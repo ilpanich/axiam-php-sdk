@@ -82,6 +82,16 @@ no special deployment.
   Authorization checks **always work**; gRPC is purely a latency optimization for
   long-running workers that can reuse one channel across many requests. See
   [`examples/grpc_checkaccess.php`](examples/grpc_checkaccess.php).
+- **`getUserInfo()` is gRPC-ONLY** (CONTRACT.md §1.1, contract 1.3) — the low-latency
+  counterpart of the server's REST `GET /oauth2/userinfo`, invoking
+  `axiam.v1.UserInfoService/GetUserInfo` on the same gRPC channel. Unlike
+  `checkAccess`/`can`/`batchCheck` it has **no REST fallback**: on a runtime without the
+  `grpc` extension (or with `restOnly: true`) it raises `NetworkError` rather than degrading.
+  It requires a prior successful `login()` (calling it with no token raises `AuthError`
+  before any wire call); a gRPC `UNAUTHENTICATED` response drives the shared single-flight
+  refresh (§9) and retries once. It returns a typed `Axiam\Sdk\Auth\UserInfo`
+  (`sub`, `tenantId`, `orgId`, and `?email`/`?preferredUsername` — the latter two present
+  only when the token carries the `email`/`profile` scope).
 - **The AMQP consumer** (`Axiam\Sdk\Amqp\Consumer`, run via
   [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php)) is a standalone CLI-oriented
   blocking consume loop — **it is not a web-request path at all** and must never be invoked
@@ -97,9 +107,10 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§11 (including §6.1 mTLS) — the binding,
-cross-language behavioral contract every AXIAM SDK implements: camelCase method names
-(§1), the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2), non-browser
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§11 (including §6.1 mTLS, contract 1.3)
+— the binding, cross-language behavioral contract every AXIAM SDK implements: camelCase
+method names (§1) — including the gRPC-only `getUserInfo` operation (§1.1) — the
+`AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2), non-browser
 `X-CSRF-Token` response-header capture (§3), a shared Guzzle `CookieJar` (§4), a required
 `tenant` constructor parameter with no default (§5), strict TLS with `customCa` as the only
 server-verification escape hatch (§6) plus optional client-certificate mutual TLS (§6.1),
@@ -260,11 +271,11 @@ redaction (CR-04), AMQP HMAC verification, JWKS/EdDSA verification, the
 ## Regenerating the gRPC stubs
 
 The protobuf message classes under `src/Grpc/Gen/` are `protoc` output, generated from
-[`proto/axiam/v1/authorization.proto`](proto/axiam/v1/authorization.proto) and **committed
-to this repository** — that is what lets `composer require axiam/axiam-sdk` work with no
-protobuf toolchain on your machine, and what keeps gRPC a `suggest` rather than a hard
-dependency. Unlike the other AXIAM SDKs, PHP does not use `buf` (D-03); it invokes `protoc`
-directly.
+[`proto/axiam/v1/authorization.proto`](proto/axiam/v1/authorization.proto) and
+[`proto/axiam/v1/userinfo.proto`](proto/axiam/v1/userinfo.proto) and **committed to this
+repository** — that is what lets `composer require axiam/axiam-sdk` work with no protobuf
+toolchain on your machine, and what keeps gRPC a `suggest` rather than a hard dependency.
+Unlike the other AXIAM SDKs, PHP does not use `buf` (D-03); it invokes `protoc` directly.
 
 You only need this when `proto/` changes:
 
@@ -273,5 +284,5 @@ composer grpc-gen    # requires protoc on PATH; no grpc_php_plugin needed
 git diff src/Grpc/Gen
 ```
 
-The service client (`src/Grpc/AuthzGrpcClient.php`) is hand-written against
-`\Grpc\BaseStub` and is **not** generated — do not overwrite it.
+The service clients (`src/Grpc/AuthzGrpcClient.php` and `src/Grpc/UserInfoGrpcClient.php`)
+are hand-written against `\Grpc\BaseStub` and are **not** generated — do not overwrite them.
