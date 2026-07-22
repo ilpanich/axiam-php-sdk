@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha16] - 2026-07-22
+
+### Added
+
+- Add gRPC-only getUserInfo operation (CONTRACT §1.1, contract 1.3)
+
+### Changed
+
+- Import TestCase in the userinfo test's second namespace block
+- Vendor CONTRACT 1.3 + userinfo.proto and regenerate gRPC message stubs
+
 ## [1.0.0-alpha15] - 2026-07-21
 
 ### Changed
