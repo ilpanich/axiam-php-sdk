@@ -196,6 +196,41 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Auth-RefreshGuard.html#method_settle"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo",
+            "name": "UserInfo",
+            "summary": "Result\u0020of\u0020\u0060AxiamClient\u003A\u003AgetUserInfo\u0028\u0029\u0060\u0020\u0028CONTRACT.md\u0020\u00A71.1,\u0020contract\u00201.3\u0029.",
+            "url": "classes/Axiam-Sdk-Auth-UserInfo.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-UserInfo.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo\u003A\u003A\u0024sub",
+            "name": "sub",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-UserInfo.html#property_sub"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-UserInfo.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo\u003A\u003A\u0024orgId",
+            "name": "orgId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-UserInfo.html#property_orgId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo\u003A\u003A\u0024email",
+            "name": "email",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-UserInfo.html#property_email"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo\u003A\u003A\u0024preferredUsername",
+            "name": "preferredUsername",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-UserInfo.html#property_preferredUsername"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AuthzDispatcher",
             "name": "AuthzDispatcher",
             "summary": "Transparent\u0020REST\/gRPC\u0020authz\u0020transport\u0020selection\u0020\u0028CONTRACT.md\u0020\u00A71,\u0020D\u002D03,\u0020SC\u00233\u0029.",
@@ -220,6 +255,11 @@ Search.appendIndex(
             "name": "batchCheck",
             "summary": "\u0060batchCheck\u0060\u0020\u0028CONTRACT.md\u0020\u00A71\u0029\u0020\u2014\u0020results\u0020preserve\u0020input\u0020order,\u0020mirroring\n\u007B\u0040see\u0020AuthzRestClient\u003A\u003AbatchCheck\u0028\u0029\u007D\u0027s\u0020contract\u0020exactly\u0020regardless\u0020of\u0020transport.",
             "url": "classes/Axiam-Sdk-AuthzDispatcher.html#method_batchCheck"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AuthzDispatcher\u003A\u003AgetUserInfo\u0028\u0029",
+            "name": "getUserInfo",
+            "summary": "\u0060getUserInfo\u0060\u0020\u0028CONTRACT.md\u0020\u00A71.1\u0029\u0020\u2014\u0020the\u0020gRPC\u002DONLY\u0020OIDC\u002Dstyle\u0020userinfo\u0020operation,\u0020the\nlow\u002Dlatency\u0020counterpart\u0020of\u0020the\u0020server\u0027s\u0020REST\u0020\u0060GET\u0020\/oauth2\/userinfo\u0060.\u0020Unlike\n\u007B\u0040see\u0020self\u003A\u003AcheckAccess\u0028\u0029\u007D\/\u007B\u0040see\u0020self\u003A\u003AbatchCheck\u0028\u0029\u007D\u0020it\u0020has\u0020NO\u0020REST\u0020fallback\u003A\u0020\u00A71.1.6\nexplicitly\u0020forbids\u0020substituting\u0020the\u0020REST\u0020endpoint,\u0020so\u0020on\u0020a\u0020runtime\u0020without\u0020the\u0020\u0060grpc\u0060\nPECL\u0020extension\u0020\u0028or\u0020with\u0020\u0060restOnly\u003A\u0020true\u0060\u0029\u0020this\u0020raises\u0020a\u0020\u007B\u0040see\u0020NetworkError\u007D\u0020rather\u0020than\nsilently\u0020degrading.",
+            "url": "classes/Axiam-Sdk-AuthzDispatcher.html#method_getUserInfo"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient",
             "name": "AxiamClient",
@@ -280,6 +320,11 @@ Search.appendIndex(
             "name": "batchCheck",
             "summary": "\u0060batchCheck\u0060\u0020\u2014\u0020results\u0020preserve\u0020input\u0020order\u0020\u0028CONTRACT.md\u0020\u00A71\u0029.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_batchCheck"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AgetUserInfo\u0028\u0029",
+            "name": "getUserInfo",
+            "summary": "\u0060getUserInfo\u0060\u0020\u2014\u0020the\u0020gRPC\u002DONLY\u0020OIDC\u002Dstyle\u0020userinfo\u0020operation\u0020\u0028CONTRACT.md\u0020\u00A71.1,\ncontract\u00201.3\u0029\u003A\u0020returns\u0020the\u0020authenticated\u0020caller\u0027s\u0020identity\u0020claims\u0020from\n\u0060axiam.v1.UserInfoService\/GetUserInfo\u0060,\u0020the\u0020low\u002Dlatency\u0020counterpart\u0020of\u0020the\u0020server\u0027s\nREST\u0020\u0060GET\u0020\/oauth2\/userinfo\u0060.\u0020Delegates\u0020to\u0020\u007B\u0040see\u0020AuthzDispatcher\u007D\u0020\u2014\u0020this\u0020class\u0020never\nhand\u002Drolls\u0020the\u0020gRPC\u0020transport\u0020\u0028D\u002D03\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_getUserInfo"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AverifyLocallyOrFallback\u0028\u0029",
             "name": "verifyLocallyOrFallback",
@@ -390,6 +435,21 @@ Search.appendIndex(
             "name": "batchCheckAccess",
             "summary": "\u0060BatchCheckAccess\u0060\u0020\u0028CONTRACT.md\u0020\u00A71\u0029\u0020\u2014\u0020results\u0020preserve\u0020input\u0020order.",
             "url": "classes/Axiam-Sdk-Grpc-AuthzGrpcClient.html#method_batchCheckAccess"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Grpc\\UserInfoGrpcClient",
+            "name": "UserInfoGrpcClient",
+            "summary": "gRPC\u0020userinfo\u0020transport\u0020\u0028CONTRACT.md\u0020\u00A71.1\/\u00A75\/\u00A76\/\u00A79,\u0020contract\u00201.3\u0029\u0020\u2014\u0020the\u0020low\u002Dlatency\ngRPC\u0020counterpart\u0020of\u0020the\u0020server\u0027s\u0020REST\u0020\u0060GET\u0020\/oauth2\/userinfo\u0060\u0020endpoint.\u0020This\u0020is\u0020the\nhand\u002Dwritten\u0020service\u002Dclient\u0020sibling\u0020of\u0020\u007B\u0040see\u0020AuthzGrpcClient\u007D\u003A\u0020it\u0020mirrors\u0020that\u0020class\u0027s\nchannel\/metadata\/status\u002Dmapping\u0020machinery\u0020exactly,\u0020differing\u0020only\u0020in\u0020the\u0020single\u0020RPC\u0020it\nexposes\u0020\u0028\u0060GetUserInfo\u0060\u0020instead\u0020of\u0020\u0060CheckAccess\u0060\/\u0060BatchCheckAccess\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Grpc-UserInfoGrpcClient.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Grpc\\UserInfoGrpcClient\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Grpc-UserInfoGrpcClient.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Grpc\\UserInfoGrpcClient\u003A\u003AgetUserInfo\u0028\u0029",
+            "name": "getUserInfo",
+            "summary": "\u0060GetUserInfo\u0060\u0020\u0028CONTRACT.md\u0020\u00A71.1\u0029\u0020\u2014\u0020returns\u0020the\u0020authenticated\u0020caller\u0027s\u0020OIDC\u002Dstyle\nidentity\u0020claims.\u0020The\u0020request\u0020is\u0020empty\u003B\u0020identity\u0020is\u0020derived\u0020entirely\u0020server\u002Dside\u0020from\nthe\u0020\u0060authorization\u0060\u0020bearer\u0020metadata\u0020this\u0020call\u0020carries\u0020\u0028\u00A71.1.1\/\u00A71.1.2\u0029.\u0020\u0060sub\u0060,\n\u0060tenant_id\u0060,\u0020and\u0020\u0060org_id\u0060\u0020are\u0020always\u0020populated\u003B\u0020\u0060email\u0060\/\u0060preferred_username\u0060\u0020are\u0020gated\non\u0020the\u0020\u0022email\u0022\/\u0022profile\u0022\u0020token\u0020scopes\u0020respectively.",
+            "url": "classes/Axiam-Sdk-Grpc-UserInfoGrpcClient.html#method_getUserInfo"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware",
             "name": "AxiamAccessMiddleware",

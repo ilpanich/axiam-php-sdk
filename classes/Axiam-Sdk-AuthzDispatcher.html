@@ -123,7 +123,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">42</span>
 
     </aside>
 
@@ -207,6 +207,18 @@ reader), never a second independent refresh mechanism.</p>
 </dt>
 <dd>`checkAccess` (CONTRACT.md §1).</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AuthzDispatcher.html#method_getUserInfo">getUserInfo()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Auth-UserInfo.html"><abbr title="\Axiam\Sdk\Auth\UserInfo">UserInfo</abbr></a>    </span>
+</dt>
+<dd>`getUserInfo` (CONTRACT.md §1.1) — the gRPC-ONLY OIDC-style userinfo operation, the
+low-latency counterpart of the server&#039;s REST `GET /oauth2/userinfo`. Unlike
+{@see self::checkAccess()}/{@see self::batchCheck()} it has NO REST fallback: §1.1.6
+explicitly forbids substituting the REST endpoint, so on a runtime without the `grpc`
+PECL extension (or with `restOnly: true`) this raises a {@see NetworkError} rather than
+silently degrading.</dd>
+
     </dl>
 
 
@@ -235,14 +247,14 @@ reader), never a second independent refresh mechanism.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">69</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html"><abbr title="\Axiam\Sdk\Rest\AuthzRestClient">AuthzRestClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restClient</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restOnly</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grpcTarget</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): Array&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tokenAccessor</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectIdAccessor</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCaPem</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientCertPem</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html"><abbr title="\Axiam\Sdk\Rest\AuthzRestClient">AuthzRestClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restClient</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restOnly</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grpcTarget</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): Array&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tokenAccessor</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectIdAccessor</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCaPem</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientCertPem</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): void&nbsp;</span><span class="phpdocumentor-signature__argument__name">$refreshAccessor</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -330,6 +342,20 @@ credentials. Must be present iff <code class="prettyprint">$clientCertPem</code>
 </section>
 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$refreshAccessor</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(): void</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Drives the shared §9 single-flight token
+refresh (expected to be <code class="prettyprint">Session::refreshIfNeeded()-&gt;wait()</code> or equivalent) —
+used ONLY by <abbr title="\Axiam\Sdk\self::getUserInfo()">self::getUserInfo()</abbr> to refresh-and-retry once on a gRPC
+<code class="prettyprint">UNAUTHENTICATED</code> (CONTRACT.md §1.1.4), exactly as REST does on a 401. Never a
+second, independent refresh mechanism (D-06); <code class="prettyprint">null</code> disables the retry (the
+UNAUTHENTICATED <code class="prettyprint">AuthError</code> then surfaces directly).</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -352,7 +378,7 @@ credentials. Must be present iff <code class="prettyprint">$clientCertPem</code>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">117</span>
+    <span class="phpdocumentor-element-found-in__line">130</span>
 
     </aside>
 
@@ -402,7 +428,7 @@ credentials. Must be present iff <code class="prettyprint">$clientCertPem</code>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">105</span>
+    <span class="phpdocumentor-element-found-in__line">118</span>
 
     </aside>
 
@@ -458,7 +484,7 @@ credentials. Must be present iff <code class="prettyprint">$clientCertPem</code>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">82</span>
+    <span class="phpdocumentor-element-found-in__line">95</span>
 
     </aside>
 
@@ -523,6 +549,64 @@ session subject), exactly as before this parameter was added.</p>
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getUserInfo">
+        getUserInfo()
+        <a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_getUserInfo" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">185</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`getUserInfo` (CONTRACT.md §1.1) — the gRPC-ONLY OIDC-style userinfo operation, the
+low-latency counterpart of the server&#039;s REST `GET /oauth2/userinfo`. Unlike
+{@see self::checkAccess()}/{@see self::batchCheck()} it has NO REST fallback: §1.1.6
+explicitly forbids substituting the REST endpoint, so on a runtime without the `grpc`
+PECL extension (or with `restOnly: true`) this raises a {@see NetworkError} rather than
+silently degrading.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getUserInfo</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-UserInfo.html"><abbr title="\Axiam\Sdk\Auth\UserInfo">UserInfo</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Behavior (mirrors the checkAccess gRPC path + the REST 401 refresh path exactly):</p>
+<ul>
+<li>§1.1.3 precondition: with no current access token, raises <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a>
+client-side WITHOUT any wire call.</li>
+<li>§1.1.2 metadata: <code class="prettyprint">authorization: Bearer &lt;token&gt;</code> + <code class="prettyprint">x-tenant-id</code> on the RPC, via the
+same <a href="classes/Axiam-Sdk-Grpc-UserInfoGrpcClient.html"><abbr title="\Axiam\Sdk\Grpc\UserInfoGrpcClient">UserInfoGrpcClient</abbr></a> channel machinery AuthzGrpcClient uses.</li>
+<li>§1.1.4 auth-failure: a gRPC <code class="prettyprint">UNAUTHENTICATED</code> (surfaced as <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a>) drives
+the shared §9 single-flight refresh (<code class="prettyprint">$refreshAccessor</code>) and retries the RPC exactly
+once; a second failure propagates (no loop, §9.3).</li>
+<li>§1.1.5 return shape: a typed <a href="classes/Axiam-Sdk-Auth-UserInfo.html"><abbr title="\Axiam\Sdk\Auth\UserInfo">UserInfo</abbr></a> — <code class="prettyprint">sub</code>/<code class="prettyprint">tenantId</code>/<code class="prettyprint">orgId</code> always set,
+<code class="prettyprint">email</code>/<code class="prettyprint">preferredUsername</code> present only when the token carried the &quot;email&quot;/&quot;profile&quot;
+scope (the server gates them; an absent optional is surfaced as <code class="prettyprint">null</code>).</li>
+</ul>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-UserInfo.html"><abbr title="\Axiam\Sdk\Auth\UserInfo">UserInfo</abbr></a></span>
+            </section>
+
+</article>
             </section>
 
         
@@ -549,6 +633,7 @@ session subject), exactly as before this parameter was added.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_batchCheck">batchCheck()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_can">can()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_checkAccess">checkAccess()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_getUserInfo">getUserInfo()</a></li>
                                     </ul>
             </li>
                     </ul>
