@@ -41,6 +41,28 @@ jobs:
       - name: PHPUnit with Clover coverage
         run: vendor/bin/phpunit --coverage-clover coverage.xml
 
+      # PHPUnit 9 has no built-in --fail-under flag (that lands in PHPUnit 10), and
+      # uploading to Coveralls alone lets any regression merge green — a drop to any
+      # % still passes this workflow. Parse coverage.xml's own <metrics> totals (the
+      # same numbers `--coverage-text` prints) and fail the job below the floor.
+      # Floor set at achieved (96.92%) minus ~2 points, rounded down, so the very
+      # first run of this gate passes; ratchet upward as coverage improves.
+      - name: Enforce minimum line coverage (94%)
+        run: |
+          php -r '
+            $xml = simplexml_load_file("coverage.xml");
+            $metrics = $xml->project->metrics;
+            $covered = (int) $metrics["coveredstatements"];
+            $total = (int) $metrics["statements"];
+            $pct = $total > 0 ? ($covered / $total) * 100 : 0;
+            $floor = 94.0;
+            printf("Line coverage: %.2f%% (%d/%d), floor: %.2f%%\n", $pct, $covered, $total, $floor);
+            if ($pct < $floor) {
+              fwrite(STDERR, sprintf("FAIL: line coverage %.2f%% is below the %.2f%% floor\n", $pct, $floor));
+              exit(1);
+            }
+          '
+
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b  # v2.3.6
         with:
