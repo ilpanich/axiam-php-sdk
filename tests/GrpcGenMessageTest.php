@@ -8,6 +8,7 @@ use Axiam\Sdk\Grpc\Gen\BatchCheckAccessRequest;
 use Axiam\Sdk\Grpc\Gen\BatchCheckAccessResponse;
 use Axiam\Sdk\Grpc\Gen\CheckAccessRequest;
 use Axiam\Sdk\Grpc\Gen\CheckAccessResponse;
+use Axiam\Sdk\Grpc\Gen\GetUserInfoResponse;
 use Axiam\Sdk\Grpc\Gen\Metadata\Authorization;
 use PHPUnit\Framework\TestCase;
 
@@ -133,5 +134,23 @@ final class GrpcGenMessageTest extends TestCase
         Authorization::initOnce();
 
         self::assertTrue(Authorization::$is_initialized);
+    }
+
+    public function testGetUserInfoResponseClearEmailAndClearPreferredUsernameUnsetTheOptionals(): void
+    {
+        $response = (new GetUserInfoResponse())
+            ->setEmail('alice@acme.test')
+            ->setPreferredUsername('alice');
+
+        self::assertTrue($response->hasEmail());
+        self::assertTrue($response->hasPreferredUsername());
+
+        $response->clearEmail();
+        $response->clearPreferredUsername();
+
+        self::assertFalse($response->hasEmail());
+        self::assertFalse($response->hasPreferredUsername());
+        self::assertSame('', $response->getEmail());
+        self::assertSame('', $response->getPreferredUsername());
     }
 }

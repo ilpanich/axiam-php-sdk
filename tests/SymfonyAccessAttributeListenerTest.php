@@ -319,4 +319,67 @@ final class SymfonyAccessAttributeListenerTest extends TestCase
 
         self::assertSame($controller, $event->getController());
     }
+
+    // --- getSubscribedEvents(): the EventSubscriberInterface wiring ------------------
+
+    public function testGetSubscribedEventsSubscribesKernelController(): void
+    {
+        $events = AxiamAccessAttributeListener::getSubscribedEvents();
+
+        self::assertArrayHasKey(\Symfony\Component\HttpKernel\KernelEvents::CONTROLLER, $events);
+        self::assertSame('onKernelController', $events[\Symfony\Component\HttpKernel\KernelEvents::CONTROLLER]);
+    }
+
+    // --- reflectController(): every controller-callable shape, via reflection -------
+    //
+    // Symfony's own ControllerEvent constructor type-hints `callable $controller` and
+    // validates it eagerly, so a string naming a nonexistent class/method (or any other
+    // genuinely non-callable value) can never reach onKernelController() through a real
+    // ControllerEvent. reflectController() itself accepts `mixed`, so these edges are
+    // driven directly via reflection instead — the same technique GrpcAuthzClientTest
+    // uses to drive AuthzGrpcClient::unary() beneath its own public wrapper.
+
+    private function reflectController(AxiamAccessAttributeListener $listener, mixed $controller): ?array
+    {
+        $ref = new \ReflectionMethod($listener, 'reflectController');
+        $ref->setAccessible(true);
+
+        return $ref->invoke($listener, $controller);
+    }
+
+    public function testReflectControllerResolvesTheStringClassMethodForm(): void
+    {
+        $listener = $this->listenerWith([]);
+
+        $reflected = $this->reflectController($listener, AccessAttributeFixtureController::class . '::authOnly');
+
+        self::assertNotNull($reflected);
+        [$method, $class] = $reflected;
+        self::assertSame('authOnly', $method->getName());
+        self::assertSame(AccessAttributeFixtureController::class, $class->getName());
+    }
+
+    public function testReflectControllerReturnsNullForAValidCallableThatMatchesNoShape(): void
+    {
+        // 'strlen' satisfies PHP's own `callable` type (a real global function), but
+        // matches none of reflectController()'s three recognized shapes (not an
+        // array-pair, no '::', not an invokable object) -> the final `else return null`.
+        $listener = $this->listenerWith([]);
+
+        self::assertNull($this->reflectController($listener, 'strlen'));
+    }
+
+    public function testReflectControllerReturnsNullWhenClassDoesNotExist(): void
+    {
+        $listener = $this->listenerWith([]);
+
+        self::assertNull($this->reflectController($listener, 'Some\\Nonexistent\\Controller::show'));
+    }
+
+    public function testReflectControllerReturnsNullWhenMethodDoesNotExistOnClass(): void
+    {
+        $listener = $this->listenerWith([]);
+
+        self::assertNull($this->reflectController($listener, AccessAttributeFixtureController::class . '::noSuchMethod'));
+    }
 }

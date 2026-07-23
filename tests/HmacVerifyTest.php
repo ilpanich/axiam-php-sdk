@@ -158,6 +158,17 @@ final class HmacVerifyTest extends TestCase
         self::assertFalse(Hmac::verify($key, self::canonicalBody($vector['message'])));
     }
 
+    public function testOddLengthHexSignatureFailsClosedWithoutThrowing(): void
+    {
+        // An odd number of hex digits is a DISTINCT hex2bin() failure mode from
+        // 'non_hex_signature' (which has non-hex characters at an even length) --
+        // hex2bin() rejects both, but for different reasons.
+        $key = "\x01\x02\x03\x04";
+        $body = self::canonicalBody(['action' => 'read', 'hmac_signature' => 'abcde']);
+
+        self::assertFalse(Hmac::verify($key, $body));
+    }
+
     public function testMalformedInputNeverThrowsReturnsFalse(): void
     {
         $key = "\x01\x02\x03\x04";
