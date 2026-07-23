@@ -201,10 +201,12 @@ final class JwksVerifier
 
         // Reset the guard once settled so the NEXT cache-miss burst starts a
         // fresh single-flight fetch rather than replaying this one forever.
-        $this->inFlightFetch = $fetch->then(function ($value) {
+        $this->inFlightFetch = $fetch->then(function (): void {
+            // The upstream chain resolves to void, so there is no value to
+            // propagate — just clear the single-flight guard. (Returning the
+            // void $value tripped PHPStan's return.void under the promises v2
+            // typing pulled in by guzzle ^8.0.)
             $this->inFlightFetch = null;
-
-            return $value;
         });
 
         return $this->inFlightFetch;

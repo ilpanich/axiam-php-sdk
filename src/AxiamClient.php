@@ -16,6 +16,7 @@ use Axiam\Sdk\Rest\AuthzRestClient;
 use Axiam\Sdk\Rest\RefreshMiddleware;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\HandlerStack;
@@ -591,7 +592,9 @@ final class AxiamClient
         try {
             return $http->post($path, ['json' => $body]);
         } catch (RequestException $e) {
-            $response = $e->getResponse();
+            // Guzzle 8 moved getResponse() to BadResponseException; a bare
+            // RequestException/ConnectException carries no response (works on ^7.13 and ^8.0).
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
             if ($response !== null) {
                 throw ErrorMapper::fromResponse($response, $path . ' failed');
             }
