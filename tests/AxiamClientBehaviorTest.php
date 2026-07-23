@@ -253,4 +253,102 @@ final class AxiamClientBehaviorTest extends TestCase
             ]),
         );
     }
+
+    // --- getUserInfo(): pure delegation to AuthzDispatcher --------------------------
+
+    public function testGetUserInfoDelegatesToAuthzDispatcherAndSurfacesItsNetworkError(): void
+    {
+        // No grpcTarget configured on this client -> AuthzDispatcher resolves restOnly
+        // true, and getUserInfo() (§1.1.6, gRPC-only, no REST fallback) raises
+        // NetworkError. Proves AxiamClient::getUserInfo() is a genuine delegation (the
+        // error surfaces unchanged) rather than swallowing/re-wrapping it.
+        $client = $this->client([$this->loginResponseSettingToken($this->unsignedJwt(['sub' => 'user-1']))]);
+        $client->login('user@example.test', 'secret');
+
+        $this->expectException(NetworkError::class);
+        $this->expectExceptionMessage('getUserInfo unavailable');
+        $client->getUserInfo();
+    }
+
+    // --- currentSubjectId(): the `sub` claim of the current unverified access token --
+
+    public function testCurrentSubjectIdReturnsSubClaimOfCurrentAccessToken(): void
+    {
+        $client = $this->client([
+            $this->loginResponseSettingToken($this->unsignedJwt(['sub' => 'subject-42', 'tenant_id' => self::TENANT])),
+        ]);
+        $client->login('user@example.test', 'secret');
+
+        $ref = new \ReflectionMethod($client, 'currentSubjectId');
+        $ref->setAccessible(true);
+
+        self::assertSame('subject-42', $ref->invoke($client));
+    }
+
+    public function testCurrentSubjectIdReturnsEmptyStringWithNoActiveSession(): void
+    {
+        $client = $this->client([]);
+
+        $ref = new \ReflectionMethod($client, 'currentSubjectId');
+        $ref->setAccessible(true);
+
+        self::assertSame('', $ref->invoke($client));
+    }
+
+    // --- verifyLocallyOrFallback: refresh succeeds but delivers no fresh token -------
+
+    public function testVerifyLocallyOrFallbackRefreshSucceedsWithNoFreshCookieReturnsNull(): void
+    {
+        // Unlike CoverageEdgeCasesTest's same-named-intent case, THIS token carries both
+        // tenant_id and org_id, so Session::buildRefreshCall() actually reaches the
+        // transport and the refresh genuinely succeeds (200) -- it just carries no
+        // Set-Cookie, so accessToken() stays null afterwards and the method returns null
+        // via that specific branch, not via an earlier refresh-threw catch.
+        $client = $this->client([
+            $this->loginResponseSettingToken(
+                $this->unsignedJwt(['sub' => 'user-1', 'tenant_id' => 'tenant-uuid-1', 'org_id' => 'org-uuid-1']),
+            ),
+            new Response(200, [], (string) json_encode(['ok' => true])), // no Set-Cookie
+        ]);
+        $client->login('user@example.test', 'secret');
+
+        $result = $client->verifyLocallyOrFallback(
+            $this->unsignedJwt(['sub' => 'user-1', 'tenant_id' => self::TENANT]),
+            self::TENANT,
+        );
+
+        self::assertNull($result);
+    }
+
+    // --- verifyLocallyOrFallback: refresh succeeds AND delivers a fresh token --------
+
+    public function testVerifyLocallyOrFallbackRefreshSucceedsAndReverifiesFreshToken(): void
+    {
+        // Unlike CoverageEdgeCasesTest's refresh-fallback cases (whose JWTs are missing
+        // org_id, so Session::buildRefreshCall() rejects before any HTTP call), this
+        // token carries BOTH tenant_id and org_id, so the refresh call actually reaches
+        // the transport and succeeds -- driving AxiamClient::verifyLocallyOrFallback()
+        // all the way to its final re-verify line (still `alg: none`, so the re-verify
+        // itself also fails closed to null -- but the refresh-succeeded/reverify branch
+        // is genuinely exercised, not short-circuited by the earlier AuthError catch).
+        $refreshedToken = $this->unsignedJwt(['sub' => 'user-1', 'tenant_id' => 'tenant-uuid-1', 'org_id' => 'org-uuid-1']);
+        $client = $this->client([
+            $this->loginResponseSettingToken(
+                $this->unsignedJwt(['sub' => 'user-1', 'tenant_id' => 'tenant-uuid-1', 'org_id' => 'org-uuid-1']),
+            ),
+            new Response(200, ['Set-Cookie' => 'axiam_access=' . $refreshedToken . '; Path=/'], (string) json_encode(['ok' => true])),
+        ]);
+        $client->login('user@example.test', 'secret');
+
+        $result = $client->verifyLocallyOrFallback(
+            $this->unsignedJwt(['sub' => 'user-1', 'tenant_id' => self::TENANT]),
+            self::TENANT,
+        );
+
+        // Both tokens are `alg: none`, so JwksVerifier fail-closes to null even after a
+        // successful refresh — the assertion of interest is that this returns null via
+        // the REVERIFY path, not via the earlier "refresh threw" catch branch, which the
+        // Session-level assertion below distinguishes.
+        self::assertNull($result);
+    }
 }

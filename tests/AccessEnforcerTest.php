@@ -330,6 +330,25 @@ final class AccessEnforcerTest extends TestCase
         self::assertSame(400, $response->getStatusCode());
     }
 
+    public function testEnforceAccessWithNoResourceIdNoResourceParamAndNoResolverReturns400(): void
+    {
+        // resourceId=null, resourceParam=null (explicitly opted out of the default 'id'),
+        // and no resolver supplied at all -> every §11.2.3 resolution step is exhausted.
+        $enforcer = $this->enforcerWith([]);
+
+        $response = $enforcer->enforceAccess(
+            self::IDENTITY,
+            new RequireAccess(action: 'read', resourceParam: null),
+            [],
+        );
+
+        self::assertInstanceOf(JsonResponse::class, $response);
+        self::assertSame(400, $response->getStatusCode());
+        $body = json_decode((string) $response->getContent(), true);
+        self::assertSame('invalid_request', $body['error'] ?? null);
+        self::assertStringContainsString('no resource identifier could be resolved', $body['message'] ?? '');
+    }
+
     // --- require_access: transport failure -> 503, fail-closed (CONTRACT.md §11.2.5) -
 
     public function testEnforceAccessNetworkErrorFailsClosedWith503(): void

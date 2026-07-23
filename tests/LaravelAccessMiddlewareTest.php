@@ -7,6 +7,7 @@ namespace Axiam\Sdk\Tests;
 use Axiam\Sdk\AccessEnforcer;
 use Axiam\Sdk\Attributes\RequireAccess;
 use Axiam\Sdk\Attributes\RequireAuth;
+use Axiam\Sdk\Attributes\RequireRole;
 use Axiam\Sdk\AxiamClient;
 use Axiam\Sdk\Laravel\AxiamAccessMiddleware;
 use GuzzleHttp\Handler\MockHandler;
@@ -74,6 +75,27 @@ final class LaravelAccessFixtureController
 
     #[RequireAccess(action: 'read', resourceParam: 'id')]
     public function readDocument(): string
+    {
+        return 'ok';
+    }
+
+    /** No #[Require*] attributes at all -> the attribute-reflection style is a no-op. */
+    public function unguarded(): string
+    {
+        return 'ok';
+    }
+}
+
+/**
+ * A class-level `#[RequireRole]` a method with none of its own inherits, mirroring
+ * {@see ClassLevelAccessFixtureController}/{@see RoleOverrideFixtureController} in the
+ * Symfony-side test — proves {@see AxiamAccessMiddleware}'s class-level attribute
+ * fallback AND its `enforceRole` wiring.
+ */
+#[RequireRole('admin', 'owner')]
+final class LaravelRoleFixtureController
+{
+    public function inheritsClassLevelRole(): string
     {
         return 'ok';
     }
@@ -296,6 +318,60 @@ final class LaravelAccessMiddlewareTest extends TestCase
         $middleware = $this->middlewareWith([]);
         $request = FakeLaravelRequest::create('/documents/1', 'GET');
         $request->fakeRoute = new FakeLaravelRoute('Some\\Nonexistent\\Controller@show', []);
+
+        $response = $middleware->handle($request, $this->passthroughNext());
+
+        self::assertSame(200, $response->getStatusCode());
+    }
+
+    public function testAttributeStyleControllerWithNoAttributesAtAllIsANoOp(): void
+    {
+        // Class/method both exist and resolve fine via reflection, but carry none of the
+        // three #[Require*] attributes -> the "nothing to enforce" early return.
+        $middleware = $this->middlewareWith([]);
+        $request = FakeLaravelRequest::create('/documents/1', 'GET');
+        $request->fakeRoute = new FakeLaravelRoute(LaravelAccessFixtureController::class . '@unguarded', []);
+
+        $response = $middleware->handle($request, $this->passthroughNext());
+
+        self::assertSame(200, $response->getStatusCode());
+    }
+
+    public function testAttributeStyleActionNameWithoutAtSignIsANoOp(): void
+    {
+        // A Closure-based Laravel route reports its action as 'Closure' (no '@'), which
+        // this middleware cannot reflect a controller method from -> no-op passthrough.
+        $middleware = $this->middlewareWith([]);
+        $request = FakeLaravelRequest::create('/documents/1', 'GET');
+        $request->fakeRoute = new FakeLaravelRoute('Closure', []);
+
+        $response = $middleware->handle($request, $this->passthroughNext());
+
+        self::assertSame(200, $response->getStatusCode());
+    }
+
+    public function testAttributeStyleClassLevelRequireRoleIsInheritedAndEnforced(): void
+    {
+        // No identity at all -> enforceRole's own auth check fires first (401), but this
+        // still proves the class-level #[RequireRole] fallback resolved and enforceRole()
+        // was reached (both the findAttribute() class-level branch and the middleware's
+        // own requireRole wiring).
+        $middleware = $this->middlewareWith([]);
+        $request = FakeLaravelRequest::create('/documents/1', 'GET');
+        $request->fakeRoute = new FakeLaravelRoute(LaravelRoleFixtureController::class . '@inheritsClassLevelRole', []);
+
+        $response = $middleware->handle($request, $this->passthroughNext());
+
+        self::assertInstanceOf(JsonResponse::class, $response);
+        self::assertSame(401, $response->getStatusCode());
+    }
+
+    public function testAttributeStyleClassLevelRequireRoleAllowsMatchingIdentity(): void
+    {
+        $middleware = $this->middlewareWith([]);
+        $request = FakeLaravelRequest::create('/documents/1', 'GET');
+        $request->attributes->set('axiam_user', ['roles' => ['admin']] + self::IDENTITY);
+        $request->fakeRoute = new FakeLaravelRoute(LaravelRoleFixtureController::class . '@inheritsClassLevelRole', []);
 
         $response = $middleware->handle($request, $this->passthroughNext());
 
