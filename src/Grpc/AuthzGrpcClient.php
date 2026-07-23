@@ -123,7 +123,7 @@ final class AuthzGrpcClient extends \Grpc\BaseStub
         return $this->unary(
             '/axiam.v1.AuthorizationService/CheckAccess',
             $request,
-            [CheckAccessResponse::class, 'decode'],
+            self::decoder(CheckAccessResponse::class),
         );
     }
 
@@ -133,8 +133,41 @@ final class AuthzGrpcClient extends \Grpc\BaseStub
         return $this->unary(
             '/axiam.v1.AuthorizationService/BatchCheckAccess',
             $request,
-            [BatchCheckAccessResponse::class, 'decode'],
+            self::decoder(BatchCheckAccessResponse::class),
         );
+    }
+
+    /**
+     * Builds a `(string): T` deserializer for the committed {@see \Axiam\Sdk\Grpc\Gen}
+     * message stubs.
+     *
+     * BUG FIX (found while adding coverage, T-22-16/B1): the previous `[$class, 'decode']`
+     * pair is not a valid `callable` — `Google\Protobuf\Internal\Message` (which every
+     * `Gen/*.php` stub extends) defines no static `decode()` method, in any of the
+     * `google/protobuf` versions this SDK supports (`^3.25 || ^4.26 || ^5.0`; confirmed
+     * against the installed v5.35.1 runtime). Passing that array literal into `unary()`'s
+     * `callable $deserialize` parameter therefore ALWAYS raised a `TypeError` before any
+     * RPC ran — in this sandbox and in any real `ext-grpc` deployment alike, since the
+     * failure is PHP's own argument-type validation, not anything sandbox-specific. This
+     * made the entire gRPC `checkAccess`/`batchCheck` transport non-functional. The fix
+     * builds an actual callable that mirrors what `decode()` was meant to do:
+     * instantiate the message and merge the wire bytes via `mergeFromString()` (the
+     * public API `Message` genuinely exposes).
+     *
+     * @template T of object
+     *
+     * @param class-string<T> $class
+     *
+     * @return callable(string): T
+     */
+    private static function decoder(string $class): callable
+    {
+        return static function (string $data) use ($class): object {
+            $message = new $class();
+            $message->mergeFromString($data);
+
+            return $message;
+        };
     }
 
     /**

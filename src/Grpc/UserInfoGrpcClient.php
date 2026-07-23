@@ -110,8 +110,34 @@ final class UserInfoGrpcClient extends \Grpc\BaseStub
         return $this->unary(
             '/axiam.v1.UserInfoService/GetUserInfo',
             new GetUserInfoRequest(),
-            [GetUserInfoResponse::class, 'decode'],
+            self::decoder(GetUserInfoResponse::class),
         );
+    }
+
+    /**
+     * Builds a `(string): T` deserializer for the committed {@see \Axiam\Sdk\Grpc\Gen}
+     * message stubs.
+     *
+     * BUG FIX (found while adding coverage, T-22-16/B1): see the identical fix + rationale
+     * on {@see \Axiam\Sdk\Grpc\AuthzGrpcClient::decoder()} — the previous `[$class,
+     * 'decode']` pair is not a valid `callable` (`Google\Protobuf\Internal\Message` defines
+     * no static `decode()`), so `getUserInfo()` always raised a `TypeError` before any RPC
+     * ran, in any environment, not just this sandbox.
+     *
+     * @template T of object
+     *
+     * @param class-string<T> $class
+     *
+     * @return callable(string): T
+     */
+    private static function decoder(string $class): callable
+    {
+        return static function (string $data) use ($class): object {
+            $message = new $class();
+            $message->mergeFromString($data);
+
+            return $message;
+        };
     }
 
     /**
