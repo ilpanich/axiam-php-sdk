@@ -6,6 +6,7 @@ namespace Axiam\Sdk\Rest;
 
 use Axiam\Sdk\Core\ErrorMapper;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 
@@ -155,7 +156,10 @@ final class AuthzRestClient
 
     private function mapException(RequestException $e): \Axiam\Sdk\Core\AxiamException
     {
-        $response = $e->getResponse();
+        // Guzzle 7 exposes getResponse() on RequestException; Guzzle 8 moved it to
+        // BadResponseException only (a bare RequestException/ConnectException has no
+        // response). Guard on BadResponseException so this holds on ^7.13 and ^8.0.
+        $response = $e instanceof BadResponseException ? $e->getResponse() : null;
         if ($response !== null) {
             return ErrorMapper::fromResponse($response, 'authz request failed');
         }

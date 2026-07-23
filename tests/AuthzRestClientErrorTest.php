@@ -13,8 +13,8 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -78,7 +78,7 @@ final class AuthzRestClientErrorTest extends TestCase
     public function testCheckAccessRequestExceptionWithResponseMapsToAuthError(): void
     {
         $rest = new AuthzRestClient($this->client([
-            new RequestException(
+            new BadResponseException(
                 'unauthorized',
                 $this->request(),
                 new Response(401, [], (string) json_encode(['error' => 'unauthorized'])),
@@ -125,7 +125,7 @@ final class AuthzRestClientErrorTest extends TestCase
     public function testBatchCheckRequestExceptionWithResponseMapsToAuthzError(): void
     {
         $rest = new AuthzRestClient($this->client([
-            new RequestException(
+            new BadResponseException(
                 'forbidden',
                 new Request('POST', '/api/v1/authz/check/batch'),
                 new Response(403, [], (string) json_encode(['error' => 'forbidden'])),
