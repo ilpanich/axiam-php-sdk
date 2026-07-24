@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha18] - 2026-07-24
+
+### Changed
+
+- Update guzzlehttp/guzzle requirement from ^7.13 to ^7.13 || ^8.0 (#10)
+- Bump actions/checkout from 7.0.0 to 7.0.1 (#9)
+- PHP SDK 88.3% → ~96.9% + add coverage gate (Phase B) (#12)
+
 ## [1.0.0-alpha16] - 2026-07-22
 
 ### Added
