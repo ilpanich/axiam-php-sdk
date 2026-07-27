@@ -17,6 +17,11 @@
             <exclude>tests/SymfonyAuthEdgeSubscriberTest.php</exclude>
             <exclude>tests/LaravelAccessMiddlewareTest.php</exclude>
             <exclude>tests/SymfonyAccessAttributeListenerTest.php</exclude>
+            <!-- CONTRACT.md §12 (plan T8 item 2): the Laravel/Symfony "Login with
+                 AXIAM" controllers need symfony/http-foundation (require-dev only) —
+                 same reasoning as the other framework-bridge exclusions above. -->
+            <exclude>tests/LaravelOidcControllerTest.php</exclude>
+            <exclude>tests/SymfonyOidcControllerTest.php</exclude>
         </testsuite>
         <!-- Laravel/Symfony bridge tests (wave-5 plans, plus the CONTRACT.md §11
              declarative-authorization listener/middleware) require the dev-only
@@ -28,6 +33,11 @@
                  LISTENER, not a middleware/subscriber) but has the exact same
                  dev-only-symfony-package dependency, so it is listed explicitly. -->
             <file>tests/SymfonyAccessAttributeListenerTest.php</file>
+            <!-- CONTRACT.md §12 (plan T8 item 2): the "Login with AXIAM" invokable
+                 controllers — neither middleware nor subscribers, but the same
+                 dev-only-framework-package dependency as everything else here. -->
+            <file>tests/LaravelOidcControllerTest.php</file>
+            <file>tests/SymfonyOidcControllerTest.php</file>
         </testsuite>
     </testsuites>
 

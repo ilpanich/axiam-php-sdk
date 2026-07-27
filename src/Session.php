@@ -6,6 +6,7 @@ namespace Axiam\Sdk;
 
 use Axiam\Sdk\Auth\RefreshGuard;
 use Axiam\Sdk\Core\AuthError;
+use Axiam\Sdk\Core\Sensitive;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Promise\Create;
@@ -36,11 +37,47 @@ use Psr\Http\Message\ResponseInterface;
  */
 final class Session
 {
+    /**
+     * Guard-slot kind for the §1 cookie-session refresh path
+     * ({@see self::refreshIfNeeded()}) — the default `refreshGuard()` kind.
+     */
+    public const REFRESH_KIND_SESSION = 'session';
+
+    /**
+     * Guard-slot kind for the §12 `oidc_refresh` OAuth2 token-endpoint path
+     * (CONTRACT.md §9 rule 5 / F-06). Used by {@see \Axiam\Sdk\Oidc\OidcClient::oidcRefresh()}
+     * so a second concurrent `oidcRefresh` caller can recognise the guard is busy with
+     * ANOTHER `oidcRefresh` (same kind) and share its single outcome, instead of
+     * re-acquiring the guard and issuing its own wire call that would replay an
+     * already-consumed (single-use, rotating) refresh token.
+     */
+    public const REFRESH_KIND_OIDC = 'oidc';
+
     private ?PromiseInterface $refreshPromise = null;
+
+    /**
+     * Which {@see self::REFRESH_KIND_SESSION}/{@see self::REFRESH_KIND_OIDC} kind of
+     * refresh currently owns {@see self::$refreshPromise}, or `null` when the guard is
+     * free. Set alongside `$refreshPromise` and cleared alongside it (see
+     * {@see self::refreshGuard()}'s `onClear`), so it is always in sync with whether
+     * there is an in-flight refresh and, when there is, what kind it is (F-06).
+     */
+    private ?string $refreshKind = null;
 
     private ?string $csrfToken = null;
 
     private readonly CookieJar $cookieJar;
+
+    /**
+     * CONTRACT.md §12.1 "`login_client_credentials` as a credential source" (a MAY):
+     * the access token adopted via {@see self::adoptBearerCredential()}, held behind
+     * {@see Sensitive} and consulted by {@see self::accessToken()} ONLY when the shared
+     * cookie jar carries none — a real `login()`/`verifyMfa()` session (cookie-sourced)
+     * always takes precedence. Never written to a public property, the cookie jar, or
+     * sent to `/oauth2/*` ({@see \Axiam\Sdk\Rest\AuthMiddleware} skips the
+     * `Authorization` header entirely on that path, §12.3 rule 2).
+     */
+    private ?Sensitive $adoptedAccessToken = null;
 
     /**
      * @param string         $baseUrl   AXIAM server base URL (HTTPS; `http://` is rejected
@@ -86,6 +123,31 @@ final class Session
     }
 
     /**
+     * Public seam for {@see \Axiam\Sdk\Oidc\OidcClient::ssoComplete()} (CONTRACT.md
+     * §12.1 note 6): `ssoComplete` establishes the session as `Set-Cookie` rather than
+     * a response body, but the server ALSO freshly sets `X-CSRF-Token` on that same
+     * response (exactly as `login()`'s response does), so this wraps the same private
+     * capture logic {@see self::refreshIfNeeded()} already uses.
+     */
+    public function captureCsrfTokenFromResponse(ResponseInterface $response): void
+    {
+        $this->captureCsrfToken($response);
+    }
+
+    /**
+     * CONTRACT.md §12.1 "`login_client_credentials` as a credential source" (a MAY):
+     * adopt `$accessToken` as this session's bearer credential for subsequent
+     * same-origin REST calls (never `/oauth2/*` — {@see \Axiam\Sdk\Rest\AuthMiddleware}
+     * excludes that path unconditionally). A cookie-sourced access token from a real
+     * `login()`/`verifyMfa()` session always takes precedence over an adopted one — see
+     * {@see self::accessToken()}.
+     */
+    public function adoptBearerCredential(Sensitive $accessToken): void
+    {
+        $this->adoptedAccessToken = $accessToken;
+    }
+
+    /**
      * Clears the captured CSRF token — called by {@see \Axiam\Sdk\AxiamClient::logout()} so a
      * logged-out session never echoes a stale `X-CSRF-Token` on a subsequent (re-authenticated)
      * request. Purely additive: does not change {@see self::csrfToken()}'s or
@@ -104,7 +166,15 @@ final class Session
      */
     public function accessToken(): ?string
     {
-        return $this->cookieValue('axiam_access');
+        $cookieToken = $this->cookieValue('axiam_access');
+        if ($cookieToken !== null) {
+            return $cookieToken;
+        }
+
+        // §12.1 "login_client_credentials as a credential source" fallback — only
+        // consulted when there is no real cookie-sourced session (see class doc on
+        // self::$adoptedAccessToken).
+        return $this->adoptedAccessToken?->reveal();
     }
 
     private function cookieValue(string $name): ?string
@@ -130,30 +200,92 @@ final class Session
      */
     public function refreshIfNeeded(): PromiseInterface
     {
+        return $this->refreshGuard(
+            fn (): PromiseInterface => $this->buildRefreshCall(),
+            onSuccess: function (mixed $response): mixed {
+                \assert($response instanceof ResponseInterface);
+                $this->captureCsrfToken($response);
+                return $response;
+            },
+            kind: self::REFRESH_KIND_SESSION,
+        )['promise'];
+    }
+
+    /**
+     * The generic single-flight primitive behind {@see self::refreshIfNeeded()}
+     * (CONTRACT.md §9) — and, additively, behind `oidc_refresh`'s own single-flight
+     * requirement (§12.1: "`oidc_refresh` MUST be governed by a §9-conformant
+     * single-flight guard"). Both share the SAME `$refreshPromise` slot, so a
+     * cookie-session refresh and an `oidcRefresh()` call can never race each other
+     * independently — whichever gets here first "owns" the slot until it settles.
+     *
+     * If no refresh is currently in flight, invokes `$startRefresh` (which must return
+     * the wire-call `PromiseInterface`) as THIS refresh, publishing it into the shared
+     * slot together with `$kind`. If a refresh is already in flight, `$startRefresh` is
+     * NOT invoked at all and the existing promise is returned instead, tagged with the
+     * kind that started it.
+     *
+     * **Result sharing across same-kind callers (CONTRACT.md §9 rule 2, F-06).** The
+     * caller distinguishes three cases via the returned `ran`/`kind` pair:
+     *   - `ran === true`: this call itself started the refresh — its own outcome IS
+     *     the shared outcome.
+     *   - `ran === false` and `kind` equals the kind THIS caller passed in: the guard
+     *     is busy with ANOTHER caller of the SAME operation (e.g. two concurrent
+     *     `oidcRefresh()` calls). The returned `promise` resolves to that one leader's
+     *     exact outcome — the caller MUST await and reuse it rather than re-acquiring
+     *     the guard and issuing its own wire call. This matters because AXIAM refresh
+     *     tokens are opaque, server-stored, and single-use with rotation: a second wire
+     *     call would replay an already-consumed token and fail `invalid_grant`.
+     *   - `ran === false` and `kind` differs from THIS caller's kind: the guard is busy
+     *     with a DIFFERENT operation (e.g. the §1 cookie-session refresh occupying the
+     *     slot while an `oidcRefresh()` call arrives). The existing promise's resolved
+     *     value cannot satisfy this caller (a PSR-7 `ResponseInterface` is not an OAuth2
+     *     token array, or vice versa), so the caller should wait for it to settle and
+     *     then retry acquiring the guard for its own kind.
+     *
+     * @param \Closure(): PromiseInterface $startRefresh Produces the wire-call promise
+     *        for THIS refresh attempt. Invoked only when the guard is free.
+     * @param (\Closure(mixed): mixed)|null $onSuccess Runs after the shared promise
+     *        resolves successfully, before the settled value is handed back (e.g. CSRF
+     *        capture) — same contract as {@see RefreshGuard::settle()}'s own parameter.
+     * @param string $kind One of {@see self::REFRESH_KIND_SESSION} /
+     *        {@see self::REFRESH_KIND_OIDC} (or a future operation-specific kind),
+     *        identifying which operation this call is performing/waiting for.
+     *
+     * @return array{ran: bool, promise: PromiseInterface, kind: string} `ran` is
+     *         `true` only when `$startRefresh` was actually invoked by THIS call;
+     *         `kind` is always the kind that OWNS the returned `promise` (THIS call's
+     *         `$kind` when `ran` is `true`, otherwise whichever kind is already
+     *         in flight).
+     */
+    public function refreshGuard(\Closure $startRefresh, ?\Closure $onSuccess = null, string $kind = self::REFRESH_KIND_SESSION): array
+    {
         if ($this->refreshPromise !== null) {
-            return $this->refreshPromise;
+            /** @var string $inFlightKind */
+            $inFlightKind = $this->refreshKind;
+
+            return ['ran' => false, 'promise' => $this->refreshPromise, 'kind' => $inFlightKind];
         }
 
         // Check-and-store completes synchronously here — nothing above this point
         // awaits or yields, so no concurrent caller can observe a null
-        // $refreshPromise again until this whole method returns. This holds
-        // whether buildRefreshCall() below returns a real in-flight HTTP
-        // promise or an immediately-rejected one (unresolvable tenant_id/org_id) —
-        // either way exactly ONE PromiseInterface is stored and shared.
-        $refreshCall = $this->buildRefreshCall();
+        // $refreshPromise again until this whole method returns. This holds whether
+        // $startRefresh() below returns a real in-flight HTTP promise or an
+        // immediately-rejected one — either way exactly ONE PromiseInterface is stored
+        // and shared.
+        $refreshCall = $startRefresh();
 
+        $this->refreshKind = $kind;
         $this->refreshPromise = RefreshGuard::settle(
             $refreshCall,
             onClear: function (): void {
                 $this->refreshPromise = null;
+                $this->refreshKind = null;
             },
-            onSuccess: function (ResponseInterface $response): ResponseInterface {
-                $this->captureCsrfToken($response);
-                return $response;
-            },
+            onSuccess: $onSuccess,
         );
 
-        return $this->refreshPromise;
+        return ['ran' => true, 'promise' => $this->refreshPromise, 'kind' => $kind];
     }
 
     /**

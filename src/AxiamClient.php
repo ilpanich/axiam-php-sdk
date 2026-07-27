@@ -11,6 +11,13 @@ use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Oidc\AuthorizationRequest;
+use Axiam\Sdk\Oidc\IntrospectionResult;
+use Axiam\Sdk\Oidc\OidcClient as OidcEngine;
+use Axiam\Sdk\Oidc\OidcConfiguration;
+use Axiam\Sdk\Oidc\OidcTokenSet;
+use Axiam\Sdk\Oidc\SsoCompleteResult;
+use Axiam\Sdk\Oidc\SsoStartResult;
 use Axiam\Sdk\Rest\AuthMiddleware;
 use Axiam\Sdk\Rest\AuthzRestClient;
 use Axiam\Sdk\Rest\RefreshMiddleware;
@@ -97,6 +104,9 @@ final class AxiamClient
 
     private readonly AuthzDispatcher $authzDispatcher;
 
+    /** CONTRACT.md §12 OIDC/SSO relying-party engine — see {@see OidcEngine}'s own docblock. */
+    private readonly OidcEngine $oidc;
+
     /**
      * §6.1: absolute path to the `0600` temp file holding the client-certificate chain PEM
      * that BOTH Guzzle clients present as `cert`, or `null` when mTLS is not configured.
@@ -154,6 +164,24 @@ final class AxiamClient
      *        internal seam, adapted to Guzzle's own documented
      *        `HandlerStack::create($mockHandler)` testing idiom
      *        (docs.guzzlephp.org/en/stable/testing.html) — never used by production code.
+     * @param string|null $oidcClientId CONTRACT.md §12: the relying party's OAuth2
+     *        `client_id`, used by every `oidc*`/`introspect`/`revoke` operation and
+     *        matched against an ID token's `aud`/`azp` (§12.4 rule 4). Required only by
+     *        callers that use the §12 OIDC/SSO helpers — omitting it leaves the §1–§11
+     *        surface completely unaffected, and a §12 call without one raises
+     *        {@see AuthError} before any wire call.
+     * @param Sensitive|string|null $oidcClientSecret CONTRACT.md §12: the confidential
+     *        client's `client_secret`, held behind {@see Sensitive} (§12.5). Omit for a
+     *        public client — `introspect`/`revoke`/`loginClientCredentials` REQUIRE it
+     *        (§12.1 note 4) and raise {@see AuthError} when it is absent; `oidcExchange`/
+     *        `oidcRefresh` omit it from the form body entirely when absent, per §12.1's
+     *        "MUST omit rather than send empty/null" rule.
+     * @param string|null $oidcTenantId CONTRACT.md §12.3 rule 4: the tenant UUID used as
+     *        the default `?tenant_id=` query parameter on `/oauth2/*` calls when a call
+     *        does not supply one explicitly. `$tenant` above is a SLUG (§5's
+     *        `X-Tenant-ID` header value) and is never accepted where the wire contract
+     *        requires a UUID — a §12 call with neither this nor a per-call `tenantId`
+     *        raises {@see AuthError} client-side, with no wire call.
      */
     public function __construct(
         string $baseUrl,
@@ -168,6 +196,9 @@ final class AxiamClient
         int $cacheTtlSeconds = 300,
         ?string $grpcTarget = null,
         ?callable $transportHandler = null,
+        ?string $oidcClientId = null,
+        Sensitive|string|null $oidcClientSecret = null,
+        ?string $oidcTenantId = null,
     ) {
         if ($tenant === '') {
             // D-13/§5 runtime backstop: PHP's type system alone cannot forbid an empty
@@ -268,6 +299,28 @@ final class AxiamClient
             // §1.1.4: getUserInfo's gRPC UNAUTHENTICATED retry drives the SAME single-flight
             // refresh guard (§9, D-06) the REST 401 path uses — never a second mechanism.
             refreshAccessor: fn (): mixed => $this->session->refreshIfNeeded()->wait(),
+        );
+
+        // CONTRACT.md §12: built on $plainHttp (AuthMiddleware only, NEVER
+        // RefreshMiddleware) so a 401 from /oauth2/introspect or /oauth2/revoke can
+        // never reach the §9 single-flight refresh guard — there is structurally no
+        // guard on this transport for it to enter (§12.3 rule 3/rule 4). Shares
+        // $this->jwksVerifier (the SAME verifier the §10 middleware uses for AXIAM's
+        // own access tokens) for ID-token signature verification, since AXIAM's OIDC
+        // provider and its own auth server are the same origin with one JWKS to trust.
+        $this->oidc = new OidcEngine(
+            http: $this->plainHttp,
+            baseUrl: $baseUrl,
+            session: $this->session,
+            jwksVerifier: $this->jwksVerifier,
+            clientId: $oidcClientId,
+            clientSecret: $oidcClientSecret !== null && !($oidcClientSecret instanceof Sensitive)
+                ? new Sensitive($oidcClientSecret)
+                : $oidcClientSecret,
+            tenantId: $oidcTenantId,
+            orgId: $orgId,
+            orgSlug: $orgSlug,
+            tenantSlugForSso: $tenant,
         );
     }
 
@@ -488,6 +541,208 @@ final class AxiamClient
     public function getUserInfo(): UserInfo
     {
         return $this->authzDispatcher->getUserInfo();
+    }
+
+    // ------------------------------------------------------------------
+    // OIDC / SSO relying-party helpers (CONTRACT.md §12, contract 1.4)
+    //
+    // The nine canonical §12 operations, exactly the §12.2 PHP names, delegating to
+    // {@see OidcEngine} — this class's OWN internal composed collaborator, exactly as
+    // `checkAccess`/`can`/`batchCheck`/`getUserInfo` above delegate to
+    // {@see AuthzDispatcher}. Building an RP flow requires `oidcClientId` (and, for
+    // `introspect`/`revoke`/`loginClientCredentials`, `oidcClientSecret`) at
+    // construction — see this class's constructor docblock.
+    // ------------------------------------------------------------------
+
+    /**
+     * `GET /.well-known/openid-configuration` (CONTRACT.md §12.1) — fetch the OIDC
+     * discovery document, cached per origin with a ≥5-minute TTL and single-flight
+     * de-duplication of concurrent callers (§12.3 rule 6). The document's own `issuer`
+     * is authoritative for ID-token validation (§12.4 rule 3) and may legitimately
+     * differ from `$baseUrl` behind a proxy — never treated as an error (§12.3 rule 6).
+     */
+    public function oidcDiscover(): OidcConfiguration
+    {
+        return $this->oidc->oidcDiscover();
+    }
+
+    /**
+     * Build an authorization request (CONTRACT.md §12.1) — **pure local computation, no
+     * network I/O**. Generates a `state`/`nonce` (CSPRNG, ≥128 bits) and a fresh PKCE
+     * verifier/challenge pair (**S256 only**), and builds `$configuration`'s
+     * `authorization_endpoint` into a redirect URL with exactly the eight SDK-owned
+     * query parameters plus any `$extraParams` supplied.
+     *
+     * **Nothing is stored** (§12.3 rule 1): persist the returned `state`, `nonce` and
+     * `codeVerifier` yourself (e.g. in your own HTTP session, or via
+     * {@see \Axiam\Sdk\Oidc\MemoryOidcStateStore}) and pass `nonce`/`codeVerifier` back
+     * into {@see self::oidcExchange()} when the authorization code arrives.
+     *
+     * @param string|list<string>|null $scope `openid` is added automatically when
+     *        absent (§12.1 rule 4). Defaults to `openid`.
+     * @param array<string,string> $extraParams Extra authorization-request parameters
+     *        (e.g. `prompt`, `login_hint`). Throws {@see \InvalidArgumentException} if
+     *        one tries to override an SDK-owned parameter (§12.1 rule 5).
+     */
+    public function oidcBegin(
+        OidcConfiguration $configuration,
+        string $redirectUri,
+        string|array|null $scope = null,
+        array $extraParams = [],
+    ): AuthorizationRequest {
+        return $this->oidc->oidcBegin($configuration, $redirectUri, $scope, $extraParams);
+    }
+
+    /**
+     * `POST /oauth2/token` with `grant_type=authorization_code` (CONTRACT.md §12.1) —
+     * exchange an authorization code for a token set, validating the returned ID token
+     * in full (§12.4) before returning. `$nonce` is MANDATORY: this grant always
+     * requests `openid`, so §12.4 rule 6 always applies. On ANY §12.4 failure the whole
+     * token set is discarded and {@see AuthError} is raised with the matching reason
+     * code (§12.4 rule 7) — `getReason()` returns one of `invalid_alg`, `unknown_kid`,
+     * `invalid_signature`, `invalid_issuer`, `invalid_audience`, `token_expired`,
+     * `nonce_mismatch`.
+     *
+     * @param Sensitive|string $codeVerifier The verifier from the matching
+     *        {@see AuthorizationRequest} — accepts the wrapped or bare form.
+     * @param string|null $tenantId Tenant UUID for the required `?tenant_id=` query
+     *        parameter (§12.3 rule 4). Falls back to the client's `oidcTenantId`.
+     * @param OidcConfiguration|null $configuration A pre-fetched discovery document, to
+     *        avoid re-reading the (cached) one. Fetched via {@see self::oidcDiscover()}
+     *        when omitted.
+     */
+    public function oidcExchange(
+        string $code,
+        Sensitive|string $codeVerifier,
+        string $redirectUri,
+        string $nonce,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): OidcTokenSet {
+        return $this->oidc->oidcExchange($code, $codeVerifier, $redirectUri, $nonce, $tenantId, $configuration);
+    }
+
+    /**
+     * `POST /oauth2/token` with `grant_type=refresh_token` (CONTRACT.md §12.1) —
+     * refresh an {@see OidcTokenSet} under the SAME §9 single-flight guard
+     * {@see self::refresh()} uses. A **distinct operation** from {@see self::refresh()}
+     * (the cookie/opaque-token session path) — the two are never merged, aliased, or
+     * fall back to one another, but they share ONE guard slot: a concurrent
+     * `oidcRefresh()` call finding the guard busy with a cookie-session refresh retries
+     * (bounded) rather than returning a stale token set.
+     *
+     * Any `id_token` in the response is validated against §12.4 rules 1–5 and 7; rule 6
+     * (nonce) is skipped (OIDC Core §12.2 does not require a nonce on a refresh-issued
+     * ID token).
+     *
+     * @param Sensitive|string $refreshToken The refresh token to redeem — accepts the
+     *        wrapped or bare form.
+     */
+    public function oidcRefresh(
+        Sensitive|string $refreshToken,
+        ?string $scope = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): OidcTokenSet {
+        return $this->oidc->oidcRefresh($refreshToken, $scope, $tenantId, $configuration);
+    }
+
+    /**
+     * `POST /oauth2/token` with `grant_type=client_credentials` (CONTRACT.md §12.1) —
+     * service-account machine-to-machine login. Requests no `openid` scope, so the
+     * response carries no `id_token`. Pass `$adoptAsCredential: true` to additionally
+     * adopt the returned access token as this client's bearer credential for
+     * subsequent same-origin REST calls (§12.1, an opt-in MAY) — the token is held
+     * behind {@see Sensitive} inside {@see Session} and is NEVER sent to `/oauth2/*`.
+     *
+     * @throws AuthError when no `oidcClientSecret` was configured — this grant cannot
+     *                    be performed by a public client (§12.1 note 4).
+     */
+    public function loginClientCredentials(
+        ?string $scope = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        bool $adoptAsCredential = false,
+    ): OidcTokenSet {
+        return $this->oidc->loginClientCredentials($scope, $tenantId, $configuration, $adoptAsCredential);
+    }
+
+    /**
+     * `POST /oauth2/introspect` (RFC 7662, CONTRACT.md §12.1) — ask the server whether
+     * a token is active and, if so, for its metadata. Requires confidential-client
+     * credentials (§12.1 note 4). A `401` here is a client-credential failure surfaced
+     * as {@see \Axiam\Sdk\Core\OAuthProtocolError} and NEVER enters the §9 refresh guard
+     * (§12.3 rule 3).
+     *
+     * @param Sensitive|string $token The token to introspect — accepts the wrapped or
+     *        bare form.
+     *
+     * @throws AuthError when no `oidcClientSecret` was configured.
+     */
+    public function introspect(
+        Sensitive|string $token,
+        ?string $tokenTypeHint = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): IntrospectionResult {
+        return $this->oidc->introspect($token, $tokenTypeHint, $tenantId, $configuration);
+    }
+
+    /**
+     * `POST /oauth2/revoke` (RFC 7009, CONTRACT.md §12.1) — revoke an access or refresh
+     * token. Returns nothing. Per RFC 7009 the server answers `200` for an unknown,
+     * expired, or already-revoked token too, so this call is **idempotent**: only a
+     * `401` (client authentication failed) is an error, surfaced as
+     * {@see \Axiam\Sdk\Core\OAuthProtocolError} (§12.1 note 5). A `5xx` still raises
+     * {@see NetworkError}.
+     *
+     * @param Sensitive|string $token The token to revoke — accepts the wrapped or bare
+     *        form.
+     *
+     * @throws AuthError when no `oidcClientSecret` was configured.
+     */
+    public function revoke(
+        Sensitive|string $token,
+        ?string $tokenTypeHint = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): void {
+        $this->oidc->revoke($token, $tokenTypeHint, $tenantId, $configuration);
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/oidc/start` (CONTRACT.md §12.1) — step 1 of
+     * first-time SSO against an **upstream** IdP. No JWT required. One tenant form
+     * (`$tenantId`/`$tenantSlug`) and one org form (`$orgId`/`$orgSlug`) must be
+     * resolvable, from the arguments or from this client's construction options
+     * (§5.1) — an unresolvable one raises {@see AuthError} client-side, with no wire
+     * call. Redirect the browser to the returned `authorizeUrl` and round-trip `state`
+     * back into {@see self::ssoComplete()} unmodified; the server keeps the nonce to
+     * itself (§12.1 note 7).
+     */
+    public function ssoStart(
+        string $federationConfigId,
+        string $redirectUri,
+        ?string $tenantId = null,
+        ?string $tenantSlug = null,
+        ?string $orgId = null,
+        ?string $orgSlug = null,
+    ): SsoStartResult {
+        return $this->oidc->ssoStart($federationConfigId, $redirectUri, $tenantId, $tenantSlug, $orgId, $orgSlug);
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/oidc/callback` (CONTRACT.md §12.1) — step 2 of
+     * upstream SSO: consumes the single-use `$state`, provisions or links the user, and
+     * establishes the session. The session arrives as `Set-Cookie` — not in the
+     * response body (§12.1 note 6) — so it is captured automatically via this client's
+     * shared §4 cookie jar; the freshly-issued §3 CSRF token is captured too, exactly
+     * as {@see self::login()} does. §12.4 does not apply here: no ID token ever reaches
+     * the SDK on the federation path.
+     */
+    public function ssoComplete(string $state, string $code): SsoCompleteResult
+    {
+        return $this->oidc->ssoComplete($state, $code);
     }
 
     // ------------------------------------------------------------------

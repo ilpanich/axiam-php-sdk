@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha19] - 2026-07-27
+
+### Fixed
+
+- `oidcRefresh()`: a concurrent caller that finds the §9 single-flight guard already
+  busy with ANOTHER `oidcRefresh` call now shares that leader's outcome instead of
+  re-acquiring the guard and issuing its own token-endpoint request. AXIAM refresh
+  tokens are single-use with rotation, so the previous behavior could replay an
+  already-consumed refresh token and fail `invalid_grant` under Fiber/event-loop
+  concurrency (cross-SDK conformance review F-06). `Session::refreshGuard()` gains an
+  optional `kind` parameter (`Session::REFRESH_KIND_SESSION` /
+  `Session::REFRESH_KIND_OIDC`) to tell same-operation contention (share the result)
+  apart from cross-operation contention (wait and retry, unchanged). Additive,
+  non-breaking.
+
+### Added
+
+- OIDC / SSO relying-party helpers (CONTRACT §12, contract 1.4): `oidcDiscover`,
+  `oidcBegin`, `oidcExchange`, `oidcRefresh`, `loginClientCredentials`, `introspect`,
+  `revoke`, `ssoStart`, `ssoComplete` directly on `AxiamClient`.
+  - New `Axiam\Sdk\Oidc\*` namespace: `OidcClient` (internal engine),
+    `OidcConfiguration`, `AuthorizationRequest`, `OidcTokenSet`, `IntrospectionResult`,
+    `SsoStartResult`, `SsoCompleteResult`, `Pkce` (RFC 7636 S256-only PKCE),
+    `IdTokenValidator` (§12.4 issuer/audience/time/nonce checks),
+    `OidcStateStoreInterface` + `MemoryOidcStateStore` (single-use, 10-minute TTL),
+    `OidcLoginFlow` (the shared framework-agnostic "Login with AXIAM" begin/complete
+    core).
+  - `Axiam\Sdk\Core\OAuthProtocolError`: a new `AuthError` sub-type for RFC 6749
+    `OAuth2ErrorResponse` bodies from `/oauth2/*` — existing `catch (AuthError $e)`
+    blocks keep working unchanged.
+  - `Axiam\Sdk\Auth\JwksVerifier::verifyIdTokenSignature()`: extends the existing §10
+    JWKS verifier (never forked) with §12.4 rules 1–2 (algorithm pin + Ed25519
+    signature, single re-fetch on an unknown `kid`) for ID tokens.
+  - Laravel: `Route::axiamOidcLogin()` route macro + `OidcLoginController`/
+    `OidcCallbackController` (optional, off by default).
+  - Symfony: `OidcLoginController`/`OidcCallbackController` (optional, manually
+    registered, off by default).
+  - `AxiamClient` gains three new optional constructor parameters: `oidcClientId`,
+    `oidcClientSecret`, `oidcTenantId`.
+
 ## [1.0.0-alpha18] - 2026-07-24
 
 ### Changed

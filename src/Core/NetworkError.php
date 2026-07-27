@@ -83,6 +83,18 @@ final class NetworkError extends AxiamException
     }
 
     /**
+     * Builds a `NetworkError` from a plain message with no live response or exception
+     * to redact — e.g. a malformed/short response BODY already decoded into a plain
+     * array by the caller, with no `ResponseInterface`/headers left to sanitize.
+     * `$message` still passes through {@see self::sanitizeMessage()} as defense in
+     * depth, matching {@see self::fromException()}'s own discipline.
+     */
+    public static function fromMessage(string $message): self
+    {
+        return new self(self::sanitizeMessage($message));
+    }
+
+    /**
      * Defense-in-depth: strips any `set-cookie`/`authorization`/`cookie`-shaped
      * fragment from an arbitrary string, in case a leaked header fragment reaches a
      * message via a path other than {@see self::fromResponse()}.

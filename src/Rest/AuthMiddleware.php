@@ -17,6 +17,13 @@ use Psr\Http\Message\RequestInterface;
  * {@see RefreshMiddleware}, so a retried request (after a single-flight refresh) is
  * re-decorated with the FRESH access token / CSRF value picked up from the shared
  * {@see Session} — never the stale headers from the original 401'd attempt.
+ *
+ * CONTRACT.md §12.1 note 3 / §12.3 rule 2: a request to `/oauth2/*` never gets the
+ * `Authorization` header, regardless of whether {@see Session::accessToken()} is
+ * currently returning a cookie-sourced session token or a
+ * `login_client_credentials`-adopted one (§12.1's opt-in credential-adoption MAY) —
+ * those endpoints authenticate the CLIENT through the form body
+ * (`client_secret_post`, never `Authorization: Basic` or `Bearer`).
  */
 final class AuthMiddleware
 {
@@ -56,7 +63,11 @@ final class AuthMiddleware
 
             $request = $request->withHeader('X-Tenant-ID', $this->session->tenant());
 
-            $accessToken = $this->session->accessToken();
+            // CONTRACT.md §12.1 note 3 / §12.3 rule 2: never attach a bearer credential
+            // (cookie-sourced OR client-credentials-adopted) to an /oauth2/* request.
+            $isOAuth2Path = str_starts_with($request->getUri()->getPath(), '/oauth2/');
+
+            $accessToken = $isOAuth2Path ? null : $this->session->accessToken();
             if ($accessToken !== null) {
                 $request = $request->withHeader('Authorization', 'Bearer ' . $accessToken);
             }

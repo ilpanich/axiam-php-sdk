@@ -121,6 +121,19 @@ transport failure.
 check against the verified identity's `roles` — coarser than `#[RequireAccess]` and
 not a substitute for it (CONTRACT.md §11.2.9).
 
+## CONTRACT.md §12 — "Login with AXIAM" (OIDC/SSO), optional and off by default
+
+[`oidc_routes.php`](oidc_routes.php) shows the OTHER opt-in surface `AxiamServiceProvider`
+registers: a `Route::axiamOidcLogin('/auth/axiam/login', '/auth/axiam/callback')` macro
+that wires `Axiam\Sdk\Laravel\OidcLoginController`/`OidcCallbackController` — an
+authorization-code + PKCE "Login with AXIAM" flow — onto both paths in one call. Unlike
+`axiam.auth`/`axiam.access`, **no route is registered unless your application calls this
+macro** (or wires the two controllers itself). Configure via `axiam.oidc.*` config keys
+or `AXIAM_OIDC_CLIENT_ID`/`AXIAM_OIDC_CLIENT_SECRET`/`AXIAM_OIDC_TENANT_ID`/
+`AXIAM_OIDC_REDIRECT_URI`/`AXIAM_OIDC_SCOPE` env vars. See the main
+[README's §12 section](../../README.md#oidc--sso-relying-party-helpers-contractmd-12)
+for the full nine-operation surface and the caller-owns-state rule.
+
 ## Running this against a real Laravel app
 
 This directory ships as illustrative, `php -l`-clean source (the core `axiam/axiam-sdk`
@@ -153,4 +166,4 @@ hatch (§6/D-12).
 
 ## Contract conformance
 
-This SDK conforms to CONTRACT.md §1–§11. See [`../../CONTRACT.md`](../../CONTRACT.md).
+This SDK conforms to CONTRACT.md §1–§12. See [`../../CONTRACT.md`](../../CONTRACT.md).
