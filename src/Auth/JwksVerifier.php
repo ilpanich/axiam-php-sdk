@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Auth;
 
+use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\AxiamException;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
@@ -126,6 +127,88 @@ final class JwksVerifier
         }
 
         return $claims;
+    }
+
+    /**
+     * §12.4 rules 1–2 (CONTRACT.md, OIDC/SSO relying-party helpers) — algorithm and
+     * Ed25519 signature verification for an OIDC ID token, reusing this SAME verifier's
+     * key cache and single-refetch-on-unknown-`kid` behavior (§12 forbids forking the
+     * JWKS verifier the §10 middleware already uses).
+     *
+     * Deliberately distinct from {@see self::verify()}: an ID token carries no
+     * `tenant_id` claim to check (that check is specific to AXIAM's own access tokens),
+     * and §12.4 requires a stable machine-readable failure reason rather than a bare
+     * `null`, so this method THROWS {@see AuthError} (with `invalid_alg`, `unknown_kid`,
+     * or `invalid_signature` in {@see AuthError::getReason()}) instead of returning one.
+     * Issuer/audience/time/nonce (§12.4 rules 3–6) are the caller's job —
+     * {@see \Axiam\Sdk\Oidc\IdTokenValidator::checkClaims()} — since they need
+     * expectations (issuer, client_id, nonce) this verifier has no reason to know about.
+     *
+     * @return array<string,mixed> Decoded claims — signature-verified, but NOT yet
+     *                              issuer/audience/time/nonce-checked.
+     */
+    public function verifyIdTokenSignature(string $jwt): array
+    {
+        if (!extension_loaded('sodium')) {
+            throw new AxiamException(
+                'ext-sodium is required for EdDSA JWT verification but is not loaded'
+            );
+        }
+
+        $parts = explode('.', $jwt);
+        if (count($parts) !== 3) {
+            throw new AuthError('id_token is not a well-formed JWT (expected 3 dot-separated segments)', 'invalid_signature');
+        }
+
+        $header = $this->decodeHeader($parts[0]);
+        $alg = is_array($header) ? ($header['alg'] ?? null) : null;
+        // §12.4 rule 1: the alg check is read from the header and enforced BEFORE any
+        // key lookup — `none` is rejected by this SAME equality test as every other
+        // non-EdDSA value, with no special case and no separate code path.
+        if ($alg !== 'EdDSA') {
+            throw new AuthError(
+                sprintf('expected alg "EdDSA", got %s', is_string($alg) ? sprintf('"%s"', $alg) : 'no alg header'),
+                'invalid_alg',
+            );
+        }
+
+        $kid = is_array($header) ? ($header['kid'] ?? null) : null;
+        if (!is_string($kid) || $kid === '') {
+            // Port brief addendum item 12: "unknown_kid also covers 'no kid header at
+            // all', not just 'no matching key'" — no re-fetch is useful here (there is no
+            // kid value a fresh JWKS document could possibly satisfy), so this fails
+            // immediately with the same reason code.
+            throw new AuthError('id_token has no kid header', 'unknown_kid');
+        }
+
+        $this->ensureFresh($kid);
+        if (!isset($this->keysByKid[$kid])) {
+            throw new AuthError(sprintf('id_token kid "%s" is unknown, even after a JWKS refetch', $kid), 'unknown_kid');
+        }
+
+        // firebase/php-jwt's own JWT::decode() enforces exp/nbf/iat internally (via the
+        // static $leeway it consults), throwing ExpiredException/BeforeValidException
+        // BEFORE ever returning the claims. This method's job is ONLY §12.4 rules 1–2
+        // (alg + signature) — time/issuer/audience/nonce (rules 3–6) are
+        // IdTokenValidator::checkClaims()'s job, over the claims of a token that may be
+        // signature-valid but time-invalid. A momentary, try/finally-scoped $leeway
+        // override neutralizes firebase/php-jwt's own time gate for the duration of
+        // this ONE decode call (restored immediately after, so it can never leak into
+        // this class's own self::verify() call for AXIAM's own access tokens, nor into
+        // any concurrent decode within the same process) so an expired-but-genuinely-
+        // signed token still reaches IdTokenValidator and is correctly rejected with
+        // `token_expired`, never misreported as `invalid_signature`.
+        $originalLeeway = JWT::$leeway;
+        JWT::$leeway = PHP_INT_MAX >> 2;
+        try {
+            $decoded = JWT::decode($jwt, $this->keysByKid);
+        } catch (\Throwable $e) {
+            throw new AuthError('id_token signature verification failed: ' . $e->getMessage(), 'invalid_signature');
+        } finally {
+            JWT::$leeway = $originalLeeway;
+        }
+
+        return (array) $decoded;
     }
 
     /** @return array<string,mixed>|null */

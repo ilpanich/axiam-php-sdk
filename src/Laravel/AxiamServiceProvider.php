@@ -6,6 +6,9 @@ namespace Axiam\Sdk\Laravel;
 
 use Axiam\Sdk\AccessEnforcer;
 use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Oidc\MemoryOidcStateStore;
+use Axiam\Sdk\Oidc\OidcLoginFlow;
+use Axiam\Sdk\Oidc\OidcStateStoreInterface;
 
 // D-01: the entire class definition is wrapped in a `class_exists` guard so that
 // autoloading this file (which only ever happens because a real Laravel application
@@ -50,10 +53,26 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
                     ? $config->get('axiam.custom_ca', getenv('AXIAM_CUSTOM_CA') ?: null)
                     : (getenv('AXIAM_CUSTOM_CA') ?: null);
 
+                // CONTRACT.md §12 (optional, off by default — a §1–§11-only consumer
+                // never sets these env vars/config keys and every §12 call is simply
+                // unreachable from routes it never registers).
+                $oidcClientId = $config !== null
+                    ? $config->get('axiam.oidc.client_id', getenv('AXIAM_OIDC_CLIENT_ID') ?: null)
+                    : (getenv('AXIAM_OIDC_CLIENT_ID') ?: null);
+                $oidcClientSecret = $config !== null
+                    ? $config->get('axiam.oidc.client_secret', getenv('AXIAM_OIDC_CLIENT_SECRET') ?: null)
+                    : (getenv('AXIAM_OIDC_CLIENT_SECRET') ?: null);
+                $oidcTenantId = $config !== null
+                    ? $config->get('axiam.oidc.tenant_id', getenv('AXIAM_OIDC_TENANT_ID') ?: null)
+                    : (getenv('AXIAM_OIDC_TENANT_ID') ?: null);
+
                 return new AxiamClient(
                     baseUrl: $baseUrl,
                     tenant: $tenant,
                     customCa: is_string($customCa) && $customCa !== '' ? $customCa : null,
+                    oidcClientId: is_string($oidcClientId) && $oidcClientId !== '' ? $oidcClientId : null,
+                    oidcClientSecret: is_string($oidcClientSecret) && $oidcClientSecret !== '' ? $oidcClientSecret : null,
+                    oidcTenantId: is_string($oidcTenantId) && $oidcTenantId !== '' ? $oidcTenantId : null,
                 );
             });
 
@@ -79,6 +98,36 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
             $this->app->singleton(AxiamAccessMiddleware::class, static fn ($app): AxiamAccessMiddleware => new AxiamAccessMiddleware(
                 $app->make(AccessEnforcer::class),
             ));
+
+            // CONTRACT.md §12 (plan T8 item 2, optional/off-by-default): a default
+            // in-memory state store — an application that needs a shared (multi-instance)
+            // store overrides this binding with its own OidcStateStoreInterface
+            // implementation, exactly like any other Laravel container binding.
+            $this->app->singleton(OidcStateStoreInterface::class, static fn (): MemoryOidcStateStore => new MemoryOidcStateStore());
+
+            $this->app->singleton(OidcLoginFlow::class, static function ($app): OidcLoginFlow {
+                $config = $app->bound('config') ? $app->make('config') : null;
+                $redirectUri = $config !== null
+                    ? (string) $config->get('axiam.oidc.redirect_uri', getenv('AXIAM_OIDC_REDIRECT_URI') ?: '')
+                    : (string) (getenv('AXIAM_OIDC_REDIRECT_URI') ?: '');
+                $scope = $config !== null
+                    ? $config->get('axiam.oidc.scope', getenv('AXIAM_OIDC_SCOPE') ?: null)
+                    : (getenv('AXIAM_OIDC_SCOPE') ?: null);
+
+                return new OidcLoginFlow(
+                    client: $app->make(AxiamClient::class),
+                    store: $app->make(OidcStateStoreInterface::class),
+                    redirectUri: $redirectUri,
+                    scope: is_string($scope) && $scope !== '' ? $scope : null,
+                );
+            });
+
+            $this->app->singleton(OidcLoginController::class, static fn ($app): OidcLoginController => new OidcLoginController(
+                $app->make(OidcLoginFlow::class),
+            ));
+            $this->app->singleton(OidcCallbackController::class, static fn ($app): OidcCallbackController => new OidcCallbackController(
+                $app->make(OidcLoginFlow::class),
+            ));
         }
 
         /**
@@ -96,6 +145,24 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
                 // attribute-reflection off the resolved controller (see
                 // AxiamAccessMiddleware's own docblock for both styles).
                 $this->app->make('router')->aliasMiddleware('axiam.access', AxiamAccessMiddleware::class);
+            }
+
+            // CONTRACT.md §12 (plan T8 item 2): a route MACRO, not an auto-registered
+            // route — calling Route::axiamOidcLogin() is what an application does to
+            // opt IN to the "Login with AXIAM" flow; nothing here registers a route on
+            // its own, so a §1–§11-only consumer is completely unaffected.
+            if (class_exists(\Illuminate\Support\Facades\Route::class)) {
+                // Deliberately calls the Route FACADE (not `$this->get(...)`) so this
+                // closure needs no `illuminate/routing`-typed `$this` binding — this
+                // package declares no runtime dependency on `illuminate/routing` at all
+                // (D-01), only on `illuminate/support`/`illuminate/contracts`.
+                \Illuminate\Support\Facades\Route::macro(
+                    'axiamOidcLogin',
+                    function (string $loginPath = '/auth/axiam/login', string $callbackPath = '/auth/axiam/callback'): void {
+                        \Illuminate\Support\Facades\Route::get($loginPath, OidcLoginController::class);
+                        \Illuminate\Support\Facades\Route::get($callbackPath, OidcCallbackController::class);
+                    },
+                );
             }
 
             // The `axiam` Gate ability — `can:axiam,<resource>,<action>` route

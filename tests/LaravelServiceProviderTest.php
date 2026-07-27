@@ -132,8 +132,12 @@ final class LaravelServiceProviderTest extends TestCase
 
             public function offsetGet(mixed $offset): mixed
             {
-                // The Gate facade resolves its accessor (the Gate contract) through here.
-                return $this->gate;
+                // Facade::resolveFacadeInstance() reads `static::$app[$name]` — route by
+                // accessor name so BOTH the Gate facade (accessor 'gate') and, since
+                // CONTRACT.md §12's `Route::axiamOidcLogin()` macro registration, the
+                // Route facade (accessor 'router') resolve to their own double rather
+                // than colliding on one hardcoded return value.
+                return $offset === 'router' ? $this->router : $this->gate;
             }
 
             public function offsetSet(mixed $offset, mixed $value): void
@@ -152,9 +156,25 @@ final class LaravelServiceProviderTest extends TestCase
             /** @var array<string, string> */
             public array $aliases = [];
 
+            /** @var array<string, \Closure> */
+            public array $macros = [];
+
             public function aliasMiddleware(string $alias, string $class): void
             {
                 $this->aliases[$alias] = $class;
+            }
+
+            /**
+             * Minimal stand-in for `Illuminate\Support\Traits\Macroable::macro()` —
+             * the real `Router` uses that trait, and `AxiamServiceProvider::boot()`
+             * registers the `Route::axiamOidcLogin()` macro (CONTRACT.md §12) through
+             * it. Recording (never invoking) the closure is enough: this test asserts
+             * registration succeeds without throwing, not the macro's own routing
+             * behavior.
+             */
+            public function macro(string $name, \Closure $macro): void
+            {
+                $this->macros[$name] = $macro;
             }
         };
     }
@@ -237,5 +257,11 @@ final class LaravelServiceProviderTest extends TestCase
         self::assertIsCallable($gate->abilities['axiam']);
         // Sanity: the facade root really was our double.
         self::assertSame($gate, Gate::getFacadeRoot());
+
+        // CONTRACT.md §12 (plan T8 item 2): the OIDC login flow is opt-in via a route
+        // MACRO, not an auto-registered route — boot() registers the macro but calls
+        // no route-registering method itself.
+        self::assertArrayHasKey('axiamOidcLogin', $router->macros);
+        self::assertIsCallable($router->macros['axiamOidcLogin']);
     }
 }

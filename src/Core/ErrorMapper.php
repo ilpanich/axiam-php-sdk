@@ -70,4 +70,30 @@ final class ErrorMapper
     {
         return self::fromStatus($response->getStatusCode(), $response, $context);
     }
+
+    /**
+     * The `/oauth2/*` translation point (CONTRACT.md §12.3 rule 3): a `400` from
+     * `POST /oauth2/token`, or a `401` from `POST /oauth2/introspect` /
+     * `POST /oauth2/revoke`, carrying an `OAuth2ErrorResponse` body (`{error,
+     * error_description}`) MUST surface as {@see OAuthProtocolError} rather than the
+     * generic {@see self::fromStatus()} mapping (which would otherwise collapse a `400`
+     * into a plain {@see NetworkError}, or a `401` into a plain {@see AuthError} that
+     * would wrongly enter the §9 single-flight refresh guard, §12.3 rule 3).
+     *
+     * Falls back to {@see self::fromStatus()} when the body does not look like an
+     * `OAuth2ErrorResponse` (missing/non-string `error`), so a genuinely malformed or
+     * unexpected error body from an `/oauth2/*` endpoint still gets a sensible mapping
+     * instead of a confusing `OAuthProtocolError` with an empty `error` field.
+     */
+    public static function fromOAuth2Response(ResponseInterface $response, string $context = 'oauth2 request failed'): AxiamException
+    {
+        $decoded = json_decode((string) $response->getBody(), true);
+        if (is_array($decoded) && is_string($decoded['error'] ?? null) && $decoded['error'] !== '') {
+            $description = $decoded['error_description'] ?? null;
+
+            return new OAuthProtocolError($decoded['error'], is_string($description) ? $description : '');
+        }
+
+        return self::fromStatus($response->getStatusCode(), $response, $context);
+    }
 }

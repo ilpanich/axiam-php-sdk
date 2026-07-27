@@ -1,0 +1,54 @@
+# examples/symfony_app/oidc_services.yaml — CONTRACT.md §12 "Login with AXIAM" (plan
+# T8 item 2). OPTIONAL and OFF BY DEFAULT, exactly like the base services.yaml's
+# AxiamAuthSubscriber/AxiamVoter: AxiamBundle ships no container extension, so nothing
+# here is wired automatically — copy this INTO your own config/services.yaml (alongside
+# services.yaml's own block) and add oidc_routes.yaml's routes to get "Login with
+# AXIAM" working, or omit both entirely if you never need the §12 helpers.
+#
+# %env(AXIAM_OIDC_CLIENT_SECRET)% is empty by default (a public client can still
+# complete oidcBegin/oidcExchange without one — only introspect()/revoke()/
+# loginClientCredentials() require it, §12.1 note 4). %env(AXIAM_OIDC_TENANT_ID)% is
+# the tenant UUID for the /oauth2/* query parameter (§12.3 rule 4) — distinct from
+# %env(AXIAM_TENANT)% (the slug) already used by the base services.yaml.
+parameters:
+    env(AXIAM_OIDC_CLIENT_SECRET): ''
+    env(AXIAM_OIDC_TENANT_ID): ''
+    env(AXIAM_OIDC_SCOPE): 'openid'
+
+services:
+    # Re-declares AxiamClient with the additional §12 constructor arguments — Symfony's
+    # service container only supports ONE definition per class id, so if your
+    # config/services.yaml already declares Axiam\Sdk\AxiamClient (per the base
+    # services.yaml), MERGE these three extra arguments into that SAME definition
+    # rather than duplicating the service.
+    Axiam\Sdk\AxiamClient:
+        arguments:
+            $baseUrl: '%env(AXIAM_BASE_URL)%'
+            $tenant: '%env(AXIAM_TENANT)%'
+            $oidcClientId: '%env(AXIAM_OIDC_CLIENT_ID)%'
+            $oidcClientSecret: '%env(AXIAM_OIDC_CLIENT_SECRET)%'
+            $oidcTenantId: '%env(AXIAM_OIDC_TENANT_ID)%'
+
+    # The default in-memory state store (single-process only, §12.3 rule 1) — swap for
+    # your own Axiam\Sdk\Oidc\OidcStateStoreInterface implementation (Redis, a database
+    # table) in a multi-instance deployment by aliasing the interface to your own
+    # service id instead of this one.
+    Axiam\Sdk\Oidc\OidcStateStoreInterface:
+        class: Axiam\Sdk\Oidc\MemoryOidcStateStore
+
+    Axiam\Sdk\Oidc\OidcLoginFlow:
+        arguments:
+            $client: '@Axiam\Sdk\AxiamClient'
+            $store: '@Axiam\Sdk\Oidc\OidcStateStoreInterface'
+            $redirectUri: '%env(AXIAM_OIDC_REDIRECT_URI)%'
+            $scope: '%env(AXIAM_OIDC_SCOPE)%'
+
+    Axiam\Sdk\Symfony\OidcLoginController:
+        arguments:
+            $flow: '@Axiam\Sdk\Oidc\OidcLoginFlow'
+        tags: ['controller.service_arguments']
+
+    Axiam\Sdk\Symfony\OidcCallbackController:
+        arguments:
+            $flow: '@Axiam\Sdk\Oidc\OidcLoginFlow'
+        tags: ['controller.service_arguments']

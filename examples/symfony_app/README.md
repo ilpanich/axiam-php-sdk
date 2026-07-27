@@ -161,6 +161,18 @@ whatever session `AxiamClient` itself might separately hold.
 check against the verified identity's `roles` — coarser than `#[RequireAccess]` and
 not a substitute for it (CONTRACT.md §11.2.9).
 
+## CONTRACT.md §12 — "Login with AXIAM" (OIDC/SSO), optional and off by default
+
+[`oidc_services.yaml`](oidc_services.yaml) + [`oidc_routes.yaml`](oidc_routes.yaml) wire
+an authorization-code + PKCE "Login with AXIAM" flow: `Axiam\Sdk\Symfony\OidcLoginController`
+and `OidcCallbackController`, both backed by the framework-agnostic
+`Axiam\Sdk\Oidc\OidcLoginFlow` core (the SAME class the Laravel bridge's controllers use,
+so both frameworks apply byte-identical 400/401/503 failure mapping). Exactly like the
+base `services.yaml`, **nothing here is wired automatically** — copy both files' contents
+into your own `config/services.yaml`/`config/routes.yaml`. See the main
+[README's §12 section](../../README.md#oidc--sso-relying-party-helpers-contractmd-12)
+for the full nine-operation surface and the caller-owns-state rule.
+
 ## Running this against a real Symfony app
 
 This directory ships as illustrative, `php -l`-clean source (the core `axiam/axiam-sdk`
@@ -197,4 +209,4 @@ hatch (§6/D-12).
 
 ## Contract conformance
 
-This SDK conforms to CONTRACT.md §1–§11. See [`../../CONTRACT.md`](../../CONTRACT.md).
+This SDK conforms to CONTRACT.md §1–§12. See [`../../CONTRACT.md`](../../CONTRACT.md).

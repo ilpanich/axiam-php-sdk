@@ -107,17 +107,18 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§11 (including §6.1 mTLS, contract 1.3)
-— the binding, cross-language behavioral contract every AXIAM SDK implements: camelCase
-method names (§1) — including the gRPC-only `getUserInfo` operation (§1.1) — the
-`AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2), non-browser
-`X-CSRF-Token` response-header capture (§3), a shared Guzzle `CookieJar` (§4), a required
-`tenant` constructor parameter with no default (§5), strict TLS with `customCa` as the only
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§12 (including §6.1 mTLS, contract 1.3;
+§12 OIDC/SSO helpers, contract 1.4) — the binding, cross-language behavioral contract every
+AXIAM SDK implements: camelCase method names (§1) — including the gRPC-only `getUserInfo`
+operation (§1.1) — the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2,
+extended by the §12 `OAuthProtocolError` `AuthError` sub-type), non-browser `X-CSRF-Token`
+response-header capture (§3), a shared Guzzle `CookieJar` (§4), a required `tenant`
+constructor parameter with no default (§5), strict TLS with `customCa` as the only
 server-verification escape hatch (§6) plus optional client-certificate mutual TLS (§6.1),
 `Sensitive`-wrapped token redaction (§7), HMAC-SHA256-verified AMQP
 messages (§8), single-flight refresh concurrency safety (§9), framework
-middleware/subscriber integration (§10), and declarative per-endpoint authorization
-helpers (§11, see below).
+middleware/subscriber integration (§10), declarative per-endpoint authorization
+helpers (§11, see below), and OIDC/SSO relying-party helpers (§12, see below).
 
 ## Framework integration
 
@@ -199,6 +200,85 @@ subject — not whatever session the shared `AxiamClient` itself might separatel
 identity's roles — coarser than `#[RequireAccess]` and not a substitute for it. No
 decision is ever cached, and no token material appears in any error output.
 
+## OIDC / SSO relying-party helpers (CONTRACT.md §12)
+
+Nine operations, directly on `AxiamClient`, let this SDK act as an OIDC/OAuth2
+**relying party** against AXIAM's own OIDC provider — "Login with AXIAM"
+(authorization-code + PKCE), service-account `client_credentials`, token
+introspection/revocation, and upstream-IdP federation SSO:
+
+| Method | Wire call | What it does |
+|---|---|---|
+| `oidcDiscover()` | `GET /.well-known/openid-configuration` | Fetch the discovery document (cached per origin, ≥5 min TTL, single-flight). |
+| `oidcBegin($configuration, $redirectUri, scope: ..., extraParams: ...)` | *(none — pure local computation)* | Build the authorization URL + a fresh `state`/`nonce`/PKCE `code_verifier`. |
+| `oidcExchange($code, $codeVerifier, $redirectUri, $nonce, ...)` | `POST /oauth2/token` (`authorization_code`) | Exchange a code for a token set; validates the ID token in full (§12.4). |
+| `oidcRefresh($refreshToken, ...)` | `POST /oauth2/token` (`refresh_token`) | Refresh an OIDC token set — distinct from, but §9-guard-sharing with, `refresh()`. |
+| `loginClientCredentials(...)` | `POST /oauth2/token` (`client_credentials`) | Service-account machine-to-machine login. |
+| `introspect($token, ...)` | `POST /oauth2/introspect` | RFC 7662 — is this token active, and what does it carry? |
+| `revoke($token, ...)` | `POST /oauth2/revoke` | RFC 7009 — revoke a token (idempotent: any `200` is success). |
+| `ssoStart($federationConfigId, $redirectUri, ...)` | `POST /api/v1/auth/federation/oidc/start` | Step 1 of upstream-IdP federation SSO. |
+| `ssoComplete($state, $code)` | `POST /api/v1/auth/federation/oidc/callback` | Step 2 — session arrives as `Set-Cookie`, captured via the §4 cookie jar. |
+
+```php
+use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Core\AuthError;
+
+$client = new AxiamClient(
+    baseUrl: 'https://api.axiam.example',
+    tenant: 'acme',
+    oidcClientId: 'my-app',
+    oidcClientSecret: getenv('AXIAM_OIDC_CLIENT_SECRET') ?: null, // omit for a public client
+    oidcTenantId: '11111111-1111-1111-1111-111111111111', // UUID for the /oauth2/* query param (§12.3 rule 4)
+);
+
+$configuration = $client->oidcDiscover();
+$request = $client->oidcBegin($configuration, 'https://app.example/callback', scope: 'openid profile');
+// Persist $request->state / $request->nonce / $request->codeVerifier YOURSELF — see below.
+// ...redirect the browser to $request->url...
+
+// On the callback, having checked the IdP's `state` matches:
+try {
+    $tokens = $client->oidcExchange(
+        code: $callbackCode,
+        codeVerifier: $request->codeVerifier,
+        redirectUri: 'https://app.example/callback',
+        nonce: $request->nonce,
+    );
+} catch (AuthError $e) {
+    // $e->getReason() is one of the §12.4 codes (invalid_alg, unknown_kid,
+    // invalid_signature, invalid_issuer, invalid_audience, token_expired,
+    // nonce_mismatch) when this was an ID-token validation failure, or an
+    // Axiam\Sdk\Core\OAuthProtocolError (an AuthError sub-type — existing
+    // catch(AuthError) blocks keep working) carrying ->error/->errorDescription.
+}
+echo $tokens->idClaims['sub']; // the validated ID-token subject
+```
+
+**The caller owns the login state (§12.3 rule 1).** `oidcBegin()` returns `state`,
+`nonce`, and a `Sensitive`-wrapped `codeVerifier`; the SDK stores **none** of them in any
+implicit cache. Persist all three yourself between the redirect and the callback (your
+own HTTP session, or `Axiam\Sdk\Oidc\MemoryOidcStateStore` — a single-use, 10-minute-TTL
+reference `OidcStateStoreInterface` implementation the Laravel/Symfony glue below uses).
+`state`/`nonce` are plain strings (not secrets, §12.3 rule 2); `codeVerifier`,
+`access_token`, `refresh_token`, `id_token`, and `client_secret` are always
+`Sensitive`-wrapped (§12.5) and redacted from `__toString()`/`var_dump()`/`json_encode()`.
+
+**"Login with AXIAM" framework glue** (optional, **off by default** on both frameworks —
+see [`examples/laravel_app/oidc_routes.php`](examples/laravel_app/oidc_routes.php) /
+[`examples/symfony_app/oidc_services.yaml`](examples/symfony_app/oidc_services.yaml) +
+[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml)):
+- **Laravel**: `Route::axiamOidcLogin('/auth/axiam/login', '/auth/axiam/callback')` — a
+  route macro registered by `AxiamServiceProvider::boot()` — wires
+  `Axiam\Sdk\Laravel\OidcLoginController`/`OidcCallbackController` onto both paths in one
+  call. Configure via `axiam.oidc.*` config keys or `AXIAM_OIDC_*` env vars
+  (`client_id`, `client_secret`, `tenant_id`, `redirect_uri`, `scope`).
+- **Symfony**: manually register `Axiam\Sdk\Symfony\OidcLoginController`/
+  `OidcCallbackController` as services (see `oidc_services.yaml`) and add the two routes
+  (see `oidc_routes.yaml`) — no auto-discovery, same as the rest of the Symfony bridge.
+- Both bridges share ONE framework-agnostic core, `Axiam\Sdk\Oidc\OidcLoginFlow`, so
+  the 400/401/503 failure mapping (malformed callback / IdP error / unknown state /
+  ID-token or OAuth2 failure / AXIAM unreachable) is byte-identical between them.
+
 ## TLS policy
 
 Guzzle's `verify` option is **always `true`** (strict TLS, system trust roots) unless a
@@ -239,7 +319,9 @@ appears in any log, exception, or debug output.
 
 ## Sensitive value redaction
 
-Token-carrying values (access tokens, refresh tokens, MFA challenge tokens) are wrapped in
+Token-carrying values (access tokens, refresh tokens, MFA challenge tokens, and — per
+CONTRACT.md §12.5 — OIDC `id_token`s, `client_secret`s, and PKCE `code_verifier`s) are
+wrapped in
 `Axiam\Sdk\Core\Sensitive`. Its `__toString()` and `jsonSerialize()` always return the
 literal string `"[SENSITIVE]"`, and the wrapped value is stored in a private static
 `WeakMap` (not an instance property) so `print_r()`/`var_export()`/`var_dump()` cannot
@@ -253,8 +335,9 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/login_mfa.php`](examples/login_mfa.php) — login → MFA → typed `LoginResult`.
 - [`examples/rest_authz.php`](examples/rest_authz.php) — `checkAccess()`/`can()`/`batchCheck()` over REST.
 - [`examples/grpc_checkaccess.php`](examples/grpc_checkaccess.php) — the same three methods over gRPC (long-running runtime, see above).
-- [`examples/laravel_app/`](examples/laravel_app/README.md) — runnable Laravel middleware + Gate example.
-- [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration).
+- [`examples/oidc_login.php`](examples/oidc_login.php) — CONTRACT.md §12: `oidcDiscover`/`oidcBegin`/`oidcExchange`, `loginClientCredentials`, `introspect`, `revoke`.
+- [`examples/laravel_app/`](examples/laravel_app/README.md) — runnable Laravel middleware + Gate example, plus [`oidc_routes.php`](examples/laravel_app/oidc_routes.php) for "Login with AXIAM".
+- [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration), plus [`oidc_services.yaml`](examples/symfony_app/oidc_services.yaml)/[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml) for "Login with AXIAM".
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).
 
 ## Testing

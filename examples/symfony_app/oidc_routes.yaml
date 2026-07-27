@@ -1,0 +1,12 @@
+# examples/symfony_app/oidc_routes.yaml — copy into your own config/routes.yaml
+# alongside oidc_services.yaml's service definitions (CONTRACT.md §12, plan T8 item 2).
+# OPTIONAL and OFF BY DEFAULT: AxiamBundle registers no route on its own.
+axiam_oidc_login:
+    path: /auth/axiam/login
+    controller: Axiam\Sdk\Symfony\OidcLoginController
+    methods: [GET]
+
+axiam_oidc_callback:
+    path: /auth/axiam/callback
+    controller: Axiam\Sdk\Symfony\OidcCallbackController
+    methods: [GET]
