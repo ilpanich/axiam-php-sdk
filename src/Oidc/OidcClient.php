@@ -353,15 +353,23 @@ final class OidcClient
 
     /**
      * `POST /oauth2/token` with `grant_type=refresh_token` (§12.1) — refresh an
-     * {@see OidcTokenSet}, under the §9 single-flight refresh guard.
+     * {@see OidcTokenSet}, governed by a §9-conformant single-flight refresh guard.
      *
      * This is a **distinct operation** from `AxiamClient::refresh()`, which drives the
      * cookie/opaque-token session path at `POST /api/v1/auth/refresh`. The two are
      * never merged or aliased and neither falls back to the other (§12.1). They DO
-     * share {@see Session}'s single §9 guard slot, so at most one refresh of either
-     * kind is ever in flight for a session — a concurrent `oidcRefresh` caller that
-     * finds the guard busy with a cookie-session refresh retries (bounded, 3 attempts)
-     * rather than returning a stale token set.
+     * share {@see Session}'s single §9 guard slot, tagged with
+     * {@see Session::REFRESH_KIND_OIDC}, so at most one refresh of either kind is ever
+     * in flight for a session:
+     *
+     *   - If the guard is busy with ANOTHER `oidcRefresh` call (same kind), this call
+     *     does **not** issue its own wire call — it awaits and reuses that one leader's
+     *     outcome (CONTRACT.md §9 rule 2, F-06). Refresh tokens are single-use with
+     *     rotation, so a second wire call here would replay an already-consumed token
+     *     and fail `invalid_grant`; sharing the result is the whole point of the guard.
+     *   - If the guard is busy with a cookie-session refresh (different kind, which
+     *     cannot produce an `OidcTokenSet`), this call retries (bounded, 3 attempts)
+     *     once that refresh settles, rather than returning a stale/foreign result.
      *
      * An `id_token` in the response is validated against §12.4 rules 1–5 and 7; rule 6
      * (nonce) is skipped, since OIDC Core §12.2 does not require a nonce in a
@@ -389,18 +397,23 @@ final class OidcClient
         for ($attempt = 0; $attempt < 3; $attempt++) {
             $guarded = $this->session->refreshGuard(
                 fn (): PromiseInterface => $this->postTokenAsync($configuration, $form, $tenantId),
+                kind: Session::REFRESH_KIND_OIDC,
             );
 
-            if ($guarded['ran']) {
+            if ($guarded['ran'] || $guarded['kind'] === Session::REFRESH_KIND_OIDC) {
+                // Either WE started this refresh, or another concurrent oidcRefresh
+                // call already did and this call is sharing its single outcome
+                // (CONTRACT.md §9 rule 2 / rule 5, F-06) — never a second wire call.
                 /** @var array<string,mixed> $wire */
                 $wire = $guarded['promise']->wait();
 
                 return $this->toTokenSet($wire, $configuration, null);
             }
 
-            // The guard was busy with a DIFFERENT refresh (the §1 cookie-session path,
-            // which cannot produce an OidcTokenSet) — wait for it to settle (we don't
-            // care whether IT succeeded or failed) and try to acquire the guard again.
+            // The guard was busy with a DIFFERENT KIND of refresh (the §1
+            // cookie-session path, which cannot produce an OidcTokenSet) — wait for
+            // it to settle (we don't care whether IT succeeded or failed) and try to
+            // acquire the guard again.
             try {
                 $guarded['promise']->wait();
             } catch (\Throwable) {

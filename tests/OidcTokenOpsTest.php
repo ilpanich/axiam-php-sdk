@@ -161,6 +161,48 @@ final class OidcTokenOpsTest extends TestCase
         self::assertSame('new-access', $tokens->accessToken->reveal());
     }
 
+    /**
+     * §9 rule 2 / rule 5 (CONTRACT.md 1.5, F-06): if the guard is already busy with
+     * ANOTHER `oidcRefresh` call (same `Session::REFRESH_KIND_OIDC` kind), a second
+     * concurrent caller must NOT issue its own wire call — it must share the first
+     * call's single outcome. AXIAM refresh tokens are opaque, server-stored, and
+     * single-use with rotation, so a second wire call here would replay an
+     * already-consumed token and fail `invalid_grant`; the mock queue is left EMPTY
+     * so any such second call fails the test immediately rather than silently
+     * succeeding with a foreign response.
+     */
+    public function testOidcRefreshSharesTheResultWhenTheGuardIsAlreadyBusyWithAnotherOidcRefresh(): void
+    {
+        $history = [];
+        $client = $this->client([], history: $history);
+
+        $sessionProp = new \ReflectionProperty(AxiamClient::class, 'session');
+        $sessionProp->setAccessible(true);
+        /** @var \Axiam\Sdk\Session $session */
+        $session = $sessionProp->getValue($client);
+
+        // Simulate a concurrent oidcRefresh already occupying the guard under the
+        // SAME "oidc" kind. As in the cookie-session busy test above, the underlying
+        // promise is already fulfilled but its settle()->then() clearing callback has
+        // not yet run (Promises/A+ callbacks are always deferred), so the guard slot
+        // is still occupied immediately after this call returns.
+        $leaderWire = ['access_token' => 'leader-access', 'token_type' => 'Bearer', 'expires_in' => 900];
+        $leader = $session->refreshGuard(
+            static fn () => \GuzzleHttp\Promise\Create::promiseFor($leaderWire),
+            kind: \Axiam\Sdk\Session::REFRESH_KIND_OIDC,
+        );
+        self::assertTrue($leader['ran'], 'the leader oidcRefresh must itself acquire the guard first');
+
+        $tokens = $client->oidcRefresh('a-different-refresh-token', configuration: $this->configuration());
+
+        self::assertSame(
+            'leader-access',
+            $tokens->accessToken->reveal(),
+            'the follower must receive the LEADER\'s outcome, not issue its own wire call',
+        );
+        self::assertCount(0, $history, 'no wire call should have been made — the outcome was shared from the in-flight oidcRefresh');
+    }
+
     public function testOidcRefreshIsDistinctFromSessionRefresh(): void
     {
         // AxiamClient::refresh() (the §1 cookie-session path) and oidcRefresh() are
