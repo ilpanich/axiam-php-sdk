@@ -818,6 +818,17 @@ final class AxiamClient
                 throw NetworkError::fromResponse($response, 'login: malformed response body');
             }
 
+            // H8 fix (SDK bench harness validation): a successful login/
+            // verifyMfa establishes the session's FIRST CSRF token (§3
+            // non-browser CSRF capture) — without capturing it here, every
+            // state-changing call this client ever makes (refresh,
+            // checkAccess, batchCheck) omits X-CSRF-Token and fails with
+            // "CSRF validation failed" (403), since Session::csrfToken()
+            // stays null forever. Session::captureCsrfTokenFromResponse()
+            // existed as a public method for exactly this but had no
+            // caller anywhere in the codebase.
+            $this->session->captureCsrfTokenFromResponse($response);
+
             return new LoginResult(mfaRequired: false, userId: $userId, tenantId: $this->tenant);
         }
 
