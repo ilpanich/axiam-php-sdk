@@ -162,6 +162,19 @@ subtype — no other class in the SDK is permitted to hand-roll this branching:
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Core-ErrorMapper.html#method_fromOAuth2Response">fromOAuth2Response()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Core-AxiamException.html"><abbr title="\Axiam\Sdk\Core\AxiamException">AxiamException</abbr></a>    </span>
+</dt>
+<dd>The `/oauth2/*` translation point (CONTRACT.md §12.3 rule 3): a `400` from
+`POST /oauth2/token`, or a `401` from `POST /oauth2/introspect` /
+`POST /oauth2/revoke`, carrying an `OAuth2ErrorResponse` body (`{error,
+error_description}`) MUST surface as {@see OAuthProtocolError} rather than the
+generic {@see self::fromStatus()} mapping (which would otherwise collapse a `400`
+into a plain {@see NetworkError}, or a `401` into a plain {@see AuthError} that
+would wrongly enter the §9 single-flight refresh guard, §12.3 rule 3).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Core-ErrorMapper.html#method_fromResponse">fromResponse()</a>
     <span>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Core-AxiamException.html"><abbr title="\Axiam\Sdk\Core\AxiamException">AxiamException</abbr></a>    </span>
@@ -193,6 +206,73 @@ is built via {@see NetworkError::fromException()}.</dd>
             <a href="classes/Axiam-Sdk-Core-ErrorMapper.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_fromOAuth2Response">
+        fromOAuth2Response()
+        <a href="classes/Axiam-Sdk-Core-ErrorMapper.html#method_fromOAuth2Response" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/ErrorMapper.php"><a href="files/src-core-errormapper.html"><abbr title="src/Core/ErrorMapper.php">ErrorMapper.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">88</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The `/oauth2/*` translation point (CONTRACT.md §12.3 rule 3): a `400` from
+`POST /oauth2/token`, or a `401` from `POST /oauth2/introspect` /
+`POST /oauth2/revoke`, carrying an `OAuth2ErrorResponse` body (`{error,
+error_description}`) MUST surface as {@see OAuthProtocolError} rather than the
+generic {@see self::fromStatus()} mapping (which would otherwise collapse a `400`
+into a plain {@see NetworkError}, or a `401` into a plain {@see AuthError} that
+would wrongly enter the §9 single-flight refresh guard, §12.3 rule 3).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">fromOAuth2Response</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$response</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$context</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">'oauth2 request failed'</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Core-AxiamException.html"><abbr title="\Axiam\Sdk\Core\AxiamException">AxiamException</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Falls back to <abbr title="\Axiam\Sdk\Core\self::fromStatus()">self::fromStatus()</abbr> when the body does not look like an
+<code class="prettyprint">OAuth2ErrorResponse</code> (missing/non-string <code class="prettyprint">error</code>), so a genuinely malformed or
+unexpected error body from an <code class="prettyprint">/oauth2/*</code> endpoint still gets a sensible mapping
+instead of a confusing <code class="prettyprint">OAuthProtocolError</code> with an empty <code class="prettyprint">error</code> field.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$response</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$context</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">'oauth2 request failed'</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Core-AxiamException.html"><abbr title="\Axiam\Sdk\Core\AxiamException">AxiamException</abbr></a></span>
+            </section>
+
+</article>
                     <article
         class="phpdocumentor-element
             -method
@@ -338,6 +418,7 @@ is built via {@see NetworkError::fromException()}.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Core-ErrorMapper.html#method_fromOAuth2Response">fromOAuth2Response()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Core-ErrorMapper.html#method_fromResponse">fromResponse()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Core-ErrorMapper.html#method_fromStatus">fromStatus()</a></li>
                                     </ul>

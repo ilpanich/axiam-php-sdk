@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+            <title>AXIAM PHP SDK</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png"/>
+    <link rel="icon" href="images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/base.css">
+            <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/template.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" integrity="sha256-ybRkN9dBjhcS2qrW1z+hfCxq+1aBdwyQM5wlQoQVt/0=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/themes/prism-okaidia.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.css">
+                <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2"></script>
+        <script src="js/template.js"></script>
+        <script src="js/search.js"></script>
+        <script defer src="js/searchIndex.js"></script>
+    </head>
+<body id="top">
+    <header class="phpdocumentor-header phpdocumentor-section">
+    <h1 class="phpdocumentor-title"><a href="" class="phpdocumentor-title__link">AXIAM PHP SDK</a></h1>
+    <input class="phpdocumentor-header__menu-button" type="checkbox" id="menu-button" name="menu-button" />
+    <label class="phpdocumentor-header__menu-icon" for="menu-button">
+        <i class="fas fa-bars"></i>
+    </label>
+    <section data-search-form class="phpdocumentor-search">
+    <label>
+        <span class="visually-hidden">Search for</span>
+        <svg class="phpdocumentor-search__icon" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+            <line x1="12.4892" y1="12.2727" x2="19.1559" y2="18.9393" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <input type="search" class="phpdocumentor-field phpdocumentor-search__field" placeholder="Loading .." disabled />
+    </label>
+</section>
+
+    <nav class="phpdocumentor-topnav">
+    <ul class="phpdocumentor-topnav__menu">
+        </ul>
+</nav>
+</header>
+
+    <main class="phpdocumentor">
+        <div class="phpdocumentor-section">
+            <input class="phpdocumentor-sidebar__menu-button" type="checkbox" id="sidebar-button" name="sidebar-button" />
+<label class="phpdocumentor-sidebar__menu-icon" for="sidebar-button">
+    Menu
+</label>
+<aside class="phpdocumentor-column -three phpdocumentor-sidebar">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
+            <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/axiam.html" class="">Axiam</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/axiam-sdk.html" class="">Sdk</a>
+                
+            </li>
+            </ul>
+
+                        </section>
+                <section class="phpdocumentor-sidebar__category -packages">
+            <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Application.html" class="">Application</a>
+</h4>
+
+                        </section>
+            
+    <section class="phpdocumentor-sidebar__category -reports">
+        <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
+    </section>
+
+    <section class="phpdocumentor-sidebar__category -indices">
+        <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
+    </section>
+</aside>
+
+            <div class="phpdocumentor-column -nine phpdocumentor-content">
+                                <section>
+                                        <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-oidc.html">Oidc</a></li>
+    </ul>
+
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    IdTokenValidator
+
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
+
+<div class="phpdocumentor-label-line">
+
+    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
+
+
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">26</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">ID-token claim validation — CONTRACT.md §12.4, OIDC Core §3.1.3.7.</p>
+
+
+    <section class="phpdocumentor-description"><p>PURE logic only: no network, no JWT decoding, no crypto beyond a constant-time
+compare. The signature half of §12.4 (rules 1–2: <code class="prettyprint">alg</code> allowlist, <code class="prettyprint">kid</code> lookup,
+Ed25519 verification, single JWKS re-fetch) lives in
+<a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature"><abbr title="\Axiam\Sdk\Auth\JwksVerifier::verifyIdTokenSignature()">JwksVerifier::verifyIdTokenSignature()</abbr></a> — the SAME verifier the
+§10 middleware already uses (§12 forbids forking it). This class holds rules 3–6
+(issuer, audience, time, nonce) plus the reason-code vocabulary, so both halves can be
+unit-tested independently, mirroring the TypeScript reference's
+<code class="prettyprint">oidcIdToken.ts</code>/<code class="prettyprint">node/jwks.ts</code> split.</p>
+<p>Every failure raises <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> carrying one of the seven stable reason codes
+below (CONTRACT.md §12.3 rule 3). Rule 7 (all-or-nothing discard) is enforced by the
+caller — <code class="prettyprint">AxiamClient::oidcExchange()</code> never returns a token set whose ID token failed
+here, so <code class="prettyprint">access_token</code>/<code class="prettyprint">refresh_token</code> from the same response are dropped with it.</p>
+</section>
+
+
+
+    
+    
+<h3 id="toc">
+    Table of Contents
+    <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h3>
+
+
+
+
+
+
+
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_ID_TOKEN_ALG">ID_TOKEN_ALG</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;EdDSA&#039;                            </span>
+</dt>
+<dd>§12.4 rule 1 — the only algorithm this SDK accepts for an ID token.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_MAX_CLOCK_SKEW_SEC">MAX_CLOCK_SKEW_SEC</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 60                            </span>
+</dt>
+<dd>Maximum (and default) permitted clock skew in seconds for ID-token time claims.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_ALG">REASON_INVALID_ALG</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;invalid_alg&#039;                            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_AUDIENCE">REASON_INVALID_AUDIENCE</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;invalid_audience&#039;                            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_ISSUER">REASON_INVALID_ISSUER</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;invalid_issuer&#039;                            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_SIGNATURE">REASON_INVALID_SIGNATURE</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;invalid_signature&#039;                            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_NONCE_MISMATCH">REASON_NONCE_MISMATCH</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;nonce_mismatch&#039;                            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_TOKEN_EXPIRED">REASON_TOKEN_EXPIRED</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;token_expired&#039;                            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_UNKNOWN_KID">REASON_UNKNOWN_KID</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;unknown_kid&#039;                            </span>
+</dt>
+
+    </dl>
+
+
+
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_checkClaims">checkClaims()</a>
+    <span>
+                                &nbsp;: array&lt;string, mixed&gt;    </span>
+</dt>
+<dd>§12.4 rules 3–6 — issuer, audience, time and nonce checks over an
+already-signature-verified claim set. Returns the claims unchanged on success;
+throws the matching {@see AuthError} reason code on the first failure.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_constantTimeEquals">constantTimeEquals()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Constant-time string equality, used for the `nonce` comparison §12.4 rule 6
+requires. Mirrors {@see \Axiam\Sdk\Amqp\Hmac::verify()}&#039;s use of `hash_equals()`.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_failure">failure()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a>    </span>
+</dt>
+<dd>Build the `AuthError` for a §12.4 failure: a stable machine-readable `$reason`
+code plus a human-readable message that — per §12.3 rule 3 and §2&#039;s construction
+rules — never embeds the token, a claim value that could carry secret material, or
+the expected nonce.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_resolveClockSkewSec">resolveClockSkewSec()</a>
+    <span>
+                                &nbsp;: int    </span>
+</dt>
+<dd>Resolve the effective clock skew: the caller&#039;s value clamped into
+`[0, MAX_CLOCK_SKEW_SEC]`, or the maximum when unset.</dd>
+
+    </dl>
+
+
+
+        
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_ID_TOKEN_ALG">
+        ID_TOKEN_ALG
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_ID_TOKEN_ALG" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">29</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">§12.4 rule 1 — the only algorithm this SDK accepts for an ID token.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">ID_TOKEN_ALG</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;EdDSA&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_MAX_CLOCK_SKEW_SEC">
+        MAX_CLOCK_SKEW_SEC
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_MAX_CLOCK_SKEW_SEC" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">36</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Maximum (and default) permitted clock skew in seconds for ID-token time claims.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">MAX_CLOCK_SKEW_SEC</span>
+    = <span class="phpdocumentor-signature__default-value">60</span>
+</code>
+
+
+        <section class="phpdocumentor-description"><p>CONTRACT.md §12.4 rule 5 caps this at 60s and forbids any configuration above the
+bound.</p>
+</section>
+
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REASON_INVALID_ALG">
+        REASON_INVALID_ALG
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_ALG" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">39</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REASON_INVALID_ALG</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;invalid_alg&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REASON_INVALID_AUDIENCE">
+        REASON_INVALID_AUDIENCE
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_AUDIENCE" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">43</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REASON_INVALID_AUDIENCE</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;invalid_audience&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REASON_INVALID_ISSUER">
+        REASON_INVALID_ISSUER
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_ISSUER" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">42</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REASON_INVALID_ISSUER</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;invalid_issuer&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REASON_INVALID_SIGNATURE">
+        REASON_INVALID_SIGNATURE
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_SIGNATURE" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">41</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REASON_INVALID_SIGNATURE</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;invalid_signature&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REASON_NONCE_MISMATCH">
+        REASON_NONCE_MISMATCH
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_NONCE_MISMATCH" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">45</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REASON_NONCE_MISMATCH</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;nonce_mismatch&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REASON_TOKEN_EXPIRED">
+        REASON_TOKEN_EXPIRED
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_TOKEN_EXPIRED" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">44</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REASON_TOKEN_EXPIRED</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;token_expired&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REASON_UNKNOWN_KID">
+        REASON_UNKNOWN_KID
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_UNKNOWN_KID" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">40</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REASON_UNKNOWN_KID</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;unknown_kid&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+            </section>
+
+        
+
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_checkClaims">
+        checkClaims()
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_checkClaims" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">90</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">§12.4 rules 3–6 — issuer, audience, time and nonce checks over an
+already-signature-verified claim set. Returns the claims unchanged on success;
+throws the matching {@see AuthError} reason code on the first failure.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">checkClaims</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$claims</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$issuer</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nonce</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clockSkewSec</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nowSec</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$claims</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The verified JWT payload.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$issuer</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The discovery document's <code class="prettyprint">issuer</code> (§12.4 rule 3).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The relying party's own <code class="prettyprint">client_id</code> (§12.4 rule 4).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$nonce</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The nonce to check against, or <code class="prettyprint">null</code> to skip rule 6 (<code class="prettyprint">oidcRefresh</code>/<code class="prettyprint">loginClientCredentials</code>).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clockSkewSec</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Permitted clock skew in seconds; clamped to <abbr title="\Axiam\Sdk\Oidc\self::MAX_CLOCK_SKEW_SEC">self::MAX_CLOCK_SKEW_SEC</abbr>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$nowSec</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Current time in epoch seconds — injectable so tests can pin it.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string, mixed&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_constantTimeEquals">
+        constantTimeEquals()
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_constantTimeEquals" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">163</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Constant-time string equality, used for the `nonce` comparison §12.4 rule 6
+requires. Mirrors {@see \Axiam\Sdk\Amqp\Hmac::verify()}&#039;s use of `hash_equals()`.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">constantTimeEquals</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$a</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$b</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$a</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$b</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_failure">
+        failure()
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_failure" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">58</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Build the `AuthError` for a §12.4 failure: a stable machine-readable `$reason`
+code plus a human-readable message that — per §12.3 rule 3 and §2&#039;s construction
+rules — never embeds the token, a claim value that could carry secret material, or
+the expected nonce.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">failure</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reason</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$message</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$reason</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$message</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_resolveClockSkewSec">
+        resolveClockSkewSec()
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_resolveClockSkewSec" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/IdTokenValidator.php"><a href="files/src-oidc-idtokenvalidator.html"><abbr title="src/Oidc/IdTokenValidator.php">IdTokenValidator.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">67</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Resolve the effective clock skew: the caller&#039;s value clamped into
+`[0, MAX_CLOCK_SKEW_SEC]`, or the maximum when unset.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">resolveClockSkewSec</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clockSkewSec</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clockSkewSec</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">int</span>
+            </section>
+
+</article>
+            </section>
+
+        
+    </article>
+                                </section>
+                <section class="phpdocumentor-on-this-page__sidebar">
+                                
+    <section class="phpdocumentor-on-this-page__content">
+        <strong class="phpdocumentor-on-this-page__title">On this page</strong>
+
+        <ul class="phpdocumentor-list -clean">
+            <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#toc-constants">Constants</a></li>
+                                                                                <li><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#toc-methods">Methods</a></li>
+                                    </ul>
+            </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_ID_TOKEN_ALG">ID_TOKEN_ALG</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_MAX_CLOCK_SKEW_SEC">MAX_CLOCK_SKEW_SEC</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_ALG">REASON_INVALID_ALG</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_AUDIENCE">REASON_INVALID_AUDIENCE</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_ISSUER">REASON_INVALID_ISSUER</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_INVALID_SIGNATURE">REASON_INVALID_SIGNATURE</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_NONCE_MISMATCH">REASON_NONCE_MISMATCH</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_TOKEN_EXPIRED">REASON_TOKEN_EXPIRED</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_REASON_UNKNOWN_KID">REASON_UNKNOWN_KID</a></li>
+                                            </ul>
+                </li>
+            
+            
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_checkClaims">checkClaims()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_constantTimeEquals">constantTimeEquals()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_failure">failure()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_resolveClockSkewSec">resolveClockSkewSec()</a></li>
+                                    </ul>
+            </li>
+                    </ul>
+    </section>
+
+                </section>
+                            </div>
+            <section data-search-results class="phpdocumentor-search-results phpdocumentor-search-results--hidden">
+    <section class="phpdocumentor-search-results__dialog">
+        <header class="phpdocumentor-search-results__header">
+            <h2 class="phpdocumentor-search-results__title">Search results</h2>
+            <button class="phpdocumentor-search-results__close"><i class="fas fa-times"></i></button>
+        </header>
+        <section class="phpdocumentor-search-results__body">
+            <ul class="phpdocumentor-search-results__entries"></ul>
+        </section>
+    </section>
+</section>
+        </div>
+        <a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+
+    </main>
+
+    <script>
+        cssVars({});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+</body>
+</html>

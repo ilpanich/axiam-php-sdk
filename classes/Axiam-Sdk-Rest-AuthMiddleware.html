@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">21</span>
+    <span class="phpdocumentor-element-found-in__line">28</span>
 
     </aside>
 
@@ -138,6 +138,12 @@ response, {@see Session::csrfToken()}) on state-changing requests
 <a href="classes/Axiam-Sdk-Rest-RefreshMiddleware.html"><abbr title="\Axiam\Sdk\Rest\RefreshMiddleware">RefreshMiddleware</abbr></a>, so a retried request (after a single-flight refresh) is
 re-decorated with the FRESH access token / CSRF value picked up from the shared
 <a href="classes/Axiam-Sdk-Session.html"><abbr title="\Axiam\Sdk\Session">Session</abbr></a> — never the stale headers from the original 401'd attempt.</p>
+<p>CONTRACT.md §12.1 note 3 / §12.3 rule 2: a request to <code class="prettyprint">/oauth2/*</code> never gets the
+<code class="prettyprint">Authorization</code> header, regardless of whether <a href="classes/Axiam-Sdk-Session.html#method_accessToken"><abbr title="\Axiam\Sdk\Session::accessToken()">Session::accessToken()</abbr></a> is
+currently returning a cookie-sourced session token or a
+<code class="prettyprint">login_client_credentials</code>-adopted one (§12.1's opt-in credential-adoption MAY) —
+those endpoints authenticate the CLIENT through the form body
+(<code class="prettyprint">client_secret_post</code>, never <code class="prettyprint">Authorization: Basic</code> or <code class="prettyprint">Bearer</code>).</p>
 </section>
 
 
@@ -207,7 +213,7 @@ bearer token and — on state-changing methods (§3) — the `X-CSRF-Token` head
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">27</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
@@ -253,7 +259,7 @@ bearer token and — on state-changing methods (§3) — the `X-CSRF-Token` head
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">42</span>
+    <span class="phpdocumentor-element-found-in__line">49</span>
 
     </aside>
 

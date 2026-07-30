@@ -134,7 +134,18 @@ refresh logic itself (D-02 prohibition) — every security-critical decision is 
 `extra.laravel.providers`, so a Laravel consumer gets this provider registered
 with ZERO manual wiring beyond `composer require axiam/axiam-sdk` (true
 zero-config auto-discovery, unlike the Symfony bridge which has no equivalent
-mechanism without a published Flex recipe).</dd>    </dl>
+mechanism without a published Flex recipe).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-OidcCallbackController.html"><abbr title="\Axiam\Sdk\Laravel\OidcCallbackController">OidcCallbackController</abbr></a></dt><dd>Step 2 of &quot;Login with AXIAM&quot; (CONTRACT.md §12.1 `oidc_exchange`): an invokable
+controller that validates the IdP callback, consumes the single-use stored
+state, exchanges the authorization code, and redirects (or replies `200 JSON`)
+on success. All security-critical logic lives in {@see OidcLoginFlow} — see
+{@see OidcLoginFlow::complete()} for the full 400/401/503 failure mapping.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html"><abbr title="\Axiam\Sdk\Laravel\OidcLoginController">OidcLoginController</abbr></a></dt><dd>Step 1 of &quot;Login with AXIAM&quot; (CONTRACT.md §12.1 `oidc_begin`): an invokable
+controller that builds the authorization request, parks its
+`state`/`nonce`/`code_verifier` in the configured
+{@see \Axiam\Sdk\Oidc\OidcStateStoreInterface}, and redirects the browser to the
+IdP. All security-critical logic lives in {@see OidcLoginFlow} — this class only
+translates its {@see OidcLoginOutcome} into an HTTP response, exactly as
+{@see AxiamMiddleware} never duplicates {@see \Axiam\Sdk\AxiamClient}&#039;s own
+verification logic.</dd>    </dl>
 
 
 

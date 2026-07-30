@@ -123,7 +123,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">38</span>
 
     </aside>
 
@@ -164,6 +164,33 @@ not need to solve that wiring, only provide the guard itself.</p>
 
 
 
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Session.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_OIDC">REFRESH_KIND_OIDC</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;oidc&#039;                            </span>
+</dt>
+<dd>Guard-slot kind for the §12 `oidc_refresh` OAuth2 token-endpoint path
+(CONTRACT.md §9 rule 5 / F-06). Used by {@see \Axiam\Sdk\Oidc\OidcClient::oidcRefresh()}
+so a second concurrent `oidcRefresh` caller can recognise the guard is busy with
+ANOTHER `oidcRefresh` (same kind) and share its single outcome, instead of
+re-acquiring the guard and issuing its own wire call that would replay an
+already-consumed (single-use, rotating) refresh token.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_SESSION">REFRESH_KIND_SESSION</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;session&#039;                            </span>
+</dt>
+<dd>Guard-slot kind for the §1 cookie-session refresh path
+({@see self::refreshIfNeeded()}) — the default `refreshGuard()` kind.</dd>
+
+    </dl>
 
 
 
@@ -190,11 +217,34 @@ of the token (mirrors the Java SDK&#039;s `SessionState::cachedAccessToken()` an
 the Go SDK&#039;s `cookieValue()` helper).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_adoptBearerCredential">adoptBearerCredential()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>CONTRACT.md §12.1 &quot;`login_client_credentials` as a credential source&quot; (a MAY):
+adopt `$accessToken` as this session&#039;s bearer credential for subsequent
+same-origin REST calls (never `/oauth2/*` — {@see \Axiam\Sdk\Rest\AuthMiddleware}
+excludes that path unconditionally). A cookie-sourced access token from a real
+`login()`/`verifyMfa()` session always takes precedence over an adopted one — see
+{@see self::accessToken()}.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_baseUrl">baseUrl()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
 <dd>AXIAM server base URL this session is bound to.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_captureCsrfTokenFromResponse">captureCsrfTokenFromResponse()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Public seam for {@see \Axiam\Sdk\Oidc\OidcClient::ssoComplete()} (CONTRACT.md
+§12.1 note 6): `ssoComplete` establishes the session as `Set-Cookie` rather than
+a response body, but the server ALSO freshly sets `X-CSRF-Token` on that same
+response (exactly as `login()`&#039;s response does), so this wraps the same private
+capture logic {@see self::refreshIfNeeded()} already uses.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_cookieJar">cookieJar()</a>
@@ -209,6 +259,18 @@ the Go SDK&#039;s `cookieValue()` helper).</dd>
                                 &nbsp;: string|null    </span>
 </dt>
 <dd>§3 non-browser CSRF: the most recently captured `X-CSRF-Token` response header.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_refreshGuard">refreshGuard()</a>
+    <span>
+                                &nbsp;: <abbr title="array{ran: bool, promise: \GuzzleHttp\Promise\PromiseInterface, kind: string}">PromiseInterface, kind: string}</abbr>    </span>
+</dt>
+<dd>The generic single-flight primitive behind {@see self::refreshIfNeeded()}
+(CONTRACT.md §9) — and, additively, behind `oidc_refresh`&#039;s own single-flight
+requirement (§12.1: &quot;`oidc_refresh` MUST be governed by a §9-conformant
+single-flight guard&quot;). Both share the SAME `$refreshPromise` slot, so a
+cookie-session refresh and an `oidcRefresh()` call can never race each other
+independently — whichever gets here first &quot;owns&quot; the slot until it settles.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_refreshIfNeeded">refreshIfNeeded()</a>
@@ -246,6 +308,81 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
 
 
         
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Session.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REFRESH_KIND_OIDC">
+        REFRESH_KIND_OIDC
+        <a href="classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_OIDC" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">54</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Guard-slot kind for the §12 `oidc_refresh` OAuth2 token-endpoint path
+(CONTRACT.md §9 rule 5 / F-06). Used by {@see \Axiam\Sdk\Oidc\OidcClient::oidcRefresh()}
+so a second concurrent `oidcRefresh` caller can recognise the guard is busy with
+ANOTHER `oidcRefresh` (same kind) and share its single outcome, instead of
+re-acquiring the guard and issuing its own wire call that would replay an
+already-consumed (single-use, rotating) refresh token.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REFRESH_KIND_OIDC</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;oidc&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_REFRESH_KIND_SESSION">
+        REFRESH_KIND_SESSION
+        <a href="classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_SESSION" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">44</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Guard-slot kind for the §1 cookie-session refresh path
+({@see self::refreshIfNeeded()}) — the default `refreshGuard()` kind.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">REFRESH_KIND_SESSION</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;session&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+            </section>
 
         
 
@@ -269,7 +406,7 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">55</span>
+    <span class="phpdocumentor-element-found-in__line">92</span>
 
     </aside>
 
@@ -346,7 +483,7 @@ that does not persist them fails every request after login.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">105</span>
+    <span class="phpdocumentor-element-found-in__line">167</span>
 
     </aside>
 
@@ -380,6 +517,56 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_adoptBearerCredential">
+        adoptBearerCredential()
+        <a href="classes/Axiam-Sdk-Session.html#method_adoptBearerCredential" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">145</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">CONTRACT.md §12.1 &quot;`login_client_credentials` as a credential source&quot; (a MAY):
+adopt `$accessToken` as this session&#039;s bearer credential for subsequent
+same-origin REST calls (never `/oauth2/*` — {@see \Axiam\Sdk\Rest\AuthMiddleware}
+excludes that path unconditionally). A cookie-sourced access token from a real
+`login()`/`verifyMfa()` session always takes precedence over an adopted one — see
+{@see self::accessToken()}.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">adoptBearerCredential</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$accessToken</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$accessToken</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_baseUrl">
         baseUrl()
         <a href="classes/Axiam-Sdk-Session.html#method_baseUrl" class="headerlink"><i class="fas fa-link"></i></a>
@@ -388,7 +575,7 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">65</span>
+    <span class="phpdocumentor-element-found-in__line">102</span>
 
     </aside>
 
@@ -419,6 +606,55 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_captureCsrfTokenFromResponse">
+        captureCsrfTokenFromResponse()
+        <a href="classes/Axiam-Sdk-Session.html#method_captureCsrfTokenFromResponse" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">132</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Public seam for {@see \Axiam\Sdk\Oidc\OidcClient::ssoComplete()} (CONTRACT.md
+§12.1 note 6): `ssoComplete` establishes the session as `Set-Cookie` rather than
+a response body, but the server ALSO freshly sets `X-CSRF-Token` on that same
+response (exactly as `login()`&#039;s response does), so this wraps the same private
+capture logic {@see self::refreshIfNeeded()} already uses.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">captureCsrfTokenFromResponse</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$response</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$response</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_cookieJar">
         cookieJar()
         <a href="classes/Axiam-Sdk-Session.html#method_cookieJar" class="headerlink"><i class="fas fa-link"></i></a>
@@ -427,7 +663,7 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">77</span>
+    <span class="phpdocumentor-element-found-in__line">114</span>
 
     </aside>
 
@@ -466,7 +702,7 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">83</span>
+    <span class="phpdocumentor-element-found-in__line">120</span>
 
     </aside>
 
@@ -497,6 +733,118 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_refreshGuard">
+        refreshGuard()
+        <a href="classes/Axiam-Sdk-Session.html#method_refreshGuard" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">261</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The generic single-flight primitive behind {@see self::refreshIfNeeded()}
+(CONTRACT.md §9) — and, additively, behind `oidc_refresh`&#039;s own single-flight
+requirement (§12.1: &quot;`oidc_refresh` MUST be governed by a §9-conformant
+single-flight guard&quot;). Both share the SAME `$refreshPromise` slot, so a
+cookie-session refresh and an `oidcRefresh()` call can never race each other
+independently — whichever gets here first &quot;owns&quot; the slot until it settles.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">refreshGuard</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">callable(): <abbr title="\GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$startRefresh</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(mixed): mixed|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$onSuccess</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$kind</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::REFRESH_KIND_SESSION">self::REFRESH_KIND_SESSION</abbr></span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="array{ran: bool, promise: \GuzzleHttp\Promise\PromiseInterface, kind: string}">PromiseInterface, kind: string}</abbr></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>If no refresh is currently in flight, invokes <code class="prettyprint">$startRefresh</code> (which must return
+the wire-call <code class="prettyprint">PromiseInterface</code>) as THIS refresh, publishing it into the shared
+slot together with <code class="prettyprint">$kind</code>. If a refresh is already in flight, <code class="prettyprint">$startRefresh</code> is
+NOT invoked at all and the existing promise is returned instead, tagged with the
+kind that started it.</p>
+<p><strong>Result sharing across same-kind callers (CONTRACT.md §9 rule 2, F-06).</strong> The
+caller distinguishes three cases via the returned <code class="prettyprint">ran</code>/<code class="prettyprint">kind</code> pair:</p>
+<ul>
+<li><code class="prettyprint">ran === true</code>: this call itself started the refresh — its own outcome IS
+the shared outcome.</li>
+<li><code class="prettyprint">ran === false</code> and <code class="prettyprint">kind</code> equals the kind THIS caller passed in: the guard
+is busy with ANOTHER caller of the SAME operation (e.g. two concurrent
+<code class="prettyprint">oidcRefresh()</code> calls). The returned <code class="prettyprint">promise</code> resolves to that one leader's
+exact outcome — the caller MUST await and reuse it rather than re-acquiring
+the guard and issuing its own wire call. This matters because AXIAM refresh
+tokens are opaque, server-stored, and single-use with rotation: a second wire
+call would replay an already-consumed token and fail <code class="prettyprint">invalid_grant</code>.</li>
+<li><code class="prettyprint">ran === false</code> and <code class="prettyprint">kind</code> differs from THIS caller's kind: the guard is busy
+with a DIFFERENT operation (e.g. the §1 cookie-session refresh occupying the
+slot while an <code class="prettyprint">oidcRefresh()</code> call arrives). The existing promise's resolved
+value cannot satisfy this caller (a PSR-7 <code class="prettyprint">ResponseInterface</code> is not an OAuth2
+token array, or vice versa), so the caller should wait for it to settle and
+then retry acquiring the guard for its own kind.</li>
+</ul>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$startRefresh</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(): <abbr title="\GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Produces the wire-call promise
+for THIS refresh attempt. Invoked only when the guard is free.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$onSuccess</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(mixed): mixed|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Runs after the shared promise
+resolves successfully, before the settled value is handed back (e.g. CSRF
+capture) — same contract as <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_settle"><abbr title="\Axiam\Sdk\Auth\RefreshGuard::settle()">RefreshGuard::settle()</abbr></a>'s own parameter.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$kind</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value"><abbr title="\self::REFRESH_KIND_SESSION">self::REFRESH_KIND_SESSION</abbr></span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>One of <abbr title="\Axiam\Sdk\self::REFRESH_KIND_SESSION">self::REFRESH_KIND_SESSION</abbr> /
+<abbr title="\Axiam\Sdk\self::REFRESH_KIND_OIDC">self::REFRESH_KIND_OIDC</abbr> (or a future operation-specific kind),
+identifying which operation this call is performing/waiting for.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><abbr title="array{ran: bool, promise: \GuzzleHttp\Promise\PromiseInterface, kind: string}">PromiseInterface, kind: string}</abbr></span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p><code class="prettyprint">ran</code> is
+<code class="prettyprint">true</code> only when <code class="prettyprint">$startRefresh</code> was actually invoked by THIS call;
+<code class="prettyprint">kind</code> is always the kind that OWNS the returned <code class="prettyprint">promise</code> (THIS call's
+<code class="prettyprint">$kind</code> when <code class="prettyprint">ran</code> is <code class="prettyprint">true</code>, otherwise whichever kind is already
+in flight).</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_refreshIfNeeded">
         refreshIfNeeded()
         <a href="classes/Axiam-Sdk-Session.html#method_refreshIfNeeded" class="headerlink"><i class="fas fa-link"></i></a>
@@ -505,7 +853,7 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">131</span>
+    <span class="phpdocumentor-element-found-in__line">201</span>
 
     </aside>
 
@@ -551,7 +899,7 @@ outcome, never on both, never on neither.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">94</span>
+    <span class="phpdocumentor-element-found-in__line">156</span>
 
     </aside>
 
@@ -589,7 +937,7 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">71</span>
+    <span class="phpdocumentor-element-found-in__line">108</span>
 
     </aside>
 
@@ -628,9 +976,17 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Session.html#toc-constants">Constants</a></li>
                                                                                 <li><a href="classes/Axiam-Sdk-Session.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_OIDC">REFRESH_KIND_OIDC</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_SESSION">REFRESH_KIND_SESSION</a></li>
+                                            </ul>
+                </li>
             
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
@@ -638,9 +994,12 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_accessToken">accessToken()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_adoptBearerCredential">adoptBearerCredential()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_baseUrl">baseUrl()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_captureCsrfTokenFromResponse">captureCsrfTokenFromResponse()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_cookieJar">cookieJar()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_csrfToken">csrfToken()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_refreshGuard">refreshGuard()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_refreshIfNeeded">refreshIfNeeded()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_resetCsrf">resetCsrf()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_tenant">tenant()</a></li>

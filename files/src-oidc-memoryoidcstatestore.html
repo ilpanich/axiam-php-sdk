@@ -94,17 +94,21 @@
             <div class="phpdocumentor-column -nine phpdocumentor-content">
                                 <section>
                                         <ul class="phpdocumentor-breadcrumbs">
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -namespace">
-        <h2 class="phpdocumentor-content__title">Core</h2>
+    <article class="phpdocumentor-element -file">
+        <h2 class="phpdocumentor-content__title">MemoryOidcStateStore.php</h2>
+
+        
+        
+        
+        
+
 
         
 <h3 id="toc">
     Table of Contents
-    <a href="namespaces/axiam-sdk-core.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/src-oidc-memoryoidcstatestore.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -113,24 +117,13 @@
 
     <h4 id="toc-classes">
         Classes
-        <a href="namespaces/axiam-sdk-core.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="files/src-oidc-memoryoidcstatestore.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></dt><dd>Authentication failure: wrong credentials, expired session, MFA failure, or a 401
-on refresh (CONTRACT.md §2). Always constructed via {@see ErrorMapper} so REST and
-gRPC transports cannot drift on the error taxonomy.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-AuthzError.html"><abbr title="\Axiam\Sdk\Core\AuthzError">AuthzError</abbr></a></dt><dd>Authorization failure: the caller is authenticated but lacks permission for the
-requested operation (CONTRACT.md §2). Always constructed via {@see ErrorMapper} so
-REST and gRPC transports cannot drift on the error taxonomy.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-AxiamException.html"><abbr title="\Axiam\Sdk\Core\AxiamException">AxiamException</abbr></a></dt><dd>Base exception for all AXIAM SDK errors (CONTRACT.md §2, D-10).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-ErrorMapper.html"><abbr title="\Axiam\Sdk\Core\ErrorMapper">ErrorMapper</abbr></a></dt><dd>Central status→error mapper (CONTRACT.md §2, D-10). {@see self::fromStatus()} is the
-single translation point from an HTTP status code to a typed {@see AxiamException}
-subtype — no other class in the SDK is permitted to hand-roll this branching:
-401 → {@see AuthError}; 403/409 → {@see AuthzError}; everything else
-(400/408/429/5xx/transport) → {@see NetworkError}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a></dt><dd>Transport-level failure: connection refused, timeout, TLS error, DNS failure, or a
-server-side 5xx (CONTRACT.md §2).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a></dt><dd>An RFC 6749 protocol error returned by an `/oauth2/*` endpoint as an
-`OAuth2ErrorResponse` body — `invalid_grant`, `invalid_client`, `invalid_request`,
-`unsupported_grant_type`, … (CONTRACT.md §2, §12.3 rule 3).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a></dt><dd>Wraps a token-carrying value so it can never be accidentally exposed via
-`__toString()`, `var_export()`/`print_r()`, or JSON serialization
-(CONTRACT.md §7, D-11).</dd>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html"><abbr title="\Axiam\Sdk\Oidc\MemoryOidcStateStore">MemoryOidcStateStore</abbr></a></dt><dd>In-memory reference implementation of {@see OidcStateStoreInterface} (CONTRACT.md
+§12.3 rule 1).</dd>    </dl>
+
 
 
 
@@ -154,7 +147,7 @@ server-side 5xx (CONTRACT.md §2).</dd>            <dt class="phpdocumentor-tabl
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                    <li><a href="namespaces/axiam-sdk-core.html#toc-classes">Classes</a></li>
+                                                                                                        <li><a href="files/src-oidc-memoryoidcstatestore.html#toc-classes">Classes</a></li>
                                                                                                                     </ul>
             </li>
 
@@ -176,7 +169,7 @@ server-side 5xx (CONTRACT.md §2).</dd>            <dt class="phpdocumentor-tabl
     </section>
 </section>
         </div>
-        <a href="namespaces/axiam-sdk-core.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/src-oidc-memoryoidcstatestore.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

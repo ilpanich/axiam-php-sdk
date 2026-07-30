@@ -137,7 +137,14 @@ beyond that on its own.</dd>            <dt class="phpdocumentor-table-of-conten
 default-deny, no explicit deny-override) is ALWAYS the authoritative
 decision-maker. This class never caches a decision beyond the token&#039;s own TTL and
 never implements a client-side deny-override (project RBAC constraint,
-CLAUDE.md).</dd>    </dl>
+CLAUDE.md).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-OidcCallbackController.html"><abbr title="\Axiam\Sdk\Symfony\OidcCallbackController">OidcCallbackController</abbr></a></dt><dd>Step 2 of &quot;Login with AXIAM&quot; (CONTRACT.md §12.1 `oidc_exchange`): validates the
+IdP callback, consumes the single-use stored state, exchanges the authorization
+code, and redirects (or replies `200 JSON`) on success. See
+{@see OidcLoginFlow::complete()} for the full 400/401/503 failure mapping.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-OidcLoginController.html"><abbr title="\Axiam\Sdk\Symfony\OidcLoginController">OidcLoginController</abbr></a></dt><dd>Step 1 of &quot;Login with AXIAM&quot; (CONTRACT.md §12.1 `oidc_begin`): builds the
+authorization request, parks its `state`/`nonce`/`code_verifier` in the
+configured {@see \Axiam\Sdk\Oidc\OidcStateStoreInterface}, and redirects the
+browser to the IdP. All security-critical logic lives in {@see OidcLoginFlow} —
+this class only translates its {@see OidcLoginOutcome} into an HTTP response.</dd>    </dl>
 
 
 

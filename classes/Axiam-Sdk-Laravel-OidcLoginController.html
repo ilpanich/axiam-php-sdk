@@ -96,16 +96,13 @@
                                         <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-core.html">Core</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-laravel.html">Laravel</a></li>
     </ul>
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    NetworkError
+    OidcLoginController
 
-        <span class="phpdocumentor-element__extends">
-        extends <a href="classes/Axiam-Sdk-Core-AxiamException.html"><abbr title="\Axiam\Sdk\Core\AxiamException">AxiamException</abbr></a>
-    </span>
     
             <div class="phpdocumentor-element__package">
             in package
@@ -125,25 +122,26 @@
 </div>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/OidcLoginController.php"><a href="files/src-laravel-oidclogincontroller.html"><abbr title="src/Laravel/OidcLoginController.php">OidcLoginController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">23</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Transport-level failure: connection refused, timeout, TLS error, DNS failure, or a
-server-side 5xx (CONTRACT.md §2).</p>
+            <p class="phpdocumentor-summary">Step 1 of &quot;Login with AXIAM&quot; (CONTRACT.md §12.1 `oidc_begin`): an invokable
+controller that builds the authorization request, parks its
+`state`/`nonce`/`code_verifier` in the configured
+{@see \Axiam\Sdk\Oidc\OidcStateStoreInterface}, and redirects the browser to the
+IdP. All security-critical logic lives in {@see OidcLoginFlow} — this class only
+translates its {@see OidcLoginOutcome} into an HTTP response, exactly as
+{@see AxiamMiddleware} never duplicates {@see \Axiam\Sdk\AxiamClient}&#039;s own
+verification logic.</p>
 
 
-    <section class="phpdocumentor-description"><p>Redact-before-wrap (D-10/D-11, CR-04 carry-forward): <abbr title="\Axiam\Sdk\Core\self::fromResponse()">self::fromResponse()</abbr> is
-the ONLY construction path that accepts a live PSR-7 <abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>, and it
-strips the <code class="prettyprint">Set-Cookie</code>/<code class="prettyprint">Authorization</code>/<code class="prettyprint">Cookie</code> header VALUES into a sanitized
-summary string BEFORE the constructor ever runs. There is no public constructor and
-no path that stores the raw <code class="prettyprint">$response</code> object (or any wrapped exception that might
-itself carry one) as this exception's message, cause, or any other property — this
-structurally prevents the token-leak-via-error class of bug first found in the
-TypeScript sibling SDK (Phase 17 CR-04, its <code class="prettyprint">src/core/errorMapper.ts</code>
-<code class="prettyprint">sanitizeAxiosError</code>) and mirrored by every later sibling SDK's <code class="prettyprint">NetworkError</code>.</p>
+    <section class="phpdocumentor-description"><p>Type-hinted against <code class="prettyprint">Symfony\Component\HttpFoundation\Request</code>/<code class="prettyprint">Response</code>
+(already the pattern <a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a> uses) rather than
+<code class="prettyprint">Illuminate\Http\*</code>, so this class needs no new runtime dependency beyond what a
+Laravel application already ships transitively (D-01).</p>
 </section>
 
 
@@ -152,7 +150,7 @@ TypeScript sibling SDK (Phase 17 CR-04, its <code class="prettyprint">src/core/e
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Core-NetworkError.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -167,38 +165,32 @@ TypeScript sibling SDK (Phase 17 CR-04, its <code class="prettyprint">src/core/e
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Axiam-Sdk-Core-NetworkError.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromException">fromException()</a>
+    <a class="" href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method___construct">__construct()</a>
     <span>
-                                &nbsp;: self    </span>
+                                &nbsp;: mixed    </span>
 </dt>
-<dd>Builds a NetworkError from a caught transport exception (socket/TLS/DNS/timeout
-failure). The caught exception&#039;s own message is defensively regex-sanitized in
-case a lower-level exception echoed a sensitive header verbatim; the exception
-itself is never stored as a cause (see class doc).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromMessage">fromMessage()</a>
+    <a class="" href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method___invoke">__invoke()</a>
     <span>
-                                &nbsp;: self    </span>
+                                &nbsp;: <abbr title="\Symfony\Component\HttpFoundation\Response">Response</abbr>    </span>
 </dt>
-<dd>Builds a `NetworkError` from a plain message with no live response or exception
-to redact — e.g. a malformed/short response BODY already decoded into a plain
-array by the caller, with no `ResponseInterface`/headers left to sanitize.</dd>
+<dd>Handles the login GET request and returns the mapped HTTP response (a redirect to the IdP, or a 503 error body).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromResponse">fromResponse()</a>
+    <a class="" href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method_toResponse">toResponse()</a>
     <span>
-                                &nbsp;: self    </span>
+                                &nbsp;: <abbr title="\Symfony\Component\HttpFoundation\Response">Response</abbr>    </span>
 </dt>
-<dd>Builds a NetworkError from a live PSR-7 response. Header NAMES are preserved for
-debuggability; VALUES of `Set-Cookie`/`Authorization`/`Cookie` are replaced with
-`[SENSITIVE]` before the summary string is built. The `$response` argument itself
-is never stored — only the resulting sanitized string survives past this method.</dd>
+<dd>Shared outcome → HTTP-response translation, reused by
+{@see OidcCallbackController} (both add nothing of their own beyond this
+translation, mirroring how {@see AxiamMiddleware}/{@see AxiamAuthSubscriber}
+independently — but identically — build their own 401/403 bodies).</dd>
 
     </dl>
 
@@ -211,35 +203,31 @@ is never stored — only the resulting sanitized string survives past this metho
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Axiam-Sdk-Core-NetworkError.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
         class="phpdocumentor-element
             -method
             -public
-                                    -static                    "
+                                                        "
 >
-    <h4 class="phpdocumentor-element__name" id="method_fromException">
-        fromException()
-        <a href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromException" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method___construct">
+        __construct()
+        <a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/OidcLoginController.php"><a href="files/src-laravel-oidclogincontroller.html"><abbr title="src/Laravel/OidcLoginController.php">OidcLoginController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">71</span>
+    <span class="phpdocumentor-element-found-in__line">36</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Builds a NetworkError from a caught transport exception (socket/TLS/DNS/timeout
-failure). The caught exception&#039;s own message is defensively regex-sanitized in
-case a lower-level exception echoed a sensitive header verbatim; the exception
-itself is never stored as a cause (see class doc).</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">fromException</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\Throwable">Throwable</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$exception</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$context</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">'Transport error'</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginFlow">OidcLoginFlow</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$flow</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -248,16 +236,54 @@ itself is never stored as a cause (see class doc).</p>
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$exception</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\Throwable">Throwable</abbr></span>
+                <span class="phpdocumentor-argument-list__argument__name">$flow</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginFlow">OidcLoginFlow</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method___invoke">
+        __invoke()
+        <a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method___invoke" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/OidcLoginController.php"><a href="files/src-laravel-oidclogincontroller.html"><abbr title="src/Laravel/OidcLoginController.php">OidcLoginController.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">41</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Handles the login GET request and returns the mapped HTTP response (a redirect to the IdP, or a 503 error body).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">__invoke</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\Symfony\Component\HttpFoundation\Request">Request</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\Response">Response</abbr></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$context</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                 = <span class="phpdocumentor-argument-list__argument__default-value">'Transport error'</span>            </dt>
+                <span class="phpdocumentor-argument-list__argument__name">$request</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\Symfony\Component\HttpFoundation\Request">Request</abbr></span>
+                            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
@@ -269,7 +295,7 @@ itself is never stored as a cause (see class doc).</p>
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">self</span>
+        <span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\Response">Response</abbr></span>
             </section>
 
 </article>
@@ -279,38 +305,36 @@ itself is never stored as a cause (see class doc).</p>
             -public
                                     -static                    "
 >
-    <h4 class="phpdocumentor-element__name" id="method_fromMessage">
-        fromMessage()
-        <a href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromMessage" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_toResponse">
+        toResponse()
+        <a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method_toResponse" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/OidcLoginController.php"><a href="files/src-laravel-oidclogincontroller.html"><abbr title="src/Laravel/OidcLoginController.php">OidcLoginController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">92</span>
+    <span class="phpdocumentor-element-found-in__line">54</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Builds a `NetworkError` from a plain message with no live response or exception
-to redact — e.g. a malformed/short response BODY already decoded into a plain
-array by the caller, with no `ResponseInterface`/headers left to sanitize.</p>
+        <p class="phpdocumentor-summary">Shared outcome → HTTP-response translation, reused by
+{@see OidcCallbackController} (both add nothing of their own beyond this
+translation, mirroring how {@see AxiamMiddleware}/{@see AxiamAuthSubscriber}
+independently — but identically — build their own 401/403 bodies).</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">fromMessage</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$message</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">toResponse</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$outcome</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\Response">Response</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">$message</code> still passes through <abbr title="\Axiam\Sdk\Core\self::sanitizeMessage()">self::sanitizeMessage()</abbr> as defense in
-depth, matching <abbr title="\Axiam\Sdk\Core\self::fromException()">self::fromException()</abbr>'s own discipline.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$message</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                <span class="phpdocumentor-argument-list__argument__name">$outcome</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
@@ -323,66 +347,7 @@ depth, matching <abbr title="\Axiam\Sdk\Core\self::fromException()">self::fromEx
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">self</span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                    -static                    "
->
-    <h4 class="phpdocumentor-element__name" id="method_fromResponse">
-        fromResponse()
-        <a href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromResponse" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">45</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">Builds a NetworkError from a live PSR-7 response. Header NAMES are preserved for
-debuggability; VALUES of `Set-Cookie`/`Authorization`/`Cookie` are replaced with
-`[SENSITIVE]` before the summary string is built. The `$response` argument itself
-is never stored — only the resulting sanitized string survives past this method.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">fromResponse</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$response</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$context</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">'HTTP error'</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$response</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr></span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$context</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                 = <span class="phpdocumentor-argument-list__argument__default-value">'HTTP error'</span>            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                
-            </dd>
-            </dl>
-
-    
-
-        
-    
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">self</span>
+        <span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\Response">Response</abbr></span>
             </section>
 
 </article>
@@ -400,7 +365,7 @@ is never stored — only the resulting sanitized string survives past this metho
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="classes/Axiam-Sdk-Core-NetworkError.html#toc-methods">Methods</a></li>
+                                                                                <li><a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
@@ -408,9 +373,9 @@ is never stored — only the resulting sanitized string survives past this metho
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromException">fromException()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromMessage">fromMessage()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Core-NetworkError.html#method_fromResponse">fromResponse()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method___invoke">__invoke()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#method_toResponse">toResponse()</a></li>
                                     </ul>
             </li>
                     </ul>
@@ -430,7 +395,7 @@ is never stored — only the resulting sanitized string survives past this metho
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Core-NetworkError.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Laravel-OidcLoginController.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

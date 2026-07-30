@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">42</span>
 
     </aside>
 
@@ -191,6 +191,16 @@ which is an environment/deployment misconfiguration, not attacker input.</p>
                                 &nbsp;: array&lt;string, mixed&gt;|null    </span>
 </dt>
 
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature">verifyIdTokenSignature()</a>
+    <span>
+                                &nbsp;: array&lt;string, mixed&gt;    </span>
+</dt>
+<dd>§12.4 rules 1–2 (CONTRACT.md, OIDC/SSO relying-party helpers) — algorithm and
+Ed25519 signature verification for an OIDC ID token, reusing this SAME verifier&#039;s
+key cache and single-refetch-on-unknown-`kid` behavior (§12 forbids forking the
+JWKS verifier the §10 middleware already uses).</dd>
+
     </dl>
 
 
@@ -219,7 +229,7 @@ which is an environment/deployment misconfiguration, not attacker input.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">69</span>
+    <span class="phpdocumentor-element-found-in__line">70</span>
 
     </aside>
 
@@ -277,7 +287,7 @@ which is an environment/deployment misconfiguration, not attacker input.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">80</span>
+    <span class="phpdocumentor-element-found-in__line">81</span>
 
     </aside>
 
@@ -323,6 +333,72 @@ failure (never throws on attacker input).</p>
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_verifyIdTokenSignature">
+        verifyIdTokenSignature()
+        <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">150</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">§12.4 rules 1–2 (CONTRACT.md, OIDC/SSO relying-party helpers) — algorithm and
+Ed25519 signature verification for an OIDC ID token, reusing this SAME verifier&#039;s
+key cache and single-refetch-on-unknown-`kid` behavior (§12 forbids forking the
+JWKS verifier the §10 middleware already uses).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">verifyIdTokenSignature</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jwt</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string, mixed&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Deliberately distinct from <abbr title="\Axiam\Sdk\Auth\self::verify()">self::verify()</abbr>: an ID token carries no
+<code class="prettyprint">tenant_id</code> claim to check (that check is specific to AXIAM's own access tokens),
+and §12.4 requires a stable machine-readable failure reason rather than a bare
+<code class="prettyprint">null</code>, so this method THROWS <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> (with <code class="prettyprint">invalid_alg</code>, <code class="prettyprint">unknown_kid</code>,
+or <code class="prettyprint">invalid_signature</code> in <a href="classes/Axiam-Sdk-Core-AuthError.html#method_getReason"><abbr title="\Axiam\Sdk\Core\AuthError::getReason()">AuthError::getReason()</abbr></a>) instead of returning one.
+Issuer/audience/time/nonce (§12.4 rules 3–6) are the caller's job —
+<a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#method_checkClaims"><abbr title="\Axiam\Sdk\Oidc\IdTokenValidator::checkClaims()">IdTokenValidator::checkClaims()</abbr></a> — since they need
+expectations (issuer, client_id, nonce) this verifier has no reason to know about.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$jwt</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string, mixed&gt;</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Decoded claims — signature-verified, but NOT yet
+issuer/audience/time/nonce-checked.</p>
+</section>
+
+            </section>
+
+</article>
             </section>
 
         
@@ -347,6 +423,7 @@ failure (never throws on attacker input).</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verify">verify()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature">verifyIdTokenSignature()</a></li>
                                     </ul>
             </li>
                     </ul>

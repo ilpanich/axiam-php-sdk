@@ -96,57 +96,44 @@
                                         <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-laravel.html">Laravel</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-oidc.html">Oidc</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -class">
+    <article class="phpdocumentor-element -interface">
         <h2 class="phpdocumentor-content__title">
-    AxiamServiceProvider
-
-        <span class="phpdocumentor-element__extends">
-        extends <abbr title="\Illuminate\Support\ServiceProvider">ServiceProvider</abbr>
-    </span>
-    
-            <div class="phpdocumentor-element__package">
-            in package
+    OidcStateStoreInterface
+                <div class="phpdocumentor-element__package">
+            in
             <ul class="phpdocumentor-breadcrumbs">
-                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                                    <li><a href="packages/Application.html">Application</a></li>
                             </ul>
         </div>
-    
-    
     </h2>
 
-<div class="phpdocumentor-label-line">
-
-    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
-
-
-</div>
-
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcStateStoreInterface.php"><a href="files/src-oidc-oidcstatestoreinterface.html"><abbr title="src/Oidc/OidcStateStoreInterface.php">OidcStateStoreInterface.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">25</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Auto-discovered Laravel bridge entry point (D-01): listed under `composer.json`
-`extra.laravel.providers`, so a Laravel consumer gets this provider registered
-with ZERO manual wiring beyond `composer require axiam/axiam-sdk` (true
-zero-config auto-discovery, unlike the Symfony bridge which has no equivalent
-mechanism without a published Flex recipe).</p>
+            <p class="phpdocumentor-summary">Optional server-side store for in-flight `oidcBegin` state (CONTRACT.md §12.3 rule 1).</p>
 
 
-    <section class="phpdocumentor-description"><p><code class="prettyprint">register()</code> binds a singleton <a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a> configured from
-<code class="prettyprint">config('axiam.*')</code> (falling back to <code class="prettyprint">AXIAM_*</code> environment variables so a
-consumer never needs to publish a config file to get started). <code class="prettyprint">boot()</code>
-registers the <code class="prettyprint">axiam.auth</code> middleware alias (<a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a>) and the
-<code class="prettyprint">axiam</code> Gate ability (<a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a>, D-02) — <code class="prettyprint">can:axiam,&lt;resource&gt;,&lt;action&gt;</code>
-route middleware then works out of the box — plus the <code class="prettyprint">axiam.access</code> middleware
-alias (<a href="classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamAccessMiddleware">AxiamAccessMiddleware</abbr></a>, backed by <a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a>, CONTRACT.md
-§11) for the declarative <code class="prettyprint">#[RequireAuth]</code>/<code class="prettyprint">#[RequireAccess]</code>/<code class="prettyprint">#[RequireRole]</code>
-helpers.</p>
+    <section class="phpdocumentor-description"><p>The nine §12 operations never touch a store on their own: <code class="prettyprint">oidcBegin</code> and
+<code class="prettyprint">oidcExchange</code> are stateless by contract, and a caller normally keeps
+<code class="prettyprint">state</code>/<code class="prettyprint">nonce</code>/<code class="prettyprint">code_verifier</code> in its own HTTP session. This interface exists for the
+Laravel/Symfony &quot;Login with AXIAM&quot; glue (<a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginFlow">OidcLoginFlow</abbr></a>), where a
+login and its callback are two separate HTTP requests with nothing but a <code class="prettyprint">state</code> value
+linking them. It MUST be opt-in — the core <code class="prettyprint">oidcBegin</code>/<code class="prettyprint">oidcExchange</code> operations remain
+fully usable without one.</p>
+<p>Implement this to back the login/callback handlers with your own storage (Redis, a
+database, an encrypted cookie). Two invariants are normative:</p>
+<ol>
+<li><strong>Single-use.</strong> <abbr title="\Axiam\Sdk\Oidc\self::consume()">self::consume()</abbr> MUST return the entry <em>and delete it
+atomically</em>, so a replayed callback cannot reuse a <code class="prettyprint">state</code>.</li>
+<li><strong>Expiry.</strong> An entry older than 10 minutes MUST NOT be returned.</li>
+</ol>
 </section>
 
 
@@ -155,7 +142,7 @@ helpers.</p>
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -170,25 +157,29 @@ helpers.</p>
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a>
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#method_consume">consume()</a>
     <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>|null    </span>
 </dt>
-<dd>Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</dd>
+<dd>Atomically fetch **and remove** the entry for `$state`. Returns `null` when the
+state is unknown, already consumed, or expired — three cases a caller MUST treat
+identically (as a failed login), because distinguishing them leaks whether a
+`state` ever existed.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a>
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#method_save">save()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
+<dd>Persist `$entry`, keyed by its `state`, starting its TTL now.</dd>
 
     </dl>
+
 
 
 
@@ -199,7 +190,7 @@ helpers.</p>
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -208,35 +199,51 @@ helpers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_boot">
-        boot()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_consume">
+        consume()
+        <a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#method_consume" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcStateStoreInterface.php"><a href="files/src-oidc-oidcstatestoreinterface.html"><abbr title="src/Oidc/OidcStateStoreInterface.php">OidcStateStoreInterface.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">137</span>
+    <span class="phpdocumentor-element-found-in__line">36</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</p>
+        <p class="phpdocumentor-summary">Atomically fetch **and remove** the entry for `$state`. Returns `null` when the
+state is unknown, already consumed, or expired — three cases a caller MUST treat
+identically (as a failed login), because distinguishing them leaks whether a
+`state` ever existed.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">boot</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">consume</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$state</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
     
-    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$state</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
     
 
         
     
-    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>|null</span>
+            </section>
+
 </article>
                     <article
         class="phpdocumentor-element
@@ -244,28 +251,39 @@ helpers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_register">
-        register()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method_save">
+        save()
+        <a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#method_save" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcStateStoreInterface.php"><a href="files/src-oidc-oidcstatestoreinterface.html"><abbr title="src/Oidc/OidcStateStoreInterface.php">OidcStateStoreInterface.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">28</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Persist `$entry`, keyed by its `state`, starting its TTL now.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">register</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">save</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$entry</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
     
-    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$entry</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
     
 
         
@@ -286,18 +304,18 @@ helpers.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods">Methods</a></li>
+                                                                                <li><a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
+                            <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#method_consume">consume()</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#method_save">save()</a></li>
+                                            </ul>
+                </li>
             
-                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
-            <li>
-                <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a></li>
-                                    </ul>
-            </li>
                     </ul>
     </section>
 
@@ -315,7 +333,7 @@ helpers.</p>
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 
