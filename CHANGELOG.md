@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha21] - 2026-07-30
+
+### Added
+
+- Add OIDC/SSO relying-party helpers (CONTRACT §12, contract 1.4)
+
+### Changed
+
+- Re-sync vendored CONTRACT.md to contract 1.6
+- Add regression coverage for CSRF-capture-after-login fix (1ee9776)
+- Re-sync vendored CONTRACT.md to contract 1.5
+
+### Fixed
+
+- Capture the CSRF token after login/verifyMfa (H8 SDK bench)
+- Share oidcRefresh's outcome across same-kind guard contention
+
 ## [1.0.0-alpha19] - 2026-07-27
 
 ### Fixed
