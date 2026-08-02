@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Webhook signature verification (CONTRACT §13, T-145).** New
+  `Axiam\Sdk\Webhook\AxiamWebhooks::verify()` validates the `X-Axiam-Signature` header
+  AXIAM attaches to every webhook delivery: HMAC-SHA256 over `<timestamp>.<raw_body>`,
+  compared in constant time (`hash_equals`) on the decoded bytes, with a two-sided
+  freshness window defaulting to 300 seconds and an injectable clock for testing.
+  Multiple `v1` values are accepted so secret rotation does not drop deliveries; a header
+  carrying no `v1` is always a failure rather than a silent pass. Returns a
+  `WebhookEvent`, or throws `WebhookVerificationException` whose message never contains
+  the secret or the expected signature. Callers MUST pass the raw request body — see the
+  README for the re-serialization caveat.
+- `CONTRACT.md` §13 vendored; conformance statement updated to §1–§13.
+
 ## [1.0.0-alpha23] - 2026-08-02
 
 ### Changed
