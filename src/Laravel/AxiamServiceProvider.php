@@ -66,6 +66,16 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
                     ? $config->get('axiam.oidc.tenant_id', getenv('AXIAM_OIDC_TENANT_ID') ?: null)
                     : (getenv('AXIAM_OIDC_TENANT_ID') ?: null);
 
+                // CONTRACT.md §10.1 rules 5/6 — CONDITIONAL and unset by default. An app
+                // that sets neither key/env var gets no issuer and no audience check at
+                // all; setting one turns that check on. Nothing is hardcoded.
+                $expectedIssuer = $config !== null
+                    ? $config->get('axiam.expected_issuer', getenv('AXIAM_EXPECTED_ISSUER') ?: null)
+                    : (getenv('AXIAM_EXPECTED_ISSUER') ?: null);
+                $expectedAudience = $config !== null
+                    ? $config->get('axiam.expected_audience', getenv('AXIAM_EXPECTED_AUDIENCE') ?: null)
+                    : (getenv('AXIAM_EXPECTED_AUDIENCE') ?: null);
+
                 return new AxiamClient(
                     baseUrl: $baseUrl,
                     tenant: $tenant,
@@ -73,6 +83,8 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
                     oidcClientId: is_string($oidcClientId) && $oidcClientId !== '' ? $oidcClientId : null,
                     oidcClientSecret: is_string($oidcClientSecret) && $oidcClientSecret !== '' ? $oidcClientSecret : null,
                     oidcTenantId: is_string($oidcTenantId) && $oidcTenantId !== '' ? $oidcTenantId : null,
+                    expectedIssuer: is_string($expectedIssuer) && $expectedIssuer !== '' ? $expectedIssuer : null,
+                    expectedAudience: is_string($expectedAudience) && $expectedAudience !== '' ? $expectedAudience : null,
                 );
             });
 

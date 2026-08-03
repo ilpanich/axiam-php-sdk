@@ -157,6 +157,55 @@ different (not lesser) developer experience than Laravel's — do not expect
 401/403/200 controller example are in
 [`examples/symfony_app/README.md`](examples/symfony_app/README.md).
 
+## Local token verification (CONTRACT.md §10.1)
+
+Both framework guards — the Laravel `AxiamMiddleware` and the Symfony
+`AxiamAuthSubscriber` — verify access tokens through one implementation,
+`Axiam\Sdk\Auth\JwksVerifier::verify()`, which applies the **complete** §10.1 minimum
+local-verification set. Every rule fails closed: a required claim that is absent,
+unparseable, or of the wrong JSON type is a rejection, never a skipped check.
+
+| # | Claim | What the verifier does |
+|---|---|---|
+| 1 | signature | Verified against the org-wide JWKS with `alg` pinned to `EdDSA` **before** any `kid` lookup, so `alg: none` and HS-family confusion are rejected without ever consulting a key. |
+| 2 | `exp` | **Required.** No `exp`, or an `exp` that is not a JSON number, is rejected. An absent `exp` is a permanent credential, not an absent constraint. |
+| 3 | `nbf` | Honoured when present; an `nbf` in the future is rejected. An absent `nbf` is valid. |
+| 4 | `tenant_id` | **Required and asserted** against the **configured** tenant. An absent claim — or an empty configured tenant — is rejected. |
+| 5 | `iss` | Checked **only** when `axiam.expected_issuer` / `AXIAM_EXPECTED_ISSUER` is set. Unset by default. |
+| 6 | `aud` | Checked **only** when `axiam.expected_audience` / `AXIAM_EXPECTED_AUDIENCE` is set. Unset by default; both the single-string and array forms are honoured. |
+| 7 | clock skew | `JwksVerifier::CLOCK_SKEW_LEEWAY_SECONDS` — a named 60-second constant applied to rules 2 and 3. Deliberately **not** operator-configurable. |
+
+**What `firebase/php-jwt` does versus what §10.1 requires.** `JWT::decode()` validates
+`nbf`/`iat`/`exp` and rejects a non-numeric `exp` — but only when the claim is *present*
+(`isset($payload->exp) && …`), so a token with **no** `exp` at all passes straight
+through it. Its `is_numeric()` test also accepts a quoted `"1700000000"`, which is a JSON
+string rather than an RFC 7519 NumericDate. And `JWT::$leeway` is a public mutable static
+that any code in the process can set to an unbounded value. This SDK therefore enforces
+rules 2, 3 and 7 itself rather than inheriting the library's behaviour, and pins
+`JWT::$leeway` to its own named constant for the duration of every decode.
+
+**The `X-Tenant-ID` request header narrows; it never overrides.** The token's `tenant_id`
+is asserted against the tenant the application was *configured* with. When the request
+also carries `X-Tenant-ID`, that header must agree with the verified claim — it can never
+select which tenant is expected, because it is attacker-controlled and doing so would
+make the check vacuous.
+
+`iss` and `aud` are conditional and default to unset; no issuer or audience is hardcoded
+anywhere. Configure them when your deployment has an expectation to assert — an app
+guarding a user-facing resource server should generally expect `axiam:user`:
+
+```php
+// config/axiam.php (Laravel) — or the AXIAM_EXPECTED_* environment variables.
+return [
+    'base_url' => env('AXIAM_BASE_URL'),
+    'tenant'   => env('AXIAM_TENANT'),
+
+    // CONDITIONAL (§10.1 rules 5 and 6). Omit either to skip that check entirely.
+    'expected_issuer'   => env('AXIAM_EXPECTED_ISSUER'),
+    'expected_audience' => env('AXIAM_EXPECTED_AUDIENCE'),
+];
+```
+
 ## Declarative authorization helpers
 
 CONTRACT.md §11 adds a per-endpoint authorization layer on top of the §10

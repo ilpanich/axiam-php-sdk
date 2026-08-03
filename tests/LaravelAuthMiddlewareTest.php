@@ -112,6 +112,68 @@ final class LaravelAuthMiddlewareTest extends TestCase
         self::assertSame(401, $response->getStatusCode());
     }
 
+    /**
+     * CONTRACT.md §10.1 rule 4: the token's `tenant_id` MUST be asserted against the
+     * CONFIGURED tenant. `X-Tenant-ID` is attacker-controlled, so letting it select the
+     * expected value would compare the token against itself — a vacuous check that lets
+     * any tenant's token into an app configured for a different one.
+     */
+    public function testAttackerSuppliedTenantHeaderCannotOverrideTheConfiguredTenant(): void
+    {
+        $token = $this->signedJwt(['sub' => 'evil', 'tenant_id' => 'attacker-tenant']);
+        $middleware = new AxiamMiddleware($this->clientWith($this->jwksQueue()), self::FIXTURE_TENANT);
+
+        $request = Request::create('/documents/1', 'GET');
+        $request->headers->set('Authorization', 'Bearer ' . $token);
+        $request->headers->set('X-Tenant-ID', 'attacker-tenant');
+        $response = $middleware->handle($request, $this->passthroughNext());
+
+        self::assertInstanceOf(JsonResponse::class, $response);
+        self::assertSame(401, $response->getStatusCode());
+    }
+
+    /** A matching `X-Tenant-ID` header still narrows correctly and is admitted. */
+    public function testMatchingTenantHeaderStillNarrowsAndIsAdmitted(): void
+    {
+        $token = $this->signedJwt(['sub' => 'user-x', 'tenant_id' => self::FIXTURE_TENANT]);
+        $middleware = new AxiamMiddleware($this->clientWith($this->jwksQueue()), self::FIXTURE_TENANT);
+
+        $request = Request::create('/documents/1', 'GET');
+        $request->headers->set('Authorization', 'Bearer ' . $token);
+        $request->headers->set('X-Tenant-ID', self::FIXTURE_TENANT);
+        $middleware->handle($request, $this->passthroughNext());
+
+        self::assertSame('user-x', $request->attributes->get('axiam_user')['user_id']);
+    }
+
+    /**
+     * CONTRACT.md §10.1 rule 2, end to end through the guard: a signature-valid,
+     * correct-tenant token carrying NO `exp` claim is a permanent credential and must
+     * be rejected. Asserted at the GUARD level (not only at the verifier) so the guard
+     * genuinely routing through the full §10.1 set is itself under test.
+     */
+    public function testTokenWithNoExpClaimIsRejectedByTheGuard(): void
+    {
+        // NOTE: bypasses signedJwt(), which always adds an exp.
+        $keypair = json_decode((string) file_get_contents(self::FIXTURES . '/ed25519_keypair.json'), true);
+        self::assertIsArray($keypair);
+        $secretKey = (string) base64_decode(strtr($keypair['secret_key_b64url'], '-_', '+/'), true);
+        $token = JWT::encode(
+            ['sub' => 'user-x', 'tenant_id' => self::FIXTURE_TENANT],
+            base64_encode($secretKey),
+            'EdDSA',
+            $keypair['kid'],
+        );
+        $middleware = new AxiamMiddleware($this->clientWith($this->jwksQueue()), self::FIXTURE_TENANT);
+
+        $request = Request::create('/documents/1', 'GET');
+        $request->headers->set('Authorization', 'Bearer ' . $token);
+        $response = $middleware->handle($request, $this->passthroughNext());
+
+        self::assertInstanceOf(JsonResponse::class, $response);
+        self::assertSame(401, $response->getStatusCode());
+    }
+
     public function testScopeStringClaimIsNormalizedToRolesList(): void
     {
         $token = $this->signedJwt([

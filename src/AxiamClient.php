@@ -182,6 +182,17 @@ final class AxiamClient
      *        `X-Tenant-ID` header value) and is never accepted where the wire contract
      *        requires a UUID — a §12 call with neither this nor a per-call `tenantId`
      *        raises {@see AuthError} client-side, with no wire call.
+     * @param string|null $expectedIssuer CONTRACT.md §10.1 rule 5: the `iss` value local
+     *        token verification requires. CONDITIONAL and unset by default — `null` means
+     *        no issuer check is performed at all; once supplied, a token whose `iss`
+     *        differs (or which carries no `iss`) is rejected. There is no default value
+     *        and no hardcoded AXIAM issuer anywhere in this SDK.
+     * @param string|null $expectedAudience CONTRACT.md §10.1 rule 6: the `aud` value local
+     *        token verification requires. CONDITIONAL and unset by default — `null` means
+     *        no audience check at all; once supplied, a token whose `aud` does not contain
+     *        it (including one with no `aud`) is rejected. An app guarding a user-facing
+     *        resource server should generally expect `axiam:user`; it is not defaulted,
+     *        because a service-to-service guard legitimately expects a different audience.
      */
     public function __construct(
         string $baseUrl,
@@ -199,6 +210,8 @@ final class AxiamClient
         ?string $oidcClientId = null,
         Sensitive|string|null $oidcClientSecret = null,
         ?string $oidcTenantId = null,
+        ?string $expectedIssuer = null,
+        ?string $expectedAudience = null,
     ) {
         if ($tenant === '') {
             // D-13/§5 runtime backstop: PHP's type system alone cannot forbid an empty
@@ -282,7 +295,15 @@ final class AxiamClient
         $authzStack->push(new RefreshMiddleware($this->session), 'axiam_refresh');
         $this->authzHttp = new Client($commonConfig + ['handler' => $authzStack]);
 
-        $this->jwksVerifier = new JwksVerifier($this->plainHttp, $baseUrl, $cacheTtlSeconds);
+        $this->jwksVerifier = new JwksVerifier(
+            $this->plainHttp,
+            $baseUrl,
+            $cacheTtlSeconds,
+            // §10.1 rules 5/6 are CONDITIONAL — normalize '' to null so an empty config
+            // value can never be mistaken for "expect the empty string".
+            ($expectedIssuer ?? '') !== '' ? $expectedIssuer : null,
+            ($expectedAudience ?? '') !== '' ? $expectedAudience : null,
+        );
 
         $resolvedRestOnly = $restOnly ?? ($grpcTarget === null);
 
