@@ -11,13 +11,17 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Laravel authentication middleware (D-02, CONTRACT.md §10): extracts the bearer/cookie
- * token, verifies it via {@see AxiamClient::verifyLocallyOrFallback()} — local JWKS
- * verification first, falling back to the shared single-flight refresh (§9, D-06) — and
- * populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles` on
- * success. Returns a standardized 401 JSON error body on any failure (missing token,
- * invalid signature, expired-and-unrefreshable token). Never duplicates JWKS-verify or
- * refresh logic itself (D-02 prohibition) — every security-critical decision is made by
- * {@see AxiamClient}.
+ * token, verifies it via {@see AxiamClient::verifyLocally()} — the no-fallback seam
+ * mandated by §10.1 rule 8 — and populates the `axiam_user` request attribute with
+ * `user_id`/`tenant_id`/`roles` on success. Returns a standardized 401 JSON error body on
+ * any failure (missing token, invalid signature, expired token). Never duplicates
+ * JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is made
+ * by {@see AxiamClient}.
+ *
+ * The decision is always about the CALLER's credential. This middleware deliberately does
+ * not use {@see AxiamClient::verifyLocallyOrFallback()}: its reactive-refresh fallback
+ * verifies *this application's own* session, so a request whose token fails verification
+ * would be admitted under the app's own principal (SEC-085).
  *
  * Type-hinted against `Symfony\Component\HttpFoundation\Request` rather than
  * `Illuminate\Http\Request`: a real `Illuminate\Http\Request` instance IS a
@@ -100,7 +104,12 @@ final class AxiamMiddleware
         // the tenant this app was configured with. Letting the header pick the expected
         // value would make the whole check vacuous: an attacker would simply present a
         // token for tenant B alongside `X-Tenant-ID: B` and be compared against himself.
-        $claims = $this->client->verifyLocallyOrFallback($token, $this->tenant);
+        //
+        // §10.1 rule 8: the decision is about the CALLER's credential and no other. This
+        // calls verifyLocally(), which has no fallback — never verifyLocallyOrFallback(),
+        // whose fallback re-verifies THIS APPLICATION's own session and would admit a
+        // failed request as the app's own (usually service-account) principal (SEC-085).
+        $claims = $this->client->verifyLocally($token, $this->tenant);
         if ($claims === null) {
             return $this->unauthorized('invalid or expired token');
         }

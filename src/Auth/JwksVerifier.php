@@ -229,6 +229,8 @@ final class JwksVerifier
         // empty-expectation case is already rejected by verify()'s guard clause.
         $tenantId = $claims['tenant_id'] ?? null;
         if (!is_string($tenantId) || $tenantId !== $expectedTenantId) {
+            self::warnOnceIfTenantComparandLooksLikeASlug($tenantId, $expectedTenantId);
+
             return false;
         }
 
@@ -264,6 +266,55 @@ final class JwksVerifier
         }
 
         return true;
+    }
+
+    /** Guards {@see self::warnOnceIfTenantComparandLooksLikeASlug()} to one emission per process. */
+    private static bool $tenantComparandWarningEmitted = false;
+
+    /**
+     * Deployment-footgun diagnostic (§13.4 observation 6). AXIAM access tokens always carry
+     * the tenant **UUID** in `tenant_id`, but this SDK's client is configured with a tenant
+     * **slug** (`tenant_slug` is what `login()` sends). An integrator who passes that same
+     * slug to a guard gets a comparand that can never match, so the guard rejects 100% of
+     * traffic — fail-closed and therefore not a vulnerability, but indistinguishable at the
+     * call site from "the token was bad", which is a miserable thing to debug.
+     *
+     * Emits a single `E_USER_WARNING` naming the actual cause. Deliberately:
+     *
+     *  - **once per process** — so it is a configuration diagnostic, not a log-flood sink;
+     *  - **keyed on the SHAPE of the configured value**, which is operator-controlled, not
+     *    on anything an attacker supplies, so it cannot be triggered on demand;
+     *  - **after the rejection is already decided** — this only ever explains a failure, it
+     *    never influences one. The security behaviour is byte-for-byte unchanged.
+     */
+    private static function warnOnceIfTenantComparandLooksLikeASlug(mixed $claimed, string $expected): void
+    {
+        if (self::$tenantComparandWarningEmitted) {
+            return;
+        }
+
+        // Only the specific confusable case: the token names a UUID tenant and the guard was
+        // configured with something that is not a UUID at all. A UUID-vs-UUID mismatch is a
+        // genuine cross-tenant rejection and must stay silent.
+        if (!is_string($claimed) || !self::looksLikeUuid($claimed) || self::looksLikeUuid($expected)) {
+            return;
+        }
+
+        self::$tenantComparandWarningEmitted = true;
+        trigger_error(
+            'AXIAM: the tenant this guard was configured with ("' . $expected . '") is not a UUID, '
+            . 'but access tokens carry the tenant UUID in their `tenant_id` claim, so this guard '
+            . 'will reject every request. Configure the guard with the tenant UUID, not the slug. '
+            . '(CONTRACT.md §10.1 rule 4; this warning is emitted once per process and does not '
+            . 'affect the rejection itself.)',
+            E_USER_WARNING,
+        );
+    }
+
+    /** Canonical 8-4-4-4-12 hex form; shape only, no version/variant validation. */
+    private static function looksLikeUuid(string $value): bool
+    {
+        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $value) === 1;
     }
 
     /**
