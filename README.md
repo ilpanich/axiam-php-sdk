@@ -107,8 +107,9 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§12 (including §6.1 mTLS, contract 1.3;
-§12 OIDC/SSO helpers, contract 1.4) — the binding, cross-language behavioral contract every
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 (including §6.1 mTLS, contract 1.3;
+§12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature verification) — the binding,
+cross-language behavioral contract every
 AXIAM SDK implements: camelCase method names (§1) — including the gRPC-only `getUserInfo`
 operation (§1.1) — the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2,
 extended by the §12 `OAuthProtocolError` `AuthError` sub-type), non-browser `X-CSRF-Token`
@@ -118,7 +119,8 @@ server-verification escape hatch (§6) plus optional client-certificate mutual T
 `Sensitive`-wrapped token redaction (§7), HMAC-SHA256-verified AMQP
 messages (§8), single-flight refresh concurrency safety (§9), framework
 middleware/subscriber integration (§10), declarative per-endpoint authorization
-helpers (§11, see below), and OIDC/SSO relying-party helpers (§12, see below).
+helpers (§11, see below), OIDC/SSO relying-party helpers (§12, see below), and
+webhook-signature verification (§13, see below).
 
 ## Framework integration
 
@@ -278,6 +280,45 @@ see [`examples/laravel_app/oidc_routes.php`](examples/laravel_app/oidc_routes.ph
 - Both bridges share ONE framework-agnostic core, `Axiam\Sdk\Oidc\OidcLoginFlow`, so
   the 400/401/503 failure mapping (malformed callback / IdP error / unknown state /
   ID-token or OAuth2 failure / AXIAM unreachable) is byte-identical between them.
+
+## Webhook signature verification (CONTRACT.md §13)
+
+AXIAM signs every webhook delivery with a Stripe-style signed timestamp. Verify it with
+`AxiamWebhooks::verify()` before trusting a payload:
+
+```php
+use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Webhook\AxiamWebhooks;
+use Axiam\Sdk\Webhook\WebhookVerificationException;
+
+// Read the RAW body BEFORE any framework parses it as JSON.
+$rawBody = file_get_contents('php://input');
+
+try {
+    $event = AxiamWebhooks::verify(
+        new Sensitive($webhookSecret),
+        $_SERVER['HTTP_X_AXIAM_SIGNATURE'] ?? '',
+        $rawBody,
+    );
+} catch (WebhookVerificationException $e) {
+    http_response_code(400);
+    return;
+}
+
+// $event->eventType, $event->deliveryId, $event->timestamp, $event->body
+```
+
+**The raw body is mandatory.** The MAC covers the exact bytes AXIAM sent, so
+`json_encode(json_decode($body))` — which can reorder keys, change whitespace, or re-escape
+`/` as `\/` — will fail verification even though the payload is semantically identical. In
+Laravel use `$request->getContent()`; in Symfony, `$request->getContent()`. Never re-encode.
+
+Behaviour: HMAC-SHA256 over `<timestamp>.<raw_body>`, compared in constant time
+(`hash_equals`) on the decoded bytes; a header carrying no `v1` is always a failure; the
+freshness window is two-sided and defaults to 300 seconds, so a future-dated timestamp is
+rejected just like a stale one. Multiple `v1` values are accepted to support secret
+rotation. Use the `X-Axiam-Delivery` header as an at-least-once dedup key — a retry replays
+a valid signature inside the freshness window.
 
 ## TLS policy
 
