@@ -100,11 +100,22 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
 
             $token = $credential['token'];
 
-            // §10: "read the X-Tenant-ID header (or use the client's configured tenant)".
-            $tenantId = $request->headers->get('X-Tenant-ID') ?: $this->tenant;
-
-            $claims = $this->client->verifyLocallyOrFallback($token, $tenantId);
+            // §10.1 rule 4: the token's tenant_id MUST equal the CONFIGURED tenant. The
+            // X-Tenant-ID header is attacker-controlled, so it can only ever NARROW which
+            // tenant this request asserts — it can never substitute for, or widen beyond,
+            // the tenant this app was configured with. Letting the header pick the
+            // expected value would make the whole check vacuous: an attacker would simply
+            // present a token for tenant B alongside `X-Tenant-ID: B` and be compared
+            // against himself.
+            $claims = $this->client->verifyLocallyOrFallback($token, $this->tenant);
             if ($claims === null) {
+                $event->setResponse($this->unauthorized('invalid or expired token'));
+
+                return;
+            }
+
+            $requestedTenant = $request->headers->get('X-Tenant-ID');
+            if (is_string($requestedTenant) && $requestedTenant !== '' && $requestedTenant !== ($claims['tenant_id'] ?? null)) {
                 $event->setResponse($this->unauthorized('invalid or expired token'));
 
                 return;
