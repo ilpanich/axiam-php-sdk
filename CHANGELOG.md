@@ -9,6 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **BREAKING (authentication bypass fixed) — `SEC-085`.** The Laravel middleware and the
+  Symfony subscriber verified the inbound request with
+  `AxiamClient::verifyLocallyOrFallback()`. That method is a *client-side* helper: when
+  the supplied token fails verification it refreshes **this application's own session**
+  and verifies **that** token instead, returning its claims. As a request guard it meant
+  a caller presenting an **expired, foreign-tenant, unsigned or outright garbage** token
+  was not rejected — it was admitted and authenticated as the application's own AXIAM
+  principal, typically a **service account** more privileged than the end user whose
+  request it replaced. Every downstream authorization decision then ran under that
+  identity.
+
+  Both guards now call the new `AxiamClient::verifyLocally()`, which applies the full
+  §10.1 set to the caller's token and has **no fallback**. `verifyLocallyOrFallback()`
+  remains for the SDK's own outbound calls, where refreshing the client's own token is
+  the intended recovery, and now documents that it must never be used as a guard.
+
+  This is codified upstream as **CONTRACT.md §10.1 rule 8** ("subject of the decision"):
+  a guard decides on the caller's credential and no other. Requests that were previously
+  admitted under the application's identity will now correctly receive `401`.
+
+### Fixed
+
+- **Slug-vs-UUID tenant comparand now diagnoses itself.** AXIAM access tokens carry the
+  tenant **UUID** in `tenant_id`, but this SDK's client is configured with a tenant
+  **slug**. A guard handed that slug rejects 100% of traffic — fail-closed and safe, but
+  it presents as "every token is invalid" with nothing pointing at the cause.
+  `JwksVerifier` now emits a single `E_USER_WARNING` naming the real problem. It fires
+  **once per process**, only when the configured value is not UUID-shaped while the claim
+  is, and strictly *after* the rejection is decided — so it cannot be used as a log-flood
+  lever and does not alter the verification outcome in any way. A genuine cross-tenant
+  rejection (UUID vs UUID) stays silent.
+
 - **BREAKING (acceptance tightened).** Align local token verification with the new
   normative CONTRACT.md §10.1 "minimum local-verification set". Three defects:
   - **`exp` is now REQUIRED.** `JwksVerifier::verify()` delegated expiry entirely to

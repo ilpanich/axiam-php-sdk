@@ -48,8 +48,9 @@ config file to get started:
 
 - The **`axiam.auth`** route-middleware alias → `Axiam\Sdk\Laravel\AxiamMiddleware`
   (authentication, D-02): verifies the bearer/cookie token locally via
-  `AxiamClient::verifyLocallyOrFallback()` (JWKS verification first, falling back to the
-  shared single-flight refresh, §9/D-06), populates the `axiam_user` request attribute
+  `AxiamClient::verifyLocally()` — the no-fallback seam §10.1 rule 8 requires of a request
+  guard, so the decision is always about the *caller's* credential and never the
+  application's own session (SEC-085) — populates the `axiam_user` request attribute
   (`user_id`/`tenant_id`/`roles`), and returns a standardized `401` JSON error body on any
   failure. This bridge never re-implements JWKS/refresh logic — every security decision
   is made by `AxiamClient` itself.

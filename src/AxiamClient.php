@@ -767,17 +767,40 @@ final class AxiamClient
     }
 
     // ------------------------------------------------------------------
-    // Framework-bridge seam (D-02): local verify, reactive-refresh fallback
+    // Verification seams: request guards (§10.1 rule 8) vs. outbound calls (D-02)
     // ------------------------------------------------------------------
 
     /**
-     * Local-first JWT verification with a reactive-refresh fallback (D-02) — the seam the
-     * Laravel/Symfony framework bridges (a later plan) call for every incoming request.
-     * Tries {@see JwksVerifier::verify()} first (no network call on the happy path); if that
-     * fails (expired/unknown-kid/invalid token), attempts the shared single-flight refresh
-     * (§9, D-06) and re-verifies the FRESH access token. Returns `null` — never unverified
-     * claims — on any failure; this method is fail-closed exactly like {@see JwksVerifier}
-     * itself, since callers use the result for an authorization decision.
+     * Verify an INBOUND caller's token and nothing else — the seam every request guard
+     * must use (CONTRACT.md §10.1 rule 8). Delegates straight to {@see JwksVerifier::verify()},
+     * which applies the full §10.1 minimum local-verification set, and returns `null` on
+     * any failure with **no fallback to another credential**.
+     *
+     * This is deliberately the *only* verification entry point offered to the framework
+     * bridges. Its sibling {@see self::verifyLocallyOrFallback()} substitutes this client's
+     * own session when verification fails, which is correct for the SDK's outbound calls
+     * and an authentication bypass in a request guard — see SEC-085.
+     *
+     * @return array<string,mixed>|null Verified claims of the SUPPLIED token, or null.
+     */
+    public function verifyLocally(string $token, string $tenant): ?array
+    {
+        return $this->jwksVerifier->verify($token, $tenant);
+    }
+
+    /**
+     * Local-first JWT verification with a reactive-refresh fallback (D-02) — for the SDK's
+     * own OUTBOUND calls, where the token being verified is this client's own and refreshing
+     * it is the intended recovery. Tries {@see JwksVerifier::verify()} first (no network call
+     * on the happy path); if that fails (expired/unknown-kid/invalid token), attempts the
+     * shared single-flight refresh (§9, D-06) and re-verifies the FRESH access token. Returns
+     * `null` — never unverified claims — on any failure.
+     *
+     * ⚠ **Never call this from a request guard.** The fallback re-verifies *a different
+     * credential* — this client's own session, typically a service account — so a caller
+     * presenting an expired, foreign-tenant or forged token would be admitted under the
+     * application's own identity (SEC-085). Request guards must call
+     * {@see self::verifyLocally()}, which decides on the caller's credential alone.
      *
      * @return array<string,mixed>|null Verified claims, or null.
      */

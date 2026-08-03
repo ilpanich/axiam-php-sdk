@@ -15,13 +15,17 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
     /**
      * Symfony authentication subscriber (D-02, CONTRACT.md §10): listens to
      * `kernel.request`, extracts the bearer/cookie token, verifies it via
-     * {@see AxiamClient::verifyLocallyOrFallback()} — local JWKS verification first,
-     * falling back to the shared single-flight refresh (§9, D-06) — and populates the
-     * `axiam_user` request attribute with `user_id`/`tenant_id`/`roles` on success.
-     * Short-circuits the request with a standardized 401 JSON error body on any failure
-     * (missing token, invalid signature, expired-and-unrefreshable token). Never
-     * duplicates JWKS-verify or refresh logic itself (D-02 prohibition) — every
-     * security-critical decision is made by {@see AxiamClient}.
+     * {@see AxiamClient::verifyLocally()} — the no-fallback seam mandated by §10.1 rule 8
+     * — and populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles`
+     * on success. Short-circuits the request with a standardized 401 JSON error body on any
+     * failure (missing token, invalid signature, expired token). Never duplicates
+     * JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is
+     * made by {@see AxiamClient}.
+     *
+     * The decision is always about the CALLER's credential. This subscriber deliberately
+     * does not use {@see AxiamClient::verifyLocallyOrFallback()}: its reactive-refresh
+     * fallback verifies *this application's own* session, so a request whose token fails
+     * verification would be admitted under the app's own principal (SEC-085).
      *
      * MUST be manually registered (Pitfall 5): Symfony has no Laravel-style zero-config
      * auto-discovery for a plain `composer require` without a published Flex recipe (out
@@ -107,7 +111,13 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
             // expected value would make the whole check vacuous: an attacker would simply
             // present a token for tenant B alongside `X-Tenant-ID: B` and be compared
             // against himself.
-            $claims = $this->client->verifyLocallyOrFallback($token, $this->tenant);
+            //
+            // §10.1 rule 8: the decision is about the CALLER's credential and no other.
+            // This calls verifyLocally(), which has no fallback — never
+            // verifyLocallyOrFallback(), whose fallback re-verifies THIS APPLICATION's own
+            // session and would admit a failed request as the app's own (usually
+            // service-account) principal (SEC-085).
+            $claims = $this->client->verifyLocally($token, $this->tenant);
             if ($claims === null) {
                 $event->setResponse($this->unauthorized('invalid or expired token'));
 

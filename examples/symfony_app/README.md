@@ -73,8 +73,9 @@ experience than the Laravel bridge, not a lesser-quality one.
 
 - **`Axiam\Sdk\Symfony\AxiamAuthSubscriber`** (authentication, D-02, §10): subscribes to
   `kernel.request` (`KernelEvents::REQUEST`). Extracts the bearer/cookie token, calls
-  `AxiamClient::verifyLocallyOrFallback()` (local JWKS verification first, falling back
-  to the shared single-flight refresh, §9/D-06), and either populates the
+  `AxiamClient::verifyLocally()` — the no-fallback seam §10.1 rule 8 requires of a request
+  guard, so the decision is always about the *caller's* credential and never the
+  application's own session (SEC-085) — and either populates the
   `axiam_user` request attribute (`user_id`/`tenant_id`/`roles`) or short-circuits the
   request with a standardized `401` `JsonResponse` via `RequestEvent::setResponse()`.
   This bridge never re-implements JWKS/refresh logic — every security decision is made
