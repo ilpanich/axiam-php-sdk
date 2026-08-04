@@ -124,21 +124,24 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamMiddleware.php"><a href="files/src-laravel-axiammiddleware.html"><abbr title="src/Laravel/AxiamMiddleware.php">AxiamMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">43</span>
+    <span class="phpdocumentor-element-found-in__line">47</span>
 
     </aside>
 
             <p class="phpdocumentor-summary">Laravel authentication middleware (D-02, CONTRACT.md §10): extracts the bearer/cookie
-token, verifies it via {@see AxiamClient::verifyLocallyOrFallback()} — local JWKS
-verification first, falling back to the shared single-flight refresh (§9, D-06) — and
-populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles` on
-success. Returns a standardized 401 JSON error body on any failure (missing token,
-invalid signature, expired-and-unrefreshable token). Never duplicates JWKS-verify or
-refresh logic itself (D-02 prohibition) — every security-critical decision is made by
-{@see AxiamClient}.</p>
+token, verifies it via {@see AxiamClient::verifyLocally()} — the no-fallback seam
+mandated by §10.1 rule 8 — and populates the `axiam_user` request attribute with
+`user_id`/`tenant_id`/`roles` on success. Returns a standardized 401 JSON error body on
+any failure (missing token, invalid signature, expired token). Never duplicates
+JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is made
+by {@see AxiamClient}.</p>
 
 
-    <section class="phpdocumentor-description"><p>Type-hinted against <code class="prettyprint">Symfony\Component\HttpFoundation\Request</code> rather than
+    <section class="phpdocumentor-description"><p>The decision is always about the CALLER's credential. This middleware deliberately does
+not use <a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyLocallyOrFallback"><abbr title="\Axiam\Sdk\AxiamClient::verifyLocallyOrFallback()">AxiamClient::verifyLocallyOrFallback()</abbr></a>: its reactive-refresh fallback
+verifies <em>this application's own</em> session, so a request whose token fails verification
+would be admitted under the app's own principal (SEC-085).</p>
+<p>Type-hinted against <code class="prettyprint">Symfony\Component\HttpFoundation\Request</code> rather than
 <code class="prettyprint">Illuminate\Http\Request</code>: a real <code class="prettyprint">Illuminate\Http\Request</code> instance IS a
 <code class="prettyprint">Symfony\Component\HttpFoundation\Request</code> (it directly extends it, adding only
 Laravel-specific convenience methods this class does not need), so Laravel's own HTTP
@@ -225,7 +228,7 @@ AXIAM server performs on its own endpoints (§3).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamMiddleware.php"><a href="files/src-laravel-axiammiddleware.html"><abbr title="src/Laravel/AxiamMiddleware.php">AxiamMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">61</span>
 
     </aside>
 
@@ -282,7 +285,7 @@ never implies tenant authorization).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamMiddleware.php"><a href="files/src-laravel-axiammiddleware.html"><abbr title="src/Laravel/AxiamMiddleware.php">AxiamMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">80</span>
+    <span class="phpdocumentor-element-found-in__line">84</span>
 
     </aside>
 

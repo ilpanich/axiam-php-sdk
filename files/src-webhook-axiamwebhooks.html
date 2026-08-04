@@ -97,7 +97,7 @@
     </ul>
 
     <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">AxiamAuthSubscriber.php</h2>
+        <h2 class="phpdocumentor-content__title">AxiamWebhooks.php</h2>
 
         
         
@@ -108,7 +108,7 @@
         
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-symfony-axiamauthsubscriber.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/src-webhook-axiamwebhooks.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -117,18 +117,14 @@
 
     <h4 id="toc-classes">
         Classes
-        <a href="files/src-symfony-axiamauthsubscriber.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="files/src-webhook-axiamwebhooks.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a></dt><dd>Symfony authentication subscriber (D-02, CONTRACT.md §10): listens to
-`kernel.request`, extracts the bearer/cookie token, verifies it via
-{@see AxiamClient::verifyLocally()} — the no-fallback seam mandated by §10.1 rule 8
-— and populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles`
-on success. Short-circuits the request with a standardized 401 JSON error body on any
-failure (missing token, invalid signature, expired token). Never duplicates
-JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is
-made by {@see AxiamClient}.</dd>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Webhook-AxiamWebhooks.html"><abbr title="\Axiam\Sdk\Webhook\AxiamWebhooks">AxiamWebhooks</abbr></a></dt><dd>Verifies the `X-Axiam-Signature` HMAC-SHA256 header AXIAM attaches to every webhook
+delivery (CONTRACT.md §13, T-145). Mirrors the server&#039;s signer
+(`crates/axiam-api-rest/src/webhook.rs`&#039;s `compute_signature_v2`): the MAC covers the
+ASCII string `&lt;t&gt;.&lt;raw_body&gt;`, keyed with the webhook secret&#039;s raw UTF-8 bytes.</dd>    </dl>
 
 
 
@@ -153,7 +149,7 @@ made by {@see AxiamClient}.</dd>    </dl>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                        <li><a href="files/src-symfony-axiamauthsubscriber.html#toc-classes">Classes</a></li>
+                                                                                                        <li><a href="files/src-webhook-axiamwebhooks.html#toc-classes">Classes</a></li>
                                                                                                                     </ul>
             </li>
 
@@ -175,7 +171,7 @@ made by {@see AxiamClient}.</dd>    </dl>
     </section>
 </section>
         </div>
-        <a href="files/src-symfony-axiamauthsubscriber.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/src-webhook-axiamwebhooks.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

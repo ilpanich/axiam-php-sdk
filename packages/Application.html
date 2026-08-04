@@ -178,13 +178,12 @@ plan calls for, from the SAME class, delegating every actual decision to the sha
 propagation, or the error-mapping table itself):</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a></dt><dd>Laravel authorization gate (D-02, CONTRACT.md §1/§10): a one-line delegation to
 {@see AxiamClient::can()} — the server&#039;s additive-only RBAC engine (allow-wins,
 default-deny, no explicit deny-override) is ALWAYS the authoritative decision-maker.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a></dt><dd>Laravel authentication middleware (D-02, CONTRACT.md §10): extracts the bearer/cookie
-token, verifies it via {@see AxiamClient::verifyLocallyOrFallback()} — local JWKS
-verification first, falling back to the shared single-flight refresh (§9, D-06) — and
-populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles` on
-success. Returns a standardized 401 JSON error body on any failure (missing token,
-invalid signature, expired-and-unrefreshable token). Never duplicates JWKS-verify or
-refresh logic itself (D-02 prohibition) — every security-critical decision is made by
-{@see AxiamClient}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html"><abbr title="\Axiam\Sdk\Laravel\AxiamServiceProvider">AxiamServiceProvider</abbr></a></dt><dd>Auto-discovered Laravel bridge entry point (D-01): listed under `composer.json`
+token, verifies it via {@see AxiamClient::verifyLocally()} — the no-fallback seam
+mandated by §10.1 rule 8 — and populates the `axiam_user` request attribute with
+`user_id`/`tenant_id`/`roles` on success. Returns a standardized 401 JSON error body on
+any failure (missing token, invalid signature, expired token). Never duplicates
+JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is made
+by {@see AxiamClient}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html"><abbr title="\Axiam\Sdk\Laravel\AxiamServiceProvider">AxiamServiceProvider</abbr></a></dt><dd>Auto-discovered Laravel bridge entry point (D-01): listed under `composer.json`
 `extra.laravel.providers`, so a Laravel consumer gets this provider registered
 with ZERO manual wiring beyond `composer require axiam/axiam-sdk` (true
 zero-config auto-discovery, unlike the Symfony bridge which has no equivalent
@@ -244,9 +243,12 @@ single-flight home for the shared refresh `Promise` (§9, D-06).</dd>           
 point Symfony&#039;s own `#[IsGranted]` attribute is enforced from
 (`Symfony\Component\Security\Http\EventListener\IsGrantedAttributeListener`).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a></dt><dd>Symfony authentication subscriber (D-02, CONTRACT.md §10): listens to
 `kernel.request`, extracts the bearer/cookie token, verifies it via
-{@see AxiamClient::verifyLocallyOrFallback()} — local JWKS verification first,
-falling back to the shared single-flight refresh (§9, D-06) — and populates the
-`axiam_user` request attribute with `user_id`/`tenant_id`/`roles` on success.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamBundle.html"><abbr title="\Axiam\Sdk\Symfony\AxiamBundle">AxiamBundle</abbr></a></dt><dd>The Symfony bundle bootstrap. This class intentionally carries no container
+{@see AxiamClient::verifyLocally()} — the no-fallback seam mandated by §10.1 rule 8
+— and populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles`
+on success. Short-circuits the request with a standardized 401 JSON error body on any
+failure (missing token, invalid signature, expired token). Never duplicates
+JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is
+made by {@see AxiamClient}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamBundle.html"><abbr title="\Axiam\Sdk\Symfony\AxiamBundle">AxiamBundle</abbr></a></dt><dd>The Symfony bundle bootstrap. This class intentionally carries no container
 extension of its own — `AxiamAuthSubscriber` (`kernel.event_subscriber`),
 `AxiamVoter` (`security.voter`), and `AxiamAccessAttributeListener`
 (`kernel.event_subscriber`, CONTRACT.md §11 declarative authorization helpers)
@@ -266,7 +268,17 @@ code, and redirects (or replies `200 JSON`) on success. See
 authorization request, parks its `state`/`nonce`/`code_verifier` in the
 configured {@see \Axiam\Sdk\Oidc\OidcStateStoreInterface}, and redirects the
 browser to the IdP. All security-critical logic lives in {@see OidcLoginFlow} —
-this class only translates its {@see OidcLoginOutcome} into an HTTP response.</dd>    </dl>
+this class only translates its {@see OidcLoginOutcome} into an HTTP response.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Webhook-AxiamWebhooks.html"><abbr title="\Axiam\Sdk\Webhook\AxiamWebhooks">AxiamWebhooks</abbr></a></dt><dd>Verifies the `X-Axiam-Signature` HMAC-SHA256 header AXIAM attaches to every webhook
+delivery (CONTRACT.md §13, T-145). Mirrors the server&#039;s signer
+(`crates/axiam-api-rest/src/webhook.rs`&#039;s `compute_signature_v2`): the MAC covers the
+ASCII string `&lt;t&gt;.&lt;raw_body&gt;`, keyed with the webhook secret&#039;s raw UTF-8 bytes.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Webhook-WebhookEvent.html"><abbr title="\Axiam\Sdk\Webhook\WebhookEvent">WebhookEvent</abbr></a></dt><dd>A webhook delivery whose `X-Axiam-Signature` has already been verified by
+{@see AxiamWebhooks::verify()} (CONTRACT.md §13). {@see self::$eventType} and
+{@see self::$deliveryId} are a best-effort parse of the verified body&#039;s `event`/`id`
+JSON fields — a non-JSON or differently-shaped body still verifies successfully (the
+MAC only covers the raw bytes, not their JSON shape), it simply leaves those two
+properties `null`. Callers that need the delivery id for at-least-once dedup (§13.3
+rule 7) should prefer the `X-Axiam-Delivery` header over relying solely on this parse.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Webhook-WebhookVerificationException.html"><abbr title="\Axiam\Sdk\Webhook\WebhookVerificationException">WebhookVerificationException</abbr></a></dt><dd>Thrown by {@see AxiamWebhooks::verify()} when a webhook delivery fails signature
+verification (CONTRACT.md §13.3 rule 6: &quot;fail closed and quiet&quot;).</dd>    </dl>
 
 
 

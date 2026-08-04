@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">42</span>
+    <span class="phpdocumentor-element-found-in__line">70</span>
 
     </aside>
 
@@ -135,23 +135,49 @@
 <code class="prettyprint">jwks_uri</code>, falling back to <code class="prettyprint">{baseUrl}/oauth2/jwks</code> if discovery is unavailable or
 omits <code class="prettyprint">jwks_uri</code>), TTL-cached, and refetched exactly once when an unknown <code class="prettyprint">kid</code> is
 encountered before failing closed.</p>
-<p>Two security invariants (every sibling SDK independently confirmed both):</p>
-<ul>
-<li>Pitfall 5 / T-alg-confusion: the header <code class="prettyprint">alg</code> is pinned to <code class="prettyprint">EdDSA</code> BEFORE any key
-lookup is attempted. A token never gets to choose its own verification algorithm.</li>
-<li>Pitfall 3 / T-cross-tenant: <code class="prettyprint">GET /oauth2/jwks</code> is organization-wide, not
-tenant-scoped, so a validly-signed token for a different tenant under the same
-organization must still be rejected. The <code class="prettyprint">tenant_id</code> claim is checked AFTER
-signature verification succeeds.</li>
-</ul>
+<p><abbr title="\Axiam\Sdk\Auth\self::verify()">self::verify()</abbr> applies the COMPLETE CONTRACT.md §10.1 &quot;minimum
+local-verification set&quot;, every rule of which fails closed:</p>
+<ol>
+<li><strong>signature</strong> — Pitfall 5 / T-alg-confusion: the header <code class="prettyprint">alg</code> is pinned to
+<code class="prettyprint">EdDSA</code> BEFORE any key lookup is attempted, so <code class="prettyprint">alg: none</code> and HS-family
+confusion are rejected without ever consulting a key. A token never gets to
+choose its own verification algorithm.</li>
+<li><strong><code class="prettyprint">exp</code> — REQUIRED.</strong> A token with no <code class="prettyprint">exp</code>, or an <code class="prettyprint">exp</code> that is not a JSON
+number, is rejected. An absent <code class="prettyprint">exp</code> is a <em>permanent credential</em>, never &quot;no
+expiry constraint&quot; — treating it as the latter is the <code class="prettyprint">SEC-080</code> defect.</li>
+<li><strong><code class="prettyprint">nbf</code></strong> — honoured when present; an <code class="prettyprint">nbf</code> in the future is rejected. An absent
+<code class="prettyprint">nbf</code> is valid.</li>
+<li><strong><code class="prettyprint">tenant_id</code> — REQUIRED and asserted.</strong> Pitfall 3 / T-cross-tenant:
+<code class="prettyprint">GET /oauth2/jwks</code> is organization-wide, not tenant-scoped, so a validly-signed
+token for a different tenant under the same organization must still be rejected.
+The claim is checked AFTER signature verification succeeds; an absent claim, or
+an empty expected tenant, fails closed.</li>
+<li><strong><code class="prettyprint">iss</code></strong> — checked only when this verifier was constructed with an expected
+issuer. Unset by default.</li>
+<li><strong><code class="prettyprint">aud</code></strong> — checked only when this verifier was constructed with an expected
+audience. Unset by default; both RFC 7519 shapes (single string, array) honoured.</li>
+<li><strong>clock skew</strong> — <abbr title="\Axiam\Sdk\Auth\self::CLOCK_SKEW_LEEWAY_SECONDS">self::CLOCK_SKEW_LEEWAY_SECONDS</abbr>, a named 60-second
+constant applied to rules 2 and 3, deliberately not operator-configurable.</li>
+</ol>
+<p>What <code class="prettyprint">firebase/php-jwt</code> does versus what §10.1 requires: <code class="prettyprint">JWT::decode()</code> validates
+<code class="prettyprint">nbf</code>/<code class="prettyprint">iat</code>/<code class="prettyprint">exp</code> and rejects a non-numeric <code class="prettyprint">exp</code> — but ONLY when the claim is
+present (<code class="prettyprint">isset($payload-&gt;exp) &amp;&amp; ...</code>). A token with <strong>no</strong> <code class="prettyprint">exp</code> at all sails
+straight through it, which is precisely the <code class="prettyprint">SEC-080</code> gap. Its <code class="prettyprint">is_numeric()</code> test
+also accepts a quoted <code class="prettyprint">&quot;1700000000&quot;</code>, which is a JSON string, not an RFC 7519
+NumericDate. And its <code class="prettyprint">JWT::$leeway</code> is a public mutable static that any code in the
+process can set to an unbounded value, which §10.1 rule 7 forbids. This class
+therefore enforces rules 2, 3 and 7 itself rather than inheriting the library's
+behaviour, and pins <code class="prettyprint">JWT::$leeway</code> to its own named constant for the duration of each
+decode so a global override cannot widen the window.</p>
 <p>Deliberately does NOT use firebase/php-jwt's <code class="prettyprint">CachedKeySet</code> convenience class — it
 requires a PSR-18 client + PSR-17 request factory + PSR-6 cache pool, a dependency
 chain D-07 explicitly avoids. This hand-rolled TTL cache mirrors every sibling SDK's
 own JWKS-cache shape (e.g. the Python SDK's <code class="prettyprint">_jwks.py</code>).</p>
 <p><code class="prettyprint">verify()</code> never throws on attacker-controlled token input — malformed/short/
-non-3-part tokens, unknown algorithms, unknown kids, and bad signatures all return
-<code class="prettyprint">null</code> (fail closed). The only thrown exception is the <code class="prettyprint">ext-sodium</code>-missing guard,
-which is an environment/deployment misconfiguration, not attacker input.</p>
+non-3-part tokens, unknown algorithms, unknown kids, bad signatures, and every §10.1
+claim-policy failure all return <code class="prettyprint">null</code> (fail closed). The only thrown exception is
+the <code class="prettyprint">ext-sodium</code>-missing guard, which is an environment/deployment misconfiguration,
+not attacker input.</p>
 </section>
 
 
@@ -170,6 +196,21 @@ which is an environment/deployment misconfiguration, not attacker input.</p>
 
 
 
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_CLOCK_SKEW_LEEWAY_SECONDS">CLOCK_SKEW_LEEWAY_SECONDS</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 60                            </span>
+</dt>
+<dd>The single, named, bounded clock-skew allowance applied to the `exp` and `nbf`
+checks (CONTRACT.md §10.1 rule 7 — RECOMMENDED 60 s).</dd>
+
+    </dl>
 
 
 
@@ -190,6 +231,9 @@ which is an environment/deployment misconfiguration, not attacker input.</p>
     <span>
                                 &nbsp;: array&lt;string, mixed&gt;|null    </span>
 </dt>
+<dd>Verifies a token against the COMPLETE CONTRACT.md §10.1 minimum local-verification
+set — see the class docblock for the seven rules and for what `firebase/php-jwt`
+does versus what §10.1 requires.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature">verifyIdTokenSignature()</a>
@@ -206,6 +250,52 @@ JWKS verifier the §10 middleware already uses).</dd>
 
 
         
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_CLOCK_SKEW_LEEWAY_SECONDS">
+        CLOCK_SKEW_LEEWAY_SECONDS
+        <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_CLOCK_SKEW_LEEWAY_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">83</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The single, named, bounded clock-skew allowance applied to the `exp` and `nbf`
+checks (CONTRACT.md §10.1 rule 7 — RECOMMENDED 60 s).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">CLOCK_SKEW_LEEWAY_SECONDS</span>
+    = <span class="phpdocumentor-signature__default-value">60</span>
+</code>
+
+
+        <section class="phpdocumentor-description"><p>Deliberately a class constant and not a constructor parameter: §10.1 requires the
+leeway be &quot;a named constant, not an inline literal&quot; and forbids it being
+&quot;operator-configurable to an unbounded value&quot;. Exposing it as a knob is the exact
+failure mode the rule exists to prevent — and <code class="prettyprint">firebase/php-jwt</code>'s own public
+mutable <code class="prettyprint">JWT::$leeway</code> static is that knob, which is why this class pins it for
+the duration of every decode instead of trusting whatever the process has set.</p>
+</section>
+
+    
+    
+
+        
+    </article>
+            </section>
 
         
 
@@ -229,14 +319,14 @@ JWKS verifier the §10 middleware already uses).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">70</span>
+    <span class="phpdocumentor-element-found-in__line">128</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\ClientInterface">ClientInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$http</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cacheTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">300</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\ClientInterface">ClientInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$http</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cacheTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">300</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedIssuer</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedAudience</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -265,6 +355,37 @@ JWKS verifier the §10 middleware already uses).</dd>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$expectedIssuer</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The <code class="prettyprint">iss</code> value this verifier requires
+(CONTRACT.md §10.1 rule 5). CONDITIONAL:
+<code class="prettyprint">null</code> (the default) means no issuer check
+is performed at all; once supplied, a token
+whose <code class="prettyprint">iss</code> differs — or which carries no
+<code class="prettyprint">iss</code> — is rejected. There is no default and
+no hardcoded AXIAM issuer.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$expectedAudience</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The <code class="prettyprint">aud</code> value this verifier requires
+(CONTRACT.md §10.1 rule 6). CONDITIONAL:
+<code class="prettyprint">null</code> (the default) means no audience check
+at all; once supplied, a token whose <code class="prettyprint">aud</code>
+does not contain it — including one with no
+<code class="prettyprint">aud</code> at all — is rejected. A guard fronting
+a user-facing resource server should
+generally expect <code class="prettyprint">axiam:user</code>.</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -287,11 +408,14 @@ JWKS verifier the §10 middleware already uses).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">81</span>
+    <span class="phpdocumentor-element-found-in__line">151</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Verifies a token against the COMPLETE CONTRACT.md §10.1 minimum local-verification
+set — see the class docblock for the seven rules and for what `firebase/php-jwt`
+does versus what §10.1 requires.</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
                     <span class="phpdocumentor-signature__name">verify</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jwt</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedTenantId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string, mixed&gt;|null</span></code>
@@ -314,7 +438,13 @@ JWKS verifier the §10 middleware already uses).</dd>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                
+                    <section class="phpdocumentor-description"><p>The configured tenant the token's <code class="prettyprint">tenant_id</code> must
+equal (§10.1 rule 4). An empty string fails closed:
+with nothing to compare against, the check would be
+vacuous, and a vacuous tenant check is how a token
+from another tenant gets in.</p>
+</section>
+
             </dd>
             </dl>
 
@@ -347,7 +477,7 @@ failure (never throws on attacker input).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">150</span>
+    <span class="phpdocumentor-element-found-in__line">383</span>
 
     </aside>
 
@@ -413,9 +543,16 @@ issuer/audience/time/nonce-checked.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#toc-constants">Constants</a></li>
                                                                                 <li><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_CLOCK_SKEW_LEEWAY_SECONDS">CLOCK_SKEW_LEEWAY_SECONDS</a></li>
+                                            </ul>
+                </li>
             
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>

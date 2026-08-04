@@ -153,13 +153,18 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003Averify\u0028\u0029",
             "name": "verify",
-            "summary": "",
+            "summary": "Verifies\u0020a\u0020token\u0020against\u0020the\u0020COMPLETE\u0020CONTRACT.md\u0020\u00A710.1\u0020minimum\u0020local\u002Dverification\nset\u0020\u2014\u0020see\u0020the\u0020class\u0020docblock\u0020for\u0020the\u0020seven\u0020rules\u0020and\u0020for\u0020what\u0020\u0060firebase\/php\u002Djwt\u0060\ndoes\u0020versus\u0020what\u0020\u00A710.1\u0020requires.",
             "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verify"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003AverifyIdTokenSignature\u0028\u0029",
             "name": "verifyIdTokenSignature",
             "summary": "\u00A712.4\u0020rules\u00201\u20132\u0020\u0028CONTRACT.md,\u0020OIDC\/SSO\u0020relying\u002Dparty\u0020helpers\u0029\u0020\u2014\u0020algorithm\u0020and\nEd25519\u0020signature\u0020verification\u0020for\u0020an\u0020OIDC\u0020ID\u0020token,\u0020reusing\u0020this\u0020SAME\u0020verifier\u0027s\nkey\u0020cache\u0020and\u0020single\u002Drefetch\u002Don\u002Dunknown\u002D\u0060kid\u0060\u0020behavior\u0020\u0028\u00A712\u0020forbids\u0020forking\u0020the\nJWKS\u0020verifier\u0020the\u0020\u00A710\u0020middleware\u0020already\u0020uses\u0029.",
             "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003ACLOCK_SKEW_LEEWAY_SECONDS",
+            "name": "CLOCK_SKEW_LEEWAY_SECONDS",
+            "summary": "The\u0020single,\u0020named,\u0020bounded\u0020clock\u002Dskew\u0020allowance\u0020applied\u0020to\u0020the\u0020\u0060exp\u0060\u0020and\u0020\u0060nbf\u0060\nchecks\u0020\u0028CONTRACT.md\u0020\u00A710.1\u0020rule\u00207\u0020\u2014\u0020RECOMMENDED\u002060\u0020s\u0029.",
+            "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_CLOCK_SKEW_LEEWAY_SECONDS"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult",
             "name": "LoginResult",
@@ -376,9 +381,14 @@ Search.appendIndex(
             "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/oidc\/callback\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1\u0029\u0020\u2014\u0020step\u00202\u0020of\nupstream\u0020SSO\u003A\u0020consumes\u0020the\u0020single\u002Duse\u0020\u0060\u0024state\u0060,\u0020provisions\u0020or\u0020links\u0020the\u0020user,\u0020and\nestablishes\u0020the\u0020session.\u0020The\u0020session\u0020arrives\u0020as\u0020\u0060Set\u002DCookie\u0060\u0020\u2014\u0020not\u0020in\u0020the\nresponse\u0020body\u0020\u0028\u00A712.1\u0020note\u00206\u0029\u0020\u2014\u0020so\u0020it\u0020is\u0020captured\u0020automatically\u0020via\u0020this\u0020client\u0027s\nshared\u0020\u00A74\u0020cookie\u0020jar\u003B\u0020the\u0020freshly\u002Dissued\u0020\u00A73\u0020CSRF\u0020token\u0020is\u0020captured\u0020too,\u0020exactly\nas\u0020\u007B\u0040see\u0020self\u003A\u003Alogin\u0028\u0029\u007D\u0020does.\u0020\u00A712.4\u0020does\u0020not\u0020apply\u0020here\u003A\u0020no\u0020ID\u0020token\u0020ever\u0020reaches\nthe\u0020SDK\u0020on\u0020the\u0020federation\u0020path.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssoComplete"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AverifyLocally\u0028\u0029",
+            "name": "verifyLocally",
+            "summary": "Verify\u0020an\u0020INBOUND\u0020caller\u0027s\u0020token\u0020and\u0020nothing\u0020else\u0020\u2014\u0020the\u0020seam\u0020every\u0020request\u0020guard\nmust\u0020use\u0020\u0028CONTRACT.md\u0020\u00A710.1\u0020rule\u00208\u0029.\u0020Delegates\u0020straight\u0020to\u0020\u007B\u0040see\u0020JwksVerifier\u003A\u003Averify\u0028\u0029\u007D,\nwhich\u0020applies\u0020the\u0020full\u0020\u00A710.1\u0020minimum\u0020local\u002Dverification\u0020set,\u0020and\u0020returns\u0020\u0060null\u0060\u0020on\nany\u0020failure\u0020with\u0020\u002A\u002Ano\u0020fallback\u0020to\u0020another\u0020credential\u002A\u002A.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_verifyLocally"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AverifyLocallyOrFallback\u0028\u0029",
             "name": "verifyLocallyOrFallback",
-            "summary": "Local\u002Dfirst\u0020JWT\u0020verification\u0020with\u0020a\u0020reactive\u002Drefresh\u0020fallback\u0020\u0028D\u002D02\u0029\u0020\u2014\u0020the\u0020seam\u0020the\nLaravel\/Symfony\u0020framework\u0020bridges\u0020\u0028a\u0020later\u0020plan\u0029\u0020call\u0020for\u0020every\u0020incoming\u0020request.",
+            "summary": "Local\u002Dfirst\u0020JWT\u0020verification\u0020with\u0020a\u0020reactive\u002Drefresh\u0020fallback\u0020\u0028D\u002D02\u0029\u0020\u2014\u0020for\u0020the\u0020SDK\u0027s\nown\u0020OUTBOUND\u0020calls,\u0020where\u0020the\u0020token\u0020being\u0020verified\u0020is\u0020this\u0020client\u0027s\u0020own\u0020and\u0020refreshing\nit\u0020is\u0020the\u0020intended\u0020recovery.\u0020Tries\u0020\u007B\u0040see\u0020JwksVerifier\u003A\u003Averify\u0028\u0029\u007D\u0020first\u0020\u0028no\u0020network\u0020call\non\u0020the\u0020happy\u0020path\u0029\u003B\u0020if\u0020that\u0020fails\u0020\u0028expired\/unknown\u002Dkid\/invalid\u0020token\u0029,\u0020attempts\u0020the\nshared\u0020single\u002Dflight\u0020refresh\u0020\u0028\u00A79,\u0020D\u002D06\u0029\u0020and\u0020re\u002Dverifies\u0020the\u0020FRESH\u0020access\u0020token.\u0020Returns\n\u0060null\u0060\u0020\u2014\u0020never\u0020unverified\u0020claims\u0020\u2014\u0020on\u0020any\u0020failure.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_verifyLocallyOrFallback"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Core\\AuthError",
@@ -578,7 +588,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamMiddleware",
             "name": "AxiamMiddleware",
-            "summary": "Laravel\u0020authentication\u0020middleware\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020extracts\u0020the\u0020bearer\/cookie\ntoken,\u0020verifies\u0020it\u0020via\u0020\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocallyOrFallback\u0028\u0029\u007D\u0020\u2014\u0020local\u0020JWKS\nverification\u0020first,\u0020falling\u0020back\u0020to\u0020the\u0020shared\u0020single\u002Dflight\u0020refresh\u0020\u0028\u00A79,\u0020D\u002D06\u0029\u0020\u2014\u0020and\npopulates\u0020the\u0020\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\u0020\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\u0020on\nsuccess.\u0020Returns\u0020a\u0020standardized\u0020401\u0020JSON\u0020error\u0020body\u0020on\u0020any\u0020failure\u0020\u0028missing\u0020token,\ninvalid\u0020signature,\u0020expired\u002Dand\u002Dunrefreshable\u0020token\u0029.\u0020Never\u0020duplicates\u0020JWKS\u002Dverify\u0020or\nrefresh\u0020logic\u0020itself\u0020\u0028D\u002D02\u0020prohibition\u0029\u0020\u2014\u0020every\u0020security\u002Dcritical\u0020decision\u0020is\u0020made\u0020by\n\u007B\u0040see\u0020AxiamClient\u007D.",
+            "summary": "Laravel\u0020authentication\u0020middleware\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020extracts\u0020the\u0020bearer\/cookie\ntoken,\u0020verifies\u0020it\u0020via\u0020\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocally\u0028\u0029\u007D\u0020\u2014\u0020the\u0020no\u002Dfallback\u0020seam\nmandated\u0020by\u0020\u00A710.1\u0020rule\u00208\u0020\u2014\u0020and\u0020populates\u0020the\u0020\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\n\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\u0020on\u0020success.\u0020Returns\u0020a\u0020standardized\u0020401\u0020JSON\u0020error\u0020body\u0020on\nany\u0020failure\u0020\u0028missing\u0020token,\u0020invalid\u0020signature,\u0020expired\u0020token\u0029.\u0020Never\u0020duplicates\nJWKS\u002Dverify\u0020logic\u0020itself\u0020\u0028D\u002D02\u0020prohibition\u0029\u0020\u2014\u0020every\u0020security\u002Dcritical\u0020decision\u0020is\u0020made\nby\u0020\u007B\u0040see\u0020AxiamClient\u007D.",
             "url": "classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamMiddleware\u003A\u003A__construct\u0028\u0029",
@@ -1418,7 +1428,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAuthSubscriber",
             "name": "AxiamAuthSubscriber",
-            "summary": "Symfony\u0020authentication\u0020subscriber\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020listens\u0020to\n\u0060kernel.request\u0060,\u0020extracts\u0020the\u0020bearer\/cookie\u0020token,\u0020verifies\u0020it\u0020via\n\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocallyOrFallback\u0028\u0029\u007D\u0020\u2014\u0020local\u0020JWKS\u0020verification\u0020first,\nfalling\u0020back\u0020to\u0020the\u0020shared\u0020single\u002Dflight\u0020refresh\u0020\u0028\u00A79,\u0020D\u002D06\u0029\u0020\u2014\u0020and\u0020populates\u0020the\n\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\u0020\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\u0020on\u0020success.",
+            "summary": "Symfony\u0020authentication\u0020subscriber\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020listens\u0020to\n\u0060kernel.request\u0060,\u0020extracts\u0020the\u0020bearer\/cookie\u0020token,\u0020verifies\u0020it\u0020via\n\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocally\u0028\u0029\u007D\u0020\u2014\u0020the\u0020no\u002Dfallback\u0020seam\u0020mandated\u0020by\u0020\u00A710.1\u0020rule\u00208\n\u2014\u0020and\u0020populates\u0020the\u0020\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\u0020\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\non\u0020success.\u0020Short\u002Dcircuits\u0020the\u0020request\u0020with\u0020a\u0020standardized\u0020401\u0020JSON\u0020error\u0020body\u0020on\u0020any\nfailure\u0020\u0028missing\u0020token,\u0020invalid\u0020signature,\u0020expired\u0020token\u0029.\u0020Never\u0020duplicates\nJWKS\u002Dverify\u0020logic\u0020itself\u0020\u0028D\u002D02\u0020prohibition\u0029\u0020\u2014\u0020every\u0020security\u002Dcritical\u0020decision\u0020is\nmade\u0020by\u0020\u007B\u0040see\u0020AxiamClient\u007D.",
             "url": "classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAuthSubscriber\u003A\u003A__construct\u0028\u0029",
@@ -1486,6 +1496,56 @@ Search.appendIndex(
             "summary": "Shared\u0020outcome\u0020\u2192\u0020HTTP\u002Dresponse\u0020translation,\u0020reused\u0020by\u0020\u007B\u0040see\u0020OidcCallbackController\u007D.",
             "url": "classes/Axiam-Sdk-Symfony-OidcLoginController.html#method_toResponse"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\AxiamWebhooks",
+            "name": "AxiamWebhooks",
+            "summary": "Verifies\u0020the\u0020\u0060X\u002DAxiam\u002DSignature\u0060\u0020HMAC\u002DSHA256\u0020header\u0020AXIAM\u0020attaches\u0020to\u0020every\u0020webhook\ndelivery\u0020\u0028CONTRACT.md\u0020\u00A713,\u0020T\u002D145\u0029.\u0020Mirrors\u0020the\u0020server\u0027s\u0020signer\n\u0028\u0060crates\/axiam\u002Dapi\u002Drest\/src\/webhook.rs\u0060\u0027s\u0020\u0060compute_signature_v2\u0060\u0029\u003A\u0020the\u0020MAC\u0020covers\u0020the\nASCII\u0020string\u0020\u0060\u003Ct\u003E.\u003Craw_body\u003E\u0060,\u0020keyed\u0020with\u0020the\u0020webhook\u0020secret\u0027s\u0020raw\u0020UTF\u002D8\u0020bytes.",
+            "url": "classes/Axiam-Sdk-Webhook-AxiamWebhooks.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\AxiamWebhooks\u003A\u003Averify\u0028\u0029",
+            "name": "verify",
+            "summary": "Verifies\u0020a\u0020webhook\u0020delivery\u0027s\u0020\u0060X\u002DAxiam\u002DSignature\u0060\u0020header\u0020against\u0020\u0060\u0024body\u0060\u0020and\nreturns\u0020the\u0020parsed\u0020\u007B\u0040see\u0020WebhookEvent\u007D\u0020on\u0020success.",
+            "url": "classes/Axiam-Sdk-Webhook-AxiamWebhooks.html#method_verify"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\AxiamWebhooks\u003A\u003ADEFAULT_TOLERANCE_SECONDS",
+            "name": "DEFAULT_TOLERANCE_SECONDS",
+            "summary": "The\u0020default\u0020freshness\u0020window\u0020\u0028CONTRACT.md\u0020\u00A713.2\u0029\u003A\u0020a\u0020signature\u0020whose\u0020\u0060t\u003D\u0060\u0020is\u0020more\nthan\u0020this\u0020far\u0020in\u0020the\u0020past\u0020OR\u0020the\u0020future\u0020\u0028relative\u0020to\u0020the\u0020\u0060\u0024now\u0060\u0020clock\u0020\u2014\u0020see\n\u007B\u0040see\u0020self\u003A\u003Averify\u0028\u0029\u007D\u0029\u0020is\u0020rejected.",
+            "url": "classes/Axiam-Sdk-Webhook-AxiamWebhooks.html#constant_DEFAULT_TOLERANCE_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\WebhookEvent",
+            "name": "WebhookEvent",
+            "summary": "A\u0020webhook\u0020delivery\u0020whose\u0020\u0060X\u002DAxiam\u002DSignature\u0060\u0020has\u0020already\u0020been\u0020verified\u0020by\n\u007B\u0040see\u0020AxiamWebhooks\u003A\u003Averify\u0028\u0029\u007D\u0020\u0028CONTRACT.md\u0020\u00A713\u0029.\u0020\u007B\u0040see\u0020self\u003A\u003A\u0024eventType\u007D\u0020and\n\u007B\u0040see\u0020self\u003A\u003A\u0024deliveryId\u007D\u0020are\u0020a\u0020best\u002Deffort\u0020parse\u0020of\u0020the\u0020verified\u0020body\u0027s\u0020\u0060event\u0060\/\u0060id\u0060\nJSON\u0020fields\u0020\u2014\u0020a\u0020non\u002DJSON\u0020or\u0020differently\u002Dshaped\u0020body\u0020still\u0020verifies\u0020successfully\u0020\u0028the\nMAC\u0020only\u0020covers\u0020the\u0020raw\u0020bytes,\u0020not\u0020their\u0020JSON\u0020shape\u0029,\u0020it\u0020simply\u0020leaves\u0020those\u0020two\nproperties\u0020\u0060null\u0060.\u0020Callers\u0020that\u0020need\u0020the\u0020delivery\u0020id\u0020for\u0020at\u002Dleast\u002Donce\u0020dedup\u0020\u0028\u00A713.3\nrule\u00207\u0029\u0020should\u0020prefer\u0020the\u0020\u0060X\u002DAxiam\u002DDelivery\u0060\u0020header\u0020over\u0020relying\u0020solely\u0020on\u0020this\u0020parse.",
+            "url": "classes/Axiam-Sdk-Webhook-WebhookEvent.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\WebhookEvent\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webhook-WebhookEvent.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\WebhookEvent\u003A\u003A\u0024timestamp",
+            "name": "timestamp",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webhook-WebhookEvent.html#property_timestamp"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\WebhookEvent\u003A\u003A\u0024body",
+            "name": "body",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webhook-WebhookEvent.html#property_body"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\WebhookEvent\u003A\u003A\u0024eventType",
+            "name": "eventType",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webhook-WebhookEvent.html#property_eventType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\WebhookEvent\u003A\u003A\u0024deliveryId",
+            "name": "deliveryId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webhook-WebhookEvent.html#property_deliveryId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook\\WebhookVerificationException",
+            "name": "WebhookVerificationException",
+            "summary": "Thrown\u0020by\u0020\u007B\u0040see\u0020AxiamWebhooks\u003A\u003Averify\u0028\u0029\u007D\u0020when\u0020a\u0020webhook\u0020delivery\u0020fails\u0020signature\nverification\u0020\u0028CONTRACT.md\u0020\u00A713.3\u0020rule\u00206\u003A\u0020\u0022fail\u0020closed\u0020and\u0020quiet\u0022\u0029.",
+            "url": "classes/Axiam-Sdk-Webhook-WebhookVerificationException.html"
+        },                {
             "fqsen": "\\",
             "name": "\\",
             "summary": "",
@@ -1545,5 +1605,10 @@ Search.appendIndex(
             "name": "Symfony",
             "summary": "",
             "url": "namespaces/axiam-sdk-symfony.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webhook",
+            "name": "Webhook",
+            "summary": "",
+            "url": "namespaces/axiam-sdk-webhook.html"
         }            ]
 );

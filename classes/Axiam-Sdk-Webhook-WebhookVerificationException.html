@@ -94,41 +94,68 @@
             <div class="phpdocumentor-column -nine phpdocumentor-content">
                                 <section>
                                         <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-webhook.html">Webhook</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">AxiamAuthSubscriber.php</h2>
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    WebhookVerificationException
 
-        
-        
-        
-        
+        <span class="phpdocumentor-element__extends">
+        extends <abbr title="\RuntimeException">RuntimeException</abbr>
+    </span>
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
+
+<div class="phpdocumentor-label-line">
+
+    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
 
 
-        
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Webhook/WebhookVerificationException.php"><a href="files/src-webhook-webhookverificationexception.html"><abbr title="src/Webhook/WebhookVerificationException.php">WebhookVerificationException.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">18</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">Thrown by {@see AxiamWebhooks::verify()} when a webhook delivery fails signature
+verification (CONTRACT.md §13.3 rule 6: &quot;fail closed and quiet&quot;).</p>
+
+
+    <section class="phpdocumentor-description"><p><code class="prettyprint">getMessage()</code> is always a fixed, generic, reason-category string (e.g. &quot;malformed
+header&quot;, &quot;signature mismatch&quot;, &quot;timestamp outside tolerance&quot;) — it NEVER includes the
+expected/computed signature, the raw secret, or any other value that could help an
+attacker forge a signature or leak the secret into a log sink further up the call
+stack. No structured reason code is exposed beyond the message category; callers that
+need to distinguish failure reasons programmatically should not parse the message.</p>
+</section>
+
+
+
+    
+    
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-symfony-axiamauthsubscriber.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Webhook-WebhookVerificationException.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
 
 
 
-    <h4 id="toc-classes">
-        Classes
-        <a href="files/src-symfony-axiamauthsubscriber.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a></dt><dd>Symfony authentication subscriber (D-02, CONTRACT.md §10): listens to
-`kernel.request`, extracts the bearer/cookie token, verifies it via
-{@see AxiamClient::verifyLocally()} — the no-fallback seam mandated by §10.1 rule 8
-— and populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles`
-on success. Short-circuits the request with a standardized 401 JSON error body on any
-failure (missing token, invalid signature, expired token). Never duplicates
-JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is
-made by {@see AxiamClient}.</dd>    </dl>
 
 
 
@@ -137,6 +164,8 @@ made by {@see AxiamClient}.</dd>    </dl>
 
 
 
+
+        
 
         
 
@@ -145,7 +174,7 @@ made by {@see AxiamClient}.</dd>    </dl>
     </article>
                                 </section>
                 <section class="phpdocumentor-on-this-page__sidebar">
-                            
+                                
     <section class="phpdocumentor-on-this-page__content">
         <strong class="phpdocumentor-on-this-page__title">On this page</strong>
 
@@ -153,10 +182,9 @@ made by {@see AxiamClient}.</dd>    </dl>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                        <li><a href="files/src-symfony-axiamauthsubscriber.html#toc-classes">Classes</a></li>
-                                                                                                                    </ul>
+                                                                            </ul>
             </li>
-
+            
             
                     </ul>
     </section>
@@ -175,7 +203,7 @@ made by {@see AxiamClient}.</dd>    </dl>
     </section>
 </section>
         </div>
-        <a href="files/src-symfony-axiamauthsubscriber.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Webhook-WebhookVerificationException.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 
