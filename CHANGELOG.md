@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha24] - 2026-08-04
+
+### Added
+
+- Add AxiamWebhooks::verify signature verifier (CONTRACT §13, T-145)
+
+### Changed
+
+- Device (mTLS) tokens now carry aud=axiam:m2m (#22)
+- Service accounts can use login_client_credentials (#21)
+- Bump coverallsapp/github-action from 2.3.6 to 2.3.8
+
+### Fixed
+
+- SEC-085 — request guards must not substitute the client's own session (#20)
+- Enforce the full CONTRACT §10.1 local-verification set
+
 ## [Unreleased]
 
 ### Security
