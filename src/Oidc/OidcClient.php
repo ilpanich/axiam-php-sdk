@@ -898,7 +898,9 @@ final class OidcClient
         }
 
         $now = time();
-        $skew = $this->clockSkewSec ?? 0;
+        // Non-nullable and already clamped by resolveClockSkewSec() in the constructor,
+        // so there is nothing to coalesce — the same allowance §12.4 rule 5 applies.
+        $skew = $this->clockSkewSec;
         $exp = $claims['exp'] ?? null;
         $iat = $claims['iat'] ?? null;
         if (!is_int($exp) || $exp + $skew < $now) {
