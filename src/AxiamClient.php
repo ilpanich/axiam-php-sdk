@@ -13,7 +13,10 @@ use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\Sensitive;
 use Axiam\Sdk\Oidc\AuthorizationRequest;
 use Axiam\Sdk\Oidc\IntrospectionResult;
+use Axiam\Sdk\Oidc\DeviceAuthorization;
+use Axiam\Sdk\Oidc\ExchangedToken;
 use Axiam\Sdk\Oidc\OidcClient as OidcEngine;
+use Axiam\Sdk\Oidc\VerifiedLogoutToken;
 use Axiam\Sdk\Oidc\OidcConfiguration;
 use Axiam\Sdk\Oidc\OidcTokenSet;
 use Axiam\Sdk\Oidc\SsoCompleteResult;
@@ -686,6 +689,121 @@ final class AxiamClient
         bool $adoptAsCredential = false,
     ): OidcTokenSet {
         return $this->oidc->loginClientCredentials($scope, $tenantId, $configuration, $adoptAsCredential);
+    }
+
+    /**
+     * `POST /oauth2/device_authorization` (CONTRACT.md §14.1) — start the device grant
+     * and obtain the code pair.
+     *
+     * **Unauthenticated by design**: a device that cannot show a browser also cannot hold
+     * a client secret, so this never sends `client_secret` and never refuses a client
+     * built without one.
+     *
+     * @throws AuthError when the discovery document advertises no
+     *                   `device_authorization_endpoint`.
+     */
+    public function deviceAuthorize(
+        ?string $scope = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): DeviceAuthorization {
+        return $this->oidc->deviceAuthorize($scope, $tenantId, $configuration);
+    }
+
+    /**
+     * `POST /oauth2/token` with the device-code grant (CONTRACT.md §14.1) — **one** poll
+     * attempt, for an application driving its own loop. Most callers want
+     * {@see self::deviceLogin()}.
+     */
+    public function devicePoll(
+        Sensitive|string $deviceCode,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): OidcTokenSet {
+        return $this->oidc->devicePoll($deviceCode, $tenantId, $configuration);
+    }
+
+    /**
+     * The composed §14.3 helper: start the grant, hand the caller the user code (before
+     * the first poll), poll to completion.
+     *
+     * Returns the token set; `$adoptAsCredential` is the same opt-in flag
+     * {@see self::loginClientCredentials()} uses (§14.3 rule 4, contract 1.7).
+     *
+     * @param callable(DeviceAuthorization):void $onUserCode Invoked before the first poll.
+     * @param (callable(int):void)|null $sleep Injectable sleeper, for tests.
+     */
+    public function deviceLogin(
+        callable $onUserCode,
+        ?string $scope = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        bool $adoptAsCredential = false,
+        ?callable $sleep = null,
+    ): OidcTokenSet {
+        return $this->oidc->deviceLogin($onUserCode, $scope, $tenantId, $configuration, $adoptAsCredential, $sleep);
+    }
+
+    /**
+     * `POST /oauth2/token` with the RFC 8693 grant (CONTRACT.md §15.1) — exchange a token
+     * for a **narrower** one.
+     *
+     * Requires confidential-client credentials. Never defaults `$actorToken`, never
+     * auto-narrows after `invalid_scope`, never adopts the result.
+     *
+     * @param list<string>|null $scopes
+     * @throws AuthError when no `oidcClientSecret` was configured.
+     */
+    public function tokenExchange(
+        Sensitive|string $subjectToken,
+        Sensitive|string|null $actorToken = null,
+        ?array $scopes = null,
+        ?string $audience = null,
+        ?string $resource = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): ExchangedToken {
+        return $this->oidc->tokenExchange(
+            $subjectToken,
+            $actorToken,
+            $scopes,
+            $audience,
+            $resource,
+            $tenantId,
+            $configuration,
+        );
+    }
+
+    /**
+     * Build the RP-initiated logout URL to redirect the user agent to (CONTRACT.md
+     * §12.7.2). Does **not** clear this client's own session.
+     *
+     * @throws AuthError when the discovery document advertises no `end_session_endpoint`.
+     */
+    public function logoutUrl(
+        Sensitive|string $idToken,
+        ?string $postLogoutRedirectUri = null,
+        ?string $state = null,
+        ?OidcConfiguration $configuration = null,
+    ): string {
+        return $this->oidc->logoutUrl($idToken, $postLogoutRedirectUri, $state, $configuration);
+    }
+
+    /**
+     * Verify a back-channel logout token the OP pushed to this application's
+     * `backchannel_logout_uri` (CONTRACT.md §12.7.3).
+     *
+     * Returns the `sid`/`sub`/`jti` the token names — never a bare `bool`, because the RP
+     * has to know *which* session to end. **Dedup on `jti` yourself**: delivery is
+     * at-least-once.
+     *
+     * @throws AuthError on any failed check.
+     */
+    public function verifyLogoutToken(
+        string $logoutToken,
+        ?OidcConfiguration $configuration = null,
+    ): VerifiedLogoutToken {
+        return $this->oidc->verifyLogoutToken($logoutToken, $configuration);
     }
 
     /**

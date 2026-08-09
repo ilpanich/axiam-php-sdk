@@ -115,6 +115,90 @@ final class AuthzRestClient
         );
     }
 
+    /**
+     * `POST /api/v1/authz/check` returning the **full** decision, including the
+     * CONTRACT.md §11 rule 9 `reason_code`.
+     *
+     * Exists because {@see self::checkAccess()} returns a bare `bool` that predates that
+     * field and cannot carry it without a breaking signature change. The distinction it
+     * surfaces is not cosmetic: `no_grant` means "ask an admin for access",
+     * `denied_by_rule` means "an admin has already decided", and an application that
+     * cannot tell them apart sends users to raise tickets that will be refused.
+     */
+    public function checkAccessDecision(
+        string $action,
+        string $resourceId,
+        ?string $scope = null,
+        ?string $subjectId = null,
+    ): AccessDecision {
+        $response = $this->postCheck($action, $resourceId, $scope, $subjectId);
+        $decoded = json_decode((string) $response->getBody(), true);
+        if (!is_array($decoded)) {
+            throw \Axiam\Sdk\Core\NetworkError::fromResponse($response, 'authz checkAccess: malformed response body');
+        }
+
+        return self::toDecision($decoded);
+    }
+
+    /**
+     * `POST /api/v1/authz/check/batch` returning the **full** decisions, including each
+     * `reason_code` (§11 rule 9). Results preserve input order.
+     *
+     * @param list<array{action:string,resource_id:string,scope?:string|null,subject_id?:string|null}> $checks
+     * @return list<AccessDecision>
+     */
+    public function batchCheckDecisions(array $checks): array
+    {
+        $body = ['checks' => array_map(
+            static fn (array $check): array => array_filter(
+                $check,
+                static fn (mixed $value): bool => $value !== null,
+            ),
+            $checks,
+        )];
+
+        try {
+            $response = $this->http->post('/api/v1/authz/check/batch', ['json' => $body]);
+        } catch (RequestException $e) {
+            throw $this->mapException($e);
+        } catch (GuzzleException $e) {
+            throw \Axiam\Sdk\Core\NetworkError::fromException($e, 'authz batchCheck request failed');
+        }
+
+        $status = $response->getStatusCode();
+        if ($status < 200 || $status >= 300) {
+            throw ErrorMapper::fromResponse($response, 'authz batchCheck failed');
+        }
+
+        $decoded = json_decode((string) $response->getBody(), true);
+        if (!is_array($decoded) || !isset($decoded['results']) || !is_array($decoded['results'])) {
+            throw \Axiam\Sdk\Core\NetworkError::fromResponse($response, 'authz batchCheck: malformed response body');
+        }
+
+        return array_values(array_map(
+            static fn (mixed $result): AccessDecision => self::toDecision(is_array($result) ? $result : []),
+            $decoded['results'],
+        ));
+    }
+
+    /**
+     * Map one decoded decision object.
+     *
+     * §11 rule 9: the reason code is surfaced verbatim, including a value this SDK has
+     * never heard of — the outcome is carried by `allowed` alone, so an unknown code can
+     * never change it.
+     *
+     * @param array<string,mixed> $decoded
+     */
+    private static function toDecision(array $decoded): AccessDecision
+    {
+        return new AccessDecision(
+            allowed: ($decoded['allowed'] ?? false) === true,
+            reason: is_string($decoded['reason'] ?? null) ? $decoded['reason'] : null,
+            reasonCode: is_string($decoded['reason_code'] ?? null) ? $decoded['reason_code'] : null,
+        );
+    }
+
     /** `POST /api/v1/authz/check` — shared by {@see self::checkAccess()} and {@see self::can()}. */
     private function postCheck(string $action, string $resourceId, ?string $scope, ?string $subjectId = null): \Psr\Http\Message\ResponseInterface
     {
