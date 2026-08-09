@@ -38,6 +38,10 @@ final class OidcConfiguration
      * @param list<string> $token_endpoint_auth_methods_supported Client-authentication methods the token endpoint supports (`client_secret_post`, §12.1 note 3).
      * @param list<string> $claims_supported Claims the server may include in an ID token.
      * @param list<string> $grant_types_supported Grant types the token endpoint supports.
+     * @param string|null $device_authorization_endpoint RFC 8628 device authorization endpoint, used by `deviceAuthorize` (§14.1). `null` when the server does not implement the device grant, or when the document came from a non-AXIAM OP — its absence is an error at call time, never a cue to build the URL by concatenation.
+     * @param string|null $end_session_endpoint OIDC RP-Initiated Logout 1.0 endpoint, used by `logoutUrl` (§12.7.2 rule 1). `null` for the same reason, and the rule is stricter here: §12.7.2 rule 1 forbids synthesising this URL from the issuer.
+     * @param bool $backchannel_logout_supported Whether the OP sends back-channel logout tokens.
+     * @param bool $backchannel_logout_session_supported Whether those logout tokens carry `sid`. AXIAM always sends it.
      */
     public function __construct(
         public readonly string $issuer,
@@ -54,6 +58,10 @@ final class OidcConfiguration
         public readonly array $token_endpoint_auth_methods_supported,
         public readonly array $claims_supported,
         public readonly array $grant_types_supported,
+        public readonly ?string $device_authorization_endpoint = null,
+        public readonly ?string $end_session_endpoint = null,
+        public readonly bool $backchannel_logout_supported = false,
+        public readonly bool $backchannel_logout_session_supported = false,
     ) {
     }
 
@@ -86,6 +94,8 @@ final class OidcConfiguration
             return array_values(array_filter($value, 'is_string'));
         };
 
+        $optionalString = static fn (mixed $value): ?string => is_string($value) && $value !== '' ? $value : null;
+
         return new self(
             issuer: $string($wire['issuer'] ?? null, 'issuer'),
             authorization_endpoint: $string($wire['authorization_endpoint'] ?? null, 'authorization_endpoint'),
@@ -101,6 +111,13 @@ final class OidcConfiguration
             token_endpoint_auth_methods_supported: $stringList($wire['token_endpoint_auth_methods_supported'] ?? null, 'token_endpoint_auth_methods_supported'),
             claims_supported: $stringList($wire['claims_supported'] ?? null, 'claims_supported'),
             grant_types_supported: $stringList($wire['grant_types_supported'] ?? null, 'grant_types_supported'),
+            // Optional (§14.1, §12.7.2 rule 1): a server that does not implement these
+            // does not advertise them, so an absent value is a fact about the server —
+            // not a malformed document.
+            device_authorization_endpoint: $optionalString($wire['device_authorization_endpoint'] ?? null),
+            end_session_endpoint: $optionalString($wire['end_session_endpoint'] ?? null),
+            backchannel_logout_supported: ($wire['backchannel_logout_supported'] ?? false) === true,
+            backchannel_logout_session_supported: ($wire['backchannel_logout_session_supported'] ?? false) === true,
         );
     }
 }
