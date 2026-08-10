@@ -46,6 +46,9 @@ final class AuthzRestClient
      */
     private const CHECK_PATH = '/api/v1/authz/check';
 
+    /** §19: the route CONSTANT, never a URL with ids substituted in. */
+    private const BATCH_PATH = '/api/v1/authz/check/batch';
+
     /**
      * @param Client                       $http      The Guzzle client.
      * @param DecisionMemo|null            $memo      §17 memo; disabled when omitted.
@@ -94,7 +97,20 @@ final class AuthzRestClient
      */
     public function checkAccess(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): bool
     {
-        return $this->decodeAllowed($this->postCheck($action, $resourceId, $scope, $subjectId));
+        // Delegates to checkAccessDecision rather than posting directly.
+        //
+        // It used to post directly, through a private helper that had no §16 retry
+        // budget, no §17 memo and no §19 request pair — so the most-used method on this
+        // class was the one method that did none of D5, while the D5 conformance suite
+        // (which drives checkAccessDecision) stayed green. That is precisely the failure
+        // §16.7 was written about: "a tested surface nobody calls is worse than an absent
+        // one, because the passing tests are what stop anyone from looking." Here the
+        // surface was called and the tests looked elsewhere, which is the same hole
+        // seen from the other side.
+        //
+        // Delegating, rather than duplicating the instrumentation, is what stops it
+        // recurring: there is now one instrumented path and no second one to forget.
+        return $this->checkAccessDecision($action, $resourceId, $scope, $subjectId)->allowed;
     }
 
     /**
@@ -118,42 +134,26 @@ final class AuthzRestClient
      */
     public function batchCheck(array $checks): array
     {
-        $body = [
-            'checks' => array_map(
-                static fn (array $check): array => array_filter(
-                    [
-                        'action' => $check['action'],
-                        'resource_id' => $check['resourceId'],
-                        'scope' => $check['scope'] ?? null,
-                    ],
-                    static fn (mixed $value): bool => $value !== null,
-                ),
-                $checks,
+        // Delegates to batchCheckDecisions for the same reason checkAccess delegates to
+        // checkAccessDecision: one instrumented path, and no second one to forget. The
+        // key rename below is the only difference between the two call surfaces — this
+        // method takes `resourceId`, the decision-returning one takes the wire spelling.
+        $decisions = $this->batchCheckDecisions(array_map(
+            static fn (array $check): array => array_filter(
+                [
+                    'action' => $check['action'],
+                    'resource_id' => $check['resourceId'],
+                    'scope' => $check['scope'] ?? null,
+                ],
+                static fn (mixed $value): bool => $value !== null,
             ),
-        ];
+            $checks,
+        ));
 
-        try {
-            $response = $this->http->post('/api/v1/authz/check/batch', ['json' => $body]);
-        } catch (RequestException $e) {
-            throw $this->mapException($e);
-        } catch (GuzzleException $e) {
-            throw \Axiam\Sdk\Core\NetworkError::fromException($e, 'authz batchCheck request failed');
-        }
-
-        $status = $response->getStatusCode();
-        if ($status < 200 || $status >= 300) {
-            throw ErrorMapper::fromResponse($response, 'authz batchCheck failed');
-        }
-
-        $decoded = json_decode((string) $response->getBody(), true);
-        if (!is_array($decoded) || !isset($decoded['results']) || !is_array($decoded['results'])) {
-            throw \Axiam\Sdk\Core\NetworkError::fromResponse($response, 'authz batchCheck: malformed response body');
-        }
-
-        return array_map(
-            static fn (mixed $result): bool => is_array($result) && ($result['allowed'] ?? false) === true,
-            $decoded['results'],
-        );
+        return array_values(array_map(
+            static fn (AccessDecision $decision): bool => $decision->allowed,
+            $decisions,
+        ));
     }
 
     /**
@@ -245,6 +245,30 @@ final class AuthzRestClient
      */
     public function batchCheckDecisions(array $checks): array
     {
+        // §16.2 names batch_check as retry-eligible alongside check_access — it is the
+        // same side-effect-free POST, just plural. Deliberately NOT memoized: the §17
+        // key is per-check, so a batch would have to split into n entries with n keys,
+        // which changes what a partial hit means (some rows from the wire, some from
+        // the memo, one composite result). §17 says nothing about batch, so this takes
+        // the conservative reading rather than inventing semantics.
+        return RetryPolicy::execute(
+            'batchCheck',
+            $this->retry,
+            $this->dispatcher(),
+            fn (int $attempt): array => $this->sendBatch($checks, $attempt),
+            $this->jitter,
+            $this->sleep,
+        );
+    }
+
+    /**
+     * One §16 attempt at the batch call, with its §19 request pair.
+     *
+     * @param list<array{action:string,resource_id:string,scope?:string|null,subject_id?:string|null}> $checks
+     * @return list<AccessDecision>
+     */
+    private function sendBatch(array $checks, int $attempt): array
+    {
         $body = ['checks' => array_map(
             static fn (array $check): array => array_filter(
                 $check,
@@ -253,23 +277,31 @@ final class AuthzRestClient
             $checks,
         )];
 
+        $end = $this->dispatcher()->startRequest('batchCheck', 'POST', self::BATCH_PATH, $attempt);
+
         try {
-            $response = $this->http->post('/api/v1/authz/check/batch', ['json' => $body]);
+            $response = $this->http->post(self::BATCH_PATH, ['json' => $body]);
         } catch (RequestException $e) {
+            $end(null, TelemetryEvent::OUTCOME_FAILURE);
             throw $this->mapException($e);
         } catch (GuzzleException $e) {
+            $end(null, TelemetryEvent::OUTCOME_FAILURE);
             throw \Axiam\Sdk\Core\NetworkError::fromException($e, 'authz batchCheck request failed');
         }
 
         $status = $response->getStatusCode();
         if ($status < 200 || $status >= 300) {
+            $end($status, TelemetryEvent::OUTCOME_FAILURE);
             throw ErrorMapper::fromResponse($response, 'authz batchCheck failed');
         }
 
         $decoded = json_decode((string) $response->getBody(), true);
         if (!is_array($decoded) || !isset($decoded['results']) || !is_array($decoded['results'])) {
+            $end($status, TelemetryEvent::OUTCOME_FAILURE);
             throw \Axiam\Sdk\Core\NetworkError::fromResponse($response, 'authz batchCheck: malformed response body');
         }
+
+        $end($status, TelemetryEvent::OUTCOME_SUCCESS);
 
         return array_values(array_map(
             static fn (mixed $result): AccessDecision => self::toDecision(is_array($result) ? $result : []),
@@ -322,16 +354,6 @@ final class AuthzRestClient
         }
 
         return $response;
-    }
-
-    private function decodeAllowed(\Psr\Http\Message\ResponseInterface $response): bool
-    {
-        $decoded = json_decode((string) $response->getBody(), true);
-        if (!is_array($decoded)) {
-            throw \Axiam\Sdk\Core\NetworkError::fromResponse($response, 'authz checkAccess: malformed response body');
-        }
-
-        return ($decoded['allowed'] ?? false) === true;
     }
 
     private function mapException(RequestException $e): \Axiam\Sdk\Core\AxiamException
