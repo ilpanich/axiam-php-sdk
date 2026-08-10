@@ -40,6 +40,13 @@ use GuzzleHttp\Exception\RequestException;
 final class AuthzRestClient
 {
     /**
+     * The §1 single-check route. Used as the §19 `path template` — the route
+     * constant, never a URL with ids substituted in, because a metric label
+     * carrying a UUID is a cardinality bomb.
+     */
+    private const CHECK_PATH = '/api/v1/authz/check';
+
+    /**
      * @param Client                       $http      The Guzzle client.
      * @param DecisionMemo|null            $memo      §17 memo; disabled when omitted.
      * @param TelemetryDispatcher|null     $telemetry §19 dispatcher; inert when omitted.
@@ -47,13 +54,6 @@ final class AuthzRestClient
      * @param (callable(): float)|null     $jitter    Injected jitter draw, for tests.
      * @param (callable(float): void)|null $sleep     Injected sleep, for tests.
      */
-    /**
-     * The §1 single-check route. Used as the §19 `path template` — the route
-     * constant, never a URL with ids substituted in, because a metric label
-     * carrying a UUID is a cardinality bomb.
-     */
-    private const CHECK_PATH = '/api/v1/authz/check';
-
     public function __construct(
         private readonly Client $http,
         private readonly ?DecisionMemo $memo = null,

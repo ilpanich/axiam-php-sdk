@@ -410,7 +410,7 @@ final class AxiamClient
     private function ensureOpen(): void
     {
         if ($this->closed) {
-            throw new \Axiam\Sdk\Core\NetworkError(
+            throw \Axiam\Sdk\Core\NetworkError::fromMessage(
                 'client is closed: this AxiamClient was shut down with close()',
             );
         }
