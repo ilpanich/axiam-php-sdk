@@ -521,6 +521,7 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/login_mfa.php`](examples/login_mfa.php) — login → MFA → typed `LoginResult`.
 - [`examples/rest_authz.php`](examples/rest_authz.php) — `checkAccess()`/`can()`/`batchCheck()` over REST.
 - [`examples/grpc_checkaccess.php`](examples/grpc_checkaccess.php) — the same three methods over gRPC (long-running runtime, see above).
+- [`examples/telemetry_hook.php`](examples/telemetry_hook.php) — CONTRACT.md §16–§19: the §19 hook, the §16 retry signal, the §19.2 rule 6 clamp warning, and `close()`. Runs without a reachable server — the failure path emits the same events as the success path.
 - [`examples/oidc_login.php`](examples/oidc_login.php) — CONTRACT.md §12: `oidcDiscover`/`oidcBegin`/`oidcExchange`, `loginClientCredentials`, `introspect`, `revoke`.
 - [`examples/laravel_app/`](examples/laravel_app/README.md) — runnable Laravel middleware + Gate example, plus [`oidc_routes.php`](examples/laravel_app/oidc_routes.php) for "Login with AXIAM".
 - [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration), plus [`oidc_services.yaml`](examples/symfony_app/oidc_services.yaml)/[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml) for "Login with AXIAM".

@@ -399,4 +399,111 @@ final class D5ConformanceTest extends TestCase
 
         self::assertSame([], $events);
     }
+
+    // -----------------------------------------------------------------------
+    // §16.7 — the SAME guarantees through the bare-bool surface
+    //
+    // Added after examples/telemetry_hook.php, which drives the ordinary public
+    // API, produced a run with zero retries and zero telemetry events. Every
+    // case above drives checkAccessDecision; checkAccess/can/batchCheck used to
+    // post directly through an uninstrumented helper, so they had no §16 budget
+    // and emitted no §19 pairs — and the green suite above is exactly what kept
+    // anyone from noticing. §16.7's wire-count requirement is satisfied only if
+    // it covers the surface callers actually reach.
+    // -----------------------------------------------------------------------
+
+    public function testCheckAccessBoolSurfaceRetriesOnTheWire(): void
+    {
+        $client = $this->clientFor(self::script([503, 200]));
+
+        self::assertTrue($client->checkAccess('read', self::RESOURCE));
+        self::assertCount(2, $this->sent);
+    }
+
+    public function testCheckAccessBoolSurfaceHonoursTheAttemptCap(): void
+    {
+        $client = $this->clientFor(self::script([503, 503, 503]));
+
+        $this->expectException(NetworkError::class);
+
+        try {
+            $client->checkAccess('read', self::RESOURCE);
+        } finally {
+            self::assertCount(RetryPolicy::MAX_ATTEMPTS, $this->sent);
+        }
+    }
+
+    public function testCanAliasRetriesOnTheWire(): void
+    {
+        // `can` is an alias for check_access (§1), so it inherits the policy or the
+        // alias is a hole in it.
+        $client = $this->clientFor(self::script([503, 200]));
+
+        self::assertTrue($client->can(self::RESOURCE, 'read'));
+        self::assertCount(2, $this->sent);
+    }
+
+    public function testCheckAccessBoolSurfaceEmitsTelemetry(): void
+    {
+        $events = [];
+        $telemetry = new TelemetryDispatcher(static function ($event) use (&$events): void {
+            $events[] = $event;
+        });
+        $client = $this->clientFor(self::script([503, 200]), null, $telemetry);
+
+        $client->checkAccess('read', self::RESOURCE);
+
+        // One request pair per ATTEMPT plus one retry between them (§19.2 rule 5).
+        $kinds = array_map(static fn ($e): string => (new \ReflectionClass($e))->getShortName(), $events);
+        self::assertSame(
+            [
+                'RequestStartEvent',
+                'RequestEndEvent',
+                'RetryEvent',
+                'RequestStartEvent',
+                'RequestEndEvent',
+            ],
+            $kinds,
+        );
+    }
+
+    public function testBatchCheckRetriesOnTheWire(): void
+    {
+        // §16.2 names batch_check as eligible alongside check_access.
+        $batchBody = '{"results":[{"allowed":true,"reason_code":"allowed"}]}';
+        $client = $this->clientFor([
+            new Response(503),
+            new Response(200, ['Content-Type' => 'application/json'], $batchBody),
+        ]);
+
+        $results = $client->batchCheck([['action' => 'read', 'resourceId' => self::RESOURCE]]);
+
+        self::assertSame([true], $results);
+        self::assertCount(2, $this->sent);
+    }
+
+    public function testBatchCheckEmitsTelemetryWithItsOwnPathTemplate(): void
+    {
+        $events = [];
+        $telemetry = new TelemetryDispatcher(static function ($event) use (&$events): void {
+            $events[] = $event;
+        });
+        $batchBody = '{"results":[{"allowed":true,"reason_code":"allowed"}]}';
+        $client = $this->clientFor(
+            [new Response(200, ['Content-Type' => 'application/json'], $batchBody)],
+            null,
+            $telemetry,
+        );
+
+        $client->batchCheck([['action' => 'read', 'resourceId' => self::RESOURCE]]);
+
+        $starts = array_values(array_filter(
+            $events,
+            static fn ($e): bool => $e instanceof \Axiam\Sdk\Core\RequestStartEvent,
+        ));
+        self::assertCount(1, $starts);
+        self::assertSame('batchCheck', $starts[0]->operation);
+        // The route CONSTANT — the batch path, not the single-check one.
+        self::assertSame('/api/v1/authz/check/batch', $starts[0]->pathTemplate);
+    }
 }
