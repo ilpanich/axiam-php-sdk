@@ -56,9 +56,14 @@ final class AuthzRestClientErrorTest extends TestCase
     {
         // A 200 whose body is a JSON scalar (not an object) must fail closed via
         // NetworkError rather than being silently treated as `allowed = false`.
+        // retry: false — this test is about the MAPPING, not about §16. With retry
+        // on, the single queued response is consumed by attempt 1 and attempts 2-3
+        // hit an empty mock queue, failing the test for a reason unrelated to what
+        // it is named for. §16's behaviour has its own wire-count tests in
+        // D5ConformanceTest.
         $rest = new AuthzRestClient($this->client([
             new Response(200, [], '"not-an-object"'),
-        ]));
+        ]), retry: false);
 
         $this->expectException(NetworkError::class);
         $rest->checkAccess('read', 'resource-1');
@@ -91,9 +96,14 @@ final class AuthzRestClientErrorTest extends TestCase
 
     public function testCheckAccessConnectExceptionMapsToNetworkError(): void
     {
+        // retry: false — this test is about the MAPPING, not about §16. With retry
+        // on, the single queued response is consumed by attempt 1 and attempts 2-3
+        // hit an empty mock queue, failing the test for a reason unrelated to what
+        // it is named for. §16's behaviour has its own wire-count tests in
+        // D5ConformanceTest.
         $rest = new AuthzRestClient($this->client([
             new ConnectException('connection refused', $this->request()),
-        ]));
+        ]), retry: false);
 
         $this->expectException(NetworkError::class);
         $rest->checkAccess('read', 'resource-1');
@@ -101,10 +111,15 @@ final class AuthzRestClientErrorTest extends TestCase
 
     public function testBatchCheckServerErrorStatusMapsToNetworkError(): void
     {
+        // retry: false — this test is about the MAPPING, not about §16. With retry
+        // on, the single queued response is consumed by attempt 1 and attempts 2-3
+        // hit an empty mock queue, failing the test for a reason unrelated to what
+        // it is named for. §16's behaviour has its own wire-count tests in
+        // D5ConformanceTest.
         $rest = new AuthzRestClient($this->client(
             [new Response(500, [], (string) json_encode(['error' => 'boom']))],
             httpErrors: false,
-        ));
+        ), retry: false);
 
         $this->expectException(NetworkError::class);
         $rest->batchCheck([['action' => 'read', 'resourceId' => 'r1']]);
@@ -114,9 +129,14 @@ final class AuthzRestClientErrorTest extends TestCase
     {
         // 200 but the `results` key is absent — the documented order/length guarantee
         // cannot be honoured, so this must fail closed rather than return [].
+        // retry: false — this test is about the MAPPING, not about §16. With retry
+        // on, the single queued response is consumed by attempt 1 and attempts 2-3
+        // hit an empty mock queue, failing the test for a reason unrelated to what
+        // it is named for. §16's behaviour has its own wire-count tests in
+        // D5ConformanceTest.
         $rest = new AuthzRestClient($this->client([
             new Response(200, [], (string) json_encode(['unexpected' => true])),
-        ]));
+        ]), retry: false);
 
         $this->expectException(NetworkError::class);
         $rest->batchCheck([['action' => 'read', 'resourceId' => 'r1']]);
@@ -138,9 +158,14 @@ final class AuthzRestClientErrorTest extends TestCase
 
     public function testBatchCheckConnectExceptionMapsToNetworkError(): void
     {
+        // retry: false — this test is about the MAPPING, not about §16. With retry
+        // on, the single queued response is consumed by attempt 1 and attempts 2-3
+        // hit an empty mock queue, failing the test for a reason unrelated to what
+        // it is named for. §16's behaviour has its own wire-count tests in
+        // D5ConformanceTest.
         $rest = new AuthzRestClient($this->client([
             new ConnectException('connection refused', new Request('POST', '/api/v1/authz/check/batch')),
-        ]));
+        ]), retry: false);
 
         $this->expectException(NetworkError::class);
         $rest->batchCheck([['action' => 'read', 'resourceId' => 'r1']]);

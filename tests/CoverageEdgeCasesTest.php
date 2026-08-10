@@ -65,7 +65,12 @@ final class CoverageEdgeCasesTest extends TestCase
         $stack = HandlerStack::create(new MockHandler([
             new RequestException('name resolution failed', new Request('POST', '/api/v1/authz/check')),
         ]));
-        $rest = new AuthzRestClient(new Client(['handler' => $stack]));
+        // retry: false — this test is about the MAPPING, not about §16. With retry
+        // on, the single queued response is consumed by attempt 1 and attempts 2-3
+        // hit an empty mock queue, failing the test for a reason unrelated to what
+        // it is named for. §16's behaviour has its own wire-count tests in
+        // D5ConformanceTest.
+        $rest = new AuthzRestClient(new Client(['handler' => $stack]), retry: false);
 
         $this->expectException(NetworkError::class);
         $rest->checkAccess('read', 'resource-1');

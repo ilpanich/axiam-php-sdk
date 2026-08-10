@@ -8,6 +8,7 @@ use Axiam\Sdk\AccessEnforcer;
 use Axiam\Sdk\Attributes\RequireAccess;
 use Axiam\Sdk\Attributes\RequireRole;
 use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Core\RetryPolicy;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Request as Psr7Request;
@@ -353,9 +354,16 @@ final class AccessEnforcerTest extends TestCase
 
     public function testEnforceAccessNetworkErrorFailsClosedWith503(): void
     {
-        $enforcer = $this->enforcerWith([
+        // §16.4: the retry budget is spent FIRST, and when it is exhausted the guard
+        // denies — the budget is not extended because the caller is a guard, and the
+        // guard does not admit a request because retries were attempted. Queueing the
+        // whole budget is what makes this assert the composed behaviour rather than
+        // the pre-§16 single-attempt one.
+        $enforcer = $this->enforcerWith(array_fill(
+            0,
+            RetryPolicy::MAX_ATTEMPTS,
             new ConnectException('connection refused', new Psr7Request('POST', '/api/v1/authz/check')),
-        ]);
+        ));
 
         $response = $enforcer->enforceAccess(
             self::IDENTITY,
@@ -393,9 +401,16 @@ final class AccessEnforcerTest extends TestCase
 
     public function testNoTokenMaterialInAnyErrorOutput(): void
     {
-        $enforcer = $this->enforcerWith([
+        // §16.4: the retry budget is spent FIRST, and when it is exhausted the guard
+        // denies — the budget is not extended because the caller is a guard, and the
+        // guard does not admit a request because retries were attempted. Queueing the
+        // whole budget is what makes this assert the composed behaviour rather than
+        // the pre-§16 single-attempt one.
+        $enforcer = $this->enforcerWith(array_fill(
+            0,
+            RetryPolicy::MAX_ATTEMPTS,
             new ConnectException('connection refused', new Psr7Request('POST', '/api/v1/authz/check')),
-        ]);
+        ));
 
         $response = $enforcer->enforceAccess(
             self::IDENTITY,
