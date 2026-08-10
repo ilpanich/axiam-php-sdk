@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Rest;
 
+use Axiam\Sdk\Core\TelemetryEvent;
+use Axiam\Sdk\Core\TelemetryDispatcher;
+use Axiam\Sdk\Core\RetryPolicy;
+use Axiam\Sdk\Core\DecisionMemo;
 use Axiam\Sdk\Core\ErrorMapper;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
@@ -35,8 +39,45 @@ use GuzzleHttp\Exception\RequestException;
  */
 final class AuthzRestClient
 {
-    public function __construct(private readonly Client $http)
+    /**
+     * @param Client                       $http      The Guzzle client.
+     * @param DecisionMemo|null            $memo      §17 memo; disabled when omitted.
+     * @param TelemetryDispatcher|null     $telemetry §19 dispatcher; inert when omitted.
+     * @param bool                         $retry     §16.1 disable switch.
+     * @param (callable(): float)|null     $jitter    Injected jitter draw, for tests.
+     * @param (callable(float): void)|null $sleep     Injected sleep, for tests.
+     */
+    /**
+     * The §1 single-check route. Used as the §19 `path template` — the route
+     * constant, never a URL with ids substituted in, because a metric label
+     * carrying a UUID is a cardinality bomb.
+     */
+    private const CHECK_PATH = '/api/v1/authz/check';
+
+    public function __construct(
+        private readonly Client $http,
+        private readonly ?DecisionMemo $memo = null,
+        private readonly ?TelemetryDispatcher $telemetry = null,
+        private readonly bool $retry = true,
+        private $jitter = null,
+        private $sleep = null,
+    ) {
+    }
+
+    /**
+     * The §19 dispatcher, or an inert one when none was supplied.
+     */
+    private function dispatcher(): TelemetryDispatcher
     {
+        return $this->telemetry ?? new TelemetryDispatcher();
+    }
+
+    /**
+     * The §17 memo, or a disabled one when none was supplied.
+     */
+    private function memo(): DecisionMemo
+    {
+        return $this->memo ?? new DecisionMemo();
     }
 
     /**
@@ -131,11 +172,66 @@ final class AuthzRestClient
         ?string $scope = null,
         ?string $subjectId = null,
     ): AccessDecision {
-        $response = $this->postCheck($action, $resourceId, $scope, $subjectId);
+        // §17: consult the memo first. Disabled by default, in which case this is
+        // one array lookup that always misses.
+        $key = DecisionMemo::key($subjectId, $resourceId, $action, $scope);
+        $memoized = $this->memo()->get($key);
+        if ($memoized !== null) {
+            return $memoized;
+        }
+
+        // §16: a POST, but side-effect-free, so it is retry-eligible. Eligibility is
+        // "changes no server state", NOT "is a GET" — gating on the verb would
+        // exclude the single most important operation this policy covers.
+        $decision = RetryPolicy::execute(
+            'checkAccess',
+            $this->retry,
+            $this->dispatcher(),
+            fn (int $attempt): AccessDecision => $this->sendCheck(
+                $action,
+                $resourceId,
+                $scope,
+                $subjectId,
+                $attempt,
+            ),
+            $this->jitter,
+            $this->sleep,
+        );
+
+        // Only a decision the server actually returned is memoized: reaching here
+        // means success, so §17.1 rule 7's ban on caching a failure is structural
+        // rather than a check that could be forgotten.
+        $this->memo()->put($key, $decision);
+
+        return $decision;
+    }
+
+    /**
+     * One §16 attempt at the single-check call, with its §19 request pair.
+     */
+    private function sendCheck(
+        string $action,
+        string $resourceId,
+        ?string $scope,
+        ?string $subjectId,
+        int $attempt,
+    ): AccessDecision {
+        $end = $this->dispatcher()->startRequest('checkAccess', 'POST', self::CHECK_PATH, $attempt);
+
+        try {
+            $response = $this->postCheck($action, $resourceId, $scope, $subjectId);
+        } catch (\Throwable $e) {
+            $end(null, TelemetryEvent::OUTCOME_FAILURE);
+            throw $e;
+        }
+
         $decoded = json_decode((string) $response->getBody(), true);
         if (!is_array($decoded)) {
+            $end($response->getStatusCode(), TelemetryEvent::OUTCOME_FAILURE);
             throw \Axiam\Sdk\Core\NetworkError::fromResponse($response, 'authz checkAccess: malformed response body');
         }
+
+        $end($response->getStatusCode(), TelemetryEvent::OUTCOME_SUCCESS);
 
         return self::toDecision($decoded);
     }
@@ -213,7 +309,7 @@ final class AuthzRestClient
         );
 
         try {
-            $response = $this->http->post('/api/v1/authz/check', ['json' => $body]);
+            $response = $this->http->post(self::CHECK_PATH, ['json' => $body]);
         } catch (RequestException $e) {
             throw $this->mapException($e);
         } catch (GuzzleException $e) {
