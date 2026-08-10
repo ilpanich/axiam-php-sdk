@@ -25,6 +25,18 @@ final class NetworkError extends AxiamException
     /** @var list<string> lowercase header names whose VALUES are never echoed. */
     private const SENSITIVE_HEADERS = ['set-cookie', 'authorization', 'cookie'];
 
+    /**
+     * A server-supplied `Retry-After` hint in milliseconds (CONTRACT.md §16.1),
+     * `null` when the response carried none.
+     *
+     * A parsed duration, never the raw header text, so the sanitization discipline
+     * this class exists to enforce is untouched: a float cannot carry a token, a
+     * URL, or anything else a header might. §16 honors it as a **floor** on the
+     * backoff — the server is stating when it will be ready, so retrying sooner is
+     * not permitted.
+     */
+    public ?float $retryAfterMs = null;
+
     private function __construct(string $message, ?\Throwable $previous = null)
     {
         // $previous, when given, MUST already be sanitized by the caller (a fresh
@@ -59,7 +71,43 @@ final class NetworkError extends AxiamException
             implode('; ', $sanitizedHeaders)
         );
 
-        return new self($message);
+        $error = new self($message);
+        $error->retryAfterMs = self::parseRetryAfterMs($response);
+
+        return $error;
+    }
+
+    /**
+     * Reads `Retry-After` as milliseconds, `null` when absent or unusable.
+     *
+     * Both RFC 7231 forms are accepted: delta-seconds and an HTTP-date. The date
+     * form is not hypothetical — CDNs and proxies commonly send it on `429`/`503`,
+     * and treating it as unparseable would silently discard the server's own
+     * statement about when it will be ready. A non-positive value collapses to
+     * `null` rather than becoming a floor, since a negative minimum wait is
+     * meaningless.
+     */
+    private static function parseRetryAfterMs(ResponseInterface $response): ?float
+    {
+        $header = trim($response->getHeaderLine('Retry-After'));
+        if ($header === '') {
+            return null;
+        }
+
+        if (ctype_digit($header)) {
+            $seconds = (int) $header;
+
+            return $seconds > 0 ? $seconds * 1000.0 : null;
+        }
+
+        $timestamp = strtotime($header);
+        if ($timestamp === false) {
+            return null;
+        }
+
+        $deltaMs = ($timestamp - time()) * 1000.0;
+
+        return $deltaMs > 0 ? $deltaMs : null;
     }
 
     /**

@@ -87,6 +87,15 @@ final class AxiamClient
     private const MFA_VERIFY_PATH = '/api/v1/auth/mfa/verify';
     private const LOGOUT_PATH = '/api/v1/auth/logout';
 
+    /** §17 decision memo. Disabled unless a TTL was configured. */
+    private readonly \Axiam\Sdk\Core\DecisionMemo $decisionMemo;
+
+    /** §19 telemetry dispatcher. Inert unless a hook was installed. */
+    private readonly \Axiam\Sdk\Core\TelemetryDispatcher $telemetry;
+
+    /** §18 shutdown flag, read on every operation. */
+    private bool $closed = false;
+
     private readonly string $tenant;
 
     private readonly ?string $orgSlug;
@@ -215,7 +224,18 @@ final class AxiamClient
         ?string $oidcTenantId = null,
         ?string $expectedIssuer = null,
         ?string $expectedAudience = null,
+        bool $retryEnabled = true,
+        float $decisionMemoTtlMs = 0.0,
+        ?callable $telemetryHook = null,
     ) {
+        // §17.1 rule 1: off unless the caller asked for it. §19: inert unless a hook
+        // was installed.
+        $this->telemetry = new \Axiam\Sdk\Core\TelemetryDispatcher($telemetryHook);
+        $this->decisionMemo = new \Axiam\Sdk\Core\DecisionMemo($decisionMemoTtlMs);
+        // §19.2 rule 6: a clamped setting is reported, not swallowed. Emitted once,
+        // here, because construction is the only moment an operator can act on it.
+        $this->decisionMemo->reportClamp($decisionMemoTtlMs, $this->telemetry);
+
         if ($tenant === '') {
             // D-13/§5 runtime backstop: PHP's type system alone cannot forbid an empty
             // string, only a missing argument. AXIAM is multi-tenant — there is no default
@@ -311,7 +331,12 @@ final class AxiamClient
         $resolvedRestOnly = $restOnly ?? ($grpcTarget === null);
 
         $this->authzDispatcher = new AuthzDispatcher(
-            restClient: new AuthzRestClient($this->authzHttp),
+            restClient: new AuthzRestClient(
+                $this->authzHttp,
+                $this->decisionMemo,
+                $this->telemetry,
+                $retryEnabled,
+            ),
             restOnly: $resolvedRestOnly,
             grpcTarget: $grpcTarget,
             tenantId: $tenant,
@@ -346,6 +371,55 @@ final class AxiamClient
             orgSlug: $orgSlug,
             tenantSlugForSso: $tenant,
         );
+    }
+
+    /**
+     * Releases this client's local resources (CONTRACT.md §18).
+     *
+     * Idempotent — calling it twice is not an error. Cleanup runs from error paths,
+     * and an error path that itself throws hides the original failure.
+     *
+     * **This does not log out.** §18.1 rule 5: shutting down a client releases
+     * *local* resources and never reaches the network. The server-side session
+     * deliberately outlives the client object, which is what lets a process restart
+     * and resume; a `close()` that logged out would silently end every user's
+     * session on each deploy. Call {@see AxiamClient::logout()} first if ending the
+     * session is what you want.
+     *
+     * After this returns, every operation on this client throws a
+     * {@see \Axiam\Sdk\Core\NetworkError} rather than silently reconnecting.
+     */
+    public function close(): void
+    {
+        $this->closed = true;
+        $this->decisionMemo->clear();
+    }
+
+    /**
+     * Throws if {@see AxiamClient::close()} has been called (§18.1 rule 4).
+     *
+     * Use-after-close is an error, not a silent reconnect: a client that quietly
+     * rebuilt its transport would make `close()` meaningless and hide the lifecycle
+     * bug that caused the call.
+     */
+    private function ensureOpen(): void
+    {
+        if ($this->closed) {
+            throw \Axiam\Sdk\Core\NetworkError::fromMessage(
+                'client is closed: this AxiamClient was shut down with close()',
+            );
+        }
+    }
+
+    /**
+     * Drops memoized decisions (§17.1 rule 9).
+     *
+     * Entries are keyed by subject rather than session, so a re-authentication as a
+     * *different* principal would otherwise inherit the previous one's decisions.
+     */
+    private function onCredentialChange(): void
+    {
+        $this->decisionMemo->clear();
     }
 
     /**
@@ -445,6 +519,8 @@ final class AxiamClient
      */
     public function login(string $email, string $password): LoginResult
     {
+        $this->ensureOpen();
+        $this->onCredentialChange();
         $response = $this->post($this->plainHttp, self::LOGIN_PATH, $this->loginBody($email, $password));
 
         return $this->handleLoginResponse($response);
@@ -458,6 +534,8 @@ final class AxiamClient
      */
     public function verifyMfa(Sensitive $challengeToken, string $totpCode): LoginResult
     {
+        $this->ensureOpen();
+        $this->onCredentialChange();
         $response = $this->post($this->plainHttp, self::MFA_VERIFY_PATH, [
             'challenge_token' => $challengeToken->reveal(),
             'totp_code' => $totpCode,
@@ -473,6 +551,8 @@ final class AxiamClient
      */
     public function refresh(): void
     {
+        $this->ensureOpen();
+        $this->onCredentialChange();
         $this->logger->debug('axiam_sdk: token refresh triggered');
         $this->session->refreshIfNeeded()->wait();
     }
@@ -485,6 +565,8 @@ final class AxiamClient
      */
     public function logout(): void
     {
+        $this->ensureOpen();
+        $this->onCredentialChange();
         $claims = $this->currentClaimsOrNull();
         $jti = is_array($claims) ? ($claims['jti'] ?? null) : null;
         if (!is_string($jti) || $jti === '') {
@@ -520,6 +602,7 @@ final class AxiamClient
      */
     public function checkAccess(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): bool
     {
+        $this->ensureOpen();
         return $this->authzDispatcher->checkAccess($action, $resourceId, $scope, $subjectId);
     }
 
@@ -542,6 +625,7 @@ final class AxiamClient
      */
     public function batchCheck(array $checks): array
     {
+        $this->ensureOpen();
         return $this->authzDispatcher->batchCheck($checks);
     }
 

@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **§16 bounded read-only retry policy** (`src/Core/RetryPolicy.php`), wired into
+  `checkAccessDecision`: 3 attempts, 200 ms base, 5 s cap, **full jitter** over `[0, backoff]`,
+  `Retry-After` honored as a floor. This SDK had no §16 policy before — `OidcClient`'s
+  `for ($attempt...)` loop coordinates concurrent refreshes and is a different mechanism — so
+  §11.2 rule 5's requirement had gone unmet since it was written.
+- **§18 `AxiamClient::close()`** — idempotent, clears the memo, and use-after-close throws
+  `NetworkError` rather than silently reconnecting. It does **not** log out and never reaches
+  the network: the server-side session outlives the client object.
+- **§19 telemetry hooks** — `telemetryHook:` on the constructor, plus the closed event
+  hierarchy (`RequestStartEvent`, `RequestEndEvent`, `RetryEvent`, `RefreshEvent`,
+  `ConfigClampedEvent`). A throwing hook cannot fail the operation that fired it, and no event
+  payload can carry a token. One request pair per *attempt*.
+- **§17 decision memo — opt-in, off by default** — `decisionMemoTtlMs:`, clamped to 5 s.
+  Allows and denies memoized identically, failures never memoized, cleared on any credential
+  change. **Reads-your-own-writes is not guaranteed.**
+- **§19.2 rule 6 `ConfigClampedEvent`** — the clamped memo TTL is now reported at construction
+  rather than applied silently. Nothing is emitted for a value already within its limit.
+- `retryEnabled:` (§16.6), default `true`.
+- `NetworkError::$retryAfterMs`, a parsed duration rather than the raw header text, so the
+  sanitization discipline that class enforces is untouched. Both RFC 7231 forms parse.
+
+### Changed
+
+- Re-vendored `CONTRACT.md` at **1.9**. `openapi.json` unchanged — docs-only contract revs.
+- `login`, `verifyMfa`, `refresh` and `logout` clear the decision memo (§17.1 rule 9) and
+  reject after close (§18.1 rule 4).
+
+
 ## [1.0.0-alpha24] - 2026-08-04
 
 ### Added
