@@ -374,11 +374,6 @@ final class AxiamClient
     }
 
     /**
-     * §6.1: cleans up the `0600` temp files backing the client-certificate identity when this
-     * client is destroyed, so no PEM material (least of all the private key) outlives the
-     * object on disk. A no-op when mTLS was not configured.
-     */
-    /**
      * Releases this client's local resources (CONTRACT.md §18).
      *
      * Idempotent — calling it twice is not an error. Cleanup runs from error paths,
@@ -427,6 +422,11 @@ final class AxiamClient
         $this->decisionMemo->clear();
     }
 
+    /**
+     * §6.1: cleans up the `0600` temp files backing the client-certificate identity when this
+     * client is destroyed, so no PEM material (least of all the private key) outlives the
+     * object on disk. A no-op when mTLS was not configured.
+     */
     public function __destruct()
     {
         foreach ([$this->clientCertFile, $this->clientKeyFile] as $file) {
