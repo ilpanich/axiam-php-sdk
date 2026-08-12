@@ -10,6 +10,7 @@ use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\OAuthProtocolError;
 use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Rest\AuthMiddleware;
 use Axiam\Sdk\Session;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
@@ -495,6 +496,22 @@ final class OidcClient
 
     /** The only `subject_token_type`/`actor_token_type` AXIAM accepts. */
     public const ACCESS_TOKEN_TYPE = 'urn:ietf:params:oauth:token-type:access_token';
+
+    /** `grant_type` of the UMA 2.0 ticket grant (CONTRACT.md §20.1). */
+    public const UMA_TICKET_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:uma-ticket';
+
+    /**
+     * The only `claim_token_format` AXIAM implements. §20.2 rule 2 makes the
+     * `claim_token` itself required rather than defaulted; the *format* has one value,
+     * so the SDK supplies it.
+     */
+    public const UMA_CLAIM_TOKEN_FORMAT = 'urn:ietf:params:oauth:token-type:access_token';
+
+    /** The scope a PAT must carry (§20.2 rule 1) — for callers minting one. */
+    public const UMA_PROTECTION_SCOPE = 'uma_protection';
+
+    /** FedAuthz §2.2 resource registration endpoint. */
+    public const RREG_PATH = '/uma2/rreg/resource_set';
 
     /**
      * The `events` member that distinguishes a logout token from an ID token
@@ -1166,6 +1183,335 @@ final class OidcClient
             expiresIn: (int) ($wire['expires_in'] ?? 0),
             redirectUri: $wire['redirect_uri'],
         );
+    }
+
+    // -------------------------------------------------------------------------
+    // §20 UMA 2.0 — Protection API and ticket grant
+    // -------------------------------------------------------------------------
+
+    /**
+     * `POST /uma2/rreg/resource_set` (§20.1) — register a resource set.
+     *
+     * The returned `$id` is **the AXIAM resource id**, directly usable as the
+     * `$resourceId` of a later {@see umaRequestTicket} call and anywhere else this SDK
+     * takes a resource id.
+     *
+     * @param Sensitive|string $pat The Protection API Token — a *client-credentials*
+     *        token carrying the `uma_protection` scope (§20.2 rule 1). This SDK never
+     *        falls back to the session's own token when one is not passed.
+     * @param list<string> $resourceScopes
+     */
+    public function umaRegisterResource(
+        Sensitive|string $pat,
+        string $name,
+        ?string $type = null,
+        array $resourceScopes = [],
+    ): ResourceSet {
+        $response = $this->umaProtectionRequest(
+            'POST',
+            self::RREG_PATH,
+            $pat,
+            'uma register resource failed',
+            self::resourceSetWire($name, $type, $resourceScopes),
+        );
+
+        return self::resourceSetFromWire($response, 'uma register resource');
+    }
+
+    /** `GET /uma2/rreg/resource_set/{id}` (§20.1) — read a registered resource set. */
+    public function umaReadResource(Sensitive|string $pat, string $id): ResourceSet
+    {
+        $response = $this->umaProtectionRequest(
+            'GET',
+            self::RREG_PATH . '/' . rawurlencode($id),
+            $pat,
+            'uma read resource failed',
+        );
+
+        return self::resourceSetFromWire($response, 'uma read resource');
+    }
+
+    /**
+     * `PUT /uma2/rreg/resource_set/{id}` (§20.1) — replace a resource set's state.
+     *
+     * **`$resourceScopes` replaces the declared list; it does not merge with it**
+     * (§20.2 rule 8). This method deliberately performs no read-modify-write: folding
+     * the current scopes into the payload as a convenience would make removing a scope
+     * impossible through this SDK.
+     *
+     * @param list<string> $resourceScopes
+     */
+    public function umaUpdateResource(
+        Sensitive|string $pat,
+        string $id,
+        string $name,
+        ?string $type = null,
+        array $resourceScopes = [],
+    ): ResourceSet {
+        $response = $this->umaProtectionRequest(
+            'PUT',
+            self::RREG_PATH . '/' . rawurlencode($id),
+            $pat,
+            'uma update resource failed',
+            self::resourceSetWire($name, $type, $resourceScopes),
+        );
+
+        return self::resourceSetFromWire($response, 'uma update resource');
+    }
+
+    /** `DELETE /uma2/rreg/resource_set/{id}` (§20.1) — deregister a resource set. */
+    public function umaDeleteResource(Sensitive|string $pat, string $id): void
+    {
+        $this->umaProtectionRequest(
+            'DELETE',
+            self::RREG_PATH . '/' . rawurlencode($id),
+            $pat,
+            'uma delete resource failed',
+        );
+    }
+
+    /**
+     * `GET /uma2/rreg/resource_set` (§20.1) — the ids **this client** registered.
+     *
+     * Not the tenant's resource tree: the server scopes the listing to the registering
+     * client, so a PAT is not an enumeration handle.
+     *
+     * @return list<string>
+     */
+    public function umaListResources(Sensitive|string $pat): array
+    {
+        $response = $this->umaProtectionRequest('GET', self::RREG_PATH, $pat, 'uma list resources failed');
+        $decoded = json_decode((string) $response->getBody(), true);
+        if (!is_array($decoded)) {
+            throw NetworkError::fromMessage('uma list resources: response body is not a JSON array');
+        }
+
+        return self::stringList($decoded);
+    }
+
+    /**
+     * `POST /uma2/perm` (§20.1) — mint a permission ticket for the pairs a caller lacks.
+     *
+     * The ticket comes back wrapped: for its 60-second life it is the credential that
+     * converts into an RPT, and a short lifetime is not the same as a harmless one
+     * (§20.6).
+     *
+     * @param list<RequestedPermission> $permissions
+     */
+    public function umaRequestTicket(Sensitive|string $pat, array $permissions): Sensitive
+    {
+        $body = array_map(
+            static fn (RequestedPermission $permission): array => [
+                'resource_id' => $permission->resourceId,
+                'resource_scopes' => $permission->resourceScopes,
+            ],
+            array_values($permissions),
+        );
+
+        $response = $this->umaProtectionRequest('POST', '/uma2/perm', $pat, 'uma request ticket failed', $body);
+        $wire = self::decodeJsonObject($response, 'uma request ticket: response body is not a JSON object');
+
+        $ticket = $wire['ticket'] ?? null;
+        if (!is_string($ticket) || $ticket === '') {
+            throw NetworkError::fromMessage('uma request ticket: malformed PermissionTicketResponse (missing ticket)');
+        }
+
+        return new Sensitive($ticket);
+    }
+
+    /**
+     * `POST /oauth2/token` with the UMA ticket grant (§20.1) — redeem a permission
+     * ticket for a Requesting Party Token.
+     *
+     * Unlike the Protection API above, this is a token-endpoint grant: the *client*
+     * authenticates through the form body (`client_secret_post`), so a client with no
+     * secret fails here client-side with no wire call.
+     *
+     * What this method deliberately does **not** do:
+     *
+     * - **No retry, ever** (§20.2 rule 6) — not on `5xx`, not on a timeout, not on
+     *   `invalid_grant`. This is the one documented exception to §16, and it is a
+     *   security rule rather than a performance one: the ticket is consumed *before* the
+     *   request is evaluated, so a failed exchange has already spent it, and a retry is a
+     *   second redemption — exactly the concurrent redemption whose measured residual
+     *   ilpanich/axiam#302 records. This SDK gets that for free: no `/oauth2/*` call
+     *   passes through {@see \Axiam\Sdk\Core\RetryPolicy}, and the transport this class
+     *   holds carries no {@see \Axiam\Sdk\Rest\RefreshMiddleware}.
+     * - **No defaulted `$claimToken`** (rule 2). It is the only channel that names the
+     *   requesting party; defaulting it to the resource server's own PAT would mint an
+     *   RPT for the resource server rather than for the user.
+     * - **No auto-narrowing on `access_denied`** (rule 3). A partial grant is refused
+     *   whole, and whether two-of-three permissions is useful is the application's
+     *   judgment, not this SDK's.
+     * - **No adoption** (rule 4). The RPT is the *requesting party's* token; adopting it
+     *   would re-privilege every later call this resource server makes as that user.
+     * - **No refresh token** (rule 5) — the grant issues none, and
+     *   {@see RequestingPartyToken} has nowhere to put one. Re-run the grant with a new
+     *   ticket to get a fresh RPT.
+     *
+     * The four ticket refusals — unknown, expired, already used, minted by another
+     * client — all arrive as one `invalid_grant`, and this SDK does not guess which
+     * (§20.4): the server collapses them because telling them apart lets a caller probe
+     * for live ticket handles.
+     *
+     * @throws AuthError when no `clientSecret` is configured.
+     */
+    public function umaExchangeTicket(
+        Sensitive|string $ticket,
+        Sensitive|string $claimToken,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): RequestingPartyToken {
+        $clientId = $this->requireClientId('umaExchangeTicket');
+        $configuration ??= $this->oidcDiscover();
+
+        $form = [
+            'grant_type' => self::UMA_TICKET_GRANT_TYPE,
+            'ticket' => self::exposeSecret($ticket),
+            'claim_token' => self::exposeSecret($claimToken),
+            'claim_token_format' => self::UMA_CLAIM_TOKEN_FORMAT,
+            'client_id' => $clientId,
+            'client_secret' => $this->requireClientSecret('umaExchangeTicket'),
+        ];
+
+        $url = $this->endpointUrl($configuration->token_endpoint, $tenantId);
+        // `access_denied` arrives as HTTP 403 on this grant (UMA 2.0 §3.3.6), where
+        // RFC 8628's is a 400. ErrorMapper::fromOAuth2Response dispatches on the `error`
+        // field before the status, so it maps correctly without a status-specific branch
+        // here — which is what §20.4 asks for.
+        $response = $this->postForm($url, $form, 'uma ticket exchange failed');
+        $wire = self::decodeJsonObject($response, 'uma ticket exchange: response body is not a JSON object');
+
+        $accessToken = $wire['access_token'] ?? null;
+        $tokenType = $wire['token_type'] ?? null;
+        $expiresIn = $wire['expires_in'] ?? null;
+        if (!is_string($accessToken) || $accessToken === '' || !is_string($tokenType) || !is_int($expiresIn)) {
+            throw NetworkError::fromMessage(
+                'uma ticket exchange: malformed TokenResponse (missing access_token/token_type/expires_in)'
+            );
+        }
+
+        return new RequestingPartyToken(
+            accessToken: new Sensitive($accessToken),
+            tokenType: $tokenType,
+            expiresIn: $expiresIn,
+        );
+    }
+
+    /**
+     * Parse a `WWW-Authenticate: UMA …` header (§20.3) — pure local computation.
+     *
+     * **Performs no exchange**, deliberately: the `as_uri` names an authorization server
+     * this client has not necessarily chosen to trust. See {@see UmaChallenge::parse()}.
+     */
+    public function umaParseChallenge(string $header): ?UmaChallenge
+    {
+        return UmaChallenge::parse($header);
+    }
+
+    /**
+     * Format a `WWW-Authenticate: UMA` header (§20.3, emit half) — pure local
+     * computation, for a resource server that has just minted a ticket.
+     */
+    public function umaChallengeHeader(string $realm, string $asUri, Sensitive|string $ticket): string
+    {
+        return UmaChallenge::header($realm, $asUri, $ticket);
+    }
+
+    /**
+     * One Protection API call, PAT-authenticated (§20.2 rule 1).
+     *
+     * The PAT travels as a per-request Guzzle option rather than a header because
+     * {@see \Axiam\Sdk\Rest\AuthMiddleware} overwrites `Authorization` unconditionally;
+     * a header set here would be replaced by the session's token, which is the silent
+     * fallback rule 1 forbids. See {@see \Axiam\Sdk\Rest\AuthMiddleware::CREDENTIAL_OVERRIDE_OPTION}.
+     *
+     * @param array<mixed>|null $json
+     */
+    private function umaProtectionRequest(
+        string $method,
+        string $path,
+        Sensitive|string $pat,
+        string $context,
+        ?array $json = null,
+    ): ResponseInterface {
+        $options = [AuthMiddleware::CREDENTIAL_OVERRIDE_OPTION => self::exposeSecret($pat)];
+        if ($json !== null) {
+            $options['json'] = $json;
+        }
+
+        try {
+            return $this->http->request($method, $path, $options);
+        } catch (RequestException $e) {
+            // §20.4 maps the Protection API by status (401 / 403 / 400), not through the
+            // OAuth2 `error` rows — those belong to the token endpoint.
+            throw $this->mapRequestException($e, $context, oauth2: false);
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, $context);
+        }
+    }
+
+    /**
+     * The registration payload. `type` is omitted rather than sent empty when the caller
+     * gave none (§12.1's absent-optional rule), leaving the server to apply its
+     * `uma_resource` default.
+     *
+     * @param list<string> $resourceScopes
+     *
+     * @return array<string,mixed>
+     */
+    private static function resourceSetWire(string $name, ?string $type, array $resourceScopes): array
+    {
+        $wire = ['name' => $name, 'resource_scopes' => array_values($resourceScopes)];
+        if ($type !== null && $type !== '') {
+            $wire['type'] = $type;
+        }
+
+        return $wire;
+    }
+
+    private static function resourceSetFromWire(ResponseInterface $response, string $context): ResourceSet
+    {
+        $wire = self::decodeJsonObject($response, $context . ': response body is not a JSON object');
+
+        $name = $wire['name'] ?? null;
+        if (!is_string($name)) {
+            throw NetworkError::fromMessage($context . ': malformed ResourceSet (missing name)');
+        }
+
+        $id = $wire['_id'] ?? null;
+        $type = $wire['type'] ?? null;
+        $scopes = $wire['resource_scopes'] ?? [];
+
+        return new ResourceSet(
+            name: $name,
+            id: is_string($id) && $id !== '' ? $id : null,
+            type: is_string($type) && $type !== '' ? $type : null,
+            resourceScopes: is_array($scopes) ? self::stringList($scopes) : [],
+        );
+    }
+
+    /**
+     * The string members of a decoded JSON array, in order.
+     *
+     * A non-string member is dropped rather than fataling the call: neither a scope list
+     * nor an id list is a credential, and a server that grows a richer member should not
+     * take an otherwise-usable response down with it.
+     *
+     * @param array<mixed> $values
+     *
+     * @return list<string>
+     */
+    private static function stringList(array $values): array
+    {
+        $strings = [];
+        foreach ($values as $value) {
+            if (is_string($value)) {
+                $strings[] = $value;
+            }
+        }
+
+        return $strings;
     }
 
     // -------------------------------------------------------------------------

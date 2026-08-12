@@ -30,6 +30,19 @@ final class AuthMiddleware
     /** @var list<string> HTTP methods §3 requires the CSRF header on. */
     private const STATE_CHANGING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
 
+    /**
+     * Per-request Guzzle option naming a bearer credential that is **not** the session's
+     * (CONTRACT.md §20.2 rule 1: the UMA Protection API carries a PAT).
+     *
+     * It exists because this middleware overwrites `Authorization` unconditionally — it
+     * has to, so a request retried after a single-flight refresh is re-decorated with the
+     * fresh token rather than the stale one it already carries. A caller therefore cannot
+     * express "use *this* credential" by setting the header; it would be silently
+     * replaced by the session token, which is exactly the fallback §20.2 rule 1 forbids.
+     * When this option is present the session token is never consulted.
+     */
+    public const CREDENTIAL_OVERRIDE_OPTION = 'axiam_credential_override';
+
     /** @param Session $session Session supplying the tenant, bearer token and CSRF token. */
     public function __construct(private readonly Session $session)
     {
@@ -67,7 +80,12 @@ final class AuthMiddleware
             // (cookie-sourced OR client-credentials-adopted) to an /oauth2/* request.
             $isOAuth2Path = str_starts_with($request->getUri()->getPath(), '/oauth2/');
 
-            $accessToken = $isOAuth2Path ? null : $this->session->accessToken();
+            $override = $options[self::CREDENTIAL_OVERRIDE_OPTION] ?? null;
+            $accessToken = match (true) {
+                $isOAuth2Path => null,
+                \is_string($override) && $override !== '' => $override,
+                default => $this->session->accessToken(),
+            };
             if ($accessToken !== null) {
                 $request = $request->withHeader('Authorization', 'Bearer ' . $accessToken);
             }

@@ -107,7 +107,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15 (including
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification) — the binding,
 cross-language behavioral contract every
@@ -388,6 +388,53 @@ Most of what this method does is refuse to be helpful:
 - **No refresh token, ever** — `ExchangedToken` has no such property. Re-run the exchange.
 - **No adoption**, and no flag to enable it — a MUST NOT, where `loginClientCredentials()`
   adoption is a MAY.
+
+## UMA 2.0 — Protection API and ticket grant (CONTRACT.md §20)
+
+The resource-server side of User-Managed Access: register what you guard, ask the
+authorization server what a caller would need, and redeem the resulting ticket.
+
+```php
+// A PAT is a client-credentials token carrying `uma_protection` — never a user token,
+// and never this client's own session (§20.2 rule 1).
+$pat = $client->loginClientCredentials(scope: OidcClient::UMA_PROTECTION_SCOPE)->accessToken;
+
+$resource = $client->umaRegisterResource($pat, 'invoice-7', 'document', ['view']);
+
+// The returned id IS the AXIAM resource id — no translation step.
+$ticket = $client->umaRequestTicket($pat, [
+    new RequestedPermission($resource->id, ['view']),
+]);
+
+header($client->umaChallengeHeader('invoices', $issuer, $ticket));
+```
+
+…and on the client side, having caught that `401`:
+
+```php
+$challenge = $client->umaParseChallenge($response->getHeaderLine('WWW-Authenticate'));
+$rpt = $client->umaExchangeTicket($challenge->ticket, $usersAccessToken);
+```
+
+The rules this surface exists to enforce:
+
+- **A ticket is never retried** — not on `5xx`, not on a timeout, not on `invalid_grant`.
+  It is the one documented exception to §16's retry policy, and a security rule rather
+  than a performance one: the ticket is consumed *before* the exchange is evaluated, so a
+  failed exchange has already spent it and a retry is a *second redemption*. Under
+  concurrency that is exactly the case whose measured residual
+  [`ilpanich/axiam#302`](https://github.com/ilpanich/axiam/issues/302) records. On failure,
+  request a **new** ticket.
+- **`umaParseChallenge()` does not exchange what it parsed.** The `as_uri` names an
+  authorization server you have not necessarily chosen to trust; auto-exchanging would send
+  the requesting party's `claim_token` to whatever host answered the `401`.
+- **`$claimToken` is required, never defaulted.** It is the only channel that names the
+  requesting party — defaulting it to your own PAT would mint an RPT for *you*.
+- **No auto-narrowing on `access_denied`.** A partial grant is refused whole; whether
+  two-of-three permissions is useful is your application's judgment, not the SDK's.
+- **The RPT is never adopted** as this client's credentials, and carries no refresh token.
+- **`umaUpdateResource()` replaces the scope list rather than merging it**, so omitting a
+  scope removes it. There is no read-modify-write.
 
 ## Logout — RP-initiated and back-channel (CONTRACT.md §12.7)
 
