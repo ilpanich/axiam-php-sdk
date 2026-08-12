@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **§20 UMA 2.0 — Protection API and ticket grant.** Nine methods on `AxiamClient`:
+  `umaRegisterResource`, `umaReadResource`, `umaUpdateResource`, `umaDeleteResource`,
+  `umaListResources`, `umaRequestTicket`, `umaExchangeTicket`, and the two local
+  challenge helpers `umaParseChallenge` / `umaChallengeHeader`. New value objects
+  `ResourceSet`, `RequestedPermission`, `RptPermission`, `RequestingPartyToken` and
+  `UmaChallenge` under `Axiam\Sdk\Oidc`.
+
+  The load-bearing rules, all asserted in `tests/OidcUmaTest.php`:
+
+  - **`umaExchangeTicket` is never retried** (§20.2 rule 6) — not on `5xx`, not on a
+    timeout, not on `invalid_grant`. This is the one documented exception to §16, and a
+    security rule rather than a performance one: the ticket is consumed *before* the
+    exchange is evaluated, so a retry is a second redemption — the concurrency case whose
+    measured residual `ilpanich/axiam#302` records.
+  - **`umaParseChallenge` performs no exchange** (§20.3). The `as_uri` names an
+    authorization server the caller has not chosen to trust.
+  - **The RPT is never adopted** as this client's credentials (§20.2 rule 4), and carries
+    no refresh token (rule 5) — `RequestingPartyToken` has nowhere to put one.
+  - **`umaUpdateResource` replaces the scope list rather than merging it** (§20.2 rule 8);
+    there is no read-modify-write, so omitting a scope removes it.
+
 - **§16 bounded read-only retry policy** (`src/Core/RetryPolicy.php`), wired into
   `checkAccessDecision`: 3 attempts, 200 ms base, 5 s cap, **full jitter** over `[0, backoff]`,
   `Retry-After` honored as a floor. This SDK had no §16 policy before — `OidcClient`'s
@@ -32,9 +53,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Re-vendored `CONTRACT.md` at **1.9**. `openapi.json` unchanged — docs-only contract revs.
+- Re-vendored `CONTRACT.md` at **1.10** and `openapi.json` (the server's `/uma2/*` surface).
 - `login`, `verifyMfa`, `refresh` and `logout` clear the decision memo (§17.1 rule 9) and
   reject after close (§18.1 rule 4).
+- `AuthMiddleware` gained `CREDENTIAL_OVERRIDE_OPTION`, a per-request Guzzle option naming a
+  bearer credential that is not the session's. The middleware overwrites `Authorization`
+  unconditionally — it has to, so a request retried after a single-flight refresh is
+  re-decorated with the fresh token — which left no way for a caller to say "use *this*
+  credential". The Protection API needs exactly that, because §20.2 rule 1 forbids falling
+  back to the session token when a PAT was asked for.
 
 
 ## [1.0.0-alpha24] - 2026-08-04

@@ -19,8 +19,12 @@ use Axiam\Sdk\Oidc\OidcClient as OidcEngine;
 use Axiam\Sdk\Oidc\VerifiedLogoutToken;
 use Axiam\Sdk\Oidc\OidcConfiguration;
 use Axiam\Sdk\Oidc\OidcTokenSet;
+use Axiam\Sdk\Oidc\RequestedPermission;
+use Axiam\Sdk\Oidc\RequestingPartyToken;
+use Axiam\Sdk\Oidc\ResourceSet;
 use Axiam\Sdk\Oidc\SsoCompleteResult;
 use Axiam\Sdk\Oidc\SsoStartResult;
+use Axiam\Sdk\Oidc\UmaChallenge;
 use Axiam\Sdk\Rest\AuthMiddleware;
 use Axiam\Sdk\Rest\AuthzRestClient;
 use Axiam\Sdk\Rest\RefreshMiddleware;
@@ -856,6 +860,109 @@ final class AxiamClient
             $tenantId,
             $configuration,
         );
+    }
+
+    /**
+     * `POST /uma2/rreg/resource_set` (CONTRACT.md §20.1) — register a UMA resource set.
+     *
+     * The returned id **is** the AXIAM resource id, usable directly as a
+     * {@see RequestedPermission}'s `$resourceId`.
+     *
+     * @param Sensitive|string $pat A client-credentials token carrying `uma_protection`
+     *        (§20.2 rule 1) — never this client's session token.
+     * @param list<string> $resourceScopes
+     */
+    public function umaRegisterResource(
+        Sensitive|string $pat,
+        string $name,
+        ?string $type = null,
+        array $resourceScopes = [],
+    ): ResourceSet {
+        return $this->oidc->umaRegisterResource($pat, $name, $type, $resourceScopes);
+    }
+
+    /** `GET /uma2/rreg/resource_set/{id}` (CONTRACT.md §20.1). */
+    public function umaReadResource(Sensitive|string $pat, string $id): ResourceSet
+    {
+        return $this->oidc->umaReadResource($pat, $id);
+    }
+
+    /**
+     * `PUT /uma2/rreg/resource_set/{id}` (CONTRACT.md §20.1) — replace a resource set.
+     *
+     * `$resourceScopes` **replaces** the declared list rather than merging with it
+     * (§20.2 rule 8), so omitting a scope removes it.
+     *
+     * @param list<string> $resourceScopes
+     */
+    public function umaUpdateResource(
+        Sensitive|string $pat,
+        string $id,
+        string $name,
+        ?string $type = null,
+        array $resourceScopes = [],
+    ): ResourceSet {
+        return $this->oidc->umaUpdateResource($pat, $id, $name, $type, $resourceScopes);
+    }
+
+    /** `DELETE /uma2/rreg/resource_set/{id}` (CONTRACT.md §20.1). */
+    public function umaDeleteResource(Sensitive|string $pat, string $id): void
+    {
+        $this->oidc->umaDeleteResource($pat, $id);
+    }
+
+    /**
+     * `GET /uma2/rreg/resource_set` (CONTRACT.md §20.1) — the ids this client registered.
+     *
+     * @return list<string>
+     */
+    public function umaListResources(Sensitive|string $pat): array
+    {
+        return $this->oidc->umaListResources($pat);
+    }
+
+    /**
+     * `POST /uma2/perm` (CONTRACT.md §20.1) — mint a permission ticket.
+     *
+     * @param list<RequestedPermission> $permissions
+     */
+    public function umaRequestTicket(Sensitive|string $pat, array $permissions): Sensitive
+    {
+        return $this->oidc->umaRequestTicket($pat, $permissions);
+    }
+
+    /**
+     * The UMA ticket grant (CONTRACT.md §20.1) — redeem a permission ticket for an RPT.
+     *
+     * **Never retried** (§20.2 rule 6, the one documented exception to §16): a ticket is
+     * spent whether or not the exchange succeeded, so a retry is a second redemption. A
+     * failure surfaces; request a *new* ticket. The result is never adopted as this
+     * client's credentials and carries no refresh token.
+     *
+     * @throws AuthError when no `oidcClientSecret` was configured.
+     */
+    public function umaExchangeTicket(
+        Sensitive|string $ticket,
+        Sensitive|string $claimToken,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): RequestingPartyToken {
+        return $this->oidc->umaExchangeTicket($ticket, $claimToken, $tenantId, $configuration);
+    }
+
+    /**
+     * Parse a `WWW-Authenticate: UMA …` header (CONTRACT.md §20.3) — local computation,
+     * and deliberately **no** exchange of the ticket it finds.
+     */
+    public function umaParseChallenge(string $header): ?UmaChallenge
+    {
+        return $this->oidc->umaParseChallenge($header);
+    }
+
+    /** Format a `WWW-Authenticate: UMA` header (CONTRACT.md §20.3, emit half). */
+    public function umaChallengeHeader(string $realm, string $asUri, Sensitive|string $ticket): string
+    {
+        return $this->oidc->umaChallengeHeader($realm, $asUri, $ticket);
     }
 
     /**
