@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **§20.3 challenge emission from the §11 enforcer.** `AccessEnforcer`'s new third
+  constructor argument takes a `UmaChallenger` (realm, `as_uri`, PAT, client); with one, a
+  `#[RequireAccess]` denial mints a permission ticket for the action that was refused and
+  returns it as `WWW-Authenticate: UMA` alongside the unchanged 403 body. Because both
+  framework bridges delegate every §11 decision to that one enforcer, configuring it once
+  covers Laravel and Symfony alike.
+
+  It is **opt-in** because emitting a challenge means minting a credential: an enforcer that
+  did it by default would turn every unauthorized request into a Protection API call, which
+  is a denial-of-service amplifier pointed at your own authorization server. An allow mints
+  nothing. And a **minting failure is not an escalation** — an expired PAT or an unreachable
+  Protection API still yields the plain 403, never a 503 and never an allow. Both are
+  asserted by counting Protection API requests. The requested scope is the AXIAM *action*,
+  so the ticket asks for exactly the authority just refused and the engine's deny rules keep
+  applying to whatever RPT comes back.
+
+  Paired with the new `examples/uma_resource_server.php` and `examples/uma_client.php`,
+  which run both halves — including the trust decision §20.3 keeps in the caller's hands
+  rather than auto-exchanging against whatever host a 403 named.
+
 - **§20 UMA 2.0 — Protection API and ticket grant.** Nine methods on `AxiamClient`:
   `umaRegisterResource`, `umaReadResource`, `umaUpdateResource`, `umaDeleteResource`,
   `umaListResources`, `umaRequestTicket`, `umaExchangeTicket`, and the two local

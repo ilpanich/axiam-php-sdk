@@ -436,6 +436,35 @@ The rules this surface exists to enforce:
 - **`umaUpdateResource()` replaces the scope list rather than merging it**, so omitting a
   scope removes it. There is no read-modify-write.
 
+### Emitting the challenge from the §11 enforcer
+
+Both framework bridges delegate every §11 decision to one `AccessEnforcer`, so a
+`UmaChallenger` handed to that enforcer covers Laravel and Symfony alike:
+
+```php
+$challenger = new UmaChallenger('invoices', $client->oidcDiscover()->issuer, $pat, $client);
+$enforcer = new AccessEnforcer($client, $logger, $challenger);
+
+// A denied #[RequireAccess] now answers 403 with
+//   WWW-Authenticate: UMA realm="invoices", as_uri="…", ticket="…"
+```
+
+Two properties are deliberate, and both are asserted by counting Protection API requests:
+
+- **Opt-in.** Emitting a challenge means minting a credential. An enforcer that did that on
+  every denial by default would put a Protection API call — and a live ticket — behind every
+  unauthorized request, which is a denial-of-service amplifier pointed at your own
+  authorization server. An allow mints nothing, and neither does a 401 or a fail-closed 503:
+  only a *resource denial* is answerable with a ticket.
+- **A minting failure is not an escalation.** An expired PAT or an unreachable Protection API
+  still yields the plain 403 — never a 503, and never an allow.
+
+The requested scope is the AXIAM **action**, so the ticket asks for exactly the authority
+that was refused and the engine's deny rules keep applying to whatever RPT comes back.
+
+Both halves run in [`examples/uma_resource_server.php`](examples/uma_resource_server.php)
+and [`examples/uma_client.php`](examples/uma_client.php).
+
 ## Logout — RP-initiated and back-channel (CONTRACT.md §12.7)
 
 `logoutUrl()` builds the redirect; `verifyLogoutToken()` validates a token the OP **pushed**
@@ -570,6 +599,8 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/grpc_checkaccess.php`](examples/grpc_checkaccess.php) — the same three methods over gRPC (long-running runtime, see above).
 - [`examples/telemetry_hook.php`](examples/telemetry_hook.php) — CONTRACT.md §16–§19: the §19 hook, the §16 retry signal, the §19.2 rule 6 clamp warning, and `close()`. Runs without a reachable server — the failure path emits the same events as the success path.
 - [`examples/oidc_login.php`](examples/oidc_login.php) — CONTRACT.md §12: `oidcDiscover`/`oidcBegin`/`oidcExchange`, `loginClientCredentials`, `introspect`, `revoke`.
+- [`examples/uma_resource_server.php`](examples/uma_resource_server.php) — CONTRACT.md §20: mint a PAT, register the resource, and emit the `WWW-Authenticate: UMA` challenge from a denial.
+- [`examples/uma_client.php`](examples/uma_client.php) — the other half: refusal → parse → trust decision → exchange → retry with the RPT.
 - [`examples/laravel_app/`](examples/laravel_app/README.md) — runnable Laravel middleware + Gate example, plus [`oidc_routes.php`](examples/laravel_app/oidc_routes.php) for "Login with AXIAM".
 - [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration), plus [`oidc_services.yaml`](examples/symfony_app/oidc_services.yaml)/[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml) for "Login with AXIAM".
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).

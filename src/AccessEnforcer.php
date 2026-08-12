@@ -8,7 +8,10 @@ use Axiam\Sdk\Attributes\RequireAccess;
 use Axiam\Sdk\Attributes\RequireRole;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\AuthzError;
+use Axiam\Sdk\Core\AxiamException;
 use Axiam\Sdk\Core\NetworkError;
+use Axiam\Sdk\Oidc\RequestedPermission;
+use Axiam\Sdk\Oidc\UmaChallenge;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -87,6 +90,7 @@ final class AccessEnforcer
     public function __construct(
         private readonly AxiamClient $client,
         ?LoggerInterface $logger = null,
+        private readonly ?UmaChallenger $challenger = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
     }
@@ -227,7 +231,7 @@ final class AccessEnforcer
                 'resource_id' => $resource,
             ]);
 
-            return $this->authorizationDenied($e->getMessage());
+            return $this->withChallenge($this->authorizationDenied($e->getMessage()), $attribute->action, $resource);
         }
 
         if (!$allowed) {
@@ -236,7 +240,11 @@ final class AccessEnforcer
                 'resource_id' => $resource,
             ]);
 
-            return $this->authorizationDenied(sprintf('forbidden: cannot %s %s', $attribute->action, $resource));
+            return $this->withChallenge(
+                $this->authorizationDenied(sprintf('forbidden: cannot %s %s', $attribute->action, $resource)),
+                $attribute->action,
+                $resource,
+            );
         }
 
         return null;
@@ -290,6 +298,48 @@ final class AccessEnforcer
         }
 
         return $value;
+    }
+
+    /**
+     * Adds `WWW-Authenticate: UMA` to a resource denial when — and only when — a
+     * {@see UmaChallenger} was configured and minting succeeded (CONTRACT.md §20.3).
+     *
+     * The requested scope is the AXIAM *action* (§20.2): asking for anything else would
+     * offer the caller authority other than the one they were denied, and would step
+     * outside the grants the engine just evaluated — deny rules included.
+     *
+     * Every failure is swallowed deliberately. A PAT that expired, a Protection API that
+     * is down, a resource that declares none of the requested scopes — none of these
+     * change the answer to the request, which was already "no". Letting them turn a deny
+     * into a 503 would give the outage a second consequence; letting them turn it into an
+     * allow would be a security bug.
+     */
+    private function withChallenge(JsonResponse $denial, string $action, string $resourceId): JsonResponse
+    {
+        if ($this->challenger === null) {
+            return $denial;
+        }
+
+        try {
+            $ticket = $this->challenger->client->umaRequestTicket(
+                $this->challenger->pat,
+                [new RequestedPermission($resourceId, [$action])],
+            );
+        } catch (AxiamException) {
+            $this->logger->debug('axiam_sdk: uma ticket minting failed; denying without a challenge', [
+                'action' => $action,
+                'resource_id' => $resourceId,
+            ]);
+
+            return $denial;
+        }
+
+        $denial->headers->set(
+            'WWW-Authenticate',
+            UmaChallenge::header($this->challenger->realm, $this->challenger->asUri, $ticket),
+        );
+
+        return $denial;
     }
 
     /** 401 `authentication_failed` (CONTRACT.md §11.2.5). */
