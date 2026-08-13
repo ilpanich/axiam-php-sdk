@@ -374,6 +374,7 @@ calling the next service.
 ```php
 $exchanged = $client->tokenExchange(
     subjectToken: $userToken,
+    subjectTokenType: OidcClient::ACCESS_TOKEN_TYPE, // required (§15.1), no default
     scopes: ['orders:read'],
     audience: 'orders-service',
 );
@@ -398,17 +399,17 @@ actually do. There is no separate operation:
 ```php
 $exchanged = $client->tokenExchange(
     subjectToken: $partnerToken,
-    subjectTokenType: OidcClient::JWT_TOKEN_TYPE, // named, never guessed
+    subjectTokenType: OidcClient::JWT_TOKEN_TYPE, // required; named, never guessed
     scopes: ['read:orders'],
     audience: 'https://orders.internal',
 );
 ```
 
-- **`$subjectTokenType` is yours to state.** The SDK never decodes the subject token to
-  pick it, and never overrides what you named. Omitting it still means
-  `OidcClient::ACCESS_TOKEN_TYPE`, the same-domain exchange above. It sits **last** in the
-  signature, after `$configuration`, so existing positional callers are unaffected — pass
-  it as a named argument.
+- **`$subjectTokenType` is yours to state, and is required** (§15.1). The SDK never decodes
+  the subject token to pick it, and never overrides what you named. There is no default:
+  omitting it is an `ArgumentCountError`, and a blank string is refused client-side with no
+  wire call. It now sits **second**, matching §15.1's canonical order — it was last while it
+  was optional, to spare positional callers, and making it required breaks them anyway.
 - **No actor token.** Delegation across a trust boundary is unsupported in v1; sending one
   is `invalid_request`, which the SDK will not work around by dropping it and re-sending.
 - **One refusal is distinguishable.** `invalid_grant` whose `errorDescription` is `the

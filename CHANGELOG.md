@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING (contract 1.13): `tokenExchange`'s `$subjectTokenType` is now required, and moves
+  from last to second** in the signature.
+
+  It shipped optional and last — last precisely so existing positional callers were unaffected.
+  That satisfied §15.7's "never inspect the subject token" while leaving the rule it serves
+  unenforced: an optional parameter with a default *is* a default the SDK applies whenever the
+  caller says nothing. §15.1 now makes it required.
+
+  **Making it required breaks positional callers anyway, so it may as well sit where the
+  contract puts it** — second, next to the `$subjectToken` it describes, matching the other ten
+  SDKs. The reason for the old placement expired with the default.
+
+  PHP refuses a call that omits it (`ArgumentCountError`, before any SDK code runs). The case
+  the signature cannot catch is a **blank** string — the shape a config-driven caller produces
+  — so that is refused client-side with no wire call, naming both constants. Both are asserted.
+
+  **Migration** — pass it second, or by name:
+
+  ```php
+  $exchanged = $client->tokenExchange(
+      subjectToken: $userToken,
+      subjectTokenType: OidcClient::ACCESS_TOKEN_TYPE, // <- add this
+      scopes: ['orders:read'],
+  );
+  ```
+
+  This closes a gap rather than opening one: `subject_token_type` has always been required *on
+  the wire*, and the SDK was covering for that with a constant which stopped being the only
+  legal value when X4 landed.
+
 ### Added
 
 - **§15.7 external-IdP subject tokens (X4).** `tokenExchange()` can now exchange a token minted
@@ -18,13 +50,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   **The type is the caller's to name, never the SDK's to guess.** §15.7 forbids inspecting the
   subject token to pick it, because which kind of token you hold is something only you know and
   a wrong guess is the difference between a request that is refused and one that is silently
-  reinterpreted. Omitting it still sends `…:access_token`, so every existing caller is
-  unaffected; a JWT-shaped subject token does **not** change what is sent, which is asserted by
-  a test.
-
-  The parameter is **last** in the signature, after `$configuration`, rather than beside the
-  `$subjectToken` it describes — this SDK has positional call sites, and inserting it second
-  would have silently shifted `$actorToken` for every one of them. Pass it as a named argument.
+  reinterpreted. A JWT-shaped subject token does **not** change what is sent, which is asserted
+  by a test. (This shipped optional and last in the signature; contract 1.13 made it required
+  and moved it second — see *Changed* above.)
 
   Also asserted: an `$actorToken` alongside an external subject token surfaces
   `invalid_request` with no retry and no request rewriting; a refused refresh or ID token type
