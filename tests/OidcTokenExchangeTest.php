@@ -377,7 +377,7 @@ final class OidcTokenExchangeTest extends TestCase
         self::assertStringNotContainsString('actor_token', $body);
 
         // The cross-domain path is not a different result shape, and §15.2 rules 6-7 hold.
-        self::assertSame(self::ISSUED_TOKEN, $result->accessToken->expose());
+        self::assertSame(self::ISSUED_TOKEN, $result->accessToken->reveal());
         self::assertSame('urn:ietf:params:oauth:token-type:access_token', $result->issuedTokenType);
         self::assertSame('read:orders', $result->scope);
     }
@@ -506,7 +506,7 @@ final class OidcTokenExchangeTest extends TestCase
             subjectTokenType: OidcClient::JWT_TOKEN_TYPE,
         );
 
-        self::assertSame(self::ISSUED_TOKEN, $result->accessToken->expose());
+        self::assertSame(self::ISSUED_TOKEN, $result->accessToken->reveal());
         // Exactly one exchange happened: nothing looped the result back in. §15.2 rule 5 is
         // what stops it — had the result been adopted, the next exchange would carry it as a
         // *subject* token, which is exactly the re-exchange §15.7 forbids, arrived at by
