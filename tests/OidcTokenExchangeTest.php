@@ -112,6 +112,7 @@ final class OidcTokenExchangeTest extends TestCase
 
         $result = $client->tokenExchange(
             self::SUBJECT_TOKEN,
+            OidcClient::ACCESS_TOKEN_TYPE,
             scopes: ['orders:read', 'orders:write'],
             audience: 'orders-service',
             configuration: $this->configuration(),
@@ -143,7 +144,7 @@ final class OidcTokenExchangeTest extends TestCase
 
         $this->expectException(AuthError::class);
         try {
-            $client->tokenExchange(self::SUBJECT_TOKEN, configuration: $this->configuration());
+            $client->tokenExchange(self::SUBJECT_TOKEN, OidcClient::ACCESS_TOKEN_TYPE, configuration: $this->configuration());
         } finally {
             self::assertCount(0, $history, 'no request should have been sent');
         }
@@ -158,7 +159,7 @@ final class OidcTokenExchangeTest extends TestCase
         $history = [];
         $client = $this->client([self::exchangeResponse()], history: $history);
 
-        $client->tokenExchange(self::SUBJECT_TOKEN, configuration: $this->configuration());
+        $client->tokenExchange(self::SUBJECT_TOKEN, OidcClient::ACCESS_TOKEN_TYPE, configuration: $this->configuration());
 
         $body = urldecode((string) $history[0]['request']->getBody());
         // §15.2 rule 1: passing none asks for IMPERSONATION. An SDK that helpfully
@@ -174,6 +175,7 @@ final class OidcTokenExchangeTest extends TestCase
 
         $client->tokenExchange(
             self::SUBJECT_TOKEN,
+            OidcClient::ACCESS_TOKEN_TYPE,
             actorToken: self::ACTOR_TOKEN,
             configuration: $this->configuration(),
         );
@@ -213,6 +215,7 @@ final class OidcTokenExchangeTest extends TestCase
         try {
             $client->tokenExchange(
                 self::SUBJECT_TOKEN,
+                OidcClient::ACCESS_TOKEN_TYPE,
                 scopes: ['orders:read', 'orders:admin'],
                 configuration: $this->configuration(),
             );
@@ -236,7 +239,7 @@ final class OidcTokenExchangeTest extends TestCase
         // no property for one and there is nothing to synthesise.
         $client = $this->client([self::exchangeResponse(refreshToken: 'should-not-exist')]);
 
-        $result = $client->tokenExchange(self::SUBJECT_TOKEN, configuration: $this->configuration());
+        $result = $client->tokenExchange(self::SUBJECT_TOKEN, OidcClient::ACCESS_TOKEN_TYPE, configuration: $this->configuration());
 
         self::assertFalse(property_exists($result, 'refreshToken'));
         self::assertStringNotContainsString('should-not-exist', print_r($result, true));
@@ -248,6 +251,7 @@ final class OidcTokenExchangeTest extends TestCase
 
         $result = $client->tokenExchange(
             self::SUBJECT_TOKEN,
+            OidcClient::ACCESS_TOKEN_TYPE,
             scopes: ['orders:read', 'orders:write'],
             configuration: $this->configuration(),
         );
@@ -264,6 +268,7 @@ final class OidcTokenExchangeTest extends TestCase
 
         $result = $client->tokenExchange(
             self::SUBJECT_TOKEN,
+            OidcClient::ACCESS_TOKEN_TYPE,
             scopes: [],
             configuration: $this->configuration(),
         );
@@ -277,7 +282,7 @@ final class OidcTokenExchangeTest extends TestCase
     {
         $client = $this->client([self::exchangeResponse()]);
 
-        $result = $client->tokenExchange(self::SUBJECT_TOKEN, configuration: $this->configuration());
+        $result = $client->tokenExchange(self::SUBJECT_TOKEN, OidcClient::ACCESS_TOKEN_TYPE, configuration: $this->configuration());
 
         // §15.5: the issued token is a bearer credential and must not render.
         self::assertStringNotContainsString(self::ISSUED_TOKEN, print_r($result->accessToken, true));
@@ -293,6 +298,7 @@ final class OidcTokenExchangeTest extends TestCase
         try {
             $client->tokenExchange(
                 self::SUBJECT_TOKEN,
+                OidcClient::ACCESS_TOKEN_TYPE,
                 actorToken: self::ACTOR_TOKEN,
                 configuration: $this->configuration(),
             );
@@ -311,6 +317,7 @@ final class OidcTokenExchangeTest extends TestCase
 
         $client->tokenExchange(
             self::SUBJECT_TOKEN,
+            OidcClient::ACCESS_TOKEN_TYPE,
             resource: 'https://orders.example.com',
             configuration: $this->configuration(),
         );
@@ -387,17 +394,69 @@ final class OidcTokenExchangeTest extends TestCase
         $history = [];
         $client = $this->client([self::exchangeResponse()], history: $history);
 
-        // A subject token that *looks* exactly like a JWT. An SDK that sniffed the token
-        // would send …:jwt here; §15.7 says it must not look, so the caller's silence still
-        // means the §15.1 same-domain default.
+        // A subject token that *looks* exactly like a JWT, presented as an access token. An
+        // SDK that sniffed the token would "correct" this to …:jwt; §15.7 says it must not
+        // look, so what the caller named is what goes out. Being able to hold this wrong is
+        // the point: only the caller knows.
         $jwtShaped = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL3BhcnRuZXIuZXhhbXBsZS8ifQ.sig';
-        $client->tokenExchange($jwtShaped, configuration: $this->configuration());
+        $client->tokenExchange(
+            $jwtShaped,
+            OidcClient::ACCESS_TOKEN_TYPE,
+            configuration: $this->configuration(),
+        );
 
         self::assertStringContainsString(
             'subject_token_type=urn:ietf:params:oauth:token-type:access_token',
             urldecode((string) $history[0]['request']->getBody()),
-            '§15.7: the token\'s shape must not pick the type',
+            '§15.7: the token\'s shape must not override the caller',
         );
+    }
+
+    /**
+     * §15.1: the type is required and has no default.
+     *
+     * PHP refuses a call that omits it entirely — an ArgumentCountError, before any SDK code
+     * runs. The case the signature cannot catch is a **blank** string, which is the shape a
+     * config-driven caller produces, and which must not become an empty field on the wire.
+     *
+     * @dataProvider blankSubjectTokenTypes
+     */
+    public function testABlankSubjectTokenTypeNeverReachesTheWire(string $blank): void
+    {
+        $history = [];
+        $client = $this->client([self::exchangeResponse()], history: $history);
+
+        try {
+            $client->tokenExchange(
+                self::SUBJECT_TOKEN,
+                $blank,
+                configuration: $this->configuration(),
+            );
+            self::fail('expected AuthError');
+        } catch (AuthError $e) {
+            // The message has to name the way out, or the caller has to go read §15.1.
+            self::assertStringContainsString('subjectTokenType', $e->getMessage());
+        }
+
+        self::assertCount(0, $history, 'no request may be sent for a type nobody chose');
+    }
+
+    /** @return array<string, array{string}> */
+    public static function blankSubjectTokenTypes(): array
+    {
+        return ['empty' => [''], 'spaces' => ['   '], 'tab' => ["\t"]];
+    }
+
+    public function testAnOmittedSubjectTokenTypeIsARuntimeError(): void
+    {
+        // The positional argument is required, so PHP itself refuses the call. That refusal
+        // IS the enforcement §15.7 asks for; asserting it here means reintroducing a default
+        // fails the suite rather than passing silently.
+        $client = $this->client([self::exchangeResponse()]);
+
+        $this->expectException(\ArgumentCountError::class);
+        // @phpstan-ignore-next-line argument.missing (that is the assertion)
+        $client->tokenExchange(self::SUBJECT_TOKEN);
     }
 
     public function testAnActorTokenWithAnExternalSubjectTokenIsRefusedWithoutRetry(): void
@@ -414,9 +473,9 @@ final class OidcTokenExchangeTest extends TestCase
         try {
             $client->tokenExchange(
                 self::EXTERNAL_SUBJECT_TOKEN,
+                OidcClient::JWT_TOKEN_TYPE,
                 self::ACTOR_TOKEN,
                 configuration: $this->configuration(),
-                subjectTokenType: OidcClient::JWT_TOKEN_TYPE,
             );
             self::fail('expected OAuthProtocolError');
         } catch (OAuthProtocolError $e) {

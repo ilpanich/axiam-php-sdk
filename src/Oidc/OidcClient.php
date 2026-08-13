@@ -752,26 +752,39 @@ final class OidcClient
      * because distinguishing them is a tenant-enumeration signal.
      *
      * @param list<string>|null $scopes Omitted from the body when `null` or empty.
-     * @param string|null $subjectTokenType What kind of token `$subjectToken` is. `null` sends
-     *        {@see ACCESS_TOKEN_TYPE}, the same-domain exchange of §15.1; to exchange a token
-     *        from a **trusted external issuer** (§15.7), pass this explicitly — normally
-     *        {@see JWT_TOKEN_TYPE}. Last in the signature rather than beside `$subjectToken`
-     *        so existing positional callers are unaffected. The SDK never reads
-     *        `$subjectToken` to decide it: which kind of token you hold is something only you
-     *        know, AXIAM refuses refresh and ID token types by name, and the SDK will not
-     *        retry a refusal as a different type.
+     * @param string $subjectTokenType What kind of token `$subjectToken` is. **Required**
+     *        (§15.1), with no default — a default would be this SDK choosing which kind of
+     *        credential you hold, which is what §15.7 forbids. Pass {@see ACCESS_TOKEN_TYPE}
+     *        for the same-domain exchange, or {@see JWT_TOKEN_TYPE} for a trusted external
+     *        issuer's JWT (§15.7). It sits **second**, matching §15.1's canonical order: it
+     *        was last while it was optional, to spare positional callers, and making it
+     *        required breaks them anyway — so it may as well be where the contract puts it.
+     *        The SDK never reads `$subjectToken` to decide it: which kind of token you hold is
+     *        something only you know, AXIAM refuses refresh and ID token types by name, and
+     *        the SDK will not retry a refusal as a different type.
      * @throws AuthError when no `clientSecret` is configured.
      */
     public function tokenExchange(
         Sensitive|string $subjectToken,
+        string $subjectTokenType,
         Sensitive|string|null $actorToken = null,
         ?array $scopes = null,
         ?string $audience = null,
         ?string $resource = null,
         ?string $tenantId = null,
         ?OidcConfiguration $configuration = null,
-        ?string $subjectTokenType = null,
     ): ExchangedToken {
+        // §15.1: required, and PHP will already have refused a call that omitted
+        // it. A blank string is the case the signature cannot catch — the shape
+        // a config-driven caller produces — and it must not become an empty
+        // field on the wire, so refuse client-side with no request.
+        if (trim($subjectTokenType) === '') {
+            throw new AuthError(
+                'tokenExchange requires a non-empty $subjectTokenType (§15.1): pass '
+                . 'OidcClient::ACCESS_TOKEN_TYPE for an AXIAM access token, or '
+                . 'OidcClient::JWT_TOKEN_TYPE for a trusted external issuer\'s JWT'
+            );
+        }
         $clientId = $this->requireClientId('tokenExchange');
         $configuration ??= $this->oidcDiscover();
 
@@ -782,7 +795,7 @@ final class OidcClient
             // pick this (§15.7): which kind of token the caller holds is the caller's to
             // know, and a guess here is the difference between a request that is refused
             // and one that is silently reinterpreted.
-            'subject_token_type' => $subjectTokenType ?? self::ACCESS_TOKEN_TYPE,
+            'subject_token_type' => $subjectTokenType,
             'client_id' => $clientId,
             'client_secret' => $this->requireClientSecret('tokenExchange'),
         ];
