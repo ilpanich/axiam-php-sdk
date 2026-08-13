@@ -7,6 +7,7 @@ namespace Axiam\Sdk\Tests;
 use Axiam\Sdk\AxiamClient;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\OAuthProtocolError;
+use Axiam\Sdk\Oidc\OidcClient;
 use Axiam\Sdk\Oidc\OidcConfiguration;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -320,5 +321,196 @@ final class OidcTokenExchangeTest extends TestCase
             'resource=https://orders.example.com',
             urldecode((string) $history[0]['request']->getBody()),
         );
+    }
+
+    // ===================================================================================
+    // §15.7 — external-IdP subject tokens (X4)
+    //
+    // No new operation: the same tokenExchange carries a partner IdP's token. What changes
+    // is which subject tokens the server accepts and what its refusals mean, so these tests
+    // are about not getting in the way of either.
+    // ===================================================================================
+
+    /**
+     * A token minted by a partner's IdP. Opaque to the SDK — deliberately not a well-formed
+     * JWT, because nothing here may decode it.
+     */
+    private const EXTERNAL_SUBJECT_TOKEN = 'partner-idp-subject-token';
+
+    /**
+     * The one normative `error_description` (§15.7). It means "fix the AXIAM trust
+     * configuration", not "fix your token".
+     */
+    private const ISSUER_NOT_CONFIGURED =
+        "the subject token's issuer is not configured for token exchange";
+
+    private static function oauthErrorWithDescription(string $code, string $description): Response
+    {
+        return new Response(400, [], (string) json_encode([
+            'error' => $code,
+            'error_description' => $description,
+        ]));
+    }
+
+    public function testAnExternalSubjectTokenTypeIsSentVerbatim(): void
+    {
+        $history = [];
+        $client = $this->client([self::exchangeResponse('read:orders')], history: $history);
+
+        $result = $client->tokenExchange(
+            self::EXTERNAL_SUBJECT_TOKEN,
+            scopes: ['read:orders'],
+            audience: 'https://orders.internal',
+            configuration: $this->configuration(),
+            subjectTokenType: OidcClient::JWT_TOKEN_TYPE,
+        );
+
+        $body = urldecode((string) $history[0]['request']->getBody());
+        // The caller named …:jwt, so …:jwt goes on the wire. §15.7: the SDK must not inspect
+        // the subject token to pick this, and must not override it.
+        self::assertStringContainsString(
+            'subject_token_type=urn:ietf:params:oauth:token-type:jwt',
+            $body,
+        );
+        self::assertStringContainsString('subject_token=' . self::EXTERNAL_SUBJECT_TOKEN, $body);
+        // Delegation across a trust boundary is unsupported; nothing may add one.
+        self::assertStringNotContainsString('actor_token', $body);
+
+        // The cross-domain path is not a different result shape, and §15.2 rules 6-7 hold.
+        self::assertSame(self::ISSUED_TOKEN, $result->accessToken->reveal());
+        self::assertSame('urn:ietf:params:oauth:token-type:access_token', $result->issuedTokenType);
+        self::assertSame('read:orders', $result->scope);
+    }
+
+    public function testSubjectTokenTypeIsNeverInferredFromTheToken(): void
+    {
+        $history = [];
+        $client = $this->client([self::exchangeResponse()], history: $history);
+
+        // A subject token that *looks* exactly like a JWT. An SDK that sniffed the token
+        // would send …:jwt here; §15.7 says it must not look, so the caller's silence still
+        // means the §15.1 same-domain default.
+        $jwtShaped = 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL3BhcnRuZXIuZXhhbXBsZS8ifQ.sig';
+        $client->tokenExchange($jwtShaped, configuration: $this->configuration());
+
+        self::assertStringContainsString(
+            'subject_token_type=urn:ietf:params:oauth:token-type:access_token',
+            urldecode((string) $history[0]['request']->getBody()),
+            '§15.7: the token\'s shape must not pick the type',
+        );
+    }
+
+    public function testAnActorTokenWithAnExternalSubjectTokenIsRefusedWithoutRetry(): void
+    {
+        $history = [];
+        $client = $this->client(
+            [self::oauthErrorWithDescription(
+                'invalid_request',
+                'actor_token is not supported for an external subject token',
+            )],
+            history: $history,
+        );
+
+        try {
+            $client->tokenExchange(
+                self::EXTERNAL_SUBJECT_TOKEN,
+                self::ACTOR_TOKEN,
+                configuration: $this->configuration(),
+                subjectTokenType: OidcClient::JWT_TOKEN_TYPE,
+            );
+            self::fail('expected OAuthProtocolError');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('invalid_request', $e->error);
+        }
+
+        // §15.7: no retry, and no rewriting. Dropping the actor token and re-sending would
+        // turn a delegation the caller asked for into an impersonation they did not.
+        self::assertCount(1, $history, 'exactly one request');
+        $body = urldecode((string) $history[0]['request']->getBody());
+        self::assertStringContainsString('actor_token=' . self::ACTOR_TOKEN, $body);
+        self::assertStringContainsString(
+            'subject_token_type=urn:ietf:params:oauth:token-type:jwt',
+            $body,
+            'subject_token_type must not be rewritten',
+        );
+    }
+
+    public function testARefusedSubjectTokenTypeIsNeverRetriedAsAnother(): void
+    {
+        // A refresh token is a re-authentication credential and an ID token is an assertion
+        // to a client about a login; neither is a bearer credential for an API, so both are
+        // refused BY NAME. Retrying as …:jwt would present one as if it were.
+        foreach ([
+            'urn:ietf:params:oauth:token-type:refresh_token',
+            'urn:ietf:params:oauth:token-type:id_token',
+        ] as $refused) {
+            $history = [];
+            $client = $this->client(
+                [self::oauthErrorWithDescription('invalid_request', 'unsupported subject_token_type')],
+                history: $history,
+            );
+
+            try {
+                $client->tokenExchange(
+                    self::EXTERNAL_SUBJECT_TOKEN,
+                    configuration: $this->configuration(),
+                    subjectTokenType: $refused,
+                );
+                self::fail('expected OAuthProtocolError');
+            } catch (OAuthProtocolError) {
+                // expected
+            }
+
+            self::assertCount(1, $history, 'no retry after a refused type');
+            self::assertStringContainsString(
+                'subject_token_type=' . $refused,
+                urldecode((string) $history[0]['request']->getBody()),
+                '§15.7: the refused type must be sent as named, not swapped',
+            );
+        }
+    }
+
+    public function testTheIssuerNotConfiguredDescriptionReachesTheCallerIntact(): void
+    {
+        $client = $this->client(
+            [self::oauthErrorWithDescription('invalid_grant', self::ISSUER_NOT_CONFIGURED)],
+        );
+
+        try {
+            $client->tokenExchange(
+                self::EXTERNAL_SUBJECT_TOKEN,
+                configuration: $this->configuration(),
+                subjectTokenType: OidcClient::JWT_TOKEN_TYPE,
+            );
+            self::fail('expected OAuthProtocolError');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('invalid_grant', $e->error);
+            // This is the ONLY distinguishable external failure, and the whole point of it is
+            // that an integrator can tell "fix the AXIAM trust config" from "fix your token".
+            // Truncating or rewording it destroys that.
+            self::assertSame(self::ISSUER_NOT_CONFIGURED, $e->errorDescription);
+        }
+    }
+
+    public function testNoHelperReExchangesAnExternallyExchangedToken(): void
+    {
+        // Tokens minted from an external subject token carry `ext_exchange`, and BOTH
+        // exchange paths refuse a subject token bearing it: exchanges do not compose. The
+        // SDK's part is to never feed a result back in by itself.
+        $history = [];
+        $client = $this->client([self::exchangeResponse('read:orders')], history: $history);
+
+        $result = $client->tokenExchange(
+            self::EXTERNAL_SUBJECT_TOKEN,
+            configuration: $this->configuration(),
+            subjectTokenType: OidcClient::JWT_TOKEN_TYPE,
+        );
+
+        self::assertSame(self::ISSUED_TOKEN, $result->accessToken->reveal());
+        // Exactly one exchange happened: nothing looped the result back in. §15.2 rule 5 is
+        // what stops it — had the result been adopted, the next exchange would carry it as a
+        // *subject* token, which is exactly the re-exchange §15.7 forbids, arrived at by
+        // accident rather than by decision.
+        self::assertCount(1, $history, 'exactly one exchange — nothing re-exchanged the result');
     }
 }

@@ -389,6 +389,38 @@ Most of what this method does is refuse to be helpful:
 - **No adoption**, and no flag to enable it — a MUST NOT, where `loginClientCredentials()`
   adoption is a MAY.
 
+### External-IdP subject tokens (CONTRACT.md §15.7)
+
+The same method exchanges a token minted by a **trusted external IdP** — a partner's
+Entra, Okta or Keycloak — for an AXIAM token scoped to what the resolved AXIAM user may
+actually do. There is no separate operation:
+
+```php
+$exchanged = $client->tokenExchange(
+    subjectToken: $partnerToken,
+    subjectTokenType: OidcClient::JWT_TOKEN_TYPE, // named, never guessed
+    scopes: ['read:orders'],
+    audience: 'https://orders.internal',
+);
+```
+
+- **`$subjectTokenType` is yours to state.** The SDK never decodes the subject token to
+  pick it, and never overrides what you named. Omitting it still means
+  `OidcClient::ACCESS_TOKEN_TYPE`, the same-domain exchange above. It sits **last** in the
+  signature, after `$configuration`, so existing positional callers are unaffected — pass
+  it as a named argument.
+- **No actor token.** Delegation across a trust boundary is unsupported in v1; sending one
+  is `invalid_request`, which the SDK will not work around by dropping it and re-sending.
+- **One refusal is distinguishable.** `invalid_grant` whose `errorDescription` is `the
+  subject token's issuer is not configured for token exchange` means *fix the AXIAM trust
+  configuration*. Every other `invalid_grant` means *fix your token*, and is deliberately
+  generic.
+- **Forward the result as-is.** It carries an `ext_exchange` claim naming the partner
+  issuer; never strip it, and never read it as an authorization input. It also cannot be
+  exchanged again — exchanges do not compose.
+
+The operator guide is `docs/api/federated-token-exchange.md`.
+
 ## UMA 2.0 — Protection API and ticket grant (CONTRACT.md §20)
 
 The resource-server side of User-Managed Access: register what you guard, ask the

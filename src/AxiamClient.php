@@ -840,6 +840,9 @@ final class AxiamClient
      * auto-narrows after `invalid_scope`, never adopts the result.
      *
      * @param list<string>|null $scopes
+     * @param string|null $subjectTokenType What kind of token `$subjectToken` is — `null` for
+     *        an AXIAM access token (§15.1), or {@see OidcClient::JWT_TOKEN_TYPE} for a
+     *        trusted external issuer's JWT (§15.7). Never inferred from the token.
      * @throws AuthError when no `oidcClientSecret` was configured.
      */
     public function tokenExchange(
@@ -850,6 +853,7 @@ final class AxiamClient
         ?string $resource = null,
         ?string $tenantId = null,
         ?OidcConfiguration $configuration = null,
+        ?string $subjectTokenType = null,
     ): ExchangedToken {
         return $this->oidc->tokenExchange(
             $subjectToken,
@@ -859,6 +863,7 @@ final class AxiamClient
             $resource,
             $tenantId,
             $configuration,
+            $subjectTokenType,
         );
     }
 
