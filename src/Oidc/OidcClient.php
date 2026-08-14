@@ -1371,8 +1371,9 @@ final class OidcClient
      *   `invalid_grant`. This is the one documented exception to §16, and it is a
      *   security rule rather than a performance one: the ticket is consumed *before* the
      *   request is evaluated, so a failed exchange has already spent it, and a retry is a
-     *   second redemption — exactly the concurrent redemption whose measured residual
-     *   ilpanich/axiam#302 records. This SDK gets that for free: no `/oauth2/*` call
+     *   second redemption — exactly the concurrent redemption a server whose storage
+     *   engine this SDK cannot attest may admit twice (ilpanich/axiam#302). This SDK gets
+     *   that for free: no `/oauth2/*` call
      *   passes through {@see \Axiam\Sdk\Core\RetryPolicy}, and the transport this class
      *   holds carries no {@see \Axiam\Sdk\Rest\RefreshMiddleware}.
      * - **No defaulted `$claimToken`** (rule 2). It is the only channel that names the
