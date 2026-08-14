@@ -410,8 +410,29 @@ final class Contract101LocalVerificationTest extends TestCase
         $claims = $this->verifier($this->servedKeys())->verify($token, self::TENANT);
 
         self::assertIsArray($claims);
-        self::assertSame(self::THUMBPRINT, $claims['cnf']['x5t#S256']);
+        // Nested objects come back as stdClass from firebase/php-jwt — asserting
+        // the real shape here is the point, since an implementation that only
+        // handles arrays rejects every bound token.
+        self::assertInstanceOf(\stdClass::class, $claims['cnf']);
+        self::assertSame(self::THUMBPRINT, $claims['cnf']->{'x5t#S256'});
         self::assertTrue(JwksVerifier::verifyCertificateBinding($claims, self::THUMBPRINT));
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($claims, null));
+    }
+
+    /**
+     * The shape regression. `verify()` returns nested claims as `stdClass`, so a
+     * rule-9 implementation that only accepts `array` rejects every legitimately
+     * bound token — rule 9 inverted into a denial-of-service on exactly the
+     * clients the operator went to the trouble of binding.
+     */
+    public function testRule9AcceptsTheStdClassShapeVerifyActuallyReturns(): void
+    {
+        $cnf = new \stdClass();
+        $cnf->{'x5t#S256'} = self::THUMBPRINT;
+        $claims = $this->validClaims() + ['cnf' => $cnf];
+
+        self::assertTrue(JwksVerifier::verifyCertificateBinding($claims, self::THUMBPRINT));
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($claims, self::OTHER_THUMBPRINT));
         self::assertFalse(JwksVerifier::verifyCertificateBinding($claims, null));
     }
 

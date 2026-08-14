@@ -360,6 +360,16 @@ final class JwksVerifier
             // An ordinary bearer token. Accepted with or without a certificate.
             return true;
         }
+
+        // `verify()` hands back a top-level array, but NESTED objects stay
+        // `stdClass` — that is what `firebase/php-jwt` decodes JSON objects to,
+        // and this class only casts the outermost level. Accepting both shapes
+        // is load-bearing, not defensive: an `is_array()`-only check rejects
+        // every legitimately certificate-bound token, which is the exact
+        // failure mode rule 9 exists to prevent, inverted.
+        if ($cnf instanceof \stdClass) {
+            $cnf = (array) $cnf;
+        }
         if (!is_array($cnf)) {
             return false;
         }
