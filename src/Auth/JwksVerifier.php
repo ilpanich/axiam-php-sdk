@@ -311,6 +311,101 @@ final class JwksVerifier
         );
     }
 
+    /**
+     * CONTRACT.md §10.1 **rule 9** — enforce a token's sender constraint against the
+     * certificate the caller presented on **this** connection (RFC 8705 §3 / RFC 7800,
+     * contract 1.15).
+     *
+     * A token carrying `cnf` is **not** a bearer token. Accepting one without proving the
+     * caller holds the named key converts it straight back into one, discarding the whole
+     * protection the operator turned on — which is why this is a rule and not a
+     * recommendation.
+     *
+     * The four cases:
+     *
+     * | token's `cnf`            | `$presentedThumbprint`   | result  |
+     * |--------------------------|--------------------------|---------|
+     * | absent                   | anything                 | `true`  |
+     * | `x5t#S256`               | equal                    | `true`  |
+     * | `x5t#S256`               | different, or `null`     | `false` |
+     * | present, no `x5t#S256`   | anything                 | `false` |
+     *
+     * The first row is why adopting this rule breaks nothing: an **unbound** token is
+     * still accepted whether or not a certificate is present. Rule 9 constrains tokens
+     * that claim a constraint; it does not make certificates mandatory.
+     *
+     * The last row is the one that is easy to get wrong. A `cnf` naming a confirmation
+     * method this SDK cannot check — a DPoP `jkt`, say — is an *unverifiable constraint*,
+     * never *no constraint*. Read the other way, a sender-constrained token silently
+     * degrades to a bearer token the day a newer AXIAM issues a confirmation this SDK
+     * predates.
+     *
+     * **The thumbprint must come from the transport.** Under PHP-FPM behind an mTLS
+     * terminator that is typically `$_SERVER['SSL_CLIENT_CERT']` converted to DER and
+     * fingerprinted with {@see self::certificateThumbprintS256()} — and only where that
+     * variable is set by a proxy **you** control. Never from a caller-settable request
+     * header: a forgeable input makes the whole mechanism decorative.
+     *
+     * Returns `bool` rather than throwing, matching {@see self::verify()}: this class
+     * never throws on attacker input.
+     *
+     * @param array<string,mixed> $claims             Verified claims from {@see self::verify()}.
+     * @param string|null         $presentedThumbprint RFC 8705 §3.1 `x5t#S256` of the peer
+     *                                                 certificate, or null if none.
+     */
+    public static function verifyCertificateBinding(array $claims, ?string $presentedThumbprint): bool
+    {
+        $cnf = $claims['cnf'] ?? null;
+        if ($cnf === null) {
+            // An ordinary bearer token. Accepted with or without a certificate.
+            return true;
+        }
+
+        // `verify()` hands back a top-level array, but NESTED objects stay
+        // `stdClass` — that is what `firebase/php-jwt` decodes JSON objects to,
+        // and this class only casts the outermost level. Accepting both shapes
+        // is load-bearing, not defensive: an `is_array()`-only check rejects
+        // every legitimately certificate-bound token, which is the exact
+        // failure mode rule 9 exists to prevent, inverted.
+        if ($cnf instanceof \stdClass) {
+            $cnf = (array) $cnf;
+        }
+        if (!is_array($cnf)) {
+            return false;
+        }
+
+        $expected = $cnf['x5t#S256'] ?? null;
+        if (!is_string($expected) || $expected === '') {
+            // A confirmation naming a method this SDK cannot verify. Fail closed.
+            return false;
+        }
+        if ($presentedThumbprint === null || $presentedThumbprint === '') {
+            return false;
+        }
+
+        // Constant-time. The thumbprint is usually public — it derives from a certificate
+        // sent in the clear during the handshake — so this is defence in depth. It matters
+        // most for a self-signed client, where the registered thumbprint is the whole
+        // credential.
+        return hash_equals($expected, $presentedThumbprint);
+    }
+
+    /**
+     * Compute the RFC 8705 §3.1 `x5t#S256` thumbprint of a DER client certificate:
+     * base64url-encoded SHA-256, **without** padding.
+     *
+     * Unpadded is not a style choice — RFC 7515 §2 defines base64url in JOSE as omitting
+     * `=`, and a padded value will not compare equal to what AXIAM put in the token.
+     *
+     * @param string $der Raw DER bytes of the peer's leaf certificate. To convert a PEM
+     *                    (what `SSL_CLIENT_CERT` carries), strip the armour and
+     *                    base64-decode the body.
+     */
+    public static function certificateThumbprintS256(string $der): string
+    {
+        return rtrim(strtr(base64_encode(hash('sha256', $der, true)), '+/', '-_'), '=');
+    }
+
     /** Canonical 8-4-4-4-12 hex form; shape only, no version/variant validation. */
     private static function looksLikeUuid(string $value): bool
     {

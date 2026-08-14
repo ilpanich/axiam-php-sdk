@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **CONTRACT.md §10.1 rule 9 — sender-constrained (certificate-bound) access tokens**
+  (contract 1.15, RFC 8705 §3 / RFC 7800). A token carrying `cnf` is **not** a bearer
+  token; accepting one without proving the caller holds the named key converts it back
+  into one.
+  - `JwksVerifier::verifyCertificateBinding(array $claims, ?string $presentedThumbprint): bool`
+    — the rule. Returns `bool` rather than throwing, matching `verify()`: this class never
+    throws on attacker input.
+  - `JwksVerifier::certificateThumbprintS256(string $der): string` — RFC 8705 §3.1
+    `x5t#S256`: base64url, **unpadded**, SHA-256 over the DER certificate.
+
+  **Not a breaking change, and it does not make certificates mandatory.** An *unbound*
+  token is still accepted with or without a certificate.
+
+  `verify()` deliberately does **not** apply rule 9: it has no transport to ask for a peer
+  certificate. Under PHP-FPM behind an mTLS terminator the thumbprint typically comes from
+  `$_SERVER['SSL_CLIENT_CERT']` — and only where that variable is set by a proxy **you**
+  control, never from a caller-settable request header.
+
+  A `cnf` naming an unimplemented method is **rejected**, never read as "unconstrained".
+
+- **CONTRACT.md §21** — the FAPI 2.0 posture as an SDK sees it. Only rule 9 is normative
+  for this SDK.
+
+### Changed
+
+- **Re-sync vendored `CONTRACT.md` / `openapi.json` to contract 1.15.**
+
+
 ### Changed
 
 - **Re-sync vendored `CONTRACT.md` to contract 1.14** — documentation only, no code change.

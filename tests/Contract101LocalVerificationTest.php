@@ -344,4 +344,111 @@ final class Contract101LocalVerificationTest extends TestCase
             JWT::$leeway = $original;
         }
     }
+
+    // --- Rule 9: sender-constrained (certificate-bound) access tokens ---------------
+    //
+    // CONTRACT.md §10.1 rule 9 (contract 1.15, RFC 8705 §3 / RFC 7800). A token carrying
+    // `cnf` is not a bearer token and must not be accepted as one.
+    //
+    // Three negatives and one positive. The POSITIVE is the one that matters most: rule 9
+    // must not become "every caller must present a certificate", which would break every
+    // deployment that does not use mTLS at all.
+
+    /** A real 43-character base64url x5t#S256, and a different one. */
+    private const THUMBPRINT = 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM';
+    private const OTHER_THUMBPRINT = 'bWluZS1ub3QteW91cnMtdGhpcy1pcy00My1jaGFyc18';
+
+    /** The regression test that keeps rule 9 from becoming a certificate mandate. */
+    public function testRule9UnboundTokenIsAcceptedWithOrWithoutACertificate(): void
+    {
+        $unbound = $this->validClaims();
+        self::assertTrue(JwksVerifier::verifyCertificateBinding($unbound, null));
+        self::assertTrue(JwksVerifier::verifyCertificateBinding($unbound, self::THUMBPRINT));
+    }
+
+    public function testRule9BoundTokenIsAcceptedWithItsOwnCertificate(): void
+    {
+        $bound = $this->validClaims() + ['cnf' => ['x5t#S256' => self::THUMBPRINT]];
+        self::assertTrue(JwksVerifier::verifyCertificateBinding($bound, self::THUMBPRINT));
+    }
+
+    public function testRule9BoundTokenIsRejectedWithNoCertificate(): void
+    {
+        $bound = $this->validClaims() + ['cnf' => ['x5t#S256' => self::THUMBPRINT]];
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($bound, null));
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($bound, ''));
+    }
+
+    public function testRule9BoundTokenIsRejectedWithADifferentCertificate(): void
+    {
+        $bound = $this->validClaims() + ['cnf' => ['x5t#S256' => self::THUMBPRINT]];
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($bound, self::OTHER_THUMBPRINT));
+    }
+
+    /**
+     * The subtle one. A `cnf` naming a confirmation method this SDK cannot check is an
+     * unverifiable constraint, never *no* constraint — read the other way, a
+     * sender-constrained token silently degrades to a bearer token the day a newer AXIAM
+     * issues a confirmation this SDK predates.
+     */
+    public function testRule9UnverifiableConfirmationIsRejectedNotIgnored(): void
+    {
+        $dpopish = $this->validClaims()
+            + ['cnf' => ['jkt' => '0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I']];
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($dpopish, null));
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($dpopish, self::THUMBPRINT));
+    }
+
+    /**
+     * `verify()` deliberately does not apply rule 9 — it has no transport to ask for a
+     * peer certificate. Asserted so the split cannot be collapsed by accident: a resource
+     * server accepting bound tokens must call `verifyCertificateBinding()` as well.
+     */
+    public function testRule9VerifyDoesNotApplyItButCarriesTheClaimThrough(): void
+    {
+        $token = $this->sign($this->validClaims() + ['cnf' => ['x5t#S256' => self::THUMBPRINT]]);
+        $claims = $this->verifier($this->servedKeys())->verify($token, self::TENANT);
+
+        self::assertIsArray($claims);
+        // Nested objects come back as stdClass from firebase/php-jwt — asserting
+        // the real shape here is the point, since an implementation that only
+        // handles arrays rejects every bound token.
+        self::assertInstanceOf(\stdClass::class, $claims['cnf']);
+        self::assertSame(self::THUMBPRINT, $claims['cnf']->{'x5t#S256'});
+        self::assertTrue(JwksVerifier::verifyCertificateBinding($claims, self::THUMBPRINT));
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($claims, null));
+    }
+
+    /**
+     * The shape regression. `verify()` returns nested claims as `stdClass`, so a
+     * rule-9 implementation that only accepts `array` rejects every legitimately
+     * bound token — rule 9 inverted into a denial-of-service on exactly the
+     * clients the operator went to the trouble of binding.
+     */
+    public function testRule9AcceptsTheStdClassShapeVerifyActuallyReturns(): void
+    {
+        $cnf = new \stdClass();
+        $cnf->{'x5t#S256'} = self::THUMBPRINT;
+        $claims = $this->validClaims() + ['cnf' => $cnf];
+
+        self::assertTrue(JwksVerifier::verifyCertificateBinding($claims, self::THUMBPRINT));
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($claims, self::OTHER_THUMBPRINT));
+        self::assertFalse(JwksVerifier::verifyCertificateBinding($claims, null));
+    }
+
+    /**
+     * RFC 7515 §2 base64url: unpadded, `-`/`_` rather than `+`/`/`. A padded or
+     * standard-base64 value will not compare equal to what AXIAM put in the token.
+     */
+    public function testRule9ThumbprintHelperProducesUnpaddedBase64Url(): void
+    {
+        $der = str_repeat("\x42", 512);
+        $tp = JwksVerifier::certificateThumbprintS256($der);
+
+        self::assertSame(43, strlen($tp));
+        self::assertStringNotContainsString('=', $tp);
+        self::assertStringNotContainsString('+', $tp);
+        self::assertStringNotContainsString('/', $tp);
+        self::assertSame($tp, JwksVerifier::certificateThumbprintS256($der));
+    }
 }
