@@ -376,7 +376,15 @@ final class JwksVerifier
 
         $expected = $cnf['x5t#S256'] ?? null;
         if (!is_string($expected) || $expected === '') {
-            // A confirmation naming a method this SDK cannot verify. Fail closed.
+            // A confirmation naming a method this entry point cannot verify —
+            // including a DPoP `jkt`. Fail closed; use verifyTokenBinding for DPoP.
+            return false;
+        }
+        // A `cnf` naming BOTH methods is a CONJUNCTION (contract 1.16): this method
+        // can establish one half and must not answer for the whole. Refusing here is
+        // what stops "check whichever we can".
+        $jkt = $cnf['jkt'] ?? null;
+        if (is_string($jkt) && $jkt !== '') {
             return false;
         }
         if ($presentedThumbprint === null || $presentedThumbprint === '') {
@@ -694,4 +702,98 @@ final class JwksVerifier
 
         return ($candidateParts['port'] ?? null) === ($baseParts['port'] ?? null);
     }
+
+    /**
+     * CONTRACT.md §10.1 **rule 9** in full — enforce a token's sender constraint
+     * against **every** proof the caller presented (contract 1.16).
+     *
+     * This is the complete rule, and the one to use unless your transport genuinely
+     * cannot produce a DPoP thumbprint.
+     *
+     * The ten cases:
+     *
+     * ```
+     * token's cnf             certificate     DPoP        result
+     * absent                  anything        anything    true
+     * x5t#S256                equal           ignored     true
+     * x5t#S256                different       ignored     false
+     * x5t#S256                null            ignored     false
+     * jkt                     ignored         equal       true
+     * jkt                     ignored         different   false
+     * jkt                     ignored         null        false
+     * both                    equal           equal       true
+     * both                    wrong/missing   —           false
+     * present, names neither  anything        anything    false
+     * ```
+     *
+     * Two rows carry the weight. **Both named is a conjunction**: an operator who
+     * turned on two constraints asked for two, and satisfying the more convenient one
+     * is not compliance. **Names neither is a refusal**: a confirmation this SDK
+     * cannot interpret is an unverifiable constraint, and reading it as
+     * "unconstrained" is the exact downgrade rule 9 exists to prevent. That includes
+     * an *empty* `cnf`, which is also how proto3 delivers an empty `CnfClaim` over
+     * gRPC (§10.3 rule 3).
+     *
+     * @param array<string,mixed> $claims Verified claims from {@see self::verify()}.
+     * @param PresentedProofs     $proofs What the caller proved on this connection
+     *   and request.
+     *
+     * @return bool `true` when the token may be accepted, `false` on any rejecting row.
+     */
+    public static function verifyTokenBinding(array $claims, PresentedProofs $proofs): bool
+    {
+        // The fast path, and the common one. First on purpose: an unbound token is
+        // accepted with no proofs at all, which is what keeps existing deployments
+        // working when a guard adopts this rule.
+        $cnf = $claims['cnf'] ?? null;
+        if ($cnf === null) {
+            return true;
+        }
+
+        // `verify()` hands back a top-level array, but NESTED objects stay stdClass —
+        // that is what firebase/php-jwt decodes JSON objects to. Accepting both shapes
+        // is load-bearing, not defensive: an is_array()-only check would reject every
+        // legitimately bound token, which is rule 9's failure mode inverted.
+        if ($cnf instanceof \stdClass) {
+            $cnf = (array) $cnf;
+        }
+        if (!is_array($cnf)) {
+            return false;
+        }
+
+        $expectedCert = $cnf['x5t#S256'] ?? null;
+        $expectedCert = is_string($expectedCert) && $expectedCert !== '' ? $expectedCert : null;
+        $expectedJkt = $cnf['jkt'] ?? null;
+        $expectedJkt = is_string($expectedJkt) && $expectedJkt !== '' ? $expectedJkt : null;
+
+        if ($expectedCert === null && $expectedJkt === null) {
+            return false;
+        }
+
+        // Each arm that applies must pass. Two independent checks rather than a branch
+        // on the pair, precisely so "both named" needs no case of its own — it is
+        // simply where both run.
+        if ($expectedCert !== null) {
+            $presented = $proofs->certificateThumbprint;
+            if ($presented === null || $presented === '') {
+                return false;
+            }
+            if (!hash_equals($expectedCert, $presented)) {
+                return false;
+            }
+        }
+
+        if ($expectedJkt !== null) {
+            $presented = $proofs->dpopThumbprint;
+            if ($presented === null || $presented === '') {
+                return false;
+            }
+            if (!hash_equals($expectedJkt, $presented)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }

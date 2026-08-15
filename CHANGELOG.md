@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **CONTRACT.md §10.1 rule 9 extended for DPoP, and §21.7.2 proof verification
+  implemented (contract 1.16/1.17).**
+
+  `JwksVerifier::verifyTokenBinding()` applies the full ten-row rule against a
+  certificate thumbprint, a verified DPoP key thumbprint, or **both**. A `cnf`
+  naming both methods is a **conjunction** — satisfying only the more convenient
+  one is not compliance — and a `cnf` naming nothing this SDK can check (including
+  an *empty* one, which is how proto3 delivers an empty `CnfClaim`) is refused
+  rather than read as unbound. `verifyCertificateBinding()` remains for
+  certificate-only transports and now **refuses** a DPoP-bound or both-bound token
+  rather than ignoring the half it cannot check.
+
+  New `DpopVerifier` implements all ten §21.7.2 checks and returns the proof key's
+  RFC 7638 thumbprint, so a value passed to `PresentedProofs` could only have come
+  from a proof that verified. `InMemoryJtiStore` covers check 8; the `JtiStore`
+  argument is required, not optional, because there is no safe default that skips
+  replay tracking. **On PHP-FPM the in-memory store prevents no replay at all** —
+  it does not survive the response — so its docblock points at Redis or a unique
+  index instead.
+
+  PS256 arrives via `firebase/php-jwt` delegating to `phpseclib`, since PHP's own
+  `openssl_verify()` has no PSS padding; phpseclib is already in the dependency
+  graph, and a PS256 proof fails closed if it is ever absent.
+
+  Not a breaking change: an unbound token is still accepted with no certificate and
+  no proof, asserted directly by the first test in the new group.
+
 - **CONTRACT.md §10.1 rule 9 — sender-constrained (certificate-bound) access tokens**
   (contract 1.15, RFC 8705 §3 / RFC 7800). A token carrying `cnf` is **not** a bearer
   token; accepting one without proving the caller holds the named key converts it back
