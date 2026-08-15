@@ -232,6 +232,57 @@ final class OidcRefreshBurstTest extends TestCase
     }
 
     /**
+     * §9 rule 5: the waiter's wait is BOUNDED, and exhausting it raises `AuthError`
+     * rather than returning a stale token set (or, worse, giving up and starting a
+     * second wire call with the leader's already-spent refresh token).
+     *
+     * Constructed by never resuming the leader, so its request stays on the wire
+     * forever, and resuming only the waiter until it gives up.
+     */
+    public function testAWaiterWhoseLeaderNeverSettlesFailsWithAuthErrorAndNoSecondWireCall(): void
+    {
+        $requests = [];
+        $client = $this->client($requests, static fn (): Response => new Response(200, [], '{}'));
+        $configuration = $this->configuration();
+
+        $waiterError = null;
+
+        $leader = new \Fiber(function () use ($client, $configuration): void {
+            $client->oidcRefresh('the-single-use-refresh-token', configuration: $configuration);
+        });
+        $waiter = new \Fiber(function () use ($client, $configuration, &$waiterError): void {
+            try {
+                $client->oidcRefresh('the-single-use-refresh-token', configuration: $configuration);
+            } catch (\Throwable $e) {
+                $waiterError = $e;
+            }
+        });
+
+        // The leader parks inside its wire call, holding the guard, and is never resumed.
+        $leader->start();
+        $waiter->start();
+
+        // Resume ONLY the waiter. The bound is an implementation detail (§9 rule 5 says
+        // so explicitly), so this drives well past it rather than asserting its value.
+        for ($pass = 0; $pass < 20000 && $waiter->isSuspended(); $pass++) {
+            $waiter->resume();
+        }
+
+        self::assertTrue($waiter->isTerminated(), 'the waiter must give up, not wait forever');
+        self::assertInstanceOf(AuthError::class, $waiterError, '§9 rule 5: exhaustion MUST raise AuthError');
+        self::assertStringContainsString('CONTRACT.md §9', $waiterError->getMessage());
+
+        self::assertSame(
+            1,
+            self::tokenCalls($requests),
+            'the waiter must never fall back to its own wire call — that would replay the refresh token '
+            . 'the still-in-flight leader is spending',
+        );
+
+        self::assertTrue($leader->isSuspended(), 'the leader must still be in flight, untouched by the waiter');
+    }
+
+    /**
      * §9 rule 2, failure path: the one call's failure is shared too — every caller fails
      * with `AuthError`, and nobody "retries" the refresh behind the guard (§9 rule 3).
      */
