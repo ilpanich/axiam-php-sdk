@@ -107,7 +107,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20 (including
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20, §22 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification) — the binding,
 cross-language behavioral contract every
@@ -121,7 +121,8 @@ server-verification escape hatch (§6) plus optional client-certificate mutual T
 messages (§8), single-flight refresh concurrency safety (§9), framework
 middleware/subscriber integration (§10), declarative per-endpoint authorization
 helpers (§11, see below), OIDC/SSO relying-party helpers (§12, see below), and
-webhook-signature verification (§13, see below).
+webhook-signature verification (§13, see below), and the §22 reactor runtime
+(`reactorServe`, see below).
 
 ## Framework integration
 
@@ -575,6 +576,106 @@ rejected just like a stale one. Multiple `v1` values are accepted to support sec
 rotation. Use the `X-Axiam-Delivery` header as an at-least-once dedup key — a retry replays
 a valid signature inside the freshness window.
 
+## Reactors — AMQP extension actors (CONTRACT.md §22)
+
+A **reactor** is an external process that subscribes to named hook events on the AXIAM bus
+and answers back — allow, deny, or a field-allow-listed mutation — inside a timeout the
+server declared. Zitadel Actions and Keycloak SPIs solve the same problem by loading
+third-party code *into* the authorization server; a reactor stays outside it, reachable
+only through a signed reply schema the server validates before it believes a word of it.
+
+```php
+use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Reactor\AmqpLibReactorTransport;
+use Axiam\Sdk\Reactor\ReactorAnswer;
+use Axiam\Sdk\Reactor\ReactorConfig;
+use Axiam\Sdk\Reactor\ReactorEvent;
+use Axiam\Sdk\Reactor\ReactorEvents;
+use Axiam\Sdk\Reactor\ReactorServer;
+
+$config = new ReactorConfig(
+    tenantId: $tenantId,
+    // §8.1 + §22.12: the tenant AMQP subkey from the management API, wrapped.
+    signingKey: new Sensitive($subkey),
+    // The queue name is derived from it — but the SERVER declared it.
+    reactorId: $reactorId,
+);
+
+$server = new ReactorServer(
+    config: $config,
+    // §8b: amqps:// only, optional CA bundle, no verification-skip switch anywhere.
+    transport: AmqpLibReactorTransport::connect('amqps://broker.example:5671', $caPath),
+    handler: function (ReactorEvent $event): ReactorAnswer {
+        switch ($event->event) {
+            case ReactorEvents::TOKEN_PRE_ISSUE:
+                // `ext.` is the COMPLETE allow-list for this event.
+                return ReactorAnswer::mutate(['ext.department' => 'eng']);
+            case ReactorEvents::LOGIN_POST_AUTH:
+                return fraudulent($event)
+                    ? ReactorAnswer::deny('embargoed region')
+                    : ReactorAnswer::allow(); // or ReactorAnswer::allowWithStepUp()
+        }
+
+        return ReactorAnswer::allow();
+    },
+);
+
+$server->reactorServe(); // blocks; call $server->stop() from a signal handler
+```
+
+`reactorServe()` verifies every delivery **before** the handler sees it — key version, MAC,
+freshness, nonce, in that order — then signs the reply with the same tenant subkey. §8's
+HMAC runs in **both directions** here: a reply is an instruction to change a token or refuse
+a login, so an unsigned or stale one is not a weak reply, it is not a reply at all.
+
+Five things this runtime does that are easy to get wrong, and that are asserted against the
+server-generated vectors in
+[`tests/Fixtures/reactor_v2_reference_vectors.json`](tests/Fixtures/reactor_v2_reference_vectors.json)
+rather than documented and hoped for:
+
+- **`hmac_signature` is serialized as `null` inside a reactor body**, not omitted the way
+  §8's own two message types omit it. This is the single most likely place to produce a MAC
+  that never verifies, in either direction.
+- **`reason`, `patch` and `require_mfa` are omitted when absent/false.** A reply that
+  serializes `"require_mfa": false` produces different canonical bytes and a different MAC.
+- **A patch is sent unfiltered.** One forbidden key rejects the *whole* patch server-side,
+  and this SDK will not quietly drop `sub` to rescue the rest — that would leave you
+  believing a field was set when it was dropped.
+- **A handler that throws publishes nothing.** No synthesized `allow`: the registration's
+  `failure_policy` decides, which is what the operator configured. `login.post_auth`
+  defaults to `fail_closed`.
+- **It never declares an exchange, a queue or a binding.** The server declares the
+  per-reactor queue from the registration, and `ReactorTransport` has no declare or bind
+  method for the runtime to reach for. A reactor that could bind could bind itself to
+  `*.token.pre_issue` and read another tenant's issuance events.
+
+The event registry, its per-event mutable-field allow-lists and §22.8's strictest-wins
+failure-policy composition are mirrored locally (`ReactorEvents::all()`,
+`ReactorEvents::defaultFailurePolicy($events)`) because the delivery path validates against
+them with no network available; `GET /api/v1/reactors/events` serves the live copy.
+
+**Not hookable, and not offered anywhere in this SDK:** the hot-path decision operations
+(the authorization check, the batch check and token introspection) are absent from the
+registry by design — §22.7 writes this as a MUST NOT because a reactor round-trip is
+milliseconds and the check path's budget is microseconds. An application that needs external
+input on an authorization decision writes a **deny grant**, which the engine evaluates in the
+hot path at hot-path cost.
+
+`timeout_ms` reaches the handler as `$event->timeoutMs` and bounds the reply: work whose
+window has already closed is abandoned rather than answered late. Telemetry (§19) is
+available through the `telemetryHook` constructor argument — and worth wiring, because a
+`fail_open` timeout produces `allow` *and* an audit record, so reactor health must never be
+inferred from the outcome alone.
+
+**Like the §8 consumer, a reactor is a long-running CLI process, never an FPM request**, and
+`php-amqplib` has no built-in reconnection: when the broker session ends `reactorServe()`
+returns and a process supervisor restarts the worker. That is a deliberate deviation from the
+Go/Java runtimes' in-process reconnect loop and the same posture this SDK already documents
+for the AMQP worker above. `$server->stop()` is safe from a `pcntl` signal handler: the
+delivery in flight is answered before the loop returns (§18).
+
+See [`examples/reactor/reactor.php`](examples/reactor/reactor.php).
+
 ## TLS policy
 
 Guzzle's `verify` option is **always `true`** (strict TLS, system trust roots) unless a
@@ -637,6 +738,7 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/uma_client.php`](examples/uma_client.php) — the other half: refusal → parse → trust decision → exchange → retry with the RPT.
 - [`examples/laravel_app/`](examples/laravel_app/README.md) — runnable Laravel middleware + Gate example, plus [`oidc_routes.php`](examples/laravel_app/oidc_routes.php) for "Login with AXIAM".
 - [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration), plus [`oidc_services.yaml`](examples/symfony_app/oidc_services.yaml)/[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml) for "Login with AXIAM".
+- [`examples/reactor/reactor.php`](examples/reactor/reactor.php) — CONTRACT.md §22: a reactor answering `token.pre_issue` with an `ext.` mutation and `login.post_auth` with a veto, over signed AMQP.
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).
 
 ## Testing

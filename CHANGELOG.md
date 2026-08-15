@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **CONTRACT.md §22 — Reactors, the AMQP extension actors (contract 1.18/1.19; remediation
+  R2.5).**
+
+  New `Axiam\Sdk\Reactor\ReactorServer::reactorServe()` — §22.10's `reactor_serve`, spelled
+  `reactorServe` by that subsection's per-language table. It consumes the **server-declared**
+  queue, verifies every delivery, dispatches to a handler, signs and publishes the reply, and
+  returns cleanly on shutdown.
+
+  §8's HMAC now runs in **both directions** on one exchange — the server signs the event, the
+  reactor signs the reply with the same tenant subkey — with one canonicalization difference
+  that costs a day if it is not stated: `hmac_signature` is serialized as **`null`** inside a
+  reactor body rather than omitted as it is in §8's own two message types. The §22.13 vectors
+  ship beside the §8 vectors under the same master key, tenant and derived subkey;
+  `tests/Fixtures/reactor_v2_reference_vectors.json` is vendored and both directions are
+  asserted byte-for-byte against `canonical_signed_json`, including the omission of
+  `reason`/`patch` when absent and of `require_mfa` when false.
+
+  Three PHP-specific canonicalization traps are handled once, in `ReactorProtocol`, and
+  tested rather than commented: `json_encode()` escapes slashes and non-ASCII where
+  `serde_json` escapes neither; a body decoded into an associative array turns an empty
+  `payload` object into `[]`, so reactor bodies are decoded into `stdClass`; and a patch is
+  key-sorted with `SORT_STRING` and written through an object, because the server's
+  `BTreeMap` emits byte-ordered keys while a PHP array emits insertion order and would
+  serialize numeric-looking keys as a JSON array.
+
+  Three rules are structural rather than documented. `ReactorAnswer::allow()` and
+  `allowWithStepUp()` take no patch, so `allow` + `patch` cannot be spelled. `ReactorTransport`
+  has no declare or bind method, so §22.1's "actors consume, they never declare topology" has
+  no seam to leak through — a reactor that could bind could bind itself to another tenant's
+  routing key. And a handler that throws publishes **nothing**: no synthesized `allow`,
+  because that would override the operator's `fail_closed` from inside the library.
+
+  A mutation is sent **unfiltered** (§22.4 rule 1) — one forbidden key rejects the whole patch
+  server-side, and dropping the offender would leave the author believing a field was set when
+  it was dropped.
+
+  §22.7's hot-path exclusion is enforced with a test rather than a comment: the three hot-path
+  decision operations appear in no constant, no list and no doc example under `src/Reactor/`
+  or `examples/reactor/`, asserted by a source scan.
+
+  Also new: `ReactorEvents::all()` and `ReactorEvents::defaultFailurePolicy()` (the §22.5
+  registry and §22.8's strictest-wins composition, which an SDK MUST NOT reduce to "take the
+  first event's default"), `ReactorEvents::queueName()`/`routingKey()`,
+  `AmqpLibReactorTransport::connect()` (§8b: `amqps://` only, optional CA bundle, no
+  verification-skip switch), and a `ReactorTelemetryEvent` (§19) whose fields are all fixed
+  readonly scalars so no variant can carry a secret. The tenant AMQP subkey is typed
+  `Sensitive` at the constructor rather than by convention (§22.12). New example:
+  `examples/reactor/reactor.php`.
+
+  **One documented deviation from the Go/Java runtimes, and it is pre-existing SDK policy
+  rather than a §22 decision:** there is no in-process reconnect loop. `php-amqplib` has no
+  built-in reconnection, so as with this SDK's §8 consumer the serve loop returns when the
+  broker session ends and a process supervisor restarts the worker. §22.10's four normative
+  rules on the helper are all implemented; reconnect appears only in that subsection's
+  descriptive prose.
+
+  Not breaking: nothing existing moved, and `Axiam\Sdk\Amqp\Consumer` is untouched.
+
 ### Changed
 
 - **`AuthError::__construct()` parameter order corrected — `$reason` moves from second to
