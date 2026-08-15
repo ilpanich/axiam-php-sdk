@@ -57,7 +57,7 @@ final class IdTokenValidator
      */
     public static function failure(string $reason, string $message): AuthError
     {
-        return new AuthError(sprintf('id_token validation failed (%s): %s', $reason, $message), $reason);
+        return new AuthError(sprintf('id_token validation failed (%s): %s', $reason, $message), reason: $reason);
     }
 
     /**

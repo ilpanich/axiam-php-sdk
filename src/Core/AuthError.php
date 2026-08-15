@@ -18,13 +18,26 @@ namespace Axiam\Sdk\Core;
  * the SAME `AuthError` type rather than a second error class (contract 1.4 judgment call:
  * ride the existing taxonomy, don't multiply it). It is `null` for every pre-existing
  * `AuthError` use in this SDK.
+ *
+ * **`$reason` is LAST on purpose (conformance-review F-18).** When §12 first added it, it
+ * went in second — ahead of `$previous` — which silently changed what the second
+ * positional argument means for every caller that already constructed this class
+ * directly. `$previous` is back in the position PHP's own exception convention (and this
+ * SDK's {@see NetworkError}) puts it, and new parameters are appended, never inserted.
+ * Pass `$reason` by name (`reason:`), which is what every call site in this SDK does.
  */
 class AuthError extends AxiamException
 {
+    /**
+     * @param string          $message  Human-readable failure description (CONTRACT.md §2:
+     *                                  never carries a token, credential, or claim value).
+     * @param \Throwable|null $previous Cause, for `getPrevious()` chaining.
+     * @param string|null     $reason   Stable machine-readable §12.4 code — pass by name.
+     */
     public function __construct(
         string $message,
-        private readonly ?string $reason = null,
         ?\Throwable $previous = null,
+        private readonly ?string $reason = null,
     ) {
         parent::__construct($message, previous: $previous);
     }

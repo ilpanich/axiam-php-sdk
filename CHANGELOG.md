@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`AuthError::__construct()` parameter order corrected — `$reason` moves from second to
+  last (conformance-review F-18, remediation R5.7).**
+
+  New signature: `__construct(string $message, ?\Throwable $previous = null, ?string
+  $reason = null)`. Previously `$reason` sat second, ahead of `$previous`.
+
+  **This is a source-level break, and calling it non-breaking would be wrong.** Any code
+  that wrote `new AuthError($message, 'token_expired')` positionally must now write
+  `new AuthError($message, reason: 'token_expired')`; from `1.0.0-alpha19` up to this
+  release that positional form was the documented one. It is being changed rather than
+  kept because the alternative is worse and permanent: before §12, `AuthError` had no
+  constructor of its own and inherited `RuntimeException`'s, so second-position meant the
+  cause for the class's whole prior life, and `new AuthError($msg, $previous)` — the shape
+  this SDK's own `NetworkError` still uses — silently became a `TypeError`. Fixing the
+  order now, at `1.0.0-alpha*`, costs one mechanical edit per call site; leaving it costs
+  a permanently surprising constructor. Six call sites inside this SDK were updated
+  (`JwksVerifier`, `IdTokenValidator`); `AuthErrorParameterOrderTest` locks the order so a
+  future additive parameter is appended rather than inserted.
+
+  `getReason()`, `getPrevious()`, `getMessage()`, the class hierarchy, and
+  `OAuthProtocolError` are all unchanged, so every `catch (AuthError $e)` block and every
+  reader of these accessors is unaffected.
+
 ### Fixed
 
 - **`oidcRefresh()`: a waiting caller no longer destroys the in-flight refresh it is
