@@ -21,6 +21,17 @@ class CheckAccessRequest extends \Google\Protobuf\Internal\Message
     protected $tenant_id = '';
     /**
      * Subject (user) UUID.
+     * SDK-Q10: optional in the same sense REST's `subject_id` is optional — an
+     * **empty** value means "the subject carried by the verified token", exactly
+     * as an absent `subject_id` does on `POST /api/v1/authz/check`. A non-empty
+     * value MUST equal the token's subject; a mismatch is refused (SEC-003).
+     * gRPC has no `authz:check_as` cross-subject form: over this transport the
+     * field can only ever restate the caller, so omitting it is now allowed
+     * rather than an INVALID_ARGUMENT.
+     * It stays a plain `string` rather than becoming a proto3 `optional`:
+     * switching an existing field to explicit presence is a cardinality change
+     * `buf breaking` rejects (verified against main), so — as in CONTRACT §10.3 —
+     * the empty string carries the meaning proto3 cannot express as absence.
      *
      * Generated from protobuf field <code>string subject_id = 2;</code>
      */
@@ -54,6 +65,17 @@ class CheckAccessRequest extends \Google\Protobuf\Internal\Message
      *           Tenant UUID — all checks are tenant-scoped.
      *     @type string $subject_id
      *           Subject (user) UUID.
+     *           SDK-Q10: optional in the same sense REST's `subject_id` is optional — an
+     *           **empty** value means "the subject carried by the verified token", exactly
+     *           as an absent `subject_id` does on `POST /api/v1/authz/check`. A non-empty
+     *           value MUST equal the token's subject; a mismatch is refused (SEC-003).
+     *           gRPC has no `authz:check_as` cross-subject form: over this transport the
+     *           field can only ever restate the caller, so omitting it is now allowed
+     *           rather than an INVALID_ARGUMENT.
+     *           It stays a plain `string` rather than becoming a proto3 `optional`:
+     *           switching an existing field to explicit presence is a cardinality change
+     *           `buf breaking` rejects (verified against main), so — as in CONTRACT §10.3 —
+     *           the empty string carries the meaning proto3 cannot express as absence.
      *     @type string $action
      *           Action name (e.g. "read", "write", "delete").
      *     @type string $resource_id
@@ -95,6 +117,17 @@ class CheckAccessRequest extends \Google\Protobuf\Internal\Message
 
     /**
      * Subject (user) UUID.
+     * SDK-Q10: optional in the same sense REST's `subject_id` is optional — an
+     * **empty** value means "the subject carried by the verified token", exactly
+     * as an absent `subject_id` does on `POST /api/v1/authz/check`. A non-empty
+     * value MUST equal the token's subject; a mismatch is refused (SEC-003).
+     * gRPC has no `authz:check_as` cross-subject form: over this transport the
+     * field can only ever restate the caller, so omitting it is now allowed
+     * rather than an INVALID_ARGUMENT.
+     * It stays a plain `string` rather than becoming a proto3 `optional`:
+     * switching an existing field to explicit presence is a cardinality change
+     * `buf breaking` rejects (verified against main), so — as in CONTRACT §10.3 —
+     * the empty string carries the meaning proto3 cannot express as absence.
      *
      * Generated from protobuf field <code>string subject_id = 2;</code>
      * @return string
@@ -106,6 +139,17 @@ class CheckAccessRequest extends \Google\Protobuf\Internal\Message
 
     /**
      * Subject (user) UUID.
+     * SDK-Q10: optional in the same sense REST's `subject_id` is optional — an
+     * **empty** value means "the subject carried by the verified token", exactly
+     * as an absent `subject_id` does on `POST /api/v1/authz/check`. A non-empty
+     * value MUST equal the token's subject; a mismatch is refused (SEC-003).
+     * gRPC has no `authz:check_as` cross-subject form: over this transport the
+     * field can only ever restate the caller, so omitting it is now allowed
+     * rather than an INVALID_ARGUMENT.
+     * It stays a plain `string` rather than becoming a proto3 `optional`:
+     * switching an existing field to explicit presence is a cardinality change
+     * `buf breaking` rejects (verified against main), so — as in CONTRACT §10.3 —
+     * the empty string carries the meaning proto3 cannot express as absence.
      *
      * Generated from protobuf field <code>string subject_id = 2;</code>
      * @param string $var

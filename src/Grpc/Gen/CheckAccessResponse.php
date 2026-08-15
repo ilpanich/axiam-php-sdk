@@ -21,10 +21,50 @@ class CheckAccessResponse extends \Google\Protobuf\Internal\Message
     protected $allowed = false;
     /**
      * Reason for denial (empty when allowed).
+     * DEPRECATED (SDK-Q10, contract 1.19). Superseded by `reason` (field 4),
+     * which is what the REST decision body has always called this. Both fields
+     * ship with byte-identical content until AXIAM **2.0**, where this one is
+     * removed; new code MUST read `reason` and MUST NOT depend on this field
+     * surviving. Deprecating rather than renaming keeps every gRPC client built
+     * against the current schema working, which a rename would have broken on
+     * the wire for exactly no behavioural gain.
+     * When 2.0 removes it, field number 2 and the name `deny_reason` must be
+     * `reserved` rather than recycled — a future field reusing tag 2 would be
+     * silently misread as a deny reason by every 1.x client still on the wire.
      *
-     * Generated from protobuf field <code>string deny_reason = 2;</code>
+     * Generated from protobuf field <code>string deny_reason = 2 [deprecated = true];</code>
+     * @deprecated
      */
     protected $deny_reason = '';
+    /**
+     * B1 (deny-override): machine-readable decision reason. One of:
+     *   "allowed"        — an allow grant matched and no deny did
+     *   "no_grant"       — nothing matched; default deny
+     *   "denied_by_rule" — an explicit deny rule matched and overrode any allow
+     * Both refusals still set allowed=false, so a client reading only `allowed`
+     * is unaffected. The distinction matters to the person on the other end:
+     * "no_grant" means ask an admin for access, "denied_by_rule" means an admin
+     * has already decided. Field 3 is additive — proto3 clients built against
+     * the previous schema ignore it.
+     *
+     * Generated from protobuf field <code>string reason_code = 3;</code>
+     */
+    protected $reason_code = '';
+    /**
+     * SDK-Q10: the human-readable reason, under the name REST already uses.
+     * This is the canonical field; `deny_reason` (field 2) is the deprecated
+     * spelling of the same string. Presence is explicit so the gRPC shape
+     * matches the REST one exactly: REST omits `reason` on an allow, and so does
+     * this — absent on `allowed = true`, present on every refusal. Explicit
+     * presence also lets a client tell "this server does not send `reason` yet"
+     * (absent on a refusal — a pre-SDK-Q10 server, fall back to `deny_reason`)
+     * apart from "allowed, so there is nothing to say".
+     * Field 4 is additive, so clients built against the previous schema ignore it
+     * and keep reading `deny_reason` until 2.0.
+     *
+     * Generated from protobuf field <code>optional string reason = 4;</code>
+     */
+    protected $reason = null;
 
     /**
      * Constructor.
@@ -36,6 +76,37 @@ class CheckAccessResponse extends \Google\Protobuf\Internal\Message
      *           Whether the access is allowed.
      *     @type string $deny_reason
      *           Reason for denial (empty when allowed).
+     *           DEPRECATED (SDK-Q10, contract 1.19). Superseded by `reason` (field 4),
+     *           which is what the REST decision body has always called this. Both fields
+     *           ship with byte-identical content until AXIAM **2.0**, where this one is
+     *           removed; new code MUST read `reason` and MUST NOT depend on this field
+     *           surviving. Deprecating rather than renaming keeps every gRPC client built
+     *           against the current schema working, which a rename would have broken on
+     *           the wire for exactly no behavioural gain.
+     *           When 2.0 removes it, field number 2 and the name `deny_reason` must be
+     *           `reserved` rather than recycled — a future field reusing tag 2 would be
+     *           silently misread as a deny reason by every 1.x client still on the wire.
+     *     @type string $reason_code
+     *           B1 (deny-override): machine-readable decision reason. One of:
+     *             "allowed"        — an allow grant matched and no deny did
+     *             "no_grant"       — nothing matched; default deny
+     *             "denied_by_rule" — an explicit deny rule matched and overrode any allow
+     *           Both refusals still set allowed=false, so a client reading only `allowed`
+     *           is unaffected. The distinction matters to the person on the other end:
+     *           "no_grant" means ask an admin for access, "denied_by_rule" means an admin
+     *           has already decided. Field 3 is additive — proto3 clients built against
+     *           the previous schema ignore it.
+     *     @type string $reason
+     *           SDK-Q10: the human-readable reason, under the name REST already uses.
+     *           This is the canonical field; `deny_reason` (field 2) is the deprecated
+     *           spelling of the same string. Presence is explicit so the gRPC shape
+     *           matches the REST one exactly: REST omits `reason` on an allow, and so does
+     *           this — absent on `allowed = true`, present on every refusal. Explicit
+     *           presence also lets a client tell "this server does not send `reason` yet"
+     *           (absent on a refusal — a pre-SDK-Q10 server, fall back to `deny_reason`)
+     *           apart from "allowed, so there is nothing to say".
+     *           Field 4 is additive, so clients built against the previous schema ignore it
+     *           and keep reading `deny_reason` until 2.0.
      * }
      */
     public function __construct($data = NULL) {
@@ -71,26 +142,146 @@ class CheckAccessResponse extends \Google\Protobuf\Internal\Message
 
     /**
      * Reason for denial (empty when allowed).
+     * DEPRECATED (SDK-Q10, contract 1.19). Superseded by `reason` (field 4),
+     * which is what the REST decision body has always called this. Both fields
+     * ship with byte-identical content until AXIAM **2.0**, where this one is
+     * removed; new code MUST read `reason` and MUST NOT depend on this field
+     * surviving. Deprecating rather than renaming keeps every gRPC client built
+     * against the current schema working, which a rename would have broken on
+     * the wire for exactly no behavioural gain.
+     * When 2.0 removes it, field number 2 and the name `deny_reason` must be
+     * `reserved` rather than recycled — a future field reusing tag 2 would be
+     * silently misread as a deny reason by every 1.x client still on the wire.
      *
-     * Generated from protobuf field <code>string deny_reason = 2;</code>
+     * Generated from protobuf field <code>string deny_reason = 2 [deprecated = true];</code>
      * @return string
+     * @deprecated
      */
     public function getDenyReason()
     {
+        @trigger_error('deny_reason is deprecated.', E_USER_DEPRECATED);
         return $this->deny_reason;
     }
 
     /**
      * Reason for denial (empty when allowed).
+     * DEPRECATED (SDK-Q10, contract 1.19). Superseded by `reason` (field 4),
+     * which is what the REST decision body has always called this. Both fields
+     * ship with byte-identical content until AXIAM **2.0**, where this one is
+     * removed; new code MUST read `reason` and MUST NOT depend on this field
+     * surviving. Deprecating rather than renaming keeps every gRPC client built
+     * against the current schema working, which a rename would have broken on
+     * the wire for exactly no behavioural gain.
+     * When 2.0 removes it, field number 2 and the name `deny_reason` must be
+     * `reserved` rather than recycled — a future field reusing tag 2 would be
+     * silently misread as a deny reason by every 1.x client still on the wire.
      *
-     * Generated from protobuf field <code>string deny_reason = 2;</code>
+     * Generated from protobuf field <code>string deny_reason = 2 [deprecated = true];</code>
      * @param string $var
      * @return $this
+     * @deprecated
      */
     public function setDenyReason($var)
     {
+        @trigger_error('deny_reason is deprecated.', E_USER_DEPRECATED);
         GPBUtil::checkString($var, True);
         $this->deny_reason = $var;
+
+        return $this;
+    }
+
+    /**
+     * B1 (deny-override): machine-readable decision reason. One of:
+     *   "allowed"        — an allow grant matched and no deny did
+     *   "no_grant"       — nothing matched; default deny
+     *   "denied_by_rule" — an explicit deny rule matched and overrode any allow
+     * Both refusals still set allowed=false, so a client reading only `allowed`
+     * is unaffected. The distinction matters to the person on the other end:
+     * "no_grant" means ask an admin for access, "denied_by_rule" means an admin
+     * has already decided. Field 3 is additive — proto3 clients built against
+     * the previous schema ignore it.
+     *
+     * Generated from protobuf field <code>string reason_code = 3;</code>
+     * @return string
+     */
+    public function getReasonCode()
+    {
+        return $this->reason_code;
+    }
+
+    /**
+     * B1 (deny-override): machine-readable decision reason. One of:
+     *   "allowed"        — an allow grant matched and no deny did
+     *   "no_grant"       — nothing matched; default deny
+     *   "denied_by_rule" — an explicit deny rule matched and overrode any allow
+     * Both refusals still set allowed=false, so a client reading only `allowed`
+     * is unaffected. The distinction matters to the person on the other end:
+     * "no_grant" means ask an admin for access, "denied_by_rule" means an admin
+     * has already decided. Field 3 is additive — proto3 clients built against
+     * the previous schema ignore it.
+     *
+     * Generated from protobuf field <code>string reason_code = 3;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setReasonCode($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->reason_code = $var;
+
+        return $this;
+    }
+
+    /**
+     * SDK-Q10: the human-readable reason, under the name REST already uses.
+     * This is the canonical field; `deny_reason` (field 2) is the deprecated
+     * spelling of the same string. Presence is explicit so the gRPC shape
+     * matches the REST one exactly: REST omits `reason` on an allow, and so does
+     * this — absent on `allowed = true`, present on every refusal. Explicit
+     * presence also lets a client tell "this server does not send `reason` yet"
+     * (absent on a refusal — a pre-SDK-Q10 server, fall back to `deny_reason`)
+     * apart from "allowed, so there is nothing to say".
+     * Field 4 is additive, so clients built against the previous schema ignore it
+     * and keep reading `deny_reason` until 2.0.
+     *
+     * Generated from protobuf field <code>optional string reason = 4;</code>
+     * @return string
+     */
+    public function getReason()
+    {
+        return isset($this->reason) ? $this->reason : '';
+    }
+
+    public function hasReason()
+    {
+        return isset($this->reason);
+    }
+
+    public function clearReason()
+    {
+        unset($this->reason);
+    }
+
+    /**
+     * SDK-Q10: the human-readable reason, under the name REST already uses.
+     * This is the canonical field; `deny_reason` (field 2) is the deprecated
+     * spelling of the same string. Presence is explicit so the gRPC shape
+     * matches the REST one exactly: REST omits `reason` on an allow, and so does
+     * this — absent on `allowed = true`, present on every refusal. Explicit
+     * presence also lets a client tell "this server does not send `reason` yet"
+     * (absent on a refusal — a pre-SDK-Q10 server, fall back to `deny_reason`)
+     * apart from "allowed, so there is nothing to say".
+     * Field 4 is additive, so clients built against the previous schema ignore it
+     * and keep reading `deny_reason` until 2.0.
+     *
+     * Generated from protobuf field <code>optional string reason = 4;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setReason($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->reason = $var;
 
         return $this;
     }
