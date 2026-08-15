@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Oidc;
 
 use Axiam\Sdk\Auth\JwksVerifier;
+use Axiam\Sdk\Auth\RefreshGuard;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
@@ -402,12 +403,24 @@ final class OidcClient
                 kind: Session::REFRESH_KIND_OIDC,
             );
 
-            if ($guarded['ran'] || $guarded['kind'] === Session::REFRESH_KIND_OIDC) {
-                // Either WE started this refresh, or another concurrent oidcRefresh
-                // call already did and this call is sharing its single outcome
-                // (CONTRACT.md §9 rule 2 / rule 5, F-06) — never a second wire call.
+            if ($guarded['ran']) {
+                // WE are the leader: this call owns the one wire call, and drives it.
                 /** @var array<string,mixed> $wire */
                 $wire = $guarded['promise']->wait();
+
+                return $this->toTokenSet($wire, $configuration, null);
+            }
+
+            if ($guarded['kind'] === Session::REFRESH_KIND_OIDC) {
+                // Another concurrent oidcRefresh already started the one wire call —
+                // JOIN it and use its outcome (CONTRACT.md §9 rule 2 / rule 5, F-06).
+                // RefreshGuard::join(), never PromiseInterface::wait(): wait() would
+                // seize a wait function the leader has already consumed, killing the
+                // leader's in-flight refresh and freeing the guard slot mid-flight —
+                // after which the next caller replays an already-spent single-use
+                // refresh token. See RefreshGuard::join()'s doc comment.
+                /** @var array<string,mixed> $wire */
+                $wire = RefreshGuard::join($guarded['promise']);
 
                 return $this->toTokenSet($wire, $configuration, null);
             }
@@ -417,7 +430,7 @@ final class OidcClient
             // it to settle (we don't care whether IT succeeded or failed) and try to
             // acquire the guard again.
             try {
-                $guarded['promise']->wait();
+                RefreshGuard::join($guarded['promise']);
             } catch (\Throwable) {
                 // Not our call — ignore and retry acquiring the guard for our own.
             }

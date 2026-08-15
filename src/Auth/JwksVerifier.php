@@ -493,7 +493,10 @@ final class JwksVerifier
 
         $parts = explode('.', $jwt);
         if (count($parts) !== 3) {
-            throw new AuthError('id_token is not a well-formed JWT (expected 3 dot-separated segments)', 'invalid_signature');
+            throw new AuthError(
+                'id_token is not a well-formed JWT (expected 3 dot-separated segments)',
+                reason: 'invalid_signature',
+            );
         }
 
         $header = $this->decodeHeader($parts[0]);
@@ -504,7 +507,7 @@ final class JwksVerifier
         if ($alg !== 'EdDSA') {
             throw new AuthError(
                 sprintf('expected alg "EdDSA", got %s', is_string($alg) ? sprintf('"%s"', $alg) : 'no alg header'),
-                'invalid_alg',
+                reason: 'invalid_alg',
             );
         }
 
@@ -514,12 +517,15 @@ final class JwksVerifier
             // all', not just 'no matching key'" — no re-fetch is useful here (there is no
             // kid value a fresh JWKS document could possibly satisfy), so this fails
             // immediately with the same reason code.
-            throw new AuthError('id_token has no kid header', 'unknown_kid');
+            throw new AuthError('id_token has no kid header', reason: 'unknown_kid');
         }
 
         $this->ensureFresh($kid);
         if (!isset($this->keysByKid[$kid])) {
-            throw new AuthError(sprintf('id_token kid "%s" is unknown, even after a JWKS refetch', $kid), 'unknown_kid');
+            throw new AuthError(
+                sprintf('id_token kid "%s" is unknown, even after a JWKS refetch', $kid),
+                reason: 'unknown_kid',
+            );
         }
 
         // firebase/php-jwt's own JWT::decode() enforces exp/nbf/iat internally (via the
@@ -539,7 +545,10 @@ final class JwksVerifier
         try {
             $decoded = JWT::decode($jwt, $this->keysByKid);
         } catch (\Throwable $e) {
-            throw new AuthError('id_token signature verification failed: ' . $e->getMessage(), 'invalid_signature');
+            throw new AuthError(
+                'id_token signature verification failed: ' . $e->getMessage(),
+                reason: 'invalid_signature',
+            );
         } finally {
             JWT::$leeway = $originalLeeway;
         }
