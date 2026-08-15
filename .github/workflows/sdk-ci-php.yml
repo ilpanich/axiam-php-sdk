@@ -107,6 +107,70 @@ jobs:
           fi
           echo "TLS-bypass gate passed — no disallowed usage found."
 
+  protoc-drift-check:
+    name: protoc drift-check (D-03)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2.37.2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      # PHP is the one AXIAM SDK that does not use buf (D-03) — protoc's PHP
+      # generator is invoked directly by tools/grpc-gen.php, and the message
+      # stubs it produces are committed to src/Grpc/Gen/ (README.md "Regenerating
+      # the gRPC stubs"). Nothing before this gate ever compared those committed
+      # stubs against the vendored proto/ tree they claim to be generated from —
+      # that gap is exactly how CheckAccessResponse.reason_code (B1 deny-override,
+      # contract 1.17) went missing from the committed stub while every other
+      # artifact had already moved on to contract 1.19; it was found only by an
+      # ad-hoc control run, not by CI. This job is that control run, made
+      # permanent: regenerate from proto/ with the *exact* generator D-03 uses,
+      # then diff the result against what is committed.
+      #
+      # protoc is downloaded pinned-by-checksum rather than installed via apt or
+      # a floating GitHub Action, for the same reason buf.gen.yaml pins the Go
+      # SDK's remote plugins (see that file's comment): protoc stamps its own
+      # version into a comment header of every file it generates, so an
+      # unpinned/floating protoc would produce false drift — a version-header-only
+      # diff with no proto change behind it — the moment Ubuntu's apt mirror or a
+      # GitHub Action rolls a new protoc release, on every open PR at once, for a
+      # change nobody made. Pinning to one exact release, verified by its own
+      # published sha256, is what keeps this gate's failures meaningful: a red
+      # run means the PROTO changed and the stub did not follow, never "protoc
+      # got upgraded underneath the gate".
+      - name: Install pinned protoc (D-03)
+        env:
+          PROTOC_VERSION: '25.3'
+          PROTOC_SHA256: 'f853e691868d0557425ea290bf7ba6384eef2fa9b04c323afab49a770ba9da80'
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/protoc.zip \
+            "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+          echo "${PROTOC_SHA256}  /tmp/protoc.zip" | sha256sum -c -
+          mkdir -p /tmp/protoc
+          unzip -q /tmp/protoc.zip -d /tmp/protoc
+          echo "/tmp/protoc/bin" >> "$GITHUB_PATH"
+
+      - name: Regenerate stubs from vendored proto/ (same generator as D-03)
+        run: |
+          set -euo pipefail
+          protoc --version
+          php tools/grpc-gen.php
+
+      # This is the actual gate. `git diff --exit-code` both prints a real,
+      # file-by-file unified diff of anything that changed AND exits non-zero if
+      # it did — so a drifted stub fails the build with the diff attached to the
+      # log, not just a pass/fail boolean. `build/` is gitignored scratch space
+      # (tools/grpc-gen.php's own output before relocation) and never part of the
+      # comparison.
+      - name: Fail on drift — committed stubs must match proto/ (D-03)
+        run: git diff --exit-code -- src/Grpc/Gen
+
   # Publishing to a public registry is IRREVERSIBLE — Packagist, like crates.io,
   # npm, PyPI, Maven Central and NuGet, refuses to re-use a version number. Git
   # tags are NOT branch-scoped, so without this gate a release tag cut on a
@@ -163,6 +227,30 @@ jobs:
 
       - name: composer validate --strict (manifest must be publishable)
         run: composer validate --strict
+
+      # D-03: the committed src/Grpc/Gen stubs must be up to date before a
+      # release tag is trusted — same drift-check as the PR gate (protoc-drift-
+      # check), run again here as a belt-and-suspenders confirm on the tagged
+      # commit itself, since protoc-drift-check only runs `on: pull_request` and
+      # this job runs on a tag push instead.
+      - name: Install pinned protoc (D-03)
+        env:
+          PROTOC_VERSION: '25.3'
+          PROTOC_SHA256: 'f853e691868d0557425ea290bf7ba6384eef2fa9b04c323afab49a770ba9da80'
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/protoc.zip \
+            "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip"
+          echo "${PROTOC_SHA256}  /tmp/protoc.zip" | sha256sum -c -
+          mkdir -p /tmp/protoc
+          unzip -q /tmp/protoc.zip -d /tmp/protoc
+          echo "/tmp/protoc/bin" >> "$GITHUB_PATH"
+
+      - name: Regenerate stubs from vendored proto/ (same generator as D-03)
+        run: php tools/grpc-gen.php
+
+      - name: Fail on drift — committed stubs must match proto/ (D-03)
+        run: git diff --exit-code -- src/Grpc/Gen
 
       - name: Packagist picks up the tag via its GitHub webhook
         run: |
