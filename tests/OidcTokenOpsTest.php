@@ -30,6 +30,11 @@ final class OidcTokenOpsTest extends TestCase
     private const CLIENT_SECRET = 's3cr3t';
     private const TENANT_UUID = '22222222-2222-2222-2222-222222222222';
 
+    /** Failure message for the §12.3 rule 3 / F-14 assertions below. */
+    private const NO_REFRESH_MESSAGE = 'CONTRACT.md §12.3 rule 3: a 401 from an /oauth2/* endpoint must never '
+        . 'reach the §9 single-flight refresh guard — the §12 transport carries no 401→refresh interceptor, '
+        . 'so this MUST stay at zero /api/v1/auth/refresh calls (conformance-review F-14)';
+
     private function configuration(): OidcConfiguration
     {
         return new OidcConfiguration(
@@ -364,18 +369,29 @@ final class OidcTokenOpsTest extends TestCase
         self::assertNull($result->sub);
     }
 
-    /** §12.3 rule 3: 401 from /oauth2/introspect -> OAuthProtocolError, NEVER the §9 refresh guard. */
+    /**
+     * §12.3 rule 3: 401 from /oauth2/introspect -> OAuthProtocolError, NEVER the §9
+     * refresh guard.
+     *
+     * This is the regression test for the structural invariant named at the OIDC
+     * transport seam in {@see AxiamClient} (conformance-review F-14): the rule holds
+     * only because no 401→refresh interceptor sits on the transport §12 uses, and
+     * nothing in the type system notices if one is added later. So the wire log is
+     * asserted directly — zero `/api/v1/auth/refresh` calls — rather than left to be
+     * inferred from a MockHandler "queue is empty" error.
+     */
     public function test401FromIntrospectSurfacesAsOAuthProtocolErrorAndNeverEntersRefreshGuard(): void
     {
         // Only ONE response queued. If the SDK mistakenly triggered the §9 refresh
         // guard (POST /api/v1/auth/refresh) on this 401, MockHandler would throw
         // "queue is empty" on that unexpected second request instead of surfacing
         // OAuthProtocolError from the first.
+        $history = [];
         $client = $this->client([
             new Response(401, [], (string) json_encode([
                 'error' => 'invalid_client', 'error_description' => 'client authentication failed',
             ])),
-        ]);
+        ], history: $history);
 
         try {
             $client->introspect('a-token', configuration: $this->configuration());
@@ -383,6 +399,8 @@ final class OidcTokenOpsTest extends TestCase
         } catch (OAuthProtocolError $e) {
             self::assertSame('invalid_client: client authentication failed', $e->getMessage());
         }
+
+        self::assertSame(0, self::refreshCalls($history), self::NO_REFRESH_MESSAGE);
     }
 
     // ===================================================================================
@@ -414,17 +432,42 @@ final class OidcTokenOpsTest extends TestCase
         self::assertSame('refresh_token', $form['token_type_hint']);
     }
 
-    /** §12.3 rule 3: 401 from /oauth2/revoke -> OAuthProtocolError, NEVER the §9 refresh guard. */
+    /**
+     * §12.3 rule 3: 401 from /oauth2/revoke -> OAuthProtocolError, NEVER the §9 refresh
+     * guard. The introspect twin above explains why the wire log is asserted directly
+     * (conformance-review F-14).
+     */
     public function test401FromRevokeSurfacesAsOAuthProtocolErrorAndNeverEntersRefreshGuard(): void
     {
+        $history = [];
         $client = $this->client([
             new Response(401, [], (string) json_encode([
                 'error' => 'invalid_client', 'error_description' => 'bad credentials',
             ])),
-        ]);
+        ], history: $history);
 
-        $this->expectException(OAuthProtocolError::class);
-        $client->revoke('a-token', configuration: $this->configuration());
+        try {
+            $client->revoke('a-token', configuration: $this->configuration());
+            self::fail('expected OAuthProtocolError');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('invalid_client: bad credentials', $e->getMessage());
+        }
+
+        self::assertSame(0, self::refreshCalls($history), self::NO_REFRESH_MESSAGE);
+    }
+
+    /**
+     * How many `/api/v1/auth/refresh` (§9 / §1 cookie-session refresh) calls the
+     * transaction log contains — see the F-14 note on the introspect test above.
+     *
+     * @param array<int,array{request: \Psr\Http\Message\RequestInterface}> $history
+     */
+    private static function refreshCalls(array $history): int
+    {
+        return \count(array_filter(
+            $history,
+            static fn (array $transaction): bool => $transaction['request']->getUri()->getPath() === '/api/v1/auth/refresh',
+        ));
     }
 
     public function test5xxFromRevokeIsNetworkErrorNotSuccess(): void

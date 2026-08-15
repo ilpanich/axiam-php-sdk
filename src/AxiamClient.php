@@ -361,6 +361,30 @@ final class AxiamClient
         // $this->jwksVerifier (the SAME verifier the §10 middleware uses for AXIAM's
         // own access tokens) for ID-token signature verification, since AXIAM's OIDC
         // provider and its own auth server are the same origin with one JWKS to trust.
+        //
+        // ---------------------------------------------------------------------------
+        // INVARIANT (name it, because nothing enforces it): §12.3 rule 3 holds here by
+        // the ABSENCE of a 401→refresh interceptor on this transport, not by any check
+        // anywhere that inspects the URL and opts /oauth2/* out. Nothing in OidcEngine,
+        // AuthMiddleware or RefreshMiddleware would object if that absence ended.
+        //
+        // Two edits silently violate the rule, and neither fails to compile:
+        //   1. pushing RefreshMiddleware (or any other retry-on-401 middleware) onto
+        //      $plainStack — it is the SAME stack $this->plainHttp and Session's own
+        //      refresh POST run on; or
+        //   2. handing OidcEngine $this->authzHttp, or any future client built on
+        //      $authzStack, instead of $plainHttp.
+        // Either one turns an ordinary `invalid_client` from /oauth2/introspect into a
+        // cookie-session refresh attempt — spending a single-use rotating refresh token
+        // to "fix" a 401 that was never about the cookie session at all.
+        //
+        // Conformance-review F-14: five SDKs rely on this same structural invariant.
+        // What guards it here is not the type system but two regression tests —
+        // OidcTokenOpsTest::test401From{Introspect,Revoke}SurfacesAsOAuthProtocolError
+        // AndNeverEntersRefreshGuard — which assert zero /api/v1/auth/refresh calls on
+        // that path. If you deliberately change this wiring, expect them to fail, and
+        // treat that failure as the contract speaking rather than as a stale test.
+        // ---------------------------------------------------------------------------
         $this->oidc = new OidcEngine(
             http: $this->plainHttp,
             baseUrl: $baseUrl,

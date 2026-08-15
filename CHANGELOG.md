@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `OAuthProtocolError` are all unchanged, so every `catch (AuthError $e)` block and every
   reader of these accessors is unaffected.
 
+- **The §12.3 rule 3 invariant is now named at the transport seam** (conformance-review
+  F-14, remediation R5.7). A 401 from `/oauth2/*` stays out of the §9 refresh guard
+  because no 401→refresh interceptor sits on the transport §12 uses — an invariant kept
+  by *absence*, which nothing in the type system re-checks. `AxiamClient`'s OIDC seam now
+  spells out the two edits that would silently break it (pushing `RefreshMiddleware` onto
+  `$plainStack`; handing `OidcEngine` the `$authzHttp` client) and points at the two
+  regression tests that guard it. Those tests previously inferred "no refresh happened"
+  from a `MockHandler` "queue is empty" error; they now assert zero
+  `/api/v1/auth/refresh` calls against the transaction log directly. No behaviour change.
+
 ### Fixed
 
 - **`oidcRefresh()`: a waiting caller no longer destroys the in-flight refresh it is
