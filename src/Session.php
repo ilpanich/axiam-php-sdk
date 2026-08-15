@@ -236,6 +236,11 @@ final class Session
      *     the guard and issuing its own wire call. This matters because AXIAM refresh
      *     tokens are opaque, server-stored, and single-use with rotation: a second wire
      *     call would replay an already-consumed token and fail `invalid_grant`.
+     *     Await it with {@see RefreshGuard::join()}, **never** with
+     *     `PromiseInterface::wait()`: only the leader — the `ran === true` caller — may
+     *     `wait()`, because `wait()` consumes the promise's wait function and drives the
+     *     call rather than observing it, so a second `wait()` from a concurrent
+     *     fiber/coroutine destroys the leader's in-flight refresh (F-06).
      *   - `ran === false` and `kind` differs from THIS caller's kind: the guard is busy
      *     with a DIFFERENT operation (e.g. the §1 cookie-session refresh occupying the
      *     slot while an `oidcRefresh()` call arrives). The existing promise's resolved

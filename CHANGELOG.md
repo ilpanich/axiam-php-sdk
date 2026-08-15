@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`oidcRefresh()`: a waiting caller no longer destroys the in-flight refresh it is
+  waiting for (CONTRACT.md §9 rules 1/2, conformance-review F-06, remediation R5.7).**
+
+  1.0.0-alpha19 taught `Session::refreshGuard()` to tell same-operation contention apart
+  from cross-operation contention, so a second concurrent `oidcRefresh` stopped issuing
+  its own token request. It then awaited the leader's outcome with
+  `PromiseInterface::wait()` — which is not a wait at all. Guzzle's `wait()` *drives* a
+  promise: it takes the underlying wait function, nulls it, and runs it. The leader had
+  already consumed it, so the waiter's `wait()` found a pending promise with no wait
+  function and **rejected the leader's promise** ("Cannot wait on a promise that has no
+  internal wait function"). Every caller in the burst failed, and because the rejection
+  ran the guard's clear-on-both-paths bookkeeping, the slot was freed while the leader's
+  request was still on the wire — so the next caller started a second
+  `POST /oauth2/token` with a refresh token the leader had already spent. Single-use
+  rotation makes that a replay, not a retry.
+
+  Waiters now use the new `RefreshGuard::join()`, which *observes* the shared promise
+  (register a callback, drain Guzzle's task queue, yield to the scheduler) instead of
+  driving it, and re-raises the leader's failure as `AuthError` for every waiter. Only
+  the leader — the `ran === true` caller — calls `wait()`. Bounded per §9 rule 5:
+  exhausting the wait raises `AuthError` rather than returning a stale token set.
+
+  Reachable only on a concurrent runtime (Fibers, Swoole, RoadRunner); vanilla
+  synchronous PHP has no second caller. Additive and non-breaking — no public signature
+  changed.
+
+- **§9's per-operation burst test now exists for `oidcRefresh`** (`OidcRefreshBurstTest`):
+  five concurrent callers, each in its own `Fiber`, against a transport that suspends the
+  caller mid-request, asserting exactly **one** `/oauth2/token` wire call and that all
+  five receive that one call's access token — plus the failure half of rule 2 (one failed
+  call, five `AuthError`s, still one wire call). It fails against the previous release.
+
 ### Added
 
 - **CONTRACT.md §10.1 rule 9 extended for DPoP, and §21.7.2 proof verification
