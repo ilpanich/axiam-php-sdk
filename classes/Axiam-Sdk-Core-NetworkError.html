@@ -164,6 +164,21 @@ TypeScript sibling SDK (Phase 17 CR-04, its <code class="prettyprint">src/core/e
 
 
 
+<h4 id="toc-properties">
+    Properties
+    <a href="classes/Axiam-Sdk-Core-NetworkError.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Core-NetworkError.html#property_retryAfterMs">$retryAfterMs</a>
+    <span>
+                        &nbsp;: float|null            </span>
+</dt>
+<dd>A server-supplied `Retry-After` hint in milliseconds (CONTRACT.md §16.1),
+`null` when the response carried none.</dd>
+
+    </dl>
 
 <h4 id="toc-methods">
     Methods
@@ -207,6 +222,58 @@ is never stored — only the resulting sanitized string survives past this metho
         
 
         
+    <section class="phpdocumentor-properties">
+        <h3 class="phpdocumentor-elements__header" id="properties">
+            Properties
+            <a href="classes/Axiam-Sdk-Core-NetworkError.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_retryAfterMs">
+        $retryAfterMs
+        <a href="classes/Axiam-Sdk-Core-NetworkError.html#property_retryAfterMs" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">38</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A server-supplied `Retry-After` hint in milliseconds (CONTRACT.md §16.1),
+`null` when the response carried none.</p>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">float|null</span>
+    <span class="phpdocumentor-signature__name">$retryAfterMs</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+        <section class="phpdocumentor-description"><p>A parsed duration, never the raw header text, so the sanitization discipline
+this class exists to enforce is untouched: a float cannot carry a token, a
+URL, or anything else a header might. §16 honors it as a <strong>floor</strong> on the
+backoff — the server is stating when it will be ready, so retrying sooner is
+not permitted.</p>
+</section>
+
+    
+    
+
+        
+        
+
+</article>
+            </section>
 
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
@@ -228,7 +295,7 @@ is never stored — only the resulting sanitized string survives past this metho
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">71</span>
+    <span class="phpdocumentor-element-found-in__line">119</span>
 
     </aside>
 
@@ -287,7 +354,7 @@ itself is never stored as a cause (see class doc).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">92</span>
+    <span class="phpdocumentor-element-found-in__line">140</span>
 
     </aside>
 
@@ -341,7 +408,7 @@ depth, matching <abbr title="\Axiam\Sdk\Core\self::fromException()">self::fromEx
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">45</span>
+    <span class="phpdocumentor-element-found-in__line">57</span>
 
     </aside>
 
@@ -400,10 +467,17 @@ is never stored — only the resulting sanitized string survives past this metho
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="classes/Axiam-Sdk-Core-NetworkError.html#toc-methods">Methods</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Core-NetworkError.html#toc-properties">Properties</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Core-NetworkError.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
+                            <li class="phpdocumentor-on-this-page-section__title">Properties</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Core-NetworkError.html#property_retryAfterMs">$retryAfterMs</a></li>
+                                            </ul>
+                </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>

@@ -227,6 +227,14 @@ checks (CONTRACT.md §10.1 rule 7 — RECOMMENDED 60 s).</dd>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_certificateThumbprintS256">certificateThumbprintS256()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>Compute the RFC 8705 §3.1 `x5t#S256` thumbprint of a DER client certificate:
+base64url-encoded SHA-256, **without** padding.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verify">verify()</a>
     <span>
                                 &nbsp;: array&lt;string, mixed&gt;|null    </span>
@@ -234,6 +242,15 @@ checks (CONTRACT.md §10.1 rule 7 — RECOMMENDED 60 s).</dd>
 <dd>Verifies a token against the COMPLETE CONTRACT.md §10.1 minimum local-verification
 set — see the class docblock for the seven rules and for what `firebase/php-jwt`
 does versus what §10.1 requires.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyCertificateBinding">verifyCertificateBinding()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>CONTRACT.md §10.1 **rule 9** — enforce a token&#039;s sender constraint against the
+certificate the caller presented on **this** connection (RFC 8705 §3 / RFC 7800,
+contract 1.15).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature">verifyIdTokenSignature()</a>
@@ -244,6 +261,14 @@ does versus what §10.1 requires.</dd>
 Ed25519 signature verification for an OIDC ID token, reusing this SAME verifier&#039;s
 key cache and single-refetch-on-unknown-`kid` behavior (§12 forbids forking the
 JWKS verifier the §10 middleware already uses).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyTokenBinding">verifyTokenBinding()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>CONTRACT.md §10.1 **rule 9** in full — enforce a token&#039;s sender constraint
+against **every** proof the caller presented (contract 1.16).</dd>
 
     </dl>
 
@@ -398,6 +423,63 @@ generally expect <code class="prettyprint">axiam:user</code>.</p>
         class="phpdocumentor-element
             -method
             -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_certificateThumbprintS256">
+        certificateThumbprintS256()
+        <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_certificateThumbprintS256" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">412</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Compute the RFC 8705 §3.1 `x5t#S256` thumbprint of a DER client certificate:
+base64url-encoded SHA-256, **without** padding.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">certificateThumbprintS256</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$der</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Unpadded is not a style choice — RFC 7515 §2 defines base64url in JOSE as omitting
+<code class="prettyprint">=</code>, and a padded value will not compare equal to what AXIAM put in the token.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$der</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Raw DER bytes of the peer's leaf certificate. To convert a PEM
+(what <code class="prettyprint">SSL_CLIENT_CERT</code> carries), strip the armour and
+base64-decode the body.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
                                                         "
 >
     <h4 class="phpdocumentor-element__name" id="method_verify">
@@ -467,6 +549,121 @@ failure (never throws on attacker input).</p>
         class="phpdocumentor-element
             -method
             -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_verifyCertificateBinding">
+        verifyCertificateBinding()
+        <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyCertificateBinding" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">356</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">CONTRACT.md §10.1 **rule 9** — enforce a token&#039;s sender constraint against the
+certificate the caller presented on **this** connection (RFC 8705 §3 / RFC 7800,
+contract 1.15).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">verifyCertificateBinding</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$claims</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$presentedThumbprint</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>A token carrying <code class="prettyprint">cnf</code> is <strong>not</strong> a bearer token. Accepting one without proving the
+caller holds the named key converts it straight back into one, discarding the whole
+protection the operator turned on — which is why this is a rule and not a
+recommendation.</p>
+<p>The four cases:</p>
+<table>
+<thead>
+<tr>
+<th>token's <code class="prettyprint">cnf</code></th>
+<th><code class="prettyprint">$presentedThumbprint</code></th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>absent</td>
+<td>anything</td>
+<td><code class="prettyprint">true</code></td>
+</tr>
+<tr>
+<td><code class="prettyprint">x5t#S256</code></td>
+<td>equal</td>
+<td><code class="prettyprint">true</code></td>
+</tr>
+<tr>
+<td><code class="prettyprint">x5t#S256</code></td>
+<td>different, or <code class="prettyprint">null</code></td>
+<td><code class="prettyprint">false</code></td>
+</tr>
+<tr>
+<td>present, no <code class="prettyprint">x5t#S256</code></td>
+<td>anything</td>
+<td><code class="prettyprint">false</code></td>
+</tr>
+</tbody>
+</table>
+<p>The first row is why adopting this rule breaks nothing: an <strong>unbound</strong> token is
+still accepted whether or not a certificate is present. Rule 9 constrains tokens
+that claim a constraint; it does not make certificates mandatory.</p>
+<p>The last row is the one that is easy to get wrong. A <code class="prettyprint">cnf</code> naming a confirmation
+method this SDK cannot check — a DPoP <code class="prettyprint">jkt</code>, say — is an <em>unverifiable constraint</em>,
+never <em>no constraint</em>. Read the other way, a sender-constrained token silently
+degrades to a bearer token the day a newer AXIAM issues a confirmation this SDK
+predates.</p>
+<p><strong>The thumbprint must come from the transport.</strong> Under PHP-FPM behind an mTLS
+terminator that is typically <code class="prettyprint">$_SERVER['SSL_CLIENT_CERT']</code> converted to DER and
+fingerprinted with <abbr title="\Axiam\Sdk\Auth\self::certificateThumbprintS256()">self::certificateThumbprintS256()</abbr> — and only where that
+variable is set by a proxy <strong>you</strong> control. Never from a caller-settable request
+header: a forgeable input makes the whole mechanism decorative.</p>
+<p>Returns <code class="prettyprint">bool</code> rather than throwing, matching <abbr title="\Axiam\Sdk\Auth\self::verify()">self::verify()</abbr>: this class
+never throws on attacker input.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$claims</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Verified claims from <abbr title="\Axiam\Sdk\Auth\self::verify()">self::verify()</abbr>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$presentedThumbprint</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>RFC 8705 §3.1 <code class="prettyprint">x5t#S256</code> of the peer
+certificate, or null if none.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
                                                         "
 >
     <h4 class="phpdocumentor-element__name" id="method_verifyIdTokenSignature">
@@ -477,7 +674,7 @@ failure (never throws on attacker input).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">383</span>
+    <span class="phpdocumentor-element-found-in__line">486</span>
 
     </aside>
 
@@ -529,6 +726,95 @@ issuer/audience/time/nonce-checked.</p>
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_verifyTokenBinding">
+        verifyTokenBinding()
+        <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyTokenBinding" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">752</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">CONTRACT.md §10.1 **rule 9** in full — enforce a token&#039;s sender constraint
+against **every** proof the caller presented (contract 1.16).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">verifyTokenBinding</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$claims</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Auth-PresentedProofs.html"><abbr title="\Axiam\Sdk\Auth\PresentedProofs">PresentedProofs</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$proofs</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>This is the complete rule, and the one to use unless your transport genuinely
+cannot produce a DPoP thumbprint.</p>
+<p>The ten cases:</p>
+<pre class="prettyprint"><code class="prettyprint">token's cnf             certificate     DPoP        result
+absent                  anything        anything    true
+x5t#S256                equal           ignored     true
+x5t#S256                different       ignored     false
+x5t#S256                null            ignored     false
+jkt                     ignored         equal       true
+jkt                     ignored         different   false
+jkt                     ignored         null        false
+both                    equal           equal       true
+both                    wrong/missing   —           false
+present, names neither  anything        anything    false
+</code></pre>
+<p>Two rows carry the weight. <strong>Both named is a conjunction</strong>: an operator who
+turned on two constraints asked for two, and satisfying the more convenient one
+is not compliance. <strong>Names neither is a refusal</strong>: a confirmation this SDK
+cannot interpret is an unverifiable constraint, and reading it as
+&quot;unconstrained&quot; is the exact downgrade rule 9 exists to prevent. That includes
+an <em>empty</em> <code class="prettyprint">cnf</code>, which is also how proto3 delivers an empty <code class="prettyprint">CnfClaim</code> over
+gRPC (§10.3 rule 3).</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$claims</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Verified claims from <abbr title="\Axiam\Sdk\Auth\self::verify()">self::verify()</abbr>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$proofs</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Auth-PresentedProofs.html"><abbr title="\Axiam\Sdk\Auth\PresentedProofs">PresentedProofs</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>What the caller proved on this connection
+and request.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p><code class="prettyprint">true</code> when the token may be accepted, <code class="prettyprint">false</code> on any rejecting row.</p>
+</section>
+
+            </section>
+
+</article>
             </section>
 
         
@@ -559,8 +845,11 @@ issuer/audience/time/nonce-checked.</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_certificateThumbprintS256">certificateThumbprintS256()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verify">verify()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyCertificateBinding">verifyCertificateBinding()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature">verifyIdTokenSignature()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyTokenBinding">verifyTokenBinding()</a></li>
                                     </ul>
             </li>
                     </ul>

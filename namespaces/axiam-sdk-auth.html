@@ -110,6 +110,13 @@
 
 
 
+    <h4 id="toc-interfaces">
+        Interfaces
+        <a href="namespaces/axiam-sdk-auth.html#toc-interfaces" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <dl class="phpdocumentor-table-of-contents">
+                    <dt class="phpdocumentor-table-of-contents__entry -interface"><a href="classes/Axiam-Sdk-Auth-JtiStore.html"><abbr title="\Axiam\Sdk\Auth\JtiStore">JtiStore</abbr></a></dt><dd>CONTRACT.md §21.7.2 check 8 — single-use `jti` tracking for DPoP proofs.</dd>    </dl>
 
     <h4 id="toc-classes">
         Classes
@@ -117,7 +124,8 @@
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html"><abbr title="\Axiam\Sdk\Auth\JwksVerifier">JwksVerifier</abbr></a></dt><dd>Local EdDSA/Ed25519 JWKS verification (CONTRACT.md D-08).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-LoginResult.html"><abbr title="\Axiam\Sdk\Auth\LoginResult">LoginResult</abbr></a></dt><dd>Result of `AxiamClient::login()` (CONTRACT.md §1, D-09).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-RefreshGuard.html"><abbr title="\Axiam\Sdk\Auth\RefreshGuard">RefreshGuard</abbr></a></dt><dd>Shared-promise clear-on-both-paths helper (CONTRACT.md §9, D-06).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-UserInfo.html"><abbr title="\Axiam\Sdk\Auth\UserInfo">UserInfo</abbr></a></dt><dd>Result of `AxiamClient::getUserInfo()` (CONTRACT.md §1.1, contract 1.3).</dd>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-DpopRequest.html"><abbr title="\Axiam\Sdk\Auth\DpopRequest">DpopRequest</abbr></a></dt><dd>What {@see DpopVerifier::verifyProof()} needs to know about the current request.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-DpopVerifier.html"><abbr title="\Axiam\Sdk\Auth\DpopVerifier">DpopVerifier</abbr></a></dt><dd>DPoP proof verification — CONTRACT.md §21.7.2 (RFC 9449), contract 1.16.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-InMemoryJtiStore.html"><abbr title="\Axiam\Sdk\Auth\InMemoryJtiStore">InMemoryJtiStore</abbr></a></dt><dd>A {@see JtiStore} for a single PHP process.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html"><abbr title="\Axiam\Sdk\Auth\JwksVerifier">JwksVerifier</abbr></a></dt><dd>Local EdDSA/Ed25519 JWKS verification (CONTRACT.md D-08).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-LoginResult.html"><abbr title="\Axiam\Sdk\Auth\LoginResult">LoginResult</abbr></a></dt><dd>Result of `AxiamClient::login()` (CONTRACT.md §1, D-09).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-PresentedProofs.html"><abbr title="\Axiam\Sdk\Auth\PresentedProofs">PresentedProofs</abbr></a></dt><dd>What the caller proved about **this** connection and **this** request, for
+{@see JwksVerifier::verifyTokenBinding()}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-RefreshGuard.html"><abbr title="\Axiam\Sdk\Auth\RefreshGuard">RefreshGuard</abbr></a></dt><dd>Shared-promise clear-on-both-paths helper (CONTRACT.md §9, D-06).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Auth-UserInfo.html"><abbr title="\Axiam\Sdk\Auth\UserInfo">UserInfo</abbr></a></dt><dd>Result of `AxiamClient::getUserInfo()` (CONTRACT.md §1.1, contract 1.3).</dd>    </dl>
 
 
 
@@ -141,7 +149,8 @@
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                    <li><a href="namespaces/axiam-sdk-auth.html#toc-classes">Classes</a></li>
+                                                                                <li><a href="namespaces/axiam-sdk-auth.html#toc-interfaces">Interfaces</a></li>
+                                                            <li><a href="namespaces/axiam-sdk-auth.html#toc-classes">Classes</a></li>
                                                                                                                     </ul>
             </li>
 

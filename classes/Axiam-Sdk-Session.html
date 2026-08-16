@@ -741,7 +741,7 @@ capture logic {@see self::refreshIfNeeded()} already uses.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">261</span>
+    <span class="phpdocumentor-element-found-in__line">266</span>
 
     </aside>
 
@@ -775,7 +775,12 @@ is busy with ANOTHER caller of the SAME operation (e.g. two concurrent
 exact outcome — the caller MUST await and reuse it rather than re-acquiring
 the guard and issuing its own wire call. This matters because AXIAM refresh
 tokens are opaque, server-stored, and single-use with rotation: a second wire
-call would replay an already-consumed token and fail <code class="prettyprint">invalid_grant</code>.</li>
+call would replay an already-consumed token and fail <code class="prettyprint">invalid_grant</code>.
+Await it with <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join"><abbr title="\Axiam\Sdk\Auth\RefreshGuard::join()">RefreshGuard::join()</abbr></a>, <strong>never</strong> with
+<code class="prettyprint">PromiseInterface::wait()</code>: only the leader — the <code class="prettyprint">ran === true</code> caller — may
+<code class="prettyprint">wait()</code>, because <code class="prettyprint">wait()</code> consumes the promise's wait function and drives the
+call rather than observing it, so a second <code class="prettyprint">wait()</code> from a concurrent
+fiber/coroutine destroys the leader's in-flight refresh (F-06).</li>
 <li><code class="prettyprint">ran === false</code> and <code class="prettyprint">kind</code> differs from THIS caller's kind: the guard is busy
 with a DIFFERENT operation (e.g. the §1 cookie-session refresh occupying the
 slot while an <code class="prettyprint">oidcRefresh()</code> call arrives). The existing promise's resolved

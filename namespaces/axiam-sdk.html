@@ -121,6 +121,7 @@
             <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-grpc.html"><abbr title="\Axiam\Sdk\Grpc">Grpc</abbr></a></dt>
             <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-laravel.html"><abbr title="\Axiam\Sdk\Laravel">Laravel</abbr></a></dt>
             <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-oidc.html"><abbr title="\Axiam\Sdk\Oidc">Oidc</abbr></a></dt>
+            <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-reactor.html"><abbr title="\Axiam\Sdk\Reactor">Reactor</abbr></a></dt>
             <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-rest.html"><abbr title="\Axiam\Sdk\Rest">Rest</abbr></a></dt>
             <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-symfony.html"><abbr title="\Axiam\Sdk\Symfony">Symfony</abbr></a></dt>
             <dt class="phpdocumentor-table-of-contents__entry -namespace"><a href="namespaces/axiam-sdk-webhook.html"><abbr title="\Axiam\Sdk\Webhook">Webhook</abbr></a></dt>
@@ -141,7 +142,7 @@ implementation, shared by BOTH framework bridges
 integrations. Neither bridge re-implements resource resolution, subject propagation,
 or the error-mapping table below — both call into this class exclusively.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AuthzDispatcher.html"><abbr title="\Axiam\Sdk\AuthzDispatcher">AuthzDispatcher</abbr></a></dt><dd>Transparent REST/gRPC authz transport selection (CONTRACT.md §1, D-03, SC#3).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a></dt><dd>The AXIAM PHP SDK&#039;s public REST entry point (CONTRACT.md §1–§9, SC#1).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Session.html"><abbr title="\Axiam\Sdk\Session">Session</abbr></a></dt><dd>Per-`AxiamClient` session state (CONTRACT.md §3/§4/§5/§9): owns the shared Guzzle
 `CookieJar` (§4), captures/exposes the non-browser CSRF token (§3), and is the
-single-flight home for the shared refresh `Promise` (§9, D-06).</dd>    </dl>
+single-flight home for the shared refresh `Promise` (§9, D-06).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-UmaChallenger.html"><abbr title="\Axiam\Sdk\UmaChallenger">UmaChallenger</abbr></a></dt><dd>A configured `WWW-Authenticate: UMA` challenge emitter (CONTRACT.md §20.3, emit half).</dd>    </dl>
 
 
 

@@ -117,7 +117,8 @@
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html"><abbr title="\Axiam\Sdk\Rest\AuthMiddleware">AuthMiddleware</abbr></a></dt><dd>`HandlerStack` middleware: injects `Authorization` (current access token) and
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a></dt><dd>The full outcome of an access check, including the CONTRACT.md §11 rule 9
+`reason_code`.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html"><abbr title="\Axiam\Sdk\Rest\AuthMiddleware">AuthMiddleware</abbr></a></dt><dd>`HandlerStack` middleware: injects `Authorization` (current access token) and
 `X-Tenant-ID` on EVERY outgoing request, and `X-CSRF-Token` (captured from a prior
 response, {@see Session::csrfToken()}) on state-changing requests
 (CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html"><abbr title="\Axiam\Sdk\Rest\AuthzRestClient">AuthzRestClient</abbr></a></dt><dd>REST authorization transport (FND-04, CONTRACT.md §1): `checkAccess()`/`can()`/
@@ -126,7 +127,7 @@ path (D-03). Reuses the caller-supplied Guzzle client (the same instance
 {@see \Axiam\Sdk\Session} wires with {@see AuthMiddleware}/{@see RefreshMiddleware} on
 its `HandlerStack`), so `Authorization`/`X-Tenant-ID`/`X-CSRF-Token` header injection
 and the single-flight refresh-on-401 behavior (D-06) apply to authz calls exactly as
-they do to every other REST call — this class never re-implements any of that.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-RefreshMiddleware.html"><abbr title="\Axiam\Sdk\Rest\RefreshMiddleware">RefreshMiddleware</abbr></a></dt><dd>`HandlerStack` middleware: on a `401` response, triggers the session&#039;s single-flight
+they do to every other REST call — this class never re-implements any of that.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-ReasonCode.html"><abbr title="\Axiam\Sdk\Rest\ReasonCode">ReasonCode</abbr></a></dt><dd>The three `reason_code` values CONTRACT.md §11 rule 9 defines.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-RefreshMiddleware.html"><abbr title="\Axiam\Sdk\Rest\RefreshMiddleware">RefreshMiddleware</abbr></a></dt><dd>`HandlerStack` middleware: on a `401` response, triggers the session&#039;s single-flight
 refresh (CONTRACT.md §9, D-06, SC#2) and retries the ORIGINAL request exactly once
 via the inner `$handler` — never a loop. All concurrent 401-triggering requests on
 one {@see Session} share the SAME refresh `PromiseInterface`

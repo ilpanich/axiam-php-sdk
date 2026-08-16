@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RefreshGuard.php"><a href="files/src-auth-refreshguard.html"><abbr title="src/Auth/RefreshGuard.php">RefreshGuard.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">30</span>
 
     </aside>
 
@@ -173,6 +173,14 @@ on that one piece of behavior (D-06's &quot;ONE mechanism&quot; requirement).</p
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join">join()</a>
+    <span>
+                                &nbsp;: mixed    </span>
+</dt>
+<dd>Wait for an ALREADY-IN-FLIGHT shared refresh to settle and return its outcome —
+the waiter&#039;s half of CONTRACT.md §9 rule 2 (F-06).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_settle">settle()</a>
     <span>
                                 &nbsp;: <abbr title="\GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr>    </span>
@@ -198,6 +206,106 @@ on that one piece of behavior (D-06's &quot;ONE mechanism&quot; requirement).</p
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_join">
+        join()
+        <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RefreshGuard.php"><a href="files/src-auth-refreshguard.html"><abbr title="src/Auth/RefreshGuard.php">RefreshGuard.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">116</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Wait for an ALREADY-IN-FLIGHT shared refresh to settle and return its outcome —
+the waiter&#039;s half of CONTRACT.md §9 rule 2 (F-06).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">join</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$shared</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>A caller that finds the guard occupied MUST end up holding the <em>leader's</em> outcome:
+AXIAM refresh tokens are opaque, server-stored and single-use with rotation, so a
+second wire call would replay an already-consumed token. The obvious way to wait —
+<code class="prettyprint">$shared-&gt;wait()</code> — is exactly what must NOT be done here, and is why this method
+exists:</p>
+<p><code class="prettyprint">GuzzleHttp\Promise\Promise::wait()</code> does not &quot;wait&quot; in the concurrent sense. It
+<em>drives</em> the promise: it takes the underlying promise's wait function, NULLS it,
+and runs it. The leader already did that when it started its own wire call, so a
+second <code class="prettyprint">wait()</code> from another fiber/coroutine walks the same wait list, finds a
+pending promise with no wait function left, and <strong>rejects the leader's promise</strong>
+with &quot;Cannot wait on a promise that has no internal wait function&quot;. That kills
+the in-flight refresh for everyone AND frees the guard slot mid-flight, so the
+next caller starts a second <code class="prettyprint">POST /oauth2/token</code> with a refresh token the leader
+has already spent — the precise failure §9 rule 2 forbids.</p>
+<p>So this observes rather than drives: it registers a callback on the shared promise,
+drains Guzzle's task queue (which is all that is needed in the overwhelmingly
+common case — a promise that has already settled and merely has deferred callbacks
+outstanding), and otherwise yields to whatever scheduler is driving the leader
+until the outcome arrives. Rule 6(a)/(d) fall out of this by construction: the
+callback is registered BEFORE any yielding, so the outcome cannot be missed no
+matter when the leader clears the slot, and a caller that arrives after full
+settlement never gets here — it acquires the free guard and refreshes afresh.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$shared</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The in-flight refresh promise returned by
+<code class="prettyprint">Session::refreshGuard()</code>'s <code class="prettyprint">promise</code> key. Already normalized by
+<abbr title="\Axiam\Sdk\Auth\self::settle()">self::settle()</abbr>, so its failure mode is <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a>.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_join_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>The leader's failure, shared verbatim with every waiter
+(§9 rule 2: &quot;on failure, all waiting requests fail with <code class="prettyprint">AuthError</code>&quot;), or a
+fresh one if the bounded wait is exhausted (§9 rule 5).</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">mixed</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>The leader's fulfilment value — for <code class="prettyprint">oidc_refresh</code>, the decoded
+<code class="prettyprint">TokenResponse</code> array of the ONE wire call every caller shares.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_settle">
         settle()
         <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_settle" class="headerlink"><i class="fas fa-link"></i></a>
@@ -206,7 +314,7 @@ on that one piece of behavior (D-06's &quot;ONE mechanism&quot; requirement).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RefreshGuard.php"><a href="files/src-auth-refreshguard.html"><abbr title="src/Auth/RefreshGuard.php">RefreshGuard.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">40</span>
+    <span class="phpdocumentor-element-found-in__line">57</span>
 
     </aside>
 
@@ -286,6 +394,7 @@ is handed back to the caller.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join">join()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_settle">settle()</a></li>
                                     </ul>
             </li>

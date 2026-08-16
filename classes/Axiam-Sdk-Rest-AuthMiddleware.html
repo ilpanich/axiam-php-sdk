@@ -162,6 +162,21 @@ those endpoints authenticate the CLIENT through the form body
 
 
 
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_CREDENTIAL_OVERRIDE_OPTION">CREDENTIAL_OVERRIDE_OPTION</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;axiam_credential_override&#039;                            </span>
+</dt>
+<dd>Per-request Guzzle option naming a bearer credential that is **not** the session&#039;s
+(CONTRACT.md §20.2 rule 1: the UMA Protection API carries a PAT).</dd>
+
+    </dl>
 
 
 
@@ -190,6 +205,52 @@ bearer token and — on state-changing methods (§3) — the `X-CSRF-Token` head
 
 
         
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_CREDENTIAL_OVERRIDE_OPTION">
+        CREDENTIAL_OVERRIDE_OPTION
+        <a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_CREDENTIAL_OVERRIDE_OPTION" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">44</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Per-request Guzzle option naming a bearer credential that is **not** the session&#039;s
+(CONTRACT.md §20.2 rule 1: the UMA Protection API carries a PAT).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">CREDENTIAL_OVERRIDE_OPTION</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;axiam_credential_override&#039;</span>
+</code>
+
+
+        <section class="phpdocumentor-description"><p>It exists because this middleware overwrites <code class="prettyprint">Authorization</code> unconditionally — it
+has to, so a request retried after a single-flight refresh is re-decorated with the
+fresh token rather than the stale one it already carries. A caller therefore cannot
+express &quot;use <em>this</em> credential&quot; by setting the header; it would be silently
+replaced by the session token, which is exactly the fallback §20.2 rule 1 forbids.
+When this option is present the session token is never consulted.</p>
+</section>
+
+    
+    
+
+        
+    </article>
+            </section>
 
         
 
@@ -213,7 +274,7 @@ bearer token and — on state-changing methods (§3) — the `X-CSRF-Token` head
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">47</span>
 
     </aside>
 
@@ -259,7 +320,7 @@ bearer token and — on state-changing methods (§3) — the `X-CSRF-Token` head
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">49</span>
+    <span class="phpdocumentor-element-found-in__line">62</span>
 
     </aside>
 
@@ -318,9 +379,16 @@ credentials never leak to a third-party URL.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#toc-constants">Constants</a></li>
                                                                                 <li><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_CREDENTIAL_OVERRIDE_OPTION">CREDENTIAL_OVERRIDE_OPTION</a></li>
+                                            </ul>
+                </li>
             
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>

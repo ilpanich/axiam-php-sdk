@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+            <title>AXIAM PHP SDK</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png"/>
+    <link rel="icon" href="images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/base.css">
+            <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/template.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" integrity="sha256-ybRkN9dBjhcS2qrW1z+hfCxq+1aBdwyQM5wlQoQVt/0=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/themes/prism-okaidia.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.css">
+                <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2"></script>
+        <script src="js/template.js"></script>
+        <script src="js/search.js"></script>
+        <script defer src="js/searchIndex.js"></script>
+    </head>
+<body id="top">
+    <header class="phpdocumentor-header phpdocumentor-section">
+    <h1 class="phpdocumentor-title"><a href="" class="phpdocumentor-title__link">AXIAM PHP SDK</a></h1>
+    <input class="phpdocumentor-header__menu-button" type="checkbox" id="menu-button" name="menu-button" />
+    <label class="phpdocumentor-header__menu-icon" for="menu-button">
+        <i class="fas fa-bars"></i>
+    </label>
+    <section data-search-form class="phpdocumentor-search">
+    <label>
+        <span class="visually-hidden">Search for</span>
+        <svg class="phpdocumentor-search__icon" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+            <line x1="12.4892" y1="12.2727" x2="19.1559" y2="18.9393" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <input type="search" class="phpdocumentor-field phpdocumentor-search__field" placeholder="Loading .." disabled />
+    </label>
+</section>
+
+    <nav class="phpdocumentor-topnav">
+    <ul class="phpdocumentor-topnav__menu">
+        </ul>
+</nav>
+</header>
+
+    <main class="phpdocumentor">
+        <div class="phpdocumentor-section">
+            <input class="phpdocumentor-sidebar__menu-button" type="checkbox" id="sidebar-button" name="sidebar-button" />
+<label class="phpdocumentor-sidebar__menu-icon" for="sidebar-button">
+    Menu
+</label>
+<aside class="phpdocumentor-column -three phpdocumentor-sidebar">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
+            <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/axiam.html" class="">Axiam</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/axiam-sdk.html" class="">Sdk</a>
+                
+            </li>
+            </ul>
+
+                        </section>
+                <section class="phpdocumentor-sidebar__category -packages">
+            <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Application.html" class="">Application</a>
+</h4>
+
+                        </section>
+            
+    <section class="phpdocumentor-sidebar__category -reports">
+        <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
+    </section>
+
+    <section class="phpdocumentor-sidebar__category -indices">
+        <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
+    </section>
+</aside>
+
+            <div class="phpdocumentor-column -nine phpdocumentor-content">
+                                <section>
+                                        <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-reactor.html">Reactor</a></li>
+    </ul>
+
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    ReactorAnswer
+
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
+
+<div class="phpdocumentor-label-line">
+
+    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
+
+
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">26</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">What a reactor handler decided (CONTRACT.md §22.4, §22.10).</p>
+
+
+    <section class="phpdocumentor-description"><p>One of three answers — allow, deny or mutate — with <code class="prettyprint">require_mfa</code> available on
+<code class="prettyprint">login.post_auth</code> as a flag on the allow answer.</p>
+<p>The constructor is private and the only way in is the four named constructors
+below, which is what makes §22.4's rules <strong>structural rather than documented</strong>:</p>
+<ol>
+<li>There is no way to spell <code class="prettyprint">allow</code> + <code class="prettyprint">patch</code>, because the allow constructors
+take no patch. A patch attached to an <code class="prettyprint">allow</code> is a reply whose author and
+whose reader disagree about what will happen; the server refuses it rather
+than resolving it.</li>
+<li><code class="prettyprint">require_mfa</code> is not a separate decision value — it rides on <code class="prettyprint">allow</code>, and
+<code class="prettyprint">allow</code> + <code class="prettyprint">require_mfa: true</code> on <code class="prettyprint">login.post_auth</code> resolves to <em>proceed only
+after step-up</em>.</li>
+<li>A mutation is carried <strong>unfiltered</strong>. This SDK never reduces a handler's
+patch to the event's allowed subset (§22.4 rule 1, §22.10 rule 3).</li>
+</ol>
+</section>
+
+
+
+    
+    
+<h3 id="toc">
+    Table of Contents
+    <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h3>
+
+
+
+
+
+
+
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_ALLOW">ALLOW</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;allow&#039;                            </span>
+</dt>
+<dd>Wire value: proceed unchanged (§22.4).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_DEFAULT_DENY_REASON">DEFAULT_DENY_REASON</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;denied by reactor&#039;                            </span>
+</dt>
+<dd>What the server substitutes when a deny carries no reason. Stated here so a
+caller reading a deny answer back sees the same string the audit record
+will.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_DENY">DENY</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;deny&#039;                            </span>
+</dt>
+<dd>Wire value: refuse the operation (§22.4).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_MUTATE">MUTATE</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;mutate&#039;                            </span>
+</dt>
+<dd>Wire value: proceed, applying a field-allow-listed patch (§22.4).</dd>
+
+    </dl>
+
+
+
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_allow">allow()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Proceed unchanged.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_allowWithStepUp">allowWithStepUp()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Proceed only after step-up authentication — `allow` + `require_mfa: true`.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_decision">decision()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>The wire decision string: `allow`, `deny` or `mutate`.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_deny">deny()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Refuse the operation.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_mutate">mutate()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Proceed, applying `$patch` — a flat map of string to string, valid on a
+mutable event only. There is no nested or typed patch in v1.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_patch">patch()</a>
+    <span>
+                                &nbsp;: array&lt;string, string&gt;|null    </span>
+</dt>
+<dd>The mutation patch, or null on a non-mutate answer.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_reason">reason()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>The deny reason, or null when absent (in which case it is omitted).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_requireMfa">requireMfa()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Whether this answer demands step-up authentication.</dd>
+
+    </dl>
+
+
+
+        
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_ALLOW">
+        ALLOW
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_ALLOW" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">29</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Wire value: proceed unchanged (§22.4).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">ALLOW</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;allow&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_DEFAULT_DENY_REASON">
+        DEFAULT_DENY_REASON
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_DEFAULT_DENY_REASON" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">42</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">What the server substitutes when a deny carries no reason. Stated here so a
+caller reading a deny answer back sees the same string the audit record
+will.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">DEFAULT_DENY_REASON</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;denied by reactor&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_DENY">
+        DENY
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_DENY" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">32</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Wire value: refuse the operation (§22.4).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">DENY</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;deny&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_MUTATE">
+        MUTATE
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_MUTATE" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">35</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Wire value: proceed, applying a field-allow-listed patch (§22.4).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">MUTATE</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;mutate&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+            </section>
+
+        
+
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_allow">
+        allow()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_allow" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">56</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Proceed unchanged.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">allow</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_allowWithStepUp">
+        allowWithStepUp()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_allowWithStepUp" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">73</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Proceed only after step-up authentication — `allow` + `require_mfa: true`.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">allowWithStepUp</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Valid on <code class="prettyprint">login.post_auth</code> ONLY. The runtime refuses it on any other event
+rather than putting a reply on the wire the server would reject as
+<code class="prettyprint">require_mfa_not_supported</code> (§22.4 row 7).</p>
+<p>On the federated sign-in paths (SAML ACS, OIDC callback) there is no step-up
+branch to take, so a <code class="prettyprint">require_mfa</code> answer <strong>fails</strong> the sign-in rather than
+being silently dropped. A reactor that needs step-up there should answer
+<abbr title="\Axiam\Sdk\Reactor\self::deny()">self::deny()</abbr> and drive enrolment out of band (§22.5).</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_decision">
+        decision()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_decision" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">113</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The wire decision string: `allow`, `deny` or `mutate`.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">decision</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_deny">
+        deny()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_deny" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">88</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Refuse the operation.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">deny</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reason</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">''</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>The reason is audited; a deny with no reason still denies, and the server
+substitutes <abbr title="\Axiam\Sdk\Reactor\self::DEFAULT_DENY_REASON">self::DEFAULT_DENY_REASON</abbr>. An empty reason is therefore
+omitted from the reply rather than sent as <code class="prettyprint">&quot;&quot;</code> — the omission is inside the
+signed bytes (§22.2), so it is not cosmetic.</p>
+<p>A deny short-circuits the chain: no later reactor is consulted (§22.6).</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$reason</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">''</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_mutate">
+        mutate()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_mutate" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">107</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Proceed, applying `$patch` — a flat map of string to string, valid on a
+mutable event only. There is no nested or typed patch in v1.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">mutate</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$patch</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>The patch is sent <strong>UNFILTERED</strong> (§22.4 rule 1, §22.10 rule 3). One
+forbidden key rejects the <em>whole</em> patch server-side, including the fields
+that would have been fine, and this SDK does NOT quietly drop the offender
+to rescue the rest: doing so would leave the reactor author believing a
+field was set when it was dropped, which is the exact failure the server
+refuses to produce. Use <a href="classes/Axiam-Sdk-Reactor-ReactorEventSpec.html#method_patchFieldAllowed"><abbr title="\Axiam\Sdk\Reactor\ReactorEventSpec::patchFieldAllowed()">ReactorEventSpec::patchFieldAllowed()</abbr></a> to
+check a key before you build the patch, not after.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$patch</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, string&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_patch">
+        patch()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_patch" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">129</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The mutation patch, or null on a non-mutate answer.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">patch</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string, string&gt;|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string, string&gt;|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_reason">
+        reason()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_reason" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">119</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The deny reason, or null when absent (in which case it is omitted).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">reason</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_requireMfa">
+        requireMfa()
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_requireMfa" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Reactor/ReactorAnswer.php"><a href="files/src-reactor-reactoranswer.html"><abbr title="src/Reactor/ReactorAnswer.php">ReactorAnswer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">135</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Whether this answer demands step-up authentication.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">requireMfa</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+            </section>
+
+        
+    </article>
+                                </section>
+                <section class="phpdocumentor-on-this-page__sidebar">
+                                
+    <section class="phpdocumentor-on-this-page__content">
+        <strong class="phpdocumentor-on-this-page__title">On this page</strong>
+
+        <ul class="phpdocumentor-list -clean">
+            <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#toc-constants">Constants</a></li>
+                                                                                <li><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#toc-methods">Methods</a></li>
+                                    </ul>
+            </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_ALLOW">ALLOW</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_DEFAULT_DENY_REASON">DEFAULT_DENY_REASON</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_DENY">DENY</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#constant_MUTATE">MUTATE</a></li>
+                                            </ul>
+                </li>
+            
+            
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_allow">allow()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_allowWithStepUp">allowWithStepUp()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_decision">decision()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_deny">deny()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_mutate">mutate()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_patch">patch()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_reason">reason()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#method_requireMfa">requireMfa()</a></li>
+                                    </ul>
+            </li>
+                    </ul>
+    </section>
+
+                </section>
+                            </div>
+            <section data-search-results class="phpdocumentor-search-results phpdocumentor-search-results--hidden">
+    <section class="phpdocumentor-search-results__dialog">
+        <header class="phpdocumentor-search-results__header">
+            <h2 class="phpdocumentor-search-results__title">Search results</h2>
+            <button class="phpdocumentor-search-results__close"><i class="fas fa-times"></i></button>
+        </header>
+        <section class="phpdocumentor-search-results__body">
+            <ul class="phpdocumentor-search-results__entries"></ul>
+        </section>
+    </section>
+</section>
+        </div>
+        <a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+
+    </main>
+
+    <script>
+        cssVars({});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+</body>
+</html>

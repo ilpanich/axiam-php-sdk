@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">40</span>
 
     </aside>
 
@@ -194,6 +194,14 @@ booleans preserves input order exactly, matching
 `BatchCheckAccessResponse::results` on the server (same order/length guarantee).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_batchCheckDecisions">batchCheckDecisions()</a>
+    <span>
+                                &nbsp;: array&lt;int, <a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a>&gt;    </span>
+</dt>
+<dd>`POST /api/v1/authz/check/batch` returning the **full** decisions, including each
+`reason_code` (§11 rule 9). Results preserve input order.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_can">can()</a>
     <span>
                                 &nbsp;: bool    </span>
@@ -210,6 +218,14 @@ alias for `check_access`&quot;).</dd>
 <dd>`checkAccess` (CONTRACT.md §1). `POST /api/v1/authz/check`. Returns the decoded
 `allowed` boolean; non-2xx responses are translated via {@see ErrorMapper} (403 -&gt;
 `AuthzError`, 401 -&gt; `AuthError`, everything else -&gt; `NetworkError`).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_checkAccessDecision">checkAccessDecision()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a>    </span>
+</dt>
+<dd>`POST /api/v1/authz/check` returning the **full** decision, including the
+CONTRACT.md §11 rule 9 `reason_code`.</dd>
 
     </dl>
 
@@ -239,14 +255,14 @@ alias for `check_access`&quot;).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\Client">Client</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$http</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\Client">Client</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$http</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-DecisionMemo.html"><abbr title="\Axiam\Sdk\Core\DecisionMemo">DecisionMemo</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$memo</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-TelemetryDispatcher.html"><abbr title="\Axiam\Sdk\Core\TelemetryDispatcher">TelemetryDispatcher</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$telemetry</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$retry</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">true</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): float|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jitter</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(float): void|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sleep</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -259,7 +275,54 @@ alias for `check_access`&quot;).</dd>
                 : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\GuzzleHttp\Client">Client</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                
+                    <section class="phpdocumentor-description"><p>The Guzzle client.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$memo</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-DecisionMemo.html"><abbr title="\Axiam\Sdk\Core\DecisionMemo">DecisionMemo</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>§17 memo; disabled when omitted.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$telemetry</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-TelemetryDispatcher.html"><abbr title="\Axiam\Sdk\Core\TelemetryDispatcher">TelemetryDispatcher</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>§19 dispatcher; inert when omitted.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$retry</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">true</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>§16.1 disable switch.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$jitter</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(): float|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Injected jitter draw, for tests.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$sleep</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(float): void|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Injected sleep, for tests.</p>
+</section>
+
             </dd>
             </dl>
 
@@ -283,7 +346,7 @@ alias for `check_access`&quot;).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">78</span>
+    <span class="phpdocumentor-element-found-in__line">135</span>
 
     </aside>
 
@@ -327,6 +390,56 @@ booleans preserves input order exactly, matching
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_batchCheckDecisions">
+        batchCheckDecisions()
+        <a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_batchCheckDecisions" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">246</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/authz/check/batch` returning the **full** decisions, including each
+`reason_code` (§11 rule 9). Results preserve input order.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">batchCheckDecisions</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;int, array{action: string, resource_id: string, scope?: string|null, subject_id?: string|null}&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$checks</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$checks</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, array{action: string, resource_id: string, scope?: string|null, subject_id?: string|null}&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a>&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_can">
         can()
         <a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_can" class="headerlink"><i class="fas fa-link"></i></a>
@@ -335,7 +448,7 @@ booleans preserves input order exactly, matching
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">64</span>
+    <span class="phpdocumentor-element-found-in__line">121</span>
 
     </aside>
 
@@ -393,7 +506,7 @@ alias for `check_access`&quot;).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">54</span>
+    <span class="phpdocumentor-element-found-in__line">98</span>
 
     </aside>
 
@@ -458,6 +571,83 @@ derives the subject from the verified JWT as before.</p>
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_checkAccessDecision">
+        checkAccessDecision()
+        <a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_checkAccessDecision" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthzRestClient.php"><a href="files/src-rest-authzrestclient.html"><abbr title="src/Rest/AuthzRestClient.php">AuthzRestClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">169</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/authz/check` returning the **full** decision, including the
+CONTRACT.md §11 rule 9 `reason_code`.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">checkAccessDecision</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$action</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Exists because <abbr title="\Axiam\Sdk\Rest\self::checkAccess()">self::checkAccess()</abbr> returns a bare <code class="prettyprint">bool</code> that predates that
+field and cannot carry it without a breaking signature change. The distinction it
+surfaces is not cosmetic: <code class="prettyprint">no_grant</code> means &quot;ask an admin for access&quot;,
+<code class="prettyprint">denied_by_rule</code> means &quot;an admin has already decided&quot;, and an application that
+cannot tell them apart sends users to raise tickets that will be refused.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$action</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$scope</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$subjectId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a></span>
+            </section>
+
+</article>
             </section>
 
         
@@ -482,8 +672,10 @@ derives the subject from the verified JWT as before.</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_batchCheck">batchCheck()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_batchCheckDecisions">batchCheckDecisions()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_can">can()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_checkAccess">checkAccess()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Rest-AuthzRestClient.html#method_checkAccessDecision">checkAccessDecision()</a></li>
                                     </ul>
             </li>
                     </ul>
