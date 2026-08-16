@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha25] - 2026-08-16
+
+### Added
+
+- Ship the §22 reactor runtime — reactorServe (R2.5)
+- Extend §10.1 rule 9 for DPoP and implement §21.7.2 (#33)
+- SubjectTokenType is required, and moves second (contract 1.13)
+- §15.7 — external-IdP subject tokens at the exchange (X4)
+- §20.3 — emit a UMA challenge from the §11 enforcer (#27)
+- §20 UMA 2.0 — Protection API and ticket grant (#26)
+- §16 retry, §17 memo, §18 close(), §19 telemetry + config_clamped (D5) (#24)
+- Device grant, token exchange, logout helpers; contract re-sync (D6) (#23)
+
+### Changed
+
+- Add a codegen drift gate for the committed gRPC stubs (D-03)
+- Re-vendor CONTRACT.md 1.19, openapi.json and proto/ from main (R5.8) (#35)
+- R5.7 — §9 refresh-result sharing under concurrency (F-06), AuthError parameter order (F-18), §12.3 rule 3 invariant (F-14) (#34)
+- Contract 1.15 — §10.1 rule 9, sender-constrained access tokens (#32)
+- Retire the "measured residual" justification (contract 1.14)
+- Re-sync to contract 1.14 (#302 closed)
+
+### Fixed
+
+- §15.7 — Sensitive exposes via reveal(), not expose()
+- Route checkAccess/can/batchCheck through the instrumented path (F3) (#25)
+
 ## [Unreleased]
 
 ### Added
