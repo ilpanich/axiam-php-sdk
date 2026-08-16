@@ -31,6 +31,43 @@ namespace Axiam\Sdk\Reactor;
 final class ReactorEvents
 {
     /**
+     * Assert that $event is a hookable §22.5 registry event, or throw.
+     *
+     * The single validation both spellings of §22.14's declarative binding go
+     * through — {@see \Axiam\Sdk\Attributes\OnReactorEvent} and
+     * {@see ReactorHandlers::bind()} — so the two cannot drift apart.
+     *
+     * @param string $event The candidate event name.
+     *
+     * @throws \InvalidArgumentException when $event is outside the registry.
+     *                                   This is also how the §22.7 hot-path
+     *                                   exclusion is enforced one layer up:
+     *                                   those operations are in no registry row,
+     *                                   so they fail here like any other unknown
+     *                                   name.
+     */
+    public static function assertHookable(string $event): void
+    {
+        if (self::specFor($event) !== null) {
+            return;
+        }
+
+        // The message names what IS hookable. It deliberately does not name what
+        // is excluded: §22.13 requires the three hot-path operations to be absent
+        // from every event constant this SDK exposes, and a list of them here —
+        // even only to say they are refused — is exactly the constant that would
+        // break it (§22.14 rule 2).
+        $hookable = array_map(static fn (ReactorEventSpec $spec): string => $spec->name, self::all());
+        sort($hookable);
+
+        throw new \InvalidArgumentException(sprintf(
+            '%s is not a hookable reactor event; the registry is [%s]',
+            $event,
+            implode(', ', $hookable),
+        ));
+    }
+
+    /**
      * Fires before an access token is issued. Mutable: claims under the `ext.`
      * namespace only.
      */

@@ -47,12 +47,14 @@ declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
 
+use Axiam\Sdk\Attributes\OnReactorEvent;
 use Axiam\Sdk\Core\Sensitive;
 use Axiam\Sdk\Reactor\AmqpLibReactorTransport;
 use Axiam\Sdk\Reactor\ReactorAnswer;
 use Axiam\Sdk\Reactor\ReactorConfig;
 use Axiam\Sdk\Reactor\ReactorEvent;
 use Axiam\Sdk\Reactor\ReactorEvents;
+use Axiam\Sdk\Reactor\ReactorHandlers;
 use Axiam\Sdk\Reactor\ReactorServer;
 use Axiam\Sdk\Reactor\ReactorTelemetryEvent;
 
@@ -99,68 +101,92 @@ foreach (ReactorEvents::all() as $spec) {
 }
 
 /**
- * Decides one event.
+ * Logs the fields §22.12 says are explicitly not secrets.
  *
- * `$event->timeoutMs` is the budget the server will actually wait — it is inside
- * the signed body, so it cannot be widened in transit. A handler doing real work
- * (a fraud lookup, a directory query) should honour it and shed load rather than
- * answer into a window the server has already closed (§22.3).
+ * The payload is readable by design — a handler that cannot inspect the event
+ * cannot decide anything — but it is tenant business data, so it is not logged
+ * at info level here and should not be in yours.
+ *
+ * Chained events also carry the patch earlier reactors already produced, so a
+ * handler decides against the state that will actually be committed. That is
+ * READ-ONLY context: echoing it back inside your own patch is not how a field
+ * is preserved — the server merges (§22.6).
  */
-$handle = static function (ReactorEvent $event): ReactorAnswer {
-    // The payload is tenant business data. It is readable by design — a handler
-    // that cannot inspect the event cannot decide anything — but §22.12 says not
-    // to log it at info level, so this example logs only the fields that are
-    // explicitly not secrets.
+function logEvent(ReactorEvent $event): void
+{
     printf("event=%s correlation=%s budget=%dms\n", $event->event, $event->correlationId, $event->timeoutMs);
 
-    // Chained events carry the patch earlier reactors already produced, so this
-    // one decides against the state that will actually be committed. It is
-    // READ-ONLY context: echoing it back inside our own patch is not how a field
-    // is preserved — the server merges (§22.6).
     $prior = $event->chainPatch();
     if ($prior !== null) {
         printf("  an earlier reactor in the chain already set %d field(s)\n", count($prior));
     }
+}
 
-    switch ($event->event) {
-        case ReactorEvents::TOKEN_PRE_ISSUE:
-            // `ext.` is the COMPLETE allow-list for this event. `sub`, `aud`,
-            // `exp`, `scope` and every other standard claim are unreachable, and a
-            // correctly signed reply setting one is refused exactly as a forged
-            // one is.
-            //
-            // Note also that a single forbidden key rejects the WHOLE patch — the
-            // SDK sends what you return, UNFILTERED, rather than quietly dropping
-            // the offender and leaving you believing it was set (§22.4 rule 1).
-            $sub = is_string($event->payload['sub'] ?? null) ? $event->payload['sub'] : 'unknown';
+/**
+ * The reactor's handlers, one per event (§22.14), instead of a `switch` whose
+ * fall-through answers `allow` on behalf of code that never ran.
+ *
+ * A misspelled event name below is refused when `#[OnReactorEvent]` is
+ * instantiated — at wiring time, not as an event that silently never fires. An
+ * event nobody bound here abstains, so the registration's `failure_policy`
+ * decides rather than this file.
+ *
+ * `$event->timeoutMs` is the budget the server will actually wait — it is
+ * inside the signed body, so it cannot be widened in transit. A handler doing
+ * real work (a fraud lookup, a directory query) should honour it and shed load
+ * rather than answer into a window the server has already closed (§22.3).
+ */
+final class ExampleReactor
+{
+    /**
+     * `ext.` is the COMPLETE allow-list for this event. `sub`, `aud`, `exp`,
+     * `scope` and every other standard claim are unreachable, and a correctly
+     * signed reply setting one is refused exactly as a forged one is.
+     *
+     * Note also that a single forbidden key rejects the WHOLE patch — the SDK
+     * sends what you return, UNFILTERED, rather than quietly dropping the
+     * offender and leaving you believing it was set (§22.4 rule 1).
+     */
+    #[OnReactorEvent(ReactorEvents::TOKEN_PRE_ISSUE)]
+    public function enrichToken(ReactorEvent $event): ReactorAnswer
+    {
+        logEvent($event);
 
-            return ReactorAnswer::mutate([
-                'ext.cost_center' => lookupCostCenter($sub),
-                'ext.department' => 'eng',
-            ]);
+        $sub = is_string($event->payload['sub'] ?? null) ? $event->payload['sub'] : 'unknown';
 
-        case ReactorEvents::LOGIN_POST_AUTH:
-            $ip = is_string($event->payload['ip'] ?? null) ? $event->payload['ip'] : '';
-            if (str_starts_with($ip, '203.0.113.')) {
-                // A deny short-circuits the chain: no later reactor is consulted.
-                // The reason is audited; the server substitutes "denied by
-                // reactor" when one is absent.
-                return ReactorAnswer::deny('embargoed region');
-            }
-
-            // Step-up is an `allow` carrying require_mfa, and it is valid on this
-            // event ONLY. On the federated paths (SAML ACS, OIDC callback) there
-            // is no step-up branch, so a require_mfa answer FAILS the sign-in
-            // rather than being dropped — answer deny there and drive enrolment
-            // out of band (§22.5).
-            //
-            // return ReactorAnswer::allowWithStepUp();
-
-            return ReactorAnswer::allow();
+        return ReactorAnswer::mutate([
+            'ext.cost_center' => lookupCostCenter($sub),
+            'ext.department' => 'eng',
+        ]);
     }
 
-    return ReactorAnswer::allow();
-};
+    /** Veto-only, plus step-up. */
+    #[OnReactorEvent(ReactorEvents::LOGIN_POST_AUTH)]
+    public function screenLogin(ReactorEvent $event): ReactorAnswer
+    {
+        logEvent($event);
+
+        $ip = is_string($event->payload['ip'] ?? null) ? $event->payload['ip'] : '';
+        if (str_starts_with($ip, '203.0.113.')) {
+            // A deny short-circuits the chain: no later reactor is consulted.
+            // The reason is audited; the server substitutes "denied by reactor"
+            // when one is absent.
+            return ReactorAnswer::deny('embargoed region');
+        }
+
+        // Step-up is an `allow` carrying require_mfa, and it is valid on this
+        // event ONLY. On the federated paths (SAML ACS, OIDC callback) there is
+        // no step-up branch, so a require_mfa answer FAILS the sign-in rather
+        // than being dropped — answer deny there and drive enrolment out of
+        // band (§22.5).
+        //
+        // return ReactorAnswer::allowWithStepUp();
+
+        return ReactorAnswer::allow();
+    }
+}
+
+$handlers = ReactorHandlers::of(new ExampleReactor());
 
 /** Stands in for whatever directory or HR system a real reactor would consult. */
 function lookupCostCenter(string $subject): string
@@ -177,7 +203,7 @@ $transport = AmqpLibReactorTransport::connect($amqpUrl, $caFile === false || $ca
 $server = new ReactorServer(
     config: $config,
     transport: $transport,
-    handler: $handle,
+    handler: $handlers->handler(),
     // §19: worth wiring rather than optional. A fail_open timeout produces `allow`
     // AND an audit record, and that pair is the whole difference between "no
     // reactor was configured" and "the reactor never answered" — reactor health
