@@ -623,6 +623,56 @@ $server = new ReactorServer(
 $server->reactorServe(); // blocks; call $server->stop() from a signal handler
 ```
 
+### Binding handlers per event (§22.14)
+
+The `switch` above is the shape every multi-event reactor grows, and its fall-through —
+`return ReactorAnswer::allow()` — answers on behalf of code that never ran. That is the
+defect §22.10 rule 2 forbids the *runtime* from committing, relocated into your file where
+the rule does not reach it: an operator who set `fail_closed` on the registration has it
+defeated there.
+
+`ReactorHandlers` is §22.14's declarative form, and it uses the same attribute mechanism
+the §11 `#[RequireAccess]` helper already uses:
+
+```php
+use Axiam\Sdk\Attributes\OnReactorEvent;
+use Axiam\Sdk\Reactor\ReactorHandlers;
+
+final class ClaimsReactor
+{
+    #[OnReactorEvent(ReactorEvents::TOKEN_PRE_ISSUE)]
+    public function enrich(ReactorEvent $event): ReactorAnswer
+    {
+        return ReactorAnswer::mutate(['ext.department' => 'eng']);
+    }
+
+    #[OnReactorEvent(ReactorEvents::LOGIN_POST_AUTH)]
+    public function screen(ReactorEvent $event): ReactorAnswer
+    {
+        return fraudulent($event) ? ReactorAnswer::deny('embargoed region') : ReactorAnswer::allow();
+    }
+}
+
+$handlers = ReactorHandlers::of(new ClaimsReactor());
+$server = new ReactorServer(config: $config, transport: $transport, handler: $handlers->handler());
+```
+
+- **A misspelled event is refused when the attribute is instantiated** — `OnReactorEvent`
+  accepts only §22.5 registry names, which is also how it refuses the three hot-path
+  operations §22.7 excludes: they are in no registry row.
+- **An unbound event abstains** — the composed handler throws `ReactorRejection`, which
+  publishes **nothing**, so the registration's `failure_policy` decides (§22.8) exactly as
+  it decides a timeout. Never a synthesized `allow`.
+- Binding the same event twice throws rather than silently overwriting, and
+  `$handlers->events()` feeds `ReactorEvents::defaultFailurePolicy()` so you can see what
+  an unreachable reactor costs before you go live.
+
+Closures work too — `(new ReactorHandlers())->bind(ReactorEvents::TOKEN_PRE_ISSUE, $fn)` —
+and both spellings are governed by the same rules. It is pure sugar: `handler()` returns
+exactly the callable `ReactorServer` already takes. It opens nothing, verifies nothing,
+signs nothing, does not filter a patch, and a handler's own throwable reaches the runtime
+unchanged so nothing is published.
+
 `reactorServe()` verifies every delivery **before** the handler sees it — key version, MAC,
 freshness, nonce, in that order — then signs the reply with the same tenant subkey. §8's
 HMAC runs in **both directions** here: a reply is an instruction to change a token or refuse
