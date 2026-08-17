@@ -94,47 +94,36 @@
             <div class="phpdocumentor-column -nine phpdocumentor-content">
                                 <section>
                                         <ul class="phpdocumentor-breadcrumbs">
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -namespace">
-        <h2 class="phpdocumentor-content__title">Reactor</h2>
+    <article class="phpdocumentor-element -file">
+        <h2 class="phpdocumentor-content__title">OnReactorEvent.php</h2>
+
+        
+        
+        
+        
+
 
         
 <h3 id="toc">
     Table of Contents
-    <a href="namespaces/axiam-sdk-reactor.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/src-attributes-onreactorevent.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
 
 
-    <h4 id="toc-interfaces">
-        Interfaces
-        <a href="namespaces/axiam-sdk-reactor.html#toc-interfaces" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -interface"><a href="classes/Axiam-Sdk-Reactor-ReactorDelivery.html"><abbr title="\Axiam\Sdk\Reactor\ReactorDelivery">ReactorDelivery</abbr></a></dt><dd>One message off the reactor&#039;s own queue (CONTRACT.md §22.1).</dd>            <dt class="phpdocumentor-table-of-contents__entry -interface"><a href="classes/Axiam-Sdk-Reactor-ReactorTransport.html"><abbr title="\Axiam\Sdk\Reactor\ReactorTransport">ReactorTransport</abbr></a></dt><dd>One live broker session for a reactor: a consumer on the reactor&#039;s own queue,
-and a way to publish a reply back to the queue the delivery named
-(CONTRACT.md §22.1, §8b).</dd>    </dl>
 
     <h4 id="toc-classes">
         Classes
-        <a href="namespaces/axiam-sdk-reactor.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="files/src-attributes-onreactorevent.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-AmqpLibReactorDelivery.html"><abbr title="\Axiam\Sdk\Reactor\AmqpLibReactorDelivery">AmqpLibReactorDelivery</abbr></a></dt><dd>Adapts a `php-amqplib` {@see AMQPMessage} to {@see ReactorDelivery}
-(CONTRACT.md §22.1).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-AmqpLibReactorTransport.html"><abbr title="\Axiam\Sdk\Reactor\AmqpLibReactorTransport">AmqpLibReactorTransport</abbr></a></dt><dd>The `php-amqplib` implementation of {@see ReactorTransport} (CONTRACT.md §22.1,
-§8b).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorAnswer.html"><abbr title="\Axiam\Sdk\Reactor\ReactorAnswer">ReactorAnswer</abbr></a></dt><dd>What a reactor handler decided (CONTRACT.md §22.4, §22.10).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorConfig.html"><abbr title="\Axiam\Sdk\Reactor\ReactorConfig">ReactorConfig</abbr></a></dt><dd>Identifies one reactor to {@see ReactorServer} (CONTRACT.md §22.1, §22.10,
-§22.12).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorEvent.html"><abbr title="\Axiam\Sdk\Reactor\ReactorEvent">ReactorEvent</abbr></a></dt><dd>One hook firing, delivered to a reactor and **already verified**
-(CONTRACT.md §22.3).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorEvents.html"><abbr title="\Axiam\Sdk\Reactor\ReactorEvents">ReactorEvents</abbr></a></dt><dd>The CONTRACT.md §22.5 event registry, §22.8&#039;s budget constants and §22.1&#039;s
-topology helpers.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorEventSpec.html"><abbr title="\Axiam\Sdk\Reactor\ReactorEventSpec">ReactorEventSpec</abbr></a></dt><dd>One hookable event from the CONTRACT.md §22.5 registry: its wire name, what a
-reply may change, and what happens when the reactor does not answer.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorHandlers.html"><abbr title="\Axiam\Sdk\Reactor\ReactorHandlers">ReactorHandlers</abbr></a></dt><dd>Declarative reactor handler binding — CONTRACT.md §22.14.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorProtocol.html"><abbr title="\Axiam\Sdk\Reactor\ReactorProtocol">ReactorProtocol</abbr></a></dt><dd>The reactor wire protocol — CONTRACT.md §22.2, §22.3, §22.4.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorRejection.html"><abbr title="\Axiam\Sdk\Reactor\ReactorRejection">ReactorRejection</abbr></a></dt><dd>A reactor delivery or handler answer this SDK refuses (CONTRACT.md §22.3,
-§22.4).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorServer.html"><abbr title="\Axiam\Sdk\Reactor\ReactorServer">ReactorServer</abbr></a></dt><dd>The CONTRACT.md §22 reactor runtime — §22.10&#039;s `reactor_serve`, spelled
-{@see self::reactorServe()} in PHP by that subsection&#039;s per-language table.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Reactor-ReactorTelemetryEvent.html"><abbr title="\Axiam\Sdk\Reactor\ReactorTelemetryEvent">ReactorTelemetryEvent</abbr></a></dt><dd>One reactor-runtime telemetry event (CONTRACT.md §19, §22.8).</dd>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Attributes-OnReactorEvent.html"><abbr title="\Axiam\Sdk\Attributes\OnReactorEvent">OnReactorEvent</abbr></a></dt><dd>Declares that a method handles one reactor hook event (CONTRACT.md §22.14,
+canonical `reactor_handlers`).</dd>    </dl>
+
 
 
 
@@ -158,8 +147,7 @@ reply may change, and what happens when the reactor does not answer.</dd>       
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="namespaces/axiam-sdk-reactor.html#toc-interfaces">Interfaces</a></li>
-                                                            <li><a href="namespaces/axiam-sdk-reactor.html#toc-classes">Classes</a></li>
+                                                                                                        <li><a href="files/src-attributes-onreactorevent.html#toc-classes">Classes</a></li>
                                                                                                                     </ul>
             </li>
 
@@ -181,7 +169,7 @@ reply may change, and what happens when the reactor does not answer.</dd>       
     </section>
 </section>
         </div>
-        <a href="namespaces/axiam-sdk-reactor.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/src-attributes-onreactorevent.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

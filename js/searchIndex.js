@@ -91,6 +91,21 @@ Search.appendIndex(
             "summary": "Default\u0020freshness\u0020window\u0020\u0028seconds\u0029\u0020applied\u0020to\u0020\u0060issued_at\u0060,\u0020matching\nthe\u0020server\u0027s\u0020DEFAULT_FRESHNESS_SKEW_SECS\u0020\u003D\u0020300\u0020\/\nAXIAM__AMQP__REPLAY_SKEW_SECS\u0020\u0028CONTRACT.md\u0020\u00A78\u0020v2\u0029.",
             "url": "classes/Axiam-Sdk-Amqp-ReplayGuard.html#constant_DEFAULT_SKEW_SECONDS"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\OnReactorEvent",
+            "name": "OnReactorEvent",
+            "summary": "Declares\u0020that\u0020a\u0020method\u0020handles\u0020one\u0020reactor\u0020hook\u0020event\u0020\u0028CONTRACT.md\u0020\u00A722.14,\ncanonical\u0020\u0060reactor_handlers\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Attributes-OnReactorEvent.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\OnReactorEvent\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-OnReactorEvent.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\OnReactorEvent\u003A\u003A\u0024event",
+            "name": "event",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-OnReactorEvent.html#property_event"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireAccess",
             "name": "RequireAccess",
             "summary": "Declarative\u0020per\u002Dendpoint\u0020authorization\u0020requirement\u0020\u0028CONTRACT.md\u0020\u00A711,\u0020canonical\n\u0060require_access\u0028action,\u0020resource\u005B,\u0020scope\u005D\u0029\u0060\u0029.\u0020Placing\u0020this\u0020attribute\u0020on\u0020a\u0020controller\nmethod\u0020or\u0020class\u0020does\u0020not\u0020itself\u0020perform\u0020any\u0020check\u0020\u2014\u0020it\u0020is\u0020metadata\u0020read\u0020by\u0020the\nframework\u002Dspecific\u0020enforcement\u0020listener\n\u0028\u007B\u0040see\u0020\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u007D,\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Laravel\\AxiamAccessMiddleware\u007D\u0029,\u0020which\u0020resolves\u0020the\u0020target\u0020resource\nand\u0020delegates\u0020the\u0020actual\u0020authorization\u0020decision\u0020to\n\u007B\u0040see\u0020\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceAccess\u0028\u0029\u007D.",
@@ -2491,6 +2506,11 @@ Search.appendIndex(
             "summary": "The\u0020CONTRACT.md\u0020\u00A722.5\u0020event\u0020registry,\u0020\u00A722.8\u0027s\u0020budget\u0020constants\u0020and\u0020\u00A722.1\u0027s\ntopology\u0020helpers.",
             "url": "classes/Axiam-Sdk-Reactor-ReactorEvents.html"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorEvents\u003A\u003AassertHookable\u0028\u0029",
+            "name": "assertHookable",
+            "summary": "Assert\u0020that\u0020\u0024event\u0020is\u0020a\u0020hookable\u0020\u00A722.5\u0020registry\u0020event,\u0020or\u0020throw.",
+            "url": "classes/Axiam-Sdk-Reactor-ReactorEvents.html#method_assertHookable"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorEvents\u003A\u003Aall\u0028\u0029",
             "name": "all",
             "summary": "The\u0020\u00A722.5\u0020registry,\u0020mirroring\u0020\u0060EVENT_REGISTRY\u0060\u0020in\n\u0060crates\/axiam\u002Dcore\/src\/models\/reactor.rs\u0060.",
@@ -2635,6 +2655,31 @@ Search.appendIndex(
             "name": "description",
             "summary": "",
             "url": "classes/Axiam-Sdk-Reactor-ReactorEventSpec.html#property_description"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorHandlers",
+            "name": "ReactorHandlers",
+            "summary": "Declarative\u0020reactor\u0020handler\u0020binding\u0020\u2014\u0020CONTRACT.md\u0020\u00A722.14.",
+            "url": "classes/Axiam-Sdk-Reactor-ReactorHandlers.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorHandlers\u003A\u003Aof\u0028\u0029",
+            "name": "of",
+            "summary": "Collect\u0020every\u0020\u0060\u0023\u005BOnReactorEvent\u005D\u0060\u002Dmarked\u0020public\u0020method\u0020on\u0020\u0024sources.",
+            "url": "classes/Axiam-Sdk-Reactor-ReactorHandlers.html#method_of"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorHandlers\u003A\u003Abind\u0028\u0029",
+            "name": "bind",
+            "summary": "Bind\u0020\u0024handler\u0020to\u0020\u0024event\u0020without\u0020an\u0020attribute.",
+            "url": "classes/Axiam-Sdk-Reactor-ReactorHandlers.html#method_bind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorHandlers\u003A\u003Aevents\u0028\u0029",
+            "name": "events",
+            "summary": "The\u0020bound\u0020event\u0020names,\u0020in\u0020binding\u0020order.",
+            "url": "classes/Axiam-Sdk-Reactor-ReactorHandlers.html#method_events"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorHandlers\u003A\u003Ahandler\u0028\u0029",
+            "name": "handler",
+            "summary": "Compose\u0020the\u0020bindings\u0020into\u0020the\u0020callable\u0020\u007B\u0040see\u0020ReactorServer\u007D\u0020accepts.",
+            "url": "classes/Axiam-Sdk-Reactor-ReactorHandlers.html#method_handler"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Reactor\\ReactorProtocol",
             "name": "ReactorProtocol",
