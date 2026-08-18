@@ -108,6 +108,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Re-vendor `openapi.json` at 1.0.0-alpha27 — the copy was pinned at alpha26 and
+  failing the cross-repo artifact-drift gate
 - **`AuthError::__construct()` parameter order corrected — `$reason` moves from second to
   last (conformance-review F-18, remediation R5.7).**
 
