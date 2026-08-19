@@ -107,7 +107,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20, §22 (including
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20, §22, §23 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification) — the binding,
 cross-language behavioral contract every
@@ -121,8 +121,9 @@ server-verification escape hatch (§6) plus optional client-certificate mutual T
 messages (§8), single-flight refresh concurrency safety (§9), framework
 middleware/subscriber integration (§10), declarative per-endpoint authorization
 helpers (§11, see below), OIDC/SSO relying-party helpers (§12, see below), and
-webhook-signature verification (§13, see below), and the §22 reactor runtime
-(`reactorServe`, see below).
+webhook-signature verification (§13, see below), the §22 reactor runtime
+(`reactorServe`, see below), and the §23 SRP-6a login path (`loginSrp`, see below —
+**conditional on a bignum extension**, which is PHP's alone among the eleven SDKs).
 
 ## Framework integration
 
@@ -726,6 +727,123 @@ delivery in flight is answered before the loop returns (§18).
 
 See [`examples/reactor/reactor.php`](examples/reactor/reactor.php).
 
+## Secure Remote Password (CONTRACT.md §23) — conditional on a bignum extension
+
+`loginSrp` proves the password to the server without the password — or anything from which it can
+be cheaply recovered — ever crossing the wire. The server stores a **verifier** `v = g^x mod N`
+instead of a password hash, and what travels is `A` and a proof, neither of which is useful without
+that verifier.
+
+```php
+if ($client->srpAvailable()) {
+    $result = $client->loginSrp('alice', $password);
+} else {
+    $result = $client->login('alice', $password);
+}
+```
+
+It takes the same arguments as `login()` and returns the same `LoginResult`, MFA branch included,
+so switching a tenant to SRP needs no change to how the result is handled. A runnable end-to-end
+example is [`examples/srp_login.php`](examples/srp_login.php).
+
+### PHP is the one SDK where this is conditional — in two ways
+
+**1. It needs `ext-gmp` or `ext-bcmath`.** PHP has no native arbitrary-precision integer, and SRP
+is 2048- to 4096-bit modular exponentiation. `srpAvailable()` reports `false` on a runtime with
+neither, rather than throwing at login time, so an application can pick a login path before
+attempting one. Prefer **`ext-gmp`**: `gmp_powm` at 4096 bits costs milliseconds where `bcpowmod`
+costs seconds. Every other feature of this SDK is unaffected by their absence.
+
+**2. It needs the tenant configured for `pbkdf2_sha256`.** No PHP runtime offers Argon2id with a
+caller-supplied salt of the right size: §23.5's SRP salt is 32 bytes, libsodium's
+`sodium_crypto_pwhash` requires exactly 16, and `password_hash(PASSWORD_ARGON2ID)` generates its
+own and accepts none. Folding 32 bytes into 16 would produce a well-formed `x` that no AXIAM server
+and no sibling SDK agrees with — and the user would be told their password is wrong, which is the
+single most misleading failure this code could produce. So `argon2id` raises `NetworkError` naming
+the KDF, exactly as §23.3 rule 4 requires of a KDF an SDK cannot perform.
+
+If you run PHP clients on SRP, set the tenant's `srp_kdf` to `pbkdf2_sha256`. Note the trade-off
+honestly: PBKDF2 is not memory-hard, so a leaked verifier database enrolled under it is cheaper to
+attack with GPUs than one enrolled under Argon2id. It is still a full KDF evaluation per candidate
+password, and §23.0's threat model — proxies, request logs, heap dumps — is unaffected.
+
+### What this buys, and what it does not
+
+SRP closes holes TLS 1.3 does not:
+
+- a TLS-terminating reverse proxy, ingress controller, CDN or service mesh sees every plaintext
+  password today; under SRP it sees `A` and `M1`;
+- an accidental request-body log, a heap dump or a crash reporter can no longer capture a plaintext
+  password, because the server never has one;
+- a leaked verifier database still costs a full KDF evaluation per candidate password.
+
+It does **not** protect against a compromised AXIAM server, and this SDK does not claim it does.
+
+### Tenant policy, and the errors that are not credential failures
+
+`srp_mode` is an organization baseline a tenant may tighten:
+
+| mode | `login()` | `loginSrp()` |
+|---|---|---|
+| `disabled` (default) | works | `NetworkError` — the endpoint answers `404` |
+| `optional` | works | works |
+| `required` | `AuthzError` (`srp_required`) | works |
+
+Neither is an `AuthError`:
+
+- `NetworkError` from `loginSrp()` means *this tenant does not offer SRP*, or *this runtime cannot
+  do what it named* — a property of the tenant or the runtime, never of any user. Fall back to
+  `login()`.
+- `AuthzError` from `login()` means *this tenant refuses password login*. The credentials were
+  never examined. Showing "invalid username or password" to a user whose password is perfectly good
+  is the failure this mapping exists to prevent.
+
+`required` refuses **every** principal in the tenant, not only the enrolled ones. Splitting the
+response on whether an account has a verifier would turn `/auth/login` into an enumeration oracle
+costing one junk password per name. It also means `required` locks out anyone not yet enrolled: a
+verifier needs the plaintext password, and a stored Argon2id hash is not invertible, so nobody can
+be enrolled retroactively. Operators turn it on last, after a password-reset campaign.
+
+### Enrolment
+
+The server cannot compute a verifier, so any request that **sets** a password has to carry one.
+`srpEnrollment()` produces the `srp` object for `POST /api/v1/users`, `/auth/password/change`,
+`/auth/reset/confirm` and `/admin/bootstrap`:
+
+```php
+$enrolment = $client->srpEnrollment(
+    'alice',                                            // the USERNAME, not an email
+    $newPassword,
+    params: new SrpKdfParams(Srp::KDF_PBKDF2_SHA256, 0), // 0 = AXIAM's own costs
+);
+$body['srp'] = $enrolment->toArray();
+```
+
+The identity must be the account's **username**: `x` is derived over `identity ":" password` using
+the identity the challenge endpoint hands back, so a verifier enrolled against an email address can
+never satisfy a login. For the same reason, **renaming a user invalidates their verifier** — the
+server clears it, and the user re-enrols at their next password change.
+
+The salt is 32 fresh bytes from `random_bytes()` on every call.
+
+### Cryptographic parameters
+
+RFC 5054 Appendix A groups `rfc5054_2048`, `rfc5054_3072` and `rfc5054_4096` (the AXIAM default),
+embedded as constants. A modulus is **never** accepted from the server — a server-supplied `N` is a
+server-supplied trapdoor — and a group this SDK does not recognise is refused rather than guessed.
+
+Two deliberate divergences from RFC 5054, both AXIAM-wide: `H` is **SHA-256**, not SHA-1; and `x`
+is a **KDF output**, not a bare hash, because RFC 5054's bare-hash `x` would make a leaked verifier
+*cheaper* to attack offline than the Argon2id hashes AXIAM already stores.
+
+### Zeroization
+
+§23.3 rule 8 requires an SDK to clear the password, `x`, `S` and `K` where that is meaningful, and
+to **say so** where it is not. In PHP it is not: strings are immutable, the engine copies them
+freely between the request body, the KDF and the interned-string table, and there is no supported
+way to overwrite the memory behind one. This SDK does not pretend otherwise. If that matters to
+your threat model, PHP is the wrong runtime for the secret to live in.
+
 ## TLS policy
 
 Guzzle's `verify` option is **always `true`** (strict TLS, system trust roots) unless a
@@ -788,6 +906,7 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/uma_client.php`](examples/uma_client.php) — the other half: refusal → parse → trust decision → exchange → retry with the RPT.
 - [`examples/laravel_app/`](examples/laravel_app/README.md) — runnable Laravel middleware + Gate example, plus [`oidc_routes.php`](examples/laravel_app/oidc_routes.php) for "Login with AXIAM".
 - [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration), plus [`oidc_services.yaml`](examples/symfony_app/oidc_services.yaml)/[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml) for "Login with AXIAM".
+- [`examples/srp_login.php`](examples/srp_login.php) — CONTRACT.md §23: `loginSrp`, the two ways SRP can be unavailable on PHP, and `srpEnrollment`.
 - [`examples/reactor/reactor.php`](examples/reactor/reactor.php) — CONTRACT.md §22: a reactor answering `token.pre_issue` with an `ext.` mutation and `login.post_auth` with a veto, over signed AMQP.
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).
 
