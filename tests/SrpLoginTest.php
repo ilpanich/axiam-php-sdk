@@ -85,8 +85,8 @@ final class SrpLoginTest extends TestCase
         $result = $client->loginSrp(self::IDENTITY, self::PASSWORD);
 
         self::assertFalse($result->mfaRequired);
-        self::assertNotNull($result->user);
-        self::assertSame('user-1', $result->user->userId);
+        self::assertNull($result->challengeToken);
+        self::assertSame('user-1', $result->userId);
     }
 
     /**
