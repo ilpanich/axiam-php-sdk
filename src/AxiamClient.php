@@ -1462,6 +1462,24 @@ final class AxiamClient
      *
      * @param array<string,mixed> $body
      */
+    private function post(Client $http, string $path, array $body): ResponseInterface
+    {
+        try {
+            return $http->post($path, ['json' => $body]);
+        } catch (RequestException $e) {
+            // Guzzle 8 moved getResponse() to BadResponseException; a bare
+            // RequestException/ConnectException carries no response (works on ^7.13 and ^8.0).
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
+            if ($response !== null) {
+                throw ErrorMapper::fromResponse($response, $path . ' failed');
+            }
+
+            throw NetworkError::fromException($e, $path . ' failed');
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, $path . ' failed');
+        }
+    }
+
     /**
      * `POST` that returns the response whatever its status, instead of throwing on 4xx/5xx.
      *
@@ -1476,24 +1494,6 @@ final class AxiamClient
     {
         try {
             return $this->plainHttp->post($path, ['json' => $body, 'http_errors' => false]);
-        } catch (GuzzleException $e) {
-            throw NetworkError::fromException($e, $path . ' failed');
-        }
-    }
-
-    private function post(Client $http, string $path, array $body): ResponseInterface
-    {
-        try {
-            return $http->post($path, ['json' => $body]);
-        } catch (RequestException $e) {
-            // Guzzle 8 moved getResponse() to BadResponseException; a bare
-            // RequestException/ConnectException carries no response (works on ^7.13 and ^8.0).
-            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
-            if ($response !== null) {
-                throw ErrorMapper::fromResponse($response, $path . ' failed');
-            }
-
-            throw NetworkError::fromException($e, $path . ' failed');
         } catch (GuzzleException $e) {
             throw NetworkError::fromException($e, $path . ' failed');
         }
