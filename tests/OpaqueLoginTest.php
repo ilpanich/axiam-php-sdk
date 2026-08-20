@@ -104,9 +104,17 @@ final class OpaqueLoginTest extends TestCase
             . self::WIRE_REGISTRATION_RESPONSE . '",' . self::ksfFields($ksf) . '}');
     }
 
+    /**
+     * A 200 `LoginSuccessResponse`.
+     *
+     * `user.id` is not decoration: `handleLoginResponse()` refuses a 200 without
+     * it as a malformed body, which is the same shape `login()` returns and the
+     * whole point of §23's same-result-type requirement.
+     */
     private static function loginOk(): Response
     {
-        return self::json(200, '{"session_id":"55555555-5555-5555-5555-555555555555","expires_in":900}');
+        return self::json(200, '{"user":{"id":"11111111-1111-1111-1111-111111111111"},'
+            . '"session_id":"55555555-5555-5555-5555-555555555555","expires_in":900}');
     }
 
     /** @return array<string, mixed> */
@@ -216,6 +224,8 @@ final class OpaqueLoginTest extends TestCase
         $result = $client->loginOpaque(self::USER, $this->password);
 
         self::assertFalse($result->mfaRequired);
+        self::assertSame('11111111-1111-1111-1111-111111111111', $result->userId);
+        self::assertSame(self::TENANT, $result->tenantId);
     }
 
     public function testTheMfaRequiredBranchSurvivesTheOpaquePath(): void
