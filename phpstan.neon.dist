@@ -36,6 +36,6 @@ parameters:
         # above it — exchange lifecycle, KSF selection, error mapping — is behind
         # OpaqueNativeInterface, fully analysed and fully tested against a fake.
         -
-            message: '#^Call to an undefined method FFI::axiam_opaque_[a-z_]+\(\)\.$#'
+            message: '#^Call to an undefined method FFI::axiam_opaque_[a-z0-9_]+\(\)\.$#'
             path: src/Opaque/FfiOpaqueNative.php
     treatPhpDocTypesAsCertain: false
