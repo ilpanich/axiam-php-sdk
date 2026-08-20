@@ -21,6 +21,10 @@ abstract class OpaqueExchange
 {
     private mixed $handle;
 
+    /**
+     * Adopts `$handle`, which this exchange now owns and must release exactly once — through
+     * `finish`, `close()` or the destructor, whichever comes first.
+     */
     public function __construct(
         protected readonly OpaqueNativeInterface $lib,
         mixed $handle,
@@ -68,6 +72,10 @@ abstract class OpaqueExchange
         $this->free($handle);
     }
 
+    /**
+     * Releases an exchange the caller abandoned — a login started and never completed. PHP's
+     * refcounting makes that prompt rather than eventual.
+     */
     public function __destruct()
     {
         $this->close();

@@ -49,6 +49,10 @@ final class KsfParams
         'p' => [1, 16],
     ];
 
+    /**
+     * Every field exactly as the server named it — no local defaults, no coercion of an absent
+     * cost to zero.
+     */
     public function __construct(
         /** The wire name of the function: `argon2id` or `scrypt`. */
         public readonly string $ksf,

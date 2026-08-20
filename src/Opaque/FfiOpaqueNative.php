@@ -81,6 +81,7 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         return new self($ffi);
     }
 
+    /** Whether this build can perform OPAQUE. */
     public function available(): bool
     {
         try {
@@ -92,6 +93,7 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         }
     }
 
+    /** The library's description of the last failure, borrowed and never freed here. */
     public function lastError(): string
     {
         $raw = $this->ffi->axiam_opaque_last_error();
@@ -103,21 +105,25 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         return FFI::string($raw);
     }
 
+    /** Builds an Argon2id key-stretching handle, or `null` when the parameters are refused. */
     public function ksfArgon2id(int $memoryKib, int $iterations, int $parallelism): mixed
     {
         return $this->ffi->axiam_opaque_ksf_argon2id($memoryKib, $iterations, $parallelism);
     }
 
+    /** Builds a scrypt key-stretching handle, or `null` when the parameters are refused. */
     public function ksfScrypt(int $logN, int $r, int $p): mixed
     {
         return $this->ffi->axiam_opaque_ksf_scrypt($logN, $r, $p);
     }
 
+    /** Releases a key-stretching handle. */
     public function ksfFree(mixed $ksf): void
     {
         $this->ffi->axiam_opaque_ksf_free($ksf);
     }
 
+    /** Begins an enrolment, returning the state handle and the hex `RegistrationRequest`. */
     public function registrationStart(string $password): ?array
     {
         $out = $this->ffi->new('char *[1]');
@@ -129,6 +135,12 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         return [$state, $this->take($out[0])];
     }
 
+    /**
+     * Completes an enrolment, CONSUMING `$state` whether it succeeds or fails.
+     *
+     * The returned string is copied out and the Rust allocation freed before it is handed back;
+     * a `null` means the library refused.
+     */
     public function registrationFinish(
         mixed $state,
         string $password,
@@ -146,11 +158,13 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         return $record === null ? null : $this->take($record);
     }
 
+    /** Releases enrolment state that was never finished. */
     public function registrationFree(mixed $state): void
     {
         $this->ffi->axiam_opaque_registration_free($state);
     }
 
+    /** Begins a login, returning the state handle and the hex `KE1`. */
     public function loginStart(string $password): ?array
     {
         $out = $this->ffi->new('char *[1]');
@@ -162,6 +176,13 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         return [$state, $this->take($out[0])];
     }
 
+    /**
+     * Completes a login, CONSUMING `$state`.
+     *
+     * A `null` return is the whole of the client's authentication check — see
+     * {@see OpaqueNativeInterface::loginFinish()}. Nothing may be sent to `login/finish` after
+     * it (CONTRACT.md §23.4 rule 7).
+     */
     public function loginFinish(mixed $state, string $password, string $ke2, mixed $ksf): ?string
     {
         $ke3 = $this->ffi->axiam_opaque_login_finish($state, $password, $ke2, $ksf, null, null);
@@ -169,6 +190,7 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         return $ke3 === null ? null : $this->take($ke3);
     }
 
+    /** Releases login state that was never finished. */
     public function loginFree(mixed $state): void
     {
         $this->ffi->axiam_opaque_login_free($state);
