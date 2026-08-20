@@ -122,8 +122,9 @@ messages (§8), single-flight refresh concurrency safety (§9), framework
 middleware/subscriber integration (§10), declarative per-endpoint authorization
 helpers (§11, see below), OIDC/SSO relying-party helpers (§12, see below), and
 webhook-signature verification (§13, see below), the §22 reactor runtime
-(`reactorServe`, see below), and the §23 SRP-6a login path (`loginSrp`, see below —
-**conditional on a bignum extension**, which is PHP's alone among the eleven SDKs).
+(`reactorServe`, see below), and the §23 OPAQUE login path (`loginOpaque`, see below —
+**conditional on `ext-ffi` and one shared library**, which is PHP's alone among the eleven
+SDKs).
 
 ## Framework integration
 
@@ -727,126 +728,166 @@ delivery in flight is answered before the loop returns (§18).
 
 See [`examples/reactor/reactor.php`](examples/reactor/reactor.php).
 
-## Secure Remote Password (CONTRACT.md §23) — conditional on a bignum extension
+## OPAQUE (CONTRACT.md §23) — conditional on `ext-ffi` and one shared library
 
-`loginSrp` proves the password to the server without the password — or anything from which it can
-be cheaply recovered — ever crossing the wire. The server stores a **verifier** `v = g^x mod N`
-instead of a password hash, and what travels is `A` and a proof, neither of which is useful without
-that verifier.
+`loginOpaque` proves the password to the server without the password — or anything from which it
+can be cheaply recovered — ever crossing the wire. The server stores a **registration record**
+sealed under a tenant-wide oblivious PRF seed, and what travels is a blinded group element and a
+MAC, neither useful without both.
 
 ```php
-if ($client->srpAvailable()) {
-    $result = $client->loginSrp('alice', $password);
+if ($client->opaqueAvailable()) {
+    $result = $client->loginOpaque('alice', $password);
 } else {
     $result = $client->login('alice', $password);
 }
 ```
 
 It takes the same arguments as `login()` and returns the same `LoginResult`, MFA branch included,
-so switching a tenant to SRP needs no change to how the result is handled. A runnable end-to-end
-example is [`examples/srp_login.php`](examples/srp_login.php).
+so switching a tenant to OPAQUE needs no change to how the result is handled. A runnable
+end-to-end example is [`examples/opaque_login.php`](examples/opaque_login.php).
 
-### PHP is the one SDK where this is conditional — in two ways
+Unlike the SRP-6a it replaces, there is no separate server-proof step and nothing has been
+dropped: RFC 9807's AKE authenticates the server during the handshake, so opening `KE2` **is** the
+proof that it holds the record.
 
-**1. It needs `ext-gmp` or `ext-bcmath`.** PHP has no native arbitrary-precision integer, and SRP
-is 2048- to 4096-bit modular exponentiation. `srpAvailable()` reports `false` on a runtime with
-neither, rather than throwing at login time, so an application can pick a login path before
-attempting one. Prefer **`ext-gmp`**: `gmp_powm` at 4096 bits costs milliseconds where `bcpowmod`
-costs seconds. Every other feature of this SDK is unaffected by their absence.
+### PHP went from two conditions to one
 
-**2. It needs the tenant configured for `pbkdf2_sha256`.** No PHP runtime offers Argon2id with a
-caller-supplied salt of the right size: §23.5's SRP salt is 32 bytes, libsodium's
-`sodium_crypto_pwhash` requires exactly 16, and `password_hash(PASSWORD_ARGON2ID)` generates its
-own and accepts none. Folding 32 bytes into 16 would produce a well-formed `x` that no AXIAM server
-and no sibling SDK agrees with — and the user would be told their password is wrong, which is the
-single most misleading failure this code could produce. So `argon2id` raises `NetworkError` naming
-the KDF, exactly as §23.3 rule 4 requires of a KDF an SDK cannot perform.
+This was the SDK where §23 hurt most, and the change is worth spelling out.
 
-This is recorded in the contract rather than left as a local quirk: §23.3 rule 4's contract-1.25
-errata names PHP, Swift, and C/C++ below OpenSSL 3.2 as the SDKs for which `argon2id` is not
-computable, and states that refusing it is conformant rather than a gap.
+The SRP client needed **two** things, and the second was the bad one:
 
-If you run PHP clients on SRP, set the tenant's `srp_kdf` to `pbkdf2_sha256`. Note the trade-off
-honestly: PBKDF2 is not memory-hard, so a leaked verifier database enrolled under it is cheaper to
-attack with GPUs than one enrolled under Argon2id. It is still a full KDF evaluation per candidate
-password, and §23.0's threat model — proxies, request logs, heap dumps — is unaffected.
+1. `ext-gmp` or `ext-bcmath`, because PHP has no native arbitrary-precision integer and SRP is
+   2048- to 4096-bit modular exponentiation.
+2. A tenant configured for `pbkdf2_sha256` — because no PHP runtime offers Argon2id with a
+   caller-supplied 32-byte salt. `sodium_crypto_pwhash` requires exactly 16, `password_hash()`
+   generates its own. **AXIAM's default KDF was, for PHP, simply unreachable**, and the honest
+   advice was to weaken the tenant's configuration for PHP's benefit.
+
+Both are gone. The key stretching now happens inside `libaxiam_opaque_ffi`, so a `true` from
+`opaqueAvailable()` means *every* tenant works — including the default one — and no tenant needs
+reconfiguring on PHP's account.
+
+What remains is having the library, which is two things that are really one:
+
+**1. `ext-ffi`.** Not guaranteed on any runtime, and disabled outright on some shared hosts.
+
+**2. `libaxiam_opaque_ffi`.** A Rust `cdylib` published as a per-platform asset on the
+[axiam release page](https://github.com/ilpanich/axiam/releases), **not** a Composer package —
+there is no cross-language registry to put it on. Put it on the system library path, or:
+
+```bash
+export AXIAM_OPAQUE_LIBRARY=/opt/axiam/libaxiam_opaque_ffi.so
+```
+
+`opaqueAvailable()` reports both as one answer, and reports rather than throwing — so an
+application chooses the login path before attempting one rather than discovering the gap
+mid-exchange. It also *calls into* the library rather than merely loading it: FFI resolves symbols
+lazily, so a probe that only opened the file would report "present" and then fail at login against
+some other library that happened to share the name.
+
+### The protocol is not implemented here
+
+CONTRACT.md §23.1 forbids an SDK from writing its own OPAQUE. SRP-6a was arithmetic every language
+can express — which in PHP meant ~800 lines across two bignum backends, plus the `pbkdf2_sha256`
+limitation on top. OPAQUE is not: it needs an oblivious PRF, `hash_to_curve`,
+`expand_message_xmd`, an envelope construction and a three-message AKE, and eleven independent
+implementations of that is eleven chances to be subtly and silently wrong in a way that still
+interoperates until it does not.
+
+`Axiam\Sdk\Opaque` therefore contains **no cryptography**. It is an FFI binding to the same
+implementation the AXIAM server links.
 
 ### What this buys, and what it does not
 
-SRP closes holes TLS 1.3 does not:
+OPAQUE closes holes TLS 1.3 does not:
 
 - a TLS-terminating reverse proxy, ingress controller, CDN or service mesh sees every plaintext
-  password today; under SRP it sees `A` and `M1`;
-- an accidental request-body log, a heap dump or a crash reporter can no longer capture a plaintext
-  password, because the server never has one;
-- a leaked verifier database still costs a full KDF evaluation per candidate password.
+  password today; under OPAQUE it sees `KE1` and `KE3`;
+- an accidental request-body log, a heap dump or a crash reporter can no longer capture a
+  plaintext password, because the server never has one;
+- **a stolen record database is not offline-crackable on its own.** This is the substantive gain
+  over SRP: cracking a record also requires the tenant's OPRF seed, which is AES-256-GCM encrypted
+  at rest under a key the database does not hold.
 
 It does **not** protect against a compromised AXIAM server, and this SDK does not claim it does.
 
 ### Tenant policy, and the errors that are not credential failures
 
-`srp_mode` is an organization baseline a tenant may tighten:
+`opaque_mode` is an organization baseline a tenant may tighten:
 
-| mode | `login()` | `loginSrp()` |
+| mode | `login()` | `loginOpaque()` |
 |---|---|---|
 | `disabled` (default) | works | `NetworkError` — the endpoint answers `404` |
 | `optional` | works | works |
-| `required` | `AuthzError` (`srp_required`) | works |
+| `required` | `AuthzError` | works |
 
-Neither is an `AuthError`:
+Which exception you get is most of what this SDK owns on this path:
 
-- `NetworkError` from `loginSrp()` means *this tenant does not offer SRP*, or *this runtime cannot
-  do what it named* — a property of the tenant or the runtime, never of any user. Fall back to
-  `login()`.
-- `AuthzError` from `login()` means *this tenant refuses password login*. The credentials were
-  never examined. Showing "invalid username or password" to a user whose password is perfectly good
-  is the failure this mapping exists to prevent.
+| condition | exception | why |
+|---|---|---|
+| tenant has OPAQUE disabled | `NetworkError` | a property of the tenant, not of any user — fall back to `login()` |
+| `ext-ffi` or the library absent | `NetworkError` | a fact about this runtime, raised before any request is sent |
+| server named a KSF this build cannot perform | `NetworkError` | a configuration problem; substituting one would surface as a wrong password |
+| `/start` response missing `ke2` | `NetworkError` | malformed response |
+| envelope did not open / `KE2` did not verify | `AuthError` | the **whole** of the credential check |
+| tenant refuses password login (`login()`) | `AuthzError` | the credentials were never examined |
+
+That `AuthError` covers both halves of the mutual authentication: a wrong password, an account
+that does not exist, and a server that does not hold the record are indistinguishable by design.
+**Nothing is sent to `login/finish` in that case** (§23.4 rule 7), and you must not retry over
+`login()` — that hands the plaintext to an endpoint that just failed to prove it holds the record.
 
 `required` refuses **every** principal in the tenant, not only the enrolled ones. Splitting the
-response on whether an account has a verifier would turn `/auth/login` into an enumeration oracle
-costing one junk password per name. It also means `required` locks out anyone not yet enrolled: a
-verifier needs the plaintext password, and a stored Argon2id hash is not invertible, so nobody can
-be enrolled retroactively. Operators turn it on last, after a password-reset campaign.
+response on whether an account has a record would turn `/auth/login` into an enumeration oracle
+costing one junk password per name. Operators turn it on last, after a password-reset campaign.
 
 ### Enrolment
 
-The server cannot compute a verifier, so any request that **sets** a password has to carry one.
-`srpEnrollment()` produces the `srp` object for `POST /api/v1/users`, `/auth/password/change`,
-`/auth/reset/confirm` and `/admin/bootstrap`:
+The server cannot build a registration record, so any request that **sets** a password has to
+carry one. `opaqueEnrollment()` produces the `opaque` object for `POST /api/v1/users`,
+`/auth/password/change`, `/auth/reset/confirm` and `/admin/bootstrap`:
 
 ```php
-$enrolment = $client->srpEnrollment(
-    'alice',                                            // the USERNAME, not an email
-    $newPassword,
-    params: new SrpKdfParams(Srp::KDF_PBKDF2_SHA256, 0), // 0 = AXIAM's own costs
-);
-$body['srp'] = $enrolment->toArray();
+$enrolment = $client->opaqueEnrollment($newPassword);
+$body['opaque'] = $enrolment->toWire();
 ```
 
-The identity must be the account's **username**: `x` is derived over `identity ":" password` using
-the identity the challenge endpoint hands back, so a verifier enrolled against an email address can
-never satisfy a login. For the same reason, **renaming a user invalidates their verifier** — the
-server clears it, and the user re-enrols at their next password change.
+Note the parameters that are gone. There is no `$identity`: the SRP version required the account's
+**username**, an email there produced a verifier no login could ever satisfy — and renaming a user
+invalidated their verifier outright. A record binds to a credential identifier the server chooses,
+so neither is true any more. There is no `$group` or `$params` either: those come from the
+`register/start` response, so a caller cannot pick a cost the server will not honour.
 
-The salt is 32 fresh bytes from `random_bytes()` on every call.
+Unlike `srpEnrollment()` this performs I/O — one `register/start` round trip. The envelope is
+sealed under the server's oblivious PRF, so there is no offline computation that produces a valid
+record.
+
+### Cost
+
+`loginOpaque()` runs the tenant's key-stretching function: Argon2id at 19 MiB and t=2 by default,
+which is tens to hundreds of milliseconds of CPU plus that memory, per login attempt. That cost is
+the point — it is what makes a stolen record expensive to attack even by someone holding the OPRF
+seed. On a request-per-process runtime it lands squarely in the request; size `max_execution_time`
+and any upstream timeout accordingly. It is not a cost `login()` has.
 
 ### Cryptographic parameters
 
-RFC 5054 Appendix A groups `rfc5054_2048`, `rfc5054_3072` and `rfc5054_4096` (the AXIAM default),
-embedded as constants. A modulus is **never** accepted from the server — a server-supplied `N` is a
-server-supplied trapdoor — and a group this SDK does not recognise is refused rather than guessed.
+The ciphersuite is `OPAQUE-3DH` over **ristretto255** with **SHA-512**, HKDF-SHA-512 and
+HMAC-SHA-512, fixed AXIAM-wide. It is not negotiated and not read from the server: a client that
+accepted a suite from the endpoint it is authenticating would be accepting a downgrade.
 
-Two deliberate divergences from RFC 5054, both AXIAM-wide: `H` is **SHA-256**, not SHA-1; and `x`
-is a **KDF output**, not a bare hash, because RFC 5054's bare-hash `x` would make a leaked verifier
-*cheaper* to attack offline than the Argon2id hashes AXIAM already stores.
+The key-stretching function *is* the server's to name, per exchange, and is honoured as given
+rather than cached or defaulted. `argon2id` and `scrypt` are accepted; anything else — including
+`pbkdf2_sha256`, which was SRP's PHP-only fallback and is not an OPAQUE KSF at all — is refused
+rather than substituted. Costs outside the bands this SDK will act on (`memory_kib` 8 MiB–1 GiB,
+`iterations` 1–10, `parallelism` 1–16, `log_n` 14–20, `r`/`p` 1–16) are refused too.
 
 ### Zeroization
 
-§23.3 rule 8 requires an SDK to clear the password, `x`, `S` and `K` where that is meaningful, and
-to **say so** where it is not. In PHP it is not: strings are immutable, the engine copies them
-freely between the request body, the KDF and the interned-string table, and there is no supported
-way to overwrite the memory behind one. This SDK does not pretend otherwise. If that matters to
-your threat model, PHP is the wrong runtime for the secret to live in.
+PHP strings are immutable and the runtime copies them freely, so this SDK **cannot** clear the
+password. §23.3 rule 8 requires saying so rather than implying a guarantee it cannot keep. What it
+does do is never put the password in a request body, and never log it.
 
 ## TLS policy
 
@@ -910,7 +951,7 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/uma_client.php`](examples/uma_client.php) — the other half: refusal → parse → trust decision → exchange → retry with the RPT.
 - [`examples/laravel_app/`](examples/laravel_app/README.md) — runnable Laravel middleware + Gate example, plus [`oidc_routes.php`](examples/laravel_app/oidc_routes.php) for "Login with AXIAM".
 - [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration), plus [`oidc_services.yaml`](examples/symfony_app/oidc_services.yaml)/[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml) for "Login with AXIAM".
-- [`examples/srp_login.php`](examples/srp_login.php) — CONTRACT.md §23: `loginSrp`, the two ways SRP can be unavailable on PHP, and `srpEnrollment`.
+- [`examples/opaque_login.php`](examples/opaque_login.php) — CONTRACT.md §23: `loginOpaque`, the one way OPAQUE can be unavailable on PHP (it used to be two), and `opaqueEnrollment`.
 - [`examples/reactor/reactor.php`](examples/reactor/reactor.php) — CONTRACT.md §22: a reactor answering `token.pre_issue` with an `ext.` mutation and `login.post_auth` with a veto, over signed AMQP.
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).
 
