@@ -65,10 +65,16 @@ final class FfiOpaqueNative implements OpaqueNativeInterface
         try {
             /** @var FFI $ffi */
             $ffi = FFI::cdef(self::CDEF, $path);
-        } catch (\FFI\Exception|\Throwable) {
+        } catch (\Throwable) {
             // Not found, wrong architecture, or a different library of the same
             // name missing our symbols. All three are "absent" as far as a
             // caller is concerned, and none is worth retrying.
+            //
+            // \Throwable rather than \FFI\Exception, which is what cdef()
+            // actually raises: PHPStan's FFI signatures declare no @throws, so
+            // naming the narrow type reads to it as a dead catch -- and a
+            // loader whose whole job is "report absent, never throw" should be
+            // catching wider than one library's own exception type anyway.
             return null;
         }
 
