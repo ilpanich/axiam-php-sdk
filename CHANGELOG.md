@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- OPAQUE (RFC 9807) login and enrolment (CONTRACT §23): `loginOpaque()`,
+  `opaqueEnrollment()` and `opaqueAvailable()` on `AxiamClient`, plus the new
+  `Axiam\Sdk\Opaque` namespace.
+- `examples/opaque_login.php`.
+- `ext-ffi` in `suggest`. It binds `libaxiam_opaque_ffi`; a consumer whose tenant
+  does not use OPAQUE needs neither.
+
+### Removed
+
+- **BREAKING** — SRP-6a. `loginSrp()`, `srpEnrollment()`, `srpAvailable()`, the
+  whole `Axiam\Sdk\Srp` namespace (both bignum backends), `srp-test-vectors.json`
+  and `examples/srp_login.php` are all gone. AXIAM's server-side SRP endpoints are
+  removed in the same release, so keeping the client would leave methods that only
+  ever return 404.
+- `ext-gmp` and `ext-bcmath` from `suggest`. They were there for SRP's modular
+  exponentiation and nothing else in this SDK uses them.
+
+### Changed
+
+- **BREAKING** — the OPAQUE protocol is NOT implemented in this SDK. CONTRACT
+  §23.1 forbids it, so the client half is an FFI binding to
+  `libaxiam_opaque_ffi` — the same implementation the AXIAM server links,
+  published as a per-platform asset on the axiam release page rather than as a
+  Composer package. Put it on the system library path or set
+  `AXIAM_OPAQUE_LIBRARY`.
+- **PHP is now conditional on one thing rather than two, and the one that went
+  away was the bad one.** The SRP client needed a bignum extension *and* a tenant
+  configured for `pbkdf2_sha256`, because no PHP runtime offers Argon2id with a
+  caller-supplied 32-byte salt — AXIAM's default KDF was, for PHP, unreachable,
+  and the advice was to weaken the tenant's configuration for PHP's benefit. The
+  key stretching now happens inside the shared library, so a `true` from
+  `opaqueAvailable()` means every tenant works, default included.
+- **BREAKING** — `opaqueEnrollment()` performs I/O, where `srpEnrollment()` did
+  not: OPAQUE's envelope is sealed under the server's oblivious PRF, so there is
+  no offline computation that produces a valid record. It also drops the
+  `$identity`, `$group` and `$params` arguments — a record binds to a credential
+  identifier the server chooses, and the key-stretching parameters are the
+  server's. As a consequence, **renaming a user no longer invalidates their
+  credential**.
+- Failure taxonomy for the OPAQUE path: a tenant with OPAQUE disabled, an absent
+  `ext-ffi` or library, and a key-stretching function this build cannot perform
+  are all `NetworkError` (a caller can fall back, or an operator can act);
+  everything else is `AuthError` and must NOT be retried over `login()`
+  (§23.4 rule 7).
+
 ## [1.0.0-alpha31] - 2026-08-20
 
 ### Changed

@@ -11,8 +11,7 @@
     "psr/log": "^3.0"
   },
   "suggest": {
-    "ext-gmp": "Required for the §23 SRP client (loginSrp/srpEnrollment). PHP has no native bignum; without ext-gmp or ext-bcmath, srpAvailable() reports false and the SRP login path is unavailable — every other feature is unaffected.",
-    "ext-bcmath": "The §23 SRP fallback when ext-gmp is absent. Materially slower: bcpowmod at 4096 bits costs seconds where gmp_powm costs milliseconds.",
+    "ext-ffi": "Required for the §23 OPAQUE client (loginOpaque/opaqueEnrollment), which binds libaxiam_opaque_ffi — CONTRACT §23.1 forbids an SDK from implementing OPAQUE itself. Without ext-ffi, opaqueAvailable() reports false and the OPAQUE login path is unavailable; every other feature is unaffected. The shared library is NOT a Composer package: download the asset for your platform from https://github.com/ilpanich/axiam/releases and put it on the system library path, or set AXIAM_OPAQUE_LIBRARY to its full path.",
     "ext-grpc": "Enables the gRPC transport for checkAccess/batchCheck on long-running runtimes (Swoole/RoadRunner). REST-only fallback is used automatically when absent.",
     "grpc/grpc": "Required alongside ext-grpc for gRPC support; the SDK never fatals without it as long as extension_loaded('grpc') gates every gRPC class reference.",
     "google/protobuf": "Runtime classes (Google\\Protobuf\\Internal\\Message) the committed src/Grpc/Gen/* stubs extend; only loaded behind the same extension_loaded('grpc') guard as grpc/grpc, so never required on a REST-only runtime."

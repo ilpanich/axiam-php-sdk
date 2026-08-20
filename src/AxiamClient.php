@@ -28,11 +28,9 @@ use Axiam\Sdk\Oidc\UmaChallenge;
 use Axiam\Sdk\Rest\AuthMiddleware;
 use Axiam\Sdk\Rest\AuthzRestClient;
 use Axiam\Sdk\Rest\RefreshMiddleware;
-use Axiam\Sdk\Srp\Srp;
-use Axiam\Sdk\Srp\SrpClientSession;
-use Axiam\Sdk\Srp\SrpEnrollment;
-use Axiam\Sdk\Srp\SrpGroup;
-use Axiam\Sdk\Srp\SrpKdfParams;
+use Axiam\Sdk\Opaque\KsfParams;
+use Axiam\Sdk\Opaque\Opaque;
+use Axiam\Sdk\Opaque\OpaqueEnrollment;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\BadResponseException;
@@ -94,18 +92,10 @@ final class AxiamClient
 {
     private const LOGIN_PATH = '/api/v1/auth/login';
     private const MFA_VERIFY_PATH = '/api/v1/auth/mfa/verify';
-    private const SRP_CHALLENGE_PATH = '/api/v1/auth/srp/challenge';
-    private const SRP_VERIFY_PATH = '/api/v1/auth/srp/verify';
+    private const OPAQUE_REGISTER_START_PATH = '/api/v1/auth/opaque/register/start';
+    private const OPAQUE_LOGIN_START_PATH = '/api/v1/auth/opaque/login/start';
+    private const OPAQUE_LOGIN_FINISH_PATH = '/api/v1/auth/opaque/login/finish';
 
-    /**
-     * The group an SRP exchange opens in before the server has named one.
-     *
-     * The challenge response names the group, but `A` has to be computed BEFORE that response
-     * exists — so the first attempt guesses, and the exchange restarts if the server names
-     * another. The guess is AXIAM's own default, so the restart is the exceptional path rather
-     * than the normal one.
-     */
-    private const SRP_OPENING_GROUP = SrpGroup::DEFAULT_WIRE_NAME;
     private const LOGOUT_PATH = '/api/v1/auth/logout';
 
     /** §17 decision memo. Disabled unless a TTL was configured. */
@@ -1182,142 +1172,195 @@ final class AxiamClient
     }
 
     // ------------------------------------------------------------------
-    // Secure Remote Password (CONTRACT.md §23)
+    // OPAQUE, RFC 9807 (CONTRACT.md §23)
     // ------------------------------------------------------------------
 
     /**
-     * `POST /api/v1/auth/srp/challenge` followed by `/verify` — SRP-6a login (CONTRACT.md §23).
+     * `POST /api/v1/auth/opaque/login/start` followed by `/finish` — OPAQUE login, RFC 9807
+     * (CONTRACT.md §23).
      *
-     * A sibling of {@see self::login()}, not a replacement. It takes the same arguments and returns
-     * the same {@see LoginResult}, MFA branch included, so an application can switch a tenant to SRP
-     * without touching its own code (§23.1).
+     * A sibling of {@see self::login()}, not a replacement. It takes the same arguments and
+     * returns the same {@see LoginResult}, MFA branch included, so an application can switch a
+     * tenant to OPAQUE without touching its own code.
      *
-     * **What this does that `login` does not.** The password never leaves this process. What crosses
-     * the wire is `A` and a proof, neither of which is useful without the account's verifier — so a
-     * TLS-terminating proxy, an accidentally verbose request log, or a heap dump on the server
-     * cannot capture a plaintext password, because the server never has one. It does **not** protect
-     * against a compromised AXIAM server.
+     * **What this does that `login` does not.** The password never leaves this process. What
+     * crosses the wire is a blinded group element and a MAC, neither useful without the account's
+     * registration record *and* the tenant's OPRF seed — so a TLS-terminating proxy, an
+     * accidentally verbose request log, or a heap dump on the server cannot capture a plaintext
+     * password, because the server never has one. It also means a stolen record database is not
+     * offline-crackable on its own, which is the pre-computation resistance SRP could not offer.
+     * It does **not** protect against a compromised AXIAM server.
      *
-     * **PHP is doubly conditional here** (§23.8). It needs `ext-gmp` or `ext-bcmath` for the bignum
-     * arithmetic — {@see self::srpAvailable()} reports which — and it needs the tenant to be
-     * configured for `pbkdf2_sha256`, because no PHP runtime offers Argon2id with a caller-supplied
-     * 32-byte salt. Both gaps surface as {@see NetworkError} naming what is missing, never as an
-     * {@see AuthError}.
+     * **PHP is no longer doubly conditional.** The SRP client this replaces needed a bignum
+     * extension *and* a tenant on `pbkdf2_sha256`, because no PHP runtime offers Argon2id with a
+     * caller-supplied salt — so the AXIAM default was, for PHP, unreachable. The key stretching
+     * now happens inside `libaxiam_opaque_ffi`, so the only remaining condition is that the
+     * library and `ext-ffi` are present, which {@see self::opaqueAvailable()} reports.
+     *
+     * **One round trip, and no server-proof step.** SRP had to guess a group before the server
+     * named one and restart the exchange if it guessed wrong; `KE1` does not depend on the
+     * key-stretching function. And where the old §23.3 rule 6 had to mandate an `M2` check in
+     * capitals — because skipping it kept only half the protocol — RFC 9807's AKE authenticates
+     * the server during the handshake, so opening `KE2` *is* the proof that it holds the record.
      *
      * **Zeroization.** PHP strings are immutable and the runtime copies them freely, so this SDK
-     * cannot clear the password, `x`, `S` or `K` — §23.3 rule 8 requires saying so rather than
-     * implying a guarantee it cannot keep.
+     * cannot clear the password — §23.3 rule 8 requires saying so rather than implying a
+     * guarantee it cannot keep.
      *
-     * @throws NetworkError if the tenant has SRP disabled (the endpoint answers `404` — a property
-     *                      of the tenant, not of any user), or if this runtime or this SDK cannot
-     *                      perform the group or KDF the server named. Deliberately not
-     *                      {@see AuthError}: reporting a client capability gap as a credential
-     *                      failure would send a user off to reset a password that works.
-     * @throws AuthError    for a wrong password, and for a server whose `M2` does not verify — in
-     *                      the latter case no session is returned and the response's cookies are
-     *                      discarded, because an endpoint that cannot prove it holds the verifier is
-     *                      not the server it claims to be
+     * @throws NetworkError if the tenant has OPAQUE disabled (the endpoint answers `404` — a
+     *                      property of the tenant, not of any user), if `ext-ffi` or
+     *                      `libaxiam_opaque_ffi` is absent, or if the server names a
+     *                      key-stretching function this SDK cannot ask for. Deliberately not
+     *                      {@see AuthError}: reporting a configuration gap as a credential
+     *                      failure would send a user off to reset a password that works, and
+     *                      would stop a caller falling back to {@see self::login()}
+     * @throws AuthError    for a wrong password, an account that does not exist, and a server
+     *                      that does not hold the record — indistinguishable by design. **Nothing
+     *                      is sent to `login/finish` in that case** (§23.4 rule 7), and a caller
+     *                      must not retry over {@see self::login()}: that hands the plaintext to
+     *                      an endpoint that just failed to prove itself
      */
-    public function loginSrp(string $usernameOrEmail, string $password): LoginResult
+    public function loginOpaque(string $usernameOrEmail, string $password): LoginResult
     {
         $this->ensureOpen();
         $this->onCredentialChange();
 
-        $srp = Srp::detect();
-        if ($srp === null) {
-            throw NetworkError::fromMessage(
-                'SRP: this PHP runtime has neither ext-gmp nor ext-bcmath, so it cannot perform the ' .
-                'arbitrary-precision arithmetic SRP requires; install one, or use login() instead'
-            );
+        $exchange = Opaque::startLogin($password);
+
+        try {
+            $body = $this->opaqueWorkspaceBody();
+            $body['username_or_email'] = $usernameOrEmail;
+            $body['ke1'] = $exchange->ke1();
+
+            $started = $this->opaqueStart(self::OPAQUE_LOGIN_START_PATH, $body, 'login/start');
+
+            if (!\is_string($started['ke2'] ?? null)) {
+                throw NetworkError::fromMessage('OPAQUE: login/start returned no `ke2`');
+            }
+
+            $ke3 = $exchange->finish($password, $started['ke2'], KsfParams::fromWire($started));
+        } finally {
+            // A no-op once finish() has spent the handle; the point is the paths
+            // where it has not -- a refused KSF, a malformed response.
+            $exchange->close();
         }
 
-        $session = SrpClientSession::begin($srp, SrpGroup::fromWire(self::SRP_OPENING_GROUP));
-        $challenge = $this->srpChallenge($usernameOrEmail, $session);
-
-        // The server named a group other than the one A was computed in, so the exchange has to
-        // restart. Rare — the opening guess is AXIAM's own default — but a tenant on a narrower
-        // group must work rather than fail.
-        $named = SrpGroup::fromWire(\is_string($challenge['group'] ?? null) ? $challenge['group'] : '');
-        if ($named->wireName !== $session->group->wireName) {
-            $session = SrpClientSession::begin($srp, $named);
-            $challenge = $this->srpChallenge($usernameOrEmail, $session);
-        }
-
-        // $challenge['identity'], never $usernameOrEmail (§23.3 rule 2).
-        $identity = \is_string($challenge['identity'] ?? null) ? $challenge['identity'] : '';
-        $saltHex = \is_string($challenge['salt'] ?? null) ? $challenge['salt'] : '';
-        $x = Srp::deriveX(
-            $identity,
-            $password,
-            Srp::hexToBytes($saltHex, 'salt'),
-            SrpKdfParams::fromChallenge($challenge),
-        );
-        $proofs = $session->finish(
-            $identity,
-            $saltHex,
-            \is_string($challenge['b_pub'] ?? null) ? $challenge['b_pub'] : '',
-            $x,
-        );
-
-        $response = $this->post($this->plainHttp, self::SRP_VERIFY_PATH, [
-            'srp_session' => \is_string($challenge['srp_session'] ?? null) ? $challenge['srp_session'] : '',
-            'client_proof' => $proofs->clientProof,
+        $response = $this->post($this->plainHttp, self::OPAQUE_LOGIN_FINISH_PATH, [
+            'opaque_session' => \is_string($started['opaque_session'] ?? null)
+                ? $started['opaque_session']
+                : '',
+            'ke3' => $ke3,
         ]);
+
         $status = $response->getStatusCode();
         if ($status !== 200 && $status !== 202) {
-            throw ErrorMapper::fromResponse($response, 'SRP login failed');
-        }
-
-        $wire = json_decode((string) $response->getBody(), true);
-        $serverProof = \is_array($wire) && \is_string($wire['server_proof'] ?? null)
-            ? $wire['server_proof']
-            : null;
-
-        // Mutual authentication (§23.3 rule 6), checked BEFORE anything from the response is read
-        // back as a session or reported. A rogue server that cannot prove itself must not get the
-        // chance to collect an MFA code either — and the cookies it set are discarded rather than
-        // left in the jar, since there is no trustworthy Set-Cookie to expire them.
-        if (!Srp::verifyServerProof($proofs->expectedServerProof, $serverProof)) {
-            $this->session->cookieJar()->clear();
-            throw new AuthError("SRP: the server failed to prove it holds this account's verifier");
+            throw ErrorMapper::fromResponse($response, 'OPAQUE login/finish failed');
         }
 
         return $this->handleLoginResponse($response);
     }
 
     /**
-     * Opens an SRP exchange and returns the decoded challenge that answers it.
+     * Builds a registration record for `$password`, to send with any request that sets one:
+     * `POST /api/v1/users`, `/auth/password/change`, `/auth/reset/confirm` and
+     * `/admin/bootstrap`.
      *
-     * Reuses {@see self::loginBody()}'s tenant/org resolution so the two login paths cannot drift,
-     * and sends no `password` field — it has no business on this request.
+     * The server cannot build this — it never sees the plaintext — so it has to arrive with the
+     * request or not at all.
+     *
+     * Unlike the `srpEnrollment` it replaces this performs I/O: one `register/start` round trip.
+     * OPAQUE's envelope is sealed under the server's oblivious PRF, so there is no offline
+     * computation that produces a valid record.
+     *
+     * Note the parameters that are gone. There is no `$identity`: the SRP version required the
+     * account's USERNAME, and an email there produced a verifier no login could ever satisfy,
+     * whereas a record binds to a credential identifier the server chooses. And there is no
+     * `$group` or `$params`, because those come from the `register/start` response — a caller
+     * cannot pick a cost the server will not honour.
+     *
+     * @throws NetworkError if the tenant has OPAQUE disabled, if `ext-ffi` or
+     *                      `libaxiam_opaque_ffi` is absent, or if the server names a
+     *                      key-stretching function this SDK cannot ask for
+     */
+    public function opaqueEnrollment(string $password): OpaqueEnrollment
+    {
+        $this->ensureOpen();
+
+        $exchange = Opaque::startRegistration($password);
+
+        try {
+            $body = $this->opaqueWorkspaceBody();
+            $body['registration_request'] = $exchange->request();
+
+            $started = $this->opaqueStart(
+                self::OPAQUE_REGISTER_START_PATH,
+                $body,
+                'register/start'
+            );
+
+            $record = $exchange->finish(
+                $password,
+                \is_string($started['registration_response'] ?? null)
+                    ? $started['registration_response']
+                    : '',
+                KsfParams::fromWire($started),
+            );
+        } finally {
+            $exchange->close();
+        }
+
+        return new OpaqueEnrollment(
+            \is_string($started['opaque_session'] ?? null) ? $started['opaque_session'] : '',
+            $record,
+        );
+    }
+
+    /**
+     * Whether this installation can perform OPAQUE (§23.2).
+     *
+     * PHP remains the AXIAM SDK language where this genuinely answers `false` — but for a
+     * different and simpler reason than before. The SRP equivalent was `false` when neither
+     * `ext-gmp` nor `ext-bcmath` was present, and even a `true` there did not promise every
+     * tenant would work: an `argon2id` tenant was refused at login time, because no PHP runtime
+     * offers Argon2id with a caller-supplied salt. That second condition is gone. The key
+     * stretching happens inside `libaxiam_opaque_ffi`, so a `true` here means every tenant works.
+     */
+    public function opaqueAvailable(): bool
+    {
+        return Opaque::available();
+    }
+
+    /**
+     * Sends one `/start` request and returns the decoded response.
+     *
+     * Shared by both OPAQUE paths so the meaning of a failure cannot drift between them. A `404`
+     * is a property of the tenant ("OPAQUE is off here"), not of the user and not of the
+     * credentials — so it is a {@see NetworkError} a caller can fall back on, never an
+     * {@see AuthError} that would be shown as "invalid password".
+     *
+     * @param array<string,mixed> $body
      *
      * @return array<string,mixed>
      */
-    private function srpChallenge(string $usernameOrEmail, SrpClientSession $session): array
+    private function opaqueStart(string $path, array $body, string $what): array
     {
-        $body = $this->loginBody($usernameOrEmail, '');
-        unset($body['password']);
-        $body['client_public'] = $session->clientPublic;
+        $response = $this->postAllowingErrorStatus($path, $body);
 
-        // Posted with http_errors off so the 404 below can be recognised for what it is: Guzzle's
-        // default would throw first, and every 4xx would arrive as the same mapped exception.
-        $response = $this->postAllowingErrorStatus(self::SRP_CHALLENGE_PATH, $body);
         if ($response->getStatusCode() === 404) {
-            // 404 is a property of the tenant ("SRP is off here"), not of the user, and not a
-            // credential failure — so a caller can fall back to login() without mistaking it for a
-            // bad password.
             throw NetworkError::fromMessage(
-                'SRP: this tenant does not offer Secure Remote Password (srp_mode is disabled); ' .
+                'OPAQUE: this tenant does not offer OPAQUE (opaque_mode is disabled); ' .
                 'use login() instead'
             );
         }
         if ($response->getStatusCode() !== 200) {
-            throw ErrorMapper::fromResponse($response, 'SRP challenge failed');
+            throw ErrorMapper::fromResponse($response, 'OPAQUE ' . $what . ' failed');
         }
 
         $wire = json_decode((string) $response->getBody(), true);
         if (!\is_array($wire)) {
-            throw NetworkError::fromMessage('SRP: the challenge response was not a JSON object');
+            throw NetworkError::fromMessage(
+                'OPAQUE: the ' . $what . ' response was not a JSON object'
+            );
         }
 
         /** @var array<string,mixed> $wire */
@@ -1325,69 +1368,21 @@ final class AxiamClient
     }
 
     /**
-     * Computes a verifier for `$password`, to send with any request that sets one:
-     * `POST /api/v1/users`, `/auth/password/change`, `/auth/reset/confirm` and
-     * `/admin/bootstrap` (§23.3 rule 11).
+     * The tenant/org fields every OPAQUE request carries.
      *
-     * The server cannot compute this — it never sees the plaintext — so it has to arrive with the
-     * request or not at all. The salt is 32 fresh bytes from the platform CSPRNG on every call.
+     * Reuses {@see self::loginBody()}'s resolution so the two login paths cannot drift, then
+     * drops both the password and the username — the password because that absence is the entire
+     * point of the exchange, and the username because `register/start` names no account at all.
+     * The login path puts its own back.
      *
-     * This performs no I/O; it is a method on the client only so it sits beside
-     * {@see self::loginSrp()} in the API.
-     *
-     * @param string      $identity the account's USERNAME — the canonical identity the challenge
-     *                              endpoint hands back. An email here produces a verifier no login
-     *                              can ever satisfy
-     * @param string|null $group    the tenant's group, from `GET /api/v1/auth/me` or the reset
-     *                              context; `null` means AXIAM's default
-     *
-     * @throws NetworkError if this runtime has no bignum extension, or the KDF is one this SDK
-     *                      cannot perform
+     * @return array<string,mixed>
      */
-    public function srpEnrollment(
-        string $identity,
-        string $password,
-        ?string $group = null,
-        ?SrpKdfParams $params = null,
-    ): SrpEnrollment {
-        $srp = Srp::detect();
-        if ($srp === null) {
-            throw NetworkError::fromMessage(
-                'SRP: this PHP runtime has neither ext-gmp nor ext-bcmath, so it cannot compute a ' .
-                'verifier; install one'
-            );
-        }
-
-        $resolvedGroup = SrpGroup::fromWire($group ?? self::SRP_OPENING_GROUP);
-        $resolved = ($params ?? new SrpKdfParams(Srp::KDF_PBKDF2_SHA256, 0))->withDefaults();
-        $salt = Srp::generateSalt();
-        $x = Srp::deriveX($identity, $password, $salt, $resolved);
-
-        return new SrpEnrollment(
-            $resolvedGroup->wireName,
-            $resolved->kdf,
-            $resolved->memoryKib,
-            $resolved->iterations,
-            $resolved->parallelism,
-            bin2hex($salt),
-            $srp->computeVerifier($resolvedGroup, $x),
-        );
-    }
-
-    /**
-     * Whether this SDK build can perform SRP (§23.1, §23.8).
-     *
-     * PHP is the one AXIAM SDK language where this genuinely answers `false`: it has no native
-     * bignum, and neither `ext-gmp` nor `ext-bcmath` is guaranteed present. It reports `false`
-     * rather than throwing, so an application can choose a login path before attempting one.
-     *
-     * A `true` here does **not** promise every tenant will work: the KDF is a per-exchange fact the
-     * server dictates, and a tenant configured for `argon2id` is refused at login time with a
-     * {@see NetworkError} naming it — see {@see self::loginSrp()}.
-     */
-    public function srpAvailable(): bool
+    private function opaqueWorkspaceBody(): array
     {
-        return Srp::detect() !== null;
+        $body = $this->loginBody('', '');
+        unset($body['password'], $body['username_or_email']);
+
+        return $body;
     }
 
     // ------------------------------------------------------------------
@@ -1484,9 +1479,9 @@ final class AxiamClient
      * `POST` that returns the response whatever its status, instead of throwing on 4xx/5xx.
      *
      * Guzzle's default `http_errors` turns every error status into the same exception shape, which
-     * is fine everywhere the status does not change the meaning. It does here: §23.5 gives `404` a
-     * specific, non-error meaning on the challenge endpoint ("this tenant has SRP disabled"), and
-     * that has to be told apart from a genuine transport failure.
+     * is fine everywhere the status does not change the meaning. It does here: §23 gives `404` a
+     * specific, non-error meaning on the OPAQUE `/start` endpoints ("this tenant has OPAQUE
+     * disabled"), and that has to be told apart from a genuine transport failure.
      *
      * @param array<string,mixed> $body
      */

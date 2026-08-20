@@ -23,4 +23,19 @@ parameters:
         # exist at runtime but cannot be autoloaded here. It also stops PHPStan from
         # analysing the stub as if it were source.
         - stubs/grpc.stub.php
+    ignoreErrors:
+        # FFI dispatches every C function through __call at runtime, so the twelve
+        # entry points cdef'd in FfiOpaqueNative are, to static analysis, calls to
+        # methods FFI does not declare. There is nothing to stub: they exist only
+        # once FFI::cdef() has parsed the declarations, which happens at run time
+        # and only where libaxiam_opaque_ffi is installed.
+        #
+        # Deliberately scoped to that one file and that one message. This is also
+        # the reason FfiOpaqueNative is the thinnest class in src/Opaque: the code
+        # PHPStan cannot see should be as small as the job allows, and everything
+        # above it — exchange lifecycle, KSF selection, error mapping — is behind
+        # OpaqueNativeInterface, fully analysed and fully tested against a fake.
+        -
+            message: '#^Call to an undefined method FFI::axiam_opaque_[a-z0-9_]+\(\)\.$#'
+            path: src/Opaque/FfiOpaqueNative.php
     treatPhpDocTypesAsCertain: false
