@@ -48,7 +48,11 @@ jobs:
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2.37.2
         with:
           php-version: '8.2'
-          extensions: sodium
+          # gmp and bcmath back the §23 SRP client (CONTRACT.md §23.8). Both are
+          # listed rather than one: they are two independent implementations of the
+          # same BigIntBackend, and the tests exercise each in turn — a bug in the
+          # one this job did not install would otherwise ship untested.
+          extensions: sodium, gmp, bcmath
           coverage: none
 
       # SC#5: composer validate + install + the full PHPUnit suite — SC#2
@@ -222,7 +226,11 @@ jobs:
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240  # v2.37.2
         with:
           php-version: '8.2'
-          extensions: sodium
+          # gmp and bcmath back the §23 SRP client (CONTRACT.md §23.8). Both are
+          # listed rather than one: they are two independent implementations of the
+          # same BigIntBackend, and the tests exercise each in turn — a bug in the
+          # one this job did not install would otherwise ship untested.
+          extensions: sodium, gmp, bcmath
           coverage: none
 
       - name: composer validate --strict (manifest must be publishable)
