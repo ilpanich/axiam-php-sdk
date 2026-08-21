@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-alpha34] - 2026-08-21
+
+### Added
+
+- Replace SRP-6a with OPAQUE (RFC 9807), CONTRACT §23
+
+### Changed
+
+- Link to the AXIAM platform documentation site
+- Re-vendor openapi.json at alpha32 (#43)
+- Give every new public member a docblock
+- Give the fake login response the user.id a 200 requires
+
+### Fixed
+
+- Let the PHPStan ignore match axiam_opaque_ksf_argon2id
+- Make PHPStan level 6 pass on the FFI binding
+
 ## [Unreleased]
 
 ### Added
