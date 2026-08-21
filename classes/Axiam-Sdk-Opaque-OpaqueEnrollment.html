@@ -96,12 +96,12 @@
                                         <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-srp.html">Srp</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-opaque.html">Opaque</a></li>
     </ul>
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    SrpProofs
+    OpaqueEnrollment
 
     
             <div class="phpdocumentor-element__package">
@@ -122,18 +122,24 @@
 </div>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Srp/SrpProofs.php"><a href="files/src-srp-srpproofs.html"><abbr title="src/Srp/SrpProofs.php">SrpProofs.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Opaque/OpaqueEnrollment.php"><a href="files/src-opaque-opaqueenrollment.html"><abbr title="src/Opaque/OpaqueEnrollment.php">OpaqueEnrollment.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">14</span>
+    <span class="phpdocumentor-element-found-in__line">21</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">The two proofs an SRP exchange produces (CONTRACT.md §23.2).</p>
+            <p class="phpdocumentor-summary">The `opaque` object CONTRACT.md §23 defines: a registration record and the server-issued
+session handle that identifies the exchange it came from.</p>
 
 
-    <section class="phpdocumentor-description"><p><abbr title="\Axiam\Sdk\Srp\self::$clientProof">self::$clientProof</abbr> goes on the verify request. <abbr title="\Axiam\Sdk\Srp\self::$expectedServerProof">self::$expectedServerProof</abbr> stays
-here and is compared against the response's <code class="prettyprint">server_proof</code>: that comparison is the half of SRP
-that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p>
+    <section class="phpdocumentor-description"><p>The server cannot build this — it never sees the plaintext — so any request that <strong>sets</strong> a
+password has to carry it: <code class="prettyprint">POST /api/v1/users</code>, <code class="prettyprint">/auth/password/change</code>,
+<code class="prettyprint">/auth/reset/confirm</code> and <code class="prettyprint">/admin/bootstrap</code>.</p>
+<p>Note what is <em>not</em> here. The SRP enrolment this replaces carried a salt, a group and a full set
+of KDF costs, and required the account's canonical username — passing an email produced a
+verifier no login could ever satisfy, and renaming a user invalidated their verifier outright.
+A record binds to a credential identifier the server chooses, and the key-stretching parameters
+are the server's, so there is nothing here a caller can get wrong.</p>
 </section>
 
 
@@ -142,7 +148,7 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -156,37 +162,44 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
 
 <h4 id="toc-properties">
     Properties
-    <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Srp-SrpProofs.html#property_clientProof">$clientProof</a>
+    <a class="" href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#property_opaqueSession">$opaqueSession</a>
     <span>
                         &nbsp;: string            </span>
 </dt>
-<dd>`M1`, lowercase hex.</dd>
+<dd>The handle `register/start` issued.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Srp-SrpProofs.html#property_expectedServerProof">$expectedServerProof</a>
+    <a class="" href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#property_registrationRecord">$registrationRecord</a>
     <span>
                         &nbsp;: string            </span>
 </dt>
-<dd>The `M2` the server must return.</dd>
+<dd>The hex `RegistrationRecord`.</dd>
 
     </dl>
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Srp-SrpProofs.html#method___construct">__construct()</a>
+    <a class="" href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#method___construct">__construct()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#method_toWire">toWire()</a>
+    <span>
+                                &nbsp;: array{opaque_session: string, registration_record: string}    </span>
+</dt>
+<dd>This enrolment as the array the password-setting endpoints accept as their `opaque` member.</dd>
 
     </dl>
 
@@ -198,7 +211,7 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
     <section class="phpdocumentor-properties">
         <h3 class="phpdocumentor-elements__header" id="properties">
             Properties
-            <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -208,27 +221,27 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
             -public
                                                 -read-only                    "
 >
-    <h4 class="phpdocumentor-element__name" id="property_clientProof">
-        $clientProof
-        <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#property_clientProof" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="property_opaqueSession">
+        $opaqueSession
+        <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#property_opaqueSession" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Srp/SrpProofs.php"><a href="files/src-srp-srpproofs.html"><abbr title="src/Srp/SrpProofs.php">SrpProofs.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Opaque/OpaqueEnrollment.php"><a href="files/src-opaque-opaqueenrollment.html"><abbr title="src/Opaque/OpaqueEnrollment.php">OpaqueEnrollment.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">18</span>
+    <span class="phpdocumentor-element-found-in__line">25</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">`M1`, lowercase hex.</p>
+        <p class="phpdocumentor-summary">The handle `register/start` issued.</p>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
         <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__type">string</span>
-    <span class="phpdocumentor-signature__name">$clientProof</span>
+    <span class="phpdocumentor-signature__name">$opaqueSession</span>
     </code>
 
     
@@ -246,27 +259,27 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
             -public
                                                 -read-only                    "
 >
-    <h4 class="phpdocumentor-element__name" id="property_expectedServerProof">
-        $expectedServerProof
-        <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#property_expectedServerProof" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="property_registrationRecord">
+        $registrationRecord
+        <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#property_registrationRecord" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Srp/SrpProofs.php"><a href="files/src-srp-srpproofs.html"><abbr title="src/Srp/SrpProofs.php">SrpProofs.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Opaque/OpaqueEnrollment.php"><a href="files/src-opaque-opaqueenrollment.html"><abbr title="src/Opaque/OpaqueEnrollment.php">OpaqueEnrollment.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">20</span>
+    <span class="phpdocumentor-element-found-in__line">27</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The `M2` the server must return.</p>
+        <p class="phpdocumentor-summary">The hex `RegistrationRecord`.</p>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
         <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__type">string</span>
-    <span class="phpdocumentor-signature__name">$expectedServerProof</span>
+    <span class="phpdocumentor-signature__name">$registrationRecord</span>
     </code>
 
     
@@ -282,7 +295,7 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -293,20 +306,20 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
 >
     <h4 class="phpdocumentor-element__name" id="method___construct">
         __construct()
-        <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Srp/SrpProofs.php"><a href="files/src-srp-srpproofs.html"><abbr title="src/Srp/SrpProofs.php">SrpProofs.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Opaque/OpaqueEnrollment.php"><a href="files/src-opaque-opaqueenrollment.html"><abbr title="src/Opaque/OpaqueEnrollment.php">OpaqueEnrollment.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">16</span>
+    <span class="phpdocumentor-element-found-in__line">23</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientProof</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedServerProof</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$opaqueSession</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$registrationRecord</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -315,14 +328,14 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$clientProof</span>
+                <span class="phpdocumentor-argument-list__argument__name">$opaqueSession</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$expectedServerProof</span>
+                <span class="phpdocumentor-argument-list__argument__name">$registrationRecord</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -335,6 +348,45 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
         
     
     
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_toWire">
+        toWire()
+        <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#method_toWire" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Opaque/OpaqueEnrollment.php"><a href="files/src-opaque-opaqueenrollment.html"><abbr title="src/Opaque/OpaqueEnrollment.php">OpaqueEnrollment.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">36</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">This enrolment as the array the password-setting endpoints accept as their `opaque` member.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">toWire</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{opaque_session: string, registration_record: string}</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{opaque_session: string, registration_record: string}</span>
+            </section>
+
 </article>
             </section>
 
@@ -350,23 +402,24 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                            <li><a href="classes/Axiam-Sdk-Srp-SrpProofs.html#toc-properties">Properties</a></li>
-                                                            <li><a href="classes/Axiam-Sdk-Srp-SrpProofs.html#toc-methods">Methods</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#toc-properties">Properties</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/Axiam-Sdk-Srp-SrpProofs.html#property_clientProof">$clientProof</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Srp-SrpProofs.html#property_expectedServerProof">$expectedServerProof</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#property_opaqueSession">$opaqueSession</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#property_registrationRecord">$registrationRecord</a></li>
                                             </ul>
                 </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Axiam-Sdk-Srp-SrpProofs.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#method_toWire">toWire()</a></li>
                                     </ul>
             </li>
                     </ul>
@@ -386,7 +439,7 @@ that authenticates the <em>server</em>, and §23.3 rule 6 makes it mandatory.</p
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Srp-SrpProofs.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Opaque-OpaqueEnrollment.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

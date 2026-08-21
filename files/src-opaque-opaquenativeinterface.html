@@ -94,17 +94,21 @@
             <div class="phpdocumentor-column -nine phpdocumentor-content">
                                 <section>
                                         <ul class="phpdocumentor-breadcrumbs">
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -namespace">
-        <h2 class="phpdocumentor-content__title">Srp</h2>
+    <article class="phpdocumentor-element -file">
+        <h2 class="phpdocumentor-content__title">OpaqueNativeInterface.php</h2>
+
+        
+        
+        
+        
+
 
         
 <h3 id="toc">
     Table of Contents
-    <a href="namespaces/axiam-sdk-srp.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/src-opaque-opaquenativeinterface.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -112,20 +116,13 @@
 
     <h4 id="toc-interfaces">
         Interfaces
-        <a href="namespaces/axiam-sdk-srp.html#toc-interfaces" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="files/src-opaque-opaquenativeinterface.html#toc-interfaces" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -interface"><a href="classes/Axiam-Sdk-Srp-BigIntBackend.html"><abbr title="\Axiam\Sdk\Srp\BigIntBackend">BigIntBackend</abbr></a></dt><dd>The arbitrary-precision arithmetic SRP needs, behind an interface.</dd>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -interface"><a href="classes/Axiam-Sdk-Opaque-OpaqueNativeInterface.html"><abbr title="\Axiam\Sdk\Opaque\OpaqueNativeInterface">OpaqueNativeInterface</abbr></a></dt><dd>The `libaxiam_opaque_ffi` C ABI, expressed in PHP terms.</dd>    </dl>
 
-    <h4 id="toc-classes">
-        Classes
-        <a href="namespaces/axiam-sdk-srp.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
 
-    </h4>
-    <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-BcMathBackend.html"><abbr title="\Axiam\Sdk\Srp\BcMathBackend">BcMathBackend</abbr></a></dt><dd>{@see BigIntBackend} over `ext-bcmath` — the fallback when `ext-gmp` is absent.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-GmpBackend.html"><abbr title="\Axiam\Sdk\Srp\GmpBackend">GmpBackend</abbr></a></dt><dd>{@see BigIntBackend} over `ext-gmp` — the preferred backend.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-Srp.html"><abbr title="\Axiam\Sdk\Srp\Srp">Srp</abbr></a></dt><dd>SRP-6a protocol arithmetic (CONTRACT.md §23).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-SrpClientSession.html"><abbr title="\Axiam\Sdk\Srp\SrpClientSession">SrpClientSession</abbr></a></dt><dd>One SRP exchange&#039;s client half: the ephemeral secret `a` held between the challenge request and
-the proof that answers it (CONTRACT.md §23.2).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-SrpEnrollment.html"><abbr title="\Axiam\Sdk\Srp\SrpEnrollment">SrpEnrollment</abbr></a></dt><dd>The `srp` object CONTRACT.md §23.5 defines: a verifier and the parameters it was computed under.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-SrpGroup.html"><abbr title="\Axiam\Sdk\Srp\SrpGroup">SrpGroup</abbr></a></dt><dd>The RFC 5054 Appendix A groups AXIAM speaks (CONTRACT.md §23.4).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-SrpKdfParams.html"><abbr title="\Axiam\Sdk\Srp\SrpKdfParams">SrpKdfParams</abbr></a></dt><dd>The KDF and cost the server dictates for one SRP exchange (CONTRACT.md §23.5).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Srp-SrpProofs.html"><abbr title="\Axiam\Sdk\Srp\SrpProofs">SrpProofs</abbr></a></dt><dd>The two proofs an SRP exchange produces (CONTRACT.md §23.2).</dd>    </dl>
 
 
 
@@ -149,9 +146,8 @@ the proof that answers it (CONTRACT.md §23.2).</dd>            <dt class="phpdo
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="namespaces/axiam-sdk-srp.html#toc-interfaces">Interfaces</a></li>
-                                                            <li><a href="namespaces/axiam-sdk-srp.html#toc-classes">Classes</a></li>
-                                                                                                                    </ul>
+                                                                                    <li><a href="files/src-opaque-opaquenativeinterface.html#toc-interfaces">Interfaces</a></li>
+                                                                                                                                        </ul>
             </li>
 
             
@@ -172,7 +168,7 @@ the proof that answers it (CONTRACT.md §23.2).</dd>            <dt class="phpdo
     </section>
 </section>
         </div>
-        <a href="namespaces/axiam-sdk-srp.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/src-opaque-opaquenativeinterface.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 
