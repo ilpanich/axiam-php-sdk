@@ -106,25 +106,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - §20 UMA 2.0 — Protection API and ticket grant (#26)
 - §16 retry, §17 memo, §18 close(), §19 telemetry + config_clamped (D5) (#24)
 - Device grant, token exchange, logout helpers; contract re-sync (D6) (#23)
-
-### Changed
-
-- Add a codegen drift gate for the committed gRPC stubs (D-03)
-- Re-vendor CONTRACT.md 1.19, openapi.json and proto/ from main (R5.8) (#35)
-- R5.7 — §9 refresh-result sharing under concurrency (F-06), AuthError parameter order (F-18), §12.3 rule 3 invariant (F-14) (#34)
-- Contract 1.15 — §10.1 rule 9, sender-constrained access tokens (#32)
-- Retire the "measured residual" justification (contract 1.14)
-- Re-sync to contract 1.14 (#302 closed)
-
-### Fixed
-
-- §15.7 — Sensitive exposes via reveal(), not expose()
-- Route checkAccess/can/batchCheck through the instrumented path (F3) (#25)
-
-## [Unreleased]
-
-### Added
-
 - **CONTRACT.md §22 — Reactors, the AMQP extension actors (contract 1.18/1.19; remediation
   R2.5).**
 
@@ -182,80 +163,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   descriptive prose.
 
   Not breaking: nothing existing moved, and `Axiam\Sdk\Amqp\Consumer` is untouched.
-
-### Changed
-
-- Re-vendor `openapi.json` at 1.0.0-alpha27 — the copy was pinned at alpha26 and
-  failing the cross-repo artifact-drift gate
-- **`AuthError::__construct()` parameter order corrected — `$reason` moves from second to
-  last (conformance-review F-18, remediation R5.7).**
-
-  New signature: `__construct(string $message, ?\Throwable $previous = null, ?string
-  $reason = null)`. Previously `$reason` sat second, ahead of `$previous`.
-
-  **This is a source-level break, and calling it non-breaking would be wrong.** Any code
-  that wrote `new AuthError($message, 'token_expired')` positionally must now write
-  `new AuthError($message, reason: 'token_expired')`; from `1.0.0-alpha19` up to this
-  release that positional form was the documented one. It is being changed rather than
-  kept because the alternative is worse and permanent: before §12, `AuthError` had no
-  constructor of its own and inherited `RuntimeException`'s, so second-position meant the
-  cause for the class's whole prior life, and `new AuthError($msg, $previous)` — the shape
-  this SDK's own `NetworkError` still uses — silently became a `TypeError`. Fixing the
-  order now, at `1.0.0-alpha*`, costs one mechanical edit per call site; leaving it costs
-  a permanently surprising constructor. Six call sites inside this SDK were updated
-  (`JwksVerifier`, `IdTokenValidator`); `AuthErrorParameterOrderTest` locks the order so a
-  future additive parameter is appended rather than inserted.
-
-  `getReason()`, `getPrevious()`, `getMessage()`, the class hierarchy, and
-  `OAuthProtocolError` are all unchanged, so every `catch (AuthError $e)` block and every
-  reader of these accessors is unaffected.
-
-- **The §12.3 rule 3 invariant is now named at the transport seam** (conformance-review
-  F-14, remediation R5.7). A 401 from `/oauth2/*` stays out of the §9 refresh guard
-  because no 401→refresh interceptor sits on the transport §12 uses — an invariant kept
-  by *absence*, which nothing in the type system re-checks. `AxiamClient`'s OIDC seam now
-  spells out the two edits that would silently break it (pushing `RefreshMiddleware` onto
-  `$plainStack`; handing `OidcEngine` the `$authzHttp` client) and points at the two
-  regression tests that guard it. Those tests previously inferred "no refresh happened"
-  from a `MockHandler` "queue is empty" error; they now assert zero
-  `/api/v1/auth/refresh` calls against the transaction log directly. No behaviour change.
-
-### Fixed
-
-- **`oidcRefresh()`: a waiting caller no longer destroys the in-flight refresh it is
-  waiting for (CONTRACT.md §9 rules 1/2, conformance-review F-06, remediation R5.7).**
-
-  1.0.0-alpha19 taught `Session::refreshGuard()` to tell same-operation contention apart
-  from cross-operation contention, so a second concurrent `oidcRefresh` stopped issuing
-  its own token request. It then awaited the leader's outcome with
-  `PromiseInterface::wait()` — which is not a wait at all. Guzzle's `wait()` *drives* a
-  promise: it takes the underlying wait function, nulls it, and runs it. The leader had
-  already consumed it, so the waiter's `wait()` found a pending promise with no wait
-  function and **rejected the leader's promise** ("Cannot wait on a promise that has no
-  internal wait function"). Every caller in the burst failed, and because the rejection
-  ran the guard's clear-on-both-paths bookkeeping, the slot was freed while the leader's
-  request was still on the wire — so the next caller started a second
-  `POST /oauth2/token` with a refresh token the leader had already spent. Single-use
-  rotation makes that a replay, not a retry.
-
-  Waiters now use the new `RefreshGuard::join()`, which *observes* the shared promise
-  (register a callback, drain Guzzle's task queue, yield to the scheduler) instead of
-  driving it, and re-raises the leader's failure as `AuthError` for every waiter. Only
-  the leader — the `ran === true` caller — calls `wait()`. Bounded per §9 rule 5:
-  exhausting the wait raises `AuthError` rather than returning a stale token set.
-
-  Reachable only on a concurrent runtime (Fibers, Swoole, RoadRunner); vanilla
-  synchronous PHP has no second caller. Additive and non-breaking — no public signature
-  changed.
-
-- **§9's per-operation burst test now exists for `oidcRefresh`** (`OidcRefreshBurstTest`):
-  five concurrent callers, each in its own `Fiber`, against a transport that suspends the
-  caller mid-request, asserting exactly **one** `/oauth2/token` wire call and that all
-  five receive that one call's access token — plus the failure half of rule 2 (one failed
-  call, five `AuthError`s, still one wire call). It fails against the previous release.
-
-### Added
-
 - **CONTRACT.md §10.1 rule 9 extended for DPoP, and §21.7.2 proof verification
   implemented (contract 1.16/1.17).**
 
@@ -305,56 +212,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **CONTRACT.md §21** — the FAPI 2.0 posture as an SDK sees it. Only rule 9 is normative
   for this SDK.
-
-### Changed
-
-- **Re-sync vendored `CONTRACT.md` / `openapi.json` to contract 1.15.**
-
-
-### Changed
-
-- **Re-sync vendored `CONTRACT.md` to contract 1.14** — documentation only, no code change.
-  §20.2 rule 6 (a permission ticket MUST NOT be retried) cited a "measured residual
-  (ilpanich/axiam#302) … roughly 1 in 640" as its second reason. That residual is closed: the
-  server now decides the ticket race with a transaction its storage engine arbitrates plus a
-  redemption nonce read back after the commit. **The rule is unchanged, and this SDK's
-  behaviour is unchanged** — `uma_exchange_ticket` stays excluded from every automatic retry
-  path. What changed is the reasoning: the first reason (a spent ticket makes the retry
-  useless) always stood alone, and the second now rests on what an SDK can actually know —
-  it is talking to a server whose storage engine it cannot attest, and the guarantee is
-  conditional on that engine being persistent.
-- **BREAKING (contract 1.13): `tokenExchange`'s `$subjectTokenType` is now required, and moves
-  from last to second** in the signature.
-
-  It shipped optional and last — last precisely so existing positional callers were unaffected.
-  That satisfied §15.7's "never inspect the subject token" while leaving the rule it serves
-  unenforced: an optional parameter with a default *is* a default the SDK applies whenever the
-  caller says nothing. §15.1 now makes it required.
-
-  **Making it required breaks positional callers anyway, so it may as well sit where the
-  contract puts it** — second, next to the `$subjectToken` it describes, matching the other ten
-  SDKs. The reason for the old placement expired with the default.
-
-  PHP refuses a call that omits it (`ArgumentCountError`, before any SDK code runs). The case
-  the signature cannot catch is a **blank** string — the shape a config-driven caller produces
-  — so that is refused client-side with no wire call, naming both constants. Both are asserted.
-
-  **Migration** — pass it second, or by name:
-
-  ```php
-  $exchanged = $client->tokenExchange(
-      subjectToken: $userToken,
-      subjectTokenType: OidcClient::ACCESS_TOKEN_TYPE, // <- add this
-      scopes: ['orders:read'],
-  );
-  ```
-
-  This closes a gap rather than opening one: `subject_token_type` has always been required *on
-  the wire*, and the SDK was covering for that with a constant which stopped being the only
-  legal value when X4 landed.
-
-### Added
-
 - **§15.7 external-IdP subject tokens (X4).** `tokenExchange()` can now exchange a token minted
   by a trusted external IdP — a partner's Entra, Okta or Keycloak — for an AXIAM token scoped to
   what the resolved AXIAM user may actually do. No new operation: the same method, plus a
@@ -444,6 +301,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Add a codegen drift gate for the committed gRPC stubs (D-03)
+- Re-vendor CONTRACT.md 1.19, openapi.json and proto/ from main (R5.8) (#35)
+- R5.7 — §9 refresh-result sharing under concurrency (F-06), AuthError parameter order (F-18), §12.3 rule 3 invariant (F-14) (#34)
+- Contract 1.15 — §10.1 rule 9, sender-constrained access tokens (#32)
+- Retire the "measured residual" justification (contract 1.14)
+- Re-sync to contract 1.14 (#302 closed)
+- Re-vendor `openapi.json` at 1.0.0-alpha27 — the copy was pinned at alpha26 and
+  failing the cross-repo artifact-drift gate
+- **`AuthError::__construct()` parameter order corrected — `$reason` moves from second to
+  last (conformance-review F-18, remediation R5.7).**
+
+  New signature: `__construct(string $message, ?\Throwable $previous = null, ?string
+  $reason = null)`. Previously `$reason` sat second, ahead of `$previous`.
+
+  **This is a source-level break, and calling it non-breaking would be wrong.** Any code
+  that wrote `new AuthError($message, 'token_expired')` positionally must now write
+  `new AuthError($message, reason: 'token_expired')`; from `1.0.0-alpha19` up to this
+  release that positional form was the documented one. It is being changed rather than
+  kept because the alternative is worse and permanent: before §12, `AuthError` had no
+  constructor of its own and inherited `RuntimeException`'s, so second-position meant the
+  cause for the class's whole prior life, and `new AuthError($msg, $previous)` — the shape
+  this SDK's own `NetworkError` still uses — silently became a `TypeError`. Fixing the
+  order now, at `1.0.0-alpha*`, costs one mechanical edit per call site; leaving it costs
+  a permanently surprising constructor. Six call sites inside this SDK were updated
+  (`JwksVerifier`, `IdTokenValidator`); `AuthErrorParameterOrderTest` locks the order so a
+  future additive parameter is appended rather than inserted.
+
+  `getReason()`, `getPrevious()`, `getMessage()`, the class hierarchy, and
+  `OAuthProtocolError` are all unchanged, so every `catch (AuthError $e)` block and every
+  reader of these accessors is unaffected.
+
+- **The §12.3 rule 3 invariant is now named at the transport seam** (conformance-review
+  F-14, remediation R5.7). A 401 from `/oauth2/*` stays out of the §9 refresh guard
+  because no 401→refresh interceptor sits on the transport §12 uses — an invariant kept
+  by *absence*, which nothing in the type system re-checks. `AxiamClient`'s OIDC seam now
+  spells out the two edits that would silently break it (pushing `RefreshMiddleware` onto
+  `$plainStack`; handing `OidcEngine` the `$authzHttp` client) and points at the two
+  regression tests that guard it. Those tests previously inferred "no refresh happened"
+  from a `MockHandler` "queue is empty" error; they now assert zero
+  `/api/v1/auth/refresh` calls against the transaction log directly. No behaviour change.
+- **Re-sync vendored `CONTRACT.md` / `openapi.json` to contract 1.15.**
+- **Re-sync vendored `CONTRACT.md` to contract 1.14** — documentation only, no code change.
+  §20.2 rule 6 (a permission ticket MUST NOT be retried) cited a "measured residual
+  (ilpanich/axiam#302) … roughly 1 in 640" as its second reason. That residual is closed: the
+  server now decides the ticket race with a transaction its storage engine arbitrates plus a
+  redemption nonce read back after the commit. **The rule is unchanged, and this SDK's
+  behaviour is unchanged** — `uma_exchange_ticket` stays excluded from every automatic retry
+  path. What changed is the reasoning: the first reason (a spent ticket makes the retry
+  useless) always stood alone, and the second now rests on what an SDK can actually know —
+  it is talking to a server whose storage engine it cannot attest, and the guarantee is
+  conditional on that engine being persistent.
+- **BREAKING (contract 1.13): `tokenExchange`'s `$subjectTokenType` is now required, and moves
+  from last to second** in the signature.
+
+  It shipped optional and last — last precisely so existing positional callers were unaffected.
+  That satisfied §15.7's "never inspect the subject token" while leaving the rule it serves
+  unenforced: an optional parameter with a default *is* a default the SDK applies whenever the
+  caller says nothing. §15.1 now makes it required.
+
+  **Making it required breaks positional callers anyway, so it may as well sit where the
+  contract puts it** — second, next to the `$subjectToken` it describes, matching the other ten
+  SDKs. The reason for the old placement expired with the default.
+
+  PHP refuses a call that omits it (`ArgumentCountError`, before any SDK code runs). The case
+  the signature cannot catch is a **blank** string — the shape a config-driven caller produces
+  — so that is refused client-side with no wire call, naming both constants. Both are asserted.
+
+  **Migration** — pass it second, or by name:
+
+  ```php
+  $exchanged = $client->tokenExchange(
+      subjectToken: $userToken,
+      subjectTokenType: OidcClient::ACCESS_TOKEN_TYPE, // <- add this
+      scopes: ['orders:read'],
+  );
+  ```
+
+  This closes a gap rather than opening one: `subject_token_type` has always been required *on
+  the wire*, and the SDK was covering for that with a constant which stopped being the only
+  legal value when X4 landed.
 - Re-vendored `CONTRACT.md` at **1.10** and `openapi.json` (the server's `/uma2/*` surface).
 - `login`, `verifyMfa`, `refresh` and `logout` clear the decision memo (§17.1 rule 9) and
   reject after close (§18.1 rule 4).
@@ -454,50 +391,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   credential". The Protection API needs exactly that, because §20.2 rule 1 forbids falling
   back to the session token when a PAT was asked for.
 
+### Fixed
+
+- §15.7 — Sensitive exposes via reveal(), not expose()
+- Route checkAccess/can/batchCheck through the instrumented path (F3) (#25)
+- **`oidcRefresh()`: a waiting caller no longer destroys the in-flight refresh it is
+  waiting for (CONTRACT.md §9 rules 1/2, conformance-review F-06, remediation R5.7).**
+
+  1.0.0-alpha19 taught `Session::refreshGuard()` to tell same-operation contention apart
+  from cross-operation contention, so a second concurrent `oidcRefresh` stopped issuing
+  its own token request. It then awaited the leader's outcome with
+  `PromiseInterface::wait()` — which is not a wait at all. Guzzle's `wait()` *drives* a
+  promise: it takes the underlying wait function, nulls it, and runs it. The leader had
+  already consumed it, so the waiter's `wait()` found a pending promise with no wait
+  function and **rejected the leader's promise** ("Cannot wait on a promise that has no
+  internal wait function"). Every caller in the burst failed, and because the rejection
+  ran the guard's clear-on-both-paths bookkeeping, the slot was freed while the leader's
+  request was still on the wire — so the next caller started a second
+  `POST /oauth2/token` with a refresh token the leader had already spent. Single-use
+  rotation makes that a replay, not a retry.
+
+  Waiters now use the new `RefreshGuard::join()`, which *observes* the shared promise
+  (register a callback, drain Guzzle's task queue, yield to the scheduler) instead of
+  driving it, and re-raises the leader's failure as `AuthError` for every waiter. Only
+  the leader — the `ran === true` caller — calls `wait()`. Bounded per §9 rule 5:
+  exhausting the wait raises `AuthError` rather than returning a stale token set.
+
+  Reachable only on a concurrent runtime (Fibers, Swoole, RoadRunner); vanilla
+  synchronous PHP has no second caller. Additive and non-breaking — no public signature
+  changed.
+
+- **§9's per-operation burst test now exists for `oidcRefresh`** (`OidcRefreshBurstTest`):
+  five concurrent callers, each in its own `Fiber`, against a transport that suspends the
+  caller mid-request, asserting exactly **one** `/oauth2/token` wire call and that all
+  five receive that one call's access token — plus the failure half of rule 2 (one failed
+  call, five `AuthError`s, still one wire call). It fails against the previous release.
 
 ## [1.0.0-alpha24] - 2026-08-04
 
 ### Added
 
 - Add AxiamWebhooks::verify signature verifier (CONTRACT §13, T-145)
+- Add the `axiam.expected_issuer` / `AXIAM_EXPECTED_ISSUER` and
+  `axiam.expected_audience` / `AXIAM_EXPECTED_AUDIENCE` configuration (plus the
+  corresponding `AxiamClient` and `JwksVerifier` constructor parameters) — the
+  CONTRACT.md §10.1 rule 5/rule 6 checks. Both are **conditional and default to unset**:
+  with no expectation configured no check is performed at all, and once configured a
+  mismatching — or absent — claim is rejected. No issuer or audience is hardcoded
+  anywhere in this SDK; an app guarding a user-facing resource server should generally
+  expect `axiam:user`. `aud` honours both RFC 7519 shapes (single string, array).
+- Add `JwksVerifier::CLOCK_SKEW_LEEWAY_SECONDS` — the named, bounded 60-second
+  clock-skew constant applied to the `exp`/`nbf` checks (§10.1 rule 7). It is a class
+  constant and is deliberately not operator-configurable.
+- Add the complete §10.1 required negative-test set
+  (`tests/Contract101LocalVerificationTest.php`): expired; no `exp`; non-numeric `exp`;
+  numeric-*string* `exp`; null `exp`; future `nbf`; different tenant; no `tenant_id`; no
+  configured tenant; `alg: none`; a real HS256-signed token bearing an EdDSA key id;
+  issuer and audience mismatch and absent-claim cases; and a case proving a global
+  `JWT::$leeway` cannot widen this SDK's window.
+- **Webhook signature verification (CONTRACT §13, T-145).** New
+  `Axiam\Sdk\Webhook\AxiamWebhooks::verify()` validates the `X-Axiam-Signature` header
+  AXIAM attaches to every webhook delivery: HMAC-SHA256 over `<timestamp>.<raw_body>`,
+  compared in constant time (`hash_equals`) on the decoded bytes, with a two-sided
+  freshness window defaulting to 300 seconds and an injectable clock for testing.
+  Multiple `v1` values are accepted so secret rotation does not drop deliveries; a header
+  carrying no `v1` is always a failure rather than a silent pass. Returns a
+  `WebhookEvent`, or throws `WebhookVerificationException` whose message never contains
+  the secret or the expected signature. Callers MUST pass the raw request body — see the
+  README for the re-serialization caveat.
+- `CONTRACT.md` §13 vendored; conformance statement updated to §1–§13.
 
 ### Changed
 
 - Device (mTLS) tokens now carry aud=axiam:m2m (#22)
 - Service accounts can use login_client_credentials (#21)
 - Bump coverallsapp/github-action from 2.3.6 to 2.3.8
+- Re-sync the vendored `CONTRACT.md` with the new normative §10.1.
 
 ### Fixed
 
 - SEC-085 — request guards must not substitute the client's own session (#20)
 - Enforce the full CONTRACT §10.1 local-verification set
-
-## [Unreleased]
-
-### Security
-
-- **BREAKING (authentication bypass fixed) — `SEC-085`.** The Laravel middleware and the
-  Symfony subscriber verified the inbound request with
-  `AxiamClient::verifyLocallyOrFallback()`. That method is a *client-side* helper: when
-  the supplied token fails verification it refreshes **this application's own session**
-  and verifies **that** token instead, returning its claims. As a request guard it meant
-  a caller presenting an **expired, foreign-tenant, unsigned or outright garbage** token
-  was not rejected — it was admitted and authenticated as the application's own AXIAM
-  principal, typically a **service account** more privileged than the end user whose
-  request it replaced. Every downstream authorization decision then ran under that
-  identity.
-
-  Both guards now call the new `AxiamClient::verifyLocally()`, which applies the full
-  §10.1 set to the caller's token and has **no fallback**. `verifyLocallyOrFallback()`
-  remains for the SDK's own outbound calls, where refreshing the client's own token is
-  the intended recovery, and now documents that it must never be used as a guard.
-
-  This is codified upstream as **CONTRACT.md §10.1 rule 8** ("subject of the decision"):
-  a guard decides on the caller's credential and no other. Requests that were previously
-  admitted under the application's identity will now correctly receive `401`.
-
-### Fixed
-
 - **Slug-vs-UUID tenant comparand now diagnoses itself.** AXIAM access tokens carry the
   tenant **UUID** in `tenant_id`, but this SDK's client is configured with a tenant
   **slug**. A guard handed that slug rejects 100% of traffic — fail-closed and safe, but
@@ -538,40 +512,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   JWKS**, or an application relying on `X-Tenant-ID` to serve multiple tenants from one
   configured client, may start rejecting what it previously accepted. That is the intent.
 
-### Added
+### Security
 
-- Add the `axiam.expected_issuer` / `AXIAM_EXPECTED_ISSUER` and
-  `axiam.expected_audience` / `AXIAM_EXPECTED_AUDIENCE` configuration (plus the
-  corresponding `AxiamClient` and `JwksVerifier` constructor parameters) — the
-  CONTRACT.md §10.1 rule 5/rule 6 checks. Both are **conditional and default to unset**:
-  with no expectation configured no check is performed at all, and once configured a
-  mismatching — or absent — claim is rejected. No issuer or audience is hardcoded
-  anywhere in this SDK; an app guarding a user-facing resource server should generally
-  expect `axiam:user`. `aud` honours both RFC 7519 shapes (single string, array).
-- Add `JwksVerifier::CLOCK_SKEW_LEEWAY_SECONDS` — the named, bounded 60-second
-  clock-skew constant applied to the `exp`/`nbf` checks (§10.1 rule 7). It is a class
-  constant and is deliberately not operator-configurable.
-- Add the complete §10.1 required negative-test set
-  (`tests/Contract101LocalVerificationTest.php`): expired; no `exp`; non-numeric `exp`;
-  numeric-*string* `exp`; null `exp`; future `nbf`; different tenant; no `tenant_id`; no
-  configured tenant; `alg: none`; a real HS256-signed token bearing an EdDSA key id;
-  issuer and audience mismatch and absent-claim cases; and a case proving a global
-  `JWT::$leeway` cannot widen this SDK's window.
-- **Webhook signature verification (CONTRACT §13, T-145).** New
-  `Axiam\Sdk\Webhook\AxiamWebhooks::verify()` validates the `X-Axiam-Signature` header
-  AXIAM attaches to every webhook delivery: HMAC-SHA256 over `<timestamp>.<raw_body>`,
-  compared in constant time (`hash_equals`) on the decoded bytes, with a two-sided
-  freshness window defaulting to 300 seconds and an injectable clock for testing.
-  Multiple `v1` values are accepted so secret rotation does not drop deliveries; a header
-  carrying no `v1` is always a failure rather than a silent pass. Returns a
-  `WebhookEvent`, or throws `WebhookVerificationException` whose message never contains
-  the secret or the expected signature. Callers MUST pass the raw request body — see the
-  README for the re-serialization caveat.
-- `CONTRACT.md` §13 vendored; conformance statement updated to §1–§13.
+- **BREAKING (authentication bypass fixed) — `SEC-085`.** The Laravel middleware and the
+  Symfony subscriber verified the inbound request with
+  `AxiamClient::verifyLocallyOrFallback()`. That method is a *client-side* helper: when
+  the supplied token fails verification it refreshes **this application's own session**
+  and verifies **that** token instead, returning its claims. As a request guard it meant
+  a caller presenting an **expired, foreign-tenant, unsigned or outright garbage** token
+  was not rejected — it was admitted and authenticated as the application's own AXIAM
+  principal, typically a **service account** more privileged than the end user whose
+  request it replaced. Every downstream authorization decision then ran under that
+  identity.
 
-### Changed
+  Both guards now call the new `AxiamClient::verifyLocally()`, which applies the full
+  §10.1 set to the caller's token and has **no fallback**. `verifyLocallyOrFallback()`
+  remains for the SDK's own outbound calls, where refreshing the client's own token is
+  the intended recovery, and now documents that it must never be used as a guard.
 
-- Re-sync the vendored `CONTRACT.md` with the new normative §10.1.
+  This is codified upstream as **CONTRACT.md §10.1 rule 8** ("subject of the decision"):
+  a guard decides on the caller's credential and no other. Requests that were previously
+  admitted under the application's identity will now correctly receive `401`.
 
 ## [1.0.0-alpha23] - 2026-08-02
 
@@ -675,12 +636,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0-alpha10] - 2026-07-18
 
-### Changed
-
-- Maintenance release — no notable changes since v1.0.0-alpha9.
-
-## [Unreleased]
-
 ### Added
 
 - gRPC-only `getUserInfo()` operation (CONTRACT.md §1.1, adopting contract 1.3):
@@ -710,6 +665,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   at construction. The private key is treated as secret material (§7): held behind `Sensitive`,
   materialized only into a `0600` temp file (removed when the client is destroyed), and never
   logged, displayed, or exposed via a getter. Conformance statement updated to note §6.1.
+
+### Changed
+
+- Maintenance release — no notable changes since v1.0.0-alpha9.
 
 ## [1.0.0-alpha2] - 2026-07-16
 
