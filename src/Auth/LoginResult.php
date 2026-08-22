@@ -9,11 +9,18 @@ use Axiam\Sdk\Core\Sensitive;
 /**
  * Result of `AxiamClient::login()` (CONTRACT.md §1, D-09).
  *
- * A readonly DTO — never thrown as an exception. Callers MUST check
- * {@see self::$mfaRequired} before assuming a fully-authenticated session was
- * established: when `true`, `$challengeToken` carries the opaque MFA challenge token
- * to pass to `verifyMfa()`; when `false`, `$userId`/`$tenantId` describe the
- * authenticated principal and `$challengeToken` is `null`.
+ * A readonly DTO — never thrown as an exception. **Three outcomes, not two.** Callers
+ * MUST check both {@see self::$mfaRequired} and {@see self::$mfaSetupRequired} before
+ * assuming a fully-authenticated session was established:
+ *
+ * - `$mfaRequired` — `$challengeToken` carries the opaque MFA challenge token to pass to
+ *   `verifyMfa()`.
+ * - `$mfaSetupRequired` (CONTRACT.md §25.2 rule 1) — the tenant requires MFA and this
+ *   account has no factor yet, and `$setupToken` carries the token to pass to
+ *   `mfaSetupEnroll()`/`mfaSetupConfirm()`. Not a failure, and not a session either: a
+ *   client that only branches on `$mfaRequired` reports a successful login that has no
+ *   session the moment a tenant turns required MFA on.
+ * - neither — `$userId`/`$tenantId` describe the authenticated principal.
  *
  * Any token-carrying field MUST be typed {@see Sensitive} (CONTRACT.md §7 blanket
  * rule, mirrors the Java SDK's 20-03 `challengeToken` decision) — no raw token string
@@ -26,6 +33,8 @@ final readonly class LoginResult
         public ?Sensitive $challengeToken = null,
         public ?string $userId = null,
         public ?string $tenantId = null,
+        public bool $mfaSetupRequired = false,
+        public ?Sensitive $setupToken = null,
     ) {
     }
 }
