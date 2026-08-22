@@ -39,6 +39,7 @@ final class OidcConfiguration
      * @param list<string> $claims_supported Claims the server may include in an ID token.
      * @param list<string> $grant_types_supported Grant types the token endpoint supports.
      * @param string|null $device_authorization_endpoint RFC 8628 device authorization endpoint, used by `deviceAuthorize` (§14.1). `null` when the server does not implement the device grant, or when the document came from a non-AXIAM OP — its absence is an error at call time, never a cue to build the URL by concatenation.
+     * @param string|null $pushed_authorization_request_endpoint RFC 9126 pushed authorization request endpoint, used by `oidcPar` (§26.1). `null` when the server does not implement PAR — its absence is an error at call time, never a cue to build the URL by concatenation, and for a FAPI 2.0 client it is fatal rather than a fallback since §21.1 refuses a `fapi2` registration that does not set `require_par`.
      * @param string|null $end_session_endpoint OIDC RP-Initiated Logout 1.0 endpoint, used by `logoutUrl` (§12.7.2 rule 1). `null` for the same reason, and the rule is stricter here: §12.7.2 rule 1 forbids synthesising this URL from the issuer.
      * @param bool $backchannel_logout_supported Whether the OP sends back-channel logout tokens.
      * @param bool $backchannel_logout_session_supported Whether those logout tokens carry `sid`. AXIAM always sends it.
@@ -59,6 +60,7 @@ final class OidcConfiguration
         public readonly array $claims_supported,
         public readonly array $grant_types_supported,
         public readonly ?string $device_authorization_endpoint = null,
+        public readonly ?string $pushed_authorization_request_endpoint = null,
         public readonly ?string $end_session_endpoint = null,
         public readonly bool $backchannel_logout_supported = false,
         public readonly bool $backchannel_logout_session_supported = false,
@@ -115,6 +117,7 @@ final class OidcConfiguration
             // does not advertise them, so an absent value is a fact about the server —
             // not a malformed document.
             device_authorization_endpoint: $optionalString($wire['device_authorization_endpoint'] ?? null),
+            pushed_authorization_request_endpoint: $optionalString($wire['pushed_authorization_request_endpoint'] ?? null),
             end_session_endpoint: $optionalString($wire['end_session_endpoint'] ?? null),
             backchannel_logout_supported: ($wire['backchannel_logout_supported'] ?? false) === true,
             backchannel_logout_session_supported: ($wire['backchannel_logout_session_supported'] ?? false) === true,

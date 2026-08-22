@@ -109,7 +109,8 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20, §22, §23 (including
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20, §22, §23,
+§24, §25, §26 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification) — the binding,
 cross-language behavioral contract every
@@ -124,9 +125,17 @@ messages (§8), single-flight refresh concurrency safety (§9), framework
 middleware/subscriber integration (§10), declarative per-endpoint authorization
 helpers (§11, see below), OIDC/SSO relying-party helpers (§12, see below), and
 webhook-signature verification (§13, see below), the §22 reactor runtime
-(`reactorServe`, see below), and the §23 OPAQUE login path (`loginOpaque`, see below —
+(`reactorServe`, see below), the §23 OPAQUE login path (`loginOpaque`, see below —
 **conditional on `ext-ffi` and one shared library**, which is PHP's alone among the eleven
-SDKs).
+SDKs), the §24 WebAuthn relying-party layer with its §24.6a JSON bridge (see below), the
+§25 account-lifecycle and MFA-enrolment operations (see below), and §26 Pushed
+Authorization Requests (see below).
+
+§24.6b — the linked-API ceremony helper — is **deliberately absent**. PHP runs on a server,
+which has no authenticator, and §24.6b rule 2 forbids emulating one in software: a
+"credential" held in process memory is not a second factor. The ceremony runs in the
+browser, and §24.6a's JSON bridge is the seam that carries the challenge out and the
+response back.
 
 ## Framework integration
 
@@ -891,6 +900,207 @@ PHP strings are immutable and the runtime copies them freely, so this SDK **cann
 password. §23.3 rule 8 requires saying so rather than implying a guarantee it cannot keep. What it
 does do is never put the password in a request body, and never log it.
 
+## WebAuthn / passkeys (`Axiam\Sdk\Webauthn`, CONTRACT.md §24)
+
+Six wire operations, two ceremonies, and one thing this SDK deliberately does not do.
+
+```php
+// Enrolment — requires a session (§24.1), refused client-side without one.
+$challenge = $client->webauthnRegisterStart();
+$credential = $client->webauthnRegisterFinish(
+    $challenge->stateToken,
+    "Alice's laptop",
+    $platformResponseJson,          // verbatim
+);
+
+// Sign-in with no username at all — the authenticator picks the account.
+$signIn = $client->webauthnDiscoverableStart();
+$result = $client->webauthnDiscoverableFinish($signIn->stateToken, $assertionJson);
+```
+
+**The server chooses every option and verifies every response; this SDK passes both through
+byte-for-byte** (§24.0). `WebauthnChallenge::$challenge` is a plain decoded array, not a
+modelled type: no defaulting, no validation-that-rejects, no re-encoding. On the way back
+the `*Finish` body is assembled as **text**, splicing the caller's response string in
+unmodified — decoding and re-encoding it would round every number through a float and hand
+the server a byte sequence the authenticator never signed.
+
+### The browser half, via the §24.6a JSON bridge
+
+```php
+// Your start endpoint
+$challenge = $client->webauthnRegisterStart();
+echo json_encode([
+    // §24.6a rule 1: the wire JSON, unparsed and unreassembled.
+    'requestJson' => $challenge->requestJson(),
+    'stateToken' => $challenge->stateToken->reveal(),
+]);
+```
+
+```javascript
+// Browser
+const options = PublicKeyCredential.parseCreationOptionsFromJSON(requestJson);
+const credential = await navigator.credentials.create({ publicKey: options });
+await fetch('/passkeys/finish', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ stateToken, response: credential.toJSON() }),  // verbatim
+});
+```
+
+`requestJson()` returns the inner options object — the `publicKey` wrapper belongs to the
+DOM's `CredentialCreationOptions`, and the platform JSON APIs do not want it. A mobile
+client relaying Android's `registrationResponseJson` uses the same two seams.
+
+Passing something that is not JSON, or is not a JSON object, raises `AuthError` client-side
+with no wire call: the SDK will not POST a body it already knows the server cannot verify.
+
+### The two authentication ceremonies are different flows (§24.2)
+
+`webauthnAuthenticateStart()`/`Finish()` is a **second factor** — it continues a `login()`
+that answered `mfaRequired` with `"webauthn"` among its methods, and the challenge token
+names the user so the server can send an `allowCredentials` list.
+`webauthnDiscoverableStart()`/`Finish()` is a **primary factor**: nothing precedes it,
+`allowCredentials` is empty, and the assertion itself identifies the user. They are not one
+operation with an optional token — merging them reproduces a bug the server already fixed,
+which is why the token is a required argument on one and absent from the other.
+
+One difference a reactor author will ask about: `discoverable/finish` fires the
+`login.post_auth` hook event (§22.5) and `authenticate/finish` does not. The latter
+continues a login already gated at its password step; the former has no such step.
+
+### Saying something useful when a ceremony fails (§24.6b rule 5)
+
+```php
+$outcome = WebauthnFailure::classify($domExceptionName);
+echo $outcome->message();
+```
+
+`AlreadyRegistered` is the exclusion list doing its job, and the only classification whose
+remedy is "use a different device" rather than "try again". `Cancelled` covers **both** an
+explicit refusal and a silent timeout — the spec deliberately refuses to distinguish them,
+because telling a website which one happened leaks whether an authenticator was present —
+so its copy does not accuse anyone of cancelling.
+
+### Two error rows that are not the §2 defaults (§24.4)
+
+- A **403 from `register/finish`** is the tenant's *attestation policy* rejecting this
+  particular authenticator. The server's message is the only place that says which one
+  would be accepted, so it is lifted into the `AuthzError`'s message rather than discarded.
+  Show it.
+- A **503 from `register/start`** means the policy needs FIDO metadata the server cannot
+  reach. That is a configuration state, not a transient one, and it is **not retried** —
+  the second documented exception to §16 after §20's.
+
+Session cookies: as of contract 1.28 both `*Finish` authentication calls set the
+`axiam_access` / `axiam_refresh` / `axiam_csrf` triple alongside the token body, so a
+completed ceremony leaves the client signed in for every cookie-driven call that follows
+(§24.3).
+
+Worked end to end in [`examples/webauthn_passkeys.php`](examples/webauthn_passkeys.php).
+
+## Account lifecycle and MFA enrolment (`Axiam\Sdk\Account`, CONTRACT.md §25)
+
+Nine operations covering the things a user does to their own account — none of which is
+administration, and all of which were previously reachable only by hand-rolling HTTP.
+
+```php
+$result = $client->login('alice@example.com', $password);
+
+if ($result->mfaSetupRequired) {
+    // The third outcome. The tenant requires MFA, this account has none, and the
+    // server handed back a setup token to finish with. There is no session yet —
+    // the token IS the credential.
+    $enrollment = $client->mfaSetupEnroll($result->setupToken);
+    renderQr($enrollment->totpUri->reveal());
+    $client->mfaSetupConfirm($result->setupToken, $code);   // completes the LOGIN
+}
+```
+
+`LoginResult` gained two properties with defaults rather than changing shape, so every
+pre-1.28 construction still works and still reads `false`. **Handle the new outcome
+anyway.** A tenant that turns on required MFA will start returning it, and a client that
+only branches on `mfaRequired` reports a successful login that has no session.
+
+`mfaSetupConfirm()` adopts credentials exactly as `login()` does, because it *is* the
+completion of a login (§25.2 rule 2) — including capturing the session's first CSRF token.
+`mfaEnroll()`/`mfaConfirm()` are the voluntary pair, from inside an existing session, and
+they do **not** clear the §17 decision memo — the subject has not changed, and discarding a
+warm memo on an unrelated profile action costs a round trip on every check that follows.
+
+Both halves of an `MfaEnrollment` are `Sensitive`, and the second one matters: the
+`otpauth://` URI *contains* the secret (§25.3). Wrapping the bare secret and then logging
+the URI leaks the same bytes.
+
+### Password reset, and the two things it will not tell you
+
+```php
+$client->requestPasswordReset(new PasswordResetRequest('alice@example.com'));
+// returns void, whether or not that address has an account
+
+$context = $client->passwordResetContext($token);
+if ($context->opaque !== null) {
+    // This tenant runs §23. Build a registration record from these parameters;
+    // a plaintext password would be refused, and refused late (§25.4 rule 1).
+}
+$client->confirmPasswordReset(new PasswordResetConfirmation($token, $newPassword, $tenantId));
+```
+
+`requestPasswordReset()` returns nothing and throws nothing on an unknown address, and this
+SDK exposes no way to tell the two cases apart. That is not an omission to improve on: a
+client that surfaced a "no such user" state — even one inferred from timing — would turn
+the endpoint into the account-enumeration oracle its uniform response exists to prevent.
+Likewise a `404` from `passwordResetContext()` means unknown, expired **or**
+already-consumed, and the SDK does not distinguish them either (§25.4 rule 3).
+
+`verifyEmail()` and `resendVerification()` are unauthenticated — a user whose address is
+unverified may have no session at all — and carry the tenant as a **body** field, since
+§12.1 rule 2's `?tenant_id=` convention is scoped to the `/oauth2` endpoints.
+
+Worked end to end in [`examples/account_lifecycle.php`](examples/account_lifecycle.php).
+
+## Pushed Authorization Requests (CONTRACT.md §26, RFC 9126)
+
+PAR moves the authorization request off the browser. Instead of putting `scope`,
+`redirect_uri`, `state` and the PKCE challenge into a URL the user agent carries, the client
+POSTs them straight to AXIAM over an authenticated back channel and puts an opaque
+`request_uri` in the redirect.
+
+```php
+$config = $client->oidcDiscover();
+if ($config->pushed_authorization_request_endpoint === null) {
+    // §26 is optional; fall back to the plain oidcBegin redirect.
+}
+
+$begun = $client->oidcBegin($config, $redirectUri, 'openid profile');
+$pushed = $client->oidcPar($begun, $redirectUri, $config, 'openid profile');
+
+header('Location: ' . $pushed->url);   // exactly ?client_id=…&request_uri=…
+```
+
+Three things worth knowing:
+
+- **The server answers `201`,** not `200` — RFC 9126 §2.2 specifies *Created*. A success
+  predicate written `=== 200` treats every successful push as a failure.
+- **The redirect URL carries exactly two parameters.** The server refuses a request that
+  mixes a `request_uri` with inline authorization parameters rather than merging them;
+  merging is where parameter confusion lives (§26.2 rule 2). Any query the discovered
+  `authorization_endpoint` already carried is dropped.
+- **`oidcBegin()` still owns `state`, `nonce` and the PKCE pair.** There is no second
+  generator (§26.2 rule 1), and `PushedAuthorizationRequest` carries all three straight
+  through to the exchange.
+
+The push is **not retried** on a 5xx or a transport failure: it is a POST that creates
+server state, so it falls outside §16.2's read-only eligibility exactly as `oidcExchange()`
+does. The safe recovery is a fresh push, which costs one round trip and cannot
+double-consume anything. The `requestUri` is `Sensitive` because between the push and the
+redirect it is a bearer handle to a fully-formed authorization request (§26.5).
+
+A **FAPI 2.0 client has no alternative**: `profile: "fapi2"` refuses a registration that
+does not set `require_par`, so such a client cannot authorize any other way (§21.1).
+
+Worked end to end in [`examples/par_login.php`](examples/par_login.php).
+
 ## TLS policy
 
 Guzzle's `verify` option is **always `true`** (strict TLS, system trust roots) unless a
@@ -955,6 +1165,9 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/symfony_app/`](examples/symfony_app/README.md) — runnable Symfony subscriber + Voter example (manual registration), plus [`oidc_services.yaml`](examples/symfony_app/oidc_services.yaml)/[`oidc_routes.yaml`](examples/symfony_app/oidc_routes.yaml) for "Login with AXIAM".
 - [`examples/opaque_login.php`](examples/opaque_login.php) — CONTRACT.md §23: `loginOpaque`, the one way OPAQUE can be unavailable on PHP (it used to be two), and `opaqueEnrollment`.
 - [`examples/reactor/reactor.php`](examples/reactor/reactor.php) — CONTRACT.md §22: a reactor answering `token.pre_issue` with an `ext.` mutation and `login.post_auth` with a veto, over signed AMQP.
+- [`examples/webauthn_passkeys.php`](examples/webauthn_passkeys.php) — CONTRACT.md §24: both ceremonies, the §24.6a JSON bridge to the browser half, and the §24.6b rule 5 failure classification.
+- [`examples/account_lifecycle.php`](examples/account_lifecycle.php) — CONTRACT.md §25: the third `login()` outcome, voluntary and forced TOTP enrolment, email verification, and the password-reset triple.
+- [`examples/par_login.php`](examples/par_login.php) — CONTRACT.md §26: the 201 answer, the two-parameter redirect URL, and the exchange that follows.
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).
 
 ## Testing

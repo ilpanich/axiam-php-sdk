@@ -310,6 +310,120 @@ final class OidcClient
         return $rebuilt;
     }
 
+
+    // -------------------------------------------------------------------------
+    // 2b. oidcPar — §26 Pushed Authorization Requests (RFC 9126)
+    // -------------------------------------------------------------------------
+
+    /**
+     * `POST /oauth2/par` (CONTRACT.md §26.1) — push the authorization request over the
+     * back channel and get an opaque handle to redirect with.
+     *
+     * PAR moves the authorization request off the browser. Instead of putting `scope`,
+     * `redirect_uri`, `state` and the PKCE challenge into a URL the user agent carries,
+     * the client POSTs them straight to AXIAM over an authenticated channel and puts an
+     * opaque `request_uri` in the redirect. What travels through the browser is then a
+     * random string that cannot be edited into meaning something else.
+     *
+     * **Required for a FAPI 2.0 client**: `profile: "fapi2"` refuses a registration that
+     * does not set `require_par`, so such a client cannot authorize any other way (§21.1).
+     *
+     * Not retried on a `5xx` or a transport failure — it is a POST that creates server
+     * state, so it falls outside §16.2's read-only eligibility exactly as
+     * {@see self::oidcExchange()} does. The safe recovery is a fresh push, which costs one
+     * round trip and cannot double-consume anything (§26.2 rule 4).
+     *
+     * @param string|list<string>|null $scope
+     *
+     * @throws AuthError client-side, with no wire call, when the discovery document
+     *   advertises no PAR endpoint — §12.7.2 rule 1's discipline: never synthesise the URL
+     *   from the issuer.
+     */
+    public function oidcPar(
+        AuthorizationRequest $request,
+        string $redirectUri,
+        ?OidcConfiguration $configuration = null,
+        string|array|null $scope = null,
+        ?string $tenantId = null,
+    ): PushedAuthorizationRequest {
+        $configuration ??= $this->oidcDiscover();
+        $clientId = $this->requireClientId('oidcPar');
+
+        $endpoint = $configuration->pushed_authorization_request_endpoint;
+        if ($endpoint === null || $endpoint === '') {
+            throw new AuthError(
+                'the authorization server\'s discovery document advertises no '
+                . 'pushed_authorization_request_endpoint: this server does not support RFC 9126 '
+                . '(CONTRACT.md §26.1).',
+            );
+        }
+
+        // §26.2 rule 1: everything below was computed by oidcBegin. There is no second
+        // generator here, and there must not be — two sources for state or the PKCE pair
+        // are two things that can disagree.
+        $form = [
+            'client_id' => $clientId,
+            'response_type' => 'code',
+            'redirect_uri' => $redirectUri,
+            'scope' => self::normalizeScope($scope),
+            'state' => $request->state,
+            'nonce' => $request->nonce,
+            'code_challenge' => Pkce::computeCodeChallenge($request->codeVerifier->reveal()),
+            'code_challenge_method' => Pkce::CODE_CHALLENGE_METHOD_S256,
+        ];
+        $this->appendClientSecret($form);
+
+        // 201, not 200. RFC 9126 §2.2 specifies Created, and this is the one thing an
+        // implementation of this section gets wrong: a success predicate written === 200
+        // treats every successful push as a failure while passing every other assertion.
+        // postForm() lets Guzzle's http_errors reject any non-2xx, which admits both.
+        $response = $this->postForm(
+            $this->endpointUrl($endpoint, $tenantId),
+            $form,
+            'pushed authorization request failed',
+        );
+
+        $wire = json_decode((string) $response->getBody(), true);
+        $requestUri = is_array($wire) ? ($wire['request_uri'] ?? null) : null;
+        if (!is_string($requestUri) || $requestUri === '') {
+            throw NetworkError::fromResponse($response, 'pushed authorization response carried no request_uri');
+        }
+
+        // §26.2 rule 2: exactly two query parameters. The server REFUSES a request
+        // carrying both a request_uri and any inline authorization parameter rather than
+        // merging them: an attacker supplies the inline value they want and lets the
+        // pushed copy satisfy whichever check reads the other one. Re-adding them "for
+        // compatibility" restores the attack — which is why any query the discovered
+        // endpoint already carried is dropped here rather than merged.
+        $authorizationUrl = self::withQuery(
+            self::stripQuery($configuration->authorization_endpoint),
+            ['client_id' => $clientId, 'request_uri' => $requestUri],
+        );
+
+        $expiresIn = is_array($wire) ? ($wire['expires_in'] ?? 0) : 0;
+
+        return new PushedAuthorizationRequest(
+            url: $authorizationUrl,
+            requestUri: new Sensitive($requestUri),
+            expiresIn: is_numeric($expiresIn) ? (int) $expiresIn : 0,
+            state: $request->state,
+            nonce: $request->nonce,
+            codeVerifier: $request->codeVerifier,
+        );
+    }
+
+    /** Drops any existing query string from `$url`, keeping scheme/host/port/path. */
+    private static function stripQuery(string $url): string
+    {
+        $parts = parse_url($url);
+        $rebuilt = ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? '');
+        if (isset($parts['port'])) {
+            $rebuilt .= ':' . $parts['port'];
+        }
+
+        return $rebuilt . ($parts['path'] ?? '');
+    }
+
     // -------------------------------------------------------------------------
     // 3. oidcExchange
     // -------------------------------------------------------------------------

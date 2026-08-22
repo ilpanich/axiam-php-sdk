@@ -7,6 +7,14 @@ namespace Axiam\Sdk;
 use Axiam\Sdk\Auth\JwksVerifier;
 use Axiam\Sdk\Auth\LoginResult;
 use Axiam\Sdk\Auth\UserInfo;
+use Axiam\Sdk\Account\MfaEnrollment;
+use Axiam\Sdk\Account\PasswordResetConfirmation;
+use Axiam\Sdk\Account\PasswordResetContext;
+use Axiam\Sdk\Account\PasswordResetRequest;
+use Axiam\Sdk\Webauthn\WebauthnChallenge;
+use Axiam\Sdk\Webauthn\WebauthnCredential;
+use Axiam\Sdk\Webauthn\WebauthnLoginResult;
+use Axiam\Sdk\Webauthn\WebauthnWorkspace;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
@@ -19,6 +27,7 @@ use Axiam\Sdk\Oidc\OidcClient as OidcEngine;
 use Axiam\Sdk\Oidc\VerifiedLogoutToken;
 use Axiam\Sdk\Oidc\OidcConfiguration;
 use Axiam\Sdk\Oidc\OidcTokenSet;
+use Axiam\Sdk\Oidc\PushedAuthorizationRequest;
 use Axiam\Sdk\Oidc\RequestedPermission;
 use Axiam\Sdk\Oidc\RequestingPartyToken;
 use Axiam\Sdk\Oidc\ResourceSet;
@@ -97,6 +106,23 @@ final class AxiamClient
     private const OPAQUE_LOGIN_FINISH_PATH = '/api/v1/auth/opaque/login/finish';
 
     private const LOGOUT_PATH = '/api/v1/auth/logout';
+
+    private const WEBAUTHN_REGISTER_START_PATH = '/api/v1/auth/webauthn/register/start';
+    private const WEBAUTHN_REGISTER_FINISH_PATH = '/api/v1/auth/webauthn/register/finish';
+    private const WEBAUTHN_AUTH_START_PATH = '/api/v1/auth/webauthn/authenticate/start';
+    private const WEBAUTHN_AUTH_FINISH_PATH = '/api/v1/auth/webauthn/authenticate/finish';
+    private const WEBAUTHN_DISCOVERABLE_START_PATH = '/api/v1/auth/webauthn/authenticate/discoverable/start';
+    private const WEBAUTHN_DISCOVERABLE_FINISH_PATH = '/api/v1/auth/webauthn/authenticate/discoverable/finish';
+
+    private const MFA_ENROLL_PATH = '/api/v1/auth/mfa/enroll';
+    private const MFA_CONFIRM_PATH = '/api/v1/auth/mfa/confirm';
+    private const MFA_SETUP_ENROLL_PATH = '/api/v1/auth/mfa/setup/enroll';
+    private const MFA_SETUP_CONFIRM_PATH = '/api/v1/auth/mfa/setup/confirm';
+    private const VERIFY_EMAIL_PATH = '/api/v1/auth/verify-email';
+    private const RESEND_VERIFICATION_PATH = '/api/v1/auth/resend-verification';
+    private const RESET_PATH = '/api/v1/auth/reset';
+    private const RESET_CONTEXT_PATH = '/api/v1/auth/reset/context';
+    private const RESET_CONFIRM_PATH = '/api/v1/auth/reset/confirm';
 
     /** §17 decision memo. Disabled unless a TTL was configured. */
     private readonly \Axiam\Sdk\Core\DecisionMemo $decisionMemo;
@@ -556,7 +582,10 @@ final class AxiamClient
     {
         $this->ensureOpen();
         $this->onCredentialChange();
-        $response = $this->post($this->plainHttp, self::LOGIN_PATH, $this->loginBody($email, $password));
+        // postAllowingErrorStatus, not post(): §25.2 rule 1 gives 403 a specific,
+        // non-error meaning here, and Guzzle's default http_errors would turn it into the
+        // same exception shape as every other failure before the body could be read.
+        $response = $this->postAllowingErrorStatus(self::LOGIN_PATH, $this->loginBody($email, $password));
 
         return $this->handleLoginResponse($response);
     }
@@ -734,6 +763,33 @@ final class AxiamClient
         array $extraParams = [],
     ): AuthorizationRequest {
         return $this->oidc->oidcBegin($configuration, $redirectUri, $scope, $extraParams);
+    }
+
+    /**
+     * `POST /oauth2/par` (CONTRACT.md §26.1) — push the authorization request over the
+     * back channel and get an opaque handle to redirect with.
+     *
+     * PAR moves the authorization request off the browser: instead of putting `scope`,
+     * `redirect_uri`, `state` and the PKCE challenge into a URL the user agent carries,
+     * the client POSTs them straight to AXIAM and puts an opaque `request_uri` in the
+     * redirect, so what travels through the browser is a random string that cannot be
+     * edited into meaning something else.
+     *
+     * **Required for a FAPI 2.0 client** (§21.1). Not retried, being a POST that creates
+     * server state (§26.2 rule 4).
+     *
+     * @param string|list<string>|null $scope
+     */
+    public function oidcPar(
+        AuthorizationRequest $request,
+        string $redirectUri,
+        ?OidcConfiguration $configuration = null,
+        string|array|null $scope = null,
+        ?string $tenantId = null,
+    ): PushedAuthorizationRequest {
+        $this->ensureOpen();
+
+        return $this->oidc->oidcPar($request, $redirectUri, $configuration, $scope, $tenantId);
     }
 
     /**
@@ -1445,6 +1501,26 @@ final class AxiamClient
             return new LoginResult(mfaRequired: true, challengeToken: new Sensitive($challengeToken));
         }
 
+        if ($status === 403) {
+            // CONTRACT.md §25.2 rule 1: a 403 carrying mfa_setup_required is an OUTCOME,
+            // not a refusal. The tenant requires MFA, this account has none, and the
+            // server handed back the token to finish with.
+            //
+            // Matched on the body's own discriminant rather than the status alone: a
+            // genuine authorization refusal is also a 403, and only one of the two
+            // carries a setup_token. The body was decoded once above, so a non-matching
+            // 403 still falls through to ErrorMapper with the response untouched.
+            $setupToken = is_array($wire) ? ($wire['setup_token'] ?? null) : null;
+            $flagged = is_array($wire) && ($wire['mfa_setup_required'] ?? false) === true;
+            if ($flagged && is_string($setupToken) && $setupToken !== '') {
+                return new LoginResult(
+                    mfaRequired: false,
+                    mfaSetupRequired: true,
+                    setupToken: new Sensitive($setupToken),
+                );
+            }
+        }
+
         $this->logger->warning('axiam_sdk: login/verify_mfa failed: status={status}', ['status' => $status]);
 
         throw ErrorMapper::fromResponse($response, 'login/verifyMfa failed');
@@ -1492,6 +1568,582 @@ final class AxiamClient
         } catch (GuzzleException $e) {
             throw NetworkError::fromException($e, $path . ' failed');
         }
+    }
+
+
+    // ------------------------------------------------------------------
+    // §25 Account lifecycle and MFA enrolment
+    // ------------------------------------------------------------------
+
+    /**
+     * `POST /api/v1/auth/mfa/enroll` (CONTRACT.md §25.1) — start voluntary TOTP enrolment for
+     * the signed-in user.
+     *
+     * Changes nothing about the current session. In particular it does **not** clear the §17
+     * decision memo: the subject has not changed, and discarding a warm memo on an unrelated
+     * profile action costs a round trip on every check that follows (§25.2 rule 3).
+     */
+    public function mfaEnroll(): MfaEnrollment
+    {
+        $this->ensureOpen();
+
+        return $this->readMfaEnrollment(
+            $this->postAllowingErrorStatus(self::MFA_ENROLL_PATH, []),
+            'mfaEnroll',
+        );
+    }
+
+    /**
+     * `POST /api/v1/auth/mfa/confirm` (CONTRACT.md §25.1) — activate the factor
+     * {@see self::mfaEnroll()} offered. Returns whether MFA is now enabled.
+     */
+    public function mfaConfirm(string $totpCode): bool
+    {
+        $this->ensureOpen();
+        $http = $this->postAllowingErrorStatus(self::MFA_CONFIRM_PATH, ['totp_code' => $totpCode]);
+        if ($http->getStatusCode() !== 200) {
+            throw ErrorMapper::fromResponse($http, 'mfaConfirm failed');
+        }
+
+        $wire = json_decode((string) $http->getBody(), true);
+
+        return is_array($wire) && ($wire['mfa_enabled'] ?? false) === true;
+    }
+
+    /**
+     * `POST /api/v1/auth/mfa/setup/enroll` (CONTRACT.md §25.1) — start the enrolment a
+     * {@see self::login()} demanded.
+     *
+     * Reached when `login()` returns {@see LoginResult::$mfaSetupRequired}: the tenant requires
+     * MFA and this account has none. There is no session yet — the setup token *is* the
+     * credential.
+     */
+    public function mfaSetupEnroll(Sensitive|string $setupToken): MfaEnrollment
+    {
+        $this->ensureOpen();
+
+        return $this->readMfaEnrollment(
+            $this->postAllowingErrorStatus(self::MFA_SETUP_ENROLL_PATH, [
+                'setup_token' => $this->reveal($setupToken),
+            ]),
+            'mfaSetupEnroll',
+        );
+    }
+
+    /**
+     * `POST /api/v1/auth/mfa/setup/confirm` (CONTRACT.md §25.1) — finish forced enrolment and,
+     * with it, the login that was interrupted.
+     *
+     * Adopts credentials exactly as {@see self::login()} does, because it *is* the completion
+     * of a login (§25.2 rule 2) — including capturing the session's first CSRF token.
+     */
+    public function mfaSetupConfirm(Sensitive|string $setupToken, string $totpCode): LoginResult
+    {
+        $this->ensureOpen();
+        $this->onCredentialChange();
+
+        $http = $this->postAllowingErrorStatus(self::MFA_SETUP_CONFIRM_PATH, [
+            'setup_token' => $this->reveal($setupToken),
+            'totp_code' => $totpCode,
+        ]);
+
+        return $this->handleLoginResponse($http);
+    }
+
+    /**
+     * `POST /api/v1/auth/verify-email` (CONTRACT.md §25.1).
+     *
+     * Unauthenticated: a user whose address is unverified may have no session at all.
+     * `$tenantId` is a **body** field here — this is not an `/oauth2` endpoint, so §12.1 rule 2's
+     * query-parameter convention does not reach it.
+     */
+    public function verifyEmail(Sensitive|string $token, string $tenantId): void
+    {
+        $this->ensureOpen();
+        $this->postExpectingNoContent(self::VERIFY_EMAIL_PATH, [
+            'token' => $this->reveal($token),
+            'tenant_id' => $tenantId,
+        ], 'verifyEmail');
+    }
+
+    /** `POST /api/v1/auth/resend-verification` (CONTRACT.md §25.1). */
+    public function resendVerification(string $email, string $tenantId): void
+    {
+        $this->ensureOpen();
+        $this->postExpectingNoContent(self::RESEND_VERIFICATION_PATH, [
+            'email' => $email,
+            'tenant_id' => $tenantId,
+        ], 'resendVerification');
+    }
+
+    /**
+     * `POST /api/v1/auth/reset` (CONTRACT.md §25.1) — ask for a reset mail.
+     *
+     * **Returns normally whether or not the address exists**, and this SDK exposes no way to
+     * tell the two apart. That is not an omission to improve on: a client that surfaced a
+     * "no such user" state — even one inferred from timing — would turn the endpoint into the
+     * account-enumeration oracle its uniform response exists to prevent (§25.4).
+     */
+    public function requestPasswordReset(PasswordResetRequest $request): void
+    {
+        $this->ensureOpen();
+
+        $body = ['email' => $request->email];
+        $orgSlug = $request->orgSlug ?? $this->orgSlug;
+        if ($orgSlug !== null) {
+            $body['org_slug'] = $orgSlug;
+        }
+        if ($request->tenantId !== null) {
+            $body['tenant_id'] = $request->tenantId;
+        } else {
+            $body['tenant_slug'] = $request->tenantSlug ?? $this->tenant;
+        }
+
+        $this->postExpectingNoContent(self::RESET_PATH, $body, 'requestPasswordReset');
+    }
+
+    /**
+     * `GET /api/v1/auth/reset/context` (CONTRACT.md §25.1) — the OPAQUE policy for the account
+     * a reset token belongs to.
+     *
+     * Call this before {@see self::confirmPasswordReset()} on any tenant that might have §23
+     * enabled: the client has to build a registration record, and building one needs parameters
+     * it cannot know before it has a token to ask with. Sending a plaintext password to a
+     * tenant in `opaque_mode: required` is refused, and refused late (§25.4 rule 1).
+     *
+     * A `404` means unknown, expired **or** already-consumed, deliberately without
+     * distinguishing them; this SDK does not distinguish them either (§25.4 rule 3).
+     */
+    public function passwordResetContext(Sensitive|string $token): PasswordResetContext
+    {
+        $this->ensureOpen();
+
+        try {
+            // The token travels as a query PARAMETER, built through Guzzle's `query` option
+            // rather than string concatenation: a token spliced onto "?token=" unescaped can
+            // end the query early, and one escaped into the PATH 404s in a way that reads
+            // exactly like an expired token.
+            $http = $this->plainHttp->get(self::RESET_CONTEXT_PATH, [
+                'query' => ['token' => $this->reveal($token)],
+                'http_errors' => false,
+            ]);
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, self::RESET_CONTEXT_PATH . ' failed');
+        }
+
+        if ($http->getStatusCode() !== 200) {
+            throw ErrorMapper::fromResponse($http, 'passwordResetContext failed');
+        }
+
+        $wire = json_decode((string) $http->getBody(), true);
+        $opaque = is_array($wire) ? ($wire['opaque'] ?? null) : null;
+
+        return new PasswordResetContext(is_array($opaque) ? $opaque : null);
+    }
+
+    /** `POST /api/v1/auth/reset/confirm` (CONTRACT.md §25.1) — set the new password. */
+    public function confirmPasswordReset(PasswordResetConfirmation $confirmation): void
+    {
+        $this->ensureOpen();
+
+        $body = [
+            'token' => $this->reveal($confirmation->token),
+            'new_password' => $this->reveal($confirmation->newPassword),
+            'tenant_id' => $confirmation->tenantId,
+        ];
+        if ($confirmation->opaque !== null) {
+            $body['opaque'] = $confirmation->opaque;
+        }
+
+        $this->postExpectingNoContent(self::RESET_CONFIRM_PATH, $body, 'confirmPasswordReset');
+    }
+
+    private function readMfaEnrollment(ResponseInterface $http, string $operation): MfaEnrollment
+    {
+        if ($http->getStatusCode() !== 200) {
+            throw ErrorMapper::fromResponse($http, $operation . ' failed');
+        }
+
+        $wire = json_decode((string) $http->getBody(), true);
+        if (!is_array($wire)) {
+            throw NetworkError::fromResponse($http, $operation . ': response body is not a JSON object');
+        }
+
+        return new MfaEnrollment(
+            secretBase32: new Sensitive((string) ($wire['secret_base32'] ?? '')),
+            totpUri: new Sensitive((string) ($wire['totp_uri'] ?? '')),
+        );
+    }
+
+    /** @param array<string,mixed> $body */
+    private function postExpectingNoContent(string $path, array $body, string $operation): void
+    {
+        $http = $this->postAllowingErrorStatus($path, $body);
+        $status = $http->getStatusCode();
+        if ($status !== 200 && $status !== 202 && $status !== 204) {
+            throw ErrorMapper::fromResponse($http, $operation . ' failed');
+        }
+    }
+
+
+    // ------------------------------------------------------------------
+    // §24 WebAuthn / passkeys — the relying-party layer
+    //
+    // PHP runs on a server, which has no authenticator, so §24.6b's linked-API
+    // helper is deliberately absent: rule 2 forbids emulating one in software,
+    // and a "credential" held in process memory is not a second factor. What is
+    // here is the half that talks to AXIAM, plus §24.6a's JSON bridge — which is
+    // what lets the browser half of a PHP relying party run the ceremony with
+    // its own platform API and hand the response string straight back.
+    // ------------------------------------------------------------------
+
+    /**
+     * `POST /api/v1/auth/webauthn/register/start` (CONTRACT.md §24.1) — begin enrolling a
+     * passkey for the signed-in user.
+     *
+     * Requires a session, and refuses **client-side with no wire call** when there is none —
+     * the shape §1.1 rule 3 requires of `getUserInfo`.
+     *
+     * The returned options are the server's, untouched (§24.0). A `503` here means the
+     * tenant's attestation policy needs FIDO metadata the server cannot reach: a configuration
+     * state, not a transient one, and §24.4 rule 2 deliberately does not retry it.
+     */
+    public function webauthnRegisterStart(): WebauthnChallenge
+    {
+        $this->ensureOpen();
+        $this->requireWebauthnSession('webauthnRegisterStart');
+
+        return $this->webauthnStart(self::WEBAUTHN_REGISTER_START_PATH, '{}');
+    }
+
+    /**
+     * `POST /api/v1/auth/webauthn/register/finish` (CONTRACT.md §24.1) — hand the
+     * authenticator's answer back and store the credential.
+     *
+     * `$response` is the platform's own response JSON, **verbatim** (§24.6a rule 2):
+     * `credential.toJSON()` from a browser, or `registrationResponseJson` from Android's
+     * Credential Manager relayed by a mobile client. It reaches the wire byte for byte,
+     * because re-encoding a signed buffer is three chances to corrupt it in service of
+     * nothing.
+     */
+    public function webauthnRegisterFinish(
+        Sensitive|string $stateToken,
+        string $credentialName,
+        string $response,
+    ): WebauthnCredential {
+        $this->ensureOpen();
+        $this->requireWebauthnSession('webauthnRegisterFinish');
+
+        $body = $this->webauthnFinishBody(
+            $stateToken,
+            $response,
+            'webauthnRegisterFinish',
+            ['credential_name' => $credentialName],
+        );
+
+        $http = $this->postRawJson(self::WEBAUTHN_REGISTER_FINISH_PATH, $body);
+        $status = $http->getStatusCode();
+        if ($status !== 200 && $status !== 201) {
+            throw $this->registerFinishError($http);
+        }
+
+        $wire = $this->webauthnWire($http, 'webauthnRegisterFinish');
+        $lastUsed = $wire['last_used_at'] ?? null;
+
+        return new WebauthnCredential(
+            id: (string) ($wire['id'] ?? ''),
+            credentialId: (string) ($wire['credential_id'] ?? ''),
+            name: (string) ($wire['name'] ?? ''),
+            credentialType: (string) ($wire['credential_type'] ?? ''),
+            createdAt: (string) ($wire['created_at'] ?? ''),
+            lastUsedAt: is_string($lastUsed) && $lastUsed !== '' ? $lastUsed : null,
+        );
+    }
+
+    /**
+     * `POST /api/v1/auth/webauthn/authenticate/start` (CONTRACT.md §24.1) — begin the
+     * **second-factor** ceremony.
+     *
+     * Continues a {@see self::login()} that answered `mfaRequired` with `"webauthn"` among its
+     * available methods; `$challengeToken` is that login's token. A different flow from
+     * {@see self::webauthnDiscoverableStart()}, not the same one with a flag (§24.2) — which
+     * is why the token is required here and absent there.
+     */
+    public function webauthnAuthenticateStart(Sensitive|string $challengeToken): WebauthnChallenge
+    {
+        $this->ensureOpen();
+        $body = json_encode(
+            ['challenge_token' => $this->reveal($challengeToken)],
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+        );
+
+        return $this->webauthnStart(self::WEBAUTHN_AUTH_START_PATH, $body);
+    }
+
+    /**
+     * `POST /api/v1/auth/webauthn/authenticate/finish` (CONTRACT.md §24.1).
+     *
+     * On success the client is signed in: the server sets the same cookie triple
+     * `POST /api/v1/auth/login` sets, and the §17 decision memo is cleared because the subject
+     * changed (§24.3).
+     */
+    public function webauthnAuthenticateFinish(Sensitive|string $stateToken, string $response): WebauthnLoginResult
+    {
+        return $this->webauthnFinish(
+            self::WEBAUTHN_AUTH_FINISH_PATH,
+            $stateToken,
+            $response,
+            'webauthnAuthenticateFinish',
+        );
+    }
+
+    /**
+     * `POST /api/v1/auth/webauthn/authenticate/discoverable/start` (CONTRACT.md §24.1) —
+     * begin the usernameless ceremony.
+     *
+     * A **primary factor**: nothing precedes it, `allowCredentials` comes back empty, and the
+     * assertion itself identifies the user. Pass `null` for `$workspace` to have it filled
+     * from this client's own configured identity.
+     *
+     * Unlike `authenticate/finish`, `discoverable/finish` fires the `login.post_auth` reactor
+     * hook (§22.5) — the former continues a login already gated at its password step, and this
+     * one has no such step.
+     */
+    public function webauthnDiscoverableStart(?WebauthnWorkspace $workspace = null): WebauthnChallenge
+    {
+        $this->ensureOpen();
+
+        return $this->webauthnStart(
+            self::WEBAUTHN_DISCOVERABLE_START_PATH,
+            json_encode($this->webauthnWorkspaceBody($workspace), JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES),
+        );
+    }
+
+    /**
+     * `POST /api/v1/auth/webauthn/authenticate/discoverable/finish` (CONTRACT.md §24.1).
+     * Adopts credentials exactly as {@see self::webauthnAuthenticateFinish()} does.
+     */
+    public function webauthnDiscoverableFinish(Sensitive|string $stateToken, string $response): WebauthnLoginResult
+    {
+        return $this->webauthnFinish(
+            self::WEBAUTHN_DISCOVERABLE_FINISH_PATH,
+            $stateToken,
+            $response,
+            'webauthnDiscoverableFinish',
+        );
+    }
+
+    /** Runs either `*_start` call and returns the options untouched. */
+    private function webauthnStart(string $path, string $body): WebauthnChallenge
+    {
+        $http = $this->postRawJson($path, $body);
+        if ($http->getStatusCode() !== 200) {
+            throw ErrorMapper::fromResponse($http, 'webauthn start failed');
+        }
+
+        $wire = $this->webauthnWire($http, 'webauthn start');
+        $challenge = $wire['challenge'] ?? [];
+        $stateToken = $wire['state_token'] ?? '';
+
+        return new WebauthnChallenge(
+            challenge: is_array($challenge) ? $challenge : [],
+            stateToken: new Sensitive(is_string($stateToken) ? $stateToken : ''),
+        );
+    }
+
+    /** The shared tail of both authentication ceremonies. */
+    private function webauthnFinish(
+        string $path,
+        Sensitive|string $stateToken,
+        string $response,
+        string $operation,
+    ): WebauthnLoginResult {
+        $this->ensureOpen();
+        // §17.1 rule 9 / §24.3 rule 4: memo entries are keyed by subject, and this call
+        // changes the subject.
+        $this->onCredentialChange();
+
+        $http = $this->postRawJson($path, $this->webauthnFinishBody($stateToken, $response, $operation));
+        if ($http->getStatusCode() !== 200) {
+            throw ErrorMapper::fromResponse($http, $operation . ' failed');
+        }
+
+        $this->session->captureCsrfTokenFromResponse($http);
+        $wire = $this->webauthnWire($http, $operation);
+
+        return new WebauthnLoginResult(
+            accessToken: new Sensitive((string) ($wire['access_token'] ?? '')),
+            refreshToken: new Sensitive((string) ($wire['refresh_token'] ?? '')),
+            sessionId: (string) ($wire['session_id'] ?? ''),
+            expiresIn: (int) ($wire['expires_in'] ?? 0),
+        );
+    }
+
+    /**
+     * Builds a `*_finish` body **as text**, splicing the caller's response JSON in verbatim
+     * (§24.0, §24.6a rule 2).
+     *
+     * Decoding the string and re-encoding it would reorder nothing predictably, round every
+     * number through a float, and generally hand the server a byte sequence the authenticator
+     * never signed. The one thing this does check is that the string IS a JSON object — the
+     * SDK will not POST a body it already knows the server cannot verify.
+     *
+     * @param array<string,string> $extraFields
+     */
+    private function webauthnFinishBody(
+        Sensitive|string $stateToken,
+        string $response,
+        string $operation,
+        array $extraFields = [],
+    ): string {
+        $trimmed = trim($response);
+        try {
+            $parsed = json_decode($trimmed, true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new AuthError(sprintf(
+                '%s: the authenticator response string is not valid JSON. Pass the platform\'s '
+                . 'response JSON verbatim (CONTRACT.md §24.6a). %s',
+                $operation,
+                $e->getMessage(),
+            ));
+        }
+
+        if (!is_array($parsed) || array_is_list($parsed)) {
+            throw new AuthError(sprintf(
+                '%s: the authenticator response must be a JSON object (CONTRACT.md §24.6a).',
+                $operation,
+            ));
+        }
+
+        $fields = ['state_token' => $this->reveal($stateToken)] + $extraFields;
+        $pairs = [];
+        foreach ($fields as $key => $value) {
+            $pairs[] = json_encode($key, JSON_THROW_ON_ERROR) . ':' . json_encode($value, JSON_THROW_ON_ERROR);
+        }
+        $pairs[] = '"response":' . $trimmed;
+
+        return '{' . implode(',', $pairs) . '}';
+    }
+
+    /**
+     * §24.1: `register/…` needs a session, and the refusal is raised client-side with **no
+     * wire call**.
+     *
+     * The signal is the cached access token rather than a separate flag: this SDK has never
+     * kept one, and a second source of truth for "am I signed in" is a second thing to get out
+     * of step with the jar.
+     */
+    private function requireWebauthnSession(string $operation): void
+    {
+        if ($this->session->accessToken() === null) {
+            throw new AuthError(sprintf(
+                '%s requires an authenticated session: enrol a passkey while signed in '
+                . '(CONTRACT.md §24.1).',
+                $operation,
+            ));
+        }
+    }
+
+    /**
+     * §24.4 rule 1: the `403` from `register/finish` is the one whose *body* matters.
+     *
+     * The generic §2 mapping would raise an authorization error reading
+     * "webauthnRegisterFinish failed", which tells the person holding the key nothing they can
+     * act on. The tenant's attestation policy rejected *this* authenticator, and the server's
+     * message is the only place that says which one would be accepted.
+     */
+    private function registerFinishError(ResponseInterface $http): \Throwable
+    {
+        $context = 'webauthnRegisterFinish failed';
+        if ($http->getStatusCode() === 403) {
+            $wire = json_decode((string) $http->getBody(), true);
+            $message = is_array($wire) ? ($wire['message'] ?? null) : null;
+            if (is_string($message) && $message !== '') {
+                $context .= ': ' . $message;
+            }
+        }
+
+        return ErrorMapper::fromResponse($http, $context);
+    }
+
+    /**
+     * Fills the discoverable ceremony's workspace from this client's own configuration when
+     * the caller passed none.
+     *
+     * Only fields that actually have a value are emitted: the server takes either form at
+     * either level, and sending `null` for the ones it does not have is indistinguishable from
+     * asking it to resolve nothing.
+     *
+     * @return array<string,string>
+     */
+    private function webauthnWorkspaceBody(?WebauthnWorkspace $workspace): array
+    {
+        $orgId = $workspace?->orgId;
+        $orgSlug = $workspace?->orgSlug;
+        if ($orgId === null && $orgSlug === null) {
+            $orgId = $this->orgId;
+            $orgSlug = $this->orgSlug;
+        }
+
+        if ($orgId !== null) {
+            $body = ['org_id' => $orgId];
+        } elseif ($orgSlug !== null) {
+            $body = ['org_slug' => $orgSlug];
+        } else {
+            throw new AuthError(
+                'webauthnDiscoverableStart needs an organization: construct the client with one, '
+                . 'or pass it in the workspace argument (CONTRACT.md §24.1).',
+            );
+        }
+
+        $tenantId = $workspace !== null ? $workspace->tenantId : null;
+        $tenantSlug = $workspace !== null ? $workspace->tenantSlug : null;
+        if ($tenantId !== null) {
+            $body['tenant_id'] = $tenantId;
+        } else {
+            $body['tenant_slug'] = $tenantSlug ?? $this->tenant;
+        }
+
+        return $body;
+    }
+
+    /**
+     * Decodes a §24 response body, which is always a JSON object.
+     *
+     * @return array<string,mixed>
+     */
+    private function webauthnWire(ResponseInterface $http, string $operation): array
+    {
+        $wire = json_decode((string) $http->getBody(), true);
+        if (!is_array($wire)) {
+            throw NetworkError::fromResponse($http, $operation . ': response body is not a JSON object');
+        }
+
+        return $wire;
+    }
+
+    /**
+     * POSTs a body that is already JSON **text**, so the caller's bytes reach the wire
+     * unmodified (§24.0). Goes through the same Guzzle client every other REST call uses, so
+     * §3 CSRF, §4 cookies, §5 tenant header and §6 TLS all apply.
+     */
+    private function postRawJson(string $path, string $json): ResponseInterface
+    {
+        try {
+            return $this->plainHttp->post($path, [
+                'body' => $json,
+                'headers' => ['Content-Type' => 'application/json'],
+                'http_errors' => false,
+            ]);
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, $path . ' failed');
+        }
+    }
+
+    /** Accepts a secret either wrapped or bare, like every other §12/§20 secret input. */
+    private function reveal(Sensitive|string $value): string
+    {
+        return $value instanceof Sensitive ? $value->reveal() : $value;
     }
 
     /**

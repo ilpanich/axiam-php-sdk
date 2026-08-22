@@ -33,6 +33,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CONTRACT.md §24 — WebAuthn / passkeys relying-party layer (`Axiam\Sdk\Webauthn`):
+  the six wire operations, the two distinct authentication ceremonies, and
+  §24.6a's JSON bridge. `WebauthnChallenge::requestJson()` is the string a PHP
+  relying party sends down to the browser, and the browser's response JSON goes
+  straight back into the matching `*Finish` — spliced into the request body as
+  text so the authenticator's signed bytes reach the wire unmodified.
+  `WebauthnFailure::classify()` maps a relayed `DOMException` name to the five
+  §24.6b rule 5 outcomes.
+
+  §24.6b's linked-API helper is deliberately absent: PHP runs on a server, which
+  has no authenticator, and rule 2 forbids emulating one in software.
+- CONTRACT.md §25 — account lifecycle and MFA enrolment (`Axiam\Sdk\Account`):
+  voluntary and forced TOTP enrolment, email verification, and the
+  password-reset triple including the `reset/context` call a tenant with §23
+  enabled requires before a new password can be built.
+- CONTRACT.md §26 — Pushed Authorization Requests, RFC 9126 (`oidcPar`,
+  `PushedAuthorizationRequest`). Required for a FAPI 2.0 client, which cannot
+  authorize any other way (§21.1).
+- `examples/webauthn_passkeys.php`, `examples/account_lifecycle.php` and
+  `examples/par_login.php`.
+
+### Changed
+
+- `LoginResult` gained `$mfaSetupRequired` and `$setupToken` for §25.2 rule 1's
+  third login outcome. Both default, so every existing construction still works
+  and reads `false`. Callers that branch only on `$mfaRequired` should still add
+  the new branch — a tenant that turns on required MFA will start returning it,
+  and ignoring it reports a successful login that has no session.
+- `login()` now reads the response body before mapping a non-2xx status, so the
+  §25.2 rule 1 discriminant is reachable. An ordinary `403` still maps through
+  `ErrorMapper` exactly as before.
+- `OidcConfiguration` gained `$pushed_authorization_request_endpoint`, defaulted
+  to `null` and parsed from discovery.
+- Re-vendored `CONTRACT.md` and `openapi.json` at contract 1.28.
+
+### Added
+
 - OPAQUE (RFC 9807) login and enrolment (CONTRACT §23): `loginOpaque()`,
   `opaqueEnrollment()` and `opaqueAvailable()` on `AxiamClient`, plus the new
   `Axiam\Sdk\Opaque` namespace.
