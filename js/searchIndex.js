@@ -26,6 +26,101 @@ Search.appendIndex(
             "summary": "\u0060require_access\u0060\u0020\u0028CONTRACT.md\u0020\u00A711.1\u0029\u003A\u0020the\u0020endpoint\u0020requires\u0020the\u0020authenticated\ncaller\u0020to\u0020pass\u0020an\u0020AXIAM\u0020authorization\u0020check\u0020for\u0020\u0060\u0024attribute\u002D\u003Eaction\u0060\u0020on\u0020a\nresource\u0020resolved\u0020from\u0020the\u0020request.\u0020This\u0020is\u0020the\u0020ONE\u0020codepath\u0020both\u0020framework\nbridges\u0020call\u0020for\u0020\u0060\u0023\u005BRequireAccess\u005D\u0060\u0020enforcement\u0020\u2014\u0020see\u0020this\u0020class\u0027s\u0020own\u0020docblock\nfor\u0020the\u0020full\u0020resource\u002Dresolution\u0020and\u0020error\u002Dmapping\u0020tables.",
             "url": "classes/Axiam-Sdk-AccessEnforcer.html#method_enforceAccess"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\MfaEnrollment",
+            "name": "MfaEnrollment",
+            "summary": "A\u0020TOTP\u0020factor\u0020offered\u0020but\u0020not\u0020yet\u0020active\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029.",
+            "url": "classes/Axiam-Sdk-Account-MfaEnrollment.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\MfaEnrollment\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-MfaEnrollment.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\MfaEnrollment\u003A\u003A\u0024secretBase32",
+            "name": "secretBase32",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-MfaEnrollment.html#property_secretBase32"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\MfaEnrollment\u003A\u003A\u0024totpUri",
+            "name": "totpUri",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-MfaEnrollment.html#property_totpUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetConfirmation",
+            "name": "PasswordResetConfirmation",
+            "summary": "Arguments\u0020to\u0020\u0060AxiamClient\u003A\u003AconfirmPasswordReset\u0028\u0029\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029.",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetConfirmation.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetConfirmation\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetConfirmation.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetConfirmation\u003A\u003A\u0024token",
+            "name": "token",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetConfirmation.html#property_token"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetConfirmation\u003A\u003A\u0024newPassword",
+            "name": "newPassword",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetConfirmation.html#property_newPassword"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetConfirmation\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetConfirmation.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetConfirmation\u003A\u003A\u0024opaque",
+            "name": "opaque",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetConfirmation.html#property_opaque"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetContext",
+            "name": "PasswordResetContext",
+            "summary": "The\u0020OPAQUE\u0020policy\u0020for\u0020the\u0020account\u0020a\u0020reset\u0020token\u0020belongs\u0020to\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029.",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetContext.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetContext\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetContext.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetContext\u003A\u003A\u0024opaque",
+            "name": "opaque",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetContext.html#property_opaque"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetRequest",
+            "name": "PasswordResetRequest",
+            "summary": "Arguments\u0020to\u0020\u0060AxiamClient\u003A\u003ArequestPasswordReset\u0028\u0029\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029.",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetRequest\u003A\u003A\u0024email",
+            "name": "email",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetRequest.html#property_email"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetRequest\u003A\u003A\u0024orgSlug",
+            "name": "orgSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetRequest.html#property_orgSlug"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetRequest\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetRequest.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Account\\PasswordResetRequest\u003A\u003A\u0024tenantSlug",
+            "name": "tenantSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Account-PasswordResetRequest.html#property_tenantSlug"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpDropMessage",
             "name": "AmqpDropMessage",
             "summary": "Poison\u002Dmessage\u0020sentinel.\u0020Application\u0020handlers\u0020throw\u0020this\u0020to\u0020signal\u0020that\u0020a\nmessage\u0020is\u0020unprocessable\u0020and\u0020must\u0020NOT\u0020be\u0020requeued\u0020\u0028e.g.\u0020a\u0020permanently\nmalformed\u0020or\u0020unsupported\u0020event\u0029\u0020\u2014\u0020distinct\u0020from\u0020a\u0020transient\u0020failure,\u0020which\nshould\u0020be\u0020requeued\u0020for\u0020retry.",
@@ -321,6 +416,16 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_tenantId"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult\u003A\u003A\u0024mfaSetupRequired",
+            "name": "mfaSetupRequired",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_mfaSetupRequired"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult\u003A\u003A\u0024setupToken",
+            "name": "setupToken",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_setupToken"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\PresentedProofs",
             "name": "PresentedProofs",
             "summary": "What\u0020the\u0020caller\u0020proved\u0020about\u0020\u002A\u002Athis\u002A\u002A\u0020connection\u0020and\u0020\u002A\u002Athis\u002A\u002A\u0020request,\u0020for\n\u007B\u0040see\u0020JwksVerifier\u003A\u003AverifyTokenBinding\u0028\u0029\u007D.",
@@ -516,6 +621,11 @@ Search.appendIndex(
             "summary": "Build\u0020an\u0020authorization\u0020request\u0020\u0028CONTRACT.md\u0020\u00A712.1\u0029\u0020\u2014\u0020\u002A\u002Apure\u0020local\u0020computation,\u0020no\nnetwork\u0020I\/O\u002A\u002A.\u0020Generates\u0020a\u0020\u0060state\u0060\/\u0060nonce\u0060\u0020\u0028CSPRNG,\u0020\u2265128\u0020bits\u0029\u0020and\u0020a\u0020fresh\u0020PKCE\nverifier\/challenge\u0020pair\u0020\u0028\u002A\u002AS256\u0020only\u002A\u002A\u0029,\u0020and\u0020builds\u0020\u0060\u0024configuration\u0060\u0027s\n\u0060authorization_endpoint\u0060\u0020into\u0020a\u0020redirect\u0020URL\u0020with\u0020exactly\u0020the\u0020eight\u0020SDK\u002Downed\nquery\u0020parameters\u0020plus\u0020any\u0020\u0060\u0024extraParams\u0060\u0020supplied.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_oidcBegin"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AoidcPar\u0028\u0029",
+            "name": "oidcPar",
+            "summary": "\u0060POST\u0020\/oauth2\/par\u0060\u0020\u0028CONTRACT.md\u0020\u00A726.1\u0029\u0020\u2014\u0020push\u0020the\u0020authorization\u0020request\u0020over\u0020the\nback\u0020channel\u0020and\u0020get\u0020an\u0020opaque\u0020handle\u0020to\u0020redirect\u0020with.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_oidcPar"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AoidcExchange\u0028\u0029",
             "name": "oidcExchange",
             "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020\u0060grant_type\u003Dauthorization_code\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1\u0029\u0020\u2014\nexchange\u0020an\u0020authorization\u0020code\u0020for\u0020a\u0020token\u0020set,\u0020validating\u0020the\u0020returned\u0020ID\u0020token\nin\u0020full\u0020\u0028\u00A712.4\u0029\u0020before\u0020returning.\u0020\u0060\u0024nonce\u0060\u0020is\u0020MANDATORY\u003A\u0020this\u0020grant\u0020always\nrequests\u0020\u0060openid\u0060,\u0020so\u0020\u00A712.4\u0020rule\u00206\u0020always\u0020applies.\u0020On\u0020ANY\u0020\u00A712.4\u0020failure\u0020the\u0020whole\ntoken\u0020set\u0020is\u0020discarded\u0020and\u0020\u007B\u0040see\u0020AuthError\u007D\u0020is\u0020raised\u0020with\u0020the\u0020matching\u0020reason\ncode\u0020\u0028\u00A712.4\u0020rule\u00207\u0029\u0020\u2014\u0020\u0060getReason\u0028\u0029\u0060\u0020returns\u0020one\u0020of\u0020\u0060invalid_alg\u0060,\u0020\u0060unknown_kid\u0060,\n\u0060invalid_signature\u0060,\u0020\u0060invalid_issuer\u0060,\u0020\u0060invalid_audience\u0060,\u0020\u0060token_expired\u0060,\n\u0060nonce_mismatch\u0060.",
@@ -650,6 +760,81 @@ Search.appendIndex(
             "name": "opaqueAvailable",
             "summary": "Whether\u0020this\u0020installation\u0020can\u0020perform\u0020OPAQUE\u0020\u0028\u00A723.2\u0029.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_opaqueAvailable"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AmfaEnroll\u0028\u0029",
+            "name": "mfaEnroll",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/mfa\/enroll\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029\u0020\u2014\u0020start\u0020voluntary\u0020TOTP\u0020enrolment\u0020for\nthe\u0020signed\u002Din\u0020user.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_mfaEnroll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AmfaConfirm\u0028\u0029",
+            "name": "mfaConfirm",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/mfa\/confirm\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029\u0020\u2014\u0020activate\u0020the\u0020factor\n\u007B\u0040see\u0020self\u003A\u003AmfaEnroll\u0028\u0029\u007D\u0020offered.\u0020Returns\u0020whether\u0020MFA\u0020is\u0020now\u0020enabled.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_mfaConfirm"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AmfaSetupEnroll\u0028\u0029",
+            "name": "mfaSetupEnroll",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/mfa\/setup\/enroll\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029\u0020\u2014\u0020start\u0020the\u0020enrolment\u0020a\n\u007B\u0040see\u0020self\u003A\u003Alogin\u0028\u0029\u007D\u0020demanded.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_mfaSetupEnroll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AmfaSetupConfirm\u0028\u0029",
+            "name": "mfaSetupConfirm",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/mfa\/setup\/confirm\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029\u0020\u2014\u0020finish\u0020forced\u0020enrolment\u0020and,\nwith\u0020it,\u0020the\u0020login\u0020that\u0020was\u0020interrupted.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_mfaSetupConfirm"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AverifyEmail\u0028\u0029",
+            "name": "verifyEmail",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/verify\u002Demail\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_verifyEmail"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AresendVerification\u0028\u0029",
+            "name": "resendVerification",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/resend\u002Dverification\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_resendVerification"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003ArequestPasswordReset\u0028\u0029",
+            "name": "requestPasswordReset",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/reset\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029\u0020\u2014\u0020ask\u0020for\u0020a\u0020reset\u0020mail.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_requestPasswordReset"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003ApasswordResetContext\u0028\u0029",
+            "name": "passwordResetContext",
+            "summary": "\u0060GET\u0020\/api\/v1\/auth\/reset\/context\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029\u0020\u2014\u0020the\u0020OPAQUE\u0020policy\u0020for\u0020the\u0020account\na\u0020reset\u0020token\u0020belongs\u0020to.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_passwordResetContext"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AconfirmPasswordReset\u0028\u0029",
+            "name": "confirmPasswordReset",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/reset\/confirm\u0060\u0020\u0028CONTRACT.md\u0020\u00A725.1\u0029\u0020\u2014\u0020set\u0020the\u0020new\u0020password.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_confirmPasswordReset"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnRegisterStart\u0028\u0029",
+            "name": "webauthnRegisterStart",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/register\/start\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029\u0020\u2014\u0020begin\u0020enrolling\u0020a\npasskey\u0020for\u0020the\u0020signed\u002Din\u0020user.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnRegisterStart"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnRegisterFinish\u0028\u0029",
+            "name": "webauthnRegisterFinish",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/register\/finish\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029\u0020\u2014\u0020hand\u0020the\nauthenticator\u0027s\u0020answer\u0020back\u0020and\u0020store\u0020the\u0020credential.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnRegisterFinish"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnAuthenticateStart\u0028\u0029",
+            "name": "webauthnAuthenticateStart",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/authenticate\/start\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029\u0020\u2014\u0020begin\u0020the\n\u002A\u002Asecond\u002Dfactor\u002A\u002A\u0020ceremony.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnAuthenticateStart"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnAuthenticateFinish\u0028\u0029",
+            "name": "webauthnAuthenticateFinish",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/authenticate\/finish\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnAuthenticateFinish"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnDiscoverableStart\u0028\u0029",
+            "name": "webauthnDiscoverableStart",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/authenticate\/discoverable\/start\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029\u0020\u2014\nbegin\u0020the\u0020usernameless\u0020ceremony.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnDiscoverableStart"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnDiscoverableFinish\u0028\u0029",
+            "name": "webauthnDiscoverableFinish",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/authenticate\/discoverable\/finish\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnDiscoverableFinish"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Core\\AuthError",
             "name": "AuthError",
@@ -1496,6 +1681,11 @@ Search.appendIndex(
             "summary": "Build\u0020an\u0020authorization\u0020request\u0020\u0028\u00A712.1\u0029\u0020\u2014\u0020\u002A\u002Apure\u0020local\u0020computation,\u0020no\u0020network\nI\/O\u002A\u002A.",
             "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_oidcBegin"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AoidcPar\u0028\u0029",
+            "name": "oidcPar",
+            "summary": "\u0060POST\u0020\/oauth2\/par\u0060\u0020\u0028CONTRACT.md\u0020\u00A726.1\u0029\u0020\u2014\u0020push\u0020the\u0020authorization\u0020request\u0020over\u0020the\nback\u0020channel\u0020and\u0020get\u0020an\u0020opaque\u0020handle\u0020to\u0020redirect\u0020with.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_oidcPar"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AoidcExchange\u0028\u0029",
             "name": "oidcExchange",
             "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020\u0060grant_type\u003Dauthorization_code\u0060\u0020\u0028\u00A712.1\u0029\u0020\u2014\u0020exchange\u0020an\nauthorization\u0020code\u0020for\u0020a\u0020token\u0020set,\u0020validating\u0020the\u0020returned\u0020ID\u0020token\u0020in\u0020full\nbefore\u0020returning.",
@@ -1776,6 +1966,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_device_authorization_endpoint"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024pushed_authorization_request_endpoint",
+            "name": "pushed_authorization_request_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_pushed_authorization_request_endpoint"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024end_session_endpoint",
             "name": "end_session_endpoint",
             "summary": "",
@@ -2020,6 +2215,46 @@ Search.appendIndex(
             "name": "CSPRNG_BYTES",
             "summary": "Entropy,\u0020in\u0020bytes,\u0020of\u0020a\u0020generated\u0020\u0060state\u0060\u0020\/\u0020\u0060nonce\u0060\u0020\/\u0020\u0060code_verifier\u0060.",
             "url": "classes/Axiam-Sdk-Oidc-Pkce.html#constant_CSPRNG_BYTES"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest",
+            "name": "PushedAuthorizationRequest",
+            "summary": "The\u0020result\u0020of\u0020\u0060AxiamClient\u003A\u003AoidcPar\u0028\u0029\u0060\u0020\u0028CONTRACT.md\u0020\u00A726.1\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest\u003A\u003A\u0024url",
+            "name": "url",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html#property_url"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest\u003A\u003A\u0024requestUri",
+            "name": "requestUri",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html#property_requestUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest\u003A\u003A\u0024expiresIn",
+            "name": "expiresIn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html#property_expiresIn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest\u003A\u003A\u0024state",
+            "name": "state",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html#property_state"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest\u003A\u003A\u0024nonce",
+            "name": "nonce",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html#property_nonce"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest\u003A\u003A\u0024codeVerifier",
+            "name": "codeVerifier",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-PushedAuthorizationRequest.html#property_codeVerifier"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\RequestedPermission",
             "name": "RequestedPermission",
@@ -3576,6 +3811,171 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-UmaChallenger.html#property_client"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnChallenge",
+            "name": "WebauthnChallenge",
+            "summary": "A\u0020started\u0020ceremony\u003A\u0020the\u0020server\u0027s\u0020options\u0020plus\u0020the\u0020token\u0020binding\u0020a\u0020response\u0020to\u0020them\n\u0028CONTRACT.md\u0020\u00A724.1\u0029.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnChallenge.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnChallenge\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnChallenge.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnChallenge\u003A\u003ArequestJson\u0028\u0029",
+            "name": "requestJson",
+            "summary": "The\u0020challenge\u0020in\u0020the\u0020JSON\u0020form\u0020every\u0020platform\u0020authenticator\u0020API\u0020takes\u0020\u0028\u00A724.6a\u0020rule\u00201\u0029.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnChallenge.html#method_requestJson"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnChallenge\u003A\u003A\u0024challenge",
+            "name": "challenge",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnChallenge.html#property_challenge"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnChallenge\u003A\u003A\u0024stateToken",
+            "name": "stateToken",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnChallenge.html#property_stateToken"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential",
+            "name": "WebauthnCredential",
+            "summary": "A\u0020credential\u0020the\u0020user\u0020just\u0020enrolled\u0020\u2014\u0020the\u0020\u0060201\u0060\u0020body\u0020of\u0020\u0060register\/finish\u0060\n\u0028CONTRACT.md\u0020\u00A724.1\u0029.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential\u003A\u003A\u0024credentialId",
+            "name": "credentialId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html#property_credentialId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential\u003A\u003A\u0024name",
+            "name": "name",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html#property_name"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential\u003A\u003A\u0024credentialType",
+            "name": "credentialType",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html#property_credentialType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnCredential\u003A\u003A\u0024lastUsedAt",
+            "name": "lastUsedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnCredential.html#property_lastUsedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure",
+            "name": "WebauthnFailure",
+            "summary": "A\u0020ceremony\u0020failure\u0020a\u0020caller\u0020can\u0020say\u0020something\u0020useful\u0020about\u0020\u0028CONTRACT.md\u0020\u00A724.6b\u0020rule\u00205\u0029.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure\u003A\u003Aclassify\u0028\u0029",
+            "name": "classify",
+            "summary": "Map\u0020a\u0020platform\u0020ceremony\u0020error\u0020name\u0020to\u0020its\u0020canonical\u0020classification.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html#method_classify"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure\u003A\u003Amessage\u0028\u0029",
+            "name": "message",
+            "summary": "Copy\u0020for\u0020this\u0020failure,\u0020safe\u0020to\u0020show\u0020a\u0020user.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html#method_message"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure\u003A\u003ACancelled",
+            "name": "Cancelled",
+            "summary": "Covers\u0020\u002A\u002Aboth\u002A\u002A\u0020an\u0020explicit\u0020refusal\u0020and\u0020a\u0020silent\u0020timeout.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html#enumcase_Cancelled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure\u003A\u003AAlreadyRegistered",
+            "name": "AlreadyRegistered",
+            "summary": "The\u0020authenticator\u0020already\u0020holds\u0020a\u0020credential\u0020for\u0020this\u0020account\u0020and\u0020refused\u0020to\u0020silently\nmint\u0020a\u0020second\u0020\u2014\u0020the\u0020exclusion\u0020list\u0020working,\u0020not\u0020a\u0020failure.\u0020The\u0020only\u0020classification\u0020whose\nremedy\u0020is\u0020\u0022use\u0020a\u0020different\u0020device\u0022.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html#enumcase_AlreadyRegistered"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure\u003A\u003ATimeout",
+            "name": "Timeout",
+            "summary": "An\u0020explicitly\u0020aborted\u0020ceremony.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html#enumcase_Timeout"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure\u003A\u003AUnsupported",
+            "name": "Unsupported",
+            "summary": "This\u0020device\u0020or\u0020browser\u0020cannot\u0020run\u0020the\u0020ceremony.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html#enumcase_Unsupported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnFailure\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "Everything\u0020else.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnFailure.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnLoginResult",
+            "name": "WebauthnLoginResult",
+            "summary": "A\u0020completed\u0020authentication\u0020ceremony\u0020\u0028CONTRACT.md\u0020\u00A724.3\u0029.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnLoginResult.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnLoginResult\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnLoginResult.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnLoginResult\u003A\u003A\u0024accessToken",
+            "name": "accessToken",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnLoginResult.html#property_accessToken"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnLoginResult\u003A\u003A\u0024refreshToken",
+            "name": "refreshToken",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnLoginResult.html#property_refreshToken"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnLoginResult\u003A\u003A\u0024sessionId",
+            "name": "sessionId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnLoginResult.html#property_sessionId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnLoginResult\u003A\u003A\u0024expiresIn",
+            "name": "expiresIn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnLoginResult.html#property_expiresIn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnWorkspace",
+            "name": "WebauthnWorkspace",
+            "summary": "The\u0020workspace\u0020a\u0020usernameless\u0020ceremony\u0020runs\u0020in\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029.",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnWorkspace.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnWorkspace\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnWorkspace.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnWorkspace\u003A\u003A\u0024orgId",
+            "name": "orgId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnWorkspace.html#property_orgId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnWorkspace\u003A\u003A\u0024orgSlug",
+            "name": "orgSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnWorkspace.html#property_orgSlug"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnWorkspace\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnWorkspace.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn\\WebauthnWorkspace\u003A\u003A\u0024tenantSlug",
+            "name": "tenantSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Webauthn-WebauthnWorkspace.html#property_tenantSlug"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Webhook\\AxiamWebhooks",
             "name": "AxiamWebhooks",
             "summary": "Verifies\u0020the\u0020\u0060X\u002DAxiam\u002DSignature\u0060\u0020HMAC\u002DSHA256\u0020header\u0020AXIAM\u0020attaches\u0020to\u0020every\u0020webhook\ndelivery\u0020\u0028CONTRACT.md\u0020\u00A713,\u0020T\u002D145\u0029.\u0020Mirrors\u0020the\u0020server\u0027s\u0020signer\n\u0028\u0060crates\/axiam\u002Dapi\u002Drest\/src\/webhook.rs\u0060\u0027s\u0020\u0060compute_signature_v2\u0060\u0029\u003A\u0020the\u0020MAC\u0020covers\u0020the\nASCII\u0020string\u0020\u0060\u003Ct\u003E.\u003Craw_body\u003E\u0060,\u0020keyed\u0020with\u0020the\u0020webhook\u0020secret\u0027s\u0020raw\u0020UTF\u002D8\u0020bytes.",
@@ -3641,6 +4041,11 @@ Search.appendIndex(
             "summary": "",
             "url": "namespaces/axiam.html"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Account",
+            "name": "Account",
+            "summary": "",
+            "url": "namespaces/axiam-sdk-account.html"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Amqp",
             "name": "Amqp",
             "summary": "",
@@ -3695,6 +4100,11 @@ Search.appendIndex(
             "name": "Symfony",
             "summary": "",
             "url": "namespaces/axiam-sdk-symfony.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Webauthn",
+            "name": "Webauthn",
+            "summary": "",
+            "url": "namespaces/axiam-sdk-webauthn.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Webhook",
             "name": "Webhook",
