@@ -63,6 +63,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Re-vendor `CONTRACT.md`. Repairs §14.1's link to the `device_login` heading,
+  which dropped a hyphen the em dash leaves behind and so rendered as a link
+  that went nowhere; the same heading's other two links were already correct.
+  Link target only — no normative change and no contract-version bump.
+
 - **Conformance statement now names §17 and §19.** The opt-in decision memo
   (`decisionMemoTtlMs`) and the telemetry hooks (`telemetryHook`) both landed with
   contract 1.8, are exercised by the D5 conformance suite, and ship a worked
