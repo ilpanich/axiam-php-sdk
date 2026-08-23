@@ -63,6 +63,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Conformance statement now names §17 and §19.** The opt-in decision memo
+  (`decisionMemoTtlMs`) and the telemetry hooks (`telemetryHook`) both landed with
+  contract 1.8, are exercised by the D5 conformance suite, and ship a worked
+  `examples/telemetry_hook.php`; the headline statement had never been widened to
+  say so.
+
 - Re-vendor `openapi.json` at **1.0.0-alpha38**. The server registered the four
   GDPR data-subject endpoints (`POST /api/v1/account/export`,
   `GET /api/v1/account/export/{token}`, `POST /api/v1/account/delete`,

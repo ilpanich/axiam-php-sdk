@@ -109,10 +109,10 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §20, §22, §23,
-§24, §25, §26 (including
+This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §17, §19, §20,
+§22, §23, §24, §25, §26 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
-verification) — the binding,
+verification; the §17 decision memo and §19 telemetry hooks, contract 1.8) — the binding,
 cross-language behavioral contract every
 AXIAM SDK implements: camelCase method names (§1) — including the gRPC-only `getUserInfo`
 operation (§1.1) — the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2,
@@ -124,7 +124,9 @@ server-verification escape hatch (§6) plus optional client-certificate mutual T
 messages (§8), single-flight refresh concurrency safety (§9), framework
 middleware/subscriber integration (§10), declarative per-endpoint authorization
 helpers (§11, see below), OIDC/SSO relying-party helpers (§12, see below), and
-webhook-signature verification (§13, see below), the §22 reactor runtime
+webhook-signature verification (§13, see below), the opt-in §17 decision memo
+(`decisionMemoTtlMs`) and the §19 telemetry hooks (`telemetryHook`, see
+[`examples/telemetry_hook.php`](examples/telemetry_hook.php)), the §22 reactor runtime
 (`reactorServe`, see below), the §23 OPAQUE login path (`loginOpaque`, see below —
 **conditional on `ext-ffi` and one shared library**, which is PHP's alone among the eleven
 SDKs), the §24 WebAuthn relying-party layer with its §24.6a JSON bridge (see below), the
