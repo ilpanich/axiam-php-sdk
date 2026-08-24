@@ -97,22 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replace SRP-6a with OPAQUE (RFC 9807), CONTRACT §23
 
-### Changed
-
-- Link to the AXIAM platform documentation site
-- Re-vendor openapi.json at alpha32 (#43)
-- Give every new public member a docblock
-- Give the fake login response the user.id a 200 requires
-
-### Fixed
-
-- Let the PHPStan ignore match axiam_opaque_ksf_argon2id
-- Make PHPStan level 6 pass on the FFI binding
-
-## [Unreleased]
-
-### Added
-
 - CONTRACT.md §24 — WebAuthn / passkeys relying-party layer (`Axiam\Sdk\Webauthn`):
   the six wire operations, the two distinct authentication ceremonies, and
   §24.6a's JSON bridge. `WebauthnChallenge::requestJson()` is the string a PHP
@@ -124,17 +108,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   §24.6b's linked-API helper is deliberately absent: PHP runs on a server, which
   has no authenticator, and rule 2 forbids emulating one in software.
+
 - CONTRACT.md §25 — account lifecycle and MFA enrolment (`Axiam\Sdk\Account`):
   voluntary and forced TOTP enrolment, email verification, and the
   password-reset triple including the `reset/context` call a tenant with §23
   enabled requires before a new password can be built.
+
 - CONTRACT.md §26 — Pushed Authorization Requests, RFC 9126 (`oidcPar`,
   `PushedAuthorizationRequest`). Required for a FAPI 2.0 client, which cannot
   authorize any other way (§21.1).
+
 - `examples/webauthn_passkeys.php`, `examples/account_lifecycle.php` and
   `examples/par_login.php`.
 
+- OPAQUE (RFC 9807) login and enrolment (CONTRACT §23): `loginOpaque()`,
+  `opaqueEnrollment()` and `opaqueAvailable()` on `AxiamClient`, plus the new
+  `Axiam\Sdk\Opaque` namespace.
+
+- `examples/opaque_login.php`.
+
+- `ext-ffi` in `suggest`. It binds `libaxiam_opaque_ffi`; a consumer whose tenant
+  does not use OPAQUE needs neither.
+
 ### Changed
+
+- Link to the AXIAM platform documentation site
+
+- Re-vendor openapi.json at alpha32 (#43)
+
+- Give every new public member a docblock
+
+- Give the fake login response the user.id a 200 requires
 
 - **Re-vendor `openapi.json`** for AXIAM server PR #368, which adds a third CA
   key custodian, `vault_pki`, having HashiCorp Vault's PKI secrets engine
@@ -195,6 +199,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   says so — a hostile server that wanted the plaintext could answer `404` and
   get the fallback whatever it put here. `required` is what closes that,
   server-side, by refusing `/auth/login` before examining any credential.
+
 - Re-vendored `CONTRACT.md` at contract **1.29** and `openapi.json` at
   **1.0.0-alpha40**.
 
@@ -222,21 +227,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and reads `false`. Callers that branch only on `$mfaRequired` should still add
   the new branch — a tenant that turns on required MFA will start returning it,
   and ignoring it reports a successful login that has no session.
+
 - `login()` now reads the response body before mapping a non-2xx status, so the
   §25.2 rule 1 discriminant is reachable. An ordinary `403` still maps through
   `ErrorMapper` exactly as before.
+
 - `OidcConfiguration` gained `$pushed_authorization_request_endpoint`, defaulted
   to `null` and parsed from discovery.
+
 - Re-vendored `CONTRACT.md` and `openapi.json` at contract 1.28.
 
-### Added
+- **BREAKING** — the OPAQUE protocol is NOT implemented in this SDK. CONTRACT
+  §23.1 forbids it, so the client half is an FFI binding to
+  `libaxiam_opaque_ffi` — the same implementation the AXIAM server links,
+  published as a per-platform asset on the axiam release page rather than as a
+  Composer package. Put it on the system library path or set
+  `AXIAM_OPAQUE_LIBRARY`.
 
-- OPAQUE (RFC 9807) login and enrolment (CONTRACT §23): `loginOpaque()`,
-  `opaqueEnrollment()` and `opaqueAvailable()` on `AxiamClient`, plus the new
-  `Axiam\Sdk\Opaque` namespace.
-- `examples/opaque_login.php`.
-- `ext-ffi` in `suggest`. It binds `libaxiam_opaque_ffi`; a consumer whose tenant
-  does not use OPAQUE needs neither.
+- **PHP is now conditional on one thing rather than two, and the one that went
+  away was the bad one.** The SRP client needed a bignum extension *and* a tenant
+  configured for `pbkdf2_sha256`, because no PHP runtime offers Argon2id with a
+  caller-supplied 32-byte salt — AXIAM's default KDF was, for PHP, unreachable,
+  and the advice was to weaken the tenant's configuration for PHP's benefit. The
+  key stretching now happens inside the shared library, so a `true` from
+  `opaqueAvailable()` means every tenant works, default included.
+
+- **BREAKING** — `opaqueEnrollment()` performs I/O, where `srpEnrollment()` did
+  not: OPAQUE's envelope is sealed under the server's oblivious PRF, so there is
+  no offline computation that produces a valid record. It also drops the
+  `$identity`, `$group` and `$params` arguments — a record binds to a credential
+  identifier the server chooses, and the key-stretching parameters are the
+  server's. As a consequence, **renaming a user no longer invalidates their
+  credential**.
+
+- Failure taxonomy for the OPAQUE path: a tenant with OPAQUE disabled, an absent
+  `ext-ffi` or library, and a key-stretching function this build cannot perform
+  are all `NetworkError` (a caller can fall back, or an operator can act);
+  everything else is `AuthError` (§23.4 rule 7 — see the contract 1.29 entry
+  above for the one `mode` under which the SDK itself retries over `login()`).
+
+- Re-vendor `openapi.json` at **1.0.0-alpha32**, matching the server. The
+  content was already byte-identical in every path and schema; only
+  `info.version` differed, which is what the cross-repo artifact-drift gate
+  reports as `STALE`.
 
 ### Removed
 
@@ -245,40 +278,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `examples/srp_login.php` are all gone. AXIAM's server-side SRP endpoints are
   removed in the same release, so keeping the client would leave methods that only
   ever return 404.
+
 - `ext-gmp` and `ext-bcmath` from `suggest`. They were there for SRP's modular
   exponentiation and nothing else in this SDK uses them.
 
-### Changed
+### Fixed
 
-- **BREAKING** — the OPAQUE protocol is NOT implemented in this SDK. CONTRACT
-  §23.1 forbids it, so the client half is an FFI binding to
-  `libaxiam_opaque_ffi` — the same implementation the AXIAM server links,
-  published as a per-platform asset on the axiam release page rather than as a
-  Composer package. Put it on the system library path or set
-  `AXIAM_OPAQUE_LIBRARY`.
-- **PHP is now conditional on one thing rather than two, and the one that went
-  away was the bad one.** The SRP client needed a bignum extension *and* a tenant
-  configured for `pbkdf2_sha256`, because no PHP runtime offers Argon2id with a
-  caller-supplied 32-byte salt — AXIAM's default KDF was, for PHP, unreachable,
-  and the advice was to weaken the tenant's configuration for PHP's benefit. The
-  key stretching now happens inside the shared library, so a `true` from
-  `opaqueAvailable()` means every tenant works, default included.
-- **BREAKING** — `opaqueEnrollment()` performs I/O, where `srpEnrollment()` did
-  not: OPAQUE's envelope is sealed under the server's oblivious PRF, so there is
-  no offline computation that produces a valid record. It also drops the
-  `$identity`, `$group` and `$params` arguments — a record binds to a credential
-  identifier the server chooses, and the key-stretching parameters are the
-  server's. As a consequence, **renaming a user no longer invalidates their
-  credential**.
-- Failure taxonomy for the OPAQUE path: a tenant with OPAQUE disabled, an absent
-  `ext-ffi` or library, and a key-stretching function this build cannot perform
-  are all `NetworkError` (a caller can fall back, or an operator can act);
-  everything else is `AuthError` (§23.4 rule 7 — see the contract 1.29 entry
-  above for the one `mode` under which the SDK itself retries over `login()`).
-- Re-vendor `openapi.json` at **1.0.0-alpha32**, matching the server. The
-  content was already byte-identical in every path and schema; only
-  `info.version` differed, which is what the cross-repo artifact-drift gate
-  reports as `STALE`.
+- Let the PHPStan ignore match axiam_opaque_ksf_argon2id
+
+- Make PHPStan level 6 pass on the FFI binding
 
 ## [1.0.0-alpha31] - 2026-08-20
 
