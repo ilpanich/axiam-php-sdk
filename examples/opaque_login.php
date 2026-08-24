@@ -81,9 +81,12 @@ try {
         } catch (AuthError $e) {
             // This covers BOTH halves of the mutual authentication: the envelope
             // only opens under the right password, and KE2's MAC only verifies if
-            // the server actually holds the record. Do NOT retry over login(),
-            // which would hand the plaintext to an endpoint that just failed to
-            // prove it holds the record (§23.4 rule 7).
+            // the server actually holds the record. Do NOT retry over login()
+            // yourself (§23.4 rule 7): under `opaque_mode: optional` loginOpaque()
+            // has ALREADY done so and this is that retry's failure, and under
+            // `required` /auth/login refuses every principal in the tenant before
+            // it examines a credential, so a retry only puts the plaintext on the
+            // wire for nothing.
             fwrite(STDERR, "login failed: {$e->getMessage()}\n");
             fwrite(STDERR, "Not retrying with a password.\n");
             exit(1);

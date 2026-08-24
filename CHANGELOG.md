@@ -77,6 +77,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **§23.4 rule 7, contract 1.29 — a failed `KE2` is no longer always final.**
+  `login/start` now answers with an optional `mode` field carrying the tenant's
+  `opaque_mode` (`"optional"` or `"required"`; a disabled tenant still answers
+  `404`), and it is the only thing that decides what `loginOpaque()` does when
+  the envelope does not open. `KE3` is still never sent. Under `"optional"` the
+  call now retries over `login()` with the same credentials and returns that
+  call's outcome — its success, or its error. Under `"required"`, and for a
+  response carrying no `mode` at all (a server older than the field), the
+  failure is an `AuthError` with no retry, exactly as before. An unrecognised
+  value fails closed.
+
+  Without the `optional` branch, enabling `optional` was indistinguishable from
+  enabling `required` with nobody enrolled: every account has no registration
+  record the moment an operator turns OPAQUE on and acquires one only when its
+  password is next set, so treating the failed exchange as final locked out
+  every user of a tenant mid-migration.
+
+  `mode` is **not** downgrade protection and the new `Axiam\Sdk\Opaque\OpaqueMode`
+  says so — a hostile server that wanted the plaintext could answer `404` and
+  get the fallback whatever it put here. `required` is what closes that,
+  server-side, by refusing `/auth/login` before examining any credential.
+- Re-vendored `CONTRACT.md` at contract **1.29** and `openapi.json` at
+  **1.0.0-alpha40**.
+
 - Re-vendor `CONTRACT.md`. Repairs §14.1's link to the `device_login` heading,
   which dropped a hyphen the em dash leaves behind and so rendered as a link
   that went nowhere; the same heading's other two links were already correct.
@@ -152,8 +176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Failure taxonomy for the OPAQUE path: a tenant with OPAQUE disabled, an absent
   `ext-ffi` or library, and a key-stretching function this build cannot perform
   are all `NetworkError` (a caller can fall back, or an operator can act);
-  everything else is `AuthError` and must NOT be retried over `login()`
-  (§23.4 rule 7).
+  everything else is `AuthError` (§23.4 rule 7 — see the contract 1.29 entry
+  above for the one `mode` under which the SDK itself retries over `login()`).
 - Re-vendor `openapi.json` at **1.0.0-alpha32**, matching the server. The
   content was already byte-identical in every path and schema; only
   `info.version` differed, which is what the cross-repo artifact-drift gate
