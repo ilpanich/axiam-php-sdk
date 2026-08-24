@@ -19,13 +19,49 @@ Identity and Authorization Management.
 - **Source:** [github.com/ilpanich/axiam-php-sdk](https://github.com/ilpanich/axiam-php-sdk)
 - **API reference:** [ilpanich.github.io/axiam-php-sdk](https://ilpanich.github.io/axiam-php-sdk/)
 - **License:** Apache-2.0
-- **PHP:** `>=8.1`
+- **PHP:** `>=8.2` — see [Supported PHP versions](#supported-php-versions)
 
 ## Install
 
 ```bash
 composer require axiam/axiam-sdk
 ```
+
+## Supported PHP versions
+
+| | Version | Why this one |
+|---|---|---|
+| **Floor** | 8.2 | The oldest release still receiving security fixes — 8.1 reached end of life on 2025-12-31. This is the `php` constraint in `composer.json`, exposed as `SupportedVersions::MIN_PHP`. |
+| **Newest** | 8.5 | The current release (2025-11), exposed as `SupportedVersions::NEWEST_TESTED_PHP`. |
+
+8.3 and 8.4 sit between the two and are supported.
+
+**The SDK is built against the floor, and runs on everything up to the newest.**
+CI proves each separately: the gating matrix in `sdk-ci-php.yml` runs
+`composer install` and the full PHPUnit suite on **8.2 and on 8.5**. Source-level
+gates that cannot depend on the runtime — `composer validate`, `composer audit`,
+PHPStan, the docblock-coverage gate and the TLS-bypass grep — run once, on the
+floor leg.
+
+> **8.2 reaches end of life on 2026-12-31.** The floor moves to 8.3 then;
+> `tests/VersionPolicyTest.php` asserts the floor is a version that still
+> receives security fixes, so this is a build failure rather than something to
+> remember.
+
+Until this change the declared floor was **untestable by construction**: the
+package published `php: >=8.1`, but the require-dev framework bridges
+(`illuminate/support` ^11, `symfony/*` ^7) require PHP ^8.2 themselves, so
+`composer install` was unsatisfiable on 8.1 and CI died before running a single
+test. The floor was advertised to every Packagist consumer and had never once
+been executed.
+
+`Axiam\Sdk\SupportedVersions` exposes both ends as readable constants — see
+[`examples/version_compatibility.php`](./examples/version_compatibility.php)
+for a runnable preflight. Composer enforces the lower bound at install time,
+but only at install time: `--ignore-platform-reqs`, a `config.platform`
+override, or a `vendor/` tree built on one runtime and deployed onto another
+all get past it, and the mismatch then surfaces as a parse error on the first
+request.
 
 ## Quickstart
 

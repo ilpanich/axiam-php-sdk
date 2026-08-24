@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **PHP 8.5 is now a CI-run runtime.** The gating matrix runs `composer install`
+  and the full PHPUnit suite on the floor **and** on the newest release, rather
+  than on a single version.
+
+- **`Axiam\Sdk\SupportedVersions`** — `MIN_PHP` and `NEWEST_TESTED_PHP` as
+  readable constants. Composer enforces the lower bound at install time, but
+  only at install time: `--ignore-platform-reqs`, a `config.platform` override,
+  or a `vendor/` tree built on one runtime and deployed onto another all get
+  past it, and the mismatch then surfaces as a parse error on the first
+  request. Nothing exposed the upper end at all.
+
+- **`tests/VersionPolicyTest.php`** — a conformance test for the support policy.
+  It binds `composer.json`'s `require.php`, the CI matrix and both
+  `SupportedVersions` constants together, and checks the declared floor against
+  a table of PHP end-of-life dates, so a floor going out of support fails the
+  build on the date it happens rather than whenever somebody next looks.
+
+- **`examples/version_compatibility.php`** — a runnable preflight reporting the
+  running runtime against the declared range, and the presence of the optional
+  `ext-ffi` and `ext-grpc` extensions alongside it.
+
+- **A "Supported PHP versions" section in the README.**
+
+### Changed
+
+- **BREAKING (declared support): `require.php` raised `>=8.1` → `>=8.2`.**
+
+  The old floor was **untestable by construction**, and CI said so in a comment
+  rather than in a failure: the require-dev framework bridges
+  (`illuminate/support` ^11, `symfony/*` ^7) require PHP ^8.2 themselves, so
+  `composer install` was unsatisfiable on 8.1 and the job died before running a
+  single test. The package advertised 8.1 to every Packagist consumer and had
+  never once executed it.
+
+  PHP 8.1 reached end of life on 2025-12-31, so this drops nothing anybody
+  should still be running. All four runtime dependencies (guzzle, php-amqplib,
+  php-jwt, psr/log) resolved on 8.1 and no source change was needed — this
+  corrects a declaration, not an implementation.
+
+- **The gating CI matrix is floor + newest (`8.2`, `8.5`)** rather than a single
+  pinned runtime. Source-level gates that cannot depend on the runtime —
+  `composer validate`, `composer audit`, PHPStan, the docblock-coverage gate and
+  the TLS-bypass grep — run once, on the floor leg.
+
 ## [1.0.0-alpha41] - 2026-08-24
 
 ### Added
