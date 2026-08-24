@@ -843,13 +843,32 @@ Which exception you get is most of what this SDK owns on this path:
 | `ext-ffi` or the library absent | `NetworkError` | a fact about this runtime, raised before any request is sent |
 | server named a KSF this build cannot perform | `NetworkError` | a configuration problem; substituting one would surface as a wrong password |
 | `/start` response missing `ke2` | `NetworkError` | malformed response |
-| envelope did not open / `KE2` did not verify | `AuthError` | the **whole** of the credential check |
+| envelope did not open / `KE2` did not verify, `mode: "required"` or no `mode` | `AuthError` | the **whole** of the credential check |
+| envelope did not open / `KE2` did not verify, `mode: "optional"` | whatever `login()` returns or raises | retried over `login()` first — see below |
 | tenant refuses password login (`login()`) | `AuthzError` | the credentials were never examined |
 
 That `AuthError` covers both halves of the mutual authentication: a wrong password, an account
-that does not exist, and a server that does not hold the record are indistinguishable by design.
-**Nothing is sent to `login/finish` in that case** (§23.4 rule 7), and you must not retry over
-`login()` — that hands the plaintext to an endpoint that just failed to prove it holds the record.
+that does not exist, a server that does not hold the record, and an account with no registration
+record at all are indistinguishable by design. **Nothing is sent to `login/finish` in that case**
+(§23.4 rule 7).
+
+What happens next depends on the `mode` field the `login/start` response carries — the tenant's
+`opaque_mode` — and on nothing else (contract 1.29):
+
+- `"optional"` — `loginOpaque()` **retries over `login()` itself**, with the same credentials,
+  and returns that call's outcome. You do not write this branch; the SDK does. It has to exist:
+  every account has no registration record the moment an operator enables OPAQUE and acquires
+  one only when its password is next set, so treating the failed exchange as final would lock
+  out every user of a tenant for the whole of its migration.
+- `"required"`, and **any response with no `mode` at all** (a server older than the field) —
+  `AuthError`, and you must not retry over `login()` yourself. It would be refused anyway:
+  `required` answers `403 opaque_required` for every principal in the tenant, so the retry would
+  put a plaintext password on the wire for nothing. An unrecognised value is treated the same way.
+
+`mode` is **not** downgrade protection, and do not read it as one: a hostile endpoint that wanted
+the plaintext could simply answer `404`, which sends a caller to `login()` whatever it puts here.
+`required` is what closes that, server-side, by refusing `/auth/login` before it examines any
+credential.
 
 `required` refuses **every** principal in the tenant, not only the enrolled ones. Splitting the
 response on whether an account has a record would turn `/auth/login` into an enumeration oracle

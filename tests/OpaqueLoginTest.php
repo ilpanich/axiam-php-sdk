@@ -37,6 +37,20 @@ final class OpaqueLoginTest extends TestCase
     private const WIRE_KE2 = '6b6532';
     private const WIRE_REGISTRATION_RESPONSE = '726573703a';
 
+    /**
+     * The three paths these tests assert ABOUT rather than merely count.
+     *
+     * §23.4 rule 7 is as much about the request that must not happen as the one that must, and an
+     * exhausted MockHandler queue only proves that *a* second request was not made.
+     */
+    private const OPAQUE_LOGIN_START_PATH = '/api/v1/auth/opaque/login/start';
+
+    /** Where `KE3` would go, and must not, once the envelope has failed to open. */
+    private const LOGIN_FINISH_PATH = '/api/v1/auth/opaque/login/finish';
+
+    /** The plaintext login path §23.4 rule 7 permits only under `mode: "optional"`. */
+    private const PLAINTEXT_LOGIN_PATH = '/api/v1/auth/login';
+
     private FakeOpaqueNative $lib;
 
     /** Minted per run rather than written down; nothing here depends on the value. */
@@ -45,12 +59,23 @@ final class OpaqueLoginTest extends TestCase
     /** @var list<string> the request bodies the fake server saw, in order */
     private array $bodies = [];
 
+    /**
+     * The request PATHS the fake server saw, in order.
+     *
+     * §23.4 rule 7 is as much about the request that must NOT happen as the one that must, and
+     * an empty MockHandler queue only proves *a* second request was not made. This proves WHICH.
+     *
+     * @var list<string>
+     */
+    private array $paths = [];
+
     protected function setUp(): void
     {
         $this->lib = new FakeOpaqueNative();
         OpaqueLibrary::setForTests($this->lib);
         $this->password = 'correct-' . bin2hex(random_bytes(8));
         $this->bodies = [];
+        $this->paths = [];
     }
 
     protected function tearDown(): void
@@ -69,10 +94,11 @@ final class OpaqueLoginTest extends TestCase
         );
     }
 
-    /** Records the body and answers with `$response`. */
+    /** Records the path and body, and answers with `$response`. */
     private function record(Response $response): callable
     {
         return function (RequestInterface $request) use ($response): Response {
+            $this->paths[] = $request->getUri()->getPath();
             $this->bodies[] = (string) $request->getBody();
 
             return $response;
@@ -91,11 +117,22 @@ final class OpaqueLoginTest extends TestCase
             : '"ksf":"' . $ksf . '","memory_kib":19456,"iterations":2,"parallelism":1';
     }
 
-    private static function loginStart(string $ksf = 'argon2id', bool $withKe2 = true): Response
-    {
+    /**
+     * `$mode` is `null` by default — the field is optional on the wire and a server older than
+     * contract 1.29 omits it entirely, which §23.4 rule 7 treats exactly as `required`.
+     */
+    private static function loginStart(
+        string $ksf = 'argon2id',
+        bool $withKe2 = true,
+        ?string $mode = null,
+    ): Response {
         $ke2 = $withKe2 ? '"ke2":"' . self::WIRE_KE2 . '",' : '';
+        $modeField = $mode === null ? '' : '"mode":"' . $mode . '",';
 
-        return self::json(200, '{"opaque_session":"handle-42",' . $ke2 . self::ksfFields($ksf) . '}');
+        return self::json(
+            200,
+            '{"opaque_session":"handle-42",' . $ke2 . $modeField . self::ksfFields($ksf) . '}'
+        );
     }
 
     private static function registerStart(string $ksf = 'argon2id'): Response
@@ -344,6 +381,133 @@ final class OpaqueLoginTest extends TestCase
         } catch (NetworkError) {
             // expected
         }
+
+        self::assertSame(0, $this->lib->statesAlive());
+    }
+
+    // -----------------------------------------------------------------
+    // §23.4 rule 7 -- what a failed KE2 does next, and only `mode` decides
+    // -----------------------------------------------------------------
+
+    public function testOptionalRetriesOverPlaintextLoginAndReturnsItsSuccess(): void
+    {
+        // The migration case, and the reason the clause exists: every account has
+        // no registration record the moment an operator enables OPAQUE, so under
+        // `optional` a failed exchange is the ordinary case. Treating it as final
+        // would lock out the whole tenant.
+        $this->lib->fail('login_finish');
+        $client = $this->client([
+            $this->record(self::loginStart(mode: 'optional')),
+            $this->record(self::loginOk()),
+        ]);
+
+        $result = $client->loginOpaque(self::USER, $this->password);
+
+        self::assertFalse($result->mfaRequired);
+        self::assertSame('11111111-1111-1111-1111-111111111111', $result->userId);
+
+        // The retry is the SDK's OWN plaintext path, not a second hand-rolled call.
+        self::assertSame(self::PLAINTEXT_LOGIN_PATH, $this->paths[1]);
+        $body = $this->decodedBody(1);
+        self::assertSame(self::USER, $body['username_or_email']);
+        self::assertSame($this->password, $body['password']);
+        self::assertSame(self::TENANT, $body['tenant_slug']);
+
+        // KE3 is never sent, whatever happens afterwards.
+        self::assertNotContains(self::LOGIN_FINISH_PATH, $this->paths);
+        self::assertArrayNotHasKey('ke3', $body);
+    }
+
+    public function testOptionalSurfacesThePlaintextRetrysFailureRatherThanTheExchanges(): void
+    {
+        // The retry's outcome IS the call's outcome, in both directions. A 401
+        // there is the ordinary authentication error a caller already handles.
+        $this->lib->fail('login_finish');
+        $client = $this->client([
+            $this->record(self::loginStart(mode: 'optional')),
+            $this->record(new Response(401)),
+        ]);
+
+        try {
+            $client->loginOpaque(self::USER, $this->password);
+            self::fail('expected an AuthError');
+        } catch (AuthError) {
+            // expected
+        }
+
+        self::assertSame(self::PLAINTEXT_LOGIN_PATH, $this->paths[1]);
+        self::assertNotContains(self::LOGIN_FINISH_PATH, $this->paths);
+    }
+
+    public function testRequiredNeverPutsThePlaintextPasswordOnTheWire(): void
+    {
+        // `required` answers 403 opaque_required for EVERY principal in the tenant,
+        // before any credential is examined -- so a retry would be refused anyway,
+        // having sent the password for nothing.
+        $this->lib->fail('login_finish');
+        $client = $this->client([$this->record(self::loginStart(mode: 'required'))]);
+
+        try {
+            $client->loginOpaque(self::USER, $this->password);
+            self::fail('expected an AuthError');
+        } catch (AuthError) {
+            // expected
+        }
+
+        self::assertSame([self::OPAQUE_LOGIN_START_PATH], $this->paths);
+        self::assertNotContains(self::PLAINTEXT_LOGIN_PATH, $this->paths);
+        self::assertNotContains(self::LOGIN_FINISH_PATH, $this->paths);
+    }
+
+    public function testAResponseWithNoModeFieldBehavesExactlyLikeRequired(): void
+    {
+        // A server older than contract 1.29 says nothing here. Silence is not
+        // permission: this fails closed, as it did before the field existed.
+        $this->lib->fail('login_finish');
+        $client = $this->client([$this->record(self::loginStart())]);
+
+        try {
+            $client->loginOpaque(self::USER, $this->password);
+            self::fail('expected an AuthError');
+        } catch (AuthError) {
+            // expected
+        }
+
+        self::assertSame([self::OPAQUE_LOGIN_START_PATH], $this->paths);
+        self::assertNotContains(self::PLAINTEXT_LOGIN_PATH, $this->paths);
+        self::assertNotContains(self::LOGIN_FINISH_PATH, $this->paths);
+    }
+
+    public function testAnUnrecognisedModeFailsClosed(): void
+    {
+        // `mode` is not downgrade protection -- a hostile server wanting the
+        // plaintext would answer 404 -- but a value this SDK does not understand
+        // still gets the conservative branch rather than the permissive one.
+        $this->lib->fail('login_finish');
+        $client = $this->client([$this->record(self::loginStart(mode: 'lenient'))]);
+
+        try {
+            $client->loginOpaque(self::USER, $this->password);
+            self::fail('expected an AuthError');
+        } catch (AuthError) {
+            // expected
+        }
+
+        self::assertSame([self::OPAQUE_LOGIN_START_PATH], $this->paths);
+        self::assertNotContains(self::PLAINTEXT_LOGIN_PATH, $this->paths);
+    }
+
+    public function testTheExchangeIsReleasedOnThePlaintextFallbackPath(): void
+    {
+        // The fallback leaves the try block by a different route than a spent
+        // handle does; the finally still has to have run.
+        $this->lib->fail('login_finish');
+        $client = $this->client([
+            $this->record(self::loginStart(mode: 'optional')),
+            $this->record(self::loginOk()),
+        ]);
+
+        $client->loginOpaque(self::USER, $this->password);
 
         self::assertSame(0, $this->lib->statesAlive());
     }

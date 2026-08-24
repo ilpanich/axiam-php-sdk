@@ -40,6 +40,7 @@ use Axiam\Sdk\Rest\RefreshMiddleware;
 use Axiam\Sdk\Opaque\KsfParams;
 use Axiam\Sdk\Opaque\Opaque;
 use Axiam\Sdk\Opaque\OpaqueEnrollment;
+use Axiam\Sdk\Opaque\OpaqueMode;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\BadResponseException;
@@ -1263,6 +1264,17 @@ final class AxiamClient
      * cannot clear the password — §23.3 rule 8 requires saying so rather than implying a
      * guarantee it cannot keep.
      *
+     * **A failed `KE2` is not always the end (§23.4 rule 7, contract 1.29).** Nothing is ever sent
+     * to `login/finish` when the envelope does not open, but what happens next depends on the
+     * `mode` the `login/start` response named, and on nothing else. Under `"optional"` this method
+     * retries over {@see self::login()} with the same credentials and returns that call's outcome
+     * — its success, or its error. Under `"required"`, and for a response that carried no `mode`
+     * at all (a server older than the field), the failure is an {@see AuthError} and there is no
+     * retry. `optional` is the state a tenant lives in for the whole of a migration: every account
+     * has no registration record the moment OPAQUE is enabled and acquires one only when its
+     * password is next set, so treating the failed exchange as final would lock out every user of
+     * the tenant. See {@see OpaqueMode} for why `mode` is **not** downgrade protection.
+     *
      * @throws NetworkError if the tenant has OPAQUE disabled (the endpoint answers `404` — a
      *                      property of the tenant, not of any user), if `ext-ffi` or
      *                      `libaxiam_opaque_ffi` is absent, or if the server names a
@@ -1272,9 +1284,10 @@ final class AxiamClient
      *                      would stop a caller falling back to {@see self::login()}
      * @throws AuthError    for a wrong password, an account that does not exist, and a server
      *                      that does not hold the record — indistinguishable by design. **Nothing
-     *                      is sent to `login/finish` in that case** (§23.4 rule 7), and a caller
-     *                      must not retry over {@see self::login()}: that hands the plaintext to
-     *                      an endpoint that just failed to prove itself
+     *                      is sent to `login/finish` in that case** (§23.4 rule 7). Raised under
+     *                      `mode: "required"` and under a response with no `mode`; under
+     *                      `"optional"` the exchange is retried over {@see self::login()} first
+     *                      and this carries that call's failure instead
      */
     public function loginOpaque(string $usernameOrEmail, string $password): LoginResult
     {
@@ -1294,11 +1307,41 @@ final class AxiamClient
                 throw NetworkError::fromMessage('OPAQUE: login/start returned no `ke2`');
             }
 
-            $ke3 = $exchange->finish($password, $started['ke2'], KsfParams::fromWire($started));
+            $mode = OpaqueMode::fromWire($started);
+
+            try {
+                $ke3 = $exchange->finish($password, $started['ke2'], KsfParams::fromWire($started));
+            } catch (AuthError $credentialFailure) {
+                // §23.4 rule 7. The envelope failing to open is the whole of the
+                // client's authentication check, so KE3 is never sent -- but it is
+                // NOT always the end of the login. Under `optional` an account with
+                // no registration record is the ordinary case rather than an error:
+                // every account has none the moment an operator enables OPAQUE, and
+                // acquires one only as it next sets a password. Treating the failed
+                // exchange as final there locks out every user of a tenant
+                // mid-migration, which is the state `optional` exists to serve.
+                //
+                // `required` (and an absent `mode`, i.e. a server older than the
+                // field) fails closed: /auth/login answers 403 opaque_required for
+                // every principal in the tenant, so a retry would put a plaintext
+                // password on the wire only to be refused.
+                if (!$mode->allowsPasswordFallback()) {
+                    throw $credentialFailure;
+                }
+
+                $ke3 = null;
+            }
         } finally {
             // A no-op once finish() has spent the handle; the point is the paths
             // where it has not -- a refused KSF, a malformed response.
             $exchange->close();
+        }
+
+        if ($ke3 === null) {
+            // The plaintext path, unmodified -- same body construction, same result
+            // handling, same errors -- so the two logins cannot drift. Its outcome is
+            // this call's outcome, success or failure.
+            return $this->login($usernameOrEmail, $password);
         }
 
         $response = $this->post($this->plainHttp, self::OPAQUE_LOGIN_FINISH_PATH, [
