@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-alpha43] - 2026-08-24
+
 ### Added
+
+- Raise the PHP floor to 8.2 and run the newest release (#50)
 
 - **PHP 8.5 is now a CI-run runtime.** The gating matrix runs `composer install`
   and the full PHPUnit suite on the floor **and** on the newest release, rather
