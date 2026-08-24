@@ -2721,6 +2721,36 @@ Search.appendIndex(
             "summary": "Overrides\u0020the\u0020search\u003A\u0020an\u0020absolute\u0020path\u0020to\u0020the\u0020shared\u0020library.",
             "url": "classes/Axiam-Sdk-Opaque-OpaqueLibrary.html#constant_PATH_ENV"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Opaque\\OpaqueMode",
+            "name": "OpaqueMode",
+            "summary": "The\u0020tenant\u0027s\u0020\u0060opaque_mode\u0060,\u0020as\u0020\u0060login\/start\u0060\u0020reports\u0020it\u0020\u0028CONTRACT.md\u0020\u00A723.4\u0020rule\u00207,\u0020\u00A723.5\u0029.",
+            "url": "classes/Axiam-Sdk-Opaque-OpaqueMode.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Opaque\\OpaqueMode\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Reads\u0020the\u0020optional\u0020\u0060mode\u0060\u0020field\u0020of\u0020a\u0020\u0060\/start\u0060\u0020response,\u0020preserving\u0020absence.",
+            "url": "classes/Axiam-Sdk-Opaque-OpaqueMode.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Opaque\\OpaqueMode\u003A\u003AallowsPasswordFallback\u0028\u0029",
+            "name": "allowsPasswordFallback",
+            "summary": "Whether\u0020a\u0020failed\u0020\u0060KE2\u0060\u0020may\u0020be\u0020retried\u0020over\u0020\u0060POST\u0020\/api\/v1\/auth\/login\u0060\u0020\u0028\u00A723.4\u0020rule\u00207\u0029.",
+            "url": "classes/Axiam-Sdk-Opaque-OpaqueMode.html#method_allowsPasswordFallback"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Opaque\\OpaqueMode\u003A\u003AOPTIONAL",
+            "name": "OPTIONAL",
+            "summary": "Both\u0020login\u0020paths\u0020work\u003B\u0020records\u0020accumulate\u0020as\u0020passwords\u0020are\u0020set.\u0020The\u0020migration\u0020state.",
+            "url": "classes/Axiam-Sdk-Opaque-OpaqueMode.html#constant_OPTIONAL"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Opaque\\OpaqueMode\u003A\u003AREQUIRED",
+            "name": "REQUIRED",
+            "summary": "\u0060\/auth\/login\u0060\u0020answers\u0020\u0060403\u0020opaque_required\u0060\u0020for\u0020every\u0020principal\u0020in\u0020the\u0020tenant.",
+            "url": "classes/Axiam-Sdk-Opaque-OpaqueMode.html#constant_REQUIRED"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Opaque\\OpaqueMode\u003A\u003A\u0024value",
+            "name": "value",
+            "summary": "The\u0020wire\u0020value,\u0020or\u0020\u0060null\u0060\u0020for\u0020a\u0020server\u0020older\u0020than\u0020the\u0020field.",
+            "url": "classes/Axiam-Sdk-Opaque-OpaqueMode.html#property_value"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Opaque\\OpaqueNativeInterface",
             "name": "OpaqueNativeInterface",
             "summary": "The\u0020\u0060libaxiam_opaque_ffi\u0060\u0020C\u0020ABI,\u0020expressed\u0020in\u0020PHP\u0020terms.",
