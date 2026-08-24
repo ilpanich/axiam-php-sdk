@@ -3716,6 +3716,21 @@ Search.appendIndex(
             "summary": "Guard\u002Dslot\u0020kind\u0020for\u0020the\u0020\u00A712\u0020\u0060oidc_refresh\u0060\u0020OAuth2\u0020token\u002Dendpoint\u0020path\n\u0028CONTRACT.md\u0020\u00A79\u0020rule\u00205\u0020\/\u0020F\u002D06\u0029.\u0020Used\u0020by\u0020\u007B\u0040see\u0020\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AoidcRefresh\u0028\u0029\u007D\nso\u0020a\u0020second\u0020concurrent\u0020\u0060oidcRefresh\u0060\u0020caller\u0020can\u0020recognise\u0020the\u0020guard\u0020is\u0020busy\u0020with\nANOTHER\u0020\u0060oidcRefresh\u0060\u0020\u0028same\u0020kind\u0029\u0020and\u0020share\u0020its\u0020single\u0020outcome,\u0020instead\u0020of\nre\u002Dacquiring\u0020the\u0020guard\u0020and\u0020issuing\u0020its\u0020own\u0020wire\u0020call\u0020that\u0020would\u0020replay\u0020an\nalready\u002Dconsumed\u0020\u0028single\u002Duse,\u0020rotating\u0029\u0020refresh\u0020token.",
             "url": "classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_OIDC"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\SupportedVersions",
+            "name": "SupportedVersions",
+            "summary": "The\u0020range\u0020of\u0020PHP\u0020versions\u0020this\u0020SDK\u0020is\u0020built\u0020and\u0020tested\u0020against.",
+            "url": "classes/Axiam-Sdk-SupportedVersions.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\SupportedVersions\u003A\u003AMIN_PHP",
+            "name": "MIN_PHP",
+            "summary": "The\u0020minimum\u0020PHP\u0020version,\u0020as\u0020\u0060major.minor\u0060.",
+            "url": "classes/Axiam-Sdk-SupportedVersions.html#constant_MIN_PHP"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\SupportedVersions\u003A\u003ANEWEST_TESTED_PHP",
+            "name": "NEWEST_TESTED_PHP",
+            "summary": "The\u0020newest\u0020PHP\u0020version\u0020the\u0020SDK\u0020has\u0020a\u0020green\u0020build\u0020against,\u0020as\u0020\u0060major.minor\u0060.",
+            "url": "classes/Axiam-Sdk-SupportedVersions.html#constant_NEWEST_TESTED_PHP"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener",
             "name": "AxiamAccessAttributeListener",
             "summary": "Symfony\u0020CONTRACT.md\u0020\u00A711\u0020declarative\u002Dauthorization\u0020enforcement\u0020listener\u003A\u0020an\n\u0060EventSubscriberInterface\u0060\u0020on\u0020\u0060KernelEvents\u003A\u003ACONTROLLER\u0060\u0020\u2014\u0020the\u0020SAME\u0020extension\npoint\u0020Symfony\u0027s\u0020own\u0020\u0060\u0023\u005BIsGranted\u005D\u0060\u0020attribute\u0020is\u0020enforced\u0020from\n\u0028\u0060Symfony\\Component\\Security\\Http\\EventListener\\IsGrantedAttributeListener\u0060\u0029.",
