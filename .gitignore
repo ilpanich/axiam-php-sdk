@@ -12,3 +12,9 @@ coverage.xml
 # protoc scratch space for `composer grpc-gen` — the stubs it produces are
 # relocated into src/Grpc/Gen/ and committed from there.
 /build/
+
+# Python bytecode from scripts/gen_management.py — the generator is the source,
+# its .pyc is not. A copy of gen_management.cpython-311.pyc was committed once
+# by accident; this keeps it from coming back.
+__pycache__/
+*.pyc
