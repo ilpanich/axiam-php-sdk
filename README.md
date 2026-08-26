@@ -146,7 +146,7 @@ messages after the first connection loss and never recover on its own.
 ## Contract conformance
 
 This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §17, §19, §20,
-§22, §23, §24, §25, §26 (including
+§22, §23, §24, §25, §26, §27 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8) — the binding,
 cross-language behavioral contract every
@@ -1158,6 +1158,111 @@ does not set `require_par`, so such a client cannot authorize any other way (§2
 
 Worked end to end in [`examples/par_login.php`](examples/par_login.php).
 
+## Management API (`Axiam\Sdk\Management`, CONTRACT.md §27)
+
+`$client->management()` is the administrative surface: **146 operations across 24
+namespaces**, generated from the vendored `management-registry.json` and `openapi.json`
+by `scripts/gen_management.py` and committed, so building this package needs no Python.
+CI re-runs the generator with `--check` on every PR, which is what stops the committed
+surface from drifting away from the contract it claims to implement.
+
+```php
+$management = $client->management();
+
+// §27.2 — namespace handles, not 146 flat methods.
+$page = $management->users()->listItems(new PageRequest(0, 50));
+
+// §27.4 rule 4 — `total` is the SERVER's count, not count($page). Confusing the two is
+// how a script silently processes the first fifty of four hundred users.
+printf("%d of %d\n", count($page), $page->total);
+
+// Every page. The walk stops on the first EMPTY page, never on a short one.
+$users = $management->users();
+foreach (ManagementTransport::walk(
+    static fn (PageRequest $p): Page => $users->listItems($p),
+) as $user) { /* ... */ }
+
+// §27.4 rule 5 — name what you mean to change. What you leave unset is OMITTED from the
+// request, not sent as null; on a sparse update those say opposite things.
+$management->users()->update($id, new Models\UpdateUserRequest(status: Models\UserStatus::Locked));
+
+// §27.4 rule 3 — `{org_id}`/`{tenant_id}` come from the client; ->inOrg()/->forTenant()
+// override them for one handle and return a COPY, leaving the original pointing where it did.
+$management->caCertificates()->inOrg($otherOrgId)->listItems();
+```
+
+**Errors (§27.4 rule 7).** Three statuses get a sub-type *inside* the §2 taxonomy, so a
+`catch (AuthzError $e)` written before §27 existed still behaves as it did:
+
+| status | type | parent | why |
+|---|---|---|---|
+| `404` | `NotFoundError` | `AuthzError` | On a multi-tenant surface the server answers `404` for another tenant's object *precisely so* a probing caller cannot enumerate it. Re-drawing that line client-side would undo the protection. |
+| `409` | `ConflictError` | `AuthzError` | §2 already maps `409` there; the sub-type keeps that mapping. |
+| `400`, `422` | `ValidationError` | `NetworkError` | Inherited from §2's `400` row. Carries the server's per-field complaints. |
+
+**Secrets (§27.5).** A one-time secret is `Sensitive`: it prints and `json_encode`s as
+`[SENSITIVE]`, so it cannot reach a log line by accident. The one writer that must send
+one in the clear unwraps it explicitly — `ManagementTransport::encodeBody()` walks the
+body and calls `reveal()`. PHP has no `json_encode` equivalent of Jackson's mixin or
+System.Text.Json's converter precedence, because `JsonSerializable` is consulted on the
+instance and nothing outranks it; making the unwrap explicit is better anyway, since
+there is no precedence rule to remember and exactly one greppable place where a secret
+is revealed.
+
+### Declarative manifests (§27.6, §27.7)
+
+Describe the tenant you want; let the SDK work out the difference.
+
+```php
+$manifest = ManagementManifest::builder()
+    ->permission('docs.read', 'documents:read', 'Read documents')
+    ->role('contractor', 'contractor', 'External', grants: [
+        'docs.read'  => 'allow',
+        'docs.write' => 'deny',   // AXIAM's RBAC is DENY-OVERRIDE, not most-specific-wins
+    ])
+    ->group('externals', 'externals', 'Contractors', roleKeys: ['contractor'])
+    ->build();
+
+$plan = $client->management()->manifest()->plan($manifest);   // writes NOTHING
+if (!$plan->isConverged()) {
+    $report = $client->management()->manifest()->apply($manifest);
+}
+```
+
+Or as attributes, which is the idiom this SDK already uses for §11 and lets a tenant's
+shape live in version control as a type:
+
+```php
+#[ManagedPermission(key: 'docs.read', action: 'documents:read')]
+#[ManagedRole(key: 'contractor', name: 'contractor', grants: ['docs.read' => 'allow'])]
+final class AcmeTenant {}
+
+$manifest = ManifestAttributeReader::read(AcmeTenant::class);
+```
+
+Four properties are worth knowing before you run one against production:
+
+- **`plan()` writes nothing.** It reads and reports. Safe on a schedule, safe in CI.
+- **`apply()` stops at the first failure and does NOT roll back** (§27.7). The returned
+  `ApplyReport` names what landed, what failed and what was never attempted — a partial
+  apply is a state you resume from, and an automatic rollback would fire a second wave of
+  writes exactly when the server is telling you something is wrong.
+- **Ordering is derived, not declared.** By kind, then dependency, then key. The tie-break
+  on key is what makes a plan stable across runs.
+- **Omission is never deletion.** There is no `ChangeAction::Delete` at all, so an
+  incomplete manifest cannot become a destructive one.
+
+An incoherent manifest — a dangling reference, a cycle, a duplicate key — is refused
+*before* the first request, because discovering it halfway through an un-rollback-able
+apply is strictly worse.
+
+See `examples/management_basics.php`, `examples/management_manifest.php`,
+`examples/management_manifest_attributes.php`, and
+`examples/device_mtls_provisioning.php` — the last a full operator/device split that mints
+a `Device` certificate from the tenant's signing CA, binds it to a service account, writes
+the one-time private key at `0600`, and then authenticates as the device over §6.1 mutual
+TLS with no password anywhere.
+
 ## TLS policy
 
 Guzzle's `verify` option is **always `true`** (strict TLS, system trust roots) unless a
@@ -1225,6 +1330,10 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/webauthn_passkeys.php`](examples/webauthn_passkeys.php) — CONTRACT.md §24: both ceremonies, the §24.6a JSON bridge to the browser half, and the §24.6b rule 5 failure classification.
 - [`examples/account_lifecycle.php`](examples/account_lifecycle.php) — CONTRACT.md §25: the third `login()` outcome, voluntary and forced TOTP enrolment, email verification, and the password-reset triple.
 - [`examples/par_login.php`](examples/par_login.php) — CONTRACT.md §26: the 201 answer, the two-parameter redirect URL, and the exchange that follows.
+- [`examples/management_basics.php`](examples/management_basics.php) — CONTRACT.md §27: namespace handles, one page vs. every page, sparse updates, per-handle scoping, and the three error classifications.
+- [`examples/management_manifest.php`](examples/management_manifest.php) — CONTRACT.md §27.6/§27.7: plan (which writes nothing) then apply (which stops at the first failure and does not roll back), including a `deny` grant.
+- [`examples/management_manifest_attributes.php`](examples/management_manifest_attributes.php) — the same manifest declared with `#[Managed*]` attributes instead of the builder.
+- [`examples/device_mtls_provisioning.php`](examples/device_mtls_provisioning.php) — the operator/device split: mint a `Device` certificate from the tenant's signing CA, bind it to a service account, write the one-time private key at `0600`, then authenticate as the device over §6.1 mutual TLS.
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).
 
 ## Testing

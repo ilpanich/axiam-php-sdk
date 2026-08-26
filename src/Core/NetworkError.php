@@ -19,8 +19,15 @@ use Psr\Http\Message\ResponseInterface;
  * structurally prevents the token-leak-via-error class of bug first found in the
  * TypeScript sibling SDK (Phase 17 CR-04, its `src/core/errorMapper.ts`
  * `sanitizeAxiosError`) and mirrored by every later sibling SDK's `NetworkError`.
+ * Not `final`, so CONTRACT.md §27.4 rule 7 can classify `400`/`422` as
+ * {@see \Axiam\Sdk\Management\ValidationError} inside this type — §2's own `400` row
+ * already lands here, and the sub-type keeps that mapping. **The redact-before-wrap
+ * invariant above is untouched by that**: the constructor a subclass can reach takes a
+ * `string` and a `\Throwable`, never a {@see ResponseInterface}, so a subclass has no
+ * more access to a live response than any other caller — {@see self::fromResponse()}
+ * remains the only path from a response into this type.
  */
-final class NetworkError extends AxiamException
+class NetworkError extends AxiamException
 {
     /** @var list<string> lowercase header names whose VALUES are never echoed. */
     private const SENSITIVE_HEADERS = ['set-cookie', 'authorization', 'cookie'];
@@ -37,7 +44,13 @@ final class NetworkError extends AxiamException
      */
     public ?float $retryAfterMs = null;
 
-    private function __construct(string $message, ?\Throwable $previous = null)
+    /**
+     * Builds the exception from an ALREADY-SANITIZED message. `protected` rather than
+     * `private` so §27.4 rule 7's {@see \Axiam\Sdk\Management\ValidationError} can
+     * extend this type; it accepts no {@see ResponseInterface}, so widening it does not
+     * widen what a subclass can reach (see class doc).
+     */
+    protected function __construct(string $message, ?\Throwable $previous = null)
     {
         // $previous, when given, MUST already be sanitized by the caller (a fresh
         // \RuntimeException carrying only a redacted summary string) — never the raw

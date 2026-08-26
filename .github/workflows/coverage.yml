@@ -45,9 +45,18 @@ jobs:
       # uploading to Coveralls alone lets any regression merge green — a drop to any
       # % still passes this workflow. Parse coverage.xml's own <metrics> totals (the
       # same numbers `--coverage-text` prints) and fail the job below the floor.
-      # Floor set at achieved (96.92%) minus ~2 points, rounded down, so the very
-      # first run of this gate passes; ratchet upward as coverage improves.
-      - name: Enforce minimum line coverage (94%)
+      # Ratcheted 94 -> 95 on 2026-08-26, when CONTRACT.md §27 landed.
+      #
+      # The previous comment here cited 96.92% as "achieved", which had gone stale: the
+      # repository grew after the gate was written and the floor was never moved, so the
+      # real figure immediately before §27 was 94.45% — a point and a half above a floor
+      # everyone believed was two points below. Measured on the commit itself rather than
+      # trusted, this time.
+      #
+      # §27 raised it to 95.93%: the management surface is 97.22% of its own 4349
+      # statements and pulled the average up. The floor follows, so the headroom is real
+      # rather than inherited from a number nobody re-checked.
+      - name: Enforce minimum line coverage (95%)
         run: |
           php -r '
             $xml = simplexml_load_file("coverage.xml");
@@ -55,7 +64,7 @@ jobs:
             $covered = (int) $metrics["coveredstatements"];
             $total = (int) $metrics["statements"];
             $pct = $total > 0 ? ($covered / $total) * 100 : 0;
-            $floor = 94.0;
+            $floor = 95.0;
             printf("Line coverage: %.2f%% (%d/%d), floor: %.2f%%\n", $pct, $covered, $total, $floor);
             if ($pct < $floor) {
               fwrite(STDERR, sprintf("FAIL: line coverage %.2f%% is below the %.2f%% floor\n", $pct, $floor));
