@@ -113,6 +113,27 @@ jobs:
         if: matrix.php == '8.2'
         run: php tools/docblock-coverage.php
 
+      # The §27 examples are type-checked, not just syntax-checked. `php -l` proves a
+      # file parses, which is worth very little for an example: an example's whole job is
+      # to show the API being used correctly, and the ways it goes wrong — a renamed
+      # method, a parameter that moved, an enum case that never existed — all parse
+      # perfectly. Writing these four surfaced exactly that: a `listSigningCas($orgId,
+      # $tenantId)` whose second parameter is really the page, a `Page` treated as an
+      # array, and a `UserStatus::Suspended` the enum does not have.
+      #
+      # Scoped to these four rather than all of examples/: the Laravel and Symfony app
+      # scaffolds reference framework globals that are not installed here, and making
+      # them analysable is a separate change from adding a management surface.
+      - name: PHPStan — §27 examples
+        if: matrix.php == '8.2'
+        run: |
+          vendor/bin/phpstan analyse --level=6 --memory-limit=512M --no-progress \
+            --autoload-file=vendor/autoload.php \
+            examples/management_basics.php \
+            examples/management_manifest.php \
+            examples/management_manifest_attributes.php \
+            examples/device_mtls_provisioning.php
+
       # D-12/SC#4: strict TLS is always on; the ONLY escape hatch is the
       # additive `customCa` CA-bundle-path pattern — there must be no Guzzle
       # `verify => false` (or equivalent TLS-verification-disable) surface
@@ -135,6 +156,33 @@ jobs:
             exit 1
           fi
           echo "TLS-bypass gate passed — no disallowed usage found."
+
+  management-drift-check:
+    name: §27 management surface drift-check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      # The §27 surface — 145 models, 24 namespace handles, and three generated test
+      # suites — is produced by scripts/gen_management.py from the VENDORED
+      # management-registry.json and openapi.json, and the output is committed so a
+      # consumer never needs Python to build this package.
+      #
+      # Committed generated code is only trustworthy if something checks it is current.
+      # The registry is maintained in ilpanich/axiam and re-vendored here; without this
+      # gate, a re-vendor that adds an operation would leave the SDK silently shipping a
+      # surface that disagrees with the contract it claims to implement — and every test
+      # would still pass, because the tests are generated from the same stale copy.
+      #
+      # No PHP, no dependencies, and deliberately no setup-python: the generator imports
+      # only the standard library, and ubuntu-latest ships a python3 new enough to run it.
+      # Adding an action here would mean pinning one more third-party SHA for a step whose
+      # entire job is `python3 file.py --check`.
+      - name: Verify the committed §27 surface matches the vendored contract
+        run: |
+          python3 --version
+          python3 scripts/gen_management.py --check
 
   protoc-drift-check:
     name: protoc drift-check (D-03)
