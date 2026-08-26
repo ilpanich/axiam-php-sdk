@@ -501,6 +501,221 @@ final class AxiamClient
         );
     }
 
+    // ---- CONTRACT.md §27.2/§27.3: the namespace handles, on the client ----
+    //
+    // `$client->roles()`, `$client->serviceAccounts()->rotateSecret($id)` -- the form
+    // §27.3's PHP row shows. `management()` above reaches the same handles behind one
+    // accessor, which §27.2 rule 4 makes the ADDITIONAL one ("SHOULD additionally be
+    // reachable behind one accessor"); shipping only that had the two the wrong way
+    // round, with the optional form present and the one the naming map specifies absent.
+    //
+    // Each forwards to management(), so rule 4's "where an SDK offers both, the two MUST
+    // return equivalent handles" holds structurally rather than by two code paths
+    // agreeing to stay in step.
+
+    /**
+     * Organizations an SDK client may read and configure. Creation and deletion are outside
+     * the SDK boundary (§27.0).
+     */
+    public function organizations(): \Axiam\Sdk\Management\OrganizationsApi
+    {
+        return $this->management()->organizations();
+    }
+
+    /**
+     * Tenants within an organization -- the isolation boundary every other namespace is scoped
+     * to.
+     */
+    public function tenants(): \Axiam\Sdk\Management\TenantsApi
+    {
+        return $this->management()->tenants();
+    }
+
+    /**
+     * Users within the client's tenant, and the administrative side of their second factor and
+     * lockout state.
+     */
+    public function users(): \Axiam\Sdk\Management\UsersApi
+    {
+        return $this->management()->users();
+    }
+
+    /**
+     * Named collections of users. Roles assigned to a group are inherited by every member.
+     */
+    public function groups(): \Axiam\Sdk\Management\GroupsApi
+    {
+        return $this->management()->groups();
+    }
+
+    /**
+     * Roles, their permission sets, and their assignment to users and groups.
+     */
+    public function roles(): \Axiam\Sdk\Management\RolesApi
+    {
+        return $this->management()->roles();
+    }
+
+    /**
+     * Permissions -- an action on a resource, optionally narrowed by a scope.
+     */
+    public function permissions(): \Axiam\Sdk\Management\PermissionsApi
+    {
+        return $this->management()->permissions();
+    }
+
+    /**
+     * The resource hierarchy role assignments cascade down.
+     */
+    public function resources(): \Axiam\Sdk\Management\ResourcesApi
+    {
+        return $this->management()->resources();
+    }
+
+    /**
+     * Sub-resource granularity, always addressed under their resource.
+     */
+    public function scopes(): \Axiam\Sdk\Management\ScopesApi
+    {
+        return $this->management()->scopes();
+    }
+
+    /**
+     * Machine identities, their secrets, and the certificate a device-bound one authenticates
+     * with.
+     */
+    public function serviceAccounts(): \Axiam\Sdk\Management\ServiceAccountsApi
+    {
+        return $this->management()->serviceAccounts();
+    }
+
+    /**
+     * End-entity X.509 certificates -- the ones issued to users, services and IoT devices.
+     */
+    public function certificates(): \Axiam\Sdk\Management\CertificatesApi
+    {
+        return $this->management()->certificates();
+    }
+
+    /**
+     * Organization CAs and the per-tenant signing CAs chained beneath them.
+     */
+    public function caCertificates(): \Axiam\Sdk\Management\CaCertificatesApi
+    {
+        return $this->management()->caCertificates();
+    }
+
+    /**
+     * OpenPGP keys used for audit signing and encrypted data export.
+     */
+    public function pgpKeys(): \Axiam\Sdk\Management\PgpKeysApi
+    {
+        return $this->management()->pgpKeys();
+    }
+
+    /**
+     * Outbound event notifications. Delivery signatures are verified with the §13 helper,
+     * which this namespace configures.
+     */
+    public function webhooks(): \Axiam\Sdk\Management\WebhooksApi
+    {
+        return $this->management()->webhooks();
+    }
+
+    /**
+     * Registered OAuth2/OIDC clients -- the registration half of what §12, §21 and §26 then
+     * speak to.
+     */
+    public function oauth2Clients(): \Axiam\Sdk\Management\Oauth2ClientsApi
+    {
+        return $this->management()->oauth2Clients();
+    }
+
+    /**
+     * Upstream IdP configuration and the per-user links it produces.
+     */
+    public function federation(): \Axiam\Sdk\Management\FederationApi
+    {
+        return $this->management()->federation();
+    }
+
+    /**
+     * Which events raise a notification, and to whom.
+     */
+    public function notificationRules(): \Axiam\Sdk\Management\NotificationRulesApi
+    {
+        return $this->management()->notificationRules();
+    }
+
+    /**
+     * Transactional-mail transport, configurable at organization level and overridable per
+     * tenant.
+     */
+    public function emailConfig(): \Axiam\Sdk\Management\EmailConfigApi
+    {
+        return $this->management()->emailConfig();
+    }
+
+    /**
+     * Effective settings, and the organization/tenant layers they resolve from.
+     */
+    public function settings(): \Axiam\Sdk\Management\SettingsApi
+    {
+        return $this->management()->settings();
+    }
+
+    /**
+     * Bearer tokens for the SCIM 2.0 provisioning endpoint.
+     */
+    public function scimTokens(): \Axiam\Sdk\Management\ScimTokensApi
+    {
+        return $this->management()->scimTokens();
+    }
+
+    /**
+     * Registration of §22 AMQP extension actors -- the admin surface §22.9 describes, which no
+     * SDK could previously reach.
+     */
+    public function reactors(): \Axiam\Sdk\Management\ReactorsApi
+    {
+        return $this->management()->reactors();
+    }
+
+    /**
+     * Per-tenant attestation policy governing the §24 ceremonies, and the compliance report
+     * over it.
+     */
+    public function webauthnPolicy(): \Axiam\Sdk\Management\WebauthnPolicyApi
+    {
+        return $this->management()->webauthnPolicy();
+    }
+
+    /**
+     * Append-only audit log, read-only by construction.
+     */
+    public function audit(): \Axiam\Sdk\Management\AuditApi
+    {
+        return $this->management()->audit();
+    }
+
+    /**
+     * GDPR self-service: the authenticated account's own export and erasure. Scoped to the
+     * caller, never to another user.
+     */
+    public function privacy(): \Axiam\Sdk\Management\PrivacyApi
+    {
+        return $this->management()->privacy();
+    }
+
+    /**
+     * Deployment-level probes and FIDO metadata state. Unauthenticated where the server leaves
+     * them so.
+     */
+    public function platform(): \Axiam\Sdk\Management\PlatformApi
+    {
+        return $this->management()->platform();
+    }
+
     /**
      * The organization UUID §27 routes substitute for `{org_id}`, or `null` when the
      * client was constructed without one (§27.4 rule 3).

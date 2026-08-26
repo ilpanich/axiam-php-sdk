@@ -1160,17 +1160,28 @@ Worked end to end in [`examples/par_login.php`](examples/par_login.php).
 
 ## Management API (`Axiam\Sdk\Management`, CONTRACT.md §27)
 
-`$client->management()` is the administrative surface: **146 operations across 24
-namespaces**, generated from the vendored `management-registry.json` and `openapi.json`
-by `scripts/gen_management.py` and committed, so building this package needs no Python.
-CI re-runs the generator with `--check` on every PR, which is what stops the committed
-surface from drifting away from the contract it claims to implement.
+The administrative surface: **146 operations across 24 namespaces**, generated from the
+vendored `management-registry.json` and `openapi.json` by `scripts/gen_management.py` and
+committed, so building this package needs no Python. CI re-runs the generator with
+`--check` on every PR, which is what stops the committed surface from drifting away from
+the contract it claims to implement.
+
+The namespace handles sit **directly on the client** — `$client->roles()`,
+`$client->serviceAccounts()->rotateSecret($id)`, the form §27.3's PHP row shows — and the
+same 24 handles are also reachable behind one accessor, `$client->management()` (§27.2
+rule 4), which reads better where a call site is already dense with §1 methods. The two
+forms are **equivalent**: the direct accessors forward to `management()`, so rule 4's
+"where an SDK offers both, the two MUST return equivalent handles" holds structurally
+rather than by two code paths agreeing, and the suite asserts it by comparing the method,
+path and query each actually puts on the wire.
 
 ```php
-$management = $client->management();
-
 // §27.2 — namespace handles, not 146 flat methods.
-$page = $management->users()->listItems(new PageRequest(0, 50));
+$page = $client->users()->listItems(new PageRequest(0, 50));
+
+// Or reach the same handles behind one accessor.
+$management = $client->management();
+$same = $management->users()->listItems(new PageRequest(0, 50));
 
 // §27.4 rule 4 — `total` is the SERVER's count, not count($page). Confusing the two is
 // how a script silently processes the first fifty of four hundred users.
