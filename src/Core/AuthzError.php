@@ -13,8 +13,14 @@ namespace Axiam\Sdk\Core;
  * server's `authorization_denied` body reports them: `action` is present when known;
  * `resourceId` is present only for a resource-scoped denial. Both may be `null` when
  * the server did not report them (or for a non-authz-shaped error).
+ * Not `final`, so CONTRACT.md §27.4 rule 7 can classify a `404` as
+ * {@see \Axiam\Sdk\Management\NotFoundError} and a `409` as
+ * {@see \Axiam\Sdk\Management\ConflictError} *inside* this type rather than beside
+ * it. A `catch (AuthzError $e)` written before §27 existed still catches both, which is
+ * exactly the property that rule asks for: the §2 taxonomy stays three top-level types,
+ * and these are sub-types of one of them rather than a fourth peer.
  */
-final class AuthzError extends AxiamException
+class AuthzError extends AxiamException
 {
     /**
      * @param string      $message    Human-readable denial reason from the server.

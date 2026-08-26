@@ -140,6 +140,19 @@ final class AxiamClient
 
     private readonly ?string $orgId;
 
+    /**
+     * The tenant UUID (`$oidcTenantId`), kept because `$tenant` above is a SLUG.
+     * CONTRACT.md §27 routes substitute `{tenant_id}`, which is the UUID form — a slug
+     * in that position is a 404 the caller cannot diagnose.
+     */
+    private readonly ?string $tenantUuid;
+
+    /** §16.1 retry switch, forwarded to the §27 management transport. */
+    private readonly bool $retryEnabled;
+
+    /** §27 management surface. Built on first use; see {@see self::management()}. */
+    private ?\Axiam\Sdk\Management\ManagementApi $management = null;
+
     private readonly LoggerInterface $logger;
 
     private readonly Session $session;
@@ -296,6 +309,8 @@ final class AxiamClient
         $this->tenant = $tenant;
         $this->orgSlug = $orgSlug;
         $this->orgId = $orgId;
+        $this->tenantUuid = $oidcTenantId;
+        $this->retryEnabled = $retryEnabled;
         $this->logger = $logger ?? new NullLogger();
 
         // §6.1/§7: hold the private key behind Sensitive so it can never leak via debug/log
@@ -455,6 +470,62 @@ final class AxiamClient
     {
         $this->closed = true;
         $this->decisionMemo->clear();
+    }
+
+    /**
+     * The CONTRACT.md §27 management surface: 146 operations across 24 namespaces.
+     *
+     * `$client->management()->users()->listItems()`. Built on the same Guzzle client that
+     * carries {@see \Axiam\Sdk\Rest\AuthMiddleware} and
+     * {@see \Axiam\Sdk\Rest\RefreshMiddleware}, so §27.8's "the generated layer sits on
+     * the SDK's existing request path" holds by construction rather than by convention.
+     *
+     * Memoised: the returned object holds only the transport and the client's default
+     * scope, and handing back a new one per call would make `management() !==
+     * management()` for no benefit. This is not a §27.4 rule 10 violation — that rule
+     * forbids caching RESPONSES, and nothing here caches one.
+     */
+    public function management(): \Axiam\Sdk\Management\ManagementApi
+    {
+        $this->ensureOpen();
+
+        return $this->management ??= new \Axiam\Sdk\Management\ManagementApi(
+            new \Axiam\Sdk\Management\ManagementTransport(
+                $this->authzHttp,
+                $this->session,
+                $this->telemetry,
+                $this->retryEnabled,
+            ),
+            $this->orgId,
+            $this->tenantUuid,
+        );
+    }
+
+    /**
+     * The organization UUID §27 routes substitute for `{org_id}`, or `null` when the
+     * client was constructed without one (§27.4 rule 3).
+     *
+     * Public because §27 has routes where `{org_id}` names the entity being ADMINISTERED
+     * rather than the calling context — the signing CAs under `caCertificates` — and
+     * those take it as an ordinary argument. Without this accessor a caller had no way to
+     * pass the same identifier the implicit routes use.
+     */
+    public function resolvedOrgId(): ?string
+    {
+        return $this->orgId;
+    }
+
+    /**
+     * The tenant UUID §27 routes substitute for `{tenant_id}`, or `null` when the client
+     * was constructed without one (§27.4 rule 3).
+     *
+     * This is the UUID, never the `$tenant` SLUG the client is constructed with: §5's
+     * `X-Tenant-ID` header takes the slug, but a `{tenant_id}` path segment takes the
+     * UUID, and the two are not interchangeable.
+     */
+    public function resolvedTenantId(): ?string
+    {
+        return $this->tenantUuid;
     }
 
     /**

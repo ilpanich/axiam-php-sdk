@@ -93,6 +93,12 @@ final class RetryPolicy
      * @param callable(int): T        $operation     The side-effect-free operation.
      * @param (callable(): float)|null $jitter       Injected jitter draw, for tests.
      * @param (callable(float): void)|null $sleep    Injected sleep, for tests.
+     * @param (callable(NetworkError): bool)|null $retryable Decides whether a caught
+     *        {@see NetworkError} is eligible at all; `null` keeps the previous
+     *        behaviour of retrying every one. CONTRACT.md §27 needs this for two
+     *        reasons: §27.4 rule 8 retries only `GET`, and §27.4 rule 7 puts
+     *        {@see \Axiam\Sdk\Management\ValidationError} UNDER `NetworkError`, so a
+     *        body the server has already rejected would otherwise be sent three times.
      * @return T
      */
     public static function execute(
@@ -102,6 +108,7 @@ final class RetryPolicy
         callable $operation,
         ?callable $jitter = null,
         ?callable $sleep = null,
+        ?callable $retryable = null,
     ): mixed {
         $attempts = $enabled ? self::MAX_ATTEMPTS : 1;
         $draw = $jitter ?? static fn (): float => mt_rand() / mt_getrandmax();
@@ -115,7 +122,7 @@ final class RetryPolicy
             try {
                 return $operation($attempt);
             } catch (NetworkError $e) {
-                if ($attempt >= $attempts) {
+                if ($attempt >= $attempts || ($retryable !== null && !$retryable($e))) {
                     throw $e;
                 }
 
