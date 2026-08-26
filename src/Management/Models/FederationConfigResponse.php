@@ -49,16 +49,16 @@ final class FederationConfigResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            $data['attribute_map'],
-            (string) $data['client_id'],
-            (string) $data['created_at'],
-            (bool) $data['enabled'],
-            (string) $data['id'],
-            (string) $data['protocol'],
-            (string) $data['provider'],
-            (string) $data['tenant_id'],
-            TokenExchangeTrustResponse::fromArray((array) $data['token_exchange']),
-            (string) $data['updated_at'],
+            ModelDecode::need($data, 'attribute_map', self::class),
+            (string) ModelDecode::need($data, 'client_id', self::class),
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (bool) ModelDecode::need($data, 'enabled', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'protocol', self::class),
+            (string) ModelDecode::need($data, 'provider', self::class),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            TokenExchangeTrustResponse::fromArray((array) ModelDecode::need($data, 'token_exchange', self::class)),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
             isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
         );
     }

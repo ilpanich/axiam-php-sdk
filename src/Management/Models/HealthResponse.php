@@ -29,7 +29,7 @@ final class HealthResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['status'],
+            (string) ModelDecode::need($data, 'status', self::class),
         );
     }
 

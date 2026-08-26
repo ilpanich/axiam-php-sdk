@@ -35,10 +35,10 @@ final class CreateNotificationRuleRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['description'],
-            array_values(array_map(static fn (mixed $v): NotificationEventType => NotificationEventType::fromWire((string) $v), (array) $data['events'])),
-            (string) $data['name'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['recipient_emails'])),
+            (string) ModelDecode::need($data, 'description', self::class),
+            array_values(array_map(static fn (mixed $v): NotificationEventType => NotificationEventType::fromWire((string) $v), (array) ModelDecode::need($data, 'events', self::class))),
+            (string) ModelDecode::need($data, 'name', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'recipient_emails', self::class))),
         );
     }
 

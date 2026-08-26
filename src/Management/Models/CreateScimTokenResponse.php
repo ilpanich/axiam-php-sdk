@@ -51,15 +51,15 @@ final class CreateScimTokenResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (string) $data['created_by'],
-            (string) $data['expires_at'],
-            (string) $data['id'],
-            (string) $data['name'],
-            ScimTokenStatus::fromWire((string) $data['status']),
-            (string) $data['tenant_id'],
-            (string) $data['user_id'],
-            new \Axiam\Sdk\Core\Sensitive((string) $data['provisioning_token']),
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'created_by', self::class),
+            (string) ModelDecode::need($data, 'expires_at', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            ScimTokenStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'user_id', self::class),
+            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'provisioning_token', self::class)),
             isset($data['last_used_at']) ? (string) $data['last_used_at'] : null,
             isset($data['revoked_at']) ? (string) $data['revoked_at'] : null,
         );

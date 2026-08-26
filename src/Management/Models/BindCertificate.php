@@ -29,7 +29,7 @@ final class BindCertificate implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['certificate_id'],
+            (string) ModelDecode::need($data, 'certificate_id', self::class),
         );
     }
 

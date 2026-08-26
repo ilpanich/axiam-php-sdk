@@ -33,9 +33,9 @@ final class GrantedScope implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['id'],
-            (string) $data['name'],
-            (string) $data['resource_id'],
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            (string) ModelDecode::need($data, 'resource_id', self::class),
         );
     }
 

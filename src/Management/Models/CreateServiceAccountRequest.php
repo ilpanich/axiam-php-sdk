@@ -32,7 +32,7 @@ final class CreateServiceAccountRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['name'],
+            (string) ModelDecode::need($data, 'name', self::class),
             isset($data['description']) ? (string) $data['description'] : null,
         );
     }

@@ -47,10 +47,10 @@ final class ComplianceReportEntry implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (bool) $data['compliant'],
-            (string) $data['credential_id'],
-            (string) $data['name'],
-            (string) $data['user_id'],
+            (bool) ModelDecode::need($data, 'compliant', self::class),
+            (string) ModelDecode::need($data, 'credential_id', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            (string) ModelDecode::need($data, 'user_id', self::class),
             isset($data['aaguid']) ? (string) $data['aaguid'] : null,
             isset($data['authenticator_name']) ? (string) $data['authenticator_name'] : null,
             isset($data['reason']) ? (string) $data['reason'] : null,

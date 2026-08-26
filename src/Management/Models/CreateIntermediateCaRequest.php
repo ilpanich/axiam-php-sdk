@@ -35,10 +35,10 @@ final class CreateIntermediateCaRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            KeyAlgorithm::fromWire((string) $data['key_algorithm']),
-            (string) $data['parent_ca_id'],
-            (string) $data['subject'],
-            (int) $data['validity_days'],
+            KeyAlgorithm::fromWire((string) ModelDecode::need($data, 'key_algorithm', self::class)),
+            (string) ModelDecode::need($data, 'parent_ca_id', self::class),
+            (string) ModelDecode::need($data, 'subject', self::class),
+            (int) ModelDecode::need($data, 'validity_days', self::class),
         );
     }
 

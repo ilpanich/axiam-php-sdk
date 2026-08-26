@@ -43,13 +43,13 @@ final class ServiceAccountResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['client_id'],
-            (string) $data['created_at'],
-            (string) $data['id'],
-            (string) $data['name'],
-            UserStatus::fromWire((string) $data['status']),
-            (string) $data['tenant_id'],
-            (string) $data['updated_at'],
+            (string) ModelDecode::need($data, 'client_id', self::class),
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            UserStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
             isset($data['description']) ? (string) $data['description'] : null,
         );
     }

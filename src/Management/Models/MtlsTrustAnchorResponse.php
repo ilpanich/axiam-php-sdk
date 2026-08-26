@@ -36,10 +36,10 @@ final class MtlsTrustAnchorResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['ca_certificate_id'],
-            (string) $data['message'],
-            (bool) $data['mtls_trust_anchor'],
-            (bool) $data['restart_required'],
+            (string) ModelDecode::need($data, 'ca_certificate_id', self::class),
+            (string) ModelDecode::need($data, 'message', self::class),
+            (bool) ModelDecode::need($data, 'mtls_trust_anchor', self::class),
+            (bool) ModelDecode::need($data, 'restart_required', self::class),
         );
     }
 

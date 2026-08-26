@@ -49,15 +49,15 @@ final class GeneratedPgpKey implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            PgpKeyAlgorithm::fromWire((string) $data['algorithm']),
-            (string) $data['created_at'],
-            (string) $data['fingerprint'],
-            (string) $data['id'],
-            (string) $data['name'],
-            (string) $data['public_key_armored'],
-            PgpKeyPurpose::fromWire((string) $data['purpose']),
-            PgpKeyStatus::fromWire((string) $data['status']),
-            (string) $data['tenant_id'],
+            PgpKeyAlgorithm::fromWire((string) ModelDecode::need($data, 'algorithm', self::class)),
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'fingerprint', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            (string) ModelDecode::need($data, 'public_key_armored', self::class),
+            PgpKeyPurpose::fromWire((string) ModelDecode::need($data, 'purpose', self::class)),
+            PgpKeyStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
             isset($data['private_key_armored']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['private_key_armored']) : null,
         );
     }

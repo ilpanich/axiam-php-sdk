@@ -36,9 +36,9 @@ final class CreateWebhookRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['events'])),
-            new \Axiam\Sdk\Core\Sensitive((string) $data['secret']),
-            (string) $data['url'],
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'events', self::class))),
+            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'secret', self::class)),
+            (string) ModelDecode::need($data, 'url', self::class),
             isset($data['retry_policy']) ? RetryPolicy::fromArray((array) $data['retry_policy']) : null,
         );
     }

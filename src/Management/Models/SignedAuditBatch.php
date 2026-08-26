@@ -40,12 +40,12 @@ final class SignedAuditBatch implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['batch_id'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['entry_ids'])),
-            (string) $data['signature_armored'],
-            (string) $data['signed_at'],
-            (string) $data['signing_key_id'],
-            (string) $data['tenant_id'],
+            (string) ModelDecode::need($data, 'batch_id', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'entry_ids', self::class))),
+            (string) ModelDecode::need($data, 'signature_armored', self::class),
+            (string) ModelDecode::need($data, 'signed_at', self::class),
+            (string) ModelDecode::need($data, 'signing_key_id', self::class),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
         );
     }
 

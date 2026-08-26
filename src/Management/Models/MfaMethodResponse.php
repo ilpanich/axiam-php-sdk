@@ -37,10 +37,10 @@ final class MfaMethodResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (string) $data['method_id'],
-            MfaMethodType::fromWire((string) $data['method_type']),
-            (string) $data['name'],
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'method_id', self::class),
+            MfaMethodType::fromWire((string) ModelDecode::need($data, 'method_type', self::class)),
+            (string) ModelDecode::need($data, 'name', self::class),
             isset($data['last_used_at']) ? (string) $data['last_used_at'] : null,
         );
     }

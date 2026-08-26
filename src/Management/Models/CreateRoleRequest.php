@@ -33,9 +33,9 @@ final class CreateRoleRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['description'],
-            (bool) $data['is_global'],
-            (string) $data['name'],
+            (string) ModelDecode::need($data, 'description', self::class),
+            (bool) ModelDecode::need($data, 'is_global', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
         );
     }
 

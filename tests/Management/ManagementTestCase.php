@@ -28,6 +28,20 @@ abstract class ManagementTestCase extends TestCase
 
     protected MockHandler $handler;
 
+    /** How many responses were queued up front, so sent-count can be derived. */
+    private int $queued = 0;
+
+    /**
+     * Every request that reached the transport, in order.
+     *
+     * `MockHandler` is final and keeps only the LAST request, which is not enough to
+     * assert things like "plan() issued no writes". Wrapping it in a recording callable
+     * is what makes that assertion real rather than a spot check on the final call.
+     *
+     * @var list<RequestInterface>
+     */
+    protected array $requests = [];
+
     /**
      * A signed-in client whose next response is `$status`/`$body`.
      *
@@ -48,12 +62,15 @@ abstract class ManagementTestCase extends TestCase
                 : new Response($status, ['Content-Type' => 'application/json'], (string) json_encode($body)),
         ]);
 
+        $this->queued = \count($this->handler);
+        $recorder = $this->recorder();
+
         $client = new AxiamClient(
             self::BASE_URL,
             self::TENANT,
             orgId: self::ORG_ID,
             oidcTenantId: self::TENANT_ID,
-            transportHandler: $this->handler,
+            transportHandler: $recorder,
             retryEnabled: false,
         );
         $client->login('admin@axiam.test', 'pw');
@@ -73,17 +90,112 @@ abstract class ManagementTestCase extends TestCase
             ])),
         ]);
 
+        $this->queued = \count($this->handler);
+        $recorder = $this->recorder();
+
         $client = new AxiamClient(
             self::BASE_URL,
             self::TENANT,
             orgId: self::ORG_ID,
             oidcTenantId: self::TENANT_ID,
-            transportHandler: $this->handler,
+            transportHandler: $recorder,
             retryEnabled: false,
         );
         $client->login('admin@axiam.test', 'pw');
 
         return $client;
+    }
+
+    /**
+     * A signed-in client whose queued responses are exactly `$responses`, in order.
+     *
+     * For the multi-request cases — auto-paging, retry, apply-stops-at-first-failure —
+     * where one canned response is not enough.
+     */
+    protected function signedInWith(Response ...$responses): AxiamClient
+    {
+        $this->handler = new MockHandler([
+            new Response(200, ['Set-Cookie' => 'axiam_access=t0ken; Path=/'], (string) json_encode([
+                'user' => ['id' => self::ORG_ID],
+            ])),
+            ...$responses,
+        ]);
+
+        $this->queued = \count($this->handler);
+        $recorder = $this->recorder();
+
+        $client = new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            orgId: self::ORG_ID,
+            oidcTenantId: self::TENANT_ID,
+            transportHandler: $recorder,
+            retryEnabled: true,
+        );
+        $client->login('admin@axiam.test', 'pw');
+
+        return $client;
+    }
+
+    /**
+     * A JSON response with `$body` as its decoded content.
+     *
+     * @param array<mixed> $body
+     */
+    protected static function json(int $status, array $body): Response
+    {
+        return new Response($status, ['Content-Type' => 'application/json'], (string) json_encode($body));
+    }
+
+    /**
+     * One page of a paginated list response.
+     *
+     * @param list<array<string,mixed>> $items
+     */
+    protected static function page(array $items, int $total): Response
+    {
+        return self::json(200, ['items' => $items, 'total' => $total, 'offset' => 0, 'limit' => 50]);
+    }
+
+    /**
+     * How many requests have reached the transport so far, the login included.
+     *
+     * Derived from what the queue has left rather than counted by a spy, so a test that
+     * asserts "no wire call happened" is asserting about the transport itself.
+     */
+    protected function requestCount(): int
+    {
+        return $this->queued - \count($this->handler);
+    }
+
+    /**
+     * A transport handler that records each request, then delegates to the mock.
+     *
+     * @return callable(RequestInterface, array<string,mixed>): mixed
+     */
+    private function recorder(): callable
+    {
+        $this->requests = [];
+        $mock = $this->handler;
+
+        return function (RequestInterface $request, array $options) use ($mock): mixed {
+            $this->requests[] = $request;
+
+            return $mock($request, $options);
+        };
+    }
+
+    /**
+     * The HTTP methods of every management request sent, the login POST excluded.
+     *
+     * @return list<string>
+     */
+    protected function sentMethods(): array
+    {
+        return array_values(array_map(
+            static fn (RequestInterface $r): string => $r->getMethod(),
+            \array_slice($this->requests, 1),
+        ));
     }
 
     /** The request the SDK last put on the wire. */

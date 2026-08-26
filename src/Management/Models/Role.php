@@ -41,13 +41,13 @@ final class Role implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (string) $data['description'],
-            (string) $data['id'],
-            (bool) $data['is_global'],
-            (string) $data['name'],
-            (string) $data['tenant_id'],
-            (string) $data['updated_at'],
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'description', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (bool) ModelDecode::need($data, 'is_global', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
         );
     }
 

@@ -31,8 +31,8 @@ final class MdsRefreshOutcomeRollbackRejected implements MdsRefreshOutcomeVarian
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['attempted_no'],
-            (int) $data['stored_no'],
+            (int) ModelDecode::need($data, 'attempted_no', self::class),
+            (int) ModelDecode::need($data, 'stored_no', self::class),
         );
     }
 

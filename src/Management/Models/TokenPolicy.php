@@ -31,8 +31,8 @@ final class TokenPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['access_token_lifetime_secs'],
-            (int) $data['refresh_token_lifetime_secs'],
+            (int) ModelDecode::need($data, 'access_token_lifetime_secs', self::class),
+            (int) ModelDecode::need($data, 'refresh_token_lifetime_secs', self::class),
         );
     }
 

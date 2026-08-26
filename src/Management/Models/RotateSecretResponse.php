@@ -30,7 +30,7 @@ final class RotateSecretResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            new \Axiam\Sdk\Core\Sensitive((string) $data['client_secret']),
+            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'client_secret', self::class)),
         );
     }
 

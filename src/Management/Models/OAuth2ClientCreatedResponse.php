@@ -48,16 +48,16 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['client_id'],
-            new \Axiam\Sdk\Core\Sensitive((string) $data['client_secret']),
-            (string) $data['created_at'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['grant_types'])),
-            (string) $data['id'],
-            (string) $data['name'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['redirect_uris'])),
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scopes'])),
-            (string) $data['tenant_id'],
-            (string) $data['updated_at'],
+            (string) ModelDecode::need($data, 'client_id', self::class),
+            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'client_secret', self::class)),
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'grant_types', self::class))),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'redirect_uris', self::class))),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scopes', self::class))),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
         );
     }
 

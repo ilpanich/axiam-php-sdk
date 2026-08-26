@@ -35,8 +35,8 @@ final class CreateScimTokenRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['name'],
-            (string) $data['user_id'],
+            (string) ModelDecode::need($data, 'name', self::class),
+            (string) ModelDecode::need($data, 'user_id', self::class),
             isset($data['expires_in_days']) ? (int) $data['expires_in_days'] : null,
         );
     }

@@ -39,8 +39,8 @@ final class MdsStatusResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['entry_count'],
-            (bool) $data['stale'],
+            (int) ModelDecode::need($data, 'entry_count', self::class),
+            (bool) ModelDecode::need($data, 'stale', self::class),
             isset($data['last_refreshed_at']) ? (string) $data['last_refreshed_at'] : null,
             isset($data['next_update']) ? (string) $data['next_update'] : null,
             isset($data['no']) ? (int) $data['no'] : null,

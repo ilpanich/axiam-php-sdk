@@ -37,7 +37,7 @@ final class ImportCaCertificateRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['public_cert_pem'],
+            (string) ModelDecode::need($data, 'public_cert_pem', self::class),
             isset($data['private_key_pem']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['private_key_pem']) : null,
         );
     }

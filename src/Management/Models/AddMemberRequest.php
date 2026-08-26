@@ -29,7 +29,7 @@ final class AddMemberRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['user_id'],
+            (string) ModelDecode::need($data, 'user_id', self::class),
         );
     }
 

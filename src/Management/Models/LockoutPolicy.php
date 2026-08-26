@@ -35,10 +35,10 @@ final class LockoutPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (float) $data['lockout_backoff_multiplier'],
-            (int) $data['lockout_duration_secs'],
-            (int) $data['max_failed_login_attempts'],
-            (int) $data['max_lockout_duration_secs'],
+            (float) ModelDecode::need($data, 'lockout_backoff_multiplier', self::class),
+            (int) ModelDecode::need($data, 'lockout_duration_secs', self::class),
+            (int) ModelDecode::need($data, 'max_failed_login_attempts', self::class),
+            (int) ModelDecode::need($data, 'max_lockout_duration_secs', self::class),
         );
     }
 

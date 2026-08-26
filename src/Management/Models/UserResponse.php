@@ -56,18 +56,18 @@ final class UserResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (string) $data['email'],
-            (bool) $data['email_verified'],
-            (int) $data['failed_login_attempts'],
-            (string) $data['id'],
-            (bool) $data['is_locked'],
-            $data['metadata'],
-            (bool) $data['mfa_enabled'],
-            UserStatus::fromWire((string) $data['status']),
-            (string) $data['tenant_id'],
-            (string) $data['updated_at'],
-            (string) $data['username'],
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'email', self::class),
+            (bool) ModelDecode::need($data, 'email_verified', self::class),
+            (int) ModelDecode::need($data, 'failed_login_attempts', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (bool) ModelDecode::need($data, 'is_locked', self::class),
+            ModelDecode::need($data, 'metadata', self::class),
+            (bool) ModelDecode::need($data, 'mfa_enabled', self::class),
+            UserStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
+            (string) ModelDecode::need($data, 'username', self::class),
             isset($data['locked_until']) ? (string) $data['locked_until'] : null,
         );
     }

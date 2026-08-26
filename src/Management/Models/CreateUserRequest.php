@@ -38,9 +38,9 @@ final class CreateUserRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['email'],
-            new \Axiam\Sdk\Core\Sensitive((string) $data['password']),
-            (string) $data['username'],
+            (string) ModelDecode::need($data, 'email', self::class),
+            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'password', self::class)),
+            (string) ModelDecode::need($data, 'username', self::class),
             isset($data['metadata']) ? $data['metadata'] : null,
             isset($data['opaque']) ? OpaqueEnrollment::fromArray((array) $data['opaque']) : null,
         );

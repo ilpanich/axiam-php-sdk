@@ -42,11 +42,11 @@ final class OidcCallbackRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['code'],
-            (string) $data['config_id'],
-            (string) $data['nonce'],
-            (string) $data['redirect_uri'],
-            (string) $data['state'],
+            (string) ModelDecode::need($data, 'code', self::class),
+            (string) ModelDecode::need($data, 'config_id', self::class),
+            (string) ModelDecode::need($data, 'nonce', self::class),
+            (string) ModelDecode::need($data, 'redirect_uri', self::class),
+            (string) ModelDecode::need($data, 'state', self::class),
         );
     }
 

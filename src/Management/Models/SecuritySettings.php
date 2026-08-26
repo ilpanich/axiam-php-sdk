@@ -55,20 +55,20 @@ final class SecuritySettings implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            CertificatePolicy::fromArray((array) $data['certificate']),
-            (string) $data['created_at'],
-            EmailVerificationPolicy::fromArray((array) $data['email']),
-            (string) $data['id'],
-            LockoutPolicy::fromArray((array) $data['lockout']),
-            MfaPolicy::fromArray((array) $data['mfa']),
-            NotificationPolicy::fromArray((array) $data['notification']),
-            OpaquePolicy::fromArray((array) $data['opaque']),
-            PasswordPolicy::fromArray((array) $data['password']),
-            PrivacyPolicy::fromArray((array) $data['privacy']),
-            SettingsScope::fromWire((string) $data['scope']),
-            (string) $data['scope_id'],
-            TokenPolicy::fromArray((array) $data['token']),
-            (string) $data['updated_at'],
+            CertificatePolicy::fromArray((array) ModelDecode::need($data, 'certificate', self::class)),
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            EmailVerificationPolicy::fromArray((array) ModelDecode::need($data, 'email', self::class)),
+            (string) ModelDecode::need($data, 'id', self::class),
+            LockoutPolicy::fromArray((array) ModelDecode::need($data, 'lockout', self::class)),
+            MfaPolicy::fromArray((array) ModelDecode::need($data, 'mfa', self::class)),
+            NotificationPolicy::fromArray((array) ModelDecode::need($data, 'notification', self::class)),
+            OpaquePolicy::fromArray((array) ModelDecode::need($data, 'opaque', self::class)),
+            PasswordPolicy::fromArray((array) ModelDecode::need($data, 'password', self::class)),
+            PrivacyPolicy::fromArray((array) ModelDecode::need($data, 'privacy', self::class)),
+            SettingsScope::fromWire((string) ModelDecode::need($data, 'scope', self::class)),
+            (string) ModelDecode::need($data, 'scope_id', self::class),
+            TokenPolicy::fromArray((array) ModelDecode::need($data, 'token', self::class)),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
         );
     }
 

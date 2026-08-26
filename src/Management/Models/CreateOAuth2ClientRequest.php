@@ -100,10 +100,10 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['grant_types'])),
-            (string) $data['name'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['redirect_uris'])),
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scopes'])),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'grant_types', self::class))),
+            (string) ModelDecode::need($data, 'name', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'redirect_uris', self::class))),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scopes', self::class))),
             isset($data['backchannel_logout_uri']) ? (string) $data['backchannel_logout_uri'] : null,
             isset($data['dpop_bound_access_tokens']) ? (bool) $data['dpop_bound_access_tokens'] : null,
             isset($data['dpop_require_nonce']) ? (bool) $data['dpop_require_nonce'] : null,

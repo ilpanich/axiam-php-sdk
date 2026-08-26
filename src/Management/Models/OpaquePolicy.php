@@ -38,9 +38,9 @@ final class OpaquePolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['opaque_ksf'],
-            (string) $data['opaque_mode'],
-            (string) $data['opaque_suite'],
+            (string) ModelDecode::need($data, 'opaque_ksf', self::class),
+            (string) ModelDecode::need($data, 'opaque_mode', self::class),
+            (string) ModelDecode::need($data, 'opaque_suite', self::class),
         );
     }
 

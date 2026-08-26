@@ -31,8 +31,8 @@ final class MdsRefreshOutcomeInitial implements MdsRefreshOutcomeVariant
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['entry_count'],
-            (int) $data['no'],
+            (int) ModelDecode::need($data, 'entry_count', self::class),
+            (int) ModelDecode::need($data, 'no', self::class),
         );
     }
 

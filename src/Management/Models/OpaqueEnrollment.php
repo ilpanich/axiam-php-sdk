@@ -41,8 +41,8 @@ final class OpaqueEnrollment implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['opaque_session'],
-            (string) $data['registration_record'],
+            (string) ModelDecode::need($data, 'opaque_session', self::class),
+            (string) ModelDecode::need($data, 'registration_record', self::class),
         );
     }
 

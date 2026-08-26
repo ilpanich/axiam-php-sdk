@@ -85,9 +85,14 @@ final class ManagementTransport
 
         // Rule 8: a GET is the only method §16 may replay. Everything else may already
         // have been applied server-side, and no client can tell from a transport failure.
-        $retryable = $method === 'GET'
-            ? static fn (NetworkError $e): bool => true
-            : static fn (NetworkError $e): bool => false;
+        //
+        // A ValidationError is excluded on TOP of that, method regardless. It is a
+        // NetworkError only because §27.4 rule 7 puts it there, but it is a decisive
+        // answer from the server rather than a transport failure: re-sending a body the
+        // server has already rejected just spends the caller's rate limit to be told the
+        // same thing three times.
+        $retryable = static fn (NetworkError $e): bool
+            => $method === 'GET' && !$e instanceof ValidationError;
 
         $response = RetryPolicy::execute(
             $operation,

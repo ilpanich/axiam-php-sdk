@@ -43,14 +43,14 @@ final class WebhookResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (bool) $data['enabled'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['events'])),
-            (string) $data['id'],
-            RetryPolicy::fromArray((array) $data['retry_policy']),
-            (string) $data['tenant_id'],
-            (string) $data['updated_at'],
-            (string) $data['url'],
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (bool) ModelDecode::need($data, 'enabled', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'events', self::class))),
+            (string) ModelDecode::need($data, 'id', self::class),
+            RetryPolicy::fromArray((array) ModelDecode::need($data, 'retry_policy', self::class)),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
+            (string) ModelDecode::need($data, 'url', self::class),
         );
     }
 

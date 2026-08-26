@@ -41,13 +41,13 @@ final class PasswordPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (bool) $data['hibp_check_enabled'],
-            (int) $data['min_length'],
-            (int) $data['password_history_count'],
-            (bool) $data['require_digits'],
-            (bool) $data['require_lowercase'],
-            (bool) $data['require_symbols'],
-            (bool) $data['require_uppercase'],
+            (bool) ModelDecode::need($data, 'hibp_check_enabled', self::class),
+            (int) ModelDecode::need($data, 'min_length', self::class),
+            (int) ModelDecode::need($data, 'password_history_count', self::class),
+            (bool) ModelDecode::need($data, 'require_digits', self::class),
+            (bool) ModelDecode::need($data, 'require_lowercase', self::class),
+            (bool) ModelDecode::need($data, 'require_symbols', self::class),
+            (bool) ModelDecode::need($data, 'require_uppercase', self::class),
         );
     }
 

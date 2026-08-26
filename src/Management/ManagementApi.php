@@ -36,6 +36,18 @@ final class ManagementApi
     }
 
     /**
+     * The §27.6 declarative layer: plan and apply a manifest.
+     *
+     * `plan()` writes nothing; `apply()` performs the plan, stops at the first failure and
+     * does not roll back (§27.7). Hand-written rather than generated — the manifest layer is a
+     * convergence loop over the operations below, not an endpoint the registry describes.
+     */
+    public function manifest(): \Axiam\Sdk\Management\Manifest\ManifestApi
+    {
+        return new \Axiam\Sdk\Management\Manifest\ManifestApi($this);
+    }
+
+    /**
      * Organizations an SDK client may read and configure. Creation and deletion are outside
      * the SDK boundary (§27.0).
      */

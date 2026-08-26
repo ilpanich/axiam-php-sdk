@@ -33,9 +33,9 @@ final class RetryPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (float) $data['backoff_multiplier'],
-            (int) $data['initial_delay_secs'],
-            (int) $data['max_retries'],
+            (float) ModelDecode::need($data, 'backoff_multiplier', self::class),
+            (int) ModelDecode::need($data, 'initial_delay_secs', self::class),
+            (int) ModelDecode::need($data, 'max_retries', self::class),
         );
     }
 

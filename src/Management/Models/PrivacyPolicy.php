@@ -38,7 +38,7 @@ final class PrivacyPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['deletion_grace_period_days'],
+            (int) ModelDecode::need($data, 'deletion_grace_period_days', self::class),
         );
     }
 

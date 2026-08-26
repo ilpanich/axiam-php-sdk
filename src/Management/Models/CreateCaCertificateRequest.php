@@ -48,9 +48,9 @@ final class CreateCaCertificateRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            KeyAlgorithm::fromWire((string) $data['key_algorithm']),
-            (string) $data['subject'],
-            (int) $data['validity_days'],
+            KeyAlgorithm::fromWire((string) ModelDecode::need($data, 'key_algorithm', self::class)),
+            (string) ModelDecode::need($data, 'subject', self::class),
+            (int) ModelDecode::need($data, 'validity_days', self::class),
             isset($data['intermediate_subject']) ? (string) $data['intermediate_subject'] : null,
             isset($data['intermediate_validity_days']) ? (int) $data['intermediate_validity_days'] : null,
             isset($data['issue_from_root']) ? (bool) $data['issue_from_root'] : null,

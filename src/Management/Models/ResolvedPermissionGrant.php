@@ -43,10 +43,10 @@ final class ResolvedPermissionGrant implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            PermissionEffect::fromWire((string) $data['effect']),
-            Permission::fromArray((array) $data['permission']),
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scope_ids'])),
-            array_values(array_map(static fn (mixed $v): GrantedScope => GrantedScope::fromArray((array) $v), (array) $data['scopes'])),
+            PermissionEffect::fromWire((string) ModelDecode::need($data, 'effect', self::class)),
+            Permission::fromArray((array) ModelDecode::need($data, 'permission', self::class)),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scope_ids', self::class))),
+            array_values(array_map(static fn (mixed $v): GrantedScope => GrantedScope::fromArray((array) $v), (array) ModelDecode::need($data, 'scopes', self::class))),
         );
     }
 

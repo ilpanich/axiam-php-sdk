@@ -33,7 +33,7 @@ final class SetMtlsTrustAnchor implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (bool) $data['enabled'],
+            (bool) ModelDecode::need($data, 'enabled', self::class),
         );
     }
 

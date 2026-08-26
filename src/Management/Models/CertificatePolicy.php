@@ -31,8 +31,8 @@ final class CertificatePolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['default_cert_validity_days'],
-            (int) $data['max_cert_validity_days'],
+            (int) ModelDecode::need($data, 'default_cert_validity_days', self::class),
+            (int) ModelDecode::need($data, 'max_cert_validity_days', self::class),
         );
     }
 

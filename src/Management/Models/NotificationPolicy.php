@@ -29,7 +29,7 @@ final class NotificationPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (bool) $data['admin_notifications_enabled'],
+            (bool) ModelDecode::need($data, 'admin_notifications_enabled', self::class),
         );
     }
 

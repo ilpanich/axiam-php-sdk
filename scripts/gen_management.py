@@ -652,11 +652,11 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         out.append("        return new self(")
         for f in fields:
             src = f"$data['{f['wire']}']"
-            expr = decode_expr(f, src)
             if f["required"]:
-                out.append(f"            {expr},")
+                need = f"ModelDecode::need($data, '{f['wire']}', self::class)"
+                out.append(f"            {decode_expr(f, need)},")
             else:
-                out.append(f"            isset({src}) ? {expr} : null,")
+                out.append(f"            isset({src}) ? {decode_expr(f, src)} : null,")
         out.append("        );")
     out.append("    }")
     out.append("")
@@ -823,9 +823,9 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
             body.append("        return new self(")
             for f in fields:
                 src = f"$data['{f['wire']}']"
-                expr = decode_expr(f, src)
-                body.append(f"            {expr}," if f["required"]
-                            else f"            isset({src}) ? {expr} : null,")
+                need = f"ModelDecode::need($data, '{f['wire']}', self::class)"
+                body.append(f"            {decode_expr(f, need)}," if f["required"]
+                            else f"            isset({src}) ? {decode_expr(f, src)} : null,")
             body.append("        );")
         body.append("    }")
         body.append("")
@@ -1192,7 +1192,19 @@ def emit_api() -> str:
     out.append("    ) {")
     out.append("    }")
 
-    accessors = []
+    manifest_block = docblock(
+        "The §27.6 declarative layer: plan and apply a manifest.\n\n"
+        "`plan()` writes nothing; `apply()` performs the plan, stops at the first failure "
+        "and does not roll back (§27.7). Hand-written rather than generated — the manifest "
+        "layer is a convergence loop over the operations below, not an endpoint the "
+        "registry describes.",
+        "    ",
+    )
+    manifest_block.append("    public function manifest(): \\Axiam\\Sdk\\Management\\Manifest\\ManifestApi")
+    manifest_block.append("    {")
+    manifest_block.append("        return new \\Axiam\\Sdk\\Management\\Manifest\\ManifestApi($this);")
+    manifest_block.append("    }")
+    accessors = ["\n".join(manifest_block)]
     for namespace, nsdef in REGISTRY["namespaces"].items():
         cls = f"{pascal(namespace)}Api"
         block = docblock(escape(nsdef["doc"]), "    ")
@@ -1600,8 +1612,9 @@ def prune(files: dict[Path, str]) -> list[Path]:
     stale = []
     models = ROOT / MODELS_DIR
     if models.is_dir():
+        hand_written = {models / "ModelDecode.php"}
         for path in sorted(models.glob("*.php")):
-            if path not in files:
+            if path not in files and path not in hand_written:
                 stale.append(path)
     return stale
 

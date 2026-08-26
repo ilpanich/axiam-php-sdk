@@ -40,11 +40,11 @@ final class TokenExchangeTrustResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['accepted_audiences'])),
-            (bool) $data['enabled'],
-            (int) $data['max_token_age_secs'],
-            (array) $data['scope_map'],
-            (string) $data['subject_mapping'],
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'accepted_audiences', self::class))),
+            (bool) ModelDecode::need($data, 'enabled', self::class),
+            (int) ModelDecode::need($data, 'max_token_age_secs', self::class),
+            (array) ModelDecode::need($data, 'scope_map', self::class),
+            (string) ModelDecode::need($data, 'subject_mapping', self::class),
             isset($data['max_lifetime_secs']) ? (int) $data['max_lifetime_secs'] : null,
         );
     }

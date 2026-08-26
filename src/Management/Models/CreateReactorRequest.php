@@ -45,9 +45,9 @@ final class CreateReactorRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['events'])),
-            ReactorMode::fromWire((string) $data['mode']),
-            (string) $data['name'],
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'events', self::class))),
+            ReactorMode::fromWire((string) ModelDecode::need($data, 'mode', self::class)),
+            (string) ModelDecode::need($data, 'name', self::class),
             isset($data['description']) ? (string) $data['description'] : null,
             isset($data['enabled']) ? (bool) $data['enabled'] : null,
             isset($data['failure_policy']) ? FailurePolicy::fromWire((string) $data['failure_policy']) : null,

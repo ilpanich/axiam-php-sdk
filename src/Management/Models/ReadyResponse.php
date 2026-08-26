@@ -31,8 +31,8 @@ final class ReadyResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['database'],
-            (string) $data['status'],
+            (string) ModelDecode::need($data, 'database', self::class),
+            (string) ModelDecode::need($data, 'status', self::class),
         );
     }
 

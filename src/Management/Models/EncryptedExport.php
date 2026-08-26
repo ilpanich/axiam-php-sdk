@@ -31,8 +31,8 @@ final class EncryptedExport implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['ciphertext_armored'],
-            (string) $data['recipient_key_id'],
+            (string) ModelDecode::need($data, 'ciphertext_armored', self::class),
+            (string) ModelDecode::need($data, 'recipient_key_id', self::class),
         );
     }
 

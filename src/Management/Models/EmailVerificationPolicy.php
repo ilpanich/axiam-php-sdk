@@ -32,8 +32,8 @@ final class EmailVerificationPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['email_verification_grace_period_hours'],
-            (bool) $data['email_verification_required'],
+            (int) ModelDecode::need($data, 'email_verification_grace_period_hours', self::class),
+            (bool) ModelDecode::need($data, 'email_verification_required', self::class),
         );
     }
 

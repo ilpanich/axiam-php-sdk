@@ -54,9 +54,9 @@ final class WebauthnAttestationPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (bool) $data['block_revoked_status'],
-            AttestationMode::fromWire((string) $data['mode']),
-            (bool) $data['require_fido_certified'],
+            (bool) ModelDecode::need($data, 'block_revoked_status', self::class),
+            AttestationMode::fromWire((string) ModelDecode::need($data, 'mode', self::class)),
+            (bool) ModelDecode::need($data, 'require_fido_certified', self::class),
             isset($data['allowed_aaguids']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_aaguids'])) : null,
             isset($data['blocked_aaguids']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['blocked_aaguids'])) : null,
             isset($data['min_certification']) ? CertificationLevel::fromWire((string) $data['min_certification']) : null,

@@ -38,7 +38,7 @@ final class GrantPermissionRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['permission_id'],
+            (string) ModelDecode::need($data, 'permission_id', self::class),
             isset($data['effect']) ? PermissionEffect::fromWire((string) $data['effect']) : null,
             isset($data['scope_ids']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scope_ids'])) : null,
         );

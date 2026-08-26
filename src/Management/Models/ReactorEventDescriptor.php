@@ -40,12 +40,12 @@ final class ReactorEventDescriptor implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            FailurePolicy::fromWire((string) $data['default_failure_policy']),
-            (string) $data['description'],
-            (bool) $data['interceptable'],
-            (bool) $data['mutable'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['mutable_fields'])),
-            (string) $data['name'],
+            FailurePolicy::fromWire((string) ModelDecode::need($data, 'default_failure_policy', self::class)),
+            (string) ModelDecode::need($data, 'description', self::class),
+            (bool) ModelDecode::need($data, 'interceptable', self::class),
+            (bool) ModelDecode::need($data, 'mutable', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'mutable_fields', self::class))),
+            (string) ModelDecode::need($data, 'name', self::class),
         );
     }
 

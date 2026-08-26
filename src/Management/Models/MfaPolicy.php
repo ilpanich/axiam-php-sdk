@@ -31,8 +31,8 @@ final class MfaPolicy implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (int) $data['mfa_challenge_lifetime_secs'],
-            (bool) $data['mfa_enforced'],
+            (int) ModelDecode::need($data, 'mfa_challenge_lifetime_secs', self::class),
+            (bool) ModelDecode::need($data, 'mfa_enforced', self::class),
         );
     }
 

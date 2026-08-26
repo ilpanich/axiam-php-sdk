@@ -40,10 +40,10 @@ final class SetOrgEmailConfig implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (bool) $data['enabled'],
-            (string) $data['from_email'],
-            (string) $data['from_name'],
-            ProviderConfig::fromArray((array) $data['provider']),
+            (bool) ModelDecode::need($data, 'enabled', self::class),
+            (string) ModelDecode::need($data, 'from_email', self::class),
+            (string) ModelDecode::need($data, 'from_name', self::class),
+            ProviderConfig::fromArray((array) ModelDecode::need($data, 'provider', self::class)),
             isset($data['reply_to']) ? (string) $data['reply_to'] : null,
         );
     }

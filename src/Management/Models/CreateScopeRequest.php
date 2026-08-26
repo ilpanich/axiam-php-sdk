@@ -31,8 +31,8 @@ final class CreateScopeRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['description'],
-            (string) $data['name'],
+            (string) ModelDecode::need($data, 'description', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
         );
     }
 

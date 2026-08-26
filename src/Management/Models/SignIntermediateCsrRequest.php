@@ -35,9 +35,9 @@ final class SignIntermediateCsrRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['csr_pem'],
-            (string) $data['parent_ca_id'],
-            (int) $data['validity_days'],
+            (string) ModelDecode::need($data, 'csr_pem', self::class),
+            (string) ModelDecode::need($data, 'parent_ca_id', self::class),
+            (int) ModelDecode::need($data, 'validity_days', self::class),
         );
     }
 

@@ -35,10 +35,10 @@ final class CreatePgpKeyRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            PgpKeyAlgorithm::fromWire((string) $data['algorithm']),
-            (string) $data['email'],
-            (string) $data['name'],
-            PgpKeyPurpose::fromWire((string) $data['purpose']),
+            PgpKeyAlgorithm::fromWire((string) ModelDecode::need($data, 'algorithm', self::class)),
+            (string) ModelDecode::need($data, 'email', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            PgpKeyPurpose::fromWire((string) ModelDecode::need($data, 'purpose', self::class)),
         );
     }
 

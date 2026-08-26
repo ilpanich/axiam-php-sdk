@@ -47,14 +47,14 @@ final class AuditLogEntry implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['action'],
-            (string) $data['actor_id'],
-            ActorType::fromWire((string) $data['actor_type']),
-            (string) $data['id'],
-            $data['metadata'],
-            AuditOutcome::fromWire((string) $data['outcome']),
-            (string) $data['tenant_id'],
-            (string) $data['timestamp'],
+            (string) ModelDecode::need($data, 'action', self::class),
+            (string) ModelDecode::need($data, 'actor_id', self::class),
+            ActorType::fromWire((string) ModelDecode::need($data, 'actor_type', self::class)),
+            (string) ModelDecode::need($data, 'id', self::class),
+            ModelDecode::need($data, 'metadata', self::class),
+            AuditOutcome::fromWire((string) ModelDecode::need($data, 'outcome', self::class)),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'timestamp', self::class),
             isset($data['ip_address']) ? (string) $data['ip_address'] : null,
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
         );

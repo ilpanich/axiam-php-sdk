@@ -47,15 +47,15 @@ final class EmailConfig implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (bool) $data['enabled'],
-            (string) $data['from_email'],
-            (string) $data['from_name'],
-            (string) $data['id'],
-            ProviderConfig::fromArray((array) $data['provider']),
-            SettingsScope::fromWire((string) $data['scope']),
-            (string) $data['scope_id'],
-            (string) $data['updated_at'],
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (bool) ModelDecode::need($data, 'enabled', self::class),
+            (string) ModelDecode::need($data, 'from_email', self::class),
+            (string) ModelDecode::need($data, 'from_name', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            ProviderConfig::fromArray((array) ModelDecode::need($data, 'provider', self::class)),
+            SettingsScope::fromWire((string) ModelDecode::need($data, 'scope', self::class)),
+            (string) ModelDecode::need($data, 'scope_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
             isset($data['reply_to']) ? (string) $data['reply_to'] : null,
         );
     }

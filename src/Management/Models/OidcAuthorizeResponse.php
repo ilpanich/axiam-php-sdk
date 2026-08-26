@@ -29,7 +29,7 @@ final class OidcAuthorizeResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['url'],
+            (string) ModelDecode::need($data, 'url', self::class),
         );
     }
 

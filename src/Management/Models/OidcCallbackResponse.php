@@ -33,9 +33,9 @@ final class OidcCallbackResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['federation_link_id'],
-            (bool) $data['newly_provisioned'],
-            (string) $data['user_id'],
+            (string) ModelDecode::need($data, 'federation_link_id', self::class),
+            (bool) ModelDecode::need($data, 'newly_provisioned', self::class),
+            (string) ModelDecode::need($data, 'user_id', self::class),
         );
     }
 

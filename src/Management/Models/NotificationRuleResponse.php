@@ -45,15 +45,15 @@ final class NotificationRuleResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (string) $data['description'],
-            (bool) $data['enabled'],
-            array_values(array_map(static fn (mixed $v): NotificationEventType => NotificationEventType::fromWire((string) $v), (array) $data['events'])),
-            (string) $data['id'],
-            (string) $data['name'],
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['recipient_emails'])),
-            (string) $data['tenant_id'],
-            (string) $data['updated_at'],
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'description', self::class),
+            (bool) ModelDecode::need($data, 'enabled', self::class),
+            array_values(array_map(static fn (mixed $v): NotificationEventType => NotificationEventType::fromWire((string) $v), (array) ModelDecode::need($data, 'events', self::class))),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'name', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'recipient_emails', self::class))),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
         );
     }
 

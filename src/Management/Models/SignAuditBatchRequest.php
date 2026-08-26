@@ -29,7 +29,7 @@ final class SignAuditBatchRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['entry_ids'])),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'entry_ids', self::class))),
         );
     }
 

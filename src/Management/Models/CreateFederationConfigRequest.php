@@ -51,10 +51,10 @@ final class CreateFederationConfigRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['client_id'],
-            new \Axiam\Sdk\Core\Sensitive((string) $data['client_secret']),
-            (string) $data['protocol'],
-            (string) $data['provider'],
+            (string) ModelDecode::need($data, 'client_id', self::class),
+            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'client_secret', self::class)),
+            (string) ModelDecode::need($data, 'protocol', self::class),
+            (string) ModelDecode::need($data, 'provider', self::class),
             isset($data['allowed_algorithms']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_algorithms'])) : null,
             isset($data['attribute_map']) ? $data['attribute_map'] : null,
             isset($data['idp_signing_cert_pem']) ? (string) $data['idp_signing_cert_pem'] : null,

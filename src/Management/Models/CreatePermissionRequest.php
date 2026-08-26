@@ -31,8 +31,8 @@ final class CreatePermissionRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['action'],
-            (string) $data['description'],
+            (string) ModelDecode::need($data, 'action', self::class),
+            (string) ModelDecode::need($data, 'description', self::class),
         );
     }
 

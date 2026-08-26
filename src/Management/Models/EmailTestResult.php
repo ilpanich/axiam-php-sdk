@@ -33,8 +33,8 @@ final class EmailTestResult implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['provider'],
-            (string) $data['to'],
+            (string) ModelDecode::need($data, 'provider', self::class),
+            (string) ModelDecode::need($data, 'to', self::class),
             isset($data['message_id']) ? (string) $data['message_id'] : null,
         );
     }

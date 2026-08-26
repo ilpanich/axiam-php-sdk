@@ -35,10 +35,10 @@ final class ProviderConfigSmtp implements ProviderConfigVariant
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['host'],
-            (int) $data['port'],
-            (bool) $data['starttls'],
-            (string) $data['username'],
+            (string) ModelDecode::need($data, 'host', self::class),
+            (int) ModelDecode::need($data, 'port', self::class),
+            (bool) ModelDecode::need($data, 'starttls', self::class),
+            (string) ModelDecode::need($data, 'username', self::class),
         );
     }
 

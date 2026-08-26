@@ -29,7 +29,7 @@ final class EncryptRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['data_base64'],
+            (string) ModelDecode::need($data, 'data_base64', self::class),
         );
     }
 

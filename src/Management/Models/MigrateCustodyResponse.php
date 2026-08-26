@@ -36,9 +36,9 @@ final class MigrateCustodyResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['ca_certificate_id'],
-            (string) $data['key_custody'],
-            (string) $data['previous_custody'],
+            (string) ModelDecode::need($data, 'ca_certificate_id', self::class),
+            (string) ModelDecode::need($data, 'key_custody', self::class),
+            (string) ModelDecode::need($data, 'previous_custody', self::class),
             isset($data['key_locator']) ? (string) $data['key_locator'] : null,
         );
     }

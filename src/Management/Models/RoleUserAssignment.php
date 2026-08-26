@@ -32,7 +32,7 @@ final class RoleUserAssignment implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            UserResponse::fromArray((array) $data['user']),
+            UserResponse::fromArray((array) ModelDecode::need($data, 'user', self::class)),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
         );
     }

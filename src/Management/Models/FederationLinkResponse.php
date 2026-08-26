@@ -43,13 +43,13 @@ final class FederationLinkResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['created_at'],
-            (string) $data['external_subject'],
-            (string) $data['federation_config_id'],
-            (string) $data['id'],
-            (string) $data['tenant_id'],
-            (string) $data['updated_at'],
-            (string) $data['user_id'],
+            (string) ModelDecode::need($data, 'created_at', self::class),
+            (string) ModelDecode::need($data, 'external_subject', self::class),
+            (string) ModelDecode::need($data, 'federation_config_id', self::class),
+            (string) ModelDecode::need($data, 'id', self::class),
+            (string) ModelDecode::need($data, 'tenant_id', self::class),
+            (string) ModelDecode::need($data, 'updated_at', self::class),
+            (string) ModelDecode::need($data, 'user_id', self::class),
             isset($data['external_email']) ? (string) $data['external_email'] : null,
         );
     }

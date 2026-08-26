@@ -33,8 +33,8 @@ final class CreateTenantRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) $data['name'],
-            (string) $data['slug'],
+            (string) ModelDecode::need($data, 'name', self::class),
+            (string) ModelDecode::need($data, 'slug', self::class),
             isset($data['metadata']) ? $data['metadata'] : null,
         );
     }
