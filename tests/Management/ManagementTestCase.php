@@ -110,9 +110,10 @@ abstract class ManagementTestCase extends TestCase
      * A signed-in client whose queued responses are exactly `$responses`, in order.
      *
      * For the multi-request cases — auto-paging, retry, apply-stops-at-first-failure —
-     * where one canned response is not enough.
+     * where one canned response is not enough. A `Throwable` in the queue is how
+     * `MockHandler` models a transport that never answered at all.
      */
-    protected function signedInWith(Response ...$responses): AxiamClient
+    protected function signedInWith(Response|\Throwable ...$responses): AxiamClient
     {
         $this->handler = new MockHandler([
             new Response(200, ['Set-Cookie' => 'axiam_access=t0ken; Path=/'], (string) json_encode([

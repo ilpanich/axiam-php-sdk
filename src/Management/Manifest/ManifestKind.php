@@ -25,16 +25,4 @@ enum ManifestKind: string
 
     /** A group, plus the roles assigned to it. Depends on roles. */
     case Group = 'group';
-
-    /**
-     * This kind's position in the derived apply order — lower runs first.
-     *
-     * Reading it off the case list rather than storing a second number keeps the two
-     * from drifting: to change the order you move the case, and there is no other place
-     * that has to agree.
-     */
-    public function order(): int
-    {
-        return array_search($this, self::cases(), true) ?: 0;
-    }
 }

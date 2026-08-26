@@ -110,21 +110,4 @@ final class ManagementManifest
 
         return $out;
     }
-
-    /**
-     * Every entity of one kind, keyed by its manifest key.
-     *
-     * @return array<string,ManifestEntity>
-     */
-    public function ofKind(ManifestKind $kind): array
-    {
-        $out = [];
-        foreach ($this->entities as $entity) {
-            if ($entity->kind === $kind) {
-                $out[$entity->key] = $entity;
-            }
-        }
-
-        return $out;
-    }
 }
