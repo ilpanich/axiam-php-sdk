@@ -121,6 +121,7 @@ final class AxiamClient
     private const MFA_SETUP_CONFIRM_PATH = '/api/v1/auth/mfa/setup/confirm';
     private const VERIFY_EMAIL_PATH = '/api/v1/auth/verify-email';
     private const RESEND_VERIFICATION_PATH = '/api/v1/auth/resend-verification';
+    private const RESEND_OWN_VERIFICATION_PATH = '/api/v1/users/me/resend-verification';
     private const RESET_PATH = '/api/v1/auth/reset';
     private const RESET_CONTEXT_PATH = '/api/v1/auth/reset/context';
     private const RESET_CONFIRM_PATH = '/api/v1/auth/reset/confirm';
@@ -1818,7 +1819,18 @@ final class AxiamClient
             // caller anywhere in the codebase.
             $this->session->captureCsrfTokenFromResponse($response);
 
-            return new LoginResult(mfaRequired: false, userId: $userId, tenantId: $this->tenant);
+            // §5.2: derived from the server's own answer, never asserted by the caller and
+            // never sent. Absent means `false`, which is what a server older than contract
+            // 1.31 answers and is the safe direction in both cases — the application then
+            // offers no cross-tenant action rather than one that would 403.
+            $organizationLevel = is_array($wire) && ($wire['user']['organization_level'] ?? false) === true;
+
+            return new LoginResult(
+                mfaRequired: false,
+                userId: $userId,
+                tenantId: $this->tenant,
+                organizationLevel: $organizationLevel,
+            );
         }
 
         if ($status === 202) {
@@ -1995,7 +2007,19 @@ final class AxiamClient
         ], 'verifyEmail');
     }
 
-    /** `POST /api/v1/auth/resend-verification` (CONTRACT.md §25.1). */
+    /**
+     * `POST /api/v1/auth/resend-verification` (CONTRACT.md §25.1) — the **unauthenticated**
+     * resend, for a caller with no session.
+     *
+     * **Returns normally whatever the outcome.** The address may not exist, may already be
+     * verified, or may be over the daily limit, and the server answers identically in every
+     * case because it takes an address from an anonymous caller: anything else is an oracle
+     * for which addresses have accounts (§25.4).
+     *
+     * A caller that *is* signed in wants {@see self::resendOwnVerification()}, which says
+     * what happened. §25.7 rule 2 forbids routing either of these to the other, and this SDK
+     * does not.
+     */
     public function resendVerification(string $email, string $tenantId): void
     {
         $this->ensureOpen();
@@ -2003,6 +2027,50 @@ final class AxiamClient
             'email' => $email,
             'tenant_id' => $tenantId,
         ], 'resendVerification');
+    }
+
+    /**
+     * `POST /api/v1/users/me/resend-verification` (CONTRACT.md §25.1, §25.7) — resend the
+     * **signed-in caller's own** verification mail, and say what happened.
+     *
+     * Takes no address. The server reads it off the caller's own record, and this signature
+     * deliberately offers no way to name a different one: a parameter here would let an
+     * authenticated session mail an arbitrary address.
+     *
+     * Unlike {@see self::resendVerification()} this reports the outcome, because the caller
+     * is signed in to the account it is asking about and none of the outcomes tells it
+     * anything it did not already bring with it:
+     *
+     * - returns — a token was minted and the mail **enqueued**. Delivery is asynchronous and
+     *   can still fail at the provider; a queue that accepts everything in front of a
+     *   provider that rejects it looks exactly like this succeeding (§25.7 rule 3).
+     * - `409` — already verified, or the account is in a state that must not be sent a live
+     *   token. Raised as the §2 mapping of `409`.
+     * - `429` — the daily resend limit. Raised as the §2 mapping of `429`.
+     *
+     * §25.7 rule 2 forbids falling back to the unauthenticated endpoint on either failure,
+     * and this SDK does not: that fallback turns both back into a silent success and
+     * restores the bug this operation exists to fix, with an extra round trip.
+     *
+     * @throws AuthError  when there is no session — raised client-side, with no wire call.
+     * @throws \Axiam\Sdk\Core\AuthzError   on the `409`: already verified, or an account
+     *     state that must not be sent a live token.
+     * @throws NetworkError on the `429`: the daily resend limit is reached.
+     */
+    public function resendOwnVerification(): void
+    {
+        $this->ensureOpen();
+        if ($this->session->accessToken() === null) {
+            throw new AuthError(
+                'resendOwnVerification requires an authenticated session: it resends the mail '
+                . 'for the account you are signed in to, and names no address (CONTRACT.md §25.7). '
+                . 'Use resendVerification($email, $tenantId) when there is no session.',
+            );
+        }
+
+        // The empty object, exactly as `mfaEnroll` sends: the server takes the address off
+        // the caller's own record, and §25.6 asks for a request carrying NO address field.
+        $this->postExpectingNoContent(self::RESEND_OWN_VERIFICATION_PATH, [], 'resendOwnVerification');
     }
 
     /**

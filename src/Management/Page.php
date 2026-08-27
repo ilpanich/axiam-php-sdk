@@ -62,7 +62,13 @@ final class Page implements \IteratorAggregate, \Countable
         return $this->items === [];
     }
 
-    /** The request that would fetch the page after this one. */
+    /**
+     * The request that would fetch the page after this one.
+     *
+     * Carries this page's `search` term forward with it (§27.4 rule 4) — that is
+     * {@see PageRequest::next()}'s job, not this one's, so every walk built on
+     * `nextRequest()` filters the whole walk rather than only its first request.
+     */
     public function nextRequest(): PageRequest
     {
         return $this->request->next();

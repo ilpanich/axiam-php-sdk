@@ -9,6 +9,89 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **CONTRACT.md contract 1.31 — list search, the truthful resend, and organization scope.**
+  The vendored `CONTRACT.md`, `openapi.json` and `management-registry.json` are re-synced
+  from `axiam@main`, and four behaviours follow from them.
+
+  **`PageRequest` gained a third component, `search` (§27.4 rule 4).** All twenty
+  paginated operations accept an optional free-text term, matched case-insensitively by
+  the **server** against the identifying fields of whatever is being listed — a name or
+  username, plus the record id, so a UUID pasted out of a log line finds its row.
+  `Page::$total` then counts *matches*, not rows.
+
+  It rides on the page request rather than becoming a third argument on twenty generated
+  methods, and that is what makes `PageRequest::next()` — and so
+  `ManagementTransport::walk()` — carry it across the whole walk. A per-method argument
+  has nowhere to live between one request and the next, so a walk built on one would
+  return the matches followed by the unfiltered tail, which reads as a server bug from
+  the caller's side. `null`, `""` and `"   "` are the same request: no `search` parameter
+  at all. The term is trimmed but never truncated — the server's length cap stays the
+  server's, because a client-side truncation the server would not have made is a silently
+  different query the caller cannot see.
+
+- **`AxiamClient::resendOwnVerification()` (§25.1, §25.7).** `POST
+  /api/v1/users/me/resend-verification`, session-authenticated, taking **no address** —
+  the server reads it off the caller's own record, and the signature deliberately offers
+  no way to name a different one.
+
+  It does not replace `resendVerification()`, and neither is routed to the other. The
+  unauthenticated one takes an address from an anonymous caller, so it must answer
+  identically whether the address exists, is already verified, or is rate-limited:
+  anything else is an oracle for which addresses have accounts. This one is asked by a
+  caller already signed in to the account it is asking about, so it tells the truth — a
+  `409` for "already verified" and a `429` for the daily limit both raise, and this SDK
+  does **not** fall back to the public endpoint on either (§25.7 rule 2). That fallback
+  would turn both failures back into a silent success and restore the exact bug this
+  operation exists to fix, with an extra round trip. Returning normally means the mail was
+  *enqueued*, not delivered.
+
+- **`LoginResult::$organizationLevel` (§5.2).** A completed login now reports whether the
+  account it signed in is an organization-level principal — one whose record lives in its
+  organization's reserved tenant, so its global grants apply in every tenant there and it
+  can act on a different one by sending a different `X-Tenant-ID`, with no re-login.
+
+  An ordinary tenant principal is a principal of exactly one tenant; the same header
+  change produces a `403` for it. The flag is what an admin UI checks *before* offering a
+  tenant selector, rather than discovering the answer from a failed request. It is derived
+  from the response and never asserted: not a constructor argument, never sent, and
+  `false` when absent — which is what a server older than contract 1.31 answers, and the
+  safe direction in every case. Added with a default rather than changing the shape of
+  `LoginResult`, so every existing construction still compiles.
+
+- **Three §27.11 model additions**, regenerated: `Tenant::$kind` (`TenantKind`, the new
+  `standard` | `organization` enum), `MtlsTrustAnchorResponse::$trustedAnchors`
+  (`?int` — `null` is *not* zero: "the listener trusts no CAs" and "there was no listener
+  to ask" are different operational states), and `Certificate::$boundServiceAccountId`.
+
+  That last one is a **projection**, not a property of the certificate: the server
+  resolves it for a whole page in one query, so `certificates()->listItems()` populates it
+  and `certificates()->get($id)` leaves it `null`, with no second request to fill it in
+  (§27.11 rule 4). `scripts/gen_management.py` learned to read the registry's
+  `response.projected_fields` and fold such a field onto its base model as optional — the
+  server expresses a projection as an `allOf` of the named base and an anonymous object,
+  and a generator that reads only for a `$ref` sees a response with no element name at
+  all.
+
+### Changed
+
+- **Generated enums are now open (§27.11 rule 1).** `fromWire()` maps a value this SDK's
+  copy of the spec does not list to that enum's new `Unknown` case instead of throwing an
+  `AxiamException`.
+
+  Throwing failed the **whole** response, so one field of one record on a page took down
+  every record on it — including the ones the caller did ask for. That is the failure
+  §27.11 rule 1 exists to prevent, and it is why this is a fix rather than a loosening.
+
+  It still never reads an unrecognised value as one of the **known** cases: reading a new
+  `"suspended"` as whichever case was declared first turns a new server state into a wrong
+  one, and on this surface these values gate access. `Unknown` is a case of its own, and
+  its wire spelling is the empty string — which no server value is, so carrying an
+  unrecognised value back into an update is refused by the server rather than written as a
+  spelling it never used. **A `match` over one of these enums now needs an `Unknown` arm**;
+  an exhaustive `match` without one raises `\UnhandledMatchError` on a value only a newer
+  server can send.
+
+
 - **The §27 namespace handles now sit directly on the client** — `$client->roles()`,
   `$client->serviceAccounts()->rotateSecret($id)` — which is the form §27.3's PHP row
   specifies. `$client->management()` still reaches the same 24 handles behind one accessor;

@@ -444,9 +444,55 @@ def replacement_schemas() -> set[str]:
     return out
 
 
+def projection_map() -> dict[str, list[dict[str, Any]]]:
+    """Fields a list projection ADDS to its base schema, keyed by the base's name.
+
+    §27.11 rule 4: the server expresses a projection as an ``allOf`` of the named base
+    and an anonymous object, so the added property belongs to no schema in
+    ``components``. The registry records it as ``response.projected_fields``; this
+    folds it back onto the base model as an OPTIONAL field, which is what makes it
+    ``null`` on the ``get`` that does not project it rather than absent from the type.
+    """
+    added: dict[str, list[dict[str, Any]]] = {}
+    for ns in REGISTRY["namespaces"].values():
+        for op in ns["operations"].values():
+            response = op.get("response") or {}
+            extras = response.get("projected_fields") or []
+            base = response.get("schema")
+            if not extras or not base:
+                continue
+            known = {f["name"] for f in added.setdefault(base.lstrip("[]"), [])}
+            for extra in extras:
+                if extra["name"] not in known:
+                    added[base.lstrip("[]")].append(extra)
+    return added
+
+
+PROJECTION_DOC = (
+    "Resolved by the list projection only.\n\n"
+    "The server resolves this for a whole page in one query, so it is populated by "
+    "`list` and is `null` on `get` (CONTRACT.md §27.11 rule 4). `null` there means "
+    "\"this read does not carry it\", not \"there is nothing bound\" — this SDK does "
+    "not issue a second request to fill it in."
+)
+
+PROJECTED: dict[str, list[dict[str, Any]]] = projection_map()
+
+
 def field_list(schema_name: str, secrets: set[str]) -> tuple[list[dict[str, Any]], str | None]:
     """Every field of ``schema_name``, required first (PHP ordering), plus its description."""
     props, required, description = flatten(schema_name)
+    props = dict(props)
+    for extra in PROJECTED.get(schema_name, []):
+        if extra["name"] in props:
+            continue
+        # Never added to `required`: the whole point is that the operation which does
+        # NOT project it still decodes, with the field null (§27.11 rule 4).
+        props[extra["name"]] = {
+            "type": extra["type"],
+            "format": extra.get("format"),
+            "description": extra.get("description") or PROJECTION_DOC,
+        }
     fields: list[dict[str, Any]] = []
     for wire, schema in props.items():
         decl, doc = php_type(schema, secret=wire in secrets)
@@ -547,38 +593,55 @@ def encode_expr(field: dict[str, Any]) -> str:
 
 
 def emit_enum(name: str, schema: Any) -> str:
-    """A backed enum whose case values are the wire spellings.
+    """A backed enum whose case values are the wire spellings, plus ``Unknown``.
 
-    ``fromWire()`` rather than the built-in ``from()`` because an unknown value must
-    fail as an SDK error a caller can catch, not a bare ``\\ValueError``. It throws
-    rather than falling back to a default case: on this surface these values gate
-    access, and silently reading an unrecognised ``"suspended"`` as whichever case
-    happens to be declared first turns a new server state into a wrong one.
+    ``fromWire()`` rather than the built-in ``from()`` because PHP's own ``from()``
+    raises a bare ``\\ValueError`` on an unrecognised value, and raising anywhere here
+    fails the WHOLE response: one field of one record on a page takes down every
+    record on it, including the ones the caller asked for. §27.11 rule 1 forbids
+    exactly that, so an unrecognised value decodes to ``Unknown``.
+
+    It is still never read as one of the KNOWN cases. Reading a new ``"suspended"`` as
+    whichever case happens to be declared first turns a new server state into a wrong
+    one, and on this surface these values gate access. ``Unknown`` is a case of its
+    own, and its wire spelling is the empty string -- which no server value is, so
+    carrying an unrecognised value back into an update is refused by the server rather
+    than written as a spelling it never used.
     """
     values = [str(v) for v in schema.get("enum") or []]
     description = schema.get("description") or f"The `{name}` enumeration from the server's OpenAPI document."
+    description = escape(description) + (
+        "\n\nAn **open** enum. A value this SDK's copy of the spec does not list decodes to "
+        "`self::Unknown` rather than failing the response it arrived in (CONTRACT.md §27.11 "
+        "rule 1). Its own wire spelling is the empty string, which no server value is, so "
+        "carrying an unrecognised value back into an update is refused by the server rather "
+        "than written as a spelling it never used. A `match` over these cases needs an "
+        "`Unknown` arm."
+    )
 
     out = [header(MODELS_NS)]
-    out.extend(docblock(escape(description)))
+    out.extend(docblock(description))
     out.append(f"enum {name}: string")
     out.append("{")
     for value in values:
         out.extend(inline_doc(f"The wire value `{escape(value)}`.", "    "))
         out.append(f"    case {enum_case(value)} = '{value}';")
         out.append("")
+    out.extend(inline_doc(
+        "A value this SDK's copy of the spec does not list; see the type's summary.", "    "))
+    out.append("    case Unknown = '';")
+    out.append("")
     out.extend(docblock(
-        f"Parses a wire value into a {name}.\n\n"
-        "Throws on an unrecognised value rather than defaulting to a case: a server "
-        "that has learned a new state should surface as a loud error, not as whichever "
-        "case was declared first.",
+        f"Parses a wire value into a {name}, mapping an unrecognised one to "
+        f"{{@see self::Unknown}}.\n\n"
+        "Never throws. A parse error here would fail the whole response the value "
+        "arrived in, so one unrecognised field of one record would take down the page "
+        "it was on (§27.11 rule 1). A `match` over this enum needs an `Unknown` arm.",
         "    ",
-        ["@throws \\Axiam\\Sdk\\Core\\AxiamException when `$value` is not a known case."],
     ))
     out.append("    public static function fromWire(string $value): self")
     out.append("    {")
-    out.append("        return self::tryFrom($value) ?? throw new \\Axiam\\Sdk\\Core\\AxiamException(")
-    out.append(f"            sprintf('unknown {name} value \"%s\" — the server may be newer than this SDK', $value),")
-    out.append("        );")
+    out.append("        return self::tryFrom($value) ?? self::Unknown;")
     out.append("    }")
     out.append("}")
     return "\n".join(out) + "\n"
@@ -913,7 +976,10 @@ def split_query(op: dict[str, Any]) -> tuple[list[str], list[str]]:
     """Query parameters split into (required, optional), paging excluded."""
     required, optional = [], []
     for q in op["query_params"]:
-        if op["paginated"] and q["name"] in {"offset", "limit"}:
+        # `search` rides on PageRequest with `offset`/`limit`, not as a third
+        # argument on twenty generated methods (§27.4 rule 4) — otherwise the
+        # auto-paging form has no way to carry it past the first request.
+        if op["paginated"] and q["name"] in {"offset", "limit", "search"}:
             continue
         (required if q["required"] else optional).append(q["name"])
     return required, optional

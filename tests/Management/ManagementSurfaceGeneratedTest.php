@@ -101,6 +101,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 [
                     'created_at' => '2026-08-26T00:00:00Z',
                     'id' => '11111111-1111-4111-8111-111111111111',
+                    'kind' => 'standard',
                     'metadata' => [],
                     'name' => 'example',
                     'organization_id' => '11111111-1111-4111-8111-111111111111',
@@ -131,6 +132,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'created_at' => '2026-08-26T00:00:00Z',
             'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'standard',
             'metadata' => [],
             'name' => 'example',
             'organization_id' => '11111111-1111-4111-8111-111111111111',
@@ -153,6 +155,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'created_at' => '2026-08-26T00:00:00Z',
             'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'standard',
             'metadata' => [],
             'name' => 'example',
             'organization_id' => '11111111-1111-4111-8111-111111111111',
@@ -178,6 +181,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'created_at' => '2026-08-26T00:00:00Z',
             'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'standard',
             'metadata' => [],
             'name' => 'example',
             'organization_id' => '11111111-1111-4111-8111-111111111111',
@@ -1722,6 +1726,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'message' => 'example',
             'mtls_trust_anchor' => true,
             'restart_required' => true,
+            'trusted_anchors' => 1,
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->caCertificates()->setMtlsTrustAnchor('11111111-1111-4111-8111-111111111111', new Models\SetMtlsTrustAnchor(true));

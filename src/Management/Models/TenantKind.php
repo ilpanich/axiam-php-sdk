@@ -9,10 +9,11 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management\Models;
 
 /**
- * FIDO certification level, as recorded in an MDS `statusReports` entry's `FIDO_CERTIFIED*`
- * status. Variant order is significant: `derive(PartialOrd, Ord)` gives `L1 < L1Plus < L2 <
- * L2Plus < L3 < L3Plus`, which `WebauthnAttestationPolicy::evaluate` (D8 step 9) relies on
- * directly for the `min_certification` boundary check (`entry_level >= policy_min`).
+ * What a tenant *is*, as distinct from what state it is in. Reserved rather than inferred: an
+ * organization has exactly one tenant of kind [`Self::Organization`], enforced by a unique
+ * index rather than by convention. Deriving it from a magic slug or from "the oldest tenant"
+ * would make the organization scope something an operator could rename or delete by accident,
+ * and it is the scope the super-admin lives in.
  *
  * An **open** enum. A value this SDK's copy of the spec does not list decodes to
  * `self::Unknown` rather than failing the response it arrived in (CONTRACT.md §27.11 rule 1).
@@ -20,31 +21,19 @@ namespace Axiam\Sdk\Management\Models;
  * unrecognised value back into an update is refused by the server rather than written as a
  * spelling it never used. A `match` over these cases needs an `Unknown` arm.
  */
-enum CertificationLevel: string
+enum TenantKind: string
 {
-    /** The wire value `L1`. */
-    case L1 = 'L1';
+    /** The wire value `standard`. */
+    case Standard = 'standard';
 
-    /** The wire value `L1Plus`. */
-    case L1Plus = 'L1Plus';
-
-    /** The wire value `L2`. */
-    case L2 = 'L2';
-
-    /** The wire value `L2Plus`. */
-    case L2Plus = 'L2Plus';
-
-    /** The wire value `L3`. */
-    case L3 = 'L3';
-
-    /** The wire value `L3Plus`. */
-    case L3Plus = 'L3Plus';
+    /** The wire value `organization`. */
+    case Organization = 'organization';
 
     /** A value this SDK's copy of the spec does not list; see the type's summary. */
     case Unknown = '';
 
     /**
-     * Parses a wire value into a CertificationLevel, mapping an unrecognised one to {@see
+     * Parses a wire value into a TenantKind, mapping an unrecognised one to {@see
      * self::Unknown}.
      *
      * Never throws. A parse error here would fail the whole response the value arrived in, so

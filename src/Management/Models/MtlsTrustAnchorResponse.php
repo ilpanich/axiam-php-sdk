@@ -18,14 +18,19 @@ final class MtlsTrustAnchorResponse implements \JsonSerializable
      * @param string $caCertificateId The CA this is about.
      * @param string $message A sentence an operator can act on, rather than a bare boolean.
      * @param bool $mtlsTrustAnchor The flag as now stored.
-     * @param bool $restartRequired Always `true`: rustls builds its client trust store once,
-     *     when the listener is constructed, so this takes effect at the next start.
+     * @param bool $restartRequired Whether the change still needs a restart to take effect.
+     *     `false` when the live listener accepted the new anchor set — the ordinary case on a TLS
+     *     deployment. `true` only when there was no listener to reload into (plaintext, or
+     *     `client_auth = off`), where the flag is stored and applies at the next start.
+     * @param int|null $trustedAnchors How many CAs the listener now trusts for client
+     *     authentication, when it was reloaded. `None` when nothing was reloaded. (optional)
      */
     public function __construct(
         public readonly string $caCertificateId,
         public readonly string $message,
         public readonly bool $mtlsTrustAnchor,
         public readonly bool $restartRequired,
+        public readonly ?int $trustedAnchors = null,
     ) {
     }
 
@@ -40,6 +45,7 @@ final class MtlsTrustAnchorResponse implements \JsonSerializable
             (string) ModelDecode::need($data, 'message', self::class),
             (bool) ModelDecode::need($data, 'mtls_trust_anchor', self::class),
             (bool) ModelDecode::need($data, 'restart_required', self::class),
+            isset($data['trusted_anchors']) ? (int) $data['trusted_anchors'] : null,
         );
     }
 
@@ -58,6 +64,9 @@ final class MtlsTrustAnchorResponse implements \JsonSerializable
         $out['message'] = $this->message;
         $out['mtls_trust_anchor'] = $this->mtlsTrustAnchor;
         $out['restart_required'] = $this->restartRequired;
+        if ($this->trustedAnchors !== null) {
+            $out['trusted_anchors'] = $this->trustedAnchors;
+        }
 
         return $out;
     }

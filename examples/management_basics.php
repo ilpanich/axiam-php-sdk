@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 /**
  * examples/management_basics.php — the CONTRACT.md §27 management surface: namespace
- * handles, paging, sparse updates, and the three error classifications.
+ * handles, paging, searching, sparse updates, open enums, and the three error
+ * classifications.
  *
  * §27.2 gives the surface namespace HANDLES rather than 146 flat methods:
  * `$client->management()->users()->listItems()`. Every handle goes through one
@@ -67,6 +68,64 @@ try {
         static fn (PageRequest $p): Page => $users->listItems($p),
     ) as $user) {
         printf("  %s\n", $user->id);
+    }
+
+    // ---- searching a list --------------------------------------------------
+    //
+    // §27.4 rule 4: the term rides on the PAGE REQUEST, not as a third argument on each
+    // of the twenty generated list methods. That is what lets the walk below carry it —
+    // a per-method argument has nowhere to live between one request and the next, and a
+    // walk that filtered only its first request would return the matches followed by the
+    // unfiltered tail.
+    //
+    // The server does the matching, case-insensitively, against the identifying fields of
+    // whatever is being listed — a name or username, plus the record id, so a UUID pasted
+    // out of a log line finds its row. `total` then counts MATCHES, not rows, which is
+    // what lets a pager built on it show a page count belonging to the set it is paging.
+    $matches = $management->users()->listItems(new PageRequest(0, 50, 'ada'));
+    printf("matching users on this page: %d, matches in total: %d\n", count($matches), $matches->total);
+
+    // The whole filtered set. Passing the term to the FIRST request is enough: `next()`
+    // carries it, so every request of the walk asks the same question.
+    foreach (ManagementTransport::walk(
+        static fn (PageRequest $p): Page => $users->listItems($p),
+        new PageRequest(0, 50, 'ada'),
+    ) as $match) {
+        printf("  match: %s\n", $match->id);
+    }
+
+    // An empty or whitespace-only term is the SAME request as none: no `search` parameter
+    // is sent at all. A search box that fires on every keystroke sends one the moment it
+    // is cleared, and "rows containing the empty string" is a different question from
+    // "all rows".
+    $everyone = $management->users()->listItems(new PageRequest(0, 50, '   '));
+    printf("unfiltered after clearing the box: %d\n", $everyone->total);
+
+    // ---- open enums, and the list-only projection (§27.11) -----------------
+    //
+    // Rule 1: a value this SDK's copy of the spec does not list decodes to `Unknown`
+    // rather than throwing. Throwing would fail the WHOLE response, so one field of one
+    // tenant would take down the page it was on — including the tenants you did ask for.
+    // `Unknown` is never confused with a known case, so a `match` needs an arm for it.
+    foreach ($management->tenants()->listItems() as $tenant) {
+        printf("  %s: %s\n", $tenant->slug, match ($tenant->kind) {
+            Models\TenantKind::Organization => 'the organization\'s own scope',
+            Models\TenantKind::Standard, null => 'an ordinary tenant',
+            Models\TenantKind::Unknown => 'a kind this SDK predates — upgrade to name it',
+        });
+    }
+
+    // Rule 4: `boundServiceAccountId` is a PROJECTION, not a property of the certificate.
+    // The server resolves it for a whole page in one query, so `listItems()` populates it
+    // and `get()` leaves it null. Null there means "this read does not carry it", not
+    // "there is nothing bound" — and this SDK does not go and fetch it, because a `get`
+    // that silently costs two round trips is the thing §27.4 rule 3 forbids elsewhere.
+    foreach ($management->certificates()->listItems() as $certificate) {
+        printf(
+            "  %s -> %s\n",
+            $certificate->subject,
+            $certificate->boundServiceAccountId ?? 'not bound to a service account',
+        );
     }
 
     // ---- a sparse update --------------------------------------------------

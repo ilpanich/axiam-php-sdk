@@ -31,6 +31,11 @@ final class Certificate implements \JsonSerializable
      * @param CertificateStatus $status the server's `status` field
      * @param string $subject The certificate subject (e.g., `CN=device-001`).
      * @param string $tenantId The tenant this certificate belongs to.
+     * @param string|null $boundServiceAccountId Resolved by the list projection only. The
+     *     server resolves this for a whole page in one query, so it is populated by `list` and is
+     *     `null` on `get` (CONTRACT.md §27.11 rule 4). `null` there means "this read does not
+     *     carry it", not "there is nothing bound" — this SDK does not issue a second request to
+     *     fill it in. (optional)
      */
     public function __construct(
         public readonly CertificateType $certType,
@@ -46,6 +51,7 @@ final class Certificate implements \JsonSerializable
         public readonly CertificateStatus $status,
         public readonly string $subject,
         public readonly string $tenantId,
+        public readonly ?string $boundServiceAccountId = null,
     ) {
     }
 
@@ -69,6 +75,7 @@ final class Certificate implements \JsonSerializable
             CertificateStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
             (string) ModelDecode::need($data, 'subject', self::class),
             (string) ModelDecode::need($data, 'tenant_id', self::class),
+            isset($data['bound_service_account_id']) ? (string) $data['bound_service_account_id'] : null,
         );
     }
 
@@ -96,6 +103,9 @@ final class Certificate implements \JsonSerializable
         $out['status'] = $this->status->value;
         $out['subject'] = $this->subject;
         $out['tenant_id'] = $this->tenantId;
+        if ($this->boundServiceAccountId !== null) {
+            $out['bound_service_account_id'] = $this->boundServiceAccountId;
+        }
 
         return $out;
     }

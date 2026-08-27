@@ -1331,6 +1331,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'message' => 'example',
             'mtls_trust_anchor' => true,
             'restart_required' => true,
+            'trusted_anchors' => 1,
         ];
 
         $model = Models\MtlsTrustAnchorResponse::fromArray($wire);
@@ -2493,6 +2494,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         $wire = [
             'created_at' => '2026-08-26T00:00:00Z',
             'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'standard',
             'metadata' => [],
             'name' => 'example',
             'organization_id' => '11111111-1111-4111-8111-111111111111',
@@ -2509,6 +2511,13 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'Tenant decoded a field it cannot render again',
         );
+    }
+
+    /** `TenantKind`: every case survives wire -> enum -> wire. */
+    public function testTenantKindRoundTrips(): void
+    {
+        self::assertSame('standard', Models\TenantKind::fromWire('standard')->value);
+        self::assertSame('organization', Models\TenantKind::fromWire('organization')->value);
     }
 
     /** `TenantSettingsOverride`: a full wire object survives decode and re-render. */
@@ -3072,6 +3081,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(143, $cases);
+        self::assertCount(144, $cases);
     }
 }
