@@ -187,6 +187,283 @@ final class ManagementSemanticsTest extends ManagementTestCase
         self::assertNotInstanceOf(\Axiam\Sdk\Management\Page::class, $children);
     }
 
+    // -- rule 4: search ----------------------------------------------------
+
+    /**
+     * A term on the page request reaches the QUERY STRING (§27.4 rule 4).
+     *
+     * Asserted on the request URI rather than on the argument, because a term the SDK
+     * accepts and never sends is exactly the failure this test exists for: every
+     * caller-side assertion still passes while the server returns the unfiltered set.
+     */
+    public function testASearchTermIsSentAsAQueryParameter(): void
+    {
+        $client = $this->signedInClient(200, ['items' => [self::role('ada')], 'total' => 1]);
+
+        $client->management()->roles()->listItems(new PageRequest(search: 'ada'));
+
+        parse_str($this->lastRequest()->getUri()->getQuery(), $query);
+        self::assertSame('ada', $query['search'] ?? null);
+    }
+
+    /**
+     * The server does the filtering, and `total` counts MATCHES (§27.4 rule 4).
+     *
+     * The page carries what the server sent, unfiltered by the SDK. Filtering client-side
+     * after the fetch would give a pager whose page count belongs to a different result
+     * set than the page it is showing.
+     */
+    public function testSearchDoesNotFilterClientSide(): void
+    {
+        $client = $this->signedInClient(200, [
+            // A server that matched loosely still gets its answer through untouched.
+            'items' => [self::role('ada'), self::role('adalovelace')],
+            'total' => 2,
+        ]);
+
+        $page = $client->management()->roles()->listItems(new PageRequest(search: 'ada'));
+
+        self::assertCount(2, $page);
+        self::assertSame(2, $page->total);
+    }
+
+    /** With no term, no `search` key is sent at all — assert the exact key set. */
+    public function testNoSearchTermSendsNoSearchKey(): void
+    {
+        $client = $this->signedInClient(200, ['items' => [], 'total' => 0]);
+
+        $client->management()->roles()->listItems(new PageRequest(0, 25));
+
+        parse_str($this->lastRequest()->getUri()->getQuery(), $query);
+        self::assertSame(['offset' => '0', 'limit' => '25'], $query);
+    }
+
+    /**
+     * An empty or whitespace-only term is the SAME request as none (§27.4 rule 4).
+     *
+     * A search box that fires on every keystroke sends one the moment it is cleared, and
+     * "rows containing the empty string" is a different question from "all rows".
+     *
+     * @dataProvider blankTerms
+     */
+    public function testABlankSearchTermIsTreatedAsNone(string $term): void
+    {
+        $client = $this->signedInClient(200, ['items' => [], 'total' => 0]);
+
+        $client->management()->roles()->listItems(new PageRequest(0, 25, $term));
+
+        parse_str($this->lastRequest()->getUri()->getQuery(), $query);
+        self::assertSame(['offset' => '0', 'limit' => '25'], $query);
+    }
+
+    /** @return iterable<string,array{string}> */
+    public static function blankTerms(): iterable
+    {
+        yield 'empty' => [''];
+        yield 'spaces' => ['   '];
+        yield 'tab and newline' => ["\t\n"];
+    }
+
+    /** A term is trimmed but never truncated — the server's length cap stays the server's. */
+    public function testASearchTermIsTrimmedButNotShortened(): void
+    {
+        $long = str_repeat('a', 300);
+        $client = $this->signedInClient(200, ['items' => [], 'total' => 0]);
+
+        $client->management()->roles()->listItems(new PageRequest(search: "  {$long}  "));
+
+        parse_str($this->lastRequest()->getUri()->getQuery(), $query);
+        self::assertSame($long, $query['search'] ?? null);
+    }
+
+    /**
+     * The auto-paging form carries the term on EVERY request of the walk (§27.4 rule 4).
+     *
+     * Asserted on each recorded request rather than on the count: a walk that filtered
+     * only its first request returns the matches followed by the unfiltered tail, which
+     * reads as a server bug from the caller's side.
+     */
+    public function testAutoPagingCarriesTheSearchTermOnEveryRequest(): void
+    {
+        $client = $this->signedInWith(
+            self::page([self::role('ada')], 3),
+            self::page([self::role('adele')], 3),
+            self::page([], 3),
+        );
+
+        $roles = $client->management()->roles();
+        iterator_to_array(ManagementTransport::walk(
+            static fn (PageRequest $p): \Axiam\Sdk\Management\Page => $roles->listItems($p),
+            new PageRequest(0, 1, 'ad'),
+        ), false);
+
+        // Slice off the login POST; every management request that follows must carry it.
+        $walked = \array_slice($this->requests, 1);
+        self::assertCount(3, $walked);
+        foreach ($walked as $i => $request) {
+            parse_str($request->getUri()->getQuery(), $query);
+            self::assertSame('ad', $query['search'] ?? null, "request {$i} dropped the term");
+        }
+    }
+
+    /**
+     * `search` rides on the page request, not as a third argument on twenty methods.
+     *
+     * §27.4 rule 4 requires this shape, and it is what makes the walk above work at all:
+     * a per-method argument has nowhere to live between one request and the next.
+     */
+    public function testSearchIsNotAGeneratedMethodArgument(): void
+    {
+        $parameters = (new \ReflectionMethod(
+            \Axiam\Sdk\Management\RolesApi::class,
+            'listItems',
+        ))->getParameters();
+
+        self::assertSame(['page'], array_map(
+            static fn (\ReflectionParameter $p): string => $p->getName(),
+            $parameters,
+        ));
+    }
+
+    /** A walk that starts from a term keeps it through `next()`, offset by offset. */
+    public function testTheNextRequestKeepsTheTerm(): void
+    {
+        $request = new PageRequest(0, 25, ' ada ');
+
+        $next = $request->next();
+
+        self::assertSame(25, $next->offset);
+        self::assertSame(' ada ', $next->search, 'the raw term is carried verbatim');
+        self::assertSame('ada', $next->toQuery()['search'] ?? null, 'and normalised on the wire');
+    }
+
+    /** `matching()` returns a COPY, so a shared request cannot be repointed. */
+    public function testMatchingReturnsACopy(): void
+    {
+        $request = new PageRequest(10, 25, 'ada');
+
+        $other = $request->matching('grace');
+
+        self::assertSame('ada', $request->search);
+        self::assertSame('grace', $other->search);
+        self::assertSame(10, $other->offset);
+        self::assertSame(25, $other->limit);
+    }
+
+    // -- §27.11: model additions -------------------------------------------
+
+    /**
+     * An unrecognised enum value decodes to `Unknown` rather than failing the response
+     * it arrived in (§27.11 rule 1).
+     *
+     * The whole point is the blast radius: the page below carries two tenants, and only
+     * one of them has a `kind` this SDK has never seen. A closed enum would throw while
+     * decoding it and take the other tenant — which the caller did ask for — down with it.
+     */
+    public function testAnUnknownEnumValueDecodesInsteadOfFailingThePage(): void
+    {
+        $client = $this->signedInClient(200, [
+            'items' => [
+                self::tenant('ordinary', 'standard'),
+                self::tenant('from-the-future', 'sandbox'),
+            ],
+            'total' => 2,
+        ]);
+
+        $page = $client->management()->tenants()->listItems();
+
+        self::assertCount(2, $page, 'one unknown value must not take down the page');
+        self::assertSame(Models\TenantKind::Standard, $page->items[0]->kind);
+        self::assertSame(Models\TenantKind::Unknown, $page->items[1]->kind);
+    }
+
+    /**
+     * `Unknown` is a case of its own, and never one of the known ones.
+     *
+     * Reading a new `"suspended"` as whichever case was declared first would turn a new
+     * server state into a wrong one, and on this surface these values gate access.
+     */
+    public function testUnknownIsNeverMistakenForAKnownCase(): void
+    {
+        $unknown = Models\TenantKind::fromWire('sandbox');
+
+        self::assertSame(Models\TenantKind::Unknown, $unknown);
+        self::assertNotSame(Models\TenantKind::Standard, $unknown);
+        self::assertNotSame(Models\TenantKind::Organization, $unknown);
+        self::assertSame('', $unknown->value, 'no server value is the empty string');
+    }
+
+    /** `kind` is read-only — it is on neither create nor update body (§27.11 rule 2). */
+    public function testTenantKindIsNotWritable(): void
+    {
+        foreach ([Models\CreateTenantRequest::class, Models\UpdateTenant::class] as $model) {
+            $names = array_map(
+                static fn (\ReflectionParameter $p): string => $p->getName(),
+                (new \ReflectionClass($model))->getConstructor()?->getParameters() ?? [],
+            );
+            self::assertNotContains('kind', $names, "{$model} must not accept kind");
+        }
+    }
+
+    /** An absent `kind` decodes as null rather than failing — the field is optional. */
+    public function testAnAbsentTenantKindDecodes(): void
+    {
+        $row = self::tenant('legacy', null);
+        $client = $this->signedInClient(200, ['items' => [$row], 'total' => 1]);
+
+        $page = $client->management()->tenants()->listItems();
+
+        self::assertNull($page->items[0]->kind);
+    }
+
+    /**
+     * `trusted_anchors` is nullable and is NOT coalesced to zero (§27.11 rule 3).
+     *
+     * "the listener trusts no CAs" and "there was no listener to ask" are different
+     * operational states, and only one of them is a problem.
+     */
+    public function testTrustedAnchorsKeepsNullDistinctFromZero(): void
+    {
+        $absent = Models\MtlsTrustAnchorResponse::fromArray([
+            'ca_certificate_id' => self::ORG_ID,
+            'message' => 'stored; applies at next start',
+            'mtls_trust_anchor' => true,
+            'restart_required' => true,
+        ]);
+        $none = Models\MtlsTrustAnchorResponse::fromArray([
+            'ca_certificate_id' => self::ORG_ID,
+            'message' => 'reloaded',
+            'mtls_trust_anchor' => false,
+            'restart_required' => false,
+            'trusted_anchors' => 0,
+        ]);
+
+        self::assertNull($absent->trustedAnchors);
+        self::assertSame(0, $none->trustedAnchors);
+        self::assertArrayNotHasKey('trusted_anchors', $absent->jsonSerialize());
+    }
+
+    /**
+     * `bound_service_account_id` is populated by `certificates.list` and null on `get`,
+     * with no second request to fill it in (§27.11 rule 4).
+     */
+    public function testTheCertificateProjectionIsListOnlyAndCostsNoExtraRequest(): void
+    {
+        $bound = '22222222-2222-4222-8222-222222222222';
+        $client = $this->signedInWith(
+            self::page([self::certificate($bound)], 1),
+            self::json(200, self::certificate(null)),
+        );
+
+        $certificates = $client->management()->certificates();
+        $listed = $certificates->listItems();
+        $fetched = $certificates->get(self::ORG_ID);
+
+        self::assertSame($bound, $listed->items[0]->boundServiceAccountId);
+        self::assertNull($fetched->boundServiceAccountId, 'get does not carry the projection');
+        self::assertCount(2, \array_slice($this->requests, 1), 'and does not go and fetch it');
+    }
+
     // -- rule 5: sparse vs replacement -------------------------------------
 
     /** A sparse body omits what you did not name — it does not null it (§27.4 rule 5). */
@@ -485,5 +762,58 @@ final class ManagementSemanticsTest extends ManagementTestCase
             'tenant_id' => self::TENANT_ID,
             'updated_at' => '2026-08-26T00:00:00Z',
         ];
+    }
+
+    /**
+     * A minimal `Tenant` object as the server would send it.
+     *
+     * @return array<string,mixed>
+     */
+    private static function tenant(string $slug, ?string $kind): array
+    {
+        $row = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'id' => self::TENANT_ID,
+            'metadata' => [],
+            'name' => $slug,
+            'organization_id' => self::ORG_ID,
+            'slug' => $slug,
+            'status' => 'active',
+            'updated_at' => '2026-08-26T00:00:00Z',
+        ];
+        if ($kind !== null) {
+            $row['kind'] = $kind;
+        }
+
+        return $row;
+    }
+
+    /**
+     * A minimal `Certificate` object, with or without the list-only projection.
+     *
+     * @return array<string,mixed>
+     */
+    private static function certificate(?string $boundServiceAccountId): array
+    {
+        $row = [
+            'cert_type' => 'device',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'fingerprint' => 'aa:bb',
+            'id' => self::ORG_ID,
+            'issuer_ca_id' => self::ORG_ID,
+            'key_algorithm' => 'ed25519',
+            'metadata' => [],
+            'not_after' => '2027-08-26T00:00:00Z',
+            'not_before' => '2026-08-26T00:00:00Z',
+            'public_cert_pem' => '-----BEGIN CERTIFICATE-----',
+            'status' => 'active',
+            'subject' => 'CN=device-001',
+            'tenant_id' => self::TENANT_ID,
+        ];
+        if ($boundServiceAccountId !== null) {
+            $row['bound_service_account_id'] = $boundServiceAccountId;
+        }
+
+        return $row;
     }
 }

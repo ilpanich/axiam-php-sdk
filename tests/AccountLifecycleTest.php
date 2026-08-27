@@ -265,6 +265,125 @@ final class AccountLifecycleTest extends TestCase
         self::assertSame('/api/v1/auth/resend-verification', $this->sent[0]->getUri()->getPath());
     }
 
+    // -----------------------------------------------------------------------
+    // §25.7 — resend_own_verification, and why it is not resend_verification
+    // -----------------------------------------------------------------------
+
+    /**
+     * The signed-in resend sends NO caller-supplied data (§25.6).
+     *
+     * Asserted on the serialized request rather than on the signature: a method that
+     * takes no address but reads one off the client and sends it anyway would pass a
+     * signature check and still be the bug §25.7 exists to prevent. An empty body — or
+     * the empty JSON object `mfaEnroll` already sends — is conformant; an `email` key is
+     * not, whatever the SDK does with the value.
+     */
+    public function testResendOwnVerificationSendsNoAddress(): void
+    {
+        $client = $this->client([$this->loginSuccessResponse(), new Response(200, [], '{"sent":true}')]);
+        $client->login('alice@example.com', 'pw');
+
+        $client->resendOwnVerification();
+
+        self::assertSame('/api/v1/users/me/resend-verification', $this->sent[1]->getUri()->getPath());
+        self::assertSame([], $this->bodyOf(1));
+        self::assertSame('', $this->sent[1]->getUri()->getQuery(), 'nor smuggled onto the query string');
+    }
+
+    /**
+     * The two resends are distinct operations on distinct paths (§25.6).
+     *
+     * §25.7 rule 2 forbids routing either to the other, in either direction; an SDK that
+     * aliased one reintroduces the exact defect that section describes, and this is the
+     * assertion that would catch it.
+     */
+    public function testTheTwoResendsHitDistinctPaths(): void
+    {
+        $client = $this->client([
+            $this->loginSuccessResponse(),
+            new Response(200, [], '{"sent":true}'),
+            new Response(202),
+        ]);
+        $client->login('alice@example.com', 'pw');
+
+        $client->resendOwnVerification();
+        $client->resendVerification('alice@example.com', self::TENANT_UUID);
+
+        self::assertSame('/api/v1/users/me/resend-verification', $this->sent[1]->getUri()->getPath());
+        self::assertSame('/api/v1/auth/resend-verification', $this->sent[2]->getUri()->getPath());
+    }
+
+    /**
+     * A `409` is raised, not swallowed — and NOT retried against the public endpoint.
+     *
+     * This matters more than it looks: the bug this operation exists to fix was a success
+     * return on a request that sent nothing, and §25.7 rule 2's forbidden "helpful"
+     * fallback would restore it with an extra round trip. The request count is what pins
+     * that: exactly one call after the login, never two.
+     */
+    public function testResendOwnVerificationRaisesOn409AndDoesNotFallBack(): void
+    {
+        $client = $this->client([
+            $this->loginSuccessResponse(),
+            new Response(409, ['Content-Type' => 'application/json'], '{"message":"already verified"}'),
+        ]);
+        $client->login('alice@example.com', 'pw');
+
+        try {
+            $client->resendOwnVerification();
+            self::fail('a 409 must not resolve successfully');
+        } catch (AuthzError) {
+            // §2 maps 409 to the authorization error, which is what §25.7's table asks for.
+        }
+
+        self::assertCount(2, $this->sent, 'no fallback to the unauthenticated endpoint');
+    }
+
+    /** A `429` is the §2 mapping of the daily resend limit, and is likewise not retried. */
+    public function testResendOwnVerificationRaisesOn429AndDoesNotFallBack(): void
+    {
+        $client = $this->client([
+            $this->loginSuccessResponse(),
+            new Response(429, ['Content-Type' => 'application/json'], '{"message":"slow down"}'),
+        ]);
+        $client->login('alice@example.com', 'pw');
+
+        try {
+            $client->resendOwnVerification();
+            self::fail('a 429 must not resolve successfully');
+        } catch (NetworkError) {
+            // §2 maps 429 to the network error.
+        }
+
+        self::assertCount(2, $this->sent, 'no fallback to the unauthenticated endpoint');
+    }
+
+    /** With no session it refuses client-side, with ZERO wire calls — like every §27 op. */
+    public function testResendOwnVerificationWithNoSessionMakesNoWireCall(): void
+    {
+        $client = $this->client([]);
+
+        $this->expectException(AuthError::class);
+        try {
+            $client->resendOwnVerification();
+        } finally {
+            self::assertSame([], $this->sent);
+        }
+    }
+
+    /**
+     * The unauthenticated resend still answers uniformly (§25.4) — the truthful one is a
+     * different operation, not a replacement for this guarantee.
+     */
+    public function testTheUnauthenticatedResendStillSaysNothingAboutTheAddress(): void
+    {
+        $client = $this->client([new Response(200, [], '{"sent":true}')]);
+
+        $client->resendVerification('nobody@example.com', self::TENANT_UUID);
+
+        self::assertSame('/api/v1/auth/resend-verification', $this->sent[0]->getUri()->getPath());
+    }
+
     public function testAnExpiredVerificationTokenIsAnError(): void
     {
         $client = $this->client([new Response(400, ['Content-Type' => 'application/json'], '{"message":"token expired"}')]);

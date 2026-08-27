@@ -102,6 +102,29 @@ See [`examples/login_mfa.php`](examples/login_mfa.php) and
 [`examples/rest_authz.php`](examples/rest_authz.php) for complete, runnable versions of
 this flow.
 
+### Organization-level principals (CONTRACT.md §5.2)
+
+A completed login also reports whether the account it signed in is an **organization-level**
+principal — one whose record lives in its organization's reserved tenant, so its global
+grants apply in every tenant of that organization:
+
+```php
+if ($result->organizationLevel) {
+    // This principal can act on another tenant by sending a different X-Tenant-ID on
+    // the next request — no re-login, because it already is a principal of every
+    // tenant in the organization. Offer the tenant selector.
+}
+```
+
+An ordinary tenant principal is a principal of exactly one tenant; changing the header for
+one of those produces a `403`, so an admin UI checks this flag *before* offering the switch
+rather than discovering the answer from a failed request.
+
+The flag is **derived, never asserted**: it is resolved server-side from the caller's own
+tenant record, it is not a constructor argument, and this SDK never sends it. It is `false`
+against a server older than contract 1.31, and `false` on the two pending login outcomes,
+where no principal has been established yet — the safe direction in every case.
+
 ## Runtime requirements — read this before using gRPC or the AMQP worker (SC#3)
 
 **The REST transport (login/MFA/refresh/logout/`checkAccess`/`can`/`batchCheck` over HTTP)
@@ -1058,7 +1081,7 @@ Worked end to end in [`examples/webauthn_passkeys.php`](examples/webauthn_passke
 
 ## Account lifecycle and MFA enrolment (`Axiam\Sdk\Account`, CONTRACT.md §25)
 
-Nine operations covering the things a user does to their own account — none of which is
+Ten operations covering the things a user does to their own account — none of which is
 administration, and all of which were previously reachable only by hand-rolling HTTP.
 
 ```php
@@ -1113,6 +1136,39 @@ already-consumed, and the SDK does not distinguish them either (§25.4 rule 3).
 `verifyEmail()` and `resendVerification()` are unauthenticated — a user whose address is
 unverified may have no session at all — and carry the tenant as a **body** field, since
 §12.1 rule 2's `?tenant_id=` convention is scoped to the `/oauth2` endpoints.
+
+### Two resends, and why neither replaces the other (§25.7)
+
+```php
+// No session — a sign-up screen. Returns whatever happened; that is the point.
+$client->resendVerification('alice@example.com', $tenantId);
+
+// Signed in — a profile page. Says what happened, and names no address.
+try {
+    $client->resendOwnVerification();
+} catch (AuthzError) {
+    // 409: already verified, or an account state that must not be sent a live token.
+} catch (NetworkError) {
+    // 429: the daily resend limit.
+}
+```
+
+They look like one operation and are not. `resendVerification()` takes an address from an
+**anonymous** caller, so it must answer identically whether the address exists, is already
+verified, or is rate-limited — anything else is an oracle for which addresses have
+accounts. `resendOwnVerification()` is asked by a caller already signed in to the account
+it is asking about, so none of those outcomes discloses anything it did not bring with it,
+and this one tells the truth.
+
+**Neither is routed to the other**, in either direction, and this SDK does not fall back
+from the authenticated one to the public one on a `409` or a `429`: that fallback turns
+both failures back into a silent success and restores the exact bug §25.7 describes, with
+an extra round trip. `resendOwnVerification()` also takes no address parameter and sends
+no address field — a parameter here would let an authenticated session mail an arbitrary
+one.
+
+Returning normally means the mail was **enqueued**, not delivered. Delivery is
+asynchronous and can still fail at the provider.
 
 Worked end to end in [`examples/account_lifecycle.php`](examples/account_lifecycle.php).
 
@@ -1201,6 +1257,58 @@ $management->users()->update($id, new Models\UpdateUserRequest(status: Models\Us
 // override them for one handle and return a COPY, leaving the original pointing where it did.
 $management->caCertificates()->inOrg($otherOrgId)->listItems();
 ```
+
+**Searching a list (§27.4 rule 4).** All twenty paginated operations take an optional
+free-text term, matched case-insensitively by the **server** against the identifying
+fields of whatever is being listed — a name or username, plus the record id, so a UUID
+pasted out of a log line finds its row.
+
+```php
+$page = $client->users()->listItems(new PageRequest(0, 50, 'ada'));
+printf("%d of %d matches\n", count($page), $page->total);   // total counts MATCHES, not rows
+
+// And the whole filtered set: the term rides on the page request, so the walk carries it.
+foreach (ManagementTransport::walk(
+    static fn (PageRequest $p): Page => $users->listItems($p),
+    new PageRequest(0, 50, 'ada'),
+) as $match) { /* ... */ }
+```
+
+The term lives on `PageRequest` rather than becoming a third argument on twenty generated
+methods, and that is what makes the walk above work at all: a per-method argument has
+nowhere to live between one request and the next, so a walk built on it would return the
+matches followed by the unfiltered tail.
+
+`null` sends no `search` parameter. An empty or whitespace-only term is the **same
+request** — a search box that fires on every keystroke sends one the moment it is cleared,
+and "rows containing the empty string" is a different question from "all rows". The term
+is trimmed but never truncated: the server caps its length, and a client-side truncation
+the server would not have made is a silently different query the caller cannot see.
+
+**Enums are open (§27.11 rule 1).** A value this SDK's copy of the spec does not list
+decodes to that enum's `Unknown` case rather than throwing. Throwing would fail the
+*whole* response, so one field of one record would take down the page it was on —
+including the records the caller did ask for. `Unknown` is never confused with a known
+case, and its wire spelling is the empty string, which no server value is: carrying an
+unrecognised value back into an update is refused by the server rather than written as a
+spelling it never used. A `match` over one of these enums needs an `Unknown` arm.
+
+```php
+foreach ($client->tenants()->listItems() as $tenant) {
+    $label = match ($tenant->kind) {
+        Models\TenantKind::Organization => 'organization scope',
+        Models\TenantKind::Standard, null => 'tenant',
+        Models\TenantKind::Unknown => 'a kind this SDK predates — upgrade to name it',
+    };
+}
+```
+
+`Certificate::$boundServiceAccountId` is a **projection**, not a property: the server
+resolves it for a whole page in one query, so `certificates()->listItems()` populates it
+and `certificates()->get($id)` leaves it `null`. `null` there means "this read does not
+carry it", not "there is nothing bound" — the SDK does not issue a second request to fill
+it in, because a `get` that silently costs two round trips is the behaviour §27.4 rule 3
+forbids for slug resolution, for the same reason (§27.11 rule 4).
 
 **Errors (§27.4 rule 7).** Three statuses get a sub-type *inside* the §2 taxonomy, so a
 `catch (AuthzError $e)` written before §27 existed still behaves as it did:

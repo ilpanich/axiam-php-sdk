@@ -10,6 +10,12 @@ namespace Axiam\Sdk\Management\Models;
 
 /**
  * The `ActorType` enumeration from the server's OpenAPI document.
+ *
+ * An **open** enum. A value this SDK's copy of the spec does not list decodes to
+ * `self::Unknown` rather than failing the response it arrived in (CONTRACT.md §27.11 rule 1).
+ * Its own wire spelling is the empty string, which no server value is, so carrying an
+ * unrecognised value back into an update is refused by the server rather than written as a
+ * spelling it never used. A `match` over these cases needs an `Unknown` arm.
  */
 enum ActorType: string
 {
@@ -22,18 +28,19 @@ enum ActorType: string
     /** The wire value `System`. */
     case System = 'System';
 
+    /** A value this SDK's copy of the spec does not list; see the type's summary. */
+    case Unknown = '';
+
     /**
-     * Parses a wire value into a ActorType.
+     * Parses a wire value into a ActorType, mapping an unrecognised one to {@see
+     * self::Unknown}.
      *
-     * Throws on an unrecognised value rather than defaulting to a case: a server that has
-     * learned a new state should surface as a loud error, not as whichever case was declared
-     * first.
-     * @throws \Axiam\Sdk\Core\AxiamException when `$value` is not a known case.
+     * Never throws. A parse error here would fail the whole response the value arrived in, so
+     * one unrecognised field of one record would take down the page it was on (§27.11 rule 1).
+     * A `match` over this enum needs an `Unknown` arm.
      */
     public static function fromWire(string $value): self
     {
-        return self::tryFrom($value) ?? throw new \Axiam\Sdk\Core\AxiamException(
-            sprintf('unknown ActorType value "%s" — the server may be newer than this SDK', $value),
-        );
+        return self::tryFrom($value) ?? self::Unknown;
     }
 }

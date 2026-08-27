@@ -23,8 +23,6 @@ use Axiam\Sdk\Management\Models\GeneratedCertificate;
 final class CertificatesApi extends ManagementSupport
 {
     /**
-     * `GET /api/v1/certificates`
-     *
      * `GET /api/v1/certificates`.
      *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not

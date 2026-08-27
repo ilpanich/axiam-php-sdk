@@ -6,13 +6,16 @@ declare(strict_types=1);
  * examples/account_lifecycle.php — CONTRACT.md §25, account lifecycle and MFA enrolment:
  * the calls a user makes about their own account, none of which is administration.
  *
- * Four demonstrations:
+ * Five demonstrations:
  *   1. Forced enrolment — the third `login()` outcome. A tenant that requires MFA meets an
  *      account that has none, and the login is neither a success nor a failure.
  *   2. Voluntary enrolment — the same two calls from inside an existing session.
  *   3. Email verification — unauthenticated, because a user whose address is unverified
  *      may have no session at all.
- *   4. Password reset — including the §23 detour a tenant with OPAQUE enabled forces, and
+ *   4. The two resends (§25.7) — one for a caller with no session, one for a caller signed
+ *      in to the account it is asking about. They are not alternatives, and neither is
+ *      routed to the other.
+ *   5. Password reset — including the §23 detour a tenant with OPAQUE enabled forces, and
  *      the enumeration guarantee that makes the first call return nothing useful on
  *      purpose.
  *
@@ -25,7 +28,9 @@ require __DIR__ . '/../vendor/autoload.php';
 use Axiam\Sdk\Account\PasswordResetConfirmation;
 use Axiam\Sdk\Account\PasswordResetRequest;
 use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Core\AuthzError;
 use Axiam\Sdk\Core\AxiamException;
+use Axiam\Sdk\Core\NetworkError;
 
 function envOr(string $key, string $fallback): string
 {
@@ -120,7 +125,42 @@ try {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Password reset (§25.4)
+// 4. The two resends (§25.7) — they look like one operation and are not
+// ---------------------------------------------------------------------------
+
+echo "== resending a verification mail ==\n";
+
+// (a) No session. A sign-up screen has an address and nothing else, so the server must
+//     answer identically whether that address exists, is already verified, or is over the
+//     daily limit: anything else is an oracle for which addresses have accounts (§25.4).
+try {
+    $client->resendVerification('alice@acme.test', $tenantId);
+    echo "  if that address needs verifying, a mail is on its way\n";
+} catch (AxiamException) {
+    // Nothing reachable; the shape is what this example documents.
+}
+
+// (b) Signed in. A profile page's caller is already authenticated to the account it is
+//     asking about, so none of the outcomes tells it anything it did not bring with it —
+//     and this call therefore says which one happened. It names NO address: a parameter
+//     here would let an authenticated session mail an arbitrary one.
+try {
+    $client->resendOwnVerification();
+    echo "  enqueued — delivery is asynchronous and can still fail at the provider\n";
+} catch (AuthzError) {
+    // 409: already verified, or an account state that must not be sent a live token.
+    echo "  nothing to send: that address is already verified\n";
+} catch (NetworkError) {
+    // 429: the daily resend limit. NOT retried against the unauthenticated endpoint —
+    // §25.7 rule 2 forbids that fallback, which would turn this failure back into a
+    // silent success and restore the bug this operation exists to fix.
+    echo "  the daily resend limit is reached; try again tomorrow\n";
+} catch (AxiamException) {
+    // Includes "no session at all", which is refused client-side with no wire call.
+}
+
+// ---------------------------------------------------------------------------
+// 5. Password reset (§25.4)
 // ---------------------------------------------------------------------------
 
 echo "== resetting a password ==\n";

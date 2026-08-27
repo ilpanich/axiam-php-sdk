@@ -27,6 +27,9 @@ final class Tenant implements \JsonSerializable
      * @param TenantStatus $status Lifecycle status. New tenants default to
      *     [`TenantStatus::Active`].
      * @param string $updatedAt the server's `updated_at` field
+     * @param TenantKind|null $kind Whether this is an ordinary tenant or the organization's
+     *     own scope. `#[serde(default)]` so every row written before organization scope existed
+     *     reads back as [`TenantKind::Standard`], which is what it is. (optional)
      */
     public function __construct(
         public readonly string $createdAt,
@@ -37,6 +40,7 @@ final class Tenant implements \JsonSerializable
         public readonly string $slug,
         public readonly TenantStatus $status,
         public readonly string $updatedAt,
+        public readonly ?TenantKind $kind = null,
     ) {
     }
 
@@ -55,6 +59,7 @@ final class Tenant implements \JsonSerializable
             (string) ModelDecode::need($data, 'slug', self::class),
             TenantStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
             (string) ModelDecode::need($data, 'updated_at', self::class),
+            isset($data['kind']) ? TenantKind::fromWire((string) $data['kind']) : null,
         );
     }
 
@@ -77,6 +82,9 @@ final class Tenant implements \JsonSerializable
         $out['slug'] = $this->slug;
         $out['status'] = $this->status->value;
         $out['updated_at'] = $this->updatedAt;
+        if ($this->kind !== null) {
+            $out['kind'] = $this->kind->value;
+        }
 
         return $out;
     }

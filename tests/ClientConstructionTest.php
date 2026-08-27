@@ -107,6 +107,133 @@ final class ClientConstructionTest extends TestCase
         self::assertNull($result->challengeToken);
     }
 
+    // --- §5.2: organization-level principals ---
+
+    /**
+     * `organization_level` on the login response reaches {@see LoginResult}.
+     *
+     * The flag is the only thing that makes a tenant switch meaningful: such a principal
+     * changes the tenant it acts on by sending a different `X-Tenant-ID`, with no
+     * re-login, because it already is a principal of every tenant in its organization.
+     * An application checks this BEFORE offering the switch rather than discovering the
+     * answer from a `403`.
+     */
+    public function testLoginSurfacesAnOrganizationLevelPrincipal(): void
+    {
+        $mock = new MockHandler([
+            new Response(200, [], (string) json_encode([
+                'user' => [
+                    'id' => 'user-0001',
+                    'username' => 'root',
+                    'email' => 'root@acme.test',
+                    'organization_level' => true,
+                ],
+                'session_id' => 'sess-0001',
+                'expires_in' => 900,
+            ])),
+        ]);
+
+        $client = new AxiamClient(self::BASE_URL, self::TENANT, transportHandler: $mock);
+
+        self::assertTrue($client->login('root@acme.test', 'pw')->organizationLevel);
+    }
+
+    /**
+     * Absent means `false`, which is what a server older than contract 1.31 answers.
+     *
+     * The safe direction in both cases: the application then offers no cross-tenant
+     * action, rather than one that would fail at the server.
+     */
+    public function testAnAbsentOrganizationLevelFlagIsFalse(): void
+    {
+        $mock = new MockHandler([
+            new Response(200, [], (string) json_encode([
+                'user' => ['id' => 'user-0001', 'username' => 'alice', 'email' => 'alice@acme.test'],
+                'session_id' => 'sess-0001',
+                'expires_in' => 900,
+            ])),
+        ]);
+
+        $client = new AxiamClient(self::BASE_URL, self::TENANT, transportHandler: $mock);
+
+        self::assertFalse($client->login('alice@acme.test', 'pw')->organizationLevel);
+    }
+
+    /**
+     * A non-boolean value is not coerced into a capability (§5.2 rule 2).
+     *
+     * The flag is resolved server-side from the caller's own tenant record; anything
+     * that is not the literal `true` is read as "no claim", because a truthy string is
+     * exactly how a field the SDK does not really understand becomes a UI offering a
+     * switch that 403s.
+     */
+    public function testANonBooleanOrganizationLevelIsNotTreatedAsTrue(): void
+    {
+        $mock = new MockHandler([
+            new Response(200, [], (string) json_encode([
+                'user' => [
+                    'id' => 'user-0001',
+                    'username' => 'alice',
+                    'email' => 'alice@acme.test',
+                    'organization_level' => 'yes',
+                ],
+                'session_id' => 'sess-0001',
+                'expires_in' => 900,
+            ])),
+        ]);
+
+        $client = new AxiamClient(self::BASE_URL, self::TENANT, transportHandler: $mock);
+
+        self::assertFalse($client->login('alice@acme.test', 'pw')->organizationLevel);
+    }
+
+    /**
+     * §5.2 rule 2: it is derived, never asserted — the SDK never SENDS it.
+     *
+     * A field a client could put on the request would be a client claiming a capability
+     * the server is supposed to resolve, which is the whole reason the rule is written
+     * as a prohibition rather than a convention.
+     */
+    public function testOrganizationLevelIsNeverSentOnTheLoginRequest(): void
+    {
+        $sent = [];
+        $mock = new MockHandler([
+            new Response(200, [], (string) json_encode([
+                'user' => ['id' => 'user-0001', 'organization_level' => true],
+                'session_id' => 'sess-0001',
+                'expires_in' => 900,
+            ])),
+        ]);
+        $handler = static function (\Psr\Http\Message\RequestInterface $request, array $options) use ($mock, &$sent): mixed {
+            $sent[] = $request;
+
+            return $mock($request, $options);
+        };
+
+        $client = new AxiamClient(self::BASE_URL, self::TENANT, transportHandler: $handler);
+        $client->login('root@acme.test', 'pw');
+
+        $body = json_decode((string) $sent[0]->getBody(), true);
+        self::assertIsArray($body);
+        self::assertArrayNotHasKey('organization_level', $body);
+    }
+
+    /** No principal is established yet on the two pending outcomes, so the flag is false. */
+    public function testAPendingLoginOutcomeIsNeverOrganizationLevel(): void
+    {
+        $mock = new MockHandler([
+            new Response(202, [], (string) json_encode([
+                'mfa_required' => true,
+                'challenge_token' => 'challenge-abc-123',
+                'available_methods' => ['totp'],
+            ])),
+        ]);
+
+        $client = new AxiamClient(self::BASE_URL, self::TENANT, transportHandler: $mock);
+
+        self::assertFalse($client->login('alice@acme.test', 'pw')->organizationLevel);
+    }
+
     public function testLoginReturnsMfaRequiredLoginResultOnChallenge(): void
     {
         $mock = new MockHandler([
