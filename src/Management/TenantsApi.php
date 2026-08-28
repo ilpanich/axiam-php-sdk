@@ -136,4 +136,25 @@ final class TenantsApi extends ManagementSupport
             null,
         );
     }
+
+    /**
+     * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export`
+     *
+     * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export`.
+     *
+     * Returns nothing; the server answers with an empty body.
+     * @param string $tenantId the `{tenant_id}` path parameter
+     */
+    public function exportAudit(
+        string $tenantId,
+    ): void {
+        $this->transport->send(
+            'tenants.export_audit',
+            'POST',
+            '/api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export',
+            ['org_id' => $this->orgId(), 'tenant_id' => $tenantId],
+            [],
+            null,
+        );
+    }
 }

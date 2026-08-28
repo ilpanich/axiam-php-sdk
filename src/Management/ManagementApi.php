@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management;
 
 /**
- * The CONTRACT.md §27 management surface: 146 operations across 24 namespaces.
+ * The CONTRACT.md §27 management surface: 147 operations across 24 namespaces.
  *
  * Reached as `$client->management()`. This class holds nothing but the shared {@see
  * ManagementTransport} and the client's default scope; each accessor below hands back a

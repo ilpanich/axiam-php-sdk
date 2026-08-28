@@ -1239,7 +1239,7 @@ Worked end to end in [`examples/par_login.php`](examples/par_login.php).
 
 ## Management API (`Axiam\Sdk\Management`, CONTRACT.md §27)
 
-The administrative surface: **146 operations across 24 namespaces**, generated from the
+The administrative surface: **147 operations across 24 namespaces**, generated from the
 vendored `management-registry.json` and `openapi.json` by `scripts/gen_management.py` and
 committed, so building this package needs no Python. CI re-runs the generator with
 `--check` on every PR, which is what stops the committed surface from drifting away from
@@ -1255,7 +1255,7 @@ rather than by two code paths agreeing, and the suite asserts it by comparing th
 path and query each actually puts on the wire.
 
 ```php
-// §27.2 — namespace handles, not 146 flat methods.
+// §27.2 — namespace handles, not 147 flat methods.
 $page = $client->users()->listItems(new PageRequest(0, 50));
 
 // Or reach the same handles behind one accessor.

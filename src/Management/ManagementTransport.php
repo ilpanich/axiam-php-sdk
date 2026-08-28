@@ -17,14 +17,14 @@ use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * The single wire path every one of the 146 §27 management operations goes through
+ * The single wire path every one of the 147 §27 management operations goes through
  * (CONTRACT.md §27.8).
  *
  * §27.8 requires the generated layer to sit on the SDK's EXISTING request path rather
  * than open a second one. It is built on the same Guzzle client that carries
  * {@see \Axiam\Sdk\Rest\AuthMiddleware} and {@see \Axiam\Sdk\Rest\RefreshMiddleware}, so
  * §3 CSRF, the §4 cookie jar, the §5 `X-Tenant-ID` header, §6 TLS and §9 single-flight
- * refresh apply to all 146 by construction — not by 146 opportunities to forget one.
+ * refresh apply to all 147 by construction — not by 147 opportunities to forget one.
  *
  * What this class adds on top of that path is only what §27 asks for:
  *

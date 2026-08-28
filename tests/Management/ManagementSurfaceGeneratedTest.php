@@ -12,7 +12,7 @@ use Axiam\Sdk\Management\Models;
 use Axiam\Sdk\Management\Page;
 
 /**
- * One case per CONTRACT.md §27 operation — all 146 of them.
+ * One case per CONTRACT.md §27 operation — all 147 of them.
  *
  * Each asserts three things about one operation: it issues the METHOD the registry names,
  * against the PATH the registry names, and — where the operation returns a body — that every
@@ -210,6 +210,20 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $request = $this->lastRequest();
         self::assertSame('DELETE', $request->getMethod());
         self::assertSame('/api/v1/organizations/11111111-1111-4111-8111-111111111111/tenants/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /**
+     * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export` — the
+     * `tenants.export_audit` operation.
+     */
+    public function testTenantsExportAuditReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->tenants()->exportAudit('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/organizations/11111111-1111-4111-8111-111111111111/tenants/11111111-1111-4111-8111-111111111111/audit-export', $request->getUri()->getPath());
     }
 
     /** `GET /api/v1/users` — the `users.list` operation. */
@@ -3665,10 +3679,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * §27.9: all 146 registry operations are covered by a case above.
+     * §27.9: all 147 registry operations are covered by a case above.
      *
-     * Counted reflectively rather than written as a literal on both sides — `assertSame(146,
-     * 146)` is a tautology, and a case removed by a bad regeneration would still pass it.
+     * Counted reflectively rather than written as a literal on both sides — `assertSame(147,
+     * 147)` is a tautology, and a case removed by a bad regeneration would still pass it.
      */
     public function testEveryRegistryOperationHasACase(): void
     {
@@ -3678,6 +3692,6 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'ReachesItsRoute'),
         );
 
-        self::assertCount(146, $cases);
+        self::assertCount(147, $cases);
     }
 }
