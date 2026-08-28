@@ -59,6 +59,46 @@ final class ClientConstructionTest extends TestCase
         new AxiamClient(self::BASE_URL, '');
     }
 
+    // --- CONTRACT.md §5.2.1 rule 2: never send an empty-string slug ---
+    //
+    // Nothing can carry a blank slug, so the server resolves nothing — and on
+    // /auth/opaque/login/start it fails on the workspace *before* the tenant's OPAQUE
+    // mode is read, so the 404 of §23.4 rule 10 never arrives, this SDK has no fallback
+    // to take, and sign-in fails even against a tenant with OPAQUE disabled.
+
+    public function testAWhitespaceOnlyTenantIsRejected(): void
+    {
+        // `=== ''` caught the empty string but not a slug of spaces, which is exactly as
+        // much of a tenant and reaches the wire the same way.
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/blank/');
+        new AxiamClient(self::BASE_URL, '   ');
+    }
+
+    public function testABlankOrgSlugIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/orgSlug/');
+        new AxiamClient(self::BASE_URL, self::TENANT, orgSlug: '');
+    }
+
+    public function testANullOrgSlugIsAccepted(): void
+    {
+        // Null is the organization identifier being *optional* (§5.1) — which a client
+        // that never calls login or refresh is entitled to — not blank. The check has to
+        // keep that distinction or every resource-server client breaks.
+        $client = new AxiamClient(self::BASE_URL, self::TENANT);
+        self::assertInstanceOf(AxiamClient::class, $client);
+    }
+
+    public function testTheReservedOrganizationTenantIsNamedLikeAnyOther(): void
+    {
+        // §5.2.1: an organization-level principal signs in by naming the organization's
+        // reserved tenant, whose slug is fixed in every deployment. No new surface.
+        $client = new AxiamClient(self::BASE_URL, 'organization', orgSlug: 'globex');
+        self::assertInstanceOf(AxiamClient::class, $client);
+    }
+
     public function testTenantParameterIsTheFirstOptionalityBoundary(): void
     {
         // Every parameter declared BEFORE `tenant` must also be required (i.e. `tenant`
