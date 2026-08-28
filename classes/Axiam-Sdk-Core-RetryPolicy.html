@@ -482,7 +482,7 @@ it will be ready, so retrying sooner is not permitted — and a
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/RetryPolicy.php"><a href="files/src-core-retrypolicy.html"><abbr title="src/Core/RetryPolicy.php">RetryPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">98</span>
+    <span class="phpdocumentor-element-found-in__line">104</span>
 
     </aside>
 
@@ -490,7 +490,7 @@ it will be ready, so retrying sooner is not permitted — and a
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">execute</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$operationName</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$enabled</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-TelemetryDispatcher.html"><abbr title="\Axiam\Sdk\Core\TelemetryDispatcher">TelemetryDispatcher</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$telemetry</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(int): <abbr title="\Axiam\Sdk\Core\T">T</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$operation</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): float|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jitter</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(float): void|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sleep</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Axiam\Sdk\Core\T">T</abbr></span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">execute</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$operationName</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$enabled</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-TelemetryDispatcher.html"><abbr title="\Axiam\Sdk\Core\TelemetryDispatcher">TelemetryDispatcher</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$telemetry</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(int): <abbr title="\Axiam\Sdk\Core\T">T</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$operation</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): float|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jitter</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(float): void|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sleep</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(<a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a>): bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$retryable</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Axiam\Sdk\Core\T">T</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -563,6 +563,20 @@ the server, not transport failures.</p>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Injected sleep, for tests.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$retryable</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(<a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a>): bool|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Decides whether a caught
+<a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a> is eligible at all; <code class="prettyprint">null</code> keeps the previous
+behaviour of retrying every one. CONTRACT.md §27 needs this for two
+reasons: §27.4 rule 8 retries only <code class="prettyprint">GET</code>, and §27.4 rule 7 puts
+<a href="classes/Axiam-Sdk-Management-ValidationError.html"><abbr title="\Axiam\Sdk\Management\ValidationError">ValidationError</abbr></a> UNDER <code class="prettyprint">NetworkError</code>, so a
+body the server has already rejected would otherwise be sent three times.</p>
 </section>
 
             </dd>

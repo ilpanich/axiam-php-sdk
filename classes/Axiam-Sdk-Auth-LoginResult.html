@@ -126,7 +126,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -144,7 +144,9 @@ account has no factor yet, and <code class="prettyprint">$setupToken</code> carr
 <code class="prettyprint">mfaSetupEnroll()</code>/<code class="prettyprint">mfaSetupConfirm()</code>. Not a failure, and not a session either: a
 client that only branches on <code class="prettyprint">$mfaRequired</code> reports a successful login that has no
 session the moment a tenant turns required MFA on.</li>
-<li>neither — <code class="prettyprint">$userId</code>/<code class="prettyprint">$tenantId</code> describe the authenticated principal.</li>
+<li>neither — <code class="prettyprint">$userId</code>/<code class="prettyprint">$tenantId</code> describe the authenticated principal, and
+<code class="prettyprint">$organizationLevel</code> says whether that principal can act across the whole
+organization (CONTRACT.md §5.2).</li>
 </ul>
 <p>Any token-carrying field MUST be typed <a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a> (CONTRACT.md §7 blanket
 rule, mirrors the Java SDK's 20-03 <code class="prettyprint">challengeToken</code> decision) — no raw token string
@@ -189,6 +191,12 @@ is ever exposed as a plain public property.</p>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Auth-LoginResult.html#property_mfaSetupRequired">$mfaSetupRequired</a>
+    <span>
+                        &nbsp;: bool            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-LoginResult.html#property_organizationLevel">$organizationLevel</a>
     <span>
                         &nbsp;: bool            </span>
 </dt>
@@ -255,7 +263,7 @@ is ever exposed as a plain public property.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">33</span>
+    <span class="phpdocumentor-element-found-in__line">52</span>
 
     </aside>
 
@@ -292,7 +300,7 @@ is ever exposed as a plain public property.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">32</span>
+    <span class="phpdocumentor-element-found-in__line">51</span>
 
     </aside>
 
@@ -329,7 +337,7 @@ is ever exposed as a plain public property.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">36</span>
+    <span class="phpdocumentor-element-found-in__line">55</span>
 
     </aside>
 
@@ -339,6 +347,43 @@ is ever exposed as a plain public property.</p>
         <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__type">bool</span>
     <span class="phpdocumentor-signature__name">$mfaSetupRequired</span>
+     = <span class="phpdocumentor-signature__default-value">false</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_organizationLevel">
+        $organizationLevel
+        <a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_organizationLevel" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                            </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">57</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">bool</span>
+    <span class="phpdocumentor-signature__name">$organizationLevel</span>
      = <span class="phpdocumentor-signature__default-value">false</span></code>
 
     
@@ -366,7 +411,7 @@ is ever exposed as a plain public property.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">56</span>
 
     </aside>
 
@@ -403,7 +448,7 @@ is ever exposed as a plain public property.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">35</span>
+    <span class="phpdocumentor-element-found-in__line">54</span>
 
     </aside>
 
@@ -440,7 +485,7 @@ is ever exposed as a plain public property.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">53</span>
 
     </aside>
 
@@ -482,14 +527,14 @@ is ever exposed as a plain public property.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/LoginResult.php"><a href="files/src-auth-loginresult.html"><abbr title="src/Auth/LoginResult.php">LoginResult.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">31</span>
+    <span class="phpdocumentor-element-found-in__line">50</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaRequired</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$challengeToken</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaSetupRequired</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$setupToken</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaRequired</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$challengeToken</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaSetupRequired</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$setupToken</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$organizationLevel</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -539,6 +584,29 @@ is ever exposed as a plain public property.</p>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$organizationLevel</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">false</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Whether the account that just signed in is an
+<em>organization-level</em>* principal (CONTRACT.md §5.2) — one whose record lives in
+its organization's reserved tenant, so its global grants apply in every tenant of
+that organization and it can act on a different one by sending a different
+<code class="prettyprint">X-Tenant-ID</code> on the next request, with no re-login.</p>
+<pre class="prettyprint"><code class="prettyprint">An ordinary tenant principal is a principal of exactly one tenant; changing the
+header for one of those produces a `403`. This flag is therefore what an
+application checks *before* offering a tenant switch, rather than discovering the
+answer from a failed request.
+
+Derived from the login response, never asserted by the caller (§5.2 rule 2), and
+`false` in three cases that are all the safe direction: a server older than
+contract 1.31, and each of the two pending outcomes above, where no principal has
+been established yet.
+</code></pre>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -572,6 +640,7 @@ is ever exposed as a plain public property.</p>
                                                     <li class=""><a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_challengeToken">$challengeToken</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_mfaRequired">$mfaRequired</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_mfaSetupRequired">$mfaSetupRequired</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_organizationLevel">$organizationLevel</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_setupToken">$setupToken</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_tenantId">$tenantId</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Auth-LoginResult.html#property_userId">$userId</a></li>

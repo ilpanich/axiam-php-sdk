@@ -119,15 +119,13 @@
 
 <div class="phpdocumentor-label-line">
 
-    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
-
 
 </div>
 
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">23</span>
+    <span class="phpdocumentor-element-found-in__line">30</span>
 
     </aside>
 
@@ -143,7 +141,14 @@ no path that stores the raw <code class="prettyprint">$response</code> object (o
 itself carry one) as this exception's message, cause, or any other property — this
 structurally prevents the token-leak-via-error class of bug first found in the
 TypeScript sibling SDK (Phase 17 CR-04, its <code class="prettyprint">src/core/errorMapper.ts</code>
-<code class="prettyprint">sanitizeAxiosError</code>) and mirrored by every later sibling SDK's <code class="prettyprint">NetworkError</code>.</p>
+<code class="prettyprint">sanitizeAxiosError</code>) and mirrored by every later sibling SDK's <code class="prettyprint">NetworkError</code>.
+Not <code class="prettyprint">final</code>, so CONTRACT.md §27.4 rule 7 can classify <code class="prettyprint">400</code>/<code class="prettyprint">422</code> as
+<a href="classes/Axiam-Sdk-Management-ValidationError.html"><abbr title="\Axiam\Sdk\Management\ValidationError">ValidationError</abbr></a> inside this type — §2's own <code class="prettyprint">400</code> row
+already lands here, and the sub-type keeps that mapping. <strong>The redact-before-wrap
+invariant above is untouched by that</strong>: the constructor a subclass can reach takes a
+<code class="prettyprint">string</code> and a <code class="prettyprint">\Throwable</code>, never a <abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr>, so a subclass has no
+more access to a live response than any other caller — <abbr title="\Axiam\Sdk\Core\self::fromResponse()">self::fromResponse()</abbr>
+remains the only path from a response into this type.</p>
 </section>
 
 
@@ -245,7 +250,7 @@ is never stored — only the resulting sanitized string survives past this metho
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">45</span>
 
     </aside>
 
@@ -295,7 +300,7 @@ not permitted.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">119</span>
+    <span class="phpdocumentor-element-found-in__line">132</span>
 
     </aside>
 
@@ -354,7 +359,7 @@ itself is never stored as a cause (see class doc).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">140</span>
+    <span class="phpdocumentor-element-found-in__line">153</span>
 
     </aside>
 
@@ -408,7 +413,7 @@ depth, matching <abbr title="\Axiam\Sdk\Core\self::fromException()">self::fromEx
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/NetworkError.php"><a href="files/src-core-networkerror.html"><abbr title="src/Core/NetworkError.php">NetworkError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">70</span>
 
     </aside>
 
