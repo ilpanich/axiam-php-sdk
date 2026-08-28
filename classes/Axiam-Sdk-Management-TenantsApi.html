@@ -185,6 +185,13 @@ and §19 telemetry apply without this class doing anything to opt in (§27.8).</
 <dd>`DELETE /api/v1/organizations/{org_id}/tenants/{tenant_id}`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-TenantsApi.html#method_exportAudit">exportAudit()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant">forTenant()</a>
     <span>
                                 &nbsp;: static    </span>
@@ -390,6 +397,56 @@ for why it copies.</dd>
         <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/organizations/{org_id}/tenants/{tenant_id}</code>.</p>
 <p>Returns nothing; the server answers with an empty body.</p>
 <p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{tenant_id}</code> path parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_exportAudit">
+        exportAudit()
+        <a href="classes/Axiam-Sdk-Management-TenantsApi.html#method_exportAudit" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/TenantsApi.php"><a href="files/src-management-tenantsapi.html"><abbr title="src/Management/TenantsApi.php">TenantsApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">148</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">exportAudit</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -711,6 +768,7 @@ from it.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-TenantsApi.html#method_create">create()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-TenantsApi.html#method_delete">delete()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-TenantsApi.html#method_exportAudit">exportAudit()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant">forTenant()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-TenantsApi.html#method_get">get()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg">inOrg()</a></li>

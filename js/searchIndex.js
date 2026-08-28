@@ -693,7 +693,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Amanagement\u0028\u0029",
             "name": "management",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020146\u0020operations\u0020across\u002024\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020147\u0020operations\u0020across\u002024\u0020namespaces.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_management"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Aorganizations\u0028\u0029",
@@ -1948,7 +1948,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi",
             "name": "ManagementApi",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020146\u0020operations\u0020across\u002024\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020147\u0020operations\u0020across\u002024\u0020namespaces.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003A__construct\u0028\u0029",
@@ -2113,7 +2113,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementTransport",
             "name": "ManagementTransport",
-            "summary": "The\u0020single\u0020wire\u0020path\u0020every\u0020one\u0020of\u0020the\u0020146\u0020\u00A727\u0020management\u0020operations\u0020goes\u0020through\n\u0028CONTRACT.md\u0020\u00A727.8\u0029.",
+            "summary": "The\u0020single\u0020wire\u0020path\u0020every\u0020one\u0020of\u0020the\u0020147\u0020\u00A727\u0020management\u0020operations\u0020goes\u0020through\n\u0028CONTRACT.md\u0020\u00A727.8\u0029.",
             "url": "classes/Axiam-Sdk-Management-ManagementTransport.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementTransport\u003A\u003A__construct\u0028\u0029",
@@ -10305,6 +10305,11 @@ Search.appendIndex(
             "name": "delete",
             "summary": "\u0060DELETE\u0020\/api\/v1\/organizations\/\u007Borg_id\u007D\/tenants\/\u007Btenant_id\u007D\u0060",
             "url": "classes/Axiam-Sdk-Management-TenantsApi.html#method_delete"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\TenantsApi\u003A\u003AexportAudit\u0028\u0029",
+            "name": "exportAudit",
+            "summary": "\u0060POST\u0020\/api\/v1\/organizations\/\u007Borg_id\u007D\/tenants\/\u007Btenant_id\u007D\/audit\u002Dexport\u0060",
+            "url": "classes/Axiam-Sdk-Management-TenantsApi.html#method_exportAudit"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\UsersApi",
             "name": "UsersApi",
