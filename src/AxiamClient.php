@@ -288,16 +288,33 @@ final class AxiamClient
         // here, because construction is the only moment an operator can act on it.
         $this->decisionMemo->reportClamp($decisionMemoTtlMs, $this->telemetry);
 
-        if ($tenant === '') {
+        if (trim($tenant) === '') {
             // D-13/§5 runtime backstop: PHP's type system alone cannot forbid an empty
             // string, only a missing argument. AXIAM is multi-tenant — there is no default
             // tenant, so a blank one is rejected exactly like an omitted one would be.
+            //
+            // §5.2.1 rule 2 widens that to whitespace: a slug of spaces is exactly as much
+            // of a tenant, and reaches the wire the same way. Nothing can carry a blank
+            // slug, so the server resolves nothing — and on /auth/opaque/login/start it
+            // fails on the workspace *before* the tenant's OPAQUE mode is read, so the 404
+            // that means "OPAQUE is not offered here" never arrives and this SDK has no
+            // fallback to take. Sign-in then fails even against a tenant with OPAQUE
+            // disabled, answered as "invalid credentials".
             throw new \InvalidArgumentException(
-                'tenant is required — AXIAM is multi-tenant and there is no default tenant (CONTRACT.md §5)'
+                'tenant is required and must not be blank — AXIAM is multi-tenant and there is no '
+                . 'default tenant; to sign in an organization-level principal, name the '
+                . 'organization\'s reserved tenant, whose slug is "organization" (CONTRACT.md §5, §5.2.1)'
             );
         }
         if ($orgSlug !== null && $orgId !== null) {
             throw new \InvalidArgumentException('orgSlug and orgId are mutually exclusive — supply at most one');
+        }
+        // §5.2.1 rule 2, the other slug. `null` stays fine — that is the organization
+        // identifier being optional (§5.1), not blank.
+        if ($orgSlug !== null && trim($orgSlug) === '') {
+            throw new \InvalidArgumentException(
+                'orgSlug must not be blank — omit it entirely, or name the organization (CONTRACT.md §5.1, §5.2.1)'
+            );
         }
         // §6.1.1: PEM cert + PEM key are all-or-nothing. Presenting a half-configured client
         // identity is never valid, so reject exactly one at construction (clear, early error).
