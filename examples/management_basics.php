@@ -7,10 +7,10 @@ declare(strict_types=1);
  * handles, paging, searching, sparse updates, open enums, and the three error
  * classifications.
  *
- * §27.2 gives the surface namespace HANDLES rather than 146 flat methods:
+ * §27.2 gives the surface namespace HANDLES rather than 147 flat methods:
  * `$client->management()->users()->listItems()`. Every handle goes through one
  * transport, so §3 CSRF, the §4 cookie jar, the §5 tenant header, §6 TLS, §16 retry and
- * §19 telemetry apply to all 146 operations without any of them opting in (§27.8).
+ * §19 telemetry apply to all 147 operations without any of them opting in (§27.8).
  *
  * Run: php examples/management_basics.php
  * (requires a reachable AXIAM server at AXIAM_BASE_URL and an administrator account —

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the CONTRACT §27 management surface for the PHP SDK.
 
-Reads ``management-registry.json`` (the 146 operations across 24 namespaces,
+Reads ``management-registry.json`` (the 147 operations across 24 namespaces,
 maintained in ``ilpanich/axiam`` and vendored here) plus ``openapi.json`` for the
 schemas those operations carry, and writes:
 
@@ -11,7 +11,7 @@ schemas those operations carry, and writes:
 - ``src/Management/ManagementApi.php`` — the 24 accessors;
 - ``tests/Management/ManagementSurfaceGeneratedTest.php``
 - ``tests/Management/ManagementSparseBodiesGeneratedTest.php``
-  — one conformance case per operation, plus the §27.9 assertion that all 146 are
+  — one conformance case per operation, plus the §27.9 assertion that all 147 are
   reached.
 
 Run with ``--check`` to verify the committed output is current; that is what CI runs,
@@ -1231,7 +1231,7 @@ def emit_api() -> str:
     """The root ``ManagementApi`` with one accessor per namespace."""
     out = [header(API_NS)]
     out.extend(docblock(
-        "The CONTRACT.md §27 management surface: 146 operations across 24 namespaces.\n\n"
+        "The CONTRACT.md §27 management surface: 147 operations across 24 namespaces.\n\n"
         "Reached as `$client->management()`. This class holds nothing but the shared "
         "{@see ManagementTransport} and the client's default scope; each accessor below "
         "hands back a namespace handle (§27.2) that can be re-scoped per call with "
@@ -1497,7 +1497,7 @@ def emit_surface_test() -> str:
     out.append("use Axiam\\Sdk\\Management\\Page;")
     out.append("")
     out.extend(docblock(
-        "One case per CONTRACT.md §27 operation — all 146 of them.\n\n"
+        "One case per CONTRACT.md §27 operation — all 147 of them.\n\n"
         "Each asserts three things about one operation: it issues the METHOD the registry "
         "names, against the PATH the registry names, and — where the operation returns a "
         "body — that every field `openapi.json` declares survives the decode. The third is "
@@ -1552,9 +1552,9 @@ def emit_surface_test() -> str:
     # §27.9: the count itself is an assertion, so an operation silently dropped from the
     # registry fails the build rather than quietly reducing coverage.
     tail = docblock(
-        "§27.9: all 146 registry operations are covered by a case above.\n\n"
+        "§27.9: all 147 registry operations are covered by a case above.\n\n"
         "Counted reflectively rather than written as a literal on both sides — "
-        "`assertSame(146, 146)` is a tautology, and a case removed by a bad regeneration "
+        "`assertSame(147, 147)` is a tautology, and a case removed by a bad regeneration "
         "would still pass it.",
         "    ",
     )

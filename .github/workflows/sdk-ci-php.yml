@@ -287,6 +287,13 @@ jobs:
     #
     # This job's remaining job is therefore to be the last gate before that
     # webhook's effect becomes permanent: assert the manifest is publishable.
+    #
+    # T-148 / H-1: no build-provenance attestation here, and that is not an
+    # omission — it follows from the PULL model above. There is no artifact:
+    # Composer fetches the source from this repository (or a dist zip GitHub
+    # generates from the same tag), so there are no bytes an attestation could
+    # speak for. `composer.lock` records the resolved commit hash, which is
+    # what makes a rewritten tag visible to a consumer.
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: [build-test, verify-tag-on-main]
     runs-on: ubuntu-latest

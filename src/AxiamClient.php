@@ -491,7 +491,7 @@ final class AxiamClient
     }
 
     /**
-     * The CONTRACT.md §27 management surface: 146 operations across 24 namespaces.
+     * The CONTRACT.md §27 management surface: 147 operations across 24 namespaces.
      *
      * `$client->management()->users()->listItems()`. Built on the same Guzzle client that
      * carries {@see \Axiam\Sdk\Rest\AuthMiddleware} and

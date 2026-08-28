@@ -23,7 +23,7 @@ use GuzzleHttp\Psr7\Response;
 /**
  * The CONTRACT.md §27.9 required-test list, hand-written.
  *
- * The generated suites next door assert that all 146 operations reach the right route
+ * The generated suites next door assert that all 147 operations reach the right route
  * with nothing dropped. These assert the RULES — the behaviours §27.4 specifies that are
  * true of the surface as a whole and that no per-operation test would catch.
  */
