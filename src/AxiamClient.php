@@ -1724,7 +1724,9 @@ final class AxiamClient
     public function opaqueEnrollmentForSelf(string $password): OpaqueEnrollment
     {
         if ($this->principalTenantId === null) {
-            throw new NetworkError(
+            // fromMessage(), not `new`: the constructor is protected so that fromResponse()
+            // stays the only path from a live response into this type.
+            throw NetworkError::fromMessage(
                 'OPAQUE: no principal tenant is known yet — sign in before building a '
                 . 'registration record for your own password'
             );
