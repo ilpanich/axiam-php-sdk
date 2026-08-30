@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -176,6 +176,13 @@ and §19 telemetry apply without this class doing anything to opt in (§27.8).</
                                 &nbsp;: void    </span>
 </dt>
 <dd>`POST /api/v1/roles/{role_id}/groups`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-RolesApi.html#method_assignToServiceAccount">assignToServiceAccount()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`POST /api/v1/roles/{role_id}/service-accounts`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-RolesApi.html#method_assignToUser">assignToUser()</a>
@@ -249,6 +256,13 @@ for why it copies.</dd>
 <dd>`GET /api/v1/roles/{role_id}/permissions`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-RolesApi.html#method_listServiceAccounts">listServiceAccounts()</a>
+    <span>
+                                &nbsp;: array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html"><abbr title="\Axiam\Sdk\Management\Models\RoleServiceAccountAssignment">RoleServiceAccountAssignment</abbr></a>&gt;    </span>
+</dt>
+<dd>`GET /api/v1/roles/{role_id}/service-accounts`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-RolesApi.html#method_listUsers">listUsers()</a>
     <span>
                                 &nbsp;: array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-RoleUserAssignment.html"><abbr title="\Axiam\Sdk\Management\Models\RoleUserAssignment">RoleUserAssignment</abbr></a>&gt;    </span>
@@ -268,6 +282,13 @@ for why it copies.</dd>
                                 &nbsp;: void    </span>
 </dt>
 <dd>`DELETE /api/v1/roles/{role_id}/groups/{group_id}`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromServiceAccount">unassignFromServiceAccount()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromUser">unassignFromUser()</a>
@@ -384,7 +405,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">270</span>
+    <span class="phpdocumentor-element-found-in__line">272</span>
 
     </aside>
 
@@ -435,6 +456,65 @@ for why it copies.</dd>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_assignToServiceAccount">
+        assignToServiceAccount()
+        <a href="classes/Axiam-Sdk-Management-RolesApi.html#method_assignToServiceAccount" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">436</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/roles/{role_id}/service-accounts`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">assignToServiceAccount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$roleId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html"><abbr title="\Axiam\Sdk\Management\Models\AssignRoleToServiceAccountRequest">AssignRoleToServiceAccountRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/roles/{role_id}/service-accounts</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$roleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{role_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html"><abbr title="\Axiam\Sdk\Management\Models\AssignRoleToServiceAccountRequest">AssignRoleToServiceAccountRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_assignToUser">
         assignToUser()
         <a href="classes/Axiam-Sdk-Management-RolesApi.html#method_assignToUser" class="headerlink"><i class="fas fa-link"></i></a>
@@ -443,7 +523,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">187</span>
+    <span class="phpdocumentor-element-found-in__line">189</span>
 
     </aside>
 
@@ -502,7 +582,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">61</span>
+    <span class="phpdocumentor-element-found-in__line">63</span>
 
     </aside>
 
@@ -555,7 +635,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">133</span>
+    <span class="phpdocumentor-element-found-in__line">135</span>
 
     </aside>
 
@@ -656,7 +736,7 @@ for why it copies.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">83</span>
+    <span class="phpdocumentor-element-found-in__line">85</span>
 
     </aside>
 
@@ -709,7 +789,7 @@ for why it copies.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">353</span>
+    <span class="phpdocumentor-element-found-in__line">355</span>
 
     </aside>
 
@@ -823,7 +903,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">239</span>
+    <span class="phpdocumentor-element-found-in__line">241</span>
 
     </aside>
 
@@ -878,7 +958,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">43</span>
 
     </aside>
 
@@ -933,7 +1013,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">322</span>
+    <span class="phpdocumentor-element-found-in__line">324</span>
 
     </aside>
 
@@ -980,6 +1060,61 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_listServiceAccounts">
+        listServiceAccounts()
+        <a href="classes/Axiam-Sdk-Management-RolesApi.html#method_listServiceAccounts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">405</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/roles/{role_id}/service-accounts`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">listServiceAccounts</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$roleId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html"><abbr title="\Axiam\Sdk\Management\Models\RoleServiceAccountAssignment">RoleServiceAccountAssignment</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/roles/{role_id}/service-accounts</code>.</p>
+<p>Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$roleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{role_id}</code> path parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html"><abbr title="\Axiam\Sdk\Management\Models\RoleServiceAccountAssignment">RoleServiceAccountAssignment</abbr></a>&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_listUsers">
         listUsers()
         <a href="classes/Axiam-Sdk-Management-RolesApi.html#method_listUsers" class="headerlink"><i class="fas fa-link"></i></a>
@@ -988,7 +1123,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">156</span>
+    <span class="phpdocumentor-element-found-in__line">158</span>
 
     </aside>
 
@@ -1043,7 +1178,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">379</span>
+    <span class="phpdocumentor-element-found-in__line">381</span>
 
     </aside>
 
@@ -1103,7 +1238,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">297</span>
+    <span class="phpdocumentor-element-found-in__line">299</span>
 
     </aside>
 
@@ -1164,6 +1299,75 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_unassignFromServiceAccount">
+        unassignFromServiceAccount()
+        <a href="classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromServiceAccount" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">463</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">unassignFromServiceAccount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$roleId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$serviceAccountId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+<p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$roleId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{role_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$serviceAccountId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{service_account_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the optional <code class="prettyprint">resource_id</code> query parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_unassignFromUser">
         unassignFromUser()
         <a href="classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromUser" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1172,7 +1376,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">214</span>
+    <span class="phpdocumentor-element-found-in__line">216</span>
 
     </aside>
 
@@ -1241,7 +1445,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/RolesApi.php"><a href="files/src-management-rolesapi.html"><abbr title="src/Management/RolesApi.php">RolesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">106</span>
+    <span class="phpdocumentor-element-found-in__line">108</span>
 
     </aside>
 
@@ -1313,6 +1517,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_assignToGroup">assignToGroup()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_assignToServiceAccount">assignToServiceAccount()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_assignToUser">assignToUser()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_create">create()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_delete">delete()</a></li>
@@ -1323,9 +1528,11 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_listGroups">listGroups()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_listItems">listItems()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_listPermissions">listPermissions()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_listServiceAccounts">listServiceAccounts()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_listUsers">listUsers()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_revokePermission">revokePermission()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromGroup">unassignFromGroup()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromServiceAccount">unassignFromServiceAccount()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromUser">unassignFromUser()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-RolesApi.html#method_update">update()</a></li>
                                     </ul>

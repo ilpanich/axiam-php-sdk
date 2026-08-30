@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">26</span>
+    <span class="phpdocumentor-element-found-in__line">28</span>
 
     </aside>
 
@@ -176,6 +176,13 @@ and §19 telemetry apply without this class doing anything to opt in (§27.8).</
                                 &nbsp;: void    </span>
 </dt>
 <dd>`POST /api/v1/groups/{group_id}/members`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-GroupsApi.html#method_addServiceAccount">addServiceAccount()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`POST /api/v1/groups/{group_id}/service-accounts`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-GroupsApi.html#method_create">create()</a>
@@ -235,11 +242,25 @@ for why it copies.</dd>
 <dd>`GET /api/v1/groups/{group_id}/roles`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-GroupsApi.html#method_listServiceAccounts">listServiceAccounts()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountResponse">ServiceAccountResponse</abbr></a>&gt;    </span>
+</dt>
+<dd>`GET /api/v1/groups/{group_id}/service-accounts`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-GroupsApi.html#method_removeMember">removeMember()</a>
     <span>
                                 &nbsp;: void    </span>
 </dt>
 <dd>`DELETE /api/v1/groups/{group_id}/members/{user_id}`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-GroupsApi.html#method_removeServiceAccount">removeServiceAccount()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-GroupsApi.html#method_update">update()</a>
@@ -349,7 +370,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">177</span>
+    <span class="phpdocumentor-element-found-in__line">179</span>
 
     </aside>
 
@@ -400,6 +421,65 @@ for why it copies.</dd>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_addServiceAccount">
+        addServiceAccount()
+        <a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_addServiceAccount" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">285</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/groups/{group_id}/service-accounts`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">addServiceAccount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$groupId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html"><abbr title="\Axiam\Sdk\Management\Models\AddServiceAccountMemberRequest">AddServiceAccountMemberRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/groups/{group_id}/service-accounts</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$groupId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{group_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html"><abbr title="\Axiam\Sdk\Management\Models\AddServiceAccountMemberRequest">AddServiceAccountMemberRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_create">
         create()
         <a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_create" class="headerlink"><i class="fas fa-link"></i></a>
@@ -408,7 +488,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">58</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
@@ -461,7 +541,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">130</span>
+    <span class="phpdocumentor-element-found-in__line">132</span>
 
     </aside>
 
@@ -562,7 +642,7 @@ for why it copies.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">80</span>
+    <span class="phpdocumentor-element-found-in__line">82</span>
 
     </aside>
 
@@ -670,7 +750,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">40</span>
 
     </aside>
 
@@ -725,7 +805,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">154</span>
+    <span class="phpdocumentor-element-found-in__line">156</span>
 
     </aside>
 
@@ -789,7 +869,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">227</span>
+    <span class="phpdocumentor-element-found-in__line">229</span>
 
     </aside>
 
@@ -836,6 +916,70 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_listServiceAccounts">
+        listServiceAccounts()
+        <a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_listServiceAccounts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">262</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/groups/{group_id}/service-accounts`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">listServiceAccounts</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$groupId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-PageRequest.html"><abbr title="\Axiam\Sdk\Management\PageRequest">PageRequest</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$page</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountResponse">ServiceAccountResponse</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/groups/{group_id}/service-accounts</code>.</p>
+<p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
+<code class="prettyprint">count($page)</code> — see §27.4 rule 4.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$groupId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{group_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$page</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-PageRequest.html"><abbr title="\Axiam\Sdk\Management\PageRequest">PageRequest</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>which page to fetch; defaults to the first</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountResponse">ServiceAccountResponse</abbr></a>&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_removeMember">
         removeMember()
         <a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_removeMember" class="headerlink"><i class="fas fa-link"></i></a>
@@ -844,7 +988,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">203</span>
+    <span class="phpdocumentor-element-found-in__line">205</span>
 
     </aside>
 
@@ -896,6 +1040,66 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_removeServiceAccount">
+        removeServiceAccount()
+        <a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_removeServiceAccount" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">311</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">removeServiceAccount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$groupId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$serviceAccountId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+<p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$groupId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{group_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$serviceAccountId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{service_account_id}</code> path parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_update">
         update()
         <a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_update" class="headerlink"><i class="fas fa-link"></i></a>
@@ -904,7 +1108,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/GroupsApi.php"><a href="files/src-management-groupsapi.html"><abbr title="src/Management/GroupsApi.php">GroupsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">103</span>
+    <span class="phpdocumentor-element-found-in__line">105</span>
 
     </aside>
 
@@ -976,6 +1180,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_addMember">addMember()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_addServiceAccount">addServiceAccount()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_create">create()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_delete">delete()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant">forTenant()</a></li>
@@ -984,7 +1189,9 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_listItems">listItems()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_listMembers">listMembers()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_listRoles">listRoles()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_listServiceAccounts">listServiceAccounts()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_removeMember">removeMember()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_removeServiceAccount">removeServiceAccount()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-GroupsApi.html#method_update">update()</a></li>
                                     </ul>
             </li>

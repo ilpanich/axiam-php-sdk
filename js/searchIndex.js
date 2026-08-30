@@ -561,6 +561,31 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_organizationLevel"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult\u003A\u003A\u0024actingTenantId",
+            "name": "actingTenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_actingTenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult\u003A\u003A\u0024principalTenantId",
+            "name": "principalTenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_principalTenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult\u003A\u003A\u0024principalTenantSlug",
+            "name": "principalTenantSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_principalTenantSlug"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult\u003A\u003A\u0024orgId",
+            "name": "orgId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_orgId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult\u003A\u003A\u0024reachableTenantIds",
+            "name": "reachableTenantIds",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-LoginResult.html#property_reachableTenantIds"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\PresentedProofs",
             "name": "PresentedProofs",
             "summary": "What\u0020the\u0020caller\u0020proved\u0020about\u0020\u002A\u002Athis\u002A\u002A\u0020connection\u0020and\u0020\u002A\u002Athis\u002A\u002A\u0020request,\u0020for\n\u007B\u0040see\u0020JwksVerifier\u003A\u003AverifyTokenBinding\u0028\u0029\u007D.",
@@ -1025,6 +1050,11 @@ Search.appendIndex(
             "name": "opaqueEnrollment",
             "summary": "Builds\u0020a\u0020registration\u0020record\u0020for\u0020\u0060\u0024password\u0060,\u0020to\u0020send\u0020with\u0020any\u0020request\u0020that\u0020sets\u0020one\u003A\n\u0060POST\u0020\/api\/v1\/users\u0060,\u0020\u0060\/auth\/password\/change\u0060,\u0020\u0060\/auth\/reset\/confirm\u0060\u0020and\n\u0060\/admin\/bootstrap\u0060.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_opaqueEnrollment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AopaqueEnrollmentForSelf\u0028\u0029",
+            "name": "opaqueEnrollmentForSelf",
+            "summary": "Builds\u0020a\u0020registration\u0020record\u0020for\u0020the\u0020\u002A\u002Acaller\u0027s\u0020own\u002A\u002A\u0020new\u0020password,\u0020sealed\u0020against\u0020the\ntenant\u0020the\u0020caller\u0027s\u0020account\u0020lives\u0020in.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_opaqueEnrollmentForSelf"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AopaqueAvailable\u0028\u0029",
             "name": "opaqueAvailable",
@@ -1946,6 +1976,21 @@ Search.appendIndex(
             "summary": "\u0060GET\u0020\/api\/v1\/groups\/\u007Bgroup_id\u007D\/roles\u0060",
             "url": "classes/Axiam-Sdk-Management-GroupsApi.html#method_listRoles"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\GroupsApi\u003A\u003AlistServiceAccounts\u0028\u0029",
+            "name": "listServiceAccounts",
+            "summary": "\u0060GET\u0020\/api\/v1\/groups\/\u007Bgroup_id\u007D\/service\u002Daccounts\u0060",
+            "url": "classes/Axiam-Sdk-Management-GroupsApi.html#method_listServiceAccounts"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\GroupsApi\u003A\u003AaddServiceAccount\u0028\u0029",
+            "name": "addServiceAccount",
+            "summary": "\u0060POST\u0020\/api\/v1\/groups\/\u007Bgroup_id\u007D\/service\u002Daccounts\u0060",
+            "url": "classes/Axiam-Sdk-Management-GroupsApi.html#method_addServiceAccount"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\GroupsApi\u003A\u003AremoveServiceAccount\u0028\u0029",
+            "name": "removeServiceAccount",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/groups\/\u007Bgroup_id\u007D\/service\u002Daccounts\/\u007Bservice_account_id\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-GroupsApi.html#method_removeServiceAccount"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi",
             "name": "ManagementApi",
             "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020147\u0020operations\u0020across\u002024\u0020namespaces.",
@@ -2486,6 +2531,36 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-AddMemberRequest.html#property_userId"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AddServiceAccountMemberRequest",
+            "name": "AddServiceAccountMemberRequest",
+            "summary": "The\u0020\u0060AddServiceAccountMemberRequest\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
+            "url": "classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AddServiceAccountMemberRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020AddServiceAccountMemberRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AddServiceAccountMemberRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020AddServiceAccountMemberRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AddServiceAccountMemberRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AddServiceAccountMemberRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AddServiceAccountMemberRequest\u003A\u003A\u0024serviceAccountId",
+            "name": "serviceAccountId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AddServiceAccountMemberRequest.html#property_serviceAccountId"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ApiProviderConfig",
             "name": "ApiProviderConfig",
             "summary": "API\u002Dbased\u0020provider\u0020configuration\u0020\u0028SendGrid,\u0020Postmark,\u0020Resend,\u0020Brevo\u0029.\u0020\u0060api_key\u0060\u0020follows\u0020the\nsame\u0020write\u002Donly\u0020\u002B\u0020omit\u002Dpreserving\u0020contract\u0020as\u0020\u005B\u0060SmtpConfig\u003A\u003Apassword\u0060\u005D\u0020\u0028D\u002D01\/D\u002D02\u0029.",
@@ -2551,6 +2626,51 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToGroupRequest.html#property_resourceId"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToGroupRequest\u003A\u003A\u0024tenantScope",
+            "name": "tenantScope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToGroupRequest.html#property_tenantScope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest",
+            "name": "AssignRoleToServiceAccountRequest",
+            "summary": "The\u0020\u0060AssignRoleToServiceAccountRequest\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020AssignRoleToServiceAccountRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020AssignRoleToServiceAccountRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest\u003A\u003A\u0024serviceAccountId",
+            "name": "serviceAccountId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html#property_serviceAccountId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest\u003A\u003A\u0024resourceId",
+            "name": "resourceId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html#property_resourceId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToServiceAccountRequest\u003A\u003A\u0024tenantScope",
+            "name": "tenantScope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToServiceAccountRequest.html#property_tenantScope"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToUserRequest",
             "name": "AssignRoleToUserRequest",
             "summary": "The\u0020\u0060AssignRoleToUserRequest\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
@@ -2585,6 +2705,11 @@ Search.appendIndex(
             "name": "resourceId",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToUserRequest.html#property_resourceId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AssignRoleToUserRequest\u003A\u003A\u0024tenantScope",
+            "name": "tenantScope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AssignRoleToUserRequest.html#property_tenantScope"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttestationMode",
             "name": "AttestationMode",
@@ -7341,6 +7466,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-RoleAssignment.html#property_resourceId"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleAssignment\u003A\u003A\u0024tenantScope",
+            "name": "tenantScope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleAssignment.html#property_tenantScope"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleGroupAssignment",
             "name": "RoleGroupAssignment",
             "summary": "A\u0020group\u0020together\u0020with\u0020the\u0020resource\u0020scope\u0020of\u0020its\u0020assignment\u0020of\u0020this\u0020role.",
@@ -7376,6 +7506,51 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-RoleGroupAssignment.html#property_resourceId"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleGroupAssignment\u003A\u003A\u0024tenantScope",
+            "name": "tenantScope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleGroupAssignment.html#property_tenantScope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment",
+            "name": "RoleServiceAccountAssignment",
+            "summary": "A\u0020service\u0020account\u0020together\u0020with\u0020the\u0020resource\u0020scope\u0020of\u0020its\u0020assignment.",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020RoleServiceAccountAssignment.",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020RoleServiceAccountAssignment\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment\u003A\u003A\u0024serviceAccount",
+            "name": "serviceAccount",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html#property_serviceAccount"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment\u003A\u003A\u0024resourceId",
+            "name": "resourceId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html#property_resourceId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleServiceAccountAssignment\u003A\u003A\u0024tenantScope",
+            "name": "tenantScope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleServiceAccountAssignment.html#property_tenantScope"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleUserAssignment",
             "name": "RoleUserAssignment",
             "summary": "A\u0020user\u0020together\u0020with\u0020the\u0020resource\u0020scope\u0020of\u0020their\u0020assignment\u0020of\u0020this\u0020role.",
@@ -7410,6 +7585,11 @@ Search.appendIndex(
             "name": "resourceId",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-RoleUserAssignment.html#property_resourceId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RoleUserAssignment\u003A\u003A\u0024tenantScope",
+            "name": "tenantScope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-RoleUserAssignment.html#property_tenantScope"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RotateSecretResponse",
             "name": "RotateSecretResponse",
@@ -10146,6 +10326,21 @@ Search.appendIndex(
             "summary": "\u0060DELETE\u0020\/api\/v1\/roles\/\u007Brole_id\u007D\/permissions\/\u007Bpermission_id\u007D\u0060",
             "url": "classes/Axiam-Sdk-Management-RolesApi.html#method_revokePermission"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\RolesApi\u003A\u003AlistServiceAccounts\u0028\u0029",
+            "name": "listServiceAccounts",
+            "summary": "\u0060GET\u0020\/api\/v1\/roles\/\u007Brole_id\u007D\/service\u002Daccounts\u0060",
+            "url": "classes/Axiam-Sdk-Management-RolesApi.html#method_listServiceAccounts"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\RolesApi\u003A\u003AassignToServiceAccount\u0028\u0029",
+            "name": "assignToServiceAccount",
+            "summary": "\u0060POST\u0020\/api\/v1\/roles\/\u007Brole_id\u007D\/service\u002Daccounts\u0060",
+            "url": "classes/Axiam-Sdk-Management-RolesApi.html#method_assignToServiceAccount"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\RolesApi\u003A\u003AunassignFromServiceAccount\u0028\u0029",
+            "name": "unassignFromServiceAccount",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/roles\/\u007Brole_id\u007D\/service\u002Daccounts\/\u007Bservice_account_id\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromServiceAccount"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ScimTokensApi",
             "name": "ScimTokensApi",
             "summary": "Bearer\u0020tokens\u0020for\u0020the\u0020SCIM\u00202.0\u0020provisioning\u0020endpoint.",
@@ -10235,6 +10430,16 @@ Search.appendIndex(
             "name": "bindCertificate",
             "summary": "\u0060POST\u0020\/api\/v1\/service\u002Daccounts\/\u007Bsa_id\u007D\/bind\u002Dcertificate\u0060",
             "url": "classes/Axiam-Sdk-Management-ServiceAccountsApi.html#method_bindCertificate"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ServiceAccountsApi\u003A\u003AlistRoles\u0028\u0029",
+            "name": "listRoles",
+            "summary": "\u0060GET\u0020\/api\/v1\/service\u002Daccounts\/\u007Bservice_account_id\u007D\/roles\u0060",
+            "url": "classes/Axiam-Sdk-Management-ServiceAccountsApi.html#method_listRoles"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ServiceAccountsApi\u003A\u003AlistGroups\u0028\u0029",
+            "name": "listGroups",
+            "summary": "\u0060GET\u0020\/api\/v1\/service\u002Daccounts\/\u007Bservice_account_id\u007D\/groups\u0060",
+            "url": "classes/Axiam-Sdk-Management-ServiceAccountsApi.html#method_listGroups"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\SettingsApi",
             "name": "SettingsApi",
