@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-beta05] - 2026-08-30
+
 ### Added
+
+- Contract 1.35 (carrying 1.34) — principal tenant, tenant_scope, service-account RBAC
 
 - **Contract 1.35, which carries contract 1.34 with it.** Nothing had been fanned
   out since 1.33, so this re-vendors `CONTRACT.md`, `openapi.json` and
@@ -46,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   refuses at the header.
 
 ### Fixed
+
+- Construct the refusal through NetworkError::fromMessage()
 
 - **A registration record for your own password was sealed against the wrong
   tenant.** CONTRACT.md §5.2.2 rule 2: the caller's credentials live in the tenant
