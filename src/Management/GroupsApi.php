@@ -9,9 +9,11 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management;
 
 use Axiam\Sdk\Management\Models\AddMemberRequest;
+use Axiam\Sdk\Management\Models\AddServiceAccountMemberRequest;
 use Axiam\Sdk\Management\Models\CreateGroupRequest;
 use Axiam\Sdk\Management\Models\Group;
 use Axiam\Sdk\Management\Models\RoleAssignment;
+use Axiam\Sdk\Management\Models\ServiceAccountResponse;
 use Axiam\Sdk\Management\Models\UpdateGroup;
 use Axiam\Sdk\Management\Models\UserResponse;
 
@@ -244,5 +246,79 @@ final class GroupsApi extends ManagementSupport
         }
 
         return $items;
+    }
+
+    /**
+     * `GET /api/v1/groups/{group_id}/service-accounts`
+     *
+     * `GET /api/v1/groups/{group_id}/service-accounts`.
+     *
+     * Returns ONE page. `Page::$total` is the server's count across all pages and is not
+     * `count($page)` — see §27.4 rule 4.
+     * @param string $groupId the `{group_id}` path parameter
+     * @param PageRequest|null $page which page to fetch; defaults to the first
+     * @return Page<ServiceAccountResponse>
+     */
+    public function listServiceAccounts(
+        string $groupId,
+        ?PageRequest $page = null,
+    ): Page {
+        return $this->transport->sendPage(
+            'groups.list_service_accounts',
+            '/api/v1/groups/{group_id}/service-accounts',
+            ['group_id' => $groupId],
+            [],
+            $page ?? new PageRequest(),
+            static fn (array $item): ServiceAccountResponse => ServiceAccountResponse::fromArray($item),
+        );
+    }
+
+    /**
+     * `POST /api/v1/groups/{group_id}/service-accounts`
+     *
+     * `POST /api/v1/groups/{group_id}/service-accounts`.
+     *
+     * Returns nothing; the server answers with an empty body.
+     * @param string $groupId the `{group_id}` path parameter
+     * @param AddServiceAccountMemberRequest $body the request body
+     */
+    public function addServiceAccount(
+        string $groupId,
+        AddServiceAccountMemberRequest $body,
+    ): void {
+        $this->transport->send(
+            'groups.add_service_account',
+            'POST',
+            '/api/v1/groups/{group_id}/service-accounts',
+            ['group_id' => $groupId],
+            [],
+            $body->toArray(),
+        );
+    }
+
+    /**
+     * `DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}`
+     *
+     * `DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}`.
+     *
+     * Returns nothing; the server answers with an empty body.
+     *
+     * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
+     * \Axiam\Sdk\Management\NotFoundError} rather than succeeding quietly.
+     * @param string $groupId the `{group_id}` path parameter
+     * @param string $serviceAccountId the `{service_account_id}` path parameter
+     */
+    public function removeServiceAccount(
+        string $groupId,
+        string $serviceAccountId,
+    ): void {
+        $this->transport->send(
+            'groups.remove_service_account',
+            'DELETE',
+            '/api/v1/groups/{group_id}/service-accounts/{service_account_id}',
+            ['group_id' => $groupId, 'service_account_id' => $serviceAccountId],
+            [],
+            null,
+        );
     }
 }

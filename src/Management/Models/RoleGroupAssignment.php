@@ -18,10 +18,14 @@ final class RoleGroupAssignment implements \JsonSerializable
      * @param Group $group The assigned group.
      * @param string|null $resourceId `None` means the role was assigned globally (no resource
      *     scope). (optional)
+     * @param list<string>|null $tenantScope The tenants this assignment reaches, or omitted
+     *     for "wherever the role does". Shown next to the assignment so an operator can tell a
+     *     deliberately narrowed grant from an organization-wide one. (optional)
      */
     public function __construct(
         public readonly Group $group,
         public readonly ?string $resourceId = null,
+        public readonly ?array $tenantScope = null,
     ) {
     }
 
@@ -34,6 +38,7 @@ final class RoleGroupAssignment implements \JsonSerializable
         return new self(
             Group::fromArray((array) ModelDecode::need($data, 'group', self::class)),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
+            isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
         );
     }
 
@@ -51,6 +56,9 @@ final class RoleGroupAssignment implements \JsonSerializable
         $out['group'] = $this->group->toArray();
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
+        }
+        if ($this->tenantScope !== null && $this->tenantScope !== []) {
+            $out['tenant_scope'] = $this->tenantScope;
         }
 
         return $out;

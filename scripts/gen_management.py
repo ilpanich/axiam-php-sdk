@@ -67,6 +67,24 @@ EXAMPLE_TIME = "2026-08-26T00:00:00Z"
 # ---------------------------------------------------------------------------
 
 
+# Fields the server refuses when present-but-empty, so `jsonSerialize` drops
+# them in that case as well as when they are null.
+#
+# Deliberately a name list rather than a rule over every optional list: for most
+# of them an empty array is meaningful (a replacement body clearing a list), and
+# dropping it would make "remove every entry" inexpressible. Only CONTRACT.md
+# §5.2.3's `tenant_scope` has a server that reads `[]` as a contradiction and
+# answers 400.
+OMIT_WHEN_EMPTY = {"tenantScope"}
+
+
+def emit_guard(name: str) -> str:
+    """The `jsonSerialize` guard for an optional field."""
+    if name in OMIT_WHEN_EMPTY:
+        return f"        if ($this->{name} !== null && $this->{name} !== []) {{"
+    return f"        if ($this->{name} !== null) {{"
+
+
 def pascal(text: str) -> str:
     """``service_accounts`` -> ``ServiceAccounts``; already-Pascal input is kept.
 
@@ -744,7 +762,7 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
             if f["required"]:
                 out.append(f"        $out['{f['wire']}'] = {expr};")
             else:
-                out.append(f"        if ($this->{f['name']} !== null) {{")
+                out.append(emit_guard(f['name']))
                 out.append(f"            $out['{f['wire']}'] = {expr};")
                 out.append("        }")
         out.append("")
@@ -905,7 +923,7 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
             if f["required"]:
                 body.append(f"        $out['{f['wire']}'] = {expr};")
             else:
-                body.append(f"        if ($this->{f['name']} !== null) {{")
+                body.append(emit_guard(f['name']))
                 body.append(f"            $out['{f['wire']}'] = {expr};")
                 body.append("        }")
         body.append("")

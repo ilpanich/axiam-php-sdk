@@ -10,6 +10,8 @@ namespace Axiam\Sdk\Management;
 
 use Axiam\Sdk\Management\Models\BindCertificate;
 use Axiam\Sdk\Management\Models\CreateServiceAccountRequest;
+use Axiam\Sdk\Management\Models\Group;
+use Axiam\Sdk\Management\Models\RoleAssignment;
 use Axiam\Sdk\Management\Models\RotateSecretResponse;
 use Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse;
 use Axiam\Sdk\Management\Models\ServiceAccountResponse;
@@ -190,5 +192,69 @@ final class ServiceAccountsApi extends ManagementSupport
             [],
             $body->toArray(),
         );
+    }
+
+    /**
+     * `GET /api/v1/service-accounts/{service_account_id}/roles`
+     *
+     * `GET /api/v1/service-accounts/{service_account_id}/roles`.
+     *
+     * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+     * plain list and never a `Page` (§27.4 rule 4).
+     * @param string $serviceAccountId the `{service_account_id}` path parameter
+     * @return list<RoleAssignment>
+     */
+    public function listRoles(
+        string $serviceAccountId,
+    ): array {
+        $decoded = $this->transport->send(
+            'service_accounts.list_roles',
+            'GET',
+            '/api/v1/service-accounts/{service_account_id}/roles',
+            ['service_account_id' => $serviceAccountId],
+            [],
+            null,
+        );
+
+        $items = [];
+        foreach ($decoded ?? [] as $item) {
+            if (is_array($item)) {
+                $items[] = RoleAssignment::fromArray($item);
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * `GET /api/v1/service-accounts/{service_account_id}/groups`
+     *
+     * `GET /api/v1/service-accounts/{service_account_id}/groups`.
+     *
+     * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+     * plain list and never a `Page` (§27.4 rule 4).
+     * @param string $serviceAccountId the `{service_account_id}` path parameter
+     * @return list<Group>
+     */
+    public function listGroups(
+        string $serviceAccountId,
+    ): array {
+        $decoded = $this->transport->send(
+            'service_accounts.list_groups',
+            'GET',
+            '/api/v1/service-accounts/{service_account_id}/groups',
+            ['service_account_id' => $serviceAccountId],
+            [],
+            null,
+        );
+
+        $items = [];
+        foreach ($decoded ?? [] as $item) {
+            if (is_array($item)) {
+                $items[] = Group::fromArray($item);
+            }
+        }
+
+        return $items;
     }
 }
