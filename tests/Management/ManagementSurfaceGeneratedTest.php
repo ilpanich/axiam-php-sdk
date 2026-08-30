@@ -445,6 +445,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'tenant_id' => '11111111-1111-4111-8111-111111111111',
                     'updated_at' => '2026-08-26T00:00:00Z',
                 ],
+                'tenant_scope' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
             ],
         ];
         $client = $this->signedInClient(200, $mounted);
@@ -640,6 +643,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'tenant_id' => '11111111-1111-4111-8111-111111111111',
                     'updated_at' => '2026-08-26T00:00:00Z',
                 ],
+                'tenant_scope' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
             ],
         ];
         $client = $this->signedInClient(200, $mounted);
@@ -651,6 +657,69 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         self::assertIsArray($result);
         self::assertCount(1, $result);
         $this->assertDecodedEveryField($mounted[0], $result[0]);
+    }
+
+    /**
+     * `GET /api/v1/groups/{group_id}/service-accounts` — the `groups.list_service_accounts`
+     * operation.
+     */
+    public function testGroupsListServiceAccountsReachesItsRoute(): void
+    {
+        $mounted = [
+            'items' => [
+                [
+                    'client_id' => 'example',
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'description' => 'example',
+                    'id' => '11111111-1111-4111-8111-111111111111',
+                    'name' => 'example',
+                    'status' => 'Active',
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                ],
+            ],
+            'total' => 1,
+            'offset' => 0,
+            'limit' => 50,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->groups()->listServiceAccounts('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/groups/11111111-1111-4111-8111-111111111111/service-accounts', $request->getUri()->getPath());
+        self::assertInstanceOf(Page::class, $result);
+        self::assertSame(1, $result->total);
+        self::assertCount(1, $result->items);
+        $this->assertDecodedEveryField($mounted['items'][0], $result->items[0]);
+    }
+
+    /**
+     * `POST /api/v1/groups/{group_id}/service-accounts` — the `groups.add_service_account`
+     * operation.
+     */
+    public function testGroupsAddServiceAccountReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->groups()->addServiceAccount('11111111-1111-4111-8111-111111111111', new Models\AddServiceAccountMemberRequest('11111111-1111-4111-8111-111111111111'));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/groups/11111111-1111-4111-8111-111111111111/service-accounts', $request->getUri()->getPath());
+    }
+
+    /**
+     * `DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}` — the
+     * `groups.remove_service_account` operation.
+     */
+    public function testGroupsRemoveServiceAccountReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->groups()->removeServiceAccount('11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/groups/11111111-1111-4111-8111-111111111111/service-accounts/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
     }
 
     /** `GET /api/v1/roles` — the `roles.list` operation. */
@@ -764,6 +833,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             [
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
+                'tenant_scope' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
                 'user' => [
                     'created_at' => '2026-08-26T00:00:00Z',
                     'email' => 'example',
@@ -832,6 +904,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'updated_at' => '2026-08-26T00:00:00Z',
                 ],
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
+                'tenant_scope' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
             ],
         ];
         $client = $this->signedInClient(200, $mounted);
@@ -930,6 +1005,69 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $request = $this->lastRequest();
         self::assertSame('DELETE', $request->getMethod());
         self::assertSame('/api/v1/roles/11111111-1111-4111-8111-111111111111/permissions/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /**
+     * `GET /api/v1/roles/{role_id}/service-accounts` — the `roles.list_service_accounts`
+     * operation.
+     */
+    public function testRolesListServiceAccountsReachesItsRoute(): void
+    {
+        $mounted = [
+            [
+                'resource_id' => '11111111-1111-4111-8111-111111111111',
+                'service_account' => [
+                    'client_id' => 'example',
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'description' => 'example',
+                    'id' => '11111111-1111-4111-8111-111111111111',
+                    'name' => 'example',
+                    'status' => 'Active',
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                ],
+                'tenant_scope' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->roles()->listServiceAccounts('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/roles/11111111-1111-4111-8111-111111111111/service-accounts', $request->getUri()->getPath());
+        self::assertIsArray($result);
+        self::assertCount(1, $result);
+        $this->assertDecodedEveryField($mounted[0], $result[0]);
+    }
+
+    /**
+     * `POST /api/v1/roles/{role_id}/service-accounts` — the `roles.assign_to_service_account`
+     * operation.
+     */
+    public function testRolesAssignToServiceAccountReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->roles()->assignToServiceAccount('11111111-1111-4111-8111-111111111111', new Models\AssignRoleToServiceAccountRequest('11111111-1111-4111-8111-111111111111'));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/roles/11111111-1111-4111-8111-111111111111/service-accounts', $request->getUri()->getPath());
+    }
+
+    /**
+     * `DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}` — the
+     * `roles.unassign_from_service_account` operation.
+     */
+    public function testRolesUnassignFromServiceAccountReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->roles()->unassignFromServiceAccount('11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/roles/11111111-1111-4111-8111-111111111111/service-accounts/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
     }
 
     /** `GET /api/v1/permissions` — the `permissions.list` operation. */
@@ -1445,6 +1583,68 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $request = $this->lastRequest();
         self::assertSame('POST', $request->getMethod());
         self::assertSame('/api/v1/service-accounts/11111111-1111-4111-8111-111111111111/bind-certificate', $request->getUri()->getPath());
+    }
+
+    /**
+     * `GET /api/v1/service-accounts/{service_account_id}/roles` — the
+     * `service_accounts.list_roles` operation.
+     */
+    public function testServiceAccountsListRolesReachesItsRoute(): void
+    {
+        $mounted = [
+            [
+                'resource_id' => '11111111-1111-4111-8111-111111111111',
+                'role' => [
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'description' => 'example',
+                    'id' => '11111111-1111-4111-8111-111111111111',
+                    'is_global' => true,
+                    'name' => 'example',
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                ],
+                'tenant_scope' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->serviceAccounts()->listRoles('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/service-accounts/11111111-1111-4111-8111-111111111111/roles', $request->getUri()->getPath());
+        self::assertIsArray($result);
+        self::assertCount(1, $result);
+        $this->assertDecodedEveryField($mounted[0], $result[0]);
+    }
+
+    /**
+     * `GET /api/v1/service-accounts/{service_account_id}/groups` — the
+     * `service_accounts.list_groups` operation.
+     */
+    public function testServiceAccountsListGroupsReachesItsRoute(): void
+    {
+        $mounted = [
+            [
+                'created_at' => '2026-08-26T00:00:00Z',
+                'description' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'metadata' => [],
+                'name' => 'example',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                'updated_at' => '2026-08-26T00:00:00Z',
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->serviceAccounts()->listGroups('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/service-accounts/11111111-1111-4111-8111-111111111111/groups', $request->getUri()->getPath());
+        self::assertIsArray($result);
+        self::assertCount(1, $result);
+        $this->assertDecodedEveryField($mounted[0], $result[0]);
     }
 
     /** `GET /api/v1/certificates` — the `certificates.list` operation. */
@@ -3692,6 +3892,6 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'ReachesItsRoute'),
         );
 
-        self::assertCount(147, $cases);
+        self::assertCount(155, $cases);
     }
 }

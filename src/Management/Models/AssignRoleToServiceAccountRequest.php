@@ -9,13 +9,13 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management\Models;
 
 /**
- * The `AssignRoleToGroupRequest` schema from the server's OpenAPI document.
+ * The `AssignRoleToServiceAccountRequest` schema from the server's OpenAPI document.
  */
-final class AssignRoleToGroupRequest implements \JsonSerializable
+final class AssignRoleToServiceAccountRequest implements \JsonSerializable
 {
     /**
-     * Constructs a AssignRoleToGroupRequest.
-     * @param string $groupId the server's `group_id` field
+     * Constructs a AssignRoleToServiceAccountRequest.
+     * @param string $serviceAccountId the server's `service_account_id` field
      * @param string|null $resourceId the server's `resource_id` field (optional)
      * @param list<string>|null $tenantScope The tenants this assignment reaches. Only
      *     meaningful for an assignment made in an organization's scope, whose global roles
@@ -26,20 +26,20 @@ final class AssignRoleToGroupRequest implements \JsonSerializable
      *     organization's own scope tenant. (optional)
      */
     public function __construct(
-        public readonly string $groupId,
+        public readonly string $serviceAccountId,
         public readonly ?string $resourceId = null,
         public readonly ?array $tenantScope = null,
     ) {
     }
 
     /**
-     * Rebuilds a AssignRoleToGroupRequest from one decoded JSON object.
+     * Rebuilds a AssignRoleToServiceAccountRequest from one decoded JSON object.
      * @param array<string,mixed> $data The raw wire object.
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) ModelDecode::need($data, 'group_id', self::class),
+            (string) ModelDecode::need($data, 'service_account_id', self::class),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
             isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
         );
@@ -56,7 +56,7 @@ final class AssignRoleToGroupRequest implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
-        $out['group_id'] = $this->groupId;
+        $out['service_account_id'] = $this->serviceAccountId;
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
         }

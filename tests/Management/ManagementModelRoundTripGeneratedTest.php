@@ -49,6 +49,23 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `AddServiceAccountMemberRequest`: a full wire object survives decode and re-render. */
+    public function testAddServiceAccountMemberRequestRoundTrips(): void
+    {
+        $wire = [
+            'service_account_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+
+        $model = Models\AddServiceAccountMemberRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'AddServiceAccountMemberRequest decoded a field it cannot render again',
+        );
+    }
+
     /** `ApiProviderConfig`: a full wire object survives decode and re-render. */
     public function testApiProviderConfigRoundTrips(): void
     {
@@ -72,6 +89,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         $wire = [
             'group_id' => '11111111-1111-4111-8111-111111111111',
             'resource_id' => '11111111-1111-4111-8111-111111111111',
+            'tenant_scope' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
         ];
 
         $model = Models\AssignRoleToGroupRequest::fromArray($wire);
@@ -84,11 +104,35 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `AssignRoleToServiceAccountRequest`: a full wire object survives decode and re-render. */
+    public function testAssignRoleToServiceAccountRequestRoundTrips(): void
+    {
+        $wire = [
+            'resource_id' => '11111111-1111-4111-8111-111111111111',
+            'service_account_id' => '11111111-1111-4111-8111-111111111111',
+            'tenant_scope' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+        ];
+
+        $model = Models\AssignRoleToServiceAccountRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'AssignRoleToServiceAccountRequest decoded a field it cannot render again',
+        );
+    }
+
     /** `AssignRoleToUserRequest`: a full wire object survives decode and re-render. */
     public function testAssignRoleToUserRequestRoundTrips(): void
     {
         $wire = [
             'resource_id' => '11111111-1111-4111-8111-111111111111',
+            'tenant_scope' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
             'user_id' => '11111111-1111-4111-8111-111111111111',
         ];
 
@@ -2059,6 +2103,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'tenant_id' => '11111111-1111-4111-8111-111111111111',
                 'updated_at' => '2026-08-26T00:00:00Z',
             ],
+            'tenant_scope' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
         ];
 
         $model = Models\RoleAssignment::fromArray($wire);
@@ -2085,6 +2132,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'updated_at' => '2026-08-26T00:00:00Z',
             ],
             'resource_id' => '11111111-1111-4111-8111-111111111111',
+            'tenant_scope' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
         ];
 
         $model = Models\RoleGroupAssignment::fromArray($wire);
@@ -2097,11 +2147,44 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `RoleServiceAccountAssignment`: a full wire object survives decode and re-render. */
+    public function testRoleServiceAccountAssignmentRoundTrips(): void
+    {
+        $wire = [
+            'resource_id' => '11111111-1111-4111-8111-111111111111',
+            'service_account' => [
+                'client_id' => 'example',
+                'created_at' => '2026-08-26T00:00:00Z',
+                'description' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'name' => 'example',
+                'status' => 'Active',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                'updated_at' => '2026-08-26T00:00:00Z',
+            ],
+            'tenant_scope' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+        ];
+
+        $model = Models\RoleServiceAccountAssignment::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'RoleServiceAccountAssignment decoded a field it cannot render again',
+        );
+    }
+
     /** `RoleUserAssignment`: a full wire object survives decode and re-render. */
     public function testRoleUserAssignmentRoundTrips(): void
     {
         $wire = [
             'resource_id' => '11111111-1111-4111-8111-111111111111',
+            'tenant_scope' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
             'user' => [
                 'created_at' => '2026-08-26T00:00:00Z',
                 'email' => 'example',
@@ -3081,6 +3164,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(144, $cases);
+        self::assertCount(147, $cases);
     }
 }

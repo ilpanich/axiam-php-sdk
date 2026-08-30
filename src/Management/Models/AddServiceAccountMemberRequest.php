@@ -9,36 +9,27 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management\Models;
 
 /**
- * A user together with the resource scope of their assignment of this role.
+ * The `AddServiceAccountMemberRequest` schema from the server's OpenAPI document.
  */
-final class RoleUserAssignment implements \JsonSerializable
+final class AddServiceAccountMemberRequest implements \JsonSerializable
 {
     /**
-     * Constructs a RoleUserAssignment.
-     * @param UserResponse $user The assigned user.
-     * @param string|null $resourceId `None` means the role was assigned globally (no resource
-     *     scope). (optional)
-     * @param list<string>|null $tenantScope The tenants this assignment reaches, or omitted
-     *     for "wherever the role does". Shown next to the assignment so an operator can tell a
-     *     deliberately narrowed grant from an organization-wide one. (optional)
+     * Constructs a AddServiceAccountMemberRequest.
+     * @param string $serviceAccountId the server's `service_account_id` field
      */
     public function __construct(
-        public readonly UserResponse $user,
-        public readonly ?string $resourceId = null,
-        public readonly ?array $tenantScope = null,
+        public readonly string $serviceAccountId,
     ) {
     }
 
     /**
-     * Rebuilds a RoleUserAssignment from one decoded JSON object.
+     * Rebuilds a AddServiceAccountMemberRequest from one decoded JSON object.
      * @param array<string,mixed> $data The raw wire object.
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            UserResponse::fromArray((array) ModelDecode::need($data, 'user', self::class)),
-            isset($data['resource_id']) ? (string) $data['resource_id'] : null,
-            isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
+            (string) ModelDecode::need($data, 'service_account_id', self::class),
         );
     }
 
@@ -53,13 +44,7 @@ final class RoleUserAssignment implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
-        $out['user'] = $this->user->toArray();
-        if ($this->resourceId !== null) {
-            $out['resource_id'] = $this->resourceId;
-        }
-        if ($this->tenantScope !== null && $this->tenantScope !== []) {
-            $out['tenant_scope'] = $this->tenantScope;
-        }
+        $out['service_account_id'] = $this->serviceAccountId;
 
         return $out;
     }

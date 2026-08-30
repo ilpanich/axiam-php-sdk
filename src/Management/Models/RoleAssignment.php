@@ -18,10 +18,13 @@ final class RoleAssignment implements \JsonSerializable
      * @param Role $role the server's `role` field
      * @param string|null $resourceId `None` means the role was assigned globally (no resource
      *     scope). (optional)
+     * @param list<string>|null $tenantScope The tenants this assignment reaches. See
+     *     [`TenantScope`]. (optional)
      */
     public function __construct(
         public readonly Role $role,
         public readonly ?string $resourceId = null,
+        public readonly ?array $tenantScope = null,
     ) {
     }
 
@@ -34,6 +37,7 @@ final class RoleAssignment implements \JsonSerializable
         return new self(
             Role::fromArray((array) ModelDecode::need($data, 'role', self::class)),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
+            isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
         );
     }
 
@@ -51,6 +55,9 @@ final class RoleAssignment implements \JsonSerializable
         $out['role'] = $this->role->toArray();
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
+        }
+        if ($this->tenantScope !== null && $this->tenantScope !== []) {
+            $out['tenant_scope'] = $this->tenantScope;
         }
 
         return $out;

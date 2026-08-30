@@ -137,6 +137,18 @@ final class AxiamClient
 
     private readonly string $tenant;
 
+    /**
+     * CONTRACT.md §5.2.2 — the tenant the signed-in principal's record *lives* in, as
+     * reported by the login response.
+     *
+     * Distinct from {@see self::$tenant}, which is the tenant being acted on: the two diverge
+     * for an organization-level principal that has selected another one. Read by
+     * {@see self::opaqueEnrollmentForSelf()}, which must seal a §23 record against the
+     * account's own tenant rather than whichever one this client is currently pointed at.
+     * `null` until a login completes.
+     */
+    private ?string $principalTenantId = null;
+
     private readonly ?string $orgSlug;
 
     private readonly ?string $orgId;
@@ -1687,12 +1699,61 @@ final class AxiamClient
      */
     public function opaqueEnrollment(string $password): OpaqueEnrollment
     {
+        return $this->enroll($password, null);
+    }
+
+    /**
+     * Builds a registration record for the **caller's own** new password, sealed against the
+     * tenant the caller's account lives in.
+     *
+     * CONTRACT.md §5.2.2 rule 2. `POST /auth/password/change` and the record that accompanies
+     * it are about the account, not about whatever tenant the client is currently pointed at,
+     * and a record sealed against the acting tenant is refused with *"the OPAQUE session was
+     * issued for a different tenant"*.
+     *
+     * The distinction only bites for an organization-level principal that has selected another
+     * tenant to act on; for everyone else the two tenants are the same value and this behaves
+     * identically to {@see self::opaqueEnrollment()}. It is still the method to call for a
+     * self-service password change, because which principal is signed in is not something the
+     * call site usually knows.
+     *
+     * @throws NetworkError when no login has completed on this client yet — the principal
+     *     tenant is reported by the login response, so there is nothing to seal against before
+     *     then — and on the same terms as {@see self::opaqueEnrollment()} otherwise.
+     */
+    public function opaqueEnrollmentForSelf(string $password): OpaqueEnrollment
+    {
+        if ($this->principalTenantId === null) {
+            // fromMessage(), not `new`: the constructor is protected so that fromResponse()
+            // stays the only path from a live response into this type.
+            throw NetworkError::fromMessage(
+                'OPAQUE: no principal tenant is known yet — sign in before building a '
+                . 'registration record for your own password'
+            );
+        }
+
+        return $this->enroll($password, $this->principalTenantId);
+    }
+
+    /**
+     * The shared body of the two enrolment methods; they differ only in the tenant the record
+     * is sealed against.
+     */
+    private function enroll(string $password, ?string $principalTenantId): OpaqueEnrollment
+    {
         $this->ensureOpen();
 
         $exchange = Opaque::startRegistration($password);
 
         try {
             $body = $this->opaqueWorkspaceBody();
+            if ($principalTenantId !== null) {
+                // §5.2.2 rule 2: name the principal tenant by id and drop the slug. A slug
+                // naming the acting tenant would out-vote the id server-side, which is the
+                // exact confusion this override exists to avoid.
+                unset($body['tenant_slug']);
+                $body['tenant_id'] = $principalTenantId;
+            }
             $body['registration_request'] = $exchange->request();
 
             $started = $this->opaqueStart(
@@ -1842,11 +1903,40 @@ final class AxiamClient
             // offers no cross-tenant action rather than one that would 403.
             $organizationLevel = is_array($wire) && ($wire['user']['organization_level'] ?? false) === true;
 
+            // §5.2.2/§5.2.3: where this principal lives and how far it reaches. Read here
+            // rather than by the caller because the fallback is the whole point and is easy
+            // to lose — an absent `principal_tenant_id` means EQUAL to the acting tenant,
+            // not unknown.
+            $user = is_array($wire) && is_array($wire['user'] ?? null) ? $wire['user'] : [];
+            $actingTenantId = is_string($user['tenant_id'] ?? null) ? $user['tenant_id'] : null;
+            $principalTenantId = is_string($user['principal_tenant_id'] ?? null)
+                ? $user['principal_tenant_id']
+                : $actingTenantId;
+            $reachable = null;
+            if (is_array($user['reachable_tenant_ids'] ?? null) && $user['reachable_tenant_ids'] !== []) {
+                // A present-but-empty list stays `null`: it would read as "reaches nothing",
+                // the opposite of what an omitted field means here.
+                $reachable = array_values(array_filter(
+                    $user['reachable_tenant_ids'],
+                    static fn (mixed $id): bool => is_string($id),
+                ));
+            }
+            // Remember where this principal lives, so a later `opaqueEnrollmentForSelf`
+            // seals against the account's own tenant without a second round trip.
+            $this->principalTenantId = $principalTenantId;
+
             return new LoginResult(
                 mfaRequired: false,
                 userId: $userId,
                 tenantId: $this->tenant,
                 organizationLevel: $organizationLevel,
+                actingTenantId: $actingTenantId,
+                principalTenantId: $principalTenantId,
+                principalTenantSlug: is_string($user['principal_tenant_slug'] ?? null)
+                    ? $user['principal_tenant_slug']
+                    : null,
+                orgId: is_string($user['org_id'] ?? null) ? $user['org_id'] : null,
+                reachableTenantIds: $reachable,
             );
         }
 

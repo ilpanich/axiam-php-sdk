@@ -17,10 +17,18 @@ final class AssignRoleToUserRequest implements \JsonSerializable
      * Constructs a AssignRoleToUserRequest.
      * @param string $userId the server's `user_id` field
      * @param string|null $resourceId the server's `resource_id` field (optional)
+     * @param list<string>|null $tenantScope The tenants this assignment reaches. Only
+     *     meaningful for an assignment made in an organization's scope, whose global roles
+     *     otherwise reach every tenant of the organization; naming tenants here confines the
+     *     assignment to those and to nothing else, the organization's own scope included. Omitted
+     *     — the default — reaches wherever the role does. Refused with 400 outside an organization
+     *     scope, when empty, and when it names a tenant of another organization or the
+     *     organization's own scope tenant. (optional)
      */
     public function __construct(
         public readonly string $userId,
         public readonly ?string $resourceId = null,
+        public readonly ?array $tenantScope = null,
     ) {
     }
 
@@ -33,6 +41,7 @@ final class AssignRoleToUserRequest implements \JsonSerializable
         return new self(
             (string) ModelDecode::need($data, 'user_id', self::class),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
+            isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
         );
     }
 
@@ -50,6 +59,9 @@ final class AssignRoleToUserRequest implements \JsonSerializable
         $out['user_id'] = $this->userId;
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
+        }
+        if ($this->tenantScope !== null && $this->tenantScope !== []) {
+            $out['tenant_scope'] = $this->tenantScope;
         }
 
         return $out;

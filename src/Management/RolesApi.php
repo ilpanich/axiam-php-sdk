@@ -9,12 +9,14 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management;
 
 use Axiam\Sdk\Management\Models\AssignRoleToGroupRequest;
+use Axiam\Sdk\Management\Models\AssignRoleToServiceAccountRequest;
 use Axiam\Sdk\Management\Models\AssignRoleToUserRequest;
 use Axiam\Sdk\Management\Models\CreateRoleRequest;
 use Axiam\Sdk\Management\Models\GrantPermissionRequest;
 use Axiam\Sdk\Management\Models\ResolvedPermissionGrant;
 use Axiam\Sdk\Management\Models\Role;
 use Axiam\Sdk\Management\Models\RoleGroupAssignment;
+use Axiam\Sdk\Management\Models\RoleServiceAccountAssignment;
 use Axiam\Sdk\Management\Models\RoleUserAssignment;
 use Axiam\Sdk\Management\Models\UpdateRole;
 
@@ -386,6 +388,89 @@ final class RolesApi extends ManagementSupport
             '/api/v1/roles/{role_id}/permissions/{permission_id}',
             ['role_id' => $roleId, 'permission_id' => $permissionId],
             [],
+            null,
+        );
+    }
+
+    /**
+     * `GET /api/v1/roles/{role_id}/service-accounts`
+     *
+     * `GET /api/v1/roles/{role_id}/service-accounts`.
+     *
+     * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+     * plain list and never a `Page` (§27.4 rule 4).
+     * @param string $roleId the `{role_id}` path parameter
+     * @return list<RoleServiceAccountAssignment>
+     */
+    public function listServiceAccounts(
+        string $roleId,
+    ): array {
+        $decoded = $this->transport->send(
+            'roles.list_service_accounts',
+            'GET',
+            '/api/v1/roles/{role_id}/service-accounts',
+            ['role_id' => $roleId],
+            [],
+            null,
+        );
+
+        $items = [];
+        foreach ($decoded ?? [] as $item) {
+            if (is_array($item)) {
+                $items[] = RoleServiceAccountAssignment::fromArray($item);
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * `POST /api/v1/roles/{role_id}/service-accounts`
+     *
+     * `POST /api/v1/roles/{role_id}/service-accounts`.
+     *
+     * Returns nothing; the server answers with an empty body.
+     * @param string $roleId the `{role_id}` path parameter
+     * @param AssignRoleToServiceAccountRequest $body the request body
+     */
+    public function assignToServiceAccount(
+        string $roleId,
+        AssignRoleToServiceAccountRequest $body,
+    ): void {
+        $this->transport->send(
+            'roles.assign_to_service_account',
+            'POST',
+            '/api/v1/roles/{role_id}/service-accounts',
+            ['role_id' => $roleId],
+            [],
+            $body->toArray(),
+        );
+    }
+
+    /**
+     * `DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}`
+     *
+     * `DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}`.
+     *
+     * Returns nothing; the server answers with an empty body.
+     *
+     * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
+     * \Axiam\Sdk\Management\NotFoundError} rather than succeeding quietly.
+     * @param string $roleId the `{role_id}` path parameter
+     * @param string $serviceAccountId the `{service_account_id}` path parameter
+     * @param string|null $resourceId the optional `resource_id` query parameter
+     */
+    public function unassignFromServiceAccount(
+        string $roleId,
+        string $serviceAccountId,
+        ?string $resourceId = null,
+    ): void {
+        $this->transport->send(
+            'roles.unassign_from_service_account',
+            'DELETE',
+            '/api/v1/roles/{role_id}/service-accounts/{service_account_id}',
+            ['role_id' => $roleId, 'service_account_id' => $serviceAccountId],
+            ['resource_id' => $resourceId],
             null,
         );
     }

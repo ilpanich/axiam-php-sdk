@@ -35,7 +35,7 @@ final readonly class LoginResult
      *     **organization-level** principal (CONTRACT.md §5.2) — one whose record lives in
      *     its organization's reserved tenant, so its global grants apply in every tenant of
      *     that organization and it can act on a different one by sending a different
-     *     `X-Tenant-ID` on the next request, with no re-login.
+     *     `X-Axiam-Tenant` on the next request, with no re-login.
      *
      *     An ordinary tenant principal is a principal of exactly one tenant; changing the
      *     header for one of those produces a `403`. This flag is therefore what an
@@ -46,6 +46,40 @@ final readonly class LoginResult
      *     `false` in three cases that are all the safe direction: a server older than
      *     contract 1.31, and each of the two pending outcomes above, where no principal has
      *     been established yet.
+     *
+     *     Since contract 1.35 that reach can be narrowed per assignment, so this flag alone
+     *     no longer decides what to offer: consult `$reachableTenantIds` as well
+     *     (§5.2.3 rule 3).
+     * @param string|null $actingTenantId The tenant this login **acts on** — CONTRACT.md
+     *     §5.2.2. `null` on the two pending outcomes and against a server older than
+     *     contract 1.34.
+     * @param string|null $principalTenantId The tenant this principal's record **lives in**.
+     *
+     *     The same value as `$actingTenantId` for every ordinary principal; the two diverge
+     *     only once an organization-level principal selects another tenant to act on. This is
+     *     where the account's own credentials belong, and what a §23 registration record for
+     *     *this* account must be sealed against — see
+     *     {@see \Axiam\Sdk\AxiamClient::opaqueEnrollmentForSelf()}.
+     *
+     *     Falls back to `$actingTenantId` when the server omits it, which is exactly right
+     *     there: a server older than contract 1.34 cannot switch the acting tenant, so the
+     *     two cannot differ.
+     * @param string|null $principalTenantSlug Slug of `$principalTenantId` —
+     *     `"organization"` for an organization-level principal.
+     * @param string|null $orgId The caller's organization as a UUID — CONTRACT.md §5.2.2
+     *     rule 3. Read this rather than resolving a slug through
+     *     `GET /api/v1/organizations`, which is `super-admin`-only and returns only the
+     *     caller's own organization.
+     * @param list<string>|null $reachableTenantIds The tenants this caller's roles reach,
+     *     when narrowed — CONTRACT.md §5.2.3.
+     *
+     *     `null` means **unrestricted**, which is both the common case and the only thing a
+     *     server older than contract 1.35 can mean. A present list is a deliberately narrowed
+     *     organization-level account: confine any tenant switch to it, because naming
+     *     anything outside is refused at the header.
+     *
+     *     Note the pairing with `$organizationLevel`: a narrowed account still reports
+     *     `true` there, so gating on that flag alone offers tenants the server will refuse.
      */
     public function __construct(
         public bool $mfaRequired,
@@ -55,6 +89,11 @@ final readonly class LoginResult
         public bool $mfaSetupRequired = false,
         public ?Sensitive $setupToken = null,
         public bool $organizationLevel = false,
+        public ?string $actingTenantId = null,
+        public ?string $principalTenantId = null,
+        public ?string $principalTenantSlug = null,
+        public ?string $orgId = null,
+        public ?array $reachableTenantIds = null,
     ) {
     }
 }

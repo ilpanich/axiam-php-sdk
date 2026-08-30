@@ -9,37 +9,35 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management\Models;
 
 /**
- * The `AssignRoleToGroupRequest` schema from the server's OpenAPI document.
+ * A service account together with the resource scope of its assignment.
  */
-final class AssignRoleToGroupRequest implements \JsonSerializable
+final class RoleServiceAccountAssignment implements \JsonSerializable
 {
     /**
-     * Constructs a AssignRoleToGroupRequest.
-     * @param string $groupId the server's `group_id` field
-     * @param string|null $resourceId the server's `resource_id` field (optional)
-     * @param list<string>|null $tenantScope The tenants this assignment reaches. Only
-     *     meaningful for an assignment made in an organization's scope, whose global roles
-     *     otherwise reach every tenant of the organization; naming tenants here confines the
-     *     assignment to those and to nothing else, the organization's own scope included. Omitted
-     *     — the default — reaches wherever the role does. Refused with 400 outside an organization
-     *     scope, when empty, and when it names a tenant of another organization or the
-     *     organization's own scope tenant. (optional)
+     * Constructs a RoleServiceAccountAssignment.
+     * @param ServiceAccountResponse $serviceAccount The assigned service account. Carries no
+     *     secret — the client secret is returned once, at creation, and never again.
+     * @param string|null $resourceId `None` means the role was assigned globally (no resource
+     *     scope). (optional)
+     * @param list<string>|null $tenantScope The tenants this assignment reaches, or omitted
+     *     for "wherever the role does". Shown next to the assignment so an operator can tell a
+     *     deliberately narrowed grant from an organization-wide one. (optional)
      */
     public function __construct(
-        public readonly string $groupId,
+        public readonly ServiceAccountResponse $serviceAccount,
         public readonly ?string $resourceId = null,
         public readonly ?array $tenantScope = null,
     ) {
     }
 
     /**
-     * Rebuilds a AssignRoleToGroupRequest from one decoded JSON object.
+     * Rebuilds a RoleServiceAccountAssignment from one decoded JSON object.
      * @param array<string,mixed> $data The raw wire object.
      */
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) ModelDecode::need($data, 'group_id', self::class),
+            ServiceAccountResponse::fromArray((array) ModelDecode::need($data, 'service_account', self::class)),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
             isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
         );
@@ -56,7 +54,7 @@ final class AssignRoleToGroupRequest implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
-        $out['group_id'] = $this->groupId;
+        $out['service_account'] = $this->serviceAccount->toArray();
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
         }
