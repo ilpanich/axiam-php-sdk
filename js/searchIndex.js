@@ -1031,6 +1031,26 @@ Search.appendIndex(
             "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/oidc\/callback\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1\u0029\u0020\u2014\u0020step\u00202\u0020of\nupstream\u0020SSO\u003A\u0020consumes\u0020the\u0020single\u002Duse\u0020\u0060\u0024state\u0060,\u0020provisions\u0020or\u0020links\u0020the\u0020user,\u0020and\nestablishes\u0020the\u0020session.\u0020The\u0020session\u0020arrives\u0020as\u0020\u0060Set\u002DCookie\u0060\u0020\u2014\u0020not\u0020in\u0020the\nresponse\u0020body\u0020\u0028\u00A712.1\u0020note\u00206\u0029\u0020\u2014\u0020so\u0020it\u0020is\u0020captured\u0020automatically\u0020via\u0020this\u0020client\u0027s\nshared\u0020\u00A74\u0020cookie\u0020jar\u003B\u0020the\u0020freshly\u002Dissued\u0020\u00A73\u0020CSRF\u0020token\u0020is\u0020captured\u0020too,\u0020exactly\nas\u0020\u007B\u0040see\u0020self\u003A\u003Alogin\u0028\u0029\u007D\u0020does.\u0020\u00A712.4\u0020does\u0020not\u0020apply\u0020here\u003A\u0020no\u0020ID\u0020token\u0020ever\u0020reaches\nthe\u0020SDK\u0020on\u0020the\u0020federation\u0020path.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssoComplete"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AssoProviders\u0028\u0029",
+            "name": "ssoProviders",
+            "summary": "\u0060GET\u0020\/api\/v1\/auth\/federation\/providers\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1,\u0020contract\u00201.38\u0029\u0020\u2014\nwhich\u0020\u0022Sign\u0020in\u0020with\u0020X\u0022\u0020buttons\u0020to\u0020render\u0020for\u0020a\u0020workspace.\u0020The\u0020identifiers\ntravel\u0020as\u0020\u002A\u002Aquery\u002A\u002A\u0020parameters\u003B\u0020this\u0020is\u0020a\u0020\u0060GET\u0060\u0020and\u0020sends\u0020no\u0020body.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssoProviders"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AssoStartOauth2\u0028\u0029",
+            "name": "ssoStartOauth2",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/oauth2\/start\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1,\u0020contract\u00201.38\u0029\n\u2014\u0020step\u00201\u0020of\u0020a\u0020login\u0020through\u0020a\u0020\u002A\u002Aplain\u002DOAuth2\u002A\u002A\u0020upstream\u0020\u0028GitHub,\u0020Facebook,\n\u0060generic_oauth2\u0060\u0029.\u0020Call\u0020this,\u0020rather\u0020than\u0020\u007B\u0040see\u0020self\u003A\u003AssoStart\u0028\u0029\u007D,\u0020exactly\u0020when\nthe\u0020provider\u0027s\u0020\u0060protocol\u0060\u0020is\u0020\u0060OAuth2\u0060\u0020\u0028\u00A712.1\u0020note\u002010\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssoStartOauth2"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AssoCompleteOauth2\u0028\u0029",
+            "name": "ssoCompleteOauth2",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/oauth2\/callback\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1,\u0020contract\n1.38\u0029\u0020\u2014\u0020step\u00202\u0020of\u0020a\u0020plain\u002DOAuth2\u0020login.\u0020Same\u0020\u0060Set\u002DCookie\u0060\u0020session\u0020and\u0020same\u0020\u00A73\nCSRF\u0020capture\u0020as\u0020\u007B\u0040see\u0020self\u003A\u003AssoComplete\u0028\u0029\u007D.\u0020\u00A712.4\u0020does\u0020not\u0020apply\u003A\u0020an\u0020\u0060OAuth2\u0060\nprovider\u0020issues\u0020no\u0020ID\u0020token\u0020at\u0020all\u0020\u0028\u00A712.1\u0020note\u002011\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssoCompleteOauth2"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AssoCompleteHandoff\u0028\u0029",
+            "name": "ssoCompleteHandoff",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/handoff\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1,\u0020contract\u00201.38\u0029\u0020\u2014\nredeem\u0020the\u0020single\u002Duse\u0020\u0060axiam_handoff\u0060\u0020code\u0020the\u0020SAML\u0020and\u0020Apple\u0020flows\u0020deliver.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssoCompleteHandoff"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AverifyLocally\u0028\u0029",
             "name": "verifyLocally",
             "summary": "Verify\u0020an\u0020INBOUND\u0020caller\u0027s\u0020token\u0020and\u0020nothing\u0020else\u0020\u2014\u0020the\u0020seam\u0020every\u0020request\u0020guard\nmust\u0020use\u0020\u0028CONTRACT.md\u0020\u00A710.1\u0020rule\u00208\u0029.\u0020Delegates\u0020straight\u0020to\u0020\u007B\u0040see\u0020JwksVerifier\u003A\u003Averify\u0028\u0029\u007D,\nwhich\u0020applies\u0020the\u0020full\u0020\u00A710.1\u0020minimum\u0020local\u002Dverification\u0020set,\u0020and\u0020returns\u0020\u0060null\u0060\u0020on\nany\u0020failure\u0020with\u0020\u002A\u002Ano\u0020fallback\u0020to\u0020another\u0020credential\u002A\u002A.",
@@ -3491,15 +3511,45 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_provider"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024allowTenantInheritance",
+            "name": "allowTenantInheritance",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_allowTenantInheritance"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024allowedAlgorithms",
             "name": "allowedAlgorithms",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_allowedAlgorithms"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024allowedIssuerTenants",
+            "name": "allowedIssuerTenants",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_allowedIssuerTenants"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024appleKeyId",
+            "name": "appleKeyId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_appleKeyId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024appleTeamId",
+            "name": "appleTeamId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_appleTeamId"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024attributeMap",
             "name": "attributeMap",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_attributeMap"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024authorizationEndpoint",
+            "name": "authorizationEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_authorizationEndpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024buttonIcon",
+            "name": "buttonIcon",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_buttonIcon"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024idpSigningCertPem",
             "name": "idpSigningCertPem",
@@ -3511,10 +3561,40 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_metadataUrl"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024providerKind",
+            "name": "providerKind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_providerKind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024providerSlug",
+            "name": "providerSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_providerSlug"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024requirePkce",
+            "name": "requirePkce",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_requirePkce"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024scopes",
+            "name": "scopes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_scopes"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024tokenEndpoint",
+            "name": "tokenEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_tokenEndpoint"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024tokenExchange",
             "name": "tokenExchange",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_tokenExchange"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024userinfoEndpoint",
+            "name": "userinfoEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_userinfoEndpoint"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateGroupRequest",
             "name": "CreateGroupRequest",
@@ -4631,6 +4711,21 @@ Search.appendIndex(
             "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#method_jsonSerialize"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024allowTenantInheritance",
+            "name": "allowTenantInheritance",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_allowTenantInheritance"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024allowedAlgorithms",
+            "name": "allowedAlgorithms",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_allowedAlgorithms"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024allowedIssuerTenants",
+            "name": "allowedIssuerTenants",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_allowedIssuerTenants"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024attributeMap",
             "name": "attributeMap",
             "summary": "",
@@ -4646,15 +4741,35 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_createdAt"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024effectiveScopes",
+            "name": "effectiveScopes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_effectiveScopes"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024enabled",
             "name": "enabled",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_enabled"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024hasBundledMark",
+            "name": "hasBundledMark",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_hasBundledMark"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024id",
             "name": "id",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024mintsClientSecret",
+            "name": "mintsClientSecret",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_mintsClientSecret"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024pkceRequired",
+            "name": "pkceRequired",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_pkceRequired"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024protocol",
             "name": "protocol",
@@ -4665,6 +4780,16 @@ Search.appendIndex(
             "name": "provider",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_provider"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024providerKind",
+            "name": "providerKind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_providerKind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024scopes",
+            "name": "scopes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_scopes"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024tenantId",
             "name": "tenantId",
@@ -4681,10 +4806,45 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_updatedAt"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024appleKeyId",
+            "name": "appleKeyId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_appleKeyId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024appleTeamId",
+            "name": "appleTeamId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_appleTeamId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024authorizationEndpoint",
+            "name": "authorizationEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_authorizationEndpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024buttonIcon",
+            "name": "buttonIcon",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_buttonIcon"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024metadataUrl",
             "name": "metadataUrl",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_metadataUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024providerSlug",
+            "name": "providerSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_providerSlug"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024tokenEndpoint",
+            "name": "tokenEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_tokenEndpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024userinfoEndpoint",
+            "name": "userinfoEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_userinfoEndpoint"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationLinkResponse",
             "name": "FederationLinkResponse",
@@ -8896,15 +9056,45 @@ Search.appendIndex(
             "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#method_jsonSerialize"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024allowTenantInheritance",
+            "name": "allowTenantInheritance",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_allowTenantInheritance"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024allowedAlgorithms",
             "name": "allowedAlgorithms",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_allowedAlgorithms"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024allowedIssuerTenants",
+            "name": "allowedIssuerTenants",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_allowedIssuerTenants"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024appleKeyId",
+            "name": "appleKeyId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_appleKeyId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024appleTeamId",
+            "name": "appleTeamId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_appleTeamId"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024attributeMap",
             "name": "attributeMap",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_attributeMap"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024authorizationEndpoint",
+            "name": "authorizationEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_authorizationEndpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024buttonIcon",
+            "name": "buttonIcon",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_buttonIcon"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024clientId",
             "name": "clientId",
@@ -8936,10 +9126,35 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_provider"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024providerSlug",
+            "name": "providerSlug",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_providerSlug"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024requirePkce",
+            "name": "requirePkce",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_requirePkce"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024scopes",
+            "name": "scopes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_scopes"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024tokenEndpoint",
+            "name": "tokenEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_tokenEndpoint"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024tokenExchange",
             "name": "tokenExchange",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_tokenExchange"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024userinfoEndpoint",
+            "name": "userinfoEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_userinfoEndpoint"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateGroup",
             "name": "UpdateGroup",
@@ -10741,6 +10956,91 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-ExchangedToken.html#property_scope"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider",
+            "name": "FederationProvider",
+            "summary": "One\u0020sign\u002Din\u0020button\u0020\u0028wire\u0020schema\u0020\u0060PublicFederationProvider\u0060,\u0020CONTRACT.md\u0020\u00A712.1,\ncontract\u00201.38\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003APROTOCOL_OIDC_CONNECT",
+            "name": "PROTOCOL_OIDC_CONNECT",
+            "summary": "\u0060protocol\u0060\u0020value\u0020selecting\u0020\u0060ssoStart\u0060\u0020\u0028\u00A712.1\u0020note\u002010\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#constant_PROTOCOL_OIDC_CONNECT"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003APROTOCOL_OAUTH2",
+            "name": "PROTOCOL_OAUTH2",
+            "summary": "\u0060protocol\u0060\u0020value\u0020selecting\u0020\u0060ssoStartOauth2\u0060\u0020\u0028\u00A712.1\u0020note\u002010\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#constant_PROTOCOL_OAUTH2"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003APROTOCOL_SAML",
+            "name": "PROTOCOL_SAML",
+            "summary": "\u0060protocol\u0060\u0020value\u0020selecting\u0020the\u0020SAML\u0020login\u0020endpoint,\u0020which\u0020is\u0020\u002A\u002Anot\u002A\u002A\u0020a\u0020\u00A712\nvocabulary\u0020operation\u0020\u0028\u00A712.1\u0020note\u002010\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#constant_PROTOCOL_SAML"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A\u0024providerKind",
+            "name": "providerKind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#property_providerKind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A\u0024displayName",
+            "name": "displayName",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#property_displayName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A\u0024protocol",
+            "name": "protocol",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#property_protocol"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A\u0024hasBundledMark",
+            "name": "hasBundledMark",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#property_hasBundledMark"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A\u0024inherited",
+            "name": "inherited",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#property_inherited"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProvider\u003A\u003A\u0024buttonIcon",
+            "name": "buttonIcon",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProvider.html#property_buttonIcon"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProviderList",
+            "name": "FederationProviderList",
+            "summary": "The\u0020result\u0020of\u0020\u0060ssoProviders\u0060\u0020\u0028wire\u0020schema\u0020\u0060PublicFederationProvidersResponse\u0060,\nCONTRACT.md\u0020\u00A712.1\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProviderList.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProviderList\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProviderList.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProviderList\u003A\u003AHANDOFF_QUERY_PARAM",
+            "name": "HANDOFF_QUERY_PARAM",
+            "summary": "The\u0020query\u0020parameter\u0020the\u0020server\u0020delivers\u0020a\u0020handoff\u0020code\u0020in,\u0020on\u0020the\u0020SPA\u0027s\u0020own\ncallback\u0020URL\u0020\u0028\u00A712.1\u0020note\u002012\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProviderList.html#constant_HANDOFF_QUERY_PARAM"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProviderList\u003A\u003AHANDOFF_CODE_TTL_SECONDS",
+            "name": "HANDOFF_CODE_TTL_SECONDS",
+            "summary": "How\u0020long\u0020a\u0020handoff\u0020code\u0020is\u0020valid,\u0020in\u0020seconds\u0020\u0028\u00A712.1\u0020note\u002012\u0029.\u0020It\u0020exists\u0020to\nsurvive\u0020one\u0020redirect.\u0020Redeem\u0020it\u0020immediately,\u0020once.",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProviderList.html#constant_HANDOFF_CODE_TTL_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\FederationProviderList\u003A\u003A\u0024providers",
+            "name": "providers",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-FederationProviderList.html#property_providers"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\IdTokenValidator",
             "name": "IdTokenValidator",
             "summary": "ID\u002Dtoken\u0020claim\u0020validation\u0020\u2014\u0020CONTRACT.md\u0020\u00A712.4,\u0020OIDC\u0020Core\u0020\u00A73.1.3.7.",
@@ -11031,6 +11331,26 @@ Search.appendIndex(
             "summary": "Format\u0020a\u0020\u0060WWW\u002DAuthenticate\u003A\u0020UMA\u0060\u0020header\u0020\u0028\u00A720.3,\u0020emit\u0020half\u0029\u0020\u2014\u0020pure\u0020local\ncomputation,\u0020for\u0020a\u0020resource\u0020server\u0020that\u0020has\u0020just\u0020minted\u0020a\u0020ticket.",
             "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_umaChallengeHeader"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AssoProviders\u0028\u0029",
+            "name": "ssoProviders",
+            "summary": "\u0060GET\u0020\/api\/v1\/auth\/federation\/providers\u0060\u0020\u0028\u00A712.1\u0029\u0020\u2014\u0020which\u0020\u0022Sign\u0020in\u0020with\u0020X\u0022\nbuttons\u0020to\u0020render\u0020for\u0020a\u0020workspace.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_ssoProviders"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AssoStartOauth2\u0028\u0029",
+            "name": "ssoStartOauth2",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/oauth2\/start\u0060\u0020\u0028\u00A712.1\u0029\u0020\u2014\u0020step\u00201\u0020of\u0020a\u0020login\nthrough\u0020a\u0020\u002A\u002Aplain\u002DOAuth2\u002A\u002A\u0020upstream\u0020\u0028GitHub,\u0020Facebook,\u0020\u0060generic_oauth2\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_ssoStartOauth2"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AssoCompleteOauth2\u0028\u0029",
+            "name": "ssoCompleteOauth2",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/oauth2\/callback\u0060\u0020\u0028\u00A712.1\u0029\u0020\u2014\u0020step\u00202\u0020of\u0020a\nplain\u002DOAuth2\u0020login.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_ssoCompleteOauth2"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AssoCompleteHandoff\u0028\u0029",
+            "name": "ssoCompleteHandoff",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/federation\/handoff\u0060\u0020\u0028\u00A712.1\u0029\u0020\u2014\u0020redeem\u0020the\u0020single\u002Duse\u0020code\nthe\u0020SAML\u0020and\u0020Apple\u0020flows\u0020deliver.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_ssoCompleteHandoff"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ADISCOVERY_PATH",
             "name": "DISCOVERY_PATH",
             "summary": "",
@@ -11045,6 +11365,26 @@ Search.appendIndex(
             "name": "SSO_CALLBACK_PATH",
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_SSO_CALLBACK_PATH"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ASSO_PROVIDERS_PATH",
+            "name": "SSO_PROVIDERS_PATH",
+            "summary": "Path\u0020of\u0020the\u0020public\u0020provider\u002Dlisting\u0020endpoint\u0020\u0028contract\u00201.38\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_SSO_PROVIDERS_PATH"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ASSO_OAUTH2_START_PATH",
+            "name": "SSO_OAUTH2_START_PATH",
+            "summary": "Path\u0020of\u0020the\u0020plain\u002DOAuth2\u0020federation\u0020step\u002D1\u0020endpoint\u0020\u0028contract\u00201.38\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_SSO_OAUTH2_START_PATH"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ASSO_OAUTH2_CALLBACK_PATH",
+            "name": "SSO_OAUTH2_CALLBACK_PATH",
+            "summary": "Path\u0020of\u0020the\u0020plain\u002DOAuth2\u0020federation\u0020step\u002D2\u0020\u0028callback\u0029\u0020endpoint\u0020\u0028contract\u00201.38\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_SSO_OAUTH2_CALLBACK_PATH"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ASSO_HANDOFF_PATH",
+            "name": "SSO_HANDOFF_PATH",
+            "summary": "Path\u0020of\u0020the\u0020handoff\u002Dcode\u0020redemption\u0020endpoint\u0020\u0028contract\u00201.38\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_SSO_HANDOFF_PATH"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AMIN_DISCOVERY_TTL_SECONDS",
             "name": "MIN_DISCOVERY_TTL_SECONDS",
