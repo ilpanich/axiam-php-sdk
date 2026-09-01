@@ -137,16 +137,16 @@ final class ManagementSparseBodiesGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * `UpdateFederationConfigRequest`: naming only `allowed_algorithms` sends only
-     * `allowed_algorithms`.
+     * `UpdateFederationConfigRequest`: naming only `allow_tenant_inheritance` sends only
+     * `allow_tenant_inheritance`.
      */
     public function testUpdateFederationConfigRequestOmitsWhatYouDidNotName(): void
     {
-        $body = new Models\UpdateFederationConfigRequest(allowedAlgorithms: ['example']);
+        $body = new Models\UpdateFederationConfigRequest(allowTenantInheritance: true);
 
         $rendered = $body->toArray();
 
-        self::assertSame(['allowed_algorithms'], array_keys($rendered));
+        self::assertSame(['allow_tenant_inheritance'], array_keys($rendered));
     }
 
     /** `UpdateNotificationRuleRequest`: naming only `description` sends only `description`. */

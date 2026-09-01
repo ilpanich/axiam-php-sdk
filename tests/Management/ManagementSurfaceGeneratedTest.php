@@ -2509,15 +2509,38 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'items' => [
                 [
+                    'allow_tenant_inheritance' => true,
+                    'allowed_algorithms' => [
+                        'example',
+                    ],
+                    'allowed_issuer_tenants' => [
+                        'example',
+                    ],
+                    'apple_key_id' => 'example',
+                    'apple_team_id' => 'example',
                     'attribute_map' => [],
+                    'authorization_endpoint' => 'example',
+                    'button_icon' => 'example',
                     'client_id' => 'example',
                     'created_at' => '2026-08-26T00:00:00Z',
+                    'effective_scopes' => [
+                        'example',
+                    ],
                     'enabled' => true,
+                    'has_bundled_mark' => true,
                     'id' => '11111111-1111-4111-8111-111111111111',
                     'metadata_url' => 'example',
+                    'mints_client_secret' => true,
+                    'pkce_required' => true,
                     'protocol' => 'example',
                     'provider' => 'example',
+                    'provider_kind' => 'example',
+                    'provider_slug' => 'example',
+                    'scopes' => [
+                        'example',
+                    ],
                     'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'token_endpoint' => 'example',
                     'token_exchange' => [
                         'accepted_audiences' => [
                             'example',
@@ -2529,6 +2552,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                         'subject_mapping' => 'example',
                     ],
                     'updated_at' => '2026-08-26T00:00:00Z',
+                    'userinfo_endpoint' => 'example',
                 ],
             ],
             'total' => 1,
@@ -2551,15 +2575,38 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testFederationCreateConfigReachesItsRoute(): void
     {
         $mounted = [
+            'allow_tenant_inheritance' => true,
+            'allowed_algorithms' => [
+                'example',
+            ],
+            'allowed_issuer_tenants' => [
+                'example',
+            ],
+            'apple_key_id' => 'example',
+            'apple_team_id' => 'example',
             'attribute_map' => [],
+            'authorization_endpoint' => 'example',
+            'button_icon' => 'example',
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
+            'effective_scopes' => [
+                'example',
+            ],
             'enabled' => true,
+            'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
             'metadata_url' => 'example',
+            'mints_client_secret' => true,
+            'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
+            'provider_kind' => 'example',
+            'provider_slug' => 'example',
+            'scopes' => [
+                'example',
+            ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'token_endpoint' => 'example',
             'token_exchange' => [
                 'accepted_audiences' => [
                     'example',
@@ -2571,6 +2618,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'subject_mapping' => 'example',
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'userinfo_endpoint' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->federation()->createConfig(new Models\CreateFederationConfigRequest('example', new \Axiam\Sdk\Core\Sensitive('s3cret'), 'example', 'example'));
@@ -2585,15 +2633,38 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testFederationGetConfigReachesItsRoute(): void
     {
         $mounted = [
+            'allow_tenant_inheritance' => true,
+            'allowed_algorithms' => [
+                'example',
+            ],
+            'allowed_issuer_tenants' => [
+                'example',
+            ],
+            'apple_key_id' => 'example',
+            'apple_team_id' => 'example',
             'attribute_map' => [],
+            'authorization_endpoint' => 'example',
+            'button_icon' => 'example',
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
+            'effective_scopes' => [
+                'example',
+            ],
             'enabled' => true,
+            'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
             'metadata_url' => 'example',
+            'mints_client_secret' => true,
+            'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
+            'provider_kind' => 'example',
+            'provider_slug' => 'example',
+            'scopes' => [
+                'example',
+            ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'token_endpoint' => 'example',
             'token_exchange' => [
                 'accepted_audiences' => [
                     'example',
@@ -2605,6 +2676,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'subject_mapping' => 'example',
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'userinfo_endpoint' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->federation()->getConfig('11111111-1111-4111-8111-111111111111');
@@ -2619,15 +2691,38 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testFederationUpdateConfigReachesItsRoute(): void
     {
         $mounted = [
+            'allow_tenant_inheritance' => true,
+            'allowed_algorithms' => [
+                'example',
+            ],
+            'allowed_issuer_tenants' => [
+                'example',
+            ],
+            'apple_key_id' => 'example',
+            'apple_team_id' => 'example',
             'attribute_map' => [],
+            'authorization_endpoint' => 'example',
+            'button_icon' => 'example',
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
+            'effective_scopes' => [
+                'example',
+            ],
             'enabled' => true,
+            'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
             'metadata_url' => 'example',
+            'mints_client_secret' => true,
+            'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
+            'provider_kind' => 'example',
+            'provider_slug' => 'example',
+            'scopes' => [
+                'example',
+            ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'token_endpoint' => 'example',
             'token_exchange' => [
                 'accepted_audiences' => [
                     'example',
@@ -2639,6 +2734,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'subject_mapping' => 'example',
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'userinfo_endpoint' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->federation()->updateConfig('11111111-1111-4111-8111-111111111111', new Models\UpdateFederationConfigRequest());

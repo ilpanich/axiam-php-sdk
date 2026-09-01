@@ -398,16 +398,31 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testCreateFederationConfigRequestRoundTrips(): void
     {
         $wire = [
+            'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
             ],
+            'allowed_issuer_tenants' => [
+                'example',
+            ],
+            'apple_key_id' => 'example',
+            'apple_team_id' => 'example',
             'attribute_map' => [],
+            'authorization_endpoint' => 'example',
+            'button_icon' => 'example',
             'client_id' => 'example',
             'client_secret' => 'example',
             'idp_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'protocol' => 'example',
             'provider' => 'example',
+            'provider_kind' => 'example',
+            'provider_slug' => 'example',
+            'require_pkce' => true,
+            'scopes' => [
+                'example',
+            ],
+            'token_endpoint' => 'example',
             'token_exchange' => [
                 'accepted_audiences' => [
                     'example',
@@ -418,6 +433,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'scope_map' => [],
                 'subject_mapping' => 'example',
             ],
+            'userinfo_endpoint' => 'example',
         ];
 
         $model = Models\CreateFederationConfigRequest::fromArray($wire);
@@ -933,15 +949,38 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testFederationConfigResponseRoundTrips(): void
     {
         $wire = [
+            'allow_tenant_inheritance' => true,
+            'allowed_algorithms' => [
+                'example',
+            ],
+            'allowed_issuer_tenants' => [
+                'example',
+            ],
+            'apple_key_id' => 'example',
+            'apple_team_id' => 'example',
             'attribute_map' => [],
+            'authorization_endpoint' => 'example',
+            'button_icon' => 'example',
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
+            'effective_scopes' => [
+                'example',
+            ],
             'enabled' => true,
+            'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
             'metadata_url' => 'example',
+            'mints_client_secret' => true,
+            'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
+            'provider_kind' => 'example',
+            'provider_slug' => 'example',
+            'scopes' => [
+                'example',
+            ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'token_endpoint' => 'example',
             'token_exchange' => [
                 'accepted_audiences' => [
                     'example',
@@ -953,6 +992,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'subject_mapping' => 'example',
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'userinfo_endpoint' => 'example',
         ];
 
         $model = Models\FederationConfigResponse::fromArray($wire);
@@ -2727,16 +2767,30 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testUpdateFederationConfigRequestRoundTrips(): void
     {
         $wire = [
+            'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
             ],
+            'allowed_issuer_tenants' => [
+                'example',
+            ],
+            'apple_key_id' => 'example',
+            'apple_team_id' => 'example',
             'attribute_map' => [],
+            'authorization_endpoint' => 'example',
+            'button_icon' => 'example',
             'client_id' => 'example',
             'client_secret' => 'example',
             'enabled' => true,
             'idp_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'provider' => 'example',
+            'provider_slug' => 'example',
+            'require_pkce' => true,
+            'scopes' => [
+                'example',
+            ],
+            'token_endpoint' => 'example',
             'token_exchange' => [
                 'accepted_audiences' => [
                     'example',
@@ -2747,6 +2801,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'scope_map' => [],
                 'subject_mapping' => 'example',
             ],
+            'userinfo_endpoint' => 'example',
         ];
 
         $model = Models\UpdateFederationConfigRequest::fromArray($wire);

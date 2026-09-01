@@ -15,30 +15,77 @@ final class FederationConfigResponse implements \JsonSerializable
 {
     /**
      * Constructs a FederationConfigResponse.
+     * @param bool $allowTenantInheritance Whether tenants of this organization may inherit
+     *     this provider.
+     * @param list<string> $allowedAlgorithms Accepted signing algorithms. Returned for OIDC
+     *     and SAML; meaningless, and therefore empty, for the OAuth2 variant.
+     * @param list<string> $allowedIssuerTenants Accepted external IdP tenants for a templated
+     *     issuer.
      * @param mixed $attributeMap the server's `attribute_map` field
      * @param string $clientId the server's `client_id` field
      * @param string $createdAt the server's `created_at` field
+     * @param list<string> $effectiveScopes The per-kind default that an empty `scopes`
+     *     resolves to. Returned so the admin UI can show what will actually be requested without
+     *     duplicating the table.
      * @param bool $enabled the server's `enabled` field
+     * @param bool $hasBundledMark Whether AXIAM ships this provider's own mark. When true the
+     *     button uses it and `button_icon` is refused; when false the button reads "Sign in with
+     *     <provider>" and may carry a custom icon.
      * @param string $id the server's `id` field
+     * @param bool $mintsClientSecret Whether AXIAM mints this provider's client secret itself,
+     *     per exchange, rather than sending a stored one. True only for an Apple config with both
+     *     identifiers set.
+     * @param bool $pkceRequired Whether PKCE is sent on the authorization request. Always true
+     *     for the OAuth2 variant regardless of the stored flag.
      * @param string $protocol the server's `protocol` field
      * @param string $provider the server's `provider` field
+     * @param string $providerKind Which provider this is. Derived from `protocol` for a config
+     *     written before the field existed.
+     * @param list<string> $scopes Scopes as stored. Empty means "use the per-kind default";
+     *     see `effective_scopes`.
      * @param string $tenantId the server's `tenant_id` field
      * @param TokenExchangeTrustResponse $tokenExchange X4 external token-exchange trust.
      * @param string $updatedAt the server's `updated_at` field
+     * @param string|null $appleKeyId Apple Key ID. (optional)
+     * @param string|null $appleTeamId Apple Team ID. Not secret — the `.p8` key is, and it is
+     *     never returned. (optional)
+     * @param string|null $authorizationEndpoint OAuth2-variant authorization endpoint.
+     *     (optional)
+     * @param string|null $buttonIcon Custom sign-in-button icon, when one is set. (optional)
      * @param string|null $metadataUrl the server's `metadata_url` field (optional)
+     * @param string|null $providerSlug Operator-chosen identifier for a `generic_*` kind.
+     *     (optional)
+     * @param string|null $tokenEndpoint OAuth2-variant token endpoint. (optional)
+     * @param string|null $userinfoEndpoint OAuth2-variant userinfo endpoint. (optional)
      */
     public function __construct(
+        public readonly bool $allowTenantInheritance,
+        public readonly array $allowedAlgorithms,
+        public readonly array $allowedIssuerTenants,
         public readonly mixed $attributeMap,
         public readonly string $clientId,
         public readonly string $createdAt,
+        public readonly array $effectiveScopes,
         public readonly bool $enabled,
+        public readonly bool $hasBundledMark,
         public readonly string $id,
+        public readonly bool $mintsClientSecret,
+        public readonly bool $pkceRequired,
         public readonly string $protocol,
         public readonly string $provider,
+        public readonly string $providerKind,
+        public readonly array $scopes,
         public readonly string $tenantId,
         public readonly TokenExchangeTrustResponse $tokenExchange,
         public readonly string $updatedAt,
+        public readonly ?string $appleKeyId = null,
+        public readonly ?string $appleTeamId = null,
+        public readonly ?string $authorizationEndpoint = null,
+        public readonly ?string $buttonIcon = null,
         public readonly ?string $metadataUrl = null,
+        public readonly ?string $providerSlug = null,
+        public readonly ?string $tokenEndpoint = null,
+        public readonly ?string $userinfoEndpoint = null,
     ) {
     }
 
@@ -49,17 +96,33 @@ final class FederationConfigResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            (bool) ModelDecode::need($data, 'allow_tenant_inheritance', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'allowed_algorithms', self::class))),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'allowed_issuer_tenants', self::class))),
             ModelDecode::need($data, 'attribute_map', self::class),
             (string) ModelDecode::need($data, 'client_id', self::class),
             (string) ModelDecode::need($data, 'created_at', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'effective_scopes', self::class))),
             (bool) ModelDecode::need($data, 'enabled', self::class),
+            (bool) ModelDecode::need($data, 'has_bundled_mark', self::class),
             (string) ModelDecode::need($data, 'id', self::class),
+            (bool) ModelDecode::need($data, 'mints_client_secret', self::class),
+            (bool) ModelDecode::need($data, 'pkce_required', self::class),
             (string) ModelDecode::need($data, 'protocol', self::class),
             (string) ModelDecode::need($data, 'provider', self::class),
+            (string) ModelDecode::need($data, 'provider_kind', self::class),
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scopes', self::class))),
             (string) ModelDecode::need($data, 'tenant_id', self::class),
             TokenExchangeTrustResponse::fromArray((array) ModelDecode::need($data, 'token_exchange', self::class)),
             (string) ModelDecode::need($data, 'updated_at', self::class),
+            isset($data['apple_key_id']) ? (string) $data['apple_key_id'] : null,
+            isset($data['apple_team_id']) ? (string) $data['apple_team_id'] : null,
+            isset($data['authorization_endpoint']) ? (string) $data['authorization_endpoint'] : null,
+            isset($data['button_icon']) ? (string) $data['button_icon'] : null,
             isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
+            isset($data['provider_slug']) ? (string) $data['provider_slug'] : null,
+            isset($data['token_endpoint']) ? (string) $data['token_endpoint'] : null,
+            isset($data['userinfo_endpoint']) ? (string) $data['userinfo_endpoint'] : null,
         );
     }
 
@@ -74,18 +137,48 @@ final class FederationConfigResponse implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
+        $out['allowed_algorithms'] = $this->allowedAlgorithms;
+        $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
         $out['attribute_map'] = $this->attributeMap;
         $out['client_id'] = $this->clientId;
         $out['created_at'] = $this->createdAt;
+        $out['effective_scopes'] = $this->effectiveScopes;
         $out['enabled'] = $this->enabled;
+        $out['has_bundled_mark'] = $this->hasBundledMark;
         $out['id'] = $this->id;
+        $out['mints_client_secret'] = $this->mintsClientSecret;
+        $out['pkce_required'] = $this->pkceRequired;
         $out['protocol'] = $this->protocol;
         $out['provider'] = $this->provider;
+        $out['provider_kind'] = $this->providerKind;
+        $out['scopes'] = $this->scopes;
         $out['tenant_id'] = $this->tenantId;
         $out['token_exchange'] = $this->tokenExchange->toArray();
         $out['updated_at'] = $this->updatedAt;
+        if ($this->appleKeyId !== null) {
+            $out['apple_key_id'] = $this->appleKeyId;
+        }
+        if ($this->appleTeamId !== null) {
+            $out['apple_team_id'] = $this->appleTeamId;
+        }
+        if ($this->authorizationEndpoint !== null) {
+            $out['authorization_endpoint'] = $this->authorizationEndpoint;
+        }
+        if ($this->buttonIcon !== null) {
+            $out['button_icon'] = $this->buttonIcon;
+        }
         if ($this->metadataUrl !== null) {
             $out['metadata_url'] = $this->metadataUrl;
+        }
+        if ($this->providerSlug !== null) {
+            $out['provider_slug'] = $this->providerSlug;
+        }
+        if ($this->tokenEndpoint !== null) {
+            $out['token_endpoint'] = $this->tokenEndpoint;
+        }
+        if ($this->userinfoEndpoint !== null) {
+            $out['userinfo_endpoint'] = $this->userinfoEndpoint;
         }
 
         return $out;
