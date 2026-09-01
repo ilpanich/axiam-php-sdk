@@ -19,9 +19,19 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
 {
     /**
      * Constructs a UpdateFederationConfigRequest.
+     * @param bool|null $allowTenantInheritance Whether tenants may inherit this
+     *     organization-level provider. (optional)
      * @param list<string>|null $allowedAlgorithms Accepted signature algorithms (CQ-B40/REQ-14
      *     AC-5). (optional)
+     * @param list<string>|null $allowedIssuerTenants Accepted external IdP tenants for a
+     *     templated issuer. Replaced wholesale. (optional)
+     * @param string|null $appleKeyId Apple Key ID. `Some(None)` clears it. (optional)
+     * @param string|null $appleTeamId Apple Team ID. `Some(None)` clears it. (optional)
      * @param mixed $attributeMap the server's `attribute_map` field (optional)
+     * @param string|null $authorizationEndpoint OAuth2-variant authorization endpoint.
+     *     `Some(None)` clears it. (optional)
+     * @param string|null $buttonIcon Sign-in-button icon for a generic provider. `Some(None)`
+     *     clears it. (optional)
      * @param string|null $clientId the server's `client_id` field (optional)
      * @param \Axiam\Sdk\Core\Sensitive|null $clientSecret the server's `client_secret` field —
      *     a one-time secret (§27.5) (optional)
@@ -30,19 +40,39 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
      *     assertions (CQ-B40/REQ-14 AC-5). `Some(None)` clears the stored cert. (optional)
      * @param string|null $metadataUrl the server's `metadata_url` field (optional)
      * @param string|null $provider the server's `provider` field (optional)
+     * @param string|null $providerSlug Operator-chosen identifier for a `generic_*` kind.
+     *     `Some(None)` clears it. (optional)
+     * @param bool|null $requirePkce Send PKCE on the authorization request. (optional)
+     * @param list<string>|null $scopes Scopes to request. Replaced wholesale; empty restores
+     *     the per-kind default. (optional)
+     * @param string|null $tokenEndpoint OAuth2-variant token endpoint. `Some(None)` clears it.
+     *     (optional)
      * @param TokenExchangeTrustRequest|null $tokenExchange the server's `token_exchange` field
      *     (optional)
+     * @param string|null $userinfoEndpoint OAuth2-variant userinfo endpoint. `Some(None)`
+     *     clears it. (optional)
      */
     public function __construct(
+        public readonly ?bool $allowTenantInheritance = null,
         public readonly ?array $allowedAlgorithms = null,
+        public readonly ?array $allowedIssuerTenants = null,
+        public readonly ?string $appleKeyId = null,
+        public readonly ?string $appleTeamId = null,
         public readonly mixed $attributeMap = null,
+        public readonly ?string $authorizationEndpoint = null,
+        public readonly ?string $buttonIcon = null,
         public readonly ?string $clientId = null,
         public readonly ?\Axiam\Sdk\Core\Sensitive $clientSecret = null,
         public readonly ?bool $enabled = null,
         public readonly ?string $idpSigningCertPem = null,
         public readonly ?string $metadataUrl = null,
         public readonly ?string $provider = null,
+        public readonly ?string $providerSlug = null,
+        public readonly ?bool $requirePkce = null,
+        public readonly ?array $scopes = null,
+        public readonly ?string $tokenEndpoint = null,
         public readonly ?TokenExchangeTrustRequest $tokenExchange = null,
+        public readonly ?string $userinfoEndpoint = null,
     ) {
     }
 
@@ -53,15 +83,26 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            isset($data['allow_tenant_inheritance']) ? (bool) $data['allow_tenant_inheritance'] : null,
             isset($data['allowed_algorithms']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_algorithms'])) : null,
+            isset($data['allowed_issuer_tenants']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_issuer_tenants'])) : null,
+            isset($data['apple_key_id']) ? (string) $data['apple_key_id'] : null,
+            isset($data['apple_team_id']) ? (string) $data['apple_team_id'] : null,
             isset($data['attribute_map']) ? $data['attribute_map'] : null,
+            isset($data['authorization_endpoint']) ? (string) $data['authorization_endpoint'] : null,
+            isset($data['button_icon']) ? (string) $data['button_icon'] : null,
             isset($data['client_id']) ? (string) $data['client_id'] : null,
             isset($data['client_secret']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['client_secret']) : null,
             isset($data['enabled']) ? (bool) $data['enabled'] : null,
             isset($data['idp_signing_cert_pem']) ? (string) $data['idp_signing_cert_pem'] : null,
             isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
             isset($data['provider']) ? (string) $data['provider'] : null,
+            isset($data['provider_slug']) ? (string) $data['provider_slug'] : null,
+            isset($data['require_pkce']) ? (bool) $data['require_pkce'] : null,
+            isset($data['scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scopes'])) : null,
+            isset($data['token_endpoint']) ? (string) $data['token_endpoint'] : null,
             isset($data['token_exchange']) ? TokenExchangeTrustRequest::fromArray((array) $data['token_exchange']) : null,
+            isset($data['userinfo_endpoint']) ? (string) $data['userinfo_endpoint'] : null,
         );
     }
 
@@ -76,11 +117,29 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        if ($this->allowTenantInheritance !== null) {
+            $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
+        }
         if ($this->allowedAlgorithms !== null) {
             $out['allowed_algorithms'] = $this->allowedAlgorithms;
         }
+        if ($this->allowedIssuerTenants !== null) {
+            $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
+        }
+        if ($this->appleKeyId !== null) {
+            $out['apple_key_id'] = $this->appleKeyId;
+        }
+        if ($this->appleTeamId !== null) {
+            $out['apple_team_id'] = $this->appleTeamId;
+        }
         if ($this->attributeMap !== null) {
             $out['attribute_map'] = $this->attributeMap;
+        }
+        if ($this->authorizationEndpoint !== null) {
+            $out['authorization_endpoint'] = $this->authorizationEndpoint;
+        }
+        if ($this->buttonIcon !== null) {
+            $out['button_icon'] = $this->buttonIcon;
         }
         if ($this->clientId !== null) {
             $out['client_id'] = $this->clientId;
@@ -100,8 +159,23 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
         if ($this->provider !== null) {
             $out['provider'] = $this->provider;
         }
+        if ($this->providerSlug !== null) {
+            $out['provider_slug'] = $this->providerSlug;
+        }
+        if ($this->requirePkce !== null) {
+            $out['require_pkce'] = $this->requirePkce;
+        }
+        if ($this->scopes !== null) {
+            $out['scopes'] = $this->scopes;
+        }
+        if ($this->tokenEndpoint !== null) {
+            $out['token_endpoint'] = $this->tokenEndpoint;
+        }
         if ($this->tokenExchange !== null) {
             $out['token_exchange'] = $this->tokenExchange->toArray();
+        }
+        if ($this->userinfoEndpoint !== null) {
+            $out['userinfo_endpoint'] = $this->userinfoEndpoint;
         }
 
         return $out;

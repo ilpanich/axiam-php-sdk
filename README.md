@@ -191,8 +191,8 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14, §15, §17, §19, §20,
-§22, §23, §24, §25, §26, §27 (including
+This SDK conforms to **contract 1.38**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+§15, §17, §19, §20, §22, §23, §24, §25, §26, §27 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8) — the binding,
 cross-language behavioral contract every
@@ -352,10 +352,11 @@ decision is ever cached, and no token material appears in any error output.
 
 ## OIDC / SSO relying-party helpers (CONTRACT.md §12)
 
-Nine operations, directly on `AxiamClient`, let this SDK act as an OIDC/OAuth2
+Thirteen operations, directly on `AxiamClient`, let this SDK act as an OIDC/OAuth2
 **relying party** against AXIAM's own OIDC provider — "Login with AXIAM"
 (authorization-code + PKCE), service-account `client_credentials`, token
-introspection/revocation, and upstream-IdP federation SSO:
+introspection/revocation, upstream-IdP federation SSO, and — as of **contract 1.38** —
+the public "Sign in with X" buttons:
 
 | Method | Wire call | What it does |
 |---|---|---|
@@ -368,6 +369,71 @@ introspection/revocation, and upstream-IdP federation SSO:
 | `revoke($token, ...)` | `POST /oauth2/revoke` | RFC 7009 — revoke a token (idempotent: any `200` is success). |
 | `ssoStart($federationConfigId, $redirectUri, ...)` | `POST /api/v1/auth/federation/oidc/start` | Step 1 of upstream-IdP federation SSO. |
 | `ssoComplete($state, $code)` | `POST /api/v1/auth/federation/oidc/callback` | Step 2 — session arrives as `Set-Cookie`, captured via the §4 cookie jar. |
+| `ssoProviders($orgId, $orgSlug, $tenantId, $tenantSlug)` | `GET /api/v1/auth/federation/providers` | Which "Sign in with X" buttons to render. Identifiers go in the **query string**, not a body. An **empty list is a success** — see below. |
+| `ssoStartOauth2($federationConfigId, $redirectUri, ...)` | `POST /api/v1/auth/federation/oauth2/start` | Step 1 through a **plain-OAuth2** upstream (GitHub, Facebook, `generic_oauth2`). PKCE is mandatory here and is generated and held **server-side**. |
+| `ssoCompleteOauth2($state, $code)` | `POST /api/v1/auth/federation/oauth2/callback` | Step 2 of the OAuth2 variant; same `Set-Cookie` session and §3 CSRF capture as `ssoComplete()`. |
+| `ssoCompleteHandoff($code)` | `POST /api/v1/auth/federation/handoff` | Redeems the single-use `axiam_handoff` code the SAML and Apple flows deliver. Valid 60 s, redeemable **once**; a `401` is terminal and is **never retried**. |
+
+### The four public login-provider operations, and their rules (contract 1.38)
+
+**An empty provider list is a success** (§12.1 note 9). An unknown organization, a known
+one with nothing configured, and a request naming no workspace at all *all* answer `200`
+with an empty array. `ssoProviders()` returns every one of them as an ordinary result and
+never throws: the endpoint is deliberately shaped so it cannot be used to enumerate
+organization or tenant slugs, and telling the three apart client-side would rebuild that
+oracle. For the same reason `ssoProviders()` is the one federation operation that does
+**not** throw client-side when no workspace resolves — it sends the request. You learn you
+named the workspace wrongly at the start operations, where every failure is a uniform
+`401`.
+
+**`protocol` selects which start operation to call** (§12.1 note 10) — never
+`providerKind`, which is branding:
+
+| `$provider->protocol` | call |
+|---|---|
+| `FederationProvider::PROTOCOL_OIDC_CONNECT` | `ssoStart()` |
+| `FederationProvider::PROTOCOL_OAUTH2` | `ssoStartOauth2()` |
+| `FederationProvider::PROTOCOL_SAML` | the SAML login endpoint — not a §12 vocabulary operation |
+
+The server refuses a mismatch with `400` rather than accepting it silently, so a client
+that assumes OIDC fails on every GitHub button. An `OAuth2` provider also issues **no ID
+token**: the server authenticates by calling a configured userinfo endpoint, so there is no
+signature, no `nonce` and no `aud` — a distinction a UI rendering these buttons should make
+visible.
+
+**`FederationProvider` is modelled faithfully** — `id`, `providerKind`, `displayName`,
+`protocol`, `hasBundledMark`, `inherited`, and the nullable `buttonIcon` (a `data:` URL,
+`null` for most providers). Inheritance from the organization is resolved **server-side**
+(§12.1 note 13): pass back the workspace and the `id` `ssoProviders()` gave you, and compute
+nothing locally. `inherited` is reported so an admin surface can show that a provider is not
+the tenant's to edit.
+
+**A `400` from a start call is a configuration refusal** (§12.1 rule 12a). On the SAML and
+Apple flows the identity provider never validates the SPA `$redirectUri`, so the server
+confines it to its own issuer origin plus `AXIAM__AUTH__SSO_SPA_ORIGINS`. That refusal
+surfaces as **`NetworkError`** — §2's `400` row, the taxonomy's
+configuration/programming-error member, as distinct from the `AuthError` a `401` gets — and
+is not retried, because the same origin will be refused again. Never build a `$redirectUri`
+out of anything the identity provider supplied.
+
+```php
+use Axiam\Sdk\Oidc\FederationProvider;
+use Axiam\Sdk\Oidc\FederationProviderList;
+
+$providers = $client->ssoProviders(orgSlug: $orgSlug)->providers;
+// An empty list is normal: render a password form, not an error.
+foreach ($providers as $provider) {
+    match ($provider->protocol) {
+        FederationProvider::PROTOCOL_OIDC_CONNECT => $client->ssoStart($provider->id, $redirectUri),
+        FederationProvider::PROTOCOL_OAUTH2 => $client->ssoStartOauth2($provider->id, $redirectUri),
+        default => null, // Saml: use the SAML login endpoint
+    };
+}
+
+// SAML / Apple come back through a handoff code on your own callback route.
+$code = $_GET[FederationProviderList::HANDOFF_QUERY_PARAM];
+$session = $client->ssoCompleteHandoff($code); // once, never retried
+```
 
 ```php
 use Axiam\Sdk\AxiamClient;

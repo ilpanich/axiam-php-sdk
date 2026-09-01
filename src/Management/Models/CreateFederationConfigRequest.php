@@ -20,27 +20,71 @@ final class CreateFederationConfigRequest implements \JsonSerializable
      *     external IdP.
      * @param string $protocol Federation protocol: "OidcConnect" or "Saml".
      * @param string $provider Display name for the identity provider (e.g., "Google", "Okta").
+     * @param bool|null $allowTenantInheritance Whether tenants of this organization may
+     *     inherit this provider. Only meaningful on a config in the organization-scope tenant.
+     *     (optional)
      * @param list<string>|null $allowedAlgorithms Accepted JWT signing algorithms (OIDC) or
      *     signature algorithms (SAML). Defaults to `["RS256"]` when not provided (CQ-B40/REQ-14
      *     AC-5). (optional)
+     * @param list<string>|null $allowedIssuerTenants External IdP tenant identifiers accepted
+     *     when the provider publishes a templated issuer (Entra ID's `{tenantid}`). (optional)
+     * @param string|null $appleKeyId Apple Key ID of the `.p8` signing key (10 characters).
+     *     With both Apple identifiers set, `client_secret` is the `.p8` key itself and AXIAM mints
+     *     a fresh five-minute client secret per token exchange. (optional)
+     * @param string|null $appleTeamId Apple Team ID (10 characters). (optional)
      * @param mixed $attributeMap Maps external IdP attributes to AXIAM user fields. (optional)
+     * @param string|null $authorizationEndpoint OAuth2-variant authorization endpoint.
+     *     Required for `OAuth2`. (optional)
+     * @param string|null $buttonIcon Sign-in-button icon for a **generic** provider, as a
+     *     base64 raster data URL (`data:image/png;base64,…`), already cropped to
+     *     `PROVIDER_ICON_SIZE_PX` square by the client. Refused for the branded kinds: Google,
+     *     Apple and Microsoft all publish sign-in-button rules that require their own mark, so
+     *     substituting a picture would produce a button that breaks the guidelines it exists to
+     *     follow. (optional)
      * @param string|null $idpSigningCertPem PEM-encoded X.509 certificate for verifying SAML
      *     assertions or OIDC signatures (CQ-B40/REQ-14 AC-5). Required for SAML configs.
      *     (optional)
      * @param string|null $metadataUrl OIDC discovery URL or SAML metadata URL. (optional)
+     * @param string|null $providerKind Which provider this is: `google`, `github`, `facebook`,
+     *     `apple`, `microsoft`, `generic_oidc`, `generic_oauth2` or `generic_saml`. Selects the
+     *     sign-in button's branding, the per-kind defaults, and the key on which a tenant config
+     *     overrides an inherited organization one. Omitted ⇒ derived from `protocol`, which is
+     *     what every config written before this field existed means. (optional)
+     * @param string|null $providerSlug Operator-chosen identifier, **required** for the
+     *     `generic_*` kinds and refused for the branded ones. (optional)
+     * @param bool|null $requirePkce Send PKCE on the authorization request. Forced on for
+     *     `OAuth2`. (optional)
+     * @param list<string>|null $scopes Scopes to request. Omitted or empty ⇒ the per-kind
+     *     default. (optional)
+     * @param string|null $tokenEndpoint OAuth2-variant token endpoint. Required for `OAuth2`.
+     *     (optional)
      * @param TokenExchangeTrustRequest|null $tokenExchange the server's `token_exchange` field
      *     (optional)
+     * @param string|null $userinfoEndpoint OAuth2-variant userinfo endpoint. Required for
+     *     `OAuth2`. (optional)
      */
     public function __construct(
         public readonly string $clientId,
         public readonly \Axiam\Sdk\Core\Sensitive $clientSecret,
         public readonly string $protocol,
         public readonly string $provider,
+        public readonly ?bool $allowTenantInheritance = null,
         public readonly ?array $allowedAlgorithms = null,
+        public readonly ?array $allowedIssuerTenants = null,
+        public readonly ?string $appleKeyId = null,
+        public readonly ?string $appleTeamId = null,
         public readonly mixed $attributeMap = null,
+        public readonly ?string $authorizationEndpoint = null,
+        public readonly ?string $buttonIcon = null,
         public readonly ?string $idpSigningCertPem = null,
         public readonly ?string $metadataUrl = null,
+        public readonly ?string $providerKind = null,
+        public readonly ?string $providerSlug = null,
+        public readonly ?bool $requirePkce = null,
+        public readonly ?array $scopes = null,
+        public readonly ?string $tokenEndpoint = null,
         public readonly ?TokenExchangeTrustRequest $tokenExchange = null,
+        public readonly ?string $userinfoEndpoint = null,
     ) {
     }
 
@@ -55,11 +99,23 @@ final class CreateFederationConfigRequest implements \JsonSerializable
             new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'client_secret', self::class)),
             (string) ModelDecode::need($data, 'protocol', self::class),
             (string) ModelDecode::need($data, 'provider', self::class),
+            isset($data['allow_tenant_inheritance']) ? (bool) $data['allow_tenant_inheritance'] : null,
             isset($data['allowed_algorithms']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_algorithms'])) : null,
+            isset($data['allowed_issuer_tenants']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_issuer_tenants'])) : null,
+            isset($data['apple_key_id']) ? (string) $data['apple_key_id'] : null,
+            isset($data['apple_team_id']) ? (string) $data['apple_team_id'] : null,
             isset($data['attribute_map']) ? $data['attribute_map'] : null,
+            isset($data['authorization_endpoint']) ? (string) $data['authorization_endpoint'] : null,
+            isset($data['button_icon']) ? (string) $data['button_icon'] : null,
             isset($data['idp_signing_cert_pem']) ? (string) $data['idp_signing_cert_pem'] : null,
             isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
+            isset($data['provider_kind']) ? (string) $data['provider_kind'] : null,
+            isset($data['provider_slug']) ? (string) $data['provider_slug'] : null,
+            isset($data['require_pkce']) ? (bool) $data['require_pkce'] : null,
+            isset($data['scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scopes'])) : null,
+            isset($data['token_endpoint']) ? (string) $data['token_endpoint'] : null,
             isset($data['token_exchange']) ? TokenExchangeTrustRequest::fromArray((array) $data['token_exchange']) : null,
+            isset($data['userinfo_endpoint']) ? (string) $data['userinfo_endpoint'] : null,
         );
     }
 
@@ -78,11 +134,29 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         $out['client_secret'] = $this->clientSecret;
         $out['protocol'] = $this->protocol;
         $out['provider'] = $this->provider;
+        if ($this->allowTenantInheritance !== null) {
+            $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
+        }
         if ($this->allowedAlgorithms !== null) {
             $out['allowed_algorithms'] = $this->allowedAlgorithms;
         }
+        if ($this->allowedIssuerTenants !== null) {
+            $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
+        }
+        if ($this->appleKeyId !== null) {
+            $out['apple_key_id'] = $this->appleKeyId;
+        }
+        if ($this->appleTeamId !== null) {
+            $out['apple_team_id'] = $this->appleTeamId;
+        }
         if ($this->attributeMap !== null) {
             $out['attribute_map'] = $this->attributeMap;
+        }
+        if ($this->authorizationEndpoint !== null) {
+            $out['authorization_endpoint'] = $this->authorizationEndpoint;
+        }
+        if ($this->buttonIcon !== null) {
+            $out['button_icon'] = $this->buttonIcon;
         }
         if ($this->idpSigningCertPem !== null) {
             $out['idp_signing_cert_pem'] = $this->idpSigningCertPem;
@@ -90,8 +164,26 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         if ($this->metadataUrl !== null) {
             $out['metadata_url'] = $this->metadataUrl;
         }
+        if ($this->providerKind !== null) {
+            $out['provider_kind'] = $this->providerKind;
+        }
+        if ($this->providerSlug !== null) {
+            $out['provider_slug'] = $this->providerSlug;
+        }
+        if ($this->requirePkce !== null) {
+            $out['require_pkce'] = $this->requirePkce;
+        }
+        if ($this->scopes !== null) {
+            $out['scopes'] = $this->scopes;
+        }
+        if ($this->tokenEndpoint !== null) {
+            $out['token_endpoint'] = $this->tokenEndpoint;
+        }
         if ($this->tokenExchange !== null) {
             $out['token_exchange'] = $this->tokenExchange->toArray();
+        }
+        if ($this->userinfoEndpoint !== null) {
+            $out['userinfo_endpoint'] = $this->userinfoEndpoint;
         }
 
         return $out;
