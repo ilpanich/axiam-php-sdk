@@ -2150,6 +2150,9 @@ final class OidcClient
         );
     }
 
+    /**
+     * @param array<string, mixed> $body the request body, JSON-encoded by Guzzle
+     */
     private function postJson(string $path, array $body, string $context): ResponseInterface
     {
         try {
