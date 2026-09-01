@@ -31,6 +31,7 @@ use Axiam\Sdk\Oidc\PushedAuthorizationRequest;
 use Axiam\Sdk\Oidc\RequestedPermission;
 use Axiam\Sdk\Oidc\RequestingPartyToken;
 use Axiam\Sdk\Oidc\ResourceSet;
+use Axiam\Sdk\Oidc\FederationProviderList;
 use Axiam\Sdk\Oidc\SsoCompleteResult;
 use Axiam\Sdk\Oidc\SsoStartResult;
 use Axiam\Sdk\Oidc\UmaChallenge;
@@ -1483,6 +1484,74 @@ final class AxiamClient
     public function ssoComplete(string $state, string $code): SsoCompleteResult
     {
         return $this->oidc->ssoComplete($state, $code);
+    }
+
+    /**
+     * `GET /api/v1/auth/federation/providers` (CONTRACT.md §12.1, contract 1.38) —
+     * which "Sign in with X" buttons to render for a workspace. The identifiers
+     * travel as **query** parameters; this is a `GET` and sends no body.
+     *
+     * **An empty list is a success.** An unknown organization, a known one with
+     * nothing configured, and a request naming no workspace at all all answer `200`
+     * with an empty array (§12.1 note 9), precisely so the endpoint cannot be used to
+     * enumerate organization or tenant slugs. For the same reason this is the one
+     * federation operation that does **not** throw client-side when no workspace
+     * resolves.
+     */
+    public function ssoProviders(
+        ?string $orgId = null,
+        ?string $orgSlug = null,
+        ?string $tenantId = null,
+        ?string $tenantSlug = null,
+    ): FederationProviderList {
+        return $this->oidc->ssoProviders($orgId, $orgSlug, $tenantId, $tenantSlug);
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/oauth2/start` (CONTRACT.md §12.1, contract 1.38)
+     * — step 1 of a login through a **plain-OAuth2** upstream (GitHub, Facebook,
+     * `generic_oauth2`). Call this, rather than {@see self::ssoStart()}, exactly when
+     * the provider's `protocol` is `OAuth2` (§12.1 note 10).
+     *
+     * PKCE is mandatory on this path and is generated and held **server-side**
+     * (§12.1 note 11). A `400` can mean the `$redirectUri` is not on an origin the
+     * deployment accepts (§12.1 rule 12a) and surfaces as `NetworkError`; it is not
+     * retried.
+     */
+    public function ssoStartOauth2(
+        string $federationConfigId,
+        string $redirectUri,
+        ?string $tenantId = null,
+        ?string $tenantSlug = null,
+        ?string $orgId = null,
+        ?string $orgSlug = null,
+    ): SsoStartResult {
+        return $this->oidc->ssoStartOauth2($federationConfigId, $redirectUri, $tenantId, $tenantSlug, $orgId, $orgSlug);
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/oauth2/callback` (CONTRACT.md §12.1, contract
+     * 1.38) — step 2 of a plain-OAuth2 login. Same `Set-Cookie` session and same §3
+     * CSRF capture as {@see self::ssoComplete()}. §12.4 does not apply: an `OAuth2`
+     * provider issues no ID token at all (§12.1 note 11).
+     */
+    public function ssoCompleteOauth2(string $state, string $code): SsoCompleteResult
+    {
+        return $this->oidc->ssoCompleteOauth2($state, $code);
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/handoff` (CONTRACT.md §12.1, contract 1.38) —
+     * redeem the single-use `axiam_handoff` code the SAML and Apple flows deliver.
+     *
+     * Valid 60 s and redeemable **once**. Redeem it from the same origin,
+     * immediately, and never retry a failed redemption: a `401` is terminal, and this
+     * makes exactly one wire call so that it cannot become a retry by accident
+     * (§12.1 note 12).
+     */
+    public function ssoCompleteHandoff(string $code): SsoCompleteResult
+    {
+        return $this->oidc->ssoCompleteHandoff($code);
     }
 
     // ------------------------------------------------------------------

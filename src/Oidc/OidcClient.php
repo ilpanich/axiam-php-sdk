@@ -55,6 +55,18 @@ final class OidcClient
     public const SSO_START_PATH = '/api/v1/auth/federation/oidc/start';
     public const SSO_CALLBACK_PATH = '/api/v1/auth/federation/oidc/callback';
 
+    /** Path of the public provider-listing endpoint (contract 1.38). */
+    public const SSO_PROVIDERS_PATH = '/api/v1/auth/federation/providers';
+
+    /** Path of the plain-OAuth2 federation step-1 endpoint (contract 1.38). */
+    public const SSO_OAUTH2_START_PATH = '/api/v1/auth/federation/oauth2/start';
+
+    /** Path of the plain-OAuth2 federation step-2 (callback) endpoint (contract 1.38). */
+    public const SSO_OAUTH2_CALLBACK_PATH = '/api/v1/auth/federation/oauth2/callback';
+
+    /** Path of the handoff-code redemption endpoint (contract 1.38). */
+    public const SSO_HANDOFF_PATH = '/api/v1/auth/federation/handoff';
+
     /**
      * Minimum — and default — discovery-cache TTL, in seconds. CONTRACT.md §12.3 rule 6
      * sets a floor of 5 minutes; a smaller configured value is raised to it.
@@ -1902,6 +1914,242 @@ final class OidcClient
      *
      * @param array<string,string> $body
      */
+    // -------------------------------------------------------------------------
+    // 10-13. Public "Sign in with X" login providers (contract 1.38)
+    // -------------------------------------------------------------------------
+
+    /**
+     * `GET /api/v1/auth/federation/providers` (§12.1) — which "Sign in with X"
+     * buttons to render for a workspace.
+     *
+     * The identifiers travel as **query** parameters; this is a `GET` and sends no
+     * body. The neighbouring start operations take the same four in a JSON body,
+     * and the two are one copy-paste apart.
+     *
+     * **An empty list is a success.** An unknown organization, a known one with
+     * nothing configured, and a request naming no workspace at all all answer
+     * `200` with an empty `providers` array (§12.1 note 9). Every one of them comes
+     * back as an ordinary result and nothing here synthesises a not-found: the
+     * endpoint is deliberately shaped so it cannot be used to enumerate
+     * organization or tenant slugs, and an SDK that reintroduced the distinction
+     * would reintroduce the oracle. A caller learns it named the workspace wrongly
+     * at the start operations, where every failure is a uniform `401`.
+     *
+     * For the same reason this is the one federation operation that does **not**
+     * throw client-side when no workspace resolves.
+     */
+    public function ssoProviders(
+        ?string $orgId = null,
+        ?string $orgSlug = null,
+        ?string $tenantId = null,
+        ?string $tenantSlug = null,
+    ): FederationProviderList {
+        $resolvedTenantId = $tenantId ?? $this->tenantId;
+        $resolvedTenantSlug = $tenantSlug ?? $this->tenantSlugForSso ?? $this->session->tenant();
+        $resolvedOrgId = $orgId ?? $this->orgId;
+        $resolvedOrgSlug = $orgSlug ?? $this->orgSlug;
+
+        $query = [];
+        if ($resolvedOrgId !== null) {
+            $query['org_id'] = $resolvedOrgId;
+        } elseif ($resolvedOrgSlug !== null) {
+            $query['org_slug'] = $resolvedOrgSlug;
+        }
+        if ($resolvedTenantId !== null) {
+            $query['tenant_id'] = $resolvedTenantId;
+        } elseif ($resolvedTenantSlug !== '') {
+            $query['tenant_slug'] = $resolvedTenantSlug;
+        }
+
+        try {
+            $response = $this->http->get(self::SSO_PROVIDERS_PATH, ['query' => $query]);
+        } catch (RequestException $e) {
+            throw $this->mapRequestException($e, 'ssoProviders request failed', oauth2: false);
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, 'ssoProviders request failed');
+        }
+
+        $wire = json_decode((string) $response->getBody(), true);
+        if (!is_array($wire)) {
+            throw NetworkError::fromResponse($response, 'ssoProviders: malformed response body');
+        }
+
+        $rawProviders = $wire['providers'] ?? [];
+        if (!is_array($rawProviders)) {
+            throw NetworkError::fromResponse($response, 'ssoProviders: malformed providers list');
+        }
+
+        $providers = [];
+        foreach ($rawProviders as $entry) {
+            if (!is_array($entry)) {
+                throw NetworkError::fromResponse($response, 'ssoProviders: malformed provider entry');
+            }
+            $providers[] = new FederationProvider(
+                id: (string) ($entry['id'] ?? ''),
+                providerKind: (string) ($entry['provider_kind'] ?? ''),
+                displayName: (string) ($entry['display_name'] ?? ''),
+                protocol: (string) ($entry['protocol'] ?? ''),
+                hasBundledMark: (bool) ($entry['has_bundled_mark'] ?? false),
+                inherited: (bool) ($entry['inherited'] ?? false),
+                buttonIcon: is_string($entry['button_icon'] ?? null) ? $entry['button_icon'] : null,
+            );
+        }
+
+        return new FederationProviderList($providers);
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/oauth2/start` (§12.1) — step 1 of a login
+     * through a **plain-OAuth2** upstream (GitHub, Facebook, `generic_oauth2`).
+     *
+     * Call this, rather than {@see self::ssoStart()}, exactly when the provider's
+     * `protocol` is {@see FederationProvider::PROTOCOL_OAUTH2} (§12.1 note 10). The
+     * server refuses a mismatch with `400` rather than accepting it silently, so a
+     * client that assumes OIDC fails on every GitHub button.
+     *
+     * PKCE is mandatory on this path and is generated and stored **server-side**;
+     * nothing about it appears in the request or the response (§12.1 note 11).
+     *
+     * A `400` here can mean the `$redirectUri` is not on an origin the deployment
+     * accepts (§12.1 rule 12a). §2's `400` row makes that a {@see NetworkError} —
+     * this taxonomy's configuration/programming-error member, as distinct from the
+     * {@see AuthError} a `401` gets. It is not retried.
+     *
+     * @throws AuthError client-side, without a wire call, when tenant or org context
+     *                    cannot be resolved.
+     */
+    public function ssoStartOauth2(
+        string $federationConfigId,
+        string $redirectUri,
+        ?string $tenantId = null,
+        ?string $tenantSlug = null,
+        ?string $orgId = null,
+        ?string $orgSlug = null,
+    ): SsoStartResult {
+        $resolvedTenantId = $tenantId ?? $this->tenantId;
+        $resolvedTenantSlug = $tenantSlug ?? $this->tenantSlugForSso ?? $this->session->tenant();
+        $resolvedOrgId = $orgId ?? $this->orgId;
+        $resolvedOrgSlug = $orgSlug ?? $this->orgSlug;
+
+        if ($resolvedTenantId === null && $resolvedTenantSlug === '') {
+            throw new AuthError(
+                'ssoStartOauth2 requires tenant context: pass tenantId or tenantSlug, or construct the client with one (CONTRACT.md §5.1).',
+            );
+        }
+        if ($resolvedOrgId === null && $resolvedOrgSlug === null) {
+            throw new AuthError(
+                'ssoStartOauth2 requires organization context: pass orgId or orgSlug, or construct the client with one (CONTRACT.md §5.1).',
+            );
+        }
+
+        $body = [
+            'federation_config_id' => $federationConfigId,
+            'redirect_uri' => $redirectUri,
+        ];
+        if ($resolvedTenantId !== null) {
+            $body['tenant_id'] = $resolvedTenantId;
+        } else {
+            $body['tenant_slug'] = $resolvedTenantSlug;
+        }
+        if ($resolvedOrgId !== null) {
+            $body['org_id'] = $resolvedOrgId;
+        } else {
+            $body['org_slug'] = $resolvedOrgSlug;
+        }
+        // No PKCE anywhere in this body, and there must not be (§12.1 note 11).
+
+        $response = $this->postJson(self::SSO_OAUTH2_START_PATH, $body, 'ssoStartOauth2 request failed');
+        $wire = json_decode((string) $response->getBody(), true);
+        if (!is_array($wire) || !is_string($wire['authorize_url'] ?? null) || !is_string($wire['state'] ?? null)) {
+            throw NetworkError::fromResponse($response, 'ssoStartOauth2: malformed response body');
+        }
+
+        return new SsoStartResult(
+            authorizeUrl: $wire['authorize_url'],
+            state: $wire['state'],
+            expiresInSecs: (int) ($wire['expires_in_secs'] ?? 0),
+        );
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/oauth2/callback` (§12.1) — step 2 of a
+     * plain-OAuth2 login.
+     *
+     * The session arrives as **`Set-Cookie`** (§12.1 note 6) through the same §4
+     * cookie jar {@see self::ssoComplete()} uses, and the §3 CSRF token is captured
+     * the same way.
+     *
+     * §12.4 does not apply: an `OAuth2` provider issues no ID token, so there is
+     * nothing to validate — the server authenticated the user by calling a
+     * configured userinfo endpoint with the access token it had just received
+     * (§12.1 note 11).
+     */
+    public function ssoCompleteOauth2(string $state, string $code): SsoCompleteResult
+    {
+        return $this->completeFederationSession(
+            self::SSO_OAUTH2_CALLBACK_PATH,
+            ['state' => $state, 'code' => $code],
+            'ssoCompleteOauth2',
+        );
+    }
+
+    /**
+     * `POST /api/v1/auth/federation/handoff` (§12.1) — redeem the single-use code
+     * the SAML and Apple flows deliver.
+     *
+     * Those two protocols return **cross-site**, so the server cannot set
+     * `SameSite=Strict` session cookies on that response. It instead redirects the
+     * browser to the SPA's callback URL with a
+     * {@see FederationProviderList::HANDOFF_QUERY_PARAM} query parameter; this call
+     * posts that code back same-origin, and *this* response is the one that carries
+     * the cookies (§12.1 note 12).
+     *
+     * **The code is gone either way.** It is valid for
+     * {@see FederationProviderList::HANDOFF_CODE_TTL_SECONDS} seconds and redeemable
+     * **once**. Redeem it from the same origin, immediately, and never retry a
+     * failed redemption: a `401` is terminal, and this makes exactly one wire call
+     * so that it cannot become a retry by accident. Unknown, expired and
+     * already-redeemed all answer the same `401`, deliberately.
+     */
+    public function ssoCompleteHandoff(string $code): SsoCompleteResult
+    {
+        return $this->completeFederationSession(
+            self::SSO_HANDOFF_PATH,
+            ['code' => $code],
+            'ssoCompleteHandoff',
+        );
+    }
+
+    /**
+     * The shared body of the two session-establishing federation POSTs: one wire
+     * call, the §2 status mapping on anything but success, and the same §4 cookie
+     * jar / §3 CSRF capture `ssoComplete()` performs.
+     *
+     * @param array<string, string> $body
+     */
+    private function completeFederationSession(string $path, array $body, string $operation): SsoCompleteResult
+    {
+        $response = $this->postJson($path, $body, $operation . ' request failed');
+        $this->session->captureCsrfTokenFromResponse($response);
+
+        $wire = json_decode((string) $response->getBody(), true);
+        if (
+            !is_array($wire)
+            || !is_string($wire['user_id'] ?? null)
+            || !is_string($wire['session_id'] ?? null)
+            || !is_string($wire['redirect_uri'] ?? null)
+        ) {
+            throw NetworkError::fromResponse($response, $operation . ': malformed response body');
+        }
+
+        return new SsoCompleteResult(
+            userId: $wire['user_id'],
+            sessionId: $wire['session_id'],
+            expiresIn: (int) ($wire['expires_in'] ?? 0),
+            redirectUri: $wire['redirect_uri'],
+        );
+    }
+
     private function postJson(string $path, array $body, string $context): ResponseInterface
     {
         try {
