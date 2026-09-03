@@ -2377,6 +2377,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'refresh_token_lifetime_secs' => 1,
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'webauthn' => [
+                'webauthn_user_verification' => 'example',
+            ],
         ];
 
         $model = Models\SecuritySettings::fromArray($wire);
@@ -2510,6 +2513,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'webauthn_user_verification' => 'example',
         ];
 
         $model = Models\SetOrgSettings::fromArray($wire);
@@ -2671,6 +2675,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'webauthn_user_verification' => 'example',
         ];
 
         $model = Models\TenantSettingsOverride::fromArray($wire);
@@ -3175,6 +3180,23 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `WebauthnPolicy`: a full wire object survives decode and re-render. */
+    public function testWebauthnPolicyRoundTrips(): void
+    {
+        $wire = [
+            'webauthn_user_verification' => 'example',
+        ];
+
+        $model = Models\WebauthnPolicy::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'WebauthnPolicy decoded a field it cannot render again',
+        );
+    }
+
     /** `WebhookResponse`: a full wire object survives decode and re-render. */
     public function testWebhookResponseRoundTrips(): void
     {
@@ -3219,6 +3241,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(147, $cases);
+        self::assertCount(148, $cases);
     }
 }
