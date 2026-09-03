@@ -3186,6 +3186,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'refresh_token_lifetime_secs' => 1,
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'webauthn' => [
+                'webauthn_user_verification' => 'example',
+            ],
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->settings()->getOrg();
@@ -3247,6 +3250,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'refresh_token_lifetime_secs' => 1,
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'webauthn' => [
+                'webauthn_user_verification' => 'example',
+            ],
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->settings()->setOrg(new Models\SetOrgSettings(1, true, 1, 1, true, true, 1.5, 1, 1, 1, 1, 1, true, 1, 1, 1, true, true, true, true));
@@ -3308,6 +3314,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'refresh_token_lifetime_secs' => 1,
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'webauthn' => [
+                'webauthn_user_verification' => 'example',
+            ],
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->settings()->getEffective();
@@ -3369,6 +3378,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'refresh_token_lifetime_secs' => 1,
             ],
             'updated_at' => '2026-08-26T00:00:00Z',
+            'webauthn' => [
+                'webauthn_user_verification' => 'example',
+            ],
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->settings()->setEffective(new Models\TenantSettingsOverride());
@@ -3410,6 +3422,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'webauthn_user_verification' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->settings()->getTenantOverride();
@@ -3451,6 +3464,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'webauthn_user_verification' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->settings()->setTenantOverride(new Models\TenantSettingsOverride());

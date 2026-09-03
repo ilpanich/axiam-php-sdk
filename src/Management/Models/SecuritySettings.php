@@ -29,6 +29,7 @@ final class SecuritySettings implements \JsonSerializable
      * @param string $scopeId the server's `scope_id` field
      * @param TokenPolicy $token the server's `token` field
      * @param string $updatedAt the server's `updated_at` field
+     * @param WebauthnPolicy $webauthn the server's `webauthn` field
      */
     public function __construct(
         public readonly CertificatePolicy $certificate,
@@ -45,6 +46,7 @@ final class SecuritySettings implements \JsonSerializable
         public readonly string $scopeId,
         public readonly TokenPolicy $token,
         public readonly string $updatedAt,
+        public readonly WebauthnPolicy $webauthn,
     ) {
     }
 
@@ -69,6 +71,7 @@ final class SecuritySettings implements \JsonSerializable
             (string) ModelDecode::need($data, 'scope_id', self::class),
             TokenPolicy::fromArray((array) ModelDecode::need($data, 'token', self::class)),
             (string) ModelDecode::need($data, 'updated_at', self::class),
+            WebauthnPolicy::fromArray((array) ModelDecode::need($data, 'webauthn', self::class)),
         );
     }
 
@@ -97,6 +100,7 @@ final class SecuritySettings implements \JsonSerializable
         $out['scope_id'] = $this->scopeId;
         $out['token'] = $this->token->toArray();
         $out['updated_at'] = $this->updatedAt;
+        $out['webauthn'] = $this->webauthn->toArray();
 
         return $out;
     }

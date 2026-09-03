@@ -57,6 +57,8 @@ final class TenantSettingsOverride implements \JsonSerializable
      * @param bool|null $requireLowercase the server's `require_lowercase` field (optional)
      * @param bool|null $requireSymbols the server's `require_symbols` field (optional)
      * @param bool|null $requireUppercase the server's `require_uppercase` field (optional)
+     * @param string|null $webauthnUserVerification the server's `webauthn_user_verification`
+     *     field (optional)
      */
     public function __construct(
         public readonly ?int $accessTokenLifetimeSecs = null,
@@ -83,6 +85,7 @@ final class TenantSettingsOverride implements \JsonSerializable
         public readonly ?bool $requireLowercase = null,
         public readonly ?bool $requireSymbols = null,
         public readonly ?bool $requireUppercase = null,
+        public readonly ?string $webauthnUserVerification = null,
     ) {
     }
 
@@ -117,6 +120,7 @@ final class TenantSettingsOverride implements \JsonSerializable
             isset($data['require_lowercase']) ? (bool) $data['require_lowercase'] : null,
             isset($data['require_symbols']) ? (bool) $data['require_symbols'] : null,
             isset($data['require_uppercase']) ? (bool) $data['require_uppercase'] : null,
+            isset($data['webauthn_user_verification']) ? (string) $data['webauthn_user_verification'] : null,
         );
     }
 
@@ -202,6 +206,9 @@ final class TenantSettingsOverride implements \JsonSerializable
         }
         if ($this->requireUppercase !== null) {
             $out['require_uppercase'] = $this->requireUppercase;
+        }
+        if ($this->webauthnUserVerification !== null) {
+            $out['webauthn_user_verification'] = $this->webauthnUserVerification;
         }
 
         return $out;
