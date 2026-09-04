@@ -8041,6 +8041,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#property_updatedAt"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SecuritySettings\u003A\u003A\u0024webauthn",
+            "name": "webauthn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#property_webauthn"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ServiceAccountCreatedResponse",
             "name": "ServiceAccountCreatedResponse",
             "summary": "Response\u0020for\u0020service\u0020account\u0020creation\u0020\u2014\u0020includes\u0020the\u0020one\u002Dtime\u0020plaintext\u0020secret.",
@@ -8400,6 +8405,11 @@ Search.appendIndex(
             "name": "opaqueSuite",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_opaqueSuite"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024webauthnUserVerification",
+            "name": "webauthnUserVerification",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_webauthnUserVerification"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SettingsScope",
             "name": "SettingsScope",
@@ -8835,6 +8845,11 @@ Search.appendIndex(
             "name": "requireUppercase",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_requireUppercase"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024webauthnUserVerification",
+            "name": "webauthnUserVerification",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_webauthnUserVerification"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantStatus",
             "name": "TenantStatus",
@@ -9995,6 +10010,36 @@ Search.appendIndex(
             "name": "unknownAaguid",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-WebauthnAttestationPolicy.html#property_unknownAaguid"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnPolicy",
+            "name": "WebauthnPolicy",
+            "summary": "WebAuthn\u0020ceremony\u0020policy.\u0020One\u0020field\u0020today.\u0020It\u0020is\u0020a\u0020struct\u0020rather\u0020than\u0020a\u0020bare\u0020field\u0020on\n\u005B\u0060SecuritySettings\u0060\u005D\u0020so\u0020that\u0020the\u0020next\u0020WebAuthn\u0020control\u0020has\u0020an\u0020obvious\u0020home,\u0020and\u0020so\u0020the\u0020admin\nUI\u0020can\u0020group\u0020them.\u0020The\u0020\u002Aattestation\u002A\u0020policy\u0020is\u0020deliberately\u0020not\u0020here\u003A\u0020it\u0020lives\u0020in\n\u005B\u0060crate\u003A\u003Amodels\u003A\u003Awebauthn_policy\u003A\u003AWebauthnAttestationPolicy\u0060\u005D,\u0020is\u0020tenant\u002Donly,\u0020and\u0020cannot\njoin\u0020this\u0020model\u0020because\u0020AAGUID\u0020allow\/block\u0020lists\u0020have\u0020no\u0020\u0022more\u0020restrictive\u0020than\u0022\u0020ordering\u0020to\nvalidate\u0020an\u0020override\u0020against.\u0020User\u0020verification\u0020does,\u0020so\u0020it\u0020can.",
+            "url": "classes/Axiam-Sdk-Management-Models-WebauthnPolicy.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnPolicy\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020WebauthnPolicy.",
+            "url": "classes/Axiam-Sdk-Management-Models-WebauthnPolicy.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnPolicy\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020WebauthnPolicy\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-WebauthnPolicy.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnPolicy\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-WebauthnPolicy.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnPolicy\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-WebauthnPolicy.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnPolicy\u003A\u003A\u0024webauthnUserVerification",
+            "name": "webauthnUserVerification",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-WebauthnPolicy.html#property_webauthnUserVerification"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebhookResponse",
             "name": "WebhookResponse",
