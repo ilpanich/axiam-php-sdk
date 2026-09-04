@@ -157,9 +157,12 @@ jobs:
           fi
           echo "TLS-bypass gate passed — no disallowed usage found."
 
+  # R-2 (T-235): runs on BOTH triggers. It was `pull_request`-only, so a stale
+  # §27 surface reaching a tag by any route other than `scripts/mass-tag.sh`
+  # met no repository-side gate at all — and the version it shipped under can
+  # never be reused.
   management-drift-check:
     name: §27 management surface drift-check
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -295,7 +298,7 @@ jobs:
     # speak for. `composer.lock` records the resolved commit hash, which is
     # what makes a rewritten tag visible to a consumer.
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    needs: [build-test, verify-tag-on-main]
+    needs: [build-test, management-drift-check, verify-tag-on-main]
     runs-on: ubuntu-latest
     permissions:
       contents: read
