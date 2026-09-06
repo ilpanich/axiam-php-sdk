@@ -43,6 +43,7 @@ final class OidcConfiguration
      * @param string|null $end_session_endpoint OIDC RP-Initiated Logout 1.0 endpoint, used by `logoutUrl` (§12.7.2 rule 1). `null` for the same reason, and the rule is stricter here: §12.7.2 rule 1 forbids synthesising this URL from the issuer.
      * @param bool $backchannel_logout_supported Whether the OP sends back-channel logout tokens.
      * @param bool $backchannel_logout_session_supported Whether those logout tokens carry `sid`. AXIAM always sends it.
+     * @param MtlsEndpointAliases|null $mtls_endpoint_aliases RFC 8705 §5 endpoint aliases for a deployment that terminates mutual TLS on a host other than the issuer's own (contract 1.40, §21.3 rule 2). `null` means "no separate host", **not** "mTLS unsupported": a deployment running `client_auth = optional` on one listener serves both populations at the conventional endpoints and correctly publishes nothing here, so a client treating absence as an error would refuse the most common mTLS topology AXIAM ships.
      */
     public function __construct(
         public readonly string $issuer,
@@ -64,6 +65,7 @@ final class OidcConfiguration
         public readonly ?string $end_session_endpoint = null,
         public readonly bool $backchannel_logout_supported = false,
         public readonly bool $backchannel_logout_session_supported = false,
+        public readonly ?MtlsEndpointAliases $mtls_endpoint_aliases = null,
     ) {
     }
 
@@ -121,6 +123,9 @@ final class OidcConfiguration
             end_session_endpoint: $optionalString($wire['end_session_endpoint'] ?? null),
             backchannel_logout_supported: ($wire['backchannel_logout_supported'] ?? false) === true,
             backchannel_logout_session_supported: ($wire['backchannel_logout_session_supported'] ?? false) === true,
+            // RFC 8705 §5 (§21.3 rule 2): absent means "no separate mTLS host", never
+            // "mTLS unsupported", so this is optional exactly as the three above are.
+            mtls_endpoint_aliases: MtlsEndpointAliases::fromWire($wire['mtls_endpoint_aliases'] ?? null),
         );
     }
 }
