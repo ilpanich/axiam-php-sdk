@@ -124,6 +124,14 @@ final class OidcClient
         private readonly ?string $tenantSlugForSso = null,
         int $discoveryTtlSeconds = self::MIN_DISCOVERY_TTL_SECONDS,
         int $clockSkewSec = IdTokenValidator::MAX_CLOCK_SKEW_SEC,
+        /**
+         * Whether the owning client was built with a §6.1 mTLS identity, and so whether
+         * CONTRACT.md §21.3 rule 2 applies to the calls it makes.
+         *
+         * The identity is configured once and presented on every request, so "is this call
+         * going over mutual TLS" has a whole-client answer here rather than a per-call one.
+         */
+        private readonly bool $presentsClientCertificate = false,
     ) {
         $this->discoveryTtlSeconds = max($discoveryTtlSeconds, self::MIN_DISCOVERY_TTL_SECONDS);
         $this->clockSkewSec = IdTokenValidator::resolveClockSkewSec($clockSkewSec);
@@ -361,7 +369,11 @@ final class OidcClient
         $configuration ??= $this->oidcDiscover();
         $clientId = $this->requireClientId('oidcPar');
 
-        $endpoint = $configuration->pushed_authorization_request_endpoint;
+        $endpoint = $this->preferredEndpoint(
+            $configuration,
+            static fn (MtlsEndpointAliases $a): ?string => $a->pushed_authorization_request_endpoint,
+            $configuration->pushed_authorization_request_endpoint,
+        );
         if ($endpoint === null || $endpoint === '') {
             throw new AuthError(
                 'the authorization server\'s discovery document advertises no '
@@ -698,7 +710,11 @@ final class OidcClient
         $clientId = $this->requireClientId('deviceAuthorize');
         $configuration ??= $this->oidcDiscover();
 
-        $endpoint = $configuration->device_authorization_endpoint;
+        $endpoint = $this->preferredEndpoint(
+            $configuration,
+            static fn (MtlsEndpointAliases $a): ?string => $a->device_authorization_endpoint,
+            $configuration->device_authorization_endpoint,
+        );
         if ($endpoint === null) {
             throw new AuthError(
                 'the authorization server\'s discovery document advertises no '
@@ -954,7 +970,14 @@ final class OidcClient
             $form['resource'] = $resource;
         }
 
-        $url = $this->endpointUrl($configuration->token_endpoint, $tenantId);
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->token_endpoint,
+                $configuration->token_endpoint,
+            ),
+            $tenantId,
+        );
         $response = $this->postForm($url, $form, 'token exchange request failed');
         $wire = self::decodeJsonObject($response, 'token exchange: response body is not a JSON object');
 
@@ -1193,7 +1216,14 @@ final class OidcClient
             $form['token_type_hint'] = $tokenTypeHint;
         }
 
-        $url = $this->endpointUrl($configuration->introspection_endpoint, $tenantId);
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->introspection_endpoint,
+                $configuration->introspection_endpoint,
+            ),
+            $tenantId,
+        );
         $response = $this->postForm($url, $form, 'introspect request failed');
         $wire = json_decode((string) $response->getBody(), true);
         if (!is_array($wire)) {
@@ -1247,7 +1277,14 @@ final class OidcClient
             $form['token_type_hint'] = $tokenTypeHint;
         }
 
-        $url = $this->endpointUrl($configuration->revocation_endpoint, $tenantId);
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->revocation_endpoint,
+                $configuration->revocation_endpoint,
+            ),
+            $tenantId,
+        );
         $this->postForm($url, $form, 'revoke request failed');
     }
 
@@ -1552,7 +1589,14 @@ final class OidcClient
             'client_secret' => $this->requireClientSecret('umaExchangeTicket'),
         ];
 
-        $url = $this->endpointUrl($configuration->token_endpoint, $tenantId);
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->token_endpoint,
+                $configuration->token_endpoint,
+            ),
+            $tenantId,
+        );
         // `access_denied` arrives as HTTP 403 on this grant (UMA 2.0 §3.3.6), where
         // RFC 8628's is a 400. ErrorMapper::fromOAuth2Response dispatches on the `error`
         // field before the status, so it maps correctly without a status-specific branch
@@ -1705,7 +1749,14 @@ final class OidcClient
      */
     private function postToken(OidcConfiguration $configuration, array $form, ?string $tenantId): array
     {
-        $url = $this->endpointUrl($configuration->token_endpoint, $tenantId);
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->token_endpoint,
+                $configuration->token_endpoint,
+            ),
+            $tenantId,
+        );
         $response = $this->postForm($url, $form, 'token request failed');
 
         return self::decodeJsonObject($response, 'token request: response body is not a JSON object');
@@ -1739,7 +1790,14 @@ final class OidcClient
      */
     private function postTokenAsync(OidcConfiguration $configuration, array $form, ?string $tenantId): PromiseInterface
     {
-        $url = $this->endpointUrl($configuration->token_endpoint, $tenantId);
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->token_endpoint,
+                $configuration->token_endpoint,
+            ),
+            $tenantId,
+        );
 
         return $this->http->requestAsync('POST', $url, [
             'form_params' => $form,
@@ -1801,6 +1859,46 @@ final class OidcClient
      * mandatory `?tenant_id=<uuid>` query parameter (§12.1 note 2). Existing query
      * parameters on the endpoint are preserved.
      */
+    /**
+     * The endpoint a call should use, preferring its RFC 8705 §5 alias when this client
+     * presents a §6.1 certificate (CONTRACT.md §21.3 rule 2).
+     *
+     * Three things this deliberately does NOT do, each of them a documented way to get
+     * rule 2 wrong:
+     *
+     * - An absent `mtls_endpoint_aliases` is never an error. It means "no separate mTLS
+     *   host", not "mTLS unsupported" — a deployment running `client_auth = optional` on
+     *   one listener serves both populations at the conventional endpoints and correctly
+     *   publishes nothing.
+     * - `$pick` can only reach {@see MtlsEndpointAliases}, so `authorization_endpoint`,
+     *   `end_session_endpoint` and `jwks_uri` are unreachable rather than merely unused:
+     *   they are front-channel or public, and an mTLS host would raise a
+     *   certificate-chooser dialog in the user's browser.
+     * - `issuer` is untouched. It is an identifier, not an endpoint, and §12.4 rule 3
+     *   still compares a token's `iss` against `$configuration->issuer` by exact string —
+     *   including for a token minted at an alias endpoint.
+     *
+     * A `null` result for a conditionally-advertised endpoint still means "this server
+     * does not support the feature" — the caller raises that, and never concatenates a URL
+     * onto the issuer.
+     *
+     * @param callable(MtlsEndpointAliases): (string|null) $pick
+     */
+    private function preferredEndpoint(
+        OidcConfiguration $configuration,
+        callable $pick,
+        ?string $topLevel,
+    ): ?string {
+        if ($this->presentsClientCertificate && $configuration->mtls_endpoint_aliases !== null) {
+            $alias = $pick($configuration->mtls_endpoint_aliases);
+            if ($alias !== null && $alias !== '') {
+                return $alias;
+            }
+        }
+
+        return $topLevel;
+    }
+
     private function endpointUrl(string $endpoint, ?string $tenantId): string
     {
         return self::withQuery($endpoint, ['tenant_id' => $this->resolveTenantId($tenantId)]);

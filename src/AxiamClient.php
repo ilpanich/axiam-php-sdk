@@ -478,6 +478,9 @@ final class AxiamClient
             orgId: $orgId,
             orgSlug: $orgSlug,
             tenantSlugForSso: $tenant,
+            // §6.1 is all-or-nothing: the guard above has already refused a
+            // half-configured pair, so either half implies both.
+            presentsClientCertificate: $clientCert !== null,
         );
     }
 
