@@ -211,4 +211,101 @@ final class OidcDiscoveryTest extends TestCase
         self::assertInstanceOf(PromiseInterface::class, $promise);
         self::assertInstanceOf(OidcConfiguration::class, $promise->wait());
     }
+
+    // --- contract 1.42 §21.5 capability members ---------------------------------------
+
+    /**
+     * Contract 1.42 added `code_challenge_methods_supported` and
+     * `token_endpoint_auth_signing_alg_values_supported` to the advertised document
+     * (CONTRACT.md §21.5). When present they are read through verbatim.
+     */
+    public function testDiscoveryReadsTheContract142CapabilityMembers(): void
+    {
+        $wire = $this->discoveryWire();
+        $wire['code_challenge_methods_supported'] = ['S256'];
+        $wire['token_endpoint_auth_signing_alg_values_supported'] = ['PS256', 'ES256', 'EdDSA'];
+        $client = $this->client([new Response(200, [], (string) json_encode($wire))]);
+
+        $configuration = $client->oidcDiscover();
+
+        self::assertSame(['S256'], $configuration->code_challenge_methods_supported);
+        self::assertSame(
+            ['PS256', 'ES256', 'EdDSA'],
+            $configuration->token_endpoint_auth_signing_alg_values_supported,
+        );
+    }
+
+    /**
+     * Both members are REQUIRED in AXIAM's own schema and modelled optional here anyway,
+     * which is the point of this test: RFC 8414 §2 defines no default for either, so an
+     * absent `code_challenge_methods_supported` is NOT an implied `["S256"]` — and a
+     * document from a non-AXIAM OP that omits them must still parse. Modelling them
+     * required would turn every such document into a NetworkError, which is a regression
+     * dressed up as strictness (CONTRACT.md §21.5, §12.3 rule 6).
+     *
+     * `null`, specifically: absent must be distinguishable from an advertised empty list,
+     * which is a server saying "I support none of these".
+     */
+    public function testAbsentCapabilityMembersParseAsNullRatherThanBeingRejected(): void
+    {
+        // discoveryWire() carries neither member — the pre-1.42 document shape.
+        $client = $this->client([$this->discoveryResponse()]);
+
+        $configuration = $client->oidcDiscover();
+
+        self::assertNull($configuration->code_challenge_methods_supported);
+        self::assertNull($configuration->token_endpoint_auth_signing_alg_values_supported);
+    }
+
+    /** An advertised empty list is a real answer and survives as `[]`, never collapsing to null. */
+    public function testAdvertisedEmptyCapabilityListIsNotCollapsedToNull(): void
+    {
+        $wire = $this->discoveryWire();
+        $wire['code_challenge_methods_supported'] = [];
+        $client = $this->client([new Response(200, [], (string) json_encode($wire))]);
+
+        $configuration = $client->oidcDiscover();
+
+        self::assertSame([], $configuration->code_challenge_methods_supported);
+    }
+
+    /**
+     * Contract 1.42 amended §5 rule 3's RATIONALE, not the rule: `client_secret_basic` is
+     * now accepted and advertised server-side, and an SDK still MUST NOT send an
+     * `Authorization: Basic` header to `/oauth2/*`. An advertisement is a statement about
+     * the deployment, not an instruction to the client, so a document listing Basic
+     * changes nothing about how this SDK authenticates — the secret stays in the form
+     * body, which is the channel proxies and APM agents do not log by default.
+     */
+    public function testAdvertisedClientSecretBasicDoesNotChangeTokenEndpointAuthentication(): void
+    {
+        $wire = $this->discoveryWire();
+        $wire['token_endpoint_auth_methods_supported'] = ['client_secret_post', 'client_secret_basic'];
+
+        $history = [];
+        $stack = \GuzzleHttp\HandlerStack::create(new MockHandler([
+            new Response(200, [], (string) json_encode($wire)),
+            new Response(200, [], (string) json_encode([
+                'access_token' => 'at',
+                'token_type' => 'Bearer',
+                'expires_in' => 900,
+            ])),
+        ]));
+        $stack->push(Middleware::history($history));
+
+        $client = new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            oidcClientId: 'my-app',
+            oidcClientSecret: 'sh!',
+            oidcTenantId: '11111111-1111-4111-8111-111111111111',
+            transportHandler: $stack,
+        );
+
+        $client->loginClientCredentials();
+
+        $tokenRequest = $history[1]['request'];
+        self::assertFalse($tokenRequest->hasHeader('Authorization'));
+        self::assertStringContainsString('client_secret=sh%21', (string) $tokenRequest->getBody());
+    }
 }
