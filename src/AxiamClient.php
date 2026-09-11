@@ -1100,6 +1100,11 @@ final class AxiamClient
      * server state (§26.2 rule 4).
      *
      * @param string|list<string>|null $scope
+     * @param string|null $dpopJkt RFC 9449 §10.1 `dpop_jkt` — the caller-computed JWK
+     *        SHA-256 thumbprint of the DPoP key, pushed so the authorization code is bound
+     *        to that key at issue time. Omitted from the form when null. This SDK verifies
+     *        DPoP proofs but does not generate them (CONTRACT.md §21.9), so the thumbprint
+     *        comes from the application, not from here.
      */
     public function oidcPar(
         AuthorizationRequest $request,
@@ -1107,10 +1112,11 @@ final class AxiamClient
         ?OidcConfiguration $configuration = null,
         string|array|null $scope = null,
         ?string $tenantId = null,
+        ?string $dpopJkt = null,
     ): PushedAuthorizationRequest {
         $this->ensureOpen();
 
-        return $this->oidc->oidcPar($request, $redirectUri, $configuration, $scope, $tenantId);
+        return $this->oidc->oidcPar($request, $redirectUri, $configuration, $scope, $tenantId, $dpopJkt);
     }
 
     /**

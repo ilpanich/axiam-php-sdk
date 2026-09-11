@@ -354,6 +354,16 @@ final class OidcClient
      * round trip and cannot double-consume anything (§26.2 rule 4).
      *
      * @param string|list<string>|null $scope
+     * @param string|null $dpopJkt RFC 9449 §10.1 `dpop_jkt` — the JWK SHA-256 thumbprint
+     *   of the key the client will prove possession of at the token endpoint, pushed here
+     *   so the authorization code is bound to that key from the moment it is issued rather
+     *   than only at redemption. Sent only when non-null (§12.1 forbids transmitting an
+     *   absent optional field as an empty value).
+     *
+     *   **The caller computes it.** CONTRACT.md §21.9 records this SDK as verifying DPoP
+     *   proofs but not generating them, so there is no client key here to derive a
+     *   thumbprint from; an application that holds one passes the base64url thumbprint it
+     *   already computes for its own `DPoP` header. The value is forwarded verbatim.
      *
      * @throws AuthError client-side, with no wire call, when the discovery document
      *   advertises no PAR endpoint — §12.7.2 rule 1's discipline: never synthesise the URL
@@ -365,6 +375,7 @@ final class OidcClient
         ?OidcConfiguration $configuration = null,
         string|array|null $scope = null,
         ?string $tenantId = null,
+        ?string $dpopJkt = null,
     ): PushedAuthorizationRequest {
         $configuration ??= $this->oidcDiscover();
         $clientId = $this->requireClientId('oidcPar');
@@ -395,6 +406,13 @@ final class OidcClient
             'code_challenge' => Pkce::computeCodeChallenge($request->codeVerifier->reveal()),
             'code_challenge_method' => Pkce::CODE_CHALLENGE_METHOD_S256,
         ];
+        // RFC 9449 §10.1: pushed only when the caller supplied one. An empty or absent
+        // dpop_jkt is omitted from the form rather than sent blank — §12.1 forbids sending
+        // an empty value for an absent optional field, and a server that reads `dpop_jkt=`
+        // as a present-but-empty thumbprint would bind the code to nothing.
+        if ($dpopJkt !== null && $dpopJkt !== '') {
+            $form['dpop_jkt'] = $dpopJkt;
+        }
         $this->appendClientSecret($form);
 
         // 201, not 200. RFC 9126 §2.2 specifies Created, and this is the one thing an
