@@ -8,6 +8,9 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Management;
 
+use Axiam\Sdk\Management\Models\ConsentView;
+use Axiam\Sdk\Management\Models\GrantScopeConsent;
+
 /**
  * GDPR self-service: the authenticated account's own export and erasure. Scoped to the caller,
  * never to another user.
@@ -95,6 +98,81 @@ final class PrivacyApi extends ManagementSupport
             '/api/v1/auth/account/delete/cancel',
             [],
             ['token' => $token],
+            null,
+        );
+    }
+
+    /**
+     * `GET /api/v1/account/consents` — the caller's own consent records.
+     *
+     * `GET /api/v1/account/consents`.
+     *
+     * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+     * plain list and never a `Page` (§27.4 rule 4).
+     * @return list<ConsentView>
+     */
+    public function listConsents(): array
+    {
+        $decoded = $this->transport->send(
+            'privacy.list_consents',
+            'GET',
+            '/api/v1/account/consents',
+            [],
+            [],
+            null,
+        );
+
+        $items = [];
+        foreach ($decoded ?? [] as $item) {
+            if (is_array($item)) {
+                $items[] = ConsentView::fromArray($item);
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * `POST /api/v1/account/consents/oidc-scopes` — record a scope-release consent.
+     *
+     * `POST /api/v1/account/consents/oidc-scopes`.
+     *
+     * Returns nothing; the server answers with an empty body.
+     * @param GrantScopeConsent $body the request body
+     */
+    public function grantScopeConsent(
+        GrantScopeConsent $body,
+    ): void {
+        $this->transport->send(
+            'privacy.grant_scope_consent',
+            'POST',
+            '/api/v1/account/consents/oidc-scopes',
+            [],
+            [],
+            $body->toArray(),
+        );
+    }
+
+    /**
+     * `DELETE /api/v1/account/consents/oidc-scopes/{client_id}` — withdraw.
+     *
+     * `DELETE /api/v1/account/consents/oidc-scopes/{client_id}`.
+     *
+     * Returns nothing; the server answers with an empty body.
+     *
+     * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
+     * \Axiam\Sdk\Management\NotFoundError} rather than succeeding quietly.
+     * @param string $clientId the `{client_id}` path parameter
+     */
+    public function withdrawScopeConsent(
+        string $clientId,
+    ): void {
+        $this->transport->send(
+            'privacy.withdraw_scope_consent',
+            'DELETE',
+            '/api/v1/account/consents/oidc-scopes/{client_id}',
+            ['client_id' => $clientId],
+            [],
             null,
         );
     }

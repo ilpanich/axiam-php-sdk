@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Generate the CONTRACT §27 management surface for the PHP SDK.
 
-Reads ``management-registry.json`` (the 147 operations across 24 namespaces,
+Reads ``management-registry.json`` (the operations and namespaces of CONTRACT §27,
 maintained in ``ilpanich/axiam`` and vendored here) plus ``openapi.json`` for the
 schemas those operations carry, and writes:
 
 - ``src/Management/Models/*.php`` — one ``final class``, ``enum`` or polymorphic base
   per request and response type, one class per file so PSR-4 can autoload it;
 - ``src/Management/<Namespace>Api.php`` — one namespace handle per namespace (§27.2);
-- ``src/Management/ManagementApi.php`` — the 24 accessors;
+- ``src/Management/ManagementApi.php`` — one accessor per namespace;
 - ``tests/Management/ManagementSurfaceGeneratedTest.php``
 - ``tests/Management/ManagementSparseBodiesGeneratedTest.php``
-  — one conformance case per operation, plus the §27.9 assertion that all 147 are
-  reached.
+  — one conformance case per operation, plus the §27.9 assertion that every one of
+  them is reached.
 
 Run with ``--check`` to verify the committed output is current; that is what CI runs,
 so a registry change that is not regenerated fails the build rather than shipping a
@@ -37,6 +37,13 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY: dict[str, Any] = json.loads((ROOT / "management-registry.json").read_text())
 SPEC: dict[str, Any] = json.loads((ROOT / "openapi.json").read_text())
+
+# Derived from the vendored registry, never written as a literal: every doc-comment
+# below that names a count interpolates these. The numbers used to be typed into six
+# prose strings, and they were still saying "147" three re-vendors after the registry
+# had reached 155 — a comment nobody could see was wrong without counting by hand.
+OPERATION_COUNT: int = int(REGISTRY["operation_count"])
+NAMESPACE_COUNT: int = int(REGISTRY["namespace_count"])
 SCHEMAS: dict[str, Any] = SPEC["components"]["schemas"]
 
 BANNER = """<?php
@@ -1249,7 +1256,8 @@ def emit_api() -> str:
     """The root ``ManagementApi`` with one accessor per namespace."""
     out = [header(API_NS)]
     out.extend(docblock(
-        "The CONTRACT.md §27 management surface: 147 operations across 24 namespaces.\n\n"
+        f"The CONTRACT.md §27 management surface: {OPERATION_COUNT} operations across "
+        f"{NAMESPACE_COUNT} namespaces.\n\n"
         "Reached as `$client->management()`. This class holds nothing but the shared "
         "{@see ManagementTransport} and the client's default scope; each accessor below "
         "hands back a namespace handle (§27.2) that can be re-scoped per call with "
@@ -1515,7 +1523,7 @@ def emit_surface_test() -> str:
     out.append("use Axiam\\Sdk\\Management\\Page;")
     out.append("")
     out.extend(docblock(
-        "One case per CONTRACT.md §27 operation — all 147 of them.\n\n"
+        f"One case per CONTRACT.md §27 operation — all {OPERATION_COUNT} of them.\n\n"
         "Each asserts three things about one operation: it issues the METHOD the registry "
         "names, against the PATH the registry names, and — where the operation returns a "
         "body — that every field `openapi.json` declares survives the decode. The third is "
@@ -1570,10 +1578,10 @@ def emit_surface_test() -> str:
     # §27.9: the count itself is an assertion, so an operation silently dropped from the
     # registry fails the build rather than quietly reducing coverage.
     tail = docblock(
-        "§27.9: all 147 registry operations are covered by a case above.\n\n"
+        f"§27.9: all {OPERATION_COUNT} registry operations are covered by a case above.\n\n"
         "Counted reflectively rather than written as a literal on both sides — "
-        "`assertSame(147, 147)` is a tautology, and a case removed by a bad regeneration "
-        "would still pass it.",
+        f"`assertSame({OPERATION_COUNT}, {OPERATION_COUNT})` is a tautology, and a case removed "
+        "by a bad regeneration would still pass it.",
         "    ",
     )
     tail.append("    public function testEveryRegistryOperationHasACase(): void")

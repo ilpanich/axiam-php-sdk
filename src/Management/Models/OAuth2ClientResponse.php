@@ -15,6 +15,10 @@ final class OAuth2ClientResponse implements \JsonSerializable
 {
     /**
      * Constructs a OAuth2ClientResponse.
+     * @param AuthnRequestParamsMode $authnRequestParams X7.1 — echoed so an operator can audit
+     *     which clients act on the OIDC authentication-request parameters, from this endpoint
+     *     rather than from the database.
+     * @param bool $browserSso X7.3 — echoed for the same reason.
      * @param string $clientId the server's `client_id` field
      * @param string $createdAt the server's `created_at` field
      * @param bool $dpopBoundAccessTokens the server's `dpop_bound_access_tokens` field
@@ -48,6 +52,8 @@ final class OAuth2ClientResponse implements \JsonSerializable
      *     field (optional)
      */
     public function __construct(
+        public readonly AuthnRequestParamsMode $authnRequestParams,
+        public readonly bool $browserSso,
         public readonly string $clientId,
         public readonly string $createdAt,
         public readonly bool $dpopBoundAccessTokens,
@@ -79,6 +85,8 @@ final class OAuth2ClientResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            AuthnRequestParamsMode::fromWire((string) ModelDecode::need($data, 'authn_request_params', self::class)),
+            (bool) ModelDecode::need($data, 'browser_sso', self::class),
             (string) ModelDecode::need($data, 'client_id', self::class),
             (string) ModelDecode::need($data, 'created_at', self::class),
             (bool) ModelDecode::need($data, 'dpop_bound_access_tokens', self::class),
@@ -114,6 +122,8 @@ final class OAuth2ClientResponse implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        $out['authn_request_params'] = $this->authnRequestParams->value;
+        $out['browser_sso'] = $this->browserSso;
         $out['client_id'] = $this->clientId;
         $out['created_at'] = $this->createdAt;
         $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;

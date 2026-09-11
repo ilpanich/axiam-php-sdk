@@ -188,6 +188,13 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('Denied', Models\AuditOutcome::fromWire('Denied')->value);
     }
 
+    /** `AuthnRequestParamsMode`: every case survives wire -> enum -> wire. */
+    public function testAuthnRequestParamsModeRoundTrips(): void
+    {
+        self::assertSame('ignore', Models\AuthnRequestParamsMode::fromWire('ignore')->value);
+        self::assertSame('honour', Models\AuthnRequestParamsMode::fromWire('honour')->value);
+    }
+
     /** `BindCertificate`: a full wire object survives decode and re-render. */
     public function testBindCertificateRoundTrips(): void
     {
@@ -315,6 +322,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testClientAuthMethodRoundTrips(): void
     {
         self::assertSame('client_secret_post', Models\ClientAuthMethod::fromWire('client_secret_post')->value);
+        self::assertSame('client_secret_basic', Models\ClientAuthMethod::fromWire('client_secret_basic')->value);
         self::assertSame('tls_client_auth', Models\ClientAuthMethod::fromWire('tls_client_auth')->value);
         self::assertSame('self_signed_tls_client_auth', Models\ClientAuthMethod::fromWire('self_signed_tls_client_auth')->value);
         self::assertSame('private_key_jwt', Models\ClientAuthMethod::fromWire('private_key_jwt')->value);
@@ -347,6 +355,26 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             [],
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'ComplianceReportEntry decoded a field it cannot render again',
+        );
+    }
+
+    /** `ConsentView`: a full wire object survives decode and re-render. */
+    public function testConsentViewRoundTrips(): void
+    {
+        $wire = [
+            'accepted_at' => '2026-08-26T00:00:00Z',
+            'consent_type' => 'example',
+            'version' => 'example',
+            'withdrawable' => true,
+        ];
+
+        $model = Models\ConsentView::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ConsentView decoded a field it cannot render again',
         );
     }
 
@@ -513,7 +541,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testCreateOAuth2ClientRequestRoundTrips(): void
     {
         $wire = [
+            'authn_request_params' => 'ignore',
             'backchannel_logout_uri' => 'example',
+            'browser_sso' => true,
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
             'grant_types' => [
@@ -1140,6 +1170,26 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `GrantScopeConsent`: a full wire object survives decode and re-render. */
+    public function testGrantScopeConsentRoundTrips(): void
+    {
+        $wire = [
+            'client_id' => 'example',
+            'scopes' => [
+                'example',
+            ],
+        ];
+
+        $model = Models\GrantScopeConsent::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'GrantScopeConsent decoded a field it cannot render again',
+        );
+    }
+
     /** `GrantedScope`: a full wire object survives decode and re-render. */
     public function testGrantedScopeRoundTrips(): void
     {
@@ -1532,6 +1582,8 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testOAuth2ClientResponseRoundTrips(): void
     {
         $wire = [
+            'authn_request_params' => 'ignore',
+            'browser_sso' => true,
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
             'dpop_bound_access_tokens' => true,
@@ -1647,6 +1699,24 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             [],
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'OidcCallbackResponse decoded a field it cannot render again',
+        );
+    }
+
+    /** `OidcPolicy`: a full wire object survives decode and re-render. */
+    public function testOidcPolicyRoundTrips(): void
+    {
+        $wire = [
+            'default_locale' => 'example',
+            'sensitive_scopes_enabled' => true,
+        ];
+
+        $model = Models\OidcPolicy::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'OidcPolicy decoded a field it cannot render again',
         );
     }
 
@@ -2353,6 +2423,10 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'notification' => [
                 'admin_notifications_enabled' => true,
             ],
+            'oidc' => [
+                'default_locale' => 'example',
+                'sensitive_scopes_enabled' => true,
+            ],
             'opaque' => [
                 'opaque_ksf' => 'example',
                 'opaque_mode' => 'example',
@@ -2492,6 +2566,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
             'default_cert_validity_days' => 1,
+            'default_locale' => 'example',
             'deletion_grace_period_days' => 1,
             'email_verification_grace_period_hours' => 1,
             'email_verification_required' => true,
@@ -2513,6 +2588,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'sensitive_scopes_enabled' => true,
             'webauthn_user_verification' => 'example',
         ];
 
@@ -2654,6 +2730,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
             'default_cert_validity_days' => 1,
+            'default_locale' => 'example',
             'deletion_grace_period_days' => 1,
             'email_verification_grace_period_hours' => 1,
             'email_verification_required' => true,
@@ -2675,6 +2752,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'sensitive_scopes_enabled' => true,
             'webauthn_user_verification' => 'example',
         ];
 
@@ -2867,7 +2945,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testUpdateOAuth2ClientRequestRoundTrips(): void
     {
         $wire = [
+            'authn_request_params' => 'ignore',
             'backchannel_logout_uri' => 'example',
+            'browser_sso' => true,
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
             'grant_types' => [
@@ -3241,6 +3321,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(148, $cases);
+        self::assertCount(152, $cases);
     }
 }

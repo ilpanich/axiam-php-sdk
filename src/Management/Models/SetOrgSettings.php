@@ -39,11 +39,14 @@ final class SetOrgSettings implements \JsonSerializable
      * @param bool $requireLowercase the server's `require_lowercase` field
      * @param bool $requireSymbols the server's `require_symbols` field
      * @param bool $requireUppercase the server's `require_uppercase` field
+     * @param string|null $defaultLocale the server's `default_locale` field (optional)
      * @param int|null $deletionGracePeriodDays the server's `deletion_grace_period_days` field
      *     (optional)
      * @param string|null $opaqueKsf the server's `opaque_ksf` field (optional)
      * @param string|null $opaqueMode the server's `opaque_mode` field (optional)
      * @param string|null $opaqueSuite the server's `opaque_suite` field (optional)
+     * @param bool|null $sensitiveScopesEnabled the server's `sensitive_scopes_enabled` field
+     *     (optional)
      * @param string|null $webauthnUserVerification the server's `webauthn_user_verification`
      *     field (optional)
      */
@@ -68,10 +71,12 @@ final class SetOrgSettings implements \JsonSerializable
         public readonly bool $requireLowercase,
         public readonly bool $requireSymbols,
         public readonly bool $requireUppercase,
+        public readonly ?string $defaultLocale = null,
         public readonly ?int $deletionGracePeriodDays = null,
         public readonly ?string $opaqueKsf = null,
         public readonly ?string $opaqueMode = null,
         public readonly ?string $opaqueSuite = null,
+        public readonly ?bool $sensitiveScopesEnabled = null,
         public readonly ?string $webauthnUserVerification = null,
     ) {
     }
@@ -103,10 +108,12 @@ final class SetOrgSettings implements \JsonSerializable
             (bool) ModelDecode::need($data, 'require_lowercase', self::class),
             (bool) ModelDecode::need($data, 'require_symbols', self::class),
             (bool) ModelDecode::need($data, 'require_uppercase', self::class),
+            isset($data['default_locale']) ? (string) $data['default_locale'] : null,
             isset($data['deletion_grace_period_days']) ? (int) $data['deletion_grace_period_days'] : null,
             isset($data['opaque_ksf']) ? (string) $data['opaque_ksf'] : null,
             isset($data['opaque_mode']) ? (string) $data['opaque_mode'] : null,
             isset($data['opaque_suite']) ? (string) $data['opaque_suite'] : null,
+            isset($data['sensitive_scopes_enabled']) ? (bool) $data['sensitive_scopes_enabled'] : null,
             isset($data['webauthn_user_verification']) ? (string) $data['webauthn_user_verification'] : null,
         );
     }
@@ -142,6 +149,9 @@ final class SetOrgSettings implements \JsonSerializable
         $out['require_lowercase'] = $this->requireLowercase;
         $out['require_symbols'] = $this->requireSymbols;
         $out['require_uppercase'] = $this->requireUppercase;
+        if ($this->defaultLocale !== null) {
+            $out['default_locale'] = $this->defaultLocale;
+        }
         if ($this->deletionGracePeriodDays !== null) {
             $out['deletion_grace_period_days'] = $this->deletionGracePeriodDays;
         }
@@ -153,6 +163,9 @@ final class SetOrgSettings implements \JsonSerializable
         }
         if ($this->opaqueSuite !== null) {
             $out['opaque_suite'] = $this->opaqueSuite;
+        }
+        if ($this->sensitiveScopesEnabled !== null) {
+            $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
         }
         if ($this->webauthnUserVerification !== null) {
             $out['webauthn_user_verification'] = $this->webauthnUserVerification;

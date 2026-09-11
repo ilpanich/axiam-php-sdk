@@ -19,8 +19,12 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
 {
     /**
      * Constructs a UpdateOAuth2ClientRequest.
+     * @param AuthnRequestParamsMode|null $authnRequestParams the server's
+     *     `authn_request_params` field (optional)
      * @param string|null $backchannelLogoutUri Pass an empty string to clear a previously
      *     registered URI — the one edit an operator makes when an RP is decommissioned. (optional)
+     * @param bool|null $browserSso X7.3 — see [`CreateOAuth2ClientRequest::browser_sso`].
+     *     (optional)
      * @param bool|null $dpopBoundAccessTokens the server's `dpop_bound_access_tokens` field
      *     (optional)
      * @param bool|null $dpopRequireNonce the server's `dpop_require_nonce` field (optional)
@@ -49,7 +53,9 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
      *     `token_endpoint_auth_method` field (optional)
      */
     public function __construct(
+        public readonly ?AuthnRequestParamsMode $authnRequestParams = null,
         public readonly ?string $backchannelLogoutUri = null,
+        public readonly ?bool $browserSso = null,
         public readonly ?bool $dpopBoundAccessTokens = null,
         public readonly ?bool $dpopRequireNonce = null,
         public readonly ?array $grantTypes = null,
@@ -77,7 +83,9 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            isset($data['authn_request_params']) ? AuthnRequestParamsMode::fromWire((string) $data['authn_request_params']) : null,
             isset($data['backchannel_logout_uri']) ? (string) $data['backchannel_logout_uri'] : null,
+            isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
             isset($data['dpop_bound_access_tokens']) ? (bool) $data['dpop_bound_access_tokens'] : null,
             isset($data['dpop_require_nonce']) ? (bool) $data['dpop_require_nonce'] : null,
             isset($data['grant_types']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['grant_types'])) : null,
@@ -109,8 +117,14 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        if ($this->authnRequestParams !== null) {
+            $out['authn_request_params'] = $this->authnRequestParams->value;
+        }
         if ($this->backchannelLogoutUri !== null) {
             $out['backchannel_logout_uri'] = $this->backchannelLogoutUri;
+        }
+        if ($this->browserSso !== null) {
+            $out['browser_sso'] = $this->browserSso;
         }
         if ($this->dpopBoundAccessTokens !== null) {
             $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;

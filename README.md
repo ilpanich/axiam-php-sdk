@@ -191,7 +191,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.38**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.42**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §22, §23, §24, §25, §26, §27 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8) — the binding,
@@ -373,6 +373,34 @@ the public "Sign in with X" buttons:
 | `ssoStartOauth2($federationConfigId, $redirectUri, ...)` | `POST /api/v1/auth/federation/oauth2/start` | Step 1 through a **plain-OAuth2** upstream (GitHub, Facebook, `generic_oauth2`). PKCE is mandatory here and is generated and held **server-side**. |
 | `ssoCompleteOauth2($state, $code)` | `POST /api/v1/auth/federation/oauth2/callback` | Step 2 of the OAuth2 variant; same `Set-Cookie` session and §3 CSRF capture as `ssoComplete()`. |
 | `ssoCompleteHandoff($code)` | `POST /api/v1/auth/federation/handoff` | Redeems the single-use `axiam_handoff` code the SAML and Apple flows deliver. Valid 60 s, redeemable **once**; a `401` is terminal and is **never retried**. |
+
+### What the discovery document models, and what is optional in it (§12.1, §21.5)
+
+`OidcConfiguration` models a **curated subset** of the OIDC Discovery 1.0 / RFC 8414
+document, and the optionality is the SDK's rather than the schema's. AXIAM marks nearly
+every member required; this type marks one required only where a missing value would leave
+the SDK with nothing to do but guess a URL. So the conditionally-advertised endpoints
+(`device_authorization_endpoint`, `pushed_authorization_request_endpoint`,
+`end_session_endpoint`) are nullable — §12.7.2 rule 1 forbids synthesising them from the
+issuer — and a document from a non-AXIAM OP still parses.
+
+Contract 1.42 adds two capability lists, both **nullable here even though AXIAM marks them
+required**:
+
+| Property | Advertised by AXIAM | Why it is optional in this SDK |
+|---|---|---|
+| `code_challenge_methods_supported` | `["S256"]` | RFC 8414 §2 defines no default, so **absence does not mean `S256`** (§21.5) — it means the document says nothing about PKCE at all. |
+| `token_endpoint_auth_signing_alg_values_supported` | `["PS256", "ES256", "EdDSA"]` | Same, and informational either way: §12.1 note 3 pins this SDK to `client_secret_post`, so it never signs a client assertion. |
+
+`null` means the member was absent; an advertised `[]` survives as `[]`, because a server
+saying "none of these" is a different fact from a server saying nothing.
+
+A related 1.42 change is a **rationale**, not a rule: `client_secret_basic` is now accepted
+server-side and advertised in `token_endpoint_auth_methods_supported`. This SDK does not
+change — §5 rule 3 still forbids an `Authorization: Basic` header on `/oauth2/*`, because
+the two methods carry the identical credential and the header is the channel reverse
+proxies and APM agents log by default. An advertisement is a statement about the deployment,
+not an instruction to the client.
 
 ### The four public login-provider operations, and their rules (contract 1.38)
 
@@ -1301,11 +1329,37 @@ redirect it is a bearer handle to a fully-formed authorization request (§26.5).
 A **FAPI 2.0 client has no alternative**: `profile: "fapi2"` refuses a registration that
 does not set `require_par`, so such a client cannot authorize any other way (§21.1).
 
+### `dpop_jkt` — binding the code to a DPoP key at issue time (contract 1.42, RFC 9449 §10.1)
+
+`oidcPar()` takes an optional sixth argument, `dpopJkt`: the base64url JWK SHA-256
+thumbprint of the key the client will prove possession of at the token endpoint. Pushing it
+binds the authorization code to that key from the moment it is issued, rather than only when
+it is redeemed — which closes the window in which a stolen code can be redeemed by a
+different key.
+
+```php
+$pushed = $client->oidcPar($begun, $redirectUri, $config, 'openid profile', null, $jkt);
+```
+
+**The caller computes the thumbprint.** CONTRACT.md §21.9 records this SDK as *verifying*
+DPoP proofs (`Axiam\Sdk\Auth\DpopVerifier`) but **not generating** them, so there is no
+client key here to derive one from; an application that holds one passes the same thumbprint
+it already computes for its own `DPoP` header, and the value is forwarded verbatim. Omitted
+from the form entirely when null or empty — §12.1 forbids transmitting an absent optional
+field as an empty value, and a server reading `dpop_jkt=` as a present-but-empty thumbprint
+would bind the code to nothing while making the request look key-bound.
+
+**`request_uri` is deliberately not exposed.** Contract 1.42 added it to the server's
+`PushedAuthorizationRequest` schema, and RFC 9126 §2.1 makes it the one authorization
+parameter a client MUST NOT push — the server models it so it can *refuse* it. A client able
+to send it is a client able to chain one pushed request into another, which is the attack
+§26.2 rule 2 exists to prevent.
+
 Worked end to end in [`examples/par_login.php`](examples/par_login.php).
 
 ## Management API (`Axiam\Sdk\Management`, CONTRACT.md §27)
 
-The administrative surface: **147 operations across 24 namespaces**, generated from the
+The administrative surface: **158 operations across 24 namespaces**, generated from the
 vendored `management-registry.json` and `openapi.json` by `scripts/gen_management.py` and
 committed, so building this package needs no Python. CI re-runs the generator with
 `--check` on every PR, which is what stops the committed surface from drifting away from

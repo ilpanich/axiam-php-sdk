@@ -25,6 +25,9 @@ final class TenantSettingsOverride implements \JsonSerializable
      *     field (optional)
      * @param int|null $defaultCertValidityDays the server's `default_cert_validity_days` field
      *     (optional)
+     * @param string|null $defaultLocale The tenant's fallback UI language. Not ordered,
+     *     therefore not validated against the baseline and never clamped — see [`OidcPolicy`].
+     *     (optional)
      * @param int|null $deletionGracePeriodDays the server's `deletion_grace_period_days` field
      *     (optional)
      * @param int|null $emailVerificationGracePeriodHours the server's
@@ -57,6 +60,8 @@ final class TenantSettingsOverride implements \JsonSerializable
      * @param bool|null $requireLowercase the server's `require_lowercase` field (optional)
      * @param bool|null $requireSymbols the server's `require_symbols` field (optional)
      * @param bool|null $requireUppercase the server's `require_uppercase` field (optional)
+     * @param bool|null $sensitiveScopesEnabled the server's `sensitive_scopes_enabled` field
+     *     (optional)
      * @param string|null $webauthnUserVerification the server's `webauthn_user_verification`
      *     field (optional)
      */
@@ -64,6 +69,7 @@ final class TenantSettingsOverride implements \JsonSerializable
         public readonly ?int $accessTokenLifetimeSecs = null,
         public readonly ?bool $adminNotificationsEnabled = null,
         public readonly ?int $defaultCertValidityDays = null,
+        public readonly ?string $defaultLocale = null,
         public readonly ?int $deletionGracePeriodDays = null,
         public readonly ?int $emailVerificationGracePeriodHours = null,
         public readonly ?bool $emailVerificationRequired = null,
@@ -85,6 +91,7 @@ final class TenantSettingsOverride implements \JsonSerializable
         public readonly ?bool $requireLowercase = null,
         public readonly ?bool $requireSymbols = null,
         public readonly ?bool $requireUppercase = null,
+        public readonly ?bool $sensitiveScopesEnabled = null,
         public readonly ?string $webauthnUserVerification = null,
     ) {
     }
@@ -99,6 +106,7 @@ final class TenantSettingsOverride implements \JsonSerializable
             isset($data['access_token_lifetime_secs']) ? (int) $data['access_token_lifetime_secs'] : null,
             isset($data['admin_notifications_enabled']) ? (bool) $data['admin_notifications_enabled'] : null,
             isset($data['default_cert_validity_days']) ? (int) $data['default_cert_validity_days'] : null,
+            isset($data['default_locale']) ? (string) $data['default_locale'] : null,
             isset($data['deletion_grace_period_days']) ? (int) $data['deletion_grace_period_days'] : null,
             isset($data['email_verification_grace_period_hours']) ? (int) $data['email_verification_grace_period_hours'] : null,
             isset($data['email_verification_required']) ? (bool) $data['email_verification_required'] : null,
@@ -120,6 +128,7 @@ final class TenantSettingsOverride implements \JsonSerializable
             isset($data['require_lowercase']) ? (bool) $data['require_lowercase'] : null,
             isset($data['require_symbols']) ? (bool) $data['require_symbols'] : null,
             isset($data['require_uppercase']) ? (bool) $data['require_uppercase'] : null,
+            isset($data['sensitive_scopes_enabled']) ? (bool) $data['sensitive_scopes_enabled'] : null,
             isset($data['webauthn_user_verification']) ? (string) $data['webauthn_user_verification'] : null,
         );
     }
@@ -143,6 +152,9 @@ final class TenantSettingsOverride implements \JsonSerializable
         }
         if ($this->defaultCertValidityDays !== null) {
             $out['default_cert_validity_days'] = $this->defaultCertValidityDays;
+        }
+        if ($this->defaultLocale !== null) {
+            $out['default_locale'] = $this->defaultLocale;
         }
         if ($this->deletionGracePeriodDays !== null) {
             $out['deletion_grace_period_days'] = $this->deletionGracePeriodDays;
@@ -206,6 +218,9 @@ final class TenantSettingsOverride implements \JsonSerializable
         }
         if ($this->requireUppercase !== null) {
             $out['require_uppercase'] = $this->requireUppercase;
+        }
+        if ($this->sensitiveScopesEnabled !== null) {
+            $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
         }
         if ($this->webauthnUserVerification !== null) {
             $out['webauthn_user_verification'] = $this->webauthnUserVerification;

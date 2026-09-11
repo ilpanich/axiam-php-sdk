@@ -486,6 +486,108 @@ final class OidcTokenOpsTest extends TestCase
         $client->revoke('a-token', configuration: $this->configuration());
     }
 
+    // ===================================================================================
+    // contract 1.42 — discovery advertises the tenant inside the endpoint URLs
+    // ===================================================================================
+
+    /**
+     * As of contract 1.42 the server appends `?tenant_id=<uuid>` to the token, revocation,
+     * introspection, device-authorization, PAR and end-session URLs it advertises in
+     * discovery, whenever the discovery request named a tenant or the deployment sets
+     * `oauth2_default_tenant_id`. (`userinfo_endpoint` and `jwks_uri` are deliberately
+     * never scoped.)
+     *
+     * An SDK that APPENDS its own `tenant_id` therefore now puts `?tenant_id=A&tenant_id=B`
+     * on the wire. This one replaces instead of appending — `OidcClient::withQuery()` merges
+     * over the endpoint's existing query — so exactly one survives, and the resolved value
+     * wins: it is the tenant the caller or session actually authenticated against, and a
+     * silent mismatch between the two is worse than a deterministic one.
+     *
+     * Unrelated parameters on the advertised endpoint are preserved: RFC 6749 §3.1/§3.2
+     * require a client to retain the endpoint's own query component. So are the port, path
+     * and fragment.
+     */
+    public function testAnAdvertisedTenantIdOnTheTokenEndpointIsReplacedNotDoubled(): void
+    {
+        $advertised = '99999999-9999-9999-9999-999999999999';
+        $history = [];
+        $client = $this->client([new Response(200, [], (string) json_encode([
+            'access_token' => 'at', 'token_type' => 'Bearer', 'expires_in' => 900,
+        ]))], history: $history);
+
+        $client->loginClientCredentials(configuration: $this->configurationWithTokenEndpoint(
+            self::BASE_URL . '/oauth2/token?tenant_id=' . $advertised . '&audience=legacy',
+        ));
+
+        $uri = $history[0]['request']->getUri();
+        $query = $uri->getQuery();
+        self::assertSame(1, substr_count($query, 'tenant_id='), 'exactly one tenant_id: ' . $query);
+        self::assertSame(self::TENANT_UUID, self::queryParam($query, 'tenant_id'));
+        self::assertSame('legacy', self::queryParam($query, 'audience'));
+        self::assertSame('/oauth2/token', $uri->getPath());
+    }
+
+    /** The same on the revocation endpoint, which discovery scopes for the same reason. */
+    public function testAnAdvertisedTenantIdOnTheRevocationEndpointIsReplacedNotDoubled(): void
+    {
+        $history = [];
+        $client = $this->client([new Response(200)], history: $history);
+
+        $client->revoke('a-token', configuration: $this->configurationWithRevocationEndpoint(
+            self::BASE_URL . ':8443/oauth2/revoke?tenant_id=99999999-9999-9999-9999-999999999999',
+        ));
+
+        $uri = $history[0]['request']->getUri();
+        self::assertSame(1, substr_count($uri->getQuery(), 'tenant_id='));
+        self::assertSame(self::TENANT_UUID, self::queryParam($uri->getQuery(), 'tenant_id'));
+        self::assertSame(8443, $uri->getPort());
+        self::assertSame('/oauth2/revoke', $uri->getPath());
+    }
+
+    private function configurationWithTokenEndpoint(string $tokenEndpoint): OidcConfiguration
+    {
+        $base = $this->configuration();
+
+        return new OidcConfiguration(
+            issuer: $base->issuer,
+            authorization_endpoint: $base->authorization_endpoint,
+            token_endpoint: $tokenEndpoint,
+            userinfo_endpoint: $base->userinfo_endpoint,
+            jwks_uri: $base->jwks_uri,
+            revocation_endpoint: $base->revocation_endpoint,
+            introspection_endpoint: $base->introspection_endpoint,
+            response_types_supported: $base->response_types_supported,
+            subject_types_supported: $base->subject_types_supported,
+            id_token_signing_alg_values_supported: $base->id_token_signing_alg_values_supported,
+            scopes_supported: $base->scopes_supported,
+            token_endpoint_auth_methods_supported: $base->token_endpoint_auth_methods_supported,
+            claims_supported: $base->claims_supported,
+            grant_types_supported: $base->grant_types_supported,
+        );
+    }
+
+    private function configurationWithRevocationEndpoint(string $revocationEndpoint): OidcConfiguration
+    {
+        $base = $this->configuration();
+
+        return new OidcConfiguration(
+            issuer: $base->issuer,
+            authorization_endpoint: $base->authorization_endpoint,
+            token_endpoint: $base->token_endpoint,
+            userinfo_endpoint: $base->userinfo_endpoint,
+            jwks_uri: $base->jwks_uri,
+            revocation_endpoint: $revocationEndpoint,
+            introspection_endpoint: $base->introspection_endpoint,
+            response_types_supported: $base->response_types_supported,
+            subject_types_supported: $base->subject_types_supported,
+            id_token_signing_alg_values_supported: $base->id_token_signing_alg_values_supported,
+            scopes_supported: $base->scopes_supported,
+            token_endpoint_auth_methods_supported: $base->token_endpoint_auth_methods_supported,
+            claims_supported: $base->claims_supported,
+            grant_types_supported: $base->grant_types_supported,
+        );
+    }
+
     private static function queryParam(string $query, string $name): ?string
     {
         parse_str($query, $parsed);

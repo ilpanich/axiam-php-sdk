@@ -10,7 +10,14 @@ use Psr\Http\Message\ResponseInterface;
 /**
  * The OIDC Discovery 1.0 metadata document served by
  * `GET /.well-known/openid-configuration` (wire schema `OidcDiscoveryDocument`,
- * CONTRACT.md §12.1). Every field is required by the server's schema.
+ * CONTRACT.md §12.1).
+ *
+ * This models a **curated subset** of the document, and the optionality here is the
+ * SDK's, not the schema's. AXIAM's own schema marks nearly every member required; this
+ * type marks a member required only where a missing value would leave the SDK with
+ * nothing to do but guess a URL — so the endpoints §12.7.2 rule 1 forbids synthesising
+ * are nullable, and so are the capability lists RFC 8414 §2 defines no default for.
+ * A document from a non-AXIAM OP has to parse.
  *
  * Field names deliberately keep the wire's snake_case spelling rather than PHP's usual
  * camelCase (contract 1.4 port-brief judgment call 3): this type IS a protocol document,
@@ -44,6 +51,8 @@ final class OidcConfiguration
      * @param bool $backchannel_logout_supported Whether the OP sends back-channel logout tokens.
      * @param bool $backchannel_logout_session_supported Whether those logout tokens carry `sid`. AXIAM always sends it.
      * @param MtlsEndpointAliases|null $mtls_endpoint_aliases RFC 8705 §5 endpoint aliases for a deployment that terminates mutual TLS on a host other than the issuer's own (contract 1.40, §21.3 rule 2). `null` means "no separate host", **not** "mTLS unsupported": a deployment running `client_auth = optional` on one listener serves both populations at the conventional endpoints and correctly publishes nothing here, so a client treating absence as an error would refuse the most common mTLS topology AXIAM ships.
+     * @param list<string>|null $code_challenge_methods_supported PKCE code-challenge methods the server supports (RFC 8414 §2 / RFC 7636 §4.3; AXIAM advertises `["S256"]` as of contract 1.42). Modelled optional even though the AXIAM schema marks it required: RFC 8414 defines no default for this member, so its **absence does not mean `S256`** (CONTRACT.md §21.5) — it means a conforming client cannot establish that PKCE is available at all, and a discovery document from a non-AXIAM OP that omits it must still parse rather than be rejected.
+     * @param list<string>|null $token_endpoint_auth_signing_alg_values_supported JWS algorithms the token endpoint accepts on a `private_key_jwt` client assertion (RFC 8414 §2; AXIAM advertises `["PS256", "ES256", "EdDSA"]` as of contract 1.42). Optional for the same reason as the member above, and informational either way: §12.1 note 3 pins this SDK to `client_secret_post`, so it never signs a client assertion.
      */
     public function __construct(
         public readonly string $issuer,
@@ -66,6 +75,8 @@ final class OidcConfiguration
         public readonly bool $backchannel_logout_supported = false,
         public readonly bool $backchannel_logout_session_supported = false,
         public readonly ?MtlsEndpointAliases $mtls_endpoint_aliases = null,
+        public readonly ?array $code_challenge_methods_supported = null,
+        public readonly ?array $token_endpoint_auth_signing_alg_values_supported = null,
     ) {
     }
 
@@ -100,6 +111,15 @@ final class OidcConfiguration
 
         $optionalString = static fn (mixed $value): ?string => is_string($value) && $value !== '' ? $value : null;
 
+        /** @return list<string>|null */
+        $optionalStringList = static function (mixed $value): ?array {
+            if (!is_array($value)) {
+                return null;
+            }
+
+            return array_values(array_filter($value, 'is_string'));
+        };
+
         return new self(
             issuer: $string($wire['issuer'] ?? null, 'issuer'),
             authorization_endpoint: $string($wire['authorization_endpoint'] ?? null, 'authorization_endpoint'),
@@ -126,6 +146,15 @@ final class OidcConfiguration
             // RFC 8705 §5 (§21.3 rule 2): absent means "no separate mTLS host", never
             // "mTLS unsupported", so this is optional exactly as the three above are.
             mtls_endpoint_aliases: MtlsEndpointAliases::fromWire($wire['mtls_endpoint_aliases'] ?? null),
+            // Contract 1.42, CONTRACT.md §21.5: newly advertised, and newly REQUIRED in
+            // the AXIAM schema — but read as optional here on purpose. RFC 8414 defines no
+            // default for either member, so an absent `code_challenge_methods_supported` is
+            // not an implied `["S256"]`; it is a document that says nothing about PKCE.
+            // Making them required would reject every non-AXIAM OP's document this SDK
+            // parses today, which is the same reason every neighbouring member above is
+            // optional.
+            code_challenge_methods_supported: $optionalStringList($wire['code_challenge_methods_supported'] ?? null),
+            token_endpoint_auth_signing_alg_values_supported: $optionalStringList($wire['token_endpoint_auth_signing_alg_values_supported'] ?? null),
         );
     }
 }

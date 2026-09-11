@@ -223,6 +223,127 @@ final class OidcParTest extends TestCase
     }
 
     // -----------------------------------------------------------------------
+    // RFC 9449 §10.1 — dpop_jkt (contract 1.42)
+    // -----------------------------------------------------------------------
+
+    /**
+     * `dpop_jkt` binds the authorization code to a DPoP key at issue time instead of only
+     * at redemption (RFC 9449 §10.1), which closes the window in which a stolen code can
+     * be redeemed by a different key.
+     *
+     * The caller computes the thumbprint. CONTRACT.md §21.9 records this SDK as verifying
+     * DPoP proofs but not generating them, so there is no client key here to derive one
+     * from — the value is forwarded verbatim.
+     */
+    public function testACallerSuppliedDpopJktIsPushed(): void
+    {
+        $jkt = '0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I';
+        $client = $this->client([$this->discoveryResponse(), $this->parResponse()]);
+        [$config, $begun] = $this->begin($client);
+
+        $client->oidcPar($begun, self::REDIRECT_URI, $config, 'openid', null, $jkt);
+
+        self::assertSame($jkt, $this->formOf(1)['dpop_jkt']);
+    }
+
+    /**
+     * §12.1: an absent optional field is omitted, never transmitted empty. A server
+     * reading `dpop_jkt=` as present-but-empty would bind the code to nothing at all,
+     * which is strictly worse than not binding it — the request looks key-bound and is
+     * not.
+     */
+    public function testDpopJktIsOmittedEntirelyWhenNotSupplied(): void
+    {
+        $client = $this->client([$this->discoveryResponse(), $this->parResponse()]);
+        [$config, $begun] = $this->begin($client);
+
+        $client->oidcPar($begun, self::REDIRECT_URI, $config, 'openid');
+
+        self::assertArrayNotHasKey('dpop_jkt', $this->formOf(1));
+    }
+
+    /** An empty string is the same absence, and is dropped rather than sent blank. */
+    public function testAnEmptyDpopJktIsOmittedRatherThanSentBlank(): void
+    {
+        $client = $this->client([$this->discoveryResponse(), $this->parResponse()]);
+        [$config, $begun] = $this->begin($client);
+
+        $client->oidcPar($begun, self::REDIRECT_URI, $config, 'openid', null, '');
+
+        self::assertArrayNotHasKey('dpop_jkt', $this->formOf(1));
+    }
+
+    /**
+     * Contract 1.42 added `request_uri` to the server's `PushedAuthorizationRequest`
+     * schema, and this SDK deliberately does NOT expose it. RFC 9126 §2.1 makes it the
+     * one authorization parameter a client MUST NOT push; the server models it so it can
+     * *refuse* it. A client able to send it is a client able to chain one pushed request
+     * into another, which is the attack §26.2 rule 2 exists to prevent — so the push must
+     * never carry one, whatever the caller does.
+     */
+    public function testThePushNeverCarriesARequestUri(): void
+    {
+        $client = $this->client([$this->discoveryResponse(), $this->parResponse()]);
+        [$config, $begun] = $this->begin($client);
+
+        $client->oidcPar($begun, self::REDIRECT_URI, $config, 'openid', null, 'thumbprint');
+
+        self::assertArrayNotHasKey('request_uri', $this->formOf(1));
+    }
+
+    // -----------------------------------------------------------------------
+    // discovery-advertised tenant scoping (contract 1.42)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Contract 1.42's server appends `?tenant_id=<uuid>` to the endpoints it advertises in
+     * discovery when the discovery request named a tenant. An SDK that *appends* its own
+     * would put two on the wire; this one replaces, so exactly one survives — and the
+     * resolved value wins, because that is the tenant the caller authenticated against.
+     *
+     * Any OTHER query parameter the endpoint carried is preserved: RFC 6749 §3.1/§3.2
+     * require a client to retain the endpoint's own query component.
+     */
+    public function testAnAdvertisedTenantIdIsReplacedNotDoubled(): void
+    {
+        $advertised = '99999999-9999-9999-9999-999999999999';
+        $client = $this->client([$this->parResponse()]);
+        $config = $this->configurationWithParEndpoint(
+            self::BASE_URL . '/oauth2/par?tenant_id=' . $advertised . '&audience=legacy',
+        );
+        $begun = $client->oidcBegin($config, self::REDIRECT_URI);
+
+        $client->oidcPar($begun, self::REDIRECT_URI, $config, 'openid');
+
+        $query = $this->sent[0]->getUri()->getQuery();
+        self::assertSame(1, substr_count($query, 'tenant_id='), 'exactly one tenant_id: ' . $query);
+        parse_str($query, $parsed);
+        self::assertSame(self::TENANT_UUID, $parsed['tenant_id']);
+        self::assertSame('legacy', $parsed['audience'], 'an unrelated query parameter must survive');
+    }
+
+    private function configurationWithParEndpoint(string $parEndpoint): OidcConfiguration
+    {
+        return new OidcConfiguration(
+            issuer: self::BASE_URL,
+            authorization_endpoint: self::BASE_URL . '/oauth2/authorize',
+            token_endpoint: self::BASE_URL . '/oauth2/token',
+            userinfo_endpoint: self::BASE_URL . '/oauth2/userinfo',
+            jwks_uri: self::BASE_URL . '/oauth2/jwks',
+            revocation_endpoint: self::BASE_URL . '/oauth2/revoke',
+            introspection_endpoint: self::BASE_URL . '/oauth2/introspect',
+            response_types_supported: ['code'],
+            subject_types_supported: ['public'],
+            id_token_signing_alg_values_supported: ['EdDSA'],
+            scopes_supported: ['openid'],
+            token_endpoint_auth_methods_supported: ['client_secret_post'],
+            claims_supported: ['sub'],
+            grant_types_supported: ['authorization_code'],
+            pushed_authorization_request_endpoint: $parEndpoint,
+        );
+    }
+
+    // -----------------------------------------------------------------------
     // §26.2 rule 2 — the redirect URL
     // -----------------------------------------------------------------------
 
