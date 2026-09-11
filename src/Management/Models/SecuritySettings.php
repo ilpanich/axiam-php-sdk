@@ -22,6 +22,7 @@ final class SecuritySettings implements \JsonSerializable
      * @param LockoutPolicy $lockout the server's `lockout` field
      * @param MfaPolicy $mfa the server's `mfa` field
      * @param NotificationPolicy $notification the server's `notification` field
+     * @param OidcPolicy $oidc the server's `oidc` field
      * @param OpaquePolicy $opaque the server's `opaque` field
      * @param PasswordPolicy $password the server's `password` field
      * @param PrivacyPolicy $privacy the server's `privacy` field
@@ -39,6 +40,7 @@ final class SecuritySettings implements \JsonSerializable
         public readonly LockoutPolicy $lockout,
         public readonly MfaPolicy $mfa,
         public readonly NotificationPolicy $notification,
+        public readonly OidcPolicy $oidc,
         public readonly OpaquePolicy $opaque,
         public readonly PasswordPolicy $password,
         public readonly PrivacyPolicy $privacy,
@@ -64,6 +66,7 @@ final class SecuritySettings implements \JsonSerializable
             LockoutPolicy::fromArray((array) ModelDecode::need($data, 'lockout', self::class)),
             MfaPolicy::fromArray((array) ModelDecode::need($data, 'mfa', self::class)),
             NotificationPolicy::fromArray((array) ModelDecode::need($data, 'notification', self::class)),
+            OidcPolicy::fromArray((array) ModelDecode::need($data, 'oidc', self::class)),
             OpaquePolicy::fromArray((array) ModelDecode::need($data, 'opaque', self::class)),
             PasswordPolicy::fromArray((array) ModelDecode::need($data, 'password', self::class)),
             PrivacyPolicy::fromArray((array) ModelDecode::need($data, 'privacy', self::class)),
@@ -93,6 +96,7 @@ final class SecuritySettings implements \JsonSerializable
         $out['lockout'] = $this->lockout->toArray();
         $out['mfa'] = $this->mfa->toArray();
         $out['notification'] = $this->notification->toArray();
+        $out['oidc'] = $this->oidc->toArray();
         $out['opaque'] = $this->opaque->toArray();
         $out['password'] = $this->password->toArray();
         $out['privacy'] = $this->privacy->toArray();

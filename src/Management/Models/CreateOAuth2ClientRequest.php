@@ -23,8 +23,22 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
      *     on exchange-capable clients with that in mind (see
      *     `docs/api/token-exchange.md#audience`).
      * @param list<string> $scopes Scopes the client may request.
+     * @param AuthnRequestParamsMode|null $authnRequestParams X7.1 — whether this client's
+     *     authorization requests may carry the OpenID Connect authentication-request parameters
+     *     (`prompt`, `max_age`, `acr_values`, `claims`, `id_token_hint`, `login_hint`, `display`,
+     *     `ui_locales`, `claims_locales`). `"ignore"` (the default) is what every AXIAM client has
+     *     always done: they are dropped and reach no decision. `"honour"` opts in, and is
+     *     **refused on a `fapi2` client** at both this gate and the authorization endpoint — the
+     *     two are different answers to the same question about what a request from this client
+     *     means. (optional)
      * @param string|null $backchannelLogoutUri B5 — where OIDC back-channel logout tokens are
      *     delivered. Omit for a client that does not participate. (optional)
+     * @param bool|null $browserSso X7.3 — whether an unauthenticated authorization request
+     *     from this client may be answered with a redirect to the login page rather than the `401`
+     *     AXIAM answers today. Accepted and stored, but **nothing reads it yet**: the login hop it
+     *     gates is a later wave. Unlike `authn_request_params` it is permitted on a `fapi2`
+     *     client, because it relaxes nothing — it decides only how an anonymous browser is
+     *     answered. (optional)
      * @param bool|null $dpopBoundAccessTokens RFC 9449 §5.2 — issue DPoP-bound
      *     (sender-constrained) access tokens to this client. Independent of both the
      *     authentication method and `tls_client_certificate_bound_access_tokens`; a client may ask
@@ -76,7 +90,9 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         public readonly string $name,
         public readonly array $redirectUris,
         public readonly array $scopes,
+        public readonly ?AuthnRequestParamsMode $authnRequestParams = null,
         public readonly ?string $backchannelLogoutUri = null,
+        public readonly ?bool $browserSso = null,
         public readonly ?bool $dpopBoundAccessTokens = null,
         public readonly ?bool $dpopRequireNonce = null,
         public readonly ?string $jwks = null,
@@ -104,7 +120,9 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             (string) ModelDecode::need($data, 'name', self::class),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'redirect_uris', self::class))),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scopes', self::class))),
+            isset($data['authn_request_params']) ? AuthnRequestParamsMode::fromWire((string) $data['authn_request_params']) : null,
             isset($data['backchannel_logout_uri']) ? (string) $data['backchannel_logout_uri'] : null,
+            isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
             isset($data['dpop_bound_access_tokens']) ? (bool) $data['dpop_bound_access_tokens'] : null,
             isset($data['dpop_require_nonce']) ? (bool) $data['dpop_require_nonce'] : null,
             isset($data['jwks']) ? (string) $data['jwks'] : null,
@@ -136,8 +154,14 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         $out['name'] = $this->name;
         $out['redirect_uris'] = $this->redirectUris;
         $out['scopes'] = $this->scopes;
+        if ($this->authnRequestParams !== null) {
+            $out['authn_request_params'] = $this->authnRequestParams->value;
+        }
         if ($this->backchannelLogoutUri !== null) {
             $out['backchannel_logout_uri'] = $this->backchannelLogoutUri;
+        }
+        if ($this->browserSso !== null) {
+            $out['browser_sso'] = $this->browserSso;
         }
         if ($this->dpopBoundAccessTokens !== null) {
             $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;

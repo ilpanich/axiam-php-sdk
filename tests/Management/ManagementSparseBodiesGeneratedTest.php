@@ -124,16 +124,16 @@ final class ManagementSparseBodiesGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * `UpdateOAuth2ClientRequest`: naming only `backchannel_logout_uri` sends only
-     * `backchannel_logout_uri`.
+     * `UpdateOAuth2ClientRequest`: naming only `authn_request_params` sends only
+     * `authn_request_params`.
      */
     public function testUpdateOAuth2ClientRequestOmitsWhatYouDidNotName(): void
     {
-        $body = new Models\UpdateOAuth2ClientRequest(backchannelLogoutUri: 'example');
+        $body = new Models\UpdateOAuth2ClientRequest(authnRequestParams: Models\AuthnRequestParamsMode::Ignore);
 
         $rendered = $body->toArray();
 
-        self::assertSame(['backchannel_logout_uri'], array_keys($rendered));
+        self::assertSame(['authn_request_params'], array_keys($rendered));
     }
 
     /**

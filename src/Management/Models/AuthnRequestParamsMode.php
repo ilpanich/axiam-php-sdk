@@ -9,11 +9,16 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management\Models;
 
 /**
- * How a client proves its identity at the token endpoint (RFC 8705 §2, OIDC Core §9 naming).
- * Only the methods AXIAM actually implements are representable. There is deliberately no
- * `none` variant: every AXIAM client is confidential today (see `handle_authorization_code`),
- * and adding a public-client value here before the rest of the server understands one would
- * let an operator register a client whose authentication is silently skipped.
+ * Whether this client's authorization requests may carry OpenID Connect's
+ * authentication-request parameters, or whether they are ignored (X7.1). The bundle this
+ * governs is `prompt`, `max_age`, `acr_values`, `claims`, `id_token_hint`, `login_hint`,
+ * `display`, `ui_locales` and `claims_locales`. It is **one** field rather than nine booleans
+ * for the same reason [`ClientProfile`] is one field rather than a dozen: a client that
+ * honours `max_age` but ignores `prompt=none` is not "mostly conformant", it is a client a
+ * relying party cannot reason about. [`Ignore`](Self::Ignore) is the serde default and is
+ * exactly what AXIAM has always done — unknown authorization-request parameters are dropped by
+ * the query deserialiser and never reach a decision. Every row written before schema v54
+ * therefore decodes to the behaviour it already had.
  *
  * An **open** enum. A value this SDK's copy of the spec does not list decodes to
  * `self::Unknown` rather than failing the response it arrived in (CONTRACT.md §27.11 rule 1).
@@ -21,28 +26,19 @@ namespace Axiam\Sdk\Management\Models;
  * unrecognised value back into an update is refused by the server rather than written as a
  * spelling it never used. A `match` over these cases needs an `Unknown` arm.
  */
-enum ClientAuthMethod: string
+enum AuthnRequestParamsMode: string
 {
-    /** The wire value `client_secret_post`. */
-    case ClientSecretPost = 'client_secret_post';
+    /** The wire value `ignore`. */
+    case Ignore = 'ignore';
 
-    /** The wire value `client_secret_basic`. */
-    case ClientSecretBasic = 'client_secret_basic';
-
-    /** The wire value `tls_client_auth`. */
-    case TlsClientAuth = 'tls_client_auth';
-
-    /** The wire value `self_signed_tls_client_auth`. */
-    case SelfSignedTlsClientAuth = 'self_signed_tls_client_auth';
-
-    /** The wire value `private_key_jwt`. */
-    case PrivateKeyJwt = 'private_key_jwt';
+    /** The wire value `honour`. */
+    case Honour = 'honour';
 
     /** A value this SDK's copy of the spec does not list; see the type's summary. */
     case Unknown = '';
 
     /**
-     * Parses a wire value into a ClientAuthMethod, mapping an unrecognised one to {@see
+     * Parses a wire value into a AuthnRequestParamsMode, mapping an unrecognised one to {@see
      * self::Unknown}.
      *
      * Never throws. A parse error here would fail the whole response the value arrived in, so
