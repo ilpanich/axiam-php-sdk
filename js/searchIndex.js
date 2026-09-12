@@ -2013,7 +2013,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi",
             "name": "ManagementApi",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020147\u0020operations\u0020across\u002024\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020158\u0020operations\u0020across\u002024\u0020namespaces.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003A__construct\u0028\u0029",
@@ -2866,6 +2866,31 @@ Search.appendIndex(
             "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
             "url": "classes/Axiam-Sdk-Management-Models-AuditOutcome.html#enumcase_Unknown"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuthnRequestParamsMode",
+            "name": "AuthnRequestParamsMode",
+            "summary": "Whether\u0020this\u0020client\u0027s\u0020authorization\u0020requests\u0020may\u0020carry\u0020OpenID\u0020Connect\u0027s\nauthentication\u002Drequest\u0020parameters,\u0020or\u0020whether\u0020they\u0020are\u0020ignored\u0020\u0028X7.1\u0029.\u0020The\u0020bundle\u0020this\ngoverns\u0020is\u0020\u0060prompt\u0060,\u0020\u0060max_age\u0060,\u0020\u0060acr_values\u0060,\u0020\u0060claims\u0060,\u0020\u0060id_token_hint\u0060,\u0020\u0060login_hint\u0060,\n\u0060display\u0060,\u0020\u0060ui_locales\u0060\u0020and\u0020\u0060claims_locales\u0060.\u0020It\u0020is\u0020\u002A\u002Aone\u002A\u002A\u0020field\u0020rather\u0020than\u0020nine\u0020booleans\nfor\u0020the\u0020same\u0020reason\u0020\u005B\u0060ClientProfile\u0060\u005D\u0020is\u0020one\u0020field\u0020rather\u0020than\u0020a\u0020dozen\u003A\u0020a\u0020client\u0020that\nhonours\u0020\u0060max_age\u0060\u0020but\u0020ignores\u0020\u0060prompt\u003Dnone\u0060\u0020is\u0020not\u0020\u0022mostly\u0020conformant\u0022,\u0020it\u0020is\u0020a\u0020client\u0020a\nrelying\u0020party\u0020cannot\u0020reason\u0020about.\u0020\u005B\u0060Ignore\u0060\u005D\u0028Self\u003A\u003AIgnore\u0029\u0020is\u0020the\u0020serde\u0020default\u0020and\u0020is\nexactly\u0020what\u0020AXIAM\u0020has\u0020always\u0020done\u0020\u2014\u0020unknown\u0020authorization\u002Drequest\u0020parameters\u0020are\u0020dropped\u0020by\nthe\u0020query\u0020deserialiser\u0020and\u0020never\u0020reach\u0020a\u0020decision.\u0020Every\u0020row\u0020written\u0020before\u0020schema\u0020v54\ntherefore\u0020decodes\u0020to\u0020the\u0020behaviour\u0020it\u0020already\u0020had.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuthnRequestParamsMode\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020AuthnRequestParamsMode,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuthnRequestParamsMode\u003A\u003AIgnore",
+            "name": "Ignore",
+            "summary": "The\u0020wire\u0020value\u0020\u0060ignore\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html#enumcase_Ignore"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuthnRequestParamsMode\u003A\u003AHonour",
+            "name": "Honour",
+            "summary": "The\u0020wire\u0020value\u0020\u0060honour\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html#enumcase_Honour"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuthnRequestParamsMode\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html#enumcase_Unknown"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\BindCertificate",
             "name": "BindCertificate",
             "summary": "Request\u0020to\u0020bind\u0020a\u0020certificate\u0020to\u0020a\u0020service\u0020account.",
@@ -3251,6 +3276,11 @@ Search.appendIndex(
             "summary": "The\u0020wire\u0020value\u0020\u0060client_secret_post\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretPost"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ClientAuthMethod\u003A\u003AClientSecretBasic",
+            "name": "ClientSecretBasic",
+            "summary": "The\u0020wire\u0020value\u0020\u0060client_secret_basic\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretBasic"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ClientAuthMethod\u003A\u003ATlsClientAuth",
             "name": "TlsClientAuth",
             "summary": "The\u0020wire\u0020value\u0020\u0060tls_client_auth\u0060.",
@@ -3355,6 +3385,51 @@ Search.appendIndex(
             "name": "reason",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-ComplianceReportEntry.html#property_reason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView",
+            "name": "ConsentView",
+            "summary": "One\u0020consent\u0020record,\u0020as\u0020the\u0020subject\u0020sees\u0020it.",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ConsentView.",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ConsentView\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003A\u0024acceptedAt",
+            "name": "acceptedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#property_acceptedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003A\u0024consentType",
+            "name": "consentType",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#property_consentType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003A\u0024version",
+            "name": "version",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#property_version"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ConsentView\u003A\u003A\u0024withdrawable",
+            "name": "withdrawable",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ConsentView.html#property_withdrawable"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateCaCertificateRequest",
             "name": "CreateCaCertificateRequest",
@@ -3771,10 +3846,20 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_scopes"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024authnRequestParams",
+            "name": "authnRequestParams",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_authnRequestParams"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024backchannelLogoutUri",
             "name": "backchannelLogoutUri",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_backchannelLogoutUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024browserSso",
+            "name": "browserSso",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_browserSso"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024dpopBoundAccessTokens",
             "name": "dpopBoundAccessTokens",
@@ -5276,6 +5361,41 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-GrantPermissionRequest.html#property_scopeIds"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantScopeConsent",
+            "name": "GrantScopeConsent",
+            "summary": "Body\u0020for\u0020recording\u0020an\u0020OIDC\u0020scope\u002Drelease\u0020consent.",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantScopeConsent\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020GrantScopeConsent.",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantScopeConsent\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020GrantScopeConsent\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantScopeConsent\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantScopeConsent\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantScopeConsent\u003A\u003A\u0024clientId",
+            "name": "clientId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html#property_clientId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantScopeConsent\u003A\u003A\u0024scopes",
+            "name": "scopes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html#property_scopes"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\Group",
             "name": "Group",
             "summary": "A\u0020group\u0020of\u0020users\u0020that\u0020can\u0020access\u0020resources\u0020based\u0020on\u0020their\u0020roles\u0020and\u0020permissions.\u0020Groups\nsimplify\u0020role\u0020management\u0020by\u0020allowing\u0020roles\u0020to\u0020be\u0020assigned\u0020to\u0020a\u0020group\u0020rather\u0020than\u0020individual\nusers.",
@@ -6196,6 +6316,16 @@ Search.appendIndex(
             "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#method_jsonSerialize"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024authnRequestParams",
+            "name": "authnRequestParams",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_authnRequestParams"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024browserSso",
+            "name": "browserSso",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_browserSso"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024clientId",
             "name": "clientId",
             "summary": "",
@@ -6465,6 +6595,41 @@ Search.appendIndex(
             "name": "userId",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-OidcCallbackResponse.html#property_userId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy",
+            "name": "OidcPolicy",
+            "summary": "OpenID\u0020Connect\u0020surface\u0020controls\u0020\u0028X7\u0020G8,\u0020plan\u0020\u00A74.6\/\u00A74.8\u0029.\u0020Two\u0020settings\u0020that\u0020are\u0020not\u0020password\nrules,\u0020and\u0020are\u0020here\u0020because\u0020this\u0020is\u0020the\u0020org\u002Dbaseline\u002Dplus\u002Dtenant\u002Doverride\u0020surface\u0020every\nother\u0020per\u002Dtenant\u0020control\u0020lives\u0020on.\u0020They\u0020are\u0020also\u0020the\u0020two\u0020settings\u0020in\u0020this\u0020model\u0020that\u0020are\n\u002Anot\u002A\u0020of\u0020the\u0020same\u0020kind\u0020as\u0020each\u0020other,\u0020so\u0020it\u0020is\u0020worth\u0020saying\u0020which\u0020is\u0020which\u003A\u0020\u002A\n\u005B\u0060Self\u003A\u003Asensitive_scopes_enabled\u0060\u005D\u0020\u002A\u002Ais\u002A\u002A\u0020ordered.\u0020Releasing\u0020personal\u0020data\u0020is\u0020the\nless\u002Drestrictive\u0020direction,\u0020so\u0020it\u0020is\u0020validated\u0020disable\u002Donly\u0020\u2014\u0020the\u0020mirror\u0020image\u0020of\n\u0060mfa_enforced\u0060\u0020\u2014\u0020and\u0020a\u0020tenant\u0020can\u0020turn\u0020its\u0020organization\u0027s\u0020decision\u0020off\u0020but\u0020never\u0020on.\u0020\u002A\n\u005B\u0060Self\u003A\u003Adefault_locale\u0060\u005D\u0020is\u0020\u002A\u002Anot\u002A\u002A\u0020ordered,\u0020and\u0020no\u0020ordering\u0020is\u0020invented\u0020for\u0020it.\u0020A\u0020language\nis\u0020a\u0020presentation\u0020preference\u003B\u0020there\u0020is\u0020no\u0020sense\u0020in\u0020which\u0020Italian\u0020is\u0020stricter\u0020than\u0020French.",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020OidcPolicy.",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020OidcPolicy\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003A\u0024sensitiveScopesEnabled",
+            "name": "sensitiveScopesEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_sensitiveScopesEnabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003A\u0024defaultLocale",
+            "name": "defaultLocale",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_defaultLocale"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OpaqueEnrollment",
             "name": "OpaqueEnrollment",
@@ -8006,6 +8171,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#property_notification"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SecuritySettings\u003A\u003A\u0024oidc",
+            "name": "oidc",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#property_oidc"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SecuritySettings\u003A\u003A\u0024opaque",
             "name": "opaque",
             "summary": "",
@@ -8386,6 +8556,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_requireUppercase"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024defaultLocale",
+            "name": "defaultLocale",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_defaultLocale"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024deletionGracePeriodDays",
             "name": "deletionGracePeriodDays",
             "summary": "",
@@ -8405,6 +8580,11 @@ Search.appendIndex(
             "name": "opaqueSuite",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_opaqueSuite"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024sensitiveScopesEnabled",
+            "name": "sensitiveScopesEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_sensitiveScopesEnabled"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024webauthnUserVerification",
             "name": "webauthnUserVerification",
@@ -8741,6 +8921,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_defaultCertValidityDays"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024defaultLocale",
+            "name": "defaultLocale",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_defaultLocale"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024deletionGracePeriodDays",
             "name": "deletionGracePeriodDays",
             "summary": "",
@@ -8845,6 +9030,11 @@ Search.appendIndex(
             "name": "requireUppercase",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_requireUppercase"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024sensitiveScopesEnabled",
+            "name": "sensitiveScopesEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_sensitiveScopesEnabled"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024webauthnUserVerification",
             "name": "webauthnUserVerification",
@@ -9286,10 +9476,20 @@ Search.appendIndex(
             "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#method_jsonSerialize"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024authnRequestParams",
+            "name": "authnRequestParams",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_authnRequestParams"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024backchannelLogoutUri",
             "name": "backchannelLogoutUri",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_backchannelLogoutUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024browserSso",
+            "name": "browserSso",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_browserSso"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024dpopBoundAccessTokens",
             "name": "dpopBoundAccessTokens",
@@ -10436,6 +10636,21 @@ Search.appendIndex(
             "summary": "\u0060GET\u0020\/api\/v1\/auth\/account\/delete\/cancel\u003Ftoken\u003D\u003Copaque\u003E\u0060",
             "url": "classes/Axiam-Sdk-Management-PrivacyApi.html#method_cancelDelete"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\PrivacyApi\u003A\u003AlistConsents\u0028\u0029",
+            "name": "listConsents",
+            "summary": "\u0060GET\u0020\/api\/v1\/account\/consents\u0060\u0020\u2014\u0020the\u0020caller\u0027s\u0020own\u0020consent\u0020records.",
+            "url": "classes/Axiam-Sdk-Management-PrivacyApi.html#method_listConsents"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\PrivacyApi\u003A\u003AgrantScopeConsent\u0028\u0029",
+            "name": "grantScopeConsent",
+            "summary": "\u0060POST\u0020\/api\/v1\/account\/consents\/oidc\u002Dscopes\u0060\u0020\u2014\u0020record\u0020a\u0020scope\u002Drelease\u0020consent.",
+            "url": "classes/Axiam-Sdk-Management-PrivacyApi.html#method_grantScopeConsent"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\PrivacyApi\u003A\u003AwithdrawScopeConsent\u0028\u0029",
+            "name": "withdrawScopeConsent",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/account\/consents\/oidc\u002Dscopes\/\u007Bclient_id\u007D\u0060\u0020\u2014\u0020withdraw.",
+            "url": "classes/Axiam-Sdk-Management-PrivacyApi.html#method_withdrawScopeConsent"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ReactorsApi",
             "name": "ReactorsApi",
             "summary": "Registration\u0020of\u0020\u00A722\u0020AMQP\u0020extension\u0020actors\u0020\u002D\u002D\u0020the\u0020admin\u0020surface\u0020\u00A722.9\u0020describes,\u0020which\u0020no\u0020SDK\ncould\u0020previously\u0020reach.",
@@ -11231,6 +11446,51 @@ Search.appendIndex(
             "summary": "The\u0020contract\u002Dmandated\u0020TTL\u0020for\u0020stored\u0020login\u0020state\u003A\u002010\u0020minutes,\u0020matching\u0020the\nserver\u0027s\u0020\u0060federation_login_state\u0060\u0020row\u0020lifetime\u0020\u0028\u00A712.3\u0020rule\u00201\u0029.",
             "url": "classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_TTL_SECONDS"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases",
+            "name": "MtlsEndpointAliases",
+            "summary": "RFC\u00208705\u0020\u00A75\u0020\u0060mtls_endpoint_aliases\u0060\u0020\u2014\u0020the\u0020six\u0020endpoints\u0020re\u002Dbased\u0020on\u0020the\u0020host\u0020that\nperforms\u0020the\u0020mutual\u002DTLS\u0020handshake\u0020\u0028wire\u0020schema\u0020\u0060MtlsEndpointAliases\u0060,\u0020contract\u00201.40\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Build\u0020a\u0020\u007B\u0040see\u0020MtlsEndpointAliases\u007D\u0020from\u0020the\u0020decoded\u0020\u0060mtls_endpoint_aliases\u0060\u0020object,\nor\u0020\u0060null\u0060\u0020when\u0020the\u0020document\u0020carries\u0020none.",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A\u0024token_endpoint",
+            "name": "token_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_token_endpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A\u0024userinfo_endpoint",
+            "name": "userinfo_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_userinfo_endpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A\u0024revocation_endpoint",
+            "name": "revocation_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_revocation_endpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A\u0024introspection_endpoint",
+            "name": "introspection_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_introspection_endpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A\u0024device_authorization_endpoint",
+            "name": "device_authorization_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_device_authorization_endpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A\u0024pushed_authorization_request_endpoint",
+            "name": "pushed_authorization_request_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_pushed_authorization_request_endpoint"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient",
             "name": "OidcClient",
             "summary": "The\u0020OIDC\u0020\/\u0020SSO\u0020relying\u002Dparty\u0020engine\u0020\u0028CONTRACT.md\u0020\u00A712\u0029\u0020behind\u0020\u007B\u0040see\n\\Axiam\\Sdk\\AxiamClient\u007D\u0027s\u0020nine\u0020public\u0020\u0060oidc\u002A\u0060\/\u0060introspect\u0060\/\u0060revoke\u0060\/\u0060sso\u002A\u0060\u0020methods.",
@@ -11498,7 +11758,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration",
             "name": "OidcConfiguration",
-            "summary": "The\u0020OIDC\u0020Discovery\u00201.0\u0020metadata\u0020document\u0020served\u0020by\n\u0060GET\u0020\/.well\u002Dknown\/openid\u002Dconfiguration\u0060\u0020\u0028wire\u0020schema\u0020\u0060OidcDiscoveryDocument\u0060,\nCONTRACT.md\u0020\u00A712.1\u0029.\u0020Every\u0020field\u0020is\u0020required\u0020by\u0020the\u0020server\u0027s\u0020schema.",
+            "summary": "The\u0020OIDC\u0020Discovery\u00201.0\u0020metadata\u0020document\u0020served\u0020by\n\u0060GET\u0020\/.well\u002Dknown\/openid\u002Dconfiguration\u0060\u0020\u0028wire\u0020schema\u0020\u0060OidcDiscoveryDocument\u0060,\nCONTRACT.md\u0020\u00A712.1\u0029.",
             "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A__construct\u0028\u0029",
@@ -11605,6 +11865,21 @@ Search.appendIndex(
             "name": "backchannel_logout_session_supported",
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_backchannel_logout_session_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024mtls_endpoint_aliases",
+            "name": "mtls_endpoint_aliases",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_mtls_endpoint_aliases"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024code_challenge_methods_supported",
+            "name": "code_challenge_methods_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_code_challenge_methods_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024token_endpoint_auth_signing_alg_values_supported",
+            "name": "token_endpoint_auth_signing_alg_values_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint_auth_signing_alg_values_supported"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow",
             "name": "OidcLoginFlow",

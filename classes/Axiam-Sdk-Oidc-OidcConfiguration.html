@@ -124,16 +124,22 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">24</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
             <p class="phpdocumentor-summary">The OIDC Discovery 1.0 metadata document served by
 `GET /.well-known/openid-configuration` (wire schema `OidcDiscoveryDocument`,
-CONTRACT.md §12.1). Every field is required by the server&#039;s schema.</p>
+CONTRACT.md §12.1).</p>
 
 
-    <section class="phpdocumentor-description"><p>Field names deliberately keep the wire's snake_case spelling rather than PHP's usual
+    <section class="phpdocumentor-description"><p>This models a <strong>curated subset</strong> of the document, and the optionality here is the
+SDK's, not the schema's. AXIAM's own schema marks nearly every member required; this
+type marks a member required only where a missing value would leave the SDK with
+nothing to do but guess a URL — so the endpoints §12.7.2 rule 1 forbids synthesising
+are nullable, and so are the capability lists RFC 8414 §2 defines no default for.
+A document from a non-AXIAM OP has to parse.</p>
+<p>Field names deliberately keep the wire's snake_case spelling rather than PHP's usual
 camelCase (contract 1.4 port-brief judgment call 3): this type IS a protocol document,
 and a caller cross-references these names against OIDC Discovery 1.0 / RFC 8414.</p>
 <p><code class="prettyprint">issuer</code> is the <strong>authoritative</strong> issuer for ID-token validation (§12.4 rule 3). It may
@@ -191,6 +197,12 @@ SDK never rejects a document on an issuer/base-URL mismatch (§12.3 rule 6). Lik
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_code_challenge_methods_supported">$code_challenge_methods_supported</a>
+    <span>
+                        &nbsp;: array&lt;string|int, mixed&gt;|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_device_authorization_endpoint">$device_authorization_endpoint</a>
     <span>
                         &nbsp;: string|null            </span>
@@ -233,6 +245,12 @@ SDK never rejects a document on an issuer/base-URL mismatch (§12.3 rule 6). Lik
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_mtls_endpoint_aliases">$mtls_endpoint_aliases</a>
+    <span>
+                        &nbsp;: <a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html"><abbr title="\Axiam\Sdk\Oidc\MtlsEndpointAliases">MtlsEndpointAliases</abbr></a>|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_pushed_authorization_request_endpoint">$pushed_authorization_request_endpoint</a>
     <span>
                         &nbsp;: string|null            </span>
@@ -272,6 +290,12 @@ SDK never rejects a document on an issuer/base-URL mismatch (§12.3 rule 6). Lik
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint_auth_methods_supported">$token_endpoint_auth_methods_supported</a>
     <span>
                         &nbsp;: array&lt;string|int, mixed&gt;            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint_auth_signing_alg_values_supported">$token_endpoint_auth_signing_alg_values_supported</a>
+    <span>
+                        &nbsp;: array&lt;string|int, mixed&gt;|null            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
@@ -334,7 +358,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">49</span>
+    <span class="phpdocumentor-element-found-in__line">59</span>
 
     </aside>
 
@@ -371,7 +395,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">66</span>
+    <span class="phpdocumentor-element-found-in__line">76</span>
 
     </aside>
 
@@ -408,7 +432,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">65</span>
+    <span class="phpdocumentor-element-found-in__line">75</span>
 
     </aside>
 
@@ -445,7 +469,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">60</span>
+    <span class="phpdocumentor-element-found-in__line">70</span>
 
     </aside>
 
@@ -472,6 +496,43 @@ confusing `TypeError` escape from the constructor.</dd>
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_code_challenge_methods_supported">
+        $code_challenge_methods_supported
+        <a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_code_challenge_methods_supported" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">78</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;|null</span>
+    <span class="phpdocumentor-signature__name">$code_challenge_methods_supported</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_device_authorization_endpoint">
         $device_authorization_endpoint
         <a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_device_authorization_endpoint" class="headerlink"><i class="fas fa-link"></i></a>
@@ -482,7 +543,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">72</span>
 
     </aside>
 
@@ -519,7 +580,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">64</span>
+    <span class="phpdocumentor-element-found-in__line">74</span>
 
     </aside>
 
@@ -556,7 +617,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">61</span>
+    <span class="phpdocumentor-element-found-in__line">71</span>
 
     </aside>
 
@@ -593,7 +654,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">67</span>
 
     </aside>
 
@@ -630,7 +691,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">54</span>
+    <span class="phpdocumentor-element-found-in__line">64</span>
 
     </aside>
 
@@ -667,7 +728,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">48</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -704,7 +765,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">52</span>
+    <span class="phpdocumentor-element-found-in__line">62</span>
 
     </aside>
 
@@ -731,6 +792,43 @@ confusing `TypeError` escape from the constructor.</dd>
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_mtls_endpoint_aliases">
+        $mtls_endpoint_aliases
+        <a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_mtls_endpoint_aliases" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">77</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type"><a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html"><abbr title="\Axiam\Sdk\Oidc\MtlsEndpointAliases">MtlsEndpointAliases</abbr></a>|null</span>
+    <span class="phpdocumentor-signature__name">$mtls_endpoint_aliases</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_pushed_authorization_request_endpoint">
         $pushed_authorization_request_endpoint
         <a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_pushed_authorization_request_endpoint" class="headerlink"><i class="fas fa-link"></i></a>
@@ -741,7 +839,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">63</span>
+    <span class="phpdocumentor-element-found-in__line">73</span>
 
     </aside>
 
@@ -778,7 +876,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">55</span>
+    <span class="phpdocumentor-element-found-in__line">65</span>
 
     </aside>
 
@@ -815,7 +913,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">53</span>
+    <span class="phpdocumentor-element-found-in__line">63</span>
 
     </aside>
 
@@ -852,7 +950,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">58</span>
+    <span class="phpdocumentor-element-found-in__line">68</span>
 
     </aside>
 
@@ -889,7 +987,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">56</span>
+    <span class="phpdocumentor-element-found-in__line">66</span>
 
     </aside>
 
@@ -926,7 +1024,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">50</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
@@ -963,7 +1061,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">59</span>
+    <span class="phpdocumentor-element-found-in__line">69</span>
 
     </aside>
 
@@ -990,6 +1088,43 @@ confusing `TypeError` escape from the constructor.</dd>
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_token_endpoint_auth_signing_alg_values_supported">
+        $token_endpoint_auth_signing_alg_values_supported
+        <a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint_auth_signing_alg_values_supported" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">79</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;|null</span>
+    <span class="phpdocumentor-signature__name">$token_endpoint_auth_signing_alg_values_supported</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_userinfo_endpoint">
         $userinfo_endpoint
         <a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_userinfo_endpoint" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1000,7 +1135,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">51</span>
+    <span class="phpdocumentor-element-found-in__line">61</span>
 
     </aside>
 
@@ -1042,14 +1177,14 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">47</span>
+    <span class="phpdocumentor-element-found-in__line">57</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$issuer</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$authorization_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userinfo_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jwks_uri</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$revocation_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$introspection_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$response_types_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subject_types_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id_token_signing_alg_values_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scopes_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token_endpoint_auth_methods_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$claims_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grant_types_supported</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$device_authorization_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$pushed_authorization_request_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$end_session_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$backchannel_logout_supported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$backchannel_logout_session_supported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$issuer</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$authorization_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userinfo_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jwks_uri</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$revocation_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$introspection_endpoint</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$response_types_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subject_types_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id_token_signing_alg_values_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scopes_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token_endpoint_auth_methods_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$claims_supported</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grant_types_supported</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$device_authorization_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$pushed_authorization_request_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$end_session_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$backchannel_logout_supported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$backchannel_logout_session_supported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html"><abbr title="\Axiam\Sdk\Oidc\MtlsEndpointAliases">MtlsEndpointAliases</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mtls_endpoint_aliases</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$code_challenge_methods_supported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token_endpoint_auth_signing_alg_values_supported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1228,6 +1363,33 @@ confusing `TypeError` escape from the constructor.</dd>
 </section>
 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$mtls_endpoint_aliases</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html"><abbr title="\Axiam\Sdk\Oidc\MtlsEndpointAliases">MtlsEndpointAliases</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>RFC 8705 §5 endpoint aliases for a deployment that terminates mutual TLS on a host other than the issuer's own (contract 1.40, §21.3 rule 2). <code class="prettyprint">null</code> means &quot;no separate host&quot;, <strong>not</strong> &quot;mTLS unsupported&quot;: a deployment running <code class="prettyprint">client_auth = optional</code> on one listener serves both populations at the conventional endpoints and correctly publishes nothing here, so a client treating absence as an error would refuse the most common mTLS topology AXIAM ships.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$code_challenge_methods_supported</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>PKCE code-challenge methods the server supports (RFC 8414 §2 / RFC 7636 §4.3; AXIAM advertises <code class="prettyprint">[&quot;S256&quot;]</code> as of contract 1.42). Modelled optional even though the AXIAM schema marks it required: RFC 8414 defines no default for this member, so its <strong>absence does not mean <code class="prettyprint">S256</code></strong> (CONTRACT.md §21.5) — it means a conforming client cannot establish that PKCE is available at all, and a discovery document from a non-AXIAM OP that omits it must still parse rather than be rejected.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$token_endpoint_auth_signing_alg_values_supported</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>JWS algorithms the token endpoint accepts on a <code class="prettyprint">private_key_jwt</code> client assertion (RFC 8414 §2; AXIAM advertises <code class="prettyprint">[&quot;PS256&quot;, &quot;ES256&quot;, &quot;EdDSA&quot;]</code> as of contract 1.42). Optional for the same reason as the member above, and informational either way: §12.1 note 3 pins this SDK to <code class="prettyprint">client_secret_post</code>, so it never signs a client assertion.</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -1250,7 +1412,7 @@ confusing `TypeError` escape from the constructor.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcConfiguration.php"><a href="files/src-oidc-oidcconfiguration.html"><abbr title="src/Oidc/OidcConfiguration.php">OidcConfiguration.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">76</span>
+    <span class="phpdocumentor-element-found-in__line">89</span>
 
     </aside>
 
@@ -1314,6 +1476,7 @@ confusing `TypeError` escape from the constructor.</p>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_backchannel_logout_session_supported">$backchannel_logout_session_supported</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_backchannel_logout_supported">$backchannel_logout_supported</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_claims_supported">$claims_supported</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_code_challenge_methods_supported">$code_challenge_methods_supported</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_device_authorization_endpoint">$device_authorization_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_end_session_endpoint">$end_session_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_grant_types_supported">$grant_types_supported</a></li>
@@ -1321,6 +1484,7 @@ confusing `TypeError` escape from the constructor.</p>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_introspection_endpoint">$introspection_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_issuer">$issuer</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_jwks_uri">$jwks_uri</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_mtls_endpoint_aliases">$mtls_endpoint_aliases</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_pushed_authorization_request_endpoint">$pushed_authorization_request_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_response_types_supported">$response_types_supported</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_revocation_endpoint">$revocation_endpoint</a></li>
@@ -1328,6 +1492,7 @@ confusing `TypeError` escape from the constructor.</p>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_subject_types_supported">$subject_types_supported</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint">$token_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint_auth_methods_supported">$token_endpoint_auth_methods_supported</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint_auth_signing_alg_values_supported">$token_endpoint_auth_signing_alg_values_supported</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_userinfo_endpoint">$userinfo_endpoint</a></li>
                                             </ul>
                 </li>

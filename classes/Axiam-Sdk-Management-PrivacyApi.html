@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">20</span>
+    <span class="phpdocumentor-element-found-in__line">23</span>
 
     </aside>
 
@@ -194,11 +194,25 @@ and §19 telemetry apply without this class doing anything to opt in (§27.8).</
 for why it copies.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_grantScopeConsent">grantScopeConsent()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`POST /api/v1/account/consents/oidc-scopes` — record a scope-release consent.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg">inOrg()</a>
     <span>
                                 &nbsp;: static    </span>
 </dt>
 <dd>A COPY of this handle scoped to `$orgId` (§27.4 rule 3).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_listConsents">listConsents()</a>
+    <span>
+                                &nbsp;: array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ConsentView.html"><abbr title="\Axiam\Sdk\Management\Models\ConsentView">ConsentView</abbr></a>&gt;    </span>
+</dt>
+<dd>`GET /api/v1/account/consents` — the caller&#039;s own consent records.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_requestDelete">requestDelete()</a>
@@ -213,6 +227,13 @@ for why it copies.</dd>
                                 &nbsp;: void    </span>
 </dt>
 <dd>`POST /api/v1/account/export`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_withdrawScopeConsent">withdrawScopeConsent()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`DELETE /api/v1/account/consents/oidc-scopes/{client_id}` — withdraw.</dd>
 
     </dl>
 
@@ -315,7 +336,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">89</span>
+    <span class="phpdocumentor-element-found-in__line">92</span>
 
     </aside>
 
@@ -365,7 +386,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">49</span>
+    <span class="phpdocumentor-element-found-in__line">52</span>
 
     </aside>
 
@@ -457,6 +478,56 @@ for why it copies.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_grantScopeConsent">
+        grantScopeConsent()
+        <a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_grantScopeConsent" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">143</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/account/consents/oidc-scopes` — record a scope-release consent.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">grantScopeConsent</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html"><abbr title="\Axiam\Sdk\Management\Models\GrantScopeConsent">GrantScopeConsent</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/account/consents/oidc-scopes</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-GrantScopeConsent.html"><abbr title="\Axiam\Sdk\Management\Models\GrantScopeConsent">GrantScopeConsent</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_inOrg">
         inOrg()
         <a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg" class="headerlink"><i class="fas fa-link"></i></a>
@@ -512,6 +583,49 @@ from it.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_listConsents">
+        listConsents()
+        <a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_listConsents" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">114</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/account/consents` — the caller&#039;s own consent records.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">listConsents</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ConsentView.html"><abbr title="\Axiam\Sdk\Management\Models\ConsentView">ConsentView</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/account/consents</code>.</p>
+<p>Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ConsentView.html"><abbr title="\Axiam\Sdk\Management\Models\ConsentView">ConsentView</abbr></a>&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_requestDelete">
         requestDelete()
         <a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_requestDelete" class="headerlink"><i class="fas fa-link"></i></a>
@@ -520,7 +634,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">69</span>
+    <span class="phpdocumentor-element-found-in__line">72</span>
 
     </aside>
 
@@ -558,7 +672,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">32</span>
 
     </aside>
 
@@ -576,6 +690,57 @@ from it.</p>
 </section>
 
     
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_withdrawScopeConsent">
+        withdrawScopeConsent()
+        <a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_withdrawScopeConsent" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PrivacyApi.php"><a href="files/src-management-privacyapi.html"><abbr title="src/Management/PrivacyApi.php">PrivacyApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">167</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`DELETE /api/v1/account/consents/oidc-scopes/{client_id}` — withdraw.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">withdrawScopeConsent</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/account/consents/oidc-scopes/{client_id}</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+<p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{client_id}</code> path parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
     
 
         
@@ -608,9 +773,12 @@ from it.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_cancelDelete">cancelDelete()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_downloadExport">downloadExport()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant">forTenant()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_grantScopeConsent">grantScopeConsent()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg">inOrg()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_listConsents">listConsents()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_requestDelete">requestDelete()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_requestExport">requestExport()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-PrivacyApi.html#method_withdrawScopeConsent">withdrawScopeConsent()</a></li>
                                     </ul>
             </li>
                     </ul>

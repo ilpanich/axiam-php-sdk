@@ -97,7 +97,7 @@
     </ul>
 
     <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">ManagementApi.php</h2>
+        <h2 class="phpdocumentor-content__title">AuthnRequestParamsMode.php</h2>
 
         
         
@@ -108,22 +108,31 @@
         
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-management-managementapi.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/src-management-models-authnrequestparamsmode.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
 
 
 
-    <h4 id="toc-classes">
-        Classes
-        <a href="files/src-management-managementapi.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
+
+
+    <h4 id="toc-enums">
+        Enums
+        <a href="files/src-management-models-authnrequestparamsmode.html#toc-enums" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Management-ManagementApi.html"><abbr title="\Axiam\Sdk\Management\ManagementApi">ManagementApi</abbr></a></dt><dd>The CONTRACT.md §27 management surface: 158 operations across 24 namespaces.</dd>    </dl>
-
-
+            <dt class="phpdocumentor-table-of-contents__entry -enum"><a href="classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html"><abbr title="\Axiam\Sdk\Management\Models\AuthnRequestParamsMode">AuthnRequestParamsMode</abbr></a></dt><dd>Whether this client&#039;s authorization requests may carry OpenID Connect&#039;s
+authentication-request parameters, or whether they are ignored (X7.1). The bundle this
+governs is `prompt`, `max_age`, `acr_values`, `claims`, `id_token_hint`, `login_hint`,
+`display`, `ui_locales` and `claims_locales`. It is **one** field rather than nine booleans
+for the same reason [`ClientProfile`] is one field rather than a dozen: a client that
+honours `max_age` but ignores `prompt=none` is not &quot;mostly conformant&quot;, it is a client a
+relying party cannot reason about. [`Ignore`](Self::Ignore) is the serde default and is
+exactly what AXIAM has always done — unknown authorization-request parameters are dropped by
+the query deserialiser and never reach a decision. Every row written before schema v54
+therefore decodes to the behaviour it already had.</dd></dl>
 
 
 
@@ -146,8 +155,8 @@
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                        <li><a href="files/src-management-managementapi.html#toc-classes">Classes</a></li>
-                                                                                                                    </ul>
+                                                                                                                                                <li><a href="files/src-management-models-authnrequestparamsmode.html#toc-enums">Enums</a></li>
+                                                                            </ul>
             </li>
 
             
@@ -168,7 +177,7 @@
     </section>
 </section>
         </div>
-        <a href="files/src-management-managementapi.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/src-management-models-authnrequestparamsmode.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

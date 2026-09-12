@@ -97,7 +97,7 @@
     </ul>
 
     <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">ManagementApi.php</h2>
+        <h2 class="phpdocumentor-content__title">OidcPolicy.php</h2>
 
         
         
@@ -108,7 +108,7 @@
         
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-management-managementapi.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/src-management-models-oidcpolicy.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -117,11 +117,19 @@
 
     <h4 id="toc-classes">
         Classes
-        <a href="files/src-management-managementapi.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="files/src-management-models-oidcpolicy.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Management-ManagementApi.html"><abbr title="\Axiam\Sdk\Management\ManagementApi">ManagementApi</abbr></a></dt><dd>The CONTRACT.md §27 management surface: 158 operations across 24 namespaces.</dd>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\OidcPolicy">OidcPolicy</abbr></a></dt><dd>OpenID Connect surface controls (X7 G8, plan §4.6/§4.8). Two settings that are not password
+rules, and are here because this is the org-baseline-plus-tenant-override surface every
+other per-tenant control lives on. They are also the two settings in this model that are
+*not* of the same kind as each other, so it is worth saying which is which: *
+[`Self::sensitive_scopes_enabled`] **is** ordered. Releasing personal data is the
+less-restrictive direction, so it is validated disable-only — the mirror image of
+`mfa_enforced` — and a tenant can turn its organization&#039;s decision off but never on. *
+[`Self::default_locale`] is **not** ordered, and no ordering is invented for it. A language
+is a presentation preference; there is no sense in which Italian is stricter than French.</dd>    </dl>
 
 
 
@@ -146,7 +154,7 @@
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                        <li><a href="files/src-management-managementapi.html#toc-classes">Classes</a></li>
+                                                                                                        <li><a href="files/src-management-models-oidcpolicy.html#toc-classes">Classes</a></li>
                                                                                                                     </ul>
             </li>
 
@@ -168,7 +176,7 @@
     </section>
 </section>
         </div>
-        <a href="files/src-management-managementapi.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/src-management-models-oidcpolicy.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 
