@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-beta13] - 2026-09-12
+
 ### Added
+
+- Accept a caller-supplied dpop_jkt on pushed authorization requests
+
+- Model the two contract 1.42 discovery capability lists
+
+- Prefer RFC 8705 §5 mtls_endpoint_aliases on mTLS calls
 
 - **`dpop_jkt` on pushed authorization requests (SDK contract 1.42, RFC 9449
   §10.1).** `oidcPar()` takes an optional sixth argument, `dpopJkt` — the
@@ -72,6 +80,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `new OidcConfiguration(...)` call sites still work.
 
 ### Changed
+
+- Record the 1.40 -> 1.42 re-sync in CHANGELOG and README
+
+- Pin replace-don't-append for a discovery-advertised tenant_id
+
+- Re-vendor CONTRACT/openapi/registry at SDK contract 1.42
 
 - Re-vendored `CONTRACT.md`, `openapi.json` and `management-registry.json` from
   `ilpanich/axiam` at **SDK contract 1.42** — two revisions, 1.40 → 1.42, since
