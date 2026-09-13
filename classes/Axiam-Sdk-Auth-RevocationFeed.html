@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+            <title>AXIAM PHP SDK</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png"/>
+    <link rel="icon" href="images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/base.css">
+            <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/template.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" integrity="sha256-ybRkN9dBjhcS2qrW1z+hfCxq+1aBdwyQM5wlQoQVt/0=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/themes/prism-okaidia.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.css">
+                <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2"></script>
+        <script src="js/template.js"></script>
+        <script src="js/search.js"></script>
+        <script defer src="js/searchIndex.js"></script>
+    </head>
+<body id="top">
+    <header class="phpdocumentor-header phpdocumentor-section">
+    <h1 class="phpdocumentor-title"><a href="" class="phpdocumentor-title__link">AXIAM PHP SDK</a></h1>
+    <input class="phpdocumentor-header__menu-button" type="checkbox" id="menu-button" name="menu-button" />
+    <label class="phpdocumentor-header__menu-icon" for="menu-button">
+        <i class="fas fa-bars"></i>
+    </label>
+    <section data-search-form class="phpdocumentor-search">
+    <label>
+        <span class="visually-hidden">Search for</span>
+        <svg class="phpdocumentor-search__icon" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+            <line x1="12.4892" y1="12.2727" x2="19.1559" y2="18.9393" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <input type="search" class="phpdocumentor-field phpdocumentor-search__field" placeholder="Loading .." disabled />
+    </label>
+</section>
+
+    <nav class="phpdocumentor-topnav">
+    <ul class="phpdocumentor-topnav__menu">
+        </ul>
+</nav>
+</header>
+
+    <main class="phpdocumentor">
+        <div class="phpdocumentor-section">
+            <input class="phpdocumentor-sidebar__menu-button" type="checkbox" id="sidebar-button" name="sidebar-button" />
+<label class="phpdocumentor-sidebar__menu-icon" for="sidebar-button">
+    Menu
+</label>
+<aside class="phpdocumentor-column -three phpdocumentor-sidebar">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
+            <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/axiam.html" class="">Axiam</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/axiam-sdk.html" class="">Sdk</a>
+                
+            </li>
+            </ul>
+
+                        </section>
+                <section class="phpdocumentor-sidebar__category -packages">
+            <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Application.html" class="">Application</a>
+</h4>
+
+                        </section>
+            
+    <section class="phpdocumentor-sidebar__category -reports">
+        <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
+    </section>
+
+    <section class="phpdocumentor-sidebar__category -indices">
+        <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
+    </section>
+</aside>
+
+            <div class="phpdocumentor-column -nine phpdocumentor-content">
+                                <section>
+                                        <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-auth.html">Auth</a></li>
+    </ul>
+
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    RevocationFeed
+
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
+
+<div class="phpdocumentor-label-line">
+
+    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
+
+
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">41</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">The optional session-revocation feed poller (CONTRACT.md §10.4, contract 1.44 — AXIAM
+threats T-39 and T-143).</p>
+
+
+    <section class="phpdocumentor-description"><p>WHAT THIS NARROWS, AND WHAT IT IS NOT</p>
+<p>An AXIAM access token is self-contained and valid for up to fifteen minutes, and this
+SDK verifies it locally. A logout, a role removal or an account disable therefore does
+not reach a token already in a caller's hands until it expires — §10.2 records that, and
+the documented answer has been &quot;route the decision through gRPC introspection instead&quot;,
+which is correct and costs a round trip PER REQUEST.</p>
+<p>A deployment may publish <code class="prettyprint">GET /oauth2/revocations</code>: the base64url-unpadded SHA-256 of
+every session id revoked within the last access-token lifetime. A guard that polls it
+rejects a revoked session within ONE POLL INTERVAL instead of one token lifetime, for one
+cacheable fetch per interval.</p>
+<p>It is NOT a control, and every rule below follows from that:</p>
+<ul>
+<li>DEFAULT OFF. Nothing polls unless a caller constructs one and passes it.</li>
+<li>NEVER ON THE REQUEST PATH. <abbr title="\Axiam\Sdk\Auth\isRevoked()">isRevoked()</abbr> answers from the cached set and, at most,
+refreshes a set the NEXT caller sees.</li>
+<li>NEVER FAIL CLOSED. An unreachable feed, a non-200, a body that does not parse, an <code class="prettyprint">alg</code>
+this build does not know — every one of them behaves exactly as no feed at all. Not as
+an empty list: an empty list asserts that nothing has been revoked, which is a guard
+that silently honours no revocations while appearing to honour them.</li>
+<li>IT ONLY EVER REJECTS. Every §10.1 rule runs first and still decides. The feed can turn
+an accept into a reject and never the reverse.</li>
+<li>A TOKEN WITH NO <code class="prettyprint">sid</code> IS NEVER MATCHED. There is no session behind a
+client-credentials token, an RPT or a token exchange, and hashing <code class="prettyprint">jti</code> instead would
+match nothing while looking like it worked.</li>
+</ul>
+</section>
+
+
+
+    
+    
+<h3 id="toc">
+    Table of Contents
+    <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h3>
+
+
+
+
+
+
+
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_DEFAULT_POLL_INTERVAL_SECONDS">DEFAULT_POLL_INTERVAL_SECONDS</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 30                            </span>
+</dt>
+<dd>The interval §10.4 recommends, and the one a feed uses unless told otherwise.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_FEED_PATH">FEED_PATH</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;/oauth2/revocations&#039;                            </span>
+</dt>
+<dd>The published feed&#039;s path, appended to a deployment&#039;s base URL.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MAX_ENTRIES">MAX_ENTRIES</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 100000                            </span>
+</dt>
+<dd>The largest number of entries kept in the cache (§10.4 rule 2).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MIN_POLL_INTERVAL_SECONDS">MIN_POLL_INTERVAL_SECONDS</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 15                            </span>
+</dt>
+<dd>The shortest interval a caller may configure (§10.4 rule 2), in seconds.</dd>
+
+    </dl>
+
+
+
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method___construct">__construct()</a>
+    <span>
+                                &nbsp;: mixed    </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_entryFor">entryFor()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>The feed entry for a `sid`, as the server computes it.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_feedUrl">feedUrl()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>The feed document&#039;s URL, for diagnostics.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_isRevoked">isRevoked()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Reports whether this session has been revoked, as far as this poller knows.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_pollIntervalSeconds">pollIntervalSeconds()</a>
+    <span>
+                                &nbsp;: int    </span>
+</dt>
+<dd>The interval actually in effect, after the MIN_POLL_INTERVAL_SECONDS clamp.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_refresh">refresh()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Fetches now, whatever the interval says. For tests, and for a caller that wants the
+first poll to have happened before it starts serving.</dd>
+
+    </dl>
+
+
+
+        
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_DEFAULT_POLL_INTERVAL_SECONDS">
+        DEFAULT_POLL_INTERVAL_SECONDS
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_DEFAULT_POLL_INTERVAL_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">67</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The interval §10.4 recommends, and the one a feed uses unless told otherwise.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">DEFAULT_POLL_INTERVAL_SECONDS</span>
+    = <span class="phpdocumentor-signature__default-value">30</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_FEED_PATH">
+        FEED_PATH
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_FEED_PATH" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">44</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The published feed&#039;s path, appended to a deployment&#039;s base URL.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">FEED_PATH</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;/oauth2/revocations&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_MAX_ENTRIES">
+        MAX_ENTRIES
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MAX_ENTRIES" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">79</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The largest number of entries kept in the cache (§10.4 rule 2).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">MAX_ENTRIES</span>
+    = <span class="phpdocumentor-signature__default-value">100000</span>
+</code>
+
+
+        <section class="phpdocumentor-description"><p>The server bounds the document by its own revocation rate over one token lifetime, so
+this is defence against a server that stops doing so — a cache with no ceiling is an
+allocation an unauthenticated endpoint controls. Overflow drops the WHOLE set rather
+than truncating it: a truncated set is a guard that admits some revoked sessions and
+reports none, which is worse than a guard that admits all of them and says the feed
+is unusable.</p>
+</section>
+
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_MIN_POLL_INTERVAL_SECONDS">
+        MIN_POLL_INTERVAL_SECONDS
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MIN_POLL_INTERVAL_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">64</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The shortest interval a caller may configure (§10.4 rule 2), in seconds.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">MIN_POLL_INTERVAL_SECONDS</span>
+    = <span class="phpdocumentor-signature__default-value">15</span>
+</code>
+
+
+        <section class="phpdocumentor-description"><p>Bounded because the feed is one deployment-wide document and a fleet of guards
+polling it at a hundred milliseconds is a load source rather than a security
+improvement. The floor is applied by CLAMPING, not by refusing: a caller who asked
+for something faster gets the fastest thing on offer.</p>
+</section>
+
+    
+    
+
+        
+    </article>
+            </section>
+
+        
+
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method___construct">
+        __construct()
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">121</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\ClientInterface">ClientInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$http</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$pollIntervalSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$http</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\GuzzleHttp\ClientInterface">ClientInterface</abbr></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>used only to fetch the feed document; the same
+Guzzle client type <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html"><abbr title="\Axiam\Sdk\Auth\JwksVerifier">JwksVerifier</abbr></a> takes</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$baseUrl</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the AXIAM server base URL; the feed
+path is resolved against it. A deployment that does
+not publish the feed is not an error here — that is
+discovered on the first poll, and behaves as no feed
+at all from then on</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$pollIntervalSeconds</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>how long a fetched set is served before a
+refetch is attempted; clamped UP to
+MIN_POLL_INTERVAL_SECONDS rather than refused</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_entryFor">
+        entryFor()
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_entryFor" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">162</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The feed entry for a `sid`, as the server computes it.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">entryFor</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sid</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Base64url without padding over the claim's EXACT string — never a
+parsed-and-re-rendered UUID, or the answer would depend on this class's UUID parser
+rather than on the feed.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$sid</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_feedUrl">
+        feedUrl()
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_feedUrl" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">132</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The feed document&#039;s URL, for diagnostics.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">feedUrl</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_isRevoked">
+        isRevoked()
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_isRevoked" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">178</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Reports whether this session has been revoked, as far as this poller knows.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">isRevoked</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sid</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>False whenever the answer is not a confident yes — a feed never fetched, unreachable,
+malformed, or simply not listing this session. The caller admits the request in all
+of those cases, which is §10.4 rule 3 and is the whole reason the feature is safe to
+turn on.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$sid</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">sid</code> claim, or null/empty for a token that carries none
+— which is never matched (§10.4 rule 6)</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_pollIntervalSeconds">
+        pollIntervalSeconds()
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_pollIntervalSeconds" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">138</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The interval actually in effect, after the MIN_POLL_INTERVAL_SECONDS clamp.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">pollIntervalSeconds</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">int</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_refresh">
+        refresh()
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_refresh" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/RevocationFeed.php"><a href="files/src-auth-revocationfeed.html"><abbr title="src/Auth/RevocationFeed.php">RevocationFeed.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">197</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Fetches now, whatever the interval says. For tests, and for a caller that wants the
+first poll to have happened before it starts serving.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">refresh</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+    
+</article>
+            </section>
+
+        
+    </article>
+                                </section>
+                <section class="phpdocumentor-on-this-page__sidebar">
+                                
+    <section class="phpdocumentor-on-this-page__content">
+        <strong class="phpdocumentor-on-this-page__title">On this page</strong>
+
+        <ul class="phpdocumentor-list -clean">
+            <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#toc-constants">Constants</a></li>
+                                                                                <li><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#toc-methods">Methods</a></li>
+                                    </ul>
+            </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_DEFAULT_POLL_INTERVAL_SECONDS">DEFAULT_POLL_INTERVAL_SECONDS</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_FEED_PATH">FEED_PATH</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MAX_ENTRIES">MAX_ENTRIES</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MIN_POLL_INTERVAL_SECONDS">MIN_POLL_INTERVAL_SECONDS</a></li>
+                                            </ul>
+                </li>
+            
+            
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_entryFor">entryFor()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_feedUrl">feedUrl()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_isRevoked">isRevoked()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_pollIntervalSeconds">pollIntervalSeconds()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#method_refresh">refresh()</a></li>
+                                    </ul>
+            </li>
+                    </ul>
+    </section>
+
+                </section>
+                            </div>
+            <section data-search-results class="phpdocumentor-search-results phpdocumentor-search-results--hidden">
+    <section class="phpdocumentor-search-results__dialog">
+        <header class="phpdocumentor-search-results__header">
+            <h2 class="phpdocumentor-search-results__title">Search results</h2>
+            <button class="phpdocumentor-search-results__close"><i class="fas fa-times"></i></button>
+        </header>
+        <section class="phpdocumentor-search-results__body">
+            <ul class="phpdocumentor-search-results__entries"></ul>
+        </section>
+    </section>
+</section>
+        </div>
+        <a href="classes/Axiam-Sdk-Auth-RevocationFeed.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+
+    </main>
+
+    <script>
+        cssVars({});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+</body>
+</html>

@@ -636,6 +636,61 @@ Search.appendIndex(
             "summary": "Wait\u0020for\u0020an\u0020ALREADY\u002DIN\u002DFLIGHT\u0020shared\u0020refresh\u0020to\u0020settle\u0020and\u0020return\u0020its\u0020outcome\u0020\u2014\nthe\u0020waiter\u0027s\u0020half\u0020of\u0020CONTRACT.md\u0020\u00A79\u0020rule\u00202\u0020\u0028F\u002D06\u0029.",
             "url": "classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed",
+            "name": "RevocationFeed",
+            "summary": "The\u0020optional\u0020session\u002Drevocation\u0020feed\u0020poller\u0020\u0028CONTRACT.md\u0020\u00A710.4,\u0020contract\u00201.44\u0020\u2014\u0020AXIAM\nthreats\u0020T\u002D39\u0020and\u0020T\u002D143\u0029.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003AfeedUrl\u0028\u0029",
+            "name": "feedUrl",
+            "summary": "The\u0020feed\u0020document\u0027s\u0020URL,\u0020for\u0020diagnostics.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#method_feedUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003ApollIntervalSeconds\u0028\u0029",
+            "name": "pollIntervalSeconds",
+            "summary": "The\u0020interval\u0020actually\u0020in\u0020effect,\u0020after\u0020the\u0020MIN_POLL_INTERVAL_SECONDS\u0020clamp.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#method_pollIntervalSeconds"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003AentryFor\u0028\u0029",
+            "name": "entryFor",
+            "summary": "The\u0020feed\u0020entry\u0020for\u0020a\u0020\u0060sid\u0060,\u0020as\u0020the\u0020server\u0020computes\u0020it.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#method_entryFor"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003AisRevoked\u0028\u0029",
+            "name": "isRevoked",
+            "summary": "Reports\u0020whether\u0020this\u0020session\u0020has\u0020been\u0020revoked,\u0020as\u0020far\u0020as\u0020this\u0020poller\u0020knows.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#method_isRevoked"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003Arefresh\u0028\u0029",
+            "name": "refresh",
+            "summary": "Fetches\u0020now,\u0020whatever\u0020the\u0020interval\u0020says.\u0020For\u0020tests,\u0020and\u0020for\u0020a\u0020caller\u0020that\u0020wants\u0020the\nfirst\u0020poll\u0020to\u0020have\u0020happened\u0020before\u0020it\u0020starts\u0020serving.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#method_refresh"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003AFEED_PATH",
+            "name": "FEED_PATH",
+            "summary": "The\u0020published\u0020feed\u0027s\u0020path,\u0020appended\u0020to\u0020a\u0020deployment\u0027s\u0020base\u0020URL.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_FEED_PATH"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003AMIN_POLL_INTERVAL_SECONDS",
+            "name": "MIN_POLL_INTERVAL_SECONDS",
+            "summary": "The\u0020shortest\u0020interval\u0020a\u0020caller\u0020may\u0020configure\u0020\u0028\u00A710.4\u0020rule\u00202\u0029,\u0020in\u0020seconds.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MIN_POLL_INTERVAL_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003ADEFAULT_POLL_INTERVAL_SECONDS",
+            "name": "DEFAULT_POLL_INTERVAL_SECONDS",
+            "summary": "The\u0020interval\u0020\u00A710.4\u0020recommends,\u0020and\u0020the\u0020one\u0020a\u0020feed\u0020uses\u0020unless\u0020told\u0020otherwise.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_DEFAULT_POLL_INTERVAL_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\RevocationFeed\u003A\u003AMAX_ENTRIES",
+            "name": "MAX_ENTRIES",
+            "summary": "The\u0020largest\u0020number\u0020of\u0020entries\u0020kept\u0020in\u0020the\u0020cache\u0020\u0028\u00A710.4\u0020rule\u00202\u0029.",
+            "url": "classes/Axiam-Sdk-Auth-RevocationFeed.html#constant_MAX_ENTRIES"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\UserInfo",
             "name": "UserInfo",
             "summary": "Result\u0020of\u0020\u0060AxiamClient\u003A\u003AgetUserInfo\u0028\u0029\u0060\u0020\u0028CONTRACT.md\u0020\u00A71.1,\u0020contract\u00201.3\u0029.",
@@ -2013,7 +2068,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi",
             "name": "ManagementApi",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020158\u0020operations\u0020across\u002024\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020159\u0020operations\u0020across\u002024\u0020namespaces.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003A__construct\u0028\u0029",
@@ -8351,6 +8406,86 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-ServiceAccountResponse.html#property_description"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse",
+            "name": "SessionResponse",
+            "summary": "One\u0020of\u0020a\u0020user\u0027s\u0020sessions,\u0020as\u0020an\u0020administrator\u0020sees\u0020it.",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SessionResponse.",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SessionResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024amr",
+            "name": "amr",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_amr"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024authenticatedAt",
+            "name": "authenticatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_authenticatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024expiresAt",
+            "name": "expiresAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_expiresAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024refreshReplayGraceAccepted",
+            "name": "refreshReplayGraceAccepted",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_refreshReplayGraceAccepted"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024refreshReplayRefused",
+            "name": "refreshReplayRefused",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_refreshReplayRefused"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024refreshReplayVerdict",
+            "name": "refreshReplayVerdict",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_refreshReplayVerdict"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024ipAddress",
+            "name": "ipAddress",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_ipAddress"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024refreshReplayAt",
+            "name": "refreshReplayAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_refreshReplayAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SessionResponse\u003A\u003A\u0024userAgent",
+            "name": "userAgent",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_userAgent"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetMtlsTrustAnchor",
             "name": "SetMtlsTrustAnchor",
             "summary": "Body\u0020for\u0020\u0060PUT\u0020...\/ca\u002Dcertificates\/\u007Bid\u007D\/mtls\u002Dtrust\u002Danchor\u0060.",
@@ -11045,6 +11180,11 @@ Search.appendIndex(
             "name": "listRoles",
             "summary": "\u0060GET\u0020\/api\/v1\/users\/\u007Buser_id\u007D\/roles\u0060",
             "url": "classes/Axiam-Sdk-Management-UsersApi.html#method_listRoles"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\UsersApi\u003A\u003AlistSessions\u0028\u0029",
+            "name": "listSessions",
+            "summary": "\u0060GET\u0020\/api\/v1\/users\/\u007Buser_id\u007D\/sessions\u0060",
+            "url": "classes/Axiam-Sdk-Management-UsersApi.html#method_listSessions"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ValidationError",
             "name": "ValidationError",
