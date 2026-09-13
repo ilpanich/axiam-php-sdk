@@ -506,4 +506,74 @@ final class D5ConformanceTest extends TestCase
         // The route CONSTANT — the batch path, not the single-check one.
         self::assertSame('/api/v1/authz/check/batch', $starts[0]->pathTemplate);
     }
+
+    // -----------------------------------------------------------------------
+    // R-4 / AXIAM T-262 — the contended-write answer
+    // -----------------------------------------------------------------------
+
+    /**
+     * The script above, but every 503 carries `Retry-After: 1` — the shape a write that
+     * lost a datastore race now answers with (AXIAM T-262: previously a bare 500).
+     *
+     * @param list<int> $statuses
+     * @return list<Response>
+     */
+    private static function contended(array $statuses): array
+    {
+        return array_map(
+            static fn (int $s): Response => $s === 200
+                ? new Response(200, ['Content-Type' => 'application/json'], self::ALLOW_BODY)
+                : new Response($s, ['Retry-After' => '1']),
+            $statuses,
+        );
+    }
+
+    public function testAContendedWriteAnswerIsRetriedAndSucceeds(): void
+    {
+        // T-262 changed a lost datastore race from 500 to 503 + Retry-After: 1 precisely
+        // so a client would come back rather than stop. This asserts the SDK takes that
+        // advice — and asserts it by COUNTING REQUESTS ON THE WIRE, because a retry
+        // helper that is exported, unit-tested and green while no production path calls
+        // it is the §16.7 failure mode this suite exists to catch.
+        $client = $this->clientFor(self::contended([503, 200]));
+
+        $decision = $client->checkAccessDecision('read', self::RESOURCE);
+
+        self::assertTrue($decision->allowed);
+        self::assertCount(2, $this->sent);
+    }
+
+    public function testANonIdempotentCallMakesExactlyOneAttemptAgainstTheSame503(): void
+    {
+        // The other half, and the one that matters more. Retry-After is advice about WHEN
+        // to come back, never permission to replay a mutation: a login retried on a 503
+        // may authenticate twice, and the same reasoning covers every POST that is not
+        // idempotent. The status and header are identical to the test above — only the
+        // idempotency of the call differs, which is the whole point.
+        $this->sent = [];
+        $handler = function ($request, array $options): \GuzzleHttp\Promise\PromiseInterface {
+            $this->sent[] = $request;
+
+            return \GuzzleHttp\Promise\Create::promiseFor(
+                new Response(503, ['Retry-After' => '1']),
+            );
+        };
+
+        $client = new \Axiam\Sdk\AxiamClient(
+            'https://axiam-d5.test',
+            'acme',
+            transportHandler: $handler,
+        );
+
+        // Minted, not written down. A literal password in a test is indistinguishable, to
+        // a secret scanner, from a real one.
+        $password = 'Fixture-' . bin2hex(random_bytes(8)) . '-aA1!';
+
+        try {
+            $client->login('someone@example.test', $password);
+            self::fail('the 503 must reach the caller rather than being retried');
+        } catch (\Throwable) {
+            self::assertCount(1, $this->sent);
+        }
+    }
 }

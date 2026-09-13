@@ -11,6 +11,7 @@ namespace Axiam\Sdk\Management;
 use Axiam\Sdk\Management\Models\CreateUserRequest;
 use Axiam\Sdk\Management\Models\MfaMethodResponse;
 use Axiam\Sdk\Management\Models\RoleAssignment;
+use Axiam\Sdk\Management\Models\SessionResponse;
 use Axiam\Sdk\Management\Models\UpdateUserRequest;
 use Axiam\Sdk\Management\Models\UserResponse;
 
@@ -267,6 +268,38 @@ final class UsersApi extends ManagementSupport
         foreach ($decoded ?? [] as $item) {
             if (is_array($item)) {
                 $items[] = RoleAssignment::fromArray($item);
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * `GET /api/v1/users/{user_id}/sessions`
+     *
+     * `GET /api/v1/users/{user_id}/sessions`.
+     *
+     * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+     * plain list and never a `Page` (§27.4 rule 4).
+     * @param string $userId the `{user_id}` path parameter
+     * @return list<SessionResponse>
+     */
+    public function listSessions(
+        string $userId,
+    ): array {
+        $decoded = $this->transport->send(
+            'users.list_sessions',
+            'GET',
+            '/api/v1/users/{user_id}/sessions',
+            ['user_id' => $userId],
+            [],
+            null,
+        );
+
+        $items = [];
+        foreach ($decoded ?? [] as $item) {
+            if (is_array($item)) {
+                $items[] = SessionResponse::fromArray($item);
             }
         }
 

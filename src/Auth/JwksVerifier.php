@@ -131,6 +131,15 @@ final class JwksVerifier
         private readonly int $cacheTtlSeconds = 300,
         private readonly ?string $expectedIssuer = null,
         private readonly ?string $expectedAudience = null,
+        /**
+         * The CONTRACT.md §10.4 session-revocation feed (contract 1.44). OPTIONAL, and
+         * null — the default — is the feature OFF: nothing is fetched, and this verifier
+         * behaves byte-for-byte as it did before contract 1.44. Supplying one lets a
+         * revoked session be rejected within one poll interval rather than one token
+         * lifetime; it can only ever turn an accept into a reject, and a feed that is
+         * unreachable or unusable behaves exactly as no feed at all.
+         */
+        private readonly ?RevocationFeed $revocationFeed = null,
     ) {
     }
 
@@ -202,7 +211,31 @@ final class JwksVerifier
         }
         $claims = (array) $decoded;
 
-        return $this->applyClaimPolicy($claims, $expectedTenantId) ? $claims : null;
+        if (!$this->applyClaimPolicy($claims, $expectedTenantId)) {
+            return null;
+        }
+
+        // CONTRACT.md §10.4 (contract 1.44) — LAST, and only after every §10.1 rule has
+        // already decided to accept. The feed "only ever rejects" (rule 4), so running it
+        // here rather than earlier is what makes that true: a token that fails a §10.1
+        // rule is rejected whatever the feed says, and the feed is not consulted — nor
+        // fetched — for it at all.
+        //
+        // This sits in verify() and NOT in verifyIdTokenSignature(), so the §12.4
+        // ID-token path cannot reach it: an ID token carries no AXIAM session and has no
+        // `sid` to match.
+        if ($this->revocationFeed !== null) {
+            $sid = $claims['sid'] ?? null;
+
+            // Rule 6: a token with no `sid` — client credentials, an RPT, a token
+            // exchange — is never matched. Hashing `jti` instead would match nothing
+            // while looking like it worked.
+            if ($this->revocationFeed->isRevoked(is_string($sid) ? $sid : null)) {
+                return null;
+            }
+        }
+
+        return $claims;
     }
 
     /**
