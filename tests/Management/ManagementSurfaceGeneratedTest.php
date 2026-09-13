@@ -12,7 +12,7 @@ use Axiam\Sdk\Management\Models;
 use Axiam\Sdk\Management\Page;
 
 /**
- * One case per CONTRACT.md §27 operation — all 158 of them.
+ * One case per CONTRACT.md §27 operation — all 159 of them.
  *
  * Each asserts three things about one operation: it issues the METHOD the registry names,
  * against the PATH the registry names, and — where the operation returns a body — that every
@@ -456,6 +456,37 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $request = $this->lastRequest();
         self::assertSame('GET', $request->getMethod());
         self::assertSame('/api/v1/users/11111111-1111-4111-8111-111111111111/roles', $request->getUri()->getPath());
+        self::assertIsArray($result);
+        self::assertCount(1, $result);
+        $this->assertDecodedEveryField($mounted[0], $result[0]);
+    }
+
+    /** `GET /api/v1/users/{user_id}/sessions` — the `users.list_sessions` operation. */
+    public function testUsersListSessionsReachesItsRoute(): void
+    {
+        $mounted = [
+            [
+                'amr' => [
+                    'example',
+                ],
+                'authenticated_at' => 'example',
+                'created_at' => 'example',
+                'expires_at' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'ip_address' => 'example',
+                'refresh_replay_at' => 'example',
+                'refresh_replay_grace_accepted' => 1,
+                'refresh_replay_refused' => 1,
+                'refresh_replay_verdict' => 'example',
+                'user_agent' => 'example',
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->users()->listSessions('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/users/11111111-1111-4111-8111-111111111111/sessions', $request->getUri()->getPath());
         self::assertIsArray($result);
         self::assertCount(1, $result);
         $this->assertDecodedEveryField($mounted[0], $result[0]);
@@ -4065,10 +4096,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * §27.9: all 158 registry operations are covered by a case above.
+     * §27.9: all 159 registry operations are covered by a case above.
      *
-     * Counted reflectively rather than written as a literal on both sides — `assertSame(158,
-     * 158)` is a tautology, and a case removed by a bad regeneration would still pass it.
+     * Counted reflectively rather than written as a literal on both sides — `assertSame(159,
+     * 159)` is a tautology, and a case removed by a bad regeneration would still pass it.
      */
     public function testEveryRegistryOperationHasACase(): void
     {
@@ -4078,6 +4109,6 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'ReachesItsRoute'),
         );
 
-        self::assertCount(158, $cases);
+        self::assertCount(159, $cases);
     }
 }

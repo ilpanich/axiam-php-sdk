@@ -1910,11 +1910,72 @@ final class OidcClient
         if ($this->presentsClientCertificate && $configuration->mtls_endpoint_aliases !== null) {
             $alias = $pick($configuration->mtls_endpoint_aliases);
             if ($alias !== null && $alias !== '') {
+                self::assertUsableMtlsAlias($alias, $topLevel);
+
                 return $alias;
             }
         }
 
         return $topLevel;
+    }
+
+    /**
+     * Refuse an `mtls_endpoint_aliases` entry that cannot carry a client certificate
+     * (CONTRACT.md §21.3.1 vector C, contract 1.43).
+     *
+     * Falling back to the top-level endpoint looks like the safe answer and is the
+     * dangerous one: the caller asked to authenticate with a certificate, the operator
+     * published something unusable, and sending the certificate to the front-channel host
+     * authenticates nothing while appearing to work.
+     *
+     * Two defects, each a refusal on its own:
+     *
+     * - NOT AN ABSOLUTE URL. A relative alias resolves against nothing the client holds,
+     *   and the one base that might seem obvious — the issuer's host — is precisely the
+     *   host the alias exists to name a different one from.
+     * - A SCHEME WEAKER THAN THE ENDPOINT IT REPLACES. An alias substitutes for exactly
+     *   one top-level endpoint, so that is what it is compared against: https -> http is a
+     *   downgrade, while http -> http is a development deployment, which AXIAM's own
+     *   `build_mtls_aliases` supports.
+     *
+     * The refusal is an {@see AuthError}, matching every other "the discovery document
+     * advertises something this client cannot use" in this SDK. It also matters
+     * operationally: §16.3 retries {@see NetworkError} and only {@see NetworkError}, so the
+     * other choice would have attempted a permanent, deterministic misconfiguration three
+     * times and reported it as transient.
+     *
+     * @throws AuthError when the alias is relative, or downgrades the scheme it replaces
+     */
+    private static function assertUsableMtlsAlias(string $alias, ?string $replaces): void
+    {
+        $parsed = parse_url($alias);
+        if ($parsed === false || !isset($parsed['scheme'], $parsed['host'])) {
+            throw new AuthError(sprintf(
+                'mtls_endpoint_aliases publishes "%s", which is not an absolute URL. Refusing rather than '
+                . 'falling back to the top-level endpoint: this call presents a client certificate, and '
+                . 'sending it to the front-channel host would authenticate nothing while appearing to work '
+                . '(CONTRACT.md §21.3.1 vector C).',
+                $alias,
+            ));
+        }
+
+        $replacedScheme = null;
+        if ($replaces !== null && $replaces !== '') {
+            $replacedParts = parse_url($replaces);
+            if ($replacedParts !== false && isset($replacedParts['scheme'])) {
+                $replacedScheme = strtolower($replacedParts['scheme']);
+            }
+        }
+
+        if ($replacedScheme === 'https' && strtolower($parsed['scheme']) !== 'https') {
+            throw new AuthError(sprintf(
+                'mtls_endpoint_aliases publishes "%s", whose scheme is "%s", in place of an https endpoint. '
+                . 'That is a downgrade, and mutual TLS over cleartext is a contradiction; refusing rather '
+                . 'than falling back to the top-level endpoint (CONTRACT.md §21.3.1 vector C).',
+                $alias,
+                strtolower($parsed['scheme']),
+            ));
+        }
     }
 
     private function endpointUrl(string $endpoint, ?string $tenantId): string

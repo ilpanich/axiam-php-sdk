@@ -182,6 +182,54 @@ final class MtlsEndpointAliasesTest extends TestCase
         return [$certPem, $keyPem];
     }
 
+    /**
+     * Every origin `$path` was requested on, in order. Empty when it was never requested —
+     * which is what a refusal that did not fall back looks like.
+     *
+     * @return list<string>
+     */
+    private function hostsFor(string $path): array
+    {
+        return array_values(array_filter(
+            $this->requested,
+            static fn (string $uri): bool => str_ends_with($uri, $path),
+        ));
+    }
+
+    /**
+     * A §6.1 client whose discovery document carries `$aliases` AND the given top-level
+     * `token_endpoint`, so the §21.3.1 like-with-like scheme comparison can be exercised
+     * against something other than the suite's https default.
+     *
+     * @param array<string,string> $aliases
+     */
+    private function clientWithTopLevelTokenEndpoint(array $aliases, string $tokenEndpoint): AxiamClient
+    {
+        $wire = $this->discoveryWire($aliases);
+        $wire['token_endpoint'] = $tokenEndpoint;
+        $handler = function (RequestInterface $request) use ($wire): \GuzzleHttp\Promise\PromiseInterface {
+            $uri = $request->getUri();
+            $this->requested[] = $uri->getScheme() . '://' . $uri->getAuthority() . $uri->getPath();
+            $response = $uri->getPath() === '/.well-known/openid-configuration'
+                ? new Response(200, [], (string) json_encode($wire))
+                : $this->responseFor($uri->getPath());
+
+            return \GuzzleHttp\Promise\Create::promiseFor($response);
+        };
+        $identity = $this->generateTestIdentity();
+
+        return new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            oidcClientId: 'my-app',
+            oidcClientSecret: 'my-secret',
+            oidcTenantId: self::TENANT_ID,
+            clientCert: $identity[0],
+            clientKey: $identity[1],
+            transportHandler: $handler,
+        );
+    }
+
     /** Assert `$path` was requested exactly once, on `$origin`. */
     private function assertOnly(string $path, string $origin): void
     {
@@ -352,5 +400,105 @@ final class MtlsEndpointAliasesTest extends TestCase
         // issuer from the host it called would reject every token it obtains over mTLS.
         self::assertSame(self::BASE_URL, $configuration->issuer);
         self::assertNotSame(self::MTLS_BASE_URL, $configuration->issuer);
+    }
+
+    // --- Vector C: a published-but-unusable alias is REFUSED, never fallen back -------
+    // --- from (CONTRACT.md §21.3.1, contract 1.43) ------------------------------------
+
+    public function testARelativeAliasIsRefusedAndNeverFallsBack(): void
+    {
+        // Vector C defect 1. A relative alias resolves against nothing the client holds,
+        // and the one base that might seem obvious — the issuer's host — is precisely the
+        // host the alias exists to name a different one from.
+        $client = $this->client(['token_endpoint' => '/oauth2/token'], mtls: true);
+
+        try {
+            $client->loginClientCredentials();
+            self::fail('an unusable alias must be refused, not fallen back from');
+        } catch (AuthError $error) {
+            self::assertStringContainsString('/oauth2/token', $error->getMessage());
+            self::assertStringContainsString('§21.3.1', $error->getMessage());
+        }
+
+        // The refusal is the point: NOTHING was sent to either origin. Falling back would
+        // have presented the client certificate to the front-channel host, which
+        // authenticates nothing while appearing to work.
+        self::assertSame([], $this->hostsFor('/oauth2/token'));
+    }
+
+    public function testASchemeDowngradingAliasIsRefusedAndNeverFallsBack(): void
+    {
+        // Vector C defect 2. The top-level endpoint is https; the alias is cleartext.
+        // Mutual TLS over cleartext is a contradiction.
+        $client = $this->client(
+            ['introspection_endpoint' => 'http://mtls.api.test/oauth2/introspect'],
+            mtls: true,
+        );
+
+        try {
+            $client->introspect(new Sensitive('t'));
+            self::fail('a scheme downgrade must be refused, not fallen back from');
+        } catch (AuthError $error) {
+            self::assertStringContainsString('http', $error->getMessage());
+            self::assertStringContainsString('§21.3.1', $error->getMessage());
+        }
+
+        self::assertSame([], $this->hostsFor('/oauth2/introspect'));
+    }
+
+    public function testTheRefusalIsAnAuthErrorNotANetworkError(): void
+    {
+        // Not a stylistic choice. §16.3 retries NetworkError and ONLY NetworkError, so
+        // classifying this as one would attempt a permanent, deterministic operator
+        // misconfiguration three times and then report it as transient.
+        $client = $this->client(['token_endpoint' => '/oauth2/token'], mtls: true);
+
+        $this->expectException(AuthError::class);
+        $client->loginClientCredentials();
+    }
+
+    public function testLikeForLikeCleartextIsAcceptedNotADowngrade(): void
+    {
+        // The I4 twin for the downgrade rule. A development deployment served over http
+        // publishes http aliases; that is not a downgrade, and AXIAM's own
+        // build_mtls_aliases produces exactly this. Refusing it would break a supported
+        // configuration in the name of a rule about downgrades.
+        //
+        // The top-level token_endpoint is rewritten to http so the comparison is
+        // like-with-like, which is the whole point of the rule.
+        $client = $this->clientWithTopLevelTokenEndpoint(
+            ['token_endpoint' => 'http://dev.api.test/oauth2/token'],
+            'http://dev.api.test/oauth2/token',
+        );
+
+        $client->loginClientCredentials();
+
+        $this->assertOnly('/oauth2/token', 'http://dev.api.test');
+    }
+
+    public function testAMalformedAliasIsInertForAClientNotDoingMtls(): void
+    {
+        // The I4 twin for the whole vector. A client with no §6.1 identity never reaches
+        // an alias at all, so an operator publishing a broken one cannot break it. This is
+        // what "configured as today behaves as today" means for the majority of callers.
+        $this->client(['token_endpoint' => '/oauth2/token'], mtls: false)
+            ->loginClientCredentials();
+
+        $this->assertOnly('/oauth2/token', self::BASE_URL);
+    }
+
+    public function testAnUnusableAliasForOneEndpointDoesNotPoisonAnother(): void
+    {
+        // Only the member actually used is validated. An operator who breaks
+        // `introspection_endpoint` has not thereby broken the token endpoint — the refusal
+        // is scoped to the call that would have used the bad alias.
+        $client = $this->client([
+            'token_endpoint' => self::MTLS_BASE_URL . '/oauth2/token',
+            'introspection_endpoint' => '/oauth2/introspect',
+        ], mtls: true);
+
+        $client->loginClientCredentials();
+
+        $this->assertOnly('/oauth2/token', self::MTLS_BASE_URL);
     }
 }

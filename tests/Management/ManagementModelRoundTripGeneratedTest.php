@@ -2515,6 +2515,35 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `SessionResponse`: a full wire object survives decode and re-render. */
+    public function testSessionResponseRoundTrips(): void
+    {
+        $wire = [
+            'amr' => [
+                'example',
+            ],
+            'authenticated_at' => 'example',
+            'created_at' => 'example',
+            'expires_at' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'ip_address' => 'example',
+            'refresh_replay_at' => 'example',
+            'refresh_replay_grace_accepted' => 1,
+            'refresh_replay_refused' => 1,
+            'refresh_replay_verdict' => 'example',
+            'user_agent' => 'example',
+        ];
+
+        $model = Models\SessionResponse::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SessionResponse decoded a field it cannot render again',
+        );
+    }
+
     /** `SetMtlsTrustAnchor`: a full wire object survives decode and re-render. */
     public function testSetMtlsTrustAnchorRoundTrips(): void
     {
@@ -3321,6 +3350,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(152, $cases);
+        self::assertCount(153, $cases);
     }
 }
