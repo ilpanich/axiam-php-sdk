@@ -36,6 +36,7 @@ final class WebauthnTest extends TestCase
     private const CHALLENGE_TOKEN = 'challenge-token-fixture-do-not-log';
     private const ACCESS_TOKEN = 'access-token-fixture-do-not-log';
     private const REFRESH_TOKEN = 'refresh-token-fixture-do-not-log';
+    private const SETUP_TOKEN = 'setup-token-fixture-do-not-log';
 
     /**
      * Deliberately "unusual but valid": every optional field populated, so the pass-through
@@ -178,6 +179,34 @@ final class WebauthnTest extends TestCase
                 'access_token' => self::ACCESS_TOKEN,
                 'refresh_token' => self::REFRESH_TOKEN,
                 'session_id' => 'session-uuid-1',
+                'expires_in' => 900,
+            ]),
+        );
+    }
+
+    /**
+     * `200 LoginSuccessResponse` from `webauthn/setup/register/finish` — the SAME cookie
+     * triple and `X-CSRF-Token` header `login()`'s response carries (§24.3), never a token
+     * pair in the body (CONTRACT.md's `LoginSuccessResponse`: "tokens are delivered via
+     * `Set-Cookie` headers — not in this body").
+     */
+    private function setupFinishSuccessResponse(string $csrfToken = 'csrf-after-setup'): Response
+    {
+        return new Response(
+            200,
+            [
+                'Set-Cookie' => 'axiam_access=' . $this->unsignedJwt([
+                    'sub' => 'user-1',
+                    'tenant_id' => '22222222-2222-2222-2222-222222222222',
+                    'jti' => 'session-1',
+                    'exp' => time() + 900,
+                ]) . '; Path=/',
+                'X-CSRF-Token' => $csrfToken,
+                'Content-Type' => 'application/json',
+            ],
+            (string) json_encode([
+                'user' => ['id' => 'user-1'],
+                'session_id' => 'session-uuid-2',
                 'expires_in' => 900,
             ]),
         );
@@ -356,6 +385,130 @@ final class WebauthnTest extends TestCase
     }
 
     // -----------------------------------------------------------------------
+    // §24.1/§25.2 (contract 1.45) — the session-less setup/register pair
+    // -----------------------------------------------------------------------
+
+    /**
+     * §24.8: "`setup/register/finish` adopts credentials exactly as `mfa_setup_confirm`
+     * does" (§25.2 rule 2). Run the same adoption assertions §24.3 requires of
+     * `webauthn_authenticate_finish`: the client is authenticated afterward, the CSRF token
+     * was captured, and a state-changing call made immediately afterward carries it.
+     */
+    public function testSetupRegisterFinishAdoptsCredentialsExactlyAsMfaSetupConfirmDoes(): void
+    {
+        $client = $this->client([
+            $this->challengeResponse(self::CREATION_CHALLENGE, self::STATE_TOKEN),
+            $this->setupFinishSuccessResponse('csrf-after-setup-finish'),
+            new Response(200, ['Content-Type' => 'application/json'], (string) json_encode(['allowed' => true])),
+        ]);
+
+        $challenge = $client->webauthnSetupRegisterStart(new Sensitive(self::SETUP_TOKEN));
+        $result = $client->webauthnSetupRegisterFinish(
+            new Sensitive(self::SETUP_TOKEN),
+            $challenge->stateToken,
+            "Alice's laptop",
+            self::REGISTRATION_RESPONSE,
+        );
+
+        // The interrupted login, completed — same shape login()'s own 200 branch returns.
+        self::assertFalse($result->mfaRequired);
+        self::assertFalse($result->mfaSetupRequired);
+        self::assertSame('user-1', $result->userId);
+
+        // A state-changing call made immediately afterward carries the captured CSRF token
+        // AND the newly-adopted bearer token — proof the client is authenticated, not just
+        // that a result object came back.
+        self::assertTrue($client->checkAccess('read', 'resource-1'));
+        $checkAccessRequest = $this->sent[2];
+        self::assertSame(
+            'csrf-after-setup-finish',
+            $checkAccessRequest->getHeaderLine('X-CSRF-Token'),
+            'the CSRF token setup/register/finish captured must be echoed on the next mutating call',
+        );
+        self::assertStringStartsWith('Bearer ', $checkAccessRequest->getHeaderLine('Authorization'));
+    }
+
+    /**
+     * §24.8: "`setup/register/*` carries no session credential." With a session configured
+     * AND a setup token supplied, neither call may send the session's `Authorization` header
+     * or cookie — the setup token is the only credential this pair accepts.
+     */
+    public function testSetupRegisterCallsCarryNoSessionCredentialEvenWhenOneIsConfigured(): void
+    {
+        $client = $this->client([
+            $this->signInResponse(),
+            $this->challengeResponse(self::CREATION_CHALLENGE, self::STATE_TOKEN),
+            $this->setupFinishSuccessResponse(),
+        ]);
+
+        // Establish an ordinary, unrelated session first — the thing §24.8 says must NOT
+        // leak onto the calls below.
+        $client->login('alice@example.com', 'pw');
+        self::assertTrue($this->sent[0]->hasHeader('Authorization') === false, 'sanity: login itself carries none yet');
+
+        $challenge = $client->webauthnSetupRegisterStart(new Sensitive(self::SETUP_TOKEN));
+        $client->webauthnSetupRegisterFinish(
+            new Sensitive(self::SETUP_TOKEN),
+            $challenge->stateToken,
+            'key',
+            self::REGISTRATION_RESPONSE,
+        );
+
+        self::assertCount(3, $this->sent);
+        foreach ([1, 2] as $index) {
+            self::assertFalse(
+                $this->sent[$index]->hasHeader('Authorization'),
+                sprintf('request %d (setup/register) must not carry the session bearer token', $index),
+            );
+            self::assertFalse(
+                $this->sent[$index]->hasHeader('Cookie'),
+                sprintf('request %d (setup/register) must not carry the session cookie', $index),
+            );
+            // X-Tenant-ID is routing context, not a credential (§5 rule 2) — still expected.
+            self::assertTrue($this->sent[$index]->hasHeader('X-Tenant-ID'));
+        }
+    }
+
+    /** The two operations reach the right endpoints, with `setup_token` in the body of both. */
+    public function testSetupRegisterCallsCarryTheSetupTokenInTheBody(): void
+    {
+        $client = $this->client([
+            $this->challengeResponse(self::CREATION_CHALLENGE, self::STATE_TOKEN),
+            $this->setupFinishSuccessResponse(),
+        ]);
+
+        $challenge = $client->webauthnSetupRegisterStart(new Sensitive(self::SETUP_TOKEN));
+        $client->webauthnSetupRegisterFinish(
+            new Sensitive(self::SETUP_TOKEN),
+            $challenge->stateToken,
+            "Alice's laptop",
+            self::REGISTRATION_RESPONSE,
+        );
+
+        self::assertSame('/api/v1/auth/webauthn/setup/register/start', $this->sent[0]->getUri()->getPath());
+        self::assertSame(self::SETUP_TOKEN, $this->bodyOf(0)['setup_token']);
+
+        self::assertSame('/api/v1/auth/webauthn/setup/register/finish', $this->sent[1]->getUri()->getPath());
+        $finishBody = $this->bodyOf(1);
+        self::assertSame(self::SETUP_TOKEN, $finishBody['setup_token']);
+        self::assertSame(self::STATE_TOKEN, $finishBody['state_token']);
+        self::assertSame("Alice's laptop", $finishBody['credential_name']);
+    }
+
+    /** No `$userId` parameter exists on either call — the setup token alone names the account. */
+    public function testSetupRegisterOperationsTakeNoUserId(): void
+    {
+        $start = new \ReflectionMethod(AxiamClient::class, 'webauthnSetupRegisterStart');
+        $finish = new \ReflectionMethod(AxiamClient::class, 'webauthnSetupRegisterFinish');
+
+        foreach ([$start, $finish] as $method) {
+            foreach ($method->getParameters() as $parameter) {
+                self::assertStringNotContainsStringIgnoringCase('userid', $parameter->getName());
+            }
+        }
+    }
+
+    // -----------------------------------------------------------------------
     // §24.4 — the two error rows that are not the §2 defaults
     // -----------------------------------------------------------------------
 
@@ -407,6 +560,77 @@ final class WebauthnTest extends TestCase
         $client->webauthnDiscoverableFinish(new Sensitive(self::STATE_TOKEN), self::AUTHENTICATION_RESPONSE);
     }
 
+    // -- the same two error rows, for setup/register/* (contract 1.45) ------
+
+    public function testSetupRegisterStart503IsNotRetried(): void
+    {
+        $client = $this->client([
+            new Response(503, ['Content-Type' => 'application/json'], '{"message":"FIDO metadata unavailable"}'),
+        ]);
+        $before = count($this->sent);
+
+        try {
+            $client->webauthnSetupRegisterStart(new Sensitive(self::SETUP_TOKEN));
+            self::fail('expected a failure');
+        } catch (\Throwable) {
+            // expected
+        }
+
+        self::assertSame(1, count($this->sent) - $before, 'the 503 must not be retried');
+    }
+
+    public function testSetupRegisterFinish403KeepsTheAttestationPolicyMessage(): void
+    {
+        $client = $this->client([
+            new Response(403, ['Content-Type' => 'application/json'], '{"message":"this security key is not FIDO certified"}'),
+        ]);
+
+        try {
+            $client->webauthnSetupRegisterFinish(
+                new Sensitive(self::SETUP_TOKEN),
+                new Sensitive(self::STATE_TOKEN),
+                'key',
+                self::REGISTRATION_RESPONSE,
+            );
+            self::fail('expected AuthzError');
+        } catch (AuthzError $e) {
+            self::assertStringContainsString('FIDO certified', $e->getMessage());
+        }
+    }
+
+    /** §24.4 row 1: 401 (invalid/expired/wrong-purpose token) — unchanged from the §2 default. */
+    public function testSetupRegisterFinishInvalidTokenIsAnAuthError(): void
+    {
+        $client = $this->client([
+            new Response(401, ['Content-Type' => 'application/json'], '{"message":"setup token expired"}'),
+        ]);
+
+        $this->expectException(AuthError::class);
+        $client->webauthnSetupRegisterFinish(
+            new Sensitive(self::SETUP_TOKEN),
+            new Sensitive(self::STATE_TOKEN),
+            'key',
+            self::REGISTRATION_RESPONSE,
+        );
+    }
+
+    /** The account already has a factor — the same `400` `mfaSetupEnroll` gives (§24.1). */
+    public function testSetupRegisterStartAlreadyHasAFactorIsRefused(): void
+    {
+        $client = $this->client([
+            new Response(400, ['Content-Type' => 'application/json'], '{"message":"account already has a factor"}'),
+        ]);
+
+        try {
+            $client->webauthnSetupRegisterStart(new Sensitive(self::SETUP_TOKEN));
+            self::fail('expected a failure');
+        } catch (\Throwable $e) {
+            // expected — the same 400 mfaSetupEnroll gives for the same rule (§2's default
+            // mapping, unchanged: §24.4 does not add a special case for this status).
+            self::assertStringContainsString('HTTP 400', $e->getMessage());
+        }
+    }
+
     // -----------------------------------------------------------------------
     // §24.5 — opaque and sensitive
     // -----------------------------------------------------------------------
@@ -445,6 +669,33 @@ final class WebauthnTest extends TestCase
         $login = $client->webauthnDiscoverableFinish(new Sensitive(self::STATE_TOKEN), self::AUTHENTICATION_RESPONSE);
         self::assertStringNotContainsString(self::ACCESS_TOKEN, print_r($login->accessToken, true));
         self::assertStringNotContainsString(self::REFRESH_TOKEN, print_r($login->refreshToken, true));
+    }
+
+    /**
+     * `setup_token` is opaque, exactly like `state_token` (§24.5), and is wrapped
+     * {@see Sensitive} by §25.3's row for it: it never appears in a rendered value even
+     * though it travels in the body of both `setup/register/*` calls.
+     */
+    public function testSetupTokenIsNeverParsedAndNeverAppearsInARenderedValue(): void
+    {
+        $nonsense = '-----definitely not a jwt-----';
+        $setupToken = new Sensitive($nonsense);
+        $client = $this->client([
+            $this->challengeResponse(self::CREATION_CHALLENGE, self::STATE_TOKEN),
+            $this->setupFinishSuccessResponse(),
+        ]);
+
+        $challenge = $client->webauthnSetupRegisterStart($setupToken);
+        self::assertSame($nonsense, $this->bodyOf(0)['setup_token'], 'the token still reaches the wire unparsed');
+
+        $client->webauthnSetupRegisterFinish($setupToken, $challenge->stateToken, 'key', self::REGISTRATION_RESPONSE);
+        self::assertSame($nonsense, $this->bodyOf(1)['setup_token']);
+
+        // §25.3: setup_token is wrapped Sensitive, exactly like state_token — neither is
+        // info-level log material.
+        self::assertStringNotContainsString($nonsense, print_r($setupToken, true));
+        self::assertStringNotContainsString($nonsense, var_export($setupToken, true));
+        self::assertStringNotContainsString($nonsense, var_export($challenge->stateToken, true));
     }
 
     // -----------------------------------------------------------------------

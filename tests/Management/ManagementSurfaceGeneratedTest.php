@@ -12,7 +12,7 @@ use Axiam\Sdk\Management\Models;
 use Axiam\Sdk\Management\Page;
 
 /**
- * One case per CONTRACT.md §27 operation — all 159 of them.
+ * One case per CONTRACT.md §27 operation — all 160 of them.
  *
  * Each asserts three things about one operation: it issues the METHOD the registry names,
  * against the PATH the registry names, and — where the operation returns a body — that every
@@ -1741,6 +1741,33 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $request = $this->lastRequest();
         self::assertSame('POST', $request->getMethod());
         self::assertSame('/api/v1/certificates', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `POST /api/v1/certificates/sign-csr` — the `certificates.sign_csr` operation. */
+    public function testCertificatesSignCsrReachesItsRoute(): void
+    {
+        $mounted = [
+            'cert_type' => 'User',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'fingerprint' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+            'key_algorithm' => 'Rsa4096',
+            'metadata' => [],
+            'not_after' => '2026-08-26T00:00:00Z',
+            'not_before' => '2026-08-26T00:00:00Z',
+            'public_cert_pem' => 'example',
+            'status' => 'Active',
+            'subject' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->certificates()->signCsr(new Models\SignCertificateCsrRequest(Models\CertificateType::User, 'example', '11111111-1111-4111-8111-111111111111', 1));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/certificates/sign-csr', $request->getUri()->getPath());
         $this->assertDecodedEveryField($mounted, $result);
     }
 
@@ -4096,10 +4123,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * §27.9: all 159 registry operations are covered by a case above.
+     * §27.9: all 160 registry operations are covered by a case above.
      *
-     * Counted reflectively rather than written as a literal on both sides — `assertSame(159,
-     * 159)` is a tautology, and a case removed by a bad regeneration would still pass it.
+     * Counted reflectively rather than written as a literal on both sides — `assertSame(160,
+     * 160)` is a tautology, and a case removed by a bad regeneration would still pass it.
      */
     public function testEveryRegistryOperationHasACase(): void
     {
@@ -4109,6 +4136,6 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'ReachesItsRoute'),
         );
 
-        self::assertCount(159, $cases);
+        self::assertCount(160, $cases);
     }
 }
