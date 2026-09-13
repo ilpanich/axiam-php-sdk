@@ -11,6 +11,7 @@ namespace Axiam\Sdk\Management;
 use Axiam\Sdk\Management\Models\Certificate;
 use Axiam\Sdk\Management\Models\CreateCertificateRequest;
 use Axiam\Sdk\Management\Models\GeneratedCertificate;
+use Axiam\Sdk\Management\Models\SignCertificateCsrRequest;
 
 /**
  * End-entity X.509 certificates -- the ones issued to users, services and IoT devices.
@@ -66,6 +67,28 @@ final class CertificatesApi extends ManagementSupport
         );
 
         return GeneratedCertificate::fromArray($decoded ?? []);
+    }
+
+    /**
+     * `POST /api/v1/certificates/sign-csr`
+     *
+     * `POST /api/v1/certificates/sign-csr`.
+     * @param SignCertificateCsrRequest $body the request body
+     * @return Certificate
+     */
+    public function signCsr(
+        SignCertificateCsrRequest $body,
+    ): Certificate {
+        $decoded = $this->transport->send(
+            'certificates.sign_csr',
+            'POST',
+            '/api/v1/certificates/sign-csr',
+            [],
+            [],
+            $body->toArray(),
+        );
+
+        return Certificate::fromArray($decoded ?? []);
     }
 
     /**

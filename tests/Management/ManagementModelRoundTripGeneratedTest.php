@@ -2657,6 +2657,27 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `SignCertificateCsrRequest`: a full wire object survives decode and re-render. */
+    public function testSignCertificateCsrRequestRoundTrips(): void
+    {
+        $wire = [
+            'cert_type' => 'User',
+            'csr_pem' => 'example',
+            'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+            'metadata' => [],
+            'validity_days' => 1,
+        ];
+
+        $model = Models\SignCertificateCsrRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SignCertificateCsrRequest decoded a field it cannot render again',
+        );
+    }
+
     /** `SignIntermediateCsrRequest`: a full wire object survives decode and re-render. */
     public function testSignIntermediateCsrRequestRoundTrips(): void
     {
@@ -3350,6 +3371,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(153, $cases);
+        self::assertCount(154, $cases);
     }
 }

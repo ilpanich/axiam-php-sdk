@@ -43,6 +43,19 @@ final class AuthMiddleware
      */
     public const CREDENTIAL_OVERRIDE_OPTION = 'axiam_credential_override';
 
+    /**
+     * Per-request Guzzle option (bool) that suppresses `Authorization` and `X-CSRF-Token`
+     * entirely, regardless of what {@see Session::accessToken()}/{@see Session::csrfToken()}
+     * currently hold. Set by {@see \Axiam\Sdk\AxiamClient::postWithoutSessionCredentials()},
+     * which the §24.1 `setup/register/*` pair uses (CONTRACT.md §24.1/§25.2, contract 1.45):
+     * a setup token travels in the body as the ONLY credential those two calls accept, and an
+     * SDK MUST NOT attach the session's on top of it — even when one happens to be configured.
+     *
+     * `X-Tenant-ID` is unaffected — it is routing context, not a credential (§5 rule 2), and
+     * a request carrying this option still carries it.
+     */
+    public const NO_SESSION_CREDENTIALS_OPTION = 'axiam_no_session_credentials';
+
     /** @param Session $session Session supplying the tenant, bearer token and CSRF token. */
     public function __construct(private readonly Session $session)
     {
@@ -76,13 +89,15 @@ final class AuthMiddleware
 
             $request = $request->withHeader('X-Tenant-ID', $this->session->tenant());
 
+            $noSessionCredentials = ($options[self::NO_SESSION_CREDENTIALS_OPTION] ?? false) === true;
+
             // CONTRACT.md §12.1 note 3 / §12.3 rule 2: never attach a bearer credential
             // (cookie-sourced OR client-credentials-adopted) to an /oauth2/* request.
             $isOAuth2Path = str_starts_with($request->getUri()->getPath(), '/oauth2/');
 
             $override = $options[self::CREDENTIAL_OVERRIDE_OPTION] ?? null;
             $accessToken = match (true) {
-                $isOAuth2Path => null,
+                $isOAuth2Path, $noSessionCredentials => null,
                 \is_string($override) && $override !== '' => $override,
                 default => $this->session->accessToken(),
             };
@@ -90,7 +105,7 @@ final class AuthMiddleware
                 $request = $request->withHeader('Authorization', 'Bearer ' . $accessToken);
             }
 
-            if (\in_array(strtoupper($request->getMethod()), self::STATE_CHANGING_METHODS, true)) {
+            if (!$noSessionCredentials && \in_array(strtoupper($request->getMethod()), self::STATE_CHANGING_METHODS, true)) {
                 $csrfToken = $this->session->csrfToken();
                 if ($csrfToken !== null) {
                     $request = $request->withHeader('X-CSRF-Token', $csrfToken);

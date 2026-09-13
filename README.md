@@ -191,7 +191,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.42**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.45**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §22, §23, §24, §25, §26, §27 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8) — the binding,
@@ -211,8 +211,9 @@ webhook-signature verification (§13, see below), the opt-in §17 decision memo
 [`examples/telemetry_hook.php`](examples/telemetry_hook.php)), the §22 reactor runtime
 (`reactorServe`, see below), the §23 OPAQUE login path (`loginOpaque`, see below —
 **conditional on `ext-ffi` and one shared library**, which is PHP's alone among the eleven
-SDKs), the §24 WebAuthn relying-party layer with its §24.6a JSON bridge (see below), the
-§25 account-lifecycle and MFA-enrolment operations (see below), and §26 Pushed
+SDKs), the §24 WebAuthn relying-party layer with its §24.6a JSON bridge and, since contract
+1.45, the session-less `webauthnSetupRegisterStart`/`webauthnSetupRegisterFinish` pair (see
+below), the §25 account-lifecycle and MFA-enrolment operations (see below), and §26 Pushed
 Authorization Requests (see below).
 
 §24.6b — the linked-API ceremony helper — is **deliberately absent**. PHP runs on a server,
@@ -1099,7 +1100,7 @@ does do is never put the password in a request body, and never log it.
 
 ## WebAuthn / passkeys (`Axiam\Sdk\Webauthn`, CONTRACT.md §24)
 
-Six wire operations, two ceremonies, and one thing this SDK deliberately does not do.
+Eight wire operations, two ceremonies, and one thing this SDK deliberately does not do.
 
 ```php
 // Enrolment — requires a session (§24.1), refused client-side without one.
@@ -1165,6 +1166,46 @@ which is why the token is a required argument on one and absent from the other.
 One difference a reactor author will ask about: `discoverable/finish` fires the
 `login.post_auth` hook event (§22.5) and `authenticate/finish` does not. The latter
 continues a login already gated at its password step; the former has no such step.
+
+### A passkey or security key as the first factor (§24.1, §25.2, contract 1.45)
+
+`webauthnSetupRegisterStart()`/`webauthnSetupRegisterFinish()` are the WebAuthn twin of
+`mfaSetupEnroll()`/`mfaSetupConfirm()`: reached when `login()` returns
+`LoginResult::$mfaSetupRequired` because the tenant requires MFA and this account has none
+yet. A user of an enforcing tenant is no longer required to own a TOTP app to get in.
+
+```php
+$login = $client->login('alice@example.com', 'pw');
+if ($login->mfaSetupRequired) {
+    $challenge = $client->webauthnSetupRegisterStart($login->setupToken);
+    // ... run the ceremony via the §24.6a JSON bridge, as above ...
+    $signedIn = $client->webauthnSetupRegisterFinish(
+        $login->setupToken,
+        $challenge->stateToken,
+        "Alice's laptop",
+        $platformResponseJson,      // verbatim
+    );
+    // $signedIn is a LoginResult — the interrupted login, completed.
+}
+```
+
+**This pair takes no session, and this SDK never attaches one** — the setup token is the
+only credential, exactly as `mfa_setup_enroll`/`mfa_setup_confirm` take none. Unlike
+`webauthnRegisterStart()`/`Finish()`, calling these never requires being signed in, and the
+wire call carries neither the session's `Authorization` header nor any cookie the shared jar
+already holds, even when the client happens to be signed in as someone else at the time.
+
+**`webauthnSetupRegisterFinish()` adopts credentials exactly as `mfaSetupConfirm()` does**
+(§25.2 rule 2): both are the completion of the login `login()` interrupted, both answer the
+same `LoginSuccessResponse`, and both leave the client in the same signed-in state — the
+`axiam_access`/`axiam_refresh`/`axiam_csrf` cookie triple, the captured CSRF token, and a
+cleared §17 decision memo. A caller who chose a passkey over TOTP ends up exactly as
+authenticated as one who did not.
+
+The account whose first factor is being enrolled is named by the setup token, never by the
+caller — there is no `$userId` parameter on either call. The server refuses an account that
+already has a factor with the same answer `mfaSetupEnroll()` gives: a setup token adds the
+**first** factor, never a second.
 
 ### Saying something useful when a ceremony fails (§24.6b rule 5)
 
@@ -1359,7 +1400,7 @@ Worked end to end in [`examples/par_login.php`](examples/par_login.php).
 
 ## Management API (`Axiam\Sdk\Management`, CONTRACT.md §27)
 
-The administrative surface: **158 operations across 24 namespaces**, generated from the
+The administrative surface: **160 operations across 24 namespaces**, generated from the
 vendored `management-registry.json` and `openapi.json` by `scripts/gen_management.py` and
 committed, so building this package needs no Python. CI re-runs the generator with
 `--check` on every PR, which is what stops the committed surface from drifting away from

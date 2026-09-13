@@ -703,6 +703,40 @@ final class ManagementSemanticsTest extends ManagementTestCase
         self::assertStringNotContainsString('hunter2', $encoded);
     }
 
+    /**
+     * `certificates.sign_csr` answers the existing `Certificate` model, never
+     * `GeneratedCertificate` (§27.5's new sentence): there is no key to return for a CSR the
+     * caller supplied the key of, so this exchange carries no key field anywhere on it. A
+     * regression here would be a generator change quietly re-pointing the operation at
+     * `GeneratedCertificate::class`, whose `privateKeyPem` this reflects over rather than
+     * merely reading the return type off a docblock.
+     */
+    public function testSignCsrReturnsACertificateWithNoPrivateKeyField(): void
+    {
+        $client = $this->signedInClient(200, self::certificate(null));
+
+        $result = $client->management()->certificates()->signCsr(new Models\SignCertificateCsrRequest(
+            Models\CertificateType::Device,
+            '-----BEGIN CERTIFICATE REQUEST-----',
+            self::ORG_ID,
+            90,
+        ));
+
+        self::assertInstanceOf(Models\Certificate::class, $result);
+        foreach ((new \ReflectionClass($result))->getProperties() as $property) {
+            self::assertStringNotContainsStringIgnoringCase(
+                'privatekey',
+                $property->getName(),
+                'Certificate must carry no private-key field: sign_csr returns no key material at all',
+            );
+            self::assertNotInstanceOf(
+                Sensitive::class,
+                $property->getValue($result),
+                'Certificate must carry no Sensitive-wrapped field: there is nothing on it to redact',
+            );
+        }
+    }
+
     // -- fixtures ----------------------------------------------------------
 
     /**

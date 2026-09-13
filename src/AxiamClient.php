@@ -115,6 +115,8 @@ final class AxiamClient
     private const WEBAUTHN_AUTH_FINISH_PATH = '/api/v1/auth/webauthn/authenticate/finish';
     private const WEBAUTHN_DISCOVERABLE_START_PATH = '/api/v1/auth/webauthn/authenticate/discoverable/start';
     private const WEBAUTHN_DISCOVERABLE_FINISH_PATH = '/api/v1/auth/webauthn/authenticate/discoverable/finish';
+    private const WEBAUTHN_SETUP_REGISTER_START_PATH = '/api/v1/auth/webauthn/setup/register/start';
+    private const WEBAUTHN_SETUP_REGISTER_FINISH_PATH = '/api/v1/auth/webauthn/setup/register/finish';
 
     private const MFA_ENROLL_PATH = '/api/v1/auth/mfa/enroll';
     private const MFA_CONFIRM_PATH = '/api/v1/auth/mfa/confirm';
@@ -1959,63 +1961,7 @@ final class AxiamClient
         $wire = json_decode((string) $response->getBody(), true);
 
         if ($status === 200) {
-            $userId = is_array($wire) ? ($wire['user']['id'] ?? null) : null;
-            if (!is_string($userId) || $userId === '') {
-                throw NetworkError::fromResponse($response, 'login: malformed response body');
-            }
-
-            // H8 fix (SDK bench harness validation): a successful login/
-            // verifyMfa establishes the session's FIRST CSRF token (§3
-            // non-browser CSRF capture) — without capturing it here, every
-            // state-changing call this client ever makes (refresh,
-            // checkAccess, batchCheck) omits X-CSRF-Token and fails with
-            // "CSRF validation failed" (403), since Session::csrfToken()
-            // stays null forever. Session::captureCsrfTokenFromResponse()
-            // existed as a public method for exactly this but had no
-            // caller anywhere in the codebase.
-            $this->session->captureCsrfTokenFromResponse($response);
-
-            // §5.2: derived from the server's own answer, never asserted by the caller and
-            // never sent. Absent means `false`, which is what a server older than contract
-            // 1.31 answers and is the safe direction in both cases — the application then
-            // offers no cross-tenant action rather than one that would 403.
-            $organizationLevel = is_array($wire) && ($wire['user']['organization_level'] ?? false) === true;
-
-            // §5.2.2/§5.2.3: where this principal lives and how far it reaches. Read here
-            // rather than by the caller because the fallback is the whole point and is easy
-            // to lose — an absent `principal_tenant_id` means EQUAL to the acting tenant,
-            // not unknown.
-            $user = is_array($wire) && is_array($wire['user'] ?? null) ? $wire['user'] : [];
-            $actingTenantId = is_string($user['tenant_id'] ?? null) ? $user['tenant_id'] : null;
-            $principalTenantId = is_string($user['principal_tenant_id'] ?? null)
-                ? $user['principal_tenant_id']
-                : $actingTenantId;
-            $reachable = null;
-            if (is_array($user['reachable_tenant_ids'] ?? null) && $user['reachable_tenant_ids'] !== []) {
-                // A present-but-empty list stays `null`: it would read as "reaches nothing",
-                // the opposite of what an omitted field means here.
-                $reachable = array_values(array_filter(
-                    $user['reachable_tenant_ids'],
-                    static fn (mixed $id): bool => is_string($id),
-                ));
-            }
-            // Remember where this principal lives, so a later `opaqueEnrollmentForSelf`
-            // seals against the account's own tenant without a second round trip.
-            $this->principalTenantId = $principalTenantId;
-
-            return new LoginResult(
-                mfaRequired: false,
-                userId: $userId,
-                tenantId: $this->tenant,
-                organizationLevel: $organizationLevel,
-                actingTenantId: $actingTenantId,
-                principalTenantId: $principalTenantId,
-                principalTenantSlug: is_string($user['principal_tenant_slug'] ?? null)
-                    ? $user['principal_tenant_slug']
-                    : null,
-                orgId: is_string($user['org_id'] ?? null) ? $user['org_id'] : null,
-                reachableTenantIds: $reachable,
-            );
+            return $this->loginResultFromSuccessBody($response, $wire, 'login');
         }
 
         if ($status === 202) {
@@ -2050,6 +1996,78 @@ final class AxiamClient
         $this->logger->warning('axiam_sdk: login/verify_mfa failed: status={status}', ['status' => $status]);
 
         throw ErrorMapper::fromResponse($response, 'login/verifyMfa failed');
+    }
+
+    /**
+     * Builds the `LoginResult` a `200` login-shaped body describes, and adopts it exactly as
+     * `login()` does: captures the session's `X-CSRF-Token` (§3), and remembers where the
+     * principal lives (§5.2.2/§5.2.3) for a later `opaqueEnrollmentForSelf`.
+     *
+     * Shared by {@see self::handleLoginResponse()}'s own `200` branch and by
+     * {@see self::webauthnSetupRegisterFinish()} — CONTRACT.md §25.2 rule 2 requires the two
+     * completions of a forced first-login enrolment (`mfa_setup_confirm` and
+     * `webauthn_setup_register_finish`) to adopt credentials identically, and this is the one
+     * implementation that makes that true by construction rather than by two call sites
+     * agreeing.
+     *
+     * @param mixed $wire The already-decoded response body (may be anything `json_decode`
+     *     returns — validated here, not by the caller).
+     */
+    private function loginResultFromSuccessBody(ResponseInterface $response, mixed $wire, string $operation): LoginResult
+    {
+        $userId = is_array($wire) ? ($wire['user']['id'] ?? null) : null;
+        if (!is_string($userId) || $userId === '') {
+            throw NetworkError::fromResponse($response, $operation . ': malformed response body');
+        }
+
+        // H8 fix (SDK bench harness validation): a successful login/verifyMfa/setup
+        // completion establishes the session's FIRST CSRF token (§3 non-browser CSRF
+        // capture) — without capturing it here, every state-changing call this client ever
+        // makes (refresh, checkAccess, batchCheck) omits X-CSRF-Token and fails with "CSRF
+        // validation failed" (403), since Session::csrfToken() stays null forever.
+        $this->session->captureCsrfTokenFromResponse($response);
+
+        // §5.2: derived from the server's own answer, never asserted by the caller and
+        // never sent. Absent means `false`, which is what a server older than contract
+        // 1.31 answers and is the safe direction in both cases — the application then
+        // offers no cross-tenant action rather than one that would 403.
+        $organizationLevel = is_array($wire) && ($wire['user']['organization_level'] ?? false) === true;
+
+        // §5.2.2/§5.2.3: where this principal lives and how far it reaches. Read here
+        // rather than by the caller because the fallback is the whole point and is easy
+        // to lose — an absent `principal_tenant_id` means EQUAL to the acting tenant,
+        // not unknown.
+        $user = is_array($wire) && is_array($wire['user'] ?? null) ? $wire['user'] : [];
+        $actingTenantId = is_string($user['tenant_id'] ?? null) ? $user['tenant_id'] : null;
+        $principalTenantId = is_string($user['principal_tenant_id'] ?? null)
+            ? $user['principal_tenant_id']
+            : $actingTenantId;
+        $reachable = null;
+        if (is_array($user['reachable_tenant_ids'] ?? null) && $user['reachable_tenant_ids'] !== []) {
+            // A present-but-empty list stays `null`: it would read as "reaches nothing",
+            // the opposite of what an omitted field means here.
+            $reachable = array_values(array_filter(
+                $user['reachable_tenant_ids'],
+                static fn (mixed $id): bool => is_string($id),
+            ));
+        }
+        // Remember where this principal lives, so a later `opaqueEnrollmentForSelf`
+        // seals against the account's own tenant without a second round trip.
+        $this->principalTenantId = $principalTenantId;
+
+        return new LoginResult(
+            mfaRequired: false,
+            userId: $userId,
+            tenantId: $this->tenant,
+            organizationLevel: $organizationLevel,
+            actingTenantId: $actingTenantId,
+            principalTenantId: $principalTenantId,
+            principalTenantSlug: is_string($user['principal_tenant_slug'] ?? null)
+                ? $user['principal_tenant_slug']
+                : null,
+            orgId: is_string($user['org_id'] ?? null) ? $user['org_id'] : null,
+            reachableTenantIds: $reachable,
+        );
     }
 
     /**
@@ -2515,10 +2533,95 @@ final class AxiamClient
         );
     }
 
-    /** Runs either `*_start` call and returns the options untouched. */
-    private function webauthnStart(string $path, string $body): WebauthnChallenge
+    /**
+     * `POST /api/v1/auth/webauthn/setup/register/start` (CONTRACT.md §24.1, contract 1.45) —
+     * begin enrolling a passkey or security key as the FIRST factor of a forced login
+     * enrolment.
+     *
+     * Reached exactly where {@see self::mfaSetupEnroll()} is: `login()` returned
+     * {@see LoginResult::$mfaSetupRequired}, and `$setupToken` is that result's
+     * `$setupToken`. There is no session — the setup token *is* the credential, and unlike
+     * {@see self::webauthnRegisterStart()} this call takes **no** session and MUST NOT be
+     * given one: an SDK that attached the caller's own session here would hand the server a
+     * second credential §24.1 does not ask for and does not want.
+     *
+     * A `503` here means the tenant's attestation policy needs FIDO metadata the server
+     * cannot reach — a configuration state, not a transient one, and (mirroring
+     * {@see self::webauthnRegisterStart()}) this is never retried.
+     */
+    public function webauthnSetupRegisterStart(Sensitive|string $setupToken): WebauthnChallenge
     {
-        $http = $this->postRawJson($path, $body);
+        $this->ensureOpen();
+
+        $body = json_encode(
+            ['setup_token' => $this->reveal($setupToken)],
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+        );
+
+        return $this->webauthnStart(self::WEBAUTHN_SETUP_REGISTER_START_PATH, $body, withoutSessionCredentials: true);
+    }
+
+    /**
+     * `POST /api/v1/auth/webauthn/setup/register/finish` (CONTRACT.md §24.1, contract 1.45) —
+     * finish enrolling the passkey or security key {@see self::webauthnSetupRegisterStart()}
+     * offered, and with it the login that was interrupted.
+     *
+     * **Adopts credentials exactly as {@see self::mfaSetupConfirm()} does** (CONTRACT.md
+     * §25.2 rule 2): both `mfa_setup_confirm` and `webauthn_setup_register_finish` *are* the
+     * completion of a login, both answer `LoginSuccessResponse`, and §24.3's five adoption
+     * rules apply to both — including capturing the session's first CSRF token and clearing
+     * the §17 decision memo. A caller who chose a passkey over TOTP must end up in the exact
+     * same signed-in state as one who did not.
+     *
+     * `$response` is the platform's own response JSON, **verbatim** (§24.6a rule 2), exactly
+     * as {@see self::webauthnRegisterFinish()} treats it.
+     *
+     * Like {@see self::webauthnSetupRegisterStart()}, this takes no session and MUST NOT be
+     * given one — the setup token is the only credential this pair accepts.
+     */
+    public function webauthnSetupRegisterFinish(
+        Sensitive|string $setupToken,
+        Sensitive|string $stateToken,
+        string $credentialName,
+        string $response,
+    ): LoginResult {
+        $this->ensureOpen();
+        $this->onCredentialChange();
+
+        $body = $this->webauthnFinishBody(
+            $stateToken,
+            $response,
+            'webauthnSetupRegisterFinish',
+            [
+                'credential_name' => $credentialName,
+                'setup_token' => $this->reveal($setupToken),
+            ],
+        );
+
+        $http = $this->postWithoutSessionCredentials(self::WEBAUTHN_SETUP_REGISTER_FINISH_PATH, $body);
+        if ($http->getStatusCode() !== 200) {
+            throw $this->setupRegisterFinishError($http);
+        }
+
+        $wire = json_decode((string) $http->getBody(), true);
+
+        return $this->loginResultFromSuccessBody($http, $wire, 'webauthnSetupRegisterFinish');
+    }
+
+    /**
+     * Runs either `*_start` call and returns the options untouched.
+     *
+     * `$withoutSessionCredentials` routes the wire call through
+     * {@see self::postWithoutSessionCredentials()} instead of {@see self::postRawJson()} — set
+     * by {@see self::webauthnSetupRegisterStart()} only: CONTRACT.md §24.1 takes no session for
+     * `setup/register/*`, and an SDK MUST NOT attach one even when a session happens to be
+     * configured.
+     */
+    private function webauthnStart(string $path, string $body, bool $withoutSessionCredentials = false): WebauthnChallenge
+    {
+        $http = $withoutSessionCredentials
+            ? $this->postWithoutSessionCredentials($path, $body)
+            : $this->postRawJson($path, $body);
         if ($http->getStatusCode() !== 200) {
             throw ErrorMapper::fromResponse($http, 'webauthn start failed');
         }
@@ -2636,7 +2739,32 @@ final class AxiamClient
      */
     private function registerFinishError(ResponseInterface $http): \Throwable
     {
-        $context = 'webauthnRegisterFinish failed';
+        return $this->attestationPolicyError($http, 'webauthnRegisterFinish');
+    }
+
+    /**
+     * §24.4 rule 1, applied to `setup/register/finish`'s own `403`: the tenant's attestation
+     * policy rejected *this* authenticator, and the server's message is the only place that
+     * says which one would be accepted. Shares {@see self::attestationPolicyError()} with
+     * {@see self::registerFinishError()} rather than re-deciding, in its own words, which
+     * field a `403` body's message lives in.
+     */
+    private function setupRegisterFinishError(ResponseInterface $http): \Throwable
+    {
+        return $this->attestationPolicyError($http, 'webauthnSetupRegisterFinish');
+    }
+
+    /**
+     * §24.4 rule 1: the `403` from a `…/finish` call is the one whose *body* matters.
+     *
+     * The generic §2 mapping would raise an authorization error reading "`$operation` failed",
+     * which tells the person holding the key nothing they can act on. The tenant's attestation
+     * policy rejected *this* authenticator, and the server's message is the only place that
+     * says which one would be accepted.
+     */
+    private function attestationPolicyError(ResponseInterface $http, string $operation): \Throwable
+    {
+        $context = $operation . ' failed';
         if ($http->getStatusCode() === 403) {
             $wire = json_decode((string) $http->getBody(), true);
             $message = is_array($wire) ? ($wire['message'] ?? null) : null;
@@ -2720,6 +2848,43 @@ final class AxiamClient
         } catch (GuzzleException $e) {
             throw NetworkError::fromException($e, $path . ' failed');
         }
+    }
+
+    /**
+     * Like {@see self::postRawJson()}, except the session's `Authorization` header and
+     * `X-CSRF-Token` are never attached, and neither is any cookie this client's shared jar
+     * already holds — even when a session is configured (CONTRACT.md §24.1: `setup/register/*`
+     * takes no session at all, and an SDK MUST NOT attach one).
+     *
+     * The request rides a fresh, empty {@see CookieJar} rather than `'cookies' => false`: a
+     * `200` from `setup/register/finish` sets the SAME `axiam_access`/`axiam_refresh`/
+     * `axiam_csrf` cookie triple `login()` does (§24.3 rule 2), and that has to be captured for
+     * adoption to work at all. Guzzle's cookie middleware extracts `Set-Cookie` into whatever
+     * jar the request carries; using a scratch jar gets the extraction for free while keeping
+     * this request's OWN `Cookie` header empty, and the scratch jar's contents are copied into
+     * the shared one afterward — never before, so nothing already in the shared jar is ever
+     * read for this request.
+     */
+    private function postWithoutSessionCredentials(string $path, string $json): ResponseInterface
+    {
+        $scratchJar = new CookieJar();
+        try {
+            $response = $this->plainHttp->post($path, [
+                'body' => $json,
+                'headers' => ['Content-Type' => 'application/json'],
+                'http_errors' => false,
+                'cookies' => $scratchJar,
+                AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION => true,
+            ]);
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, $path . ' failed');
+        }
+
+        foreach ($scratchJar as $cookie) {
+            $this->session->cookieJar()->setCookie($cookie);
+        }
+
+        return $response;
     }
 
     /** Accepts a secret either wrapped or bare, like every other §12/§20 secret input. */

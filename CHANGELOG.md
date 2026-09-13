@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Re-vendored `CONTRACT.md` (1.45), `openapi.json`, `management-registry.json`
+  and `proto/` from `axiam` at `3d5b279`, and regenerated the §27 management
+  surface (`scripts/gen_management.py`): **159 → 160 operations**.
+
+- **`certificates.signCsr(SignCertificateCsrRequest)` — `POST
+  /api/v1/certificates/sign-csr` (contract 1.45).** Issue a leaf certificate
+  from a caller-supplied CSR instead of a server-generated key pair: the
+  request carries `csrPem`, `issuerCaId`, `certType`, `validityDays` and
+  optional `metadata`, and answers the **existing** `Certificate` model — never
+  `GeneratedCertificate` — because a CSR the caller supplied the key of has no
+  private key for AXIAM to return. `subject` and `keyAlgorithm` are read off
+  the CSR server-side rather than accepted from the request, so the stored row
+  and the issued certificate cannot disagree. A model round-trip test asserts
+  `Certificate` carries no private-key field and no `Sensitive`-wrapped field
+  at all, reflectively rather than by reading a docblock.
+
+- **`webauthnSetupRegisterStart(Sensitive|string $setupToken)` /
+  `webauthnSetupRegisterFinish($setupToken, $stateToken, $credentialName,
+  $response)` — the WebAuthn twin of `mfaSetupEnroll`/`mfaSetupConfirm`
+  (CONTRACT.md §24.1, §24.7, §25.1, §25.2, contract 1.45).** Enrol a passkey or
+  security key as the **first** factor of a forced login enrolment — reached
+  from `LoginResult::$mfaSetupRequired` exactly where the TOTP pair is — so a
+  user of an MFA-enforcing tenant is no longer required to own a TOTP app to
+  get in.
+
+  This pair takes **no session, and none is ever attached**: unlike
+  `webauthnRegisterStart`/`Finish`, calling it never requires being signed in,
+  and — new machinery this adds to `AxiamClient` — the wire call carries
+  neither the session's `Authorization` header nor any cookie the shared jar
+  already holds, even when the client happens to be authenticated as someone
+  else at the time. `Axiam\Sdk\Rest\AuthMiddleware` gained a
+  `NO_SESSION_CREDENTIALS_OPTION` per-request flag for exactly this, and the
+  request itself rides a scratch `CookieJar` so a `Set-Cookie` on `finish`'s
+  `200` is still captured and merged into the client's own jar afterward —
+  suppressing what is sent without losing what is meant to be adopted.
+
+  `webauthnSetupRegisterFinish` adopts credentials **exactly as
+  `mfaSetupConfirm` does** (§25.2 rule 2): both are the completion of the
+  login `login()` interrupted, both answer `LoginSuccessResponse`, and both
+  now share one `loginResultFromSuccessBody()` implementation (factored out of
+  `handleLoginResponse`'s own `200` branch) rather than two call sites
+  agreeing to parse the body the same way. A `403` surfaces the tenant's
+  attestation-policy message verbatim (§24.4 rule 1, shared with
+  `webauthnRegisterFinish` via a new `attestationPolicyError()` helper); a
+  `503` from `start` is never retried, as this SDK's plain transport never
+  retries anything on that path. `setup_token` is wrapped `Sensitive` (§25.3),
+  `state_token` as everywhere else in §24 (§24.5).
+
+  Nine new tests in `tests/WebauthnTest.php` cover the adoption, the
+  no-session-credential guarantee (asserted on the transport, with a session
+  deliberately configured first), the wire shape, the three status rows, and
+  that `setup_token` is never parsed or rendered.
+
 ## [1.0.0-beta14] - 2026-09-13
 
 ### Added
