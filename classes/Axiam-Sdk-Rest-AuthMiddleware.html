@@ -176,6 +176,18 @@ those endpoints authenticate the CLIENT through the form body
 <dd>Per-request Guzzle option naming a bearer credential that is **not** the session&#039;s
 (CONTRACT.md §20.2 rule 1: the UMA Protection API carries a PAT).</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_NO_SESSION_CREDENTIALS_OPTION">NO_SESSION_CREDENTIALS_OPTION</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;axiam_no_session_credentials&#039;                            </span>
+</dt>
+<dd>Per-request Guzzle option (bool) that suppresses `Authorization` and `X-CSRF-Token`
+entirely, regardless of what {@see Session::accessToken()}/{@see Session::csrfToken()}
+currently hold. Set by {@see \Axiam\Sdk\AxiamClient::postWithoutSessionCredentials()},
+which the §24.1 `setup/register/*` pair uses (CONTRACT.md §24.1/§25.2, contract 1.45):
+a setup token travels in the body as the ONLY credential those two calls accept, and an
+SDK MUST NOT attach the session&#039;s on top of it — even when one happens to be configured.</dd>
+
     </dl>
 
 
@@ -250,6 +262,45 @@ When this option is present the session token is never consulted.</p>
 
         
     </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_NO_SESSION_CREDENTIALS_OPTION">
+        NO_SESSION_CREDENTIALS_OPTION
+        <a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_NO_SESSION_CREDENTIALS_OPTION" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">57</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Per-request Guzzle option (bool) that suppresses `Authorization` and `X-CSRF-Token`
+entirely, regardless of what {@see Session::accessToken()}/{@see Session::csrfToken()}
+currently hold. Set by {@see \Axiam\Sdk\AxiamClient::postWithoutSessionCredentials()},
+which the §24.1 `setup/register/*` pair uses (CONTRACT.md §24.1/§25.2, contract 1.45):
+a setup token travels in the body as the ONLY credential those two calls accept, and an
+SDK MUST NOT attach the session&#039;s on top of it — even when one happens to be configured.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">NO_SESSION_CREDENTIALS_OPTION</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;axiam_no_session_credentials&#039;</span>
+</code>
+
+
+        <section class="phpdocumentor-description"><p><code class="prettyprint">X-Tenant-ID</code> is unaffected — it is routing context, not a credential (§5 rule 2), and
+a request carrying this option still carries it.</p>
+</section>
+
+    
+    
+
+        
+    </article>
             </section>
 
         
@@ -274,7 +325,7 @@ When this option is present the session token is never consulted.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">47</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
@@ -320,7 +371,7 @@ When this option is present the session token is never consulted.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">75</span>
 
     </aside>
 
@@ -387,6 +438,7 @@ credentials never leak to a third-party URL.</p>
                 <li>
                     <ul class="phpdocumentor-list -clean">
                                                     <li class=""><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_CREDENTIAL_OVERRIDE_OPTION">CREDENTIAL_OVERRIDE_OPTION</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_NO_SESSION_CREDENTIALS_OPTION">NO_SESSION_CREDENTIALS_OPTION</a></li>
                                             </ul>
                 </li>
             

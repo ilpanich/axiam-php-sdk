@@ -1216,6 +1216,16 @@ Search.appendIndex(
             "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/authenticate\/discoverable\/finish\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1\u0029.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnDiscoverableFinish"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnSetupRegisterStart\u0028\u0029",
+            "name": "webauthnSetupRegisterStart",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/setup\/register\/start\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1,\u0020contract\u00201.45\u0029\u0020\u2014\nbegin\u0020enrolling\u0020a\u0020passkey\u0020or\u0020security\u0020key\u0020as\u0020the\u0020FIRST\u0020factor\u0020of\u0020a\u0020forced\u0020login\nenrolment.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnSetupRegisterStart"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AwebauthnSetupRegisterFinish\u0028\u0029",
+            "name": "webauthnSetupRegisterFinish",
+            "summary": "\u0060POST\u0020\/api\/v1\/auth\/webauthn\/setup\/register\/finish\u0060\u0020\u0028CONTRACT.md\u0020\u00A724.1,\u0020contract\u00201.45\u0029\u0020\u2014\nfinish\u0020enrolling\u0020the\u0020passkey\u0020or\u0020security\u0020key\u0020\u007B\u0040see\u0020self\u003A\u003AwebauthnSetupRegisterStart\u0028\u0029\u007D\noffered,\u0020and\u0020with\u0020it\u0020the\u0020login\u0020that\u0020was\u0020interrupted.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_webauthnSetupRegisterFinish"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Core\\AuthError",
             "name": "AuthError",
             "summary": "Authentication\u0020failure\u003A\u0020wrong\u0020credentials,\u0020expired\u0020session,\u0020MFA\u0020failure,\u0020or\u0020a\u0020401\non\u0020refresh\u0020\u0028CONTRACT.md\u0020\u00A72\u0029.\u0020Always\u0020constructed\u0020via\u0020\u007B\u0040see\u0020ErrorMapper\u007D\u0020so\u0020REST\u0020and\ngRPC\u0020transports\u0020cannot\u0020drift\u0020on\u0020the\u0020error\u0020taxonomy.",
@@ -1866,6 +1876,11 @@ Search.appendIndex(
             "summary": "\u0060POST\u0020\/api\/v1\/certificates\u0060",
             "url": "classes/Axiam-Sdk-Management-CertificatesApi.html#method_generate"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\CertificatesApi\u003A\u003AsignCsr\u0028\u0029",
+            "name": "signCsr",
+            "summary": "\u0060POST\u0020\/api\/v1\/certificates\/sign\u002Dcsr\u0060",
+            "url": "classes/Axiam-Sdk-Management-CertificatesApi.html#method_signCsr"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\CertificatesApi\u003A\u003Aget\u0028\u0029",
             "name": "get",
             "summary": "\u0060GET\u0020\/api\/v1\/certificates\/\u007Bid\u007D\u0060",
@@ -2068,7 +2083,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi",
             "name": "ManagementApi",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020159\u0020operations\u0020across\u002024\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020160\u0020operations\u0020across\u002024\u0020namespaces.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003A__construct\u0028\u0029",
@@ -8781,6 +8796,56 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SignAuditBatchRequest.html#property_entryIds"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest",
+            "name": "SignCertificateCsrRequest",
+            "summary": "Body\u0020of\u0020\u0060POST\u0020\/api\/v1\/certificates\/sign\u002Dcsr\u0060.\u0020No\u0020\u0060subject\u0060\u0020and\u0020no\u0020\u0060key_algorithm\u0060\u003A\u0020both\u0020are\nread\u0020out\u0020of\u0020the\u0020CSR,\u0020which\u0020is\u0020the\u0020only\u0020place\u0020they\u0020can\u0020be\u0020stated\u0020without\u0020the\u0020row\u0020and\u0020the\ncertificate\u0020being\u0020able\u0020to\u0020disagree.\u0020No\u0020key\u0020is\u0020returned,\u0020so\u0020there\u0020is\u0020no\u0020key\u0020field\u0020anywhere\u0020on\nthis\u0020exchange.",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SignCertificateCsrRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SignCertificateCsrRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A\u0024certType",
+            "name": "certType",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#property_certType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A\u0024csrPem",
+            "name": "csrPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#property_csrPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A\u0024issuerCaId",
+            "name": "issuerCaId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#property_issuerCaId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A\u0024validityDays",
+            "name": "validityDays",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#property_validityDays"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A\u0024metadata",
+            "name": "metadata",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#property_metadata"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignedAuditBatch",
             "name": "SignedAuditBatch",
             "summary": "A\u0020signed\u0020batch\u0020of\u0020audit\u0020log\u0020entries.",
@@ -13610,6 +13675,11 @@ Search.appendIndex(
             "name": "CREDENTIAL_OVERRIDE_OPTION",
             "summary": "Per\u002Drequest\u0020Guzzle\u0020option\u0020naming\u0020a\u0020bearer\u0020credential\u0020that\u0020is\u0020\u002A\u002Anot\u002A\u002A\u0020the\u0020session\u0027s\n\u0028CONTRACT.md\u0020\u00A720.2\u0020rule\u00201\u003A\u0020the\u0020UMA\u0020Protection\u0020API\u0020carries\u0020a\u0020PAT\u0029.",
             "url": "classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_CREDENTIAL_OVERRIDE_OPTION"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Rest\\AuthMiddleware\u003A\u003ANO_SESSION_CREDENTIALS_OPTION",
+            "name": "NO_SESSION_CREDENTIALS_OPTION",
+            "summary": "Per\u002Drequest\u0020Guzzle\u0020option\u0020\u0028bool\u0029\u0020that\u0020suppresses\u0020\u0060Authorization\u0060\u0020and\u0020\u0060X\u002DCSRF\u002DToken\u0060\nentirely,\u0020regardless\u0020of\u0020what\u0020\u007B\u0040see\u0020Session\u003A\u003AaccessToken\u0028\u0029\u007D\/\u007B\u0040see\u0020Session\u003A\u003AcsrfToken\u0028\u0029\u007D\ncurrently\u0020hold.\u0020Set\u0020by\u0020\u007B\u0040see\u0020\\Axiam\\Sdk\\AxiamClient\u003A\u003ApostWithoutSessionCredentials\u0028\u0029\u007D,\nwhich\u0020the\u0020\u00A724.1\u0020\u0060setup\/register\/\u002A\u0060\u0020pair\u0020uses\u0020\u0028CONTRACT.md\u0020\u00A724.1\/\u00A725.2,\u0020contract\u00201.45\u0029\u003A\na\u0020setup\u0020token\u0020travels\u0020in\u0020the\u0020body\u0020as\u0020the\u0020ONLY\u0020credential\u0020those\u0020two\u0020calls\u0020accept,\u0020and\u0020an\nSDK\u0020MUST\u0020NOT\u0020attach\u0020the\u0020session\u0027s\u0020on\u0020top\u0020of\u0020it\u0020\u2014\u0020even\u0020when\u0020one\u0020happens\u0020to\u0020be\u0020configured.",
+            "url": "classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_NO_SESSION_CREDENTIALS_OPTION"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Rest\\AuthzRestClient",
             "name": "AuthzRestClient",
