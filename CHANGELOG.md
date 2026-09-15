@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-beta15] - 2026-09-15
+
 ### Added
 
 - Re-vendored `CONTRACT.md` (1.45), `openapi.json`, `management-registry.json`
@@ -61,6 +63,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   no-session-credential guarantee (asserted on the transport, with a session
   deliberately configured first), the wire shape, the three status rows, and
   that `setup_token` is never parsed or rendered.
+
+### Changed
+
+- Re-vendor CONTRACT.md at 1.46
+
+- F-1 (PHP): certificates.signCsr and the WebAuthn setup/register pair (contract 1.45) (#68)
 
 ## [1.0.0-beta14] - 2026-09-13
 
