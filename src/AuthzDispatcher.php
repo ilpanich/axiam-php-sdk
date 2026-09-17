@@ -8,7 +8,9 @@ use Axiam\Sdk\Auth\UserInfo;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Grpc\Gen\CheckAccessResponse;
 use Axiam\Sdk\Grpc\Gen\GetUserInfoResponse;
+use Axiam\Sdk\Rest\AccessDecision;
 use Axiam\Sdk\Rest\AuthzRestClient;
 
 /**
@@ -94,6 +96,23 @@ final class AuthzDispatcher
      */
     public function checkAccess(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): bool
     {
+        return $this->checkAccessDecision($action, $resourceId, $scope, $subjectId)->allowed;
+    }
+
+    /**
+     * `checkAccess`, returning the **full** decision including CONTRACT.md §11 rule 9's
+     * `reason_code` — the transport-agnostic counterpart of
+     * {@see \Axiam\Sdk\Rest\AuthzRestClient::checkAccessDecision()}, dispatched over
+     * whichever transport {@see self::checkAccess()} itself would have used.
+     *
+     * Exists for {@see \Axiam\Sdk\AccessEnforcer}, which needs `reasonCode` to decide
+     * whether a CONTRACT.md §28.5 rule 5 `insufficient_scope` challenge applies to a
+     * denial — a distinction {@see self::checkAccess()}'s bare `bool` cannot carry.
+     *
+     * @param string|null $subjectId See {@see self::checkAccess()}'s own docblock.
+     */
+    public function checkAccessDecision(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): AccessDecision
+    {
         if (!$this->restOnly && extension_loaded('grpc')) {
             // Class referenced ONLY inside this guarded branch (Pitfall 4 / T-22-16) —
             // on a runtime without the grpc PECL extension, this line never executes,
@@ -107,11 +126,29 @@ final class AuthzDispatcher
                 $scope,
             );
 
-            return $response->getAllowed();
+            return self::toDecision($response);
         }
 
         // D-03: authz ALWAYS works — transparent fallback, not a degraded mode.
-        return $this->restClient->checkAccess($action, $resourceId, $scope, $subjectId);
+        return $this->restClient->checkAccessDecision($action, $resourceId, $scope, $subjectId);
+    }
+
+    /**
+     * SDK-Q10 (contract 1.19): `reason` (field 4) is canonical; `deny_reason` (field 2,
+     * deprecated) is read only when `reason` is absent — the same fallback
+     * {@see \Axiam\Sdk\Rest\AuthzRestClient}'s own REST decoder applies, so the two
+     * transports can never disagree about which field wins.
+     */
+    private static function toDecision(CheckAccessResponse $response): AccessDecision
+    {
+        $reasonCode = $response->getReasonCode();
+        $denyReason = $response->getDenyReason();
+
+        return new AccessDecision(
+            allowed: $response->getAllowed(),
+            reason: $response->hasReason() ? $response->getReason() : ($denyReason !== '' ? $denyReason : null),
+            reasonCode: $reasonCode !== '' ? $reasonCode : null,
+        );
     }
 
     /** `can` (CONTRACT.md §1) — the browser/UI-scenario alias for {@see self::checkAccess()}. */

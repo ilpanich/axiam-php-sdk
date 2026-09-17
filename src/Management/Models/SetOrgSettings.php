@@ -39,9 +39,20 @@ final class SetOrgSettings implements \JsonSerializable
      * @param bool $requireLowercase the server's `require_lowercase` field
      * @param bool $requireSymbols the server's `require_symbols` field
      * @param bool $requireUppercase the server's `require_uppercase` field
+     * @param list<string>|null $dcrAllowedRedirectHosts the server's
+     *     `dcr_allowed_redirect_hosts` field (optional)
+     * @param list<string>|null $dcrAllowedScopes the server's `dcr_allowed_scopes` field
+     *     (optional)
+     * @param int|null $dcrMaxClients the server's `dcr_max_clients` field (optional)
+     * @param int|null $dcrUnusedClientTtlDays the server's `dcr_unused_client_ttl_days` field
+     *     (optional)
      * @param string|null $defaultLocale the server's `default_locale` field (optional)
      * @param int|null $deletionGracePeriodDays the server's `deletion_grace_period_days` field
      *     (optional)
+     * @param string|null $dynamicRegistration the server's `dynamic_registration` field
+     *     (optional)
+     * @param list<string>|null $externalClientAllowedResources the server's
+     *     `external_client_allowed_resources` field (optional)
      * @param string|null $opaqueKsf the server's `opaque_ksf` field (optional)
      * @param string|null $opaqueMode the server's `opaque_mode` field (optional)
      * @param string|null $opaqueSuite the server's `opaque_suite` field (optional)
@@ -71,8 +82,14 @@ final class SetOrgSettings implements \JsonSerializable
         public readonly bool $requireLowercase,
         public readonly bool $requireSymbols,
         public readonly bool $requireUppercase,
+        public readonly ?array $dcrAllowedRedirectHosts = null,
+        public readonly ?array $dcrAllowedScopes = null,
+        public readonly ?int $dcrMaxClients = null,
+        public readonly ?int $dcrUnusedClientTtlDays = null,
         public readonly ?string $defaultLocale = null,
         public readonly ?int $deletionGracePeriodDays = null,
+        public readonly ?string $dynamicRegistration = null,
+        public readonly ?array $externalClientAllowedResources = null,
         public readonly ?string $opaqueKsf = null,
         public readonly ?string $opaqueMode = null,
         public readonly ?string $opaqueSuite = null,
@@ -108,8 +125,14 @@ final class SetOrgSettings implements \JsonSerializable
             (bool) ModelDecode::need($data, 'require_lowercase', self::class),
             (bool) ModelDecode::need($data, 'require_symbols', self::class),
             (bool) ModelDecode::need($data, 'require_uppercase', self::class),
+            isset($data['dcr_allowed_redirect_hosts']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_redirect_hosts'])) : null,
+            isset($data['dcr_allowed_scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_scopes'])) : null,
+            isset($data['dcr_max_clients']) ? (int) $data['dcr_max_clients'] : null,
+            isset($data['dcr_unused_client_ttl_days']) ? (int) $data['dcr_unused_client_ttl_days'] : null,
             isset($data['default_locale']) ? (string) $data['default_locale'] : null,
             isset($data['deletion_grace_period_days']) ? (int) $data['deletion_grace_period_days'] : null,
+            isset($data['dynamic_registration']) ? (string) $data['dynamic_registration'] : null,
+            isset($data['external_client_allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['external_client_allowed_resources'])) : null,
             isset($data['opaque_ksf']) ? (string) $data['opaque_ksf'] : null,
             isset($data['opaque_mode']) ? (string) $data['opaque_mode'] : null,
             isset($data['opaque_suite']) ? (string) $data['opaque_suite'] : null,
@@ -149,11 +172,29 @@ final class SetOrgSettings implements \JsonSerializable
         $out['require_lowercase'] = $this->requireLowercase;
         $out['require_symbols'] = $this->requireSymbols;
         $out['require_uppercase'] = $this->requireUppercase;
+        if ($this->dcrAllowedRedirectHosts !== null) {
+            $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
+        }
+        if ($this->dcrAllowedScopes !== null) {
+            $out['dcr_allowed_scopes'] = $this->dcrAllowedScopes;
+        }
+        if ($this->dcrMaxClients !== null) {
+            $out['dcr_max_clients'] = $this->dcrMaxClients;
+        }
+        if ($this->dcrUnusedClientTtlDays !== null) {
+            $out['dcr_unused_client_ttl_days'] = $this->dcrUnusedClientTtlDays;
+        }
         if ($this->defaultLocale !== null) {
             $out['default_locale'] = $this->defaultLocale;
         }
         if ($this->deletionGracePeriodDays !== null) {
             $out['deletion_grace_period_days'] = $this->deletionGracePeriodDays;
+        }
+        if ($this->dynamicRegistration !== null) {
+            $out['dynamic_registration'] = $this->dynamicRegistration;
+        }
+        if ($this->externalClientAllowedResources !== null) {
+            $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
         }
         if ($this->opaqueKsf !== null) {
             $out['opaque_ksf'] = $this->opaqueKsf;

@@ -144,6 +144,20 @@ final class JwksVerifier
     }
 
     /**
+     * The `$expectedAudience` this verifier was constructed with (CONTRACT.md §10.1
+     * rule 6), or `null` when no audience check is configured.
+     *
+     * Public so a §10 guard built around this verifier can read back its own audience
+     * configuration — {@see \Axiam\Sdk\Mcp\McpGuardOptions::build()} (CONTRACT.md §28.5
+     * rule 2) reads it via {@see \Axiam\Sdk\AxiamClient::expectedAudience()} rather than
+     * requiring a second, independently-configured audience option for §28.
+     */
+    public function expectedAudience(): ?string
+    {
+        return $this->expectedAudience;
+    }
+
+    /**
      * Verifies a token against the COMPLETE CONTRACT.md §10.1 minimum local-verification
      * set — see the class docblock for the seven rules and for what `firebase/php-jwt`
      * does versus what §10.1 requires.

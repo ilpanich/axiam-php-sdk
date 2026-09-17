@@ -18,11 +18,22 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
      * @param list<string> $grantTypes Grant types this client is authorized to use.
      * @param string $name Human-readable name for the client.
      * @param list<string> $redirectUris Allowed redirect URIs (must be HTTPS, except localhost
-     *     for dev). SEC-089: this list doubles as the token-exchange audience allow-list — adding
-     *     a URI here also authorises it as a token audience for this client, so review additions
-     *     on exchange-capable clients with that in mind (see
+     *     for dev). SEC-089 / T21.3: this list **also** authorises token-exchange audiences, and
+     *     that coupling is now deprecated — `allowed_resources` is the field that means "audiences
+     *     this client may address". The redirect-URI branch survives one release so that no
+     *     deployment's working exchange breaks on upgrade, and it logs a deprecation warning when
+     *     it is the branch that matched. Register exchange targets in `allowed_resources` (see
      *     `docs/api/token-exchange.md#audience`).
      * @param list<string> $scopes Scopes the client may request.
+     * @param list<string>|null $allowedResources T21.3 / RFC 8707 — the target services this
+     *     client may name in a `resource` parameter, at `/oauth2/authorize`, `/oauth2/par`,
+     *     `/oauth2/device_authorization` and `/oauth2/token`. Each entry must be an absolute URI
+     *     without a fragment (RFC 8707 §2). Entries are stored in their RFC 3986 §6.2.2 normalised
+     *     form, which is what the read-back shows and what every comparison uses; matching is by
+     *     equivalence and **never by prefix**. Empty (the default) means the client may name no
+     *     resource, so every token it obtains carries `axiam:user` or `axiam:m2m` exactly as
+     *     before RFC 8707 support existed. This is also the list the RFC 8693 token exchange
+     *     consults for its `audience`/`resource` target. (optional)
      * @param AuthnRequestParamsMode|null $authnRequestParams X7.1 — whether this client's
      *     authorization requests may carry the OpenID Connect authentication-request parameters
      *     (`prompt`, `max_age`, `acr_values`, `claims`, `id_token_hint`, `login_hint`, `display`,
@@ -90,6 +101,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         public readonly string $name,
         public readonly array $redirectUris,
         public readonly array $scopes,
+        public readonly ?array $allowedResources = null,
         public readonly ?AuthnRequestParamsMode $authnRequestParams = null,
         public readonly ?string $backchannelLogoutUri = null,
         public readonly ?bool $browserSso = null,
@@ -120,6 +132,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             (string) ModelDecode::need($data, 'name', self::class),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'redirect_uris', self::class))),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scopes', self::class))),
+            isset($data['allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_resources'])) : null,
             isset($data['authn_request_params']) ? AuthnRequestParamsMode::fromWire((string) $data['authn_request_params']) : null,
             isset($data['backchannel_logout_uri']) ? (string) $data['backchannel_logout_uri'] : null,
             isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
@@ -154,6 +167,9 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         $out['name'] = $this->name;
         $out['redirect_uris'] = $this->redirectUris;
         $out['scopes'] = $this->scopes;
+        if ($this->allowedResources !== null) {
+            $out['allowed_resources'] = $this->allowedResources;
+        }
         if ($this->authnRequestParams !== null) {
             $out['authn_request_params'] = $this->authnRequestParams->value;
         }

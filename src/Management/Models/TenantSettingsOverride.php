@@ -23,6 +23,13 @@ final class TenantSettingsOverride implements \JsonSerializable
      *     (optional)
      * @param bool|null $adminNotificationsEnabled the server's `admin_notifications_enabled`
      *     field (optional)
+     * @param list<string>|null $dcrAllowedRedirectHosts the server's
+     *     `dcr_allowed_redirect_hosts` field (optional)
+     * @param list<string>|null $dcrAllowedScopes the server's `dcr_allowed_scopes` field
+     *     (optional)
+     * @param int|null $dcrMaxClients the server's `dcr_max_clients` field (optional)
+     * @param int|null $dcrUnusedClientTtlDays the server's `dcr_unused_client_ttl_days` field
+     *     (optional)
      * @param int|null $defaultCertValidityDays the server's `default_cert_validity_days` field
      *     (optional)
      * @param string|null $defaultLocale The tenant's fallback UI language. Not ordered,
@@ -30,10 +37,14 @@ final class TenantSettingsOverride implements \JsonSerializable
      *     (optional)
      * @param int|null $deletionGracePeriodDays the server's `deletion_grace_period_days` field
      *     (optional)
+     * @param string|null $dynamicRegistration the server's `dynamic_registration` field
+     *     (optional)
      * @param int|null $emailVerificationGracePeriodHours the server's
      *     `email_verification_grace_period_hours` field (optional)
      * @param bool|null $emailVerificationRequired the server's `email_verification_required`
      *     field (optional)
+     * @param list<string>|null $externalClientAllowedResources the server's
+     *     `external_client_allowed_resources` field (optional)
      * @param bool|null $hibpCheckEnabled the server's `hibp_check_enabled` field (optional)
      * @param float|null $lockoutBackoffMultiplier the server's `lockout_backoff_multiplier`
      *     field (optional)
@@ -68,11 +79,17 @@ final class TenantSettingsOverride implements \JsonSerializable
     public function __construct(
         public readonly ?int $accessTokenLifetimeSecs = null,
         public readonly ?bool $adminNotificationsEnabled = null,
+        public readonly ?array $dcrAllowedRedirectHosts = null,
+        public readonly ?array $dcrAllowedScopes = null,
+        public readonly ?int $dcrMaxClients = null,
+        public readonly ?int $dcrUnusedClientTtlDays = null,
         public readonly ?int $defaultCertValidityDays = null,
         public readonly ?string $defaultLocale = null,
         public readonly ?int $deletionGracePeriodDays = null,
+        public readonly ?string $dynamicRegistration = null,
         public readonly ?int $emailVerificationGracePeriodHours = null,
         public readonly ?bool $emailVerificationRequired = null,
+        public readonly ?array $externalClientAllowedResources = null,
         public readonly ?bool $hibpCheckEnabled = null,
         public readonly ?float $lockoutBackoffMultiplier = null,
         public readonly ?int $lockoutDurationSecs = null,
@@ -105,11 +122,17 @@ final class TenantSettingsOverride implements \JsonSerializable
         return new self(
             isset($data['access_token_lifetime_secs']) ? (int) $data['access_token_lifetime_secs'] : null,
             isset($data['admin_notifications_enabled']) ? (bool) $data['admin_notifications_enabled'] : null,
+            isset($data['dcr_allowed_redirect_hosts']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_redirect_hosts'])) : null,
+            isset($data['dcr_allowed_scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_scopes'])) : null,
+            isset($data['dcr_max_clients']) ? (int) $data['dcr_max_clients'] : null,
+            isset($data['dcr_unused_client_ttl_days']) ? (int) $data['dcr_unused_client_ttl_days'] : null,
             isset($data['default_cert_validity_days']) ? (int) $data['default_cert_validity_days'] : null,
             isset($data['default_locale']) ? (string) $data['default_locale'] : null,
             isset($data['deletion_grace_period_days']) ? (int) $data['deletion_grace_period_days'] : null,
+            isset($data['dynamic_registration']) ? (string) $data['dynamic_registration'] : null,
             isset($data['email_verification_grace_period_hours']) ? (int) $data['email_verification_grace_period_hours'] : null,
             isset($data['email_verification_required']) ? (bool) $data['email_verification_required'] : null,
+            isset($data['external_client_allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['external_client_allowed_resources'])) : null,
             isset($data['hibp_check_enabled']) ? (bool) $data['hibp_check_enabled'] : null,
             isset($data['lockout_backoff_multiplier']) ? (float) $data['lockout_backoff_multiplier'] : null,
             isset($data['lockout_duration_secs']) ? (int) $data['lockout_duration_secs'] : null,
@@ -150,6 +173,18 @@ final class TenantSettingsOverride implements \JsonSerializable
         if ($this->adminNotificationsEnabled !== null) {
             $out['admin_notifications_enabled'] = $this->adminNotificationsEnabled;
         }
+        if ($this->dcrAllowedRedirectHosts !== null) {
+            $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
+        }
+        if ($this->dcrAllowedScopes !== null) {
+            $out['dcr_allowed_scopes'] = $this->dcrAllowedScopes;
+        }
+        if ($this->dcrMaxClients !== null) {
+            $out['dcr_max_clients'] = $this->dcrMaxClients;
+        }
+        if ($this->dcrUnusedClientTtlDays !== null) {
+            $out['dcr_unused_client_ttl_days'] = $this->dcrUnusedClientTtlDays;
+        }
         if ($this->defaultCertValidityDays !== null) {
             $out['default_cert_validity_days'] = $this->defaultCertValidityDays;
         }
@@ -159,11 +194,17 @@ final class TenantSettingsOverride implements \JsonSerializable
         if ($this->deletionGracePeriodDays !== null) {
             $out['deletion_grace_period_days'] = $this->deletionGracePeriodDays;
         }
+        if ($this->dynamicRegistration !== null) {
+            $out['dynamic_registration'] = $this->dynamicRegistration;
+        }
         if ($this->emailVerificationGracePeriodHours !== null) {
             $out['email_verification_grace_period_hours'] = $this->emailVerificationGracePeriodHours;
         }
         if ($this->emailVerificationRequired !== null) {
             $out['email_verification_required'] = $this->emailVerificationRequired;
+        }
+        if ($this->externalClientAllowedResources !== null) {
+            $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
         }
         if ($this->hibpCheckEnabled !== null) {
             $out['hibp_check_enabled'] = $this->hibpCheckEnabled;

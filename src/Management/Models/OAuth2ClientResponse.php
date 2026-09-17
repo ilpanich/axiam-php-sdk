@@ -15,6 +15,9 @@ final class OAuth2ClientResponse implements \JsonSerializable
 {
     /**
      * Constructs a OAuth2ClientResponse.
+     * @param list<string> $allowedResources T21.3 — echoed in its stored, normalised form, so
+     *     an operator auditing which audiences a client may mint tokens for reads the strings the
+     *     server actually compares rather than the ones they typed.
      * @param AuthnRequestParamsMode $authnRequestParams X7.1 — echoed so an operator can audit
      *     which clients act on the OIDC authentication-request parameters, from this endpoint
      *     rather than from the database.
@@ -25,6 +28,14 @@ final class OAuth2ClientResponse implements \JsonSerializable
      * @param bool $dpopRequireNonce the server's `dpop_require_nonce` field
      * @param list<string> $grantTypes the server's `grant_types` field
      * @param string $id the server's `id` field
+     * @param ManagedBy $managedBy T21.4 / D5 — who created this registration: `admin`, `dcr`
+     *     or `cimd`. Echoed because an operator auditing a tenant needs to answer "which of these
+     *     did we create?" from this endpoint rather than from the database, and because three
+     *     behaviours hang off it: a non-`admin` client may never carry the FAPI profile, is always
+     *     consent-gated, and is the only kind the unused-client sweeper touches. Read-only. There
+     *     is no corresponding member on the update DTO: a registration's provenance is a fact
+     *     about how it came to exist, and a field that could be edited to `admin` would be a field
+     *     that launders one.
      * @param string $name the server's `name` field
      * @param ClientProfile $profile X5.1 — the registered posture and mTLS credentials.
      *     Read-back matters: an operator auditing which clients are financial-grade should be able
@@ -44,6 +55,12 @@ final class OAuth2ClientResponse implements \JsonSerializable
      *     registered. The document itself is public key material, so returning it leaks nothing; a
      *     `jwks_uri` is likewise public by construction. (optional)
      * @param string|null $jwksUri the server's `jwks_uri` field (optional)
+     * @param string|null $lastAuthorizedAt T21.4 — when this client was last issued an
+     *     authorization code, for the sweeper that deletes self-registered clients nobody uses.
+     *     Always absent for an `admin` client: the stamp is written only for a non-`admin` one, so
+     *     that an administrator's client takes exactly the path it took before T21.4 (I1). `null`
+     *     on a self-registered client means it has never been authorized, and the sweeper reads
+     *     `created_at` instead. (optional)
      * @param string|null $tlsClientAuthSanDns the server's `tls_client_auth_san_dns` field
      *     (optional)
      * @param string|null $tlsClientAuthSanUri the server's `tls_client_auth_san_uri` field
@@ -52,6 +69,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
      *     field (optional)
      */
     public function __construct(
+        public readonly array $allowedResources,
         public readonly AuthnRequestParamsMode $authnRequestParams,
         public readonly bool $browserSso,
         public readonly string $clientId,
@@ -60,6 +78,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
         public readonly bool $dpopRequireNonce,
         public readonly array $grantTypes,
         public readonly string $id,
+        public readonly ManagedBy $managedBy,
         public readonly string $name,
         public readonly ClientProfile $profile,
         public readonly array $redirectUris,
@@ -72,6 +91,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
         public readonly string $updatedAt,
         public readonly ?string $jwks = null,
         public readonly ?string $jwksUri = null,
+        public readonly ?string $lastAuthorizedAt = null,
         public readonly ?string $tlsClientAuthSanDns = null,
         public readonly ?string $tlsClientAuthSanUri = null,
         public readonly ?string $tlsClientAuthSubjectDn = null,
@@ -85,6 +105,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'allowed_resources', self::class))),
             AuthnRequestParamsMode::fromWire((string) ModelDecode::need($data, 'authn_request_params', self::class)),
             (bool) ModelDecode::need($data, 'browser_sso', self::class),
             (string) ModelDecode::need($data, 'client_id', self::class),
@@ -93,6 +114,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
             (bool) ModelDecode::need($data, 'dpop_require_nonce', self::class),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'grant_types', self::class))),
             (string) ModelDecode::need($data, 'id', self::class),
+            ManagedBy::fromWire((string) ModelDecode::need($data, 'managed_by', self::class)),
             (string) ModelDecode::need($data, 'name', self::class),
             ClientProfile::fromWire((string) ModelDecode::need($data, 'profile', self::class)),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'redirect_uris', self::class))),
@@ -105,6 +127,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
             (string) ModelDecode::need($data, 'updated_at', self::class),
             isset($data['jwks']) ? (string) $data['jwks'] : null,
             isset($data['jwks_uri']) ? (string) $data['jwks_uri'] : null,
+            isset($data['last_authorized_at']) ? (string) $data['last_authorized_at'] : null,
             isset($data['tls_client_auth_san_dns']) ? (string) $data['tls_client_auth_san_dns'] : null,
             isset($data['tls_client_auth_san_uri']) ? (string) $data['tls_client_auth_san_uri'] : null,
             isset($data['tls_client_auth_subject_dn']) ? (string) $data['tls_client_auth_subject_dn'] : null,
@@ -122,6 +145,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        $out['allowed_resources'] = $this->allowedResources;
         $out['authn_request_params'] = $this->authnRequestParams->value;
         $out['browser_sso'] = $this->browserSso;
         $out['client_id'] = $this->clientId;
@@ -130,6 +154,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
         $out['dpop_require_nonce'] = $this->dpopRequireNonce;
         $out['grant_types'] = $this->grantTypes;
         $out['id'] = $this->id;
+        $out['managed_by'] = $this->managedBy->value;
         $out['name'] = $this->name;
         $out['profile'] = $this->profile->value;
         $out['redirect_uris'] = $this->redirectUris;
@@ -145,6 +170,9 @@ final class OAuth2ClientResponse implements \JsonSerializable
         }
         if ($this->jwksUri !== null) {
             $out['jwks_uri'] = $this->jwksUri;
+        }
+        if ($this->lastAuthorizedAt !== null) {
+            $out['last_authorized_at'] = $this->lastAuthorizedAt;
         }
         if ($this->tlsClientAuthSanDns !== null) {
             $out['tls_client_auth_san_dns'] = $this->tlsClientAuthSanDns;

@@ -10,10 +10,14 @@ namespace Axiam\Sdk\Management\Models;
 
 /**
  * How a client proves its identity at the token endpoint (RFC 8705 §2, OIDC Core §9 naming).
- * Only the methods AXIAM actually implements are representable. There is deliberately no
- * `none` variant: every AXIAM client is confidential today (see `handle_authorization_code`),
- * and adding a public-client value here before the rest of the server understands one would
- * let an operator register a client whose authentication is silently skipped.
+ * Only the methods AXIAM actually implements are representable. `None` — the public-client
+ * value — was deliberately absent until T21.2: adding it before the rest of the server
+ * understood one would have let an operator register a client whose authentication is silently
+ * skipped. The server understands one now (`token.rs`'s `authenticate_client_credential` has
+ * an arm that accepts *no* credential and refuses a presented one, the authorization endpoint
+ * derives its PKCE requirement from this enum, and the admin API refuses the method alongside
+ * any grant or binding that contradicts it), so the variant exists — and only that arm may
+ * ever treat a missing credential as success.
  *
  * An **open** enum. A value this SDK's copy of the spec does not list decodes to
  * `self::Unknown` rather than failing the response it arrived in (CONTRACT.md §27.11 rule 1).
@@ -37,6 +41,9 @@ enum ClientAuthMethod: string
 
     /** The wire value `private_key_jwt`. */
     case PrivateKeyJwt = 'private_key_jwt';
+
+    /** The wire value `none`. */
+    case None = 'none';
 
     /** A value this SDK's copy of the spec does not list; see the type's summary. */
     case Unknown = '';

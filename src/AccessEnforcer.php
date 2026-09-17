@@ -10,6 +10,7 @@ use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\AuthzError;
 use Axiam\Sdk\Core\AxiamException;
 use Axiam\Sdk\Core\NetworkError;
+use Axiam\Sdk\Mcp\McpGuardOptions;
 use Axiam\Sdk\Oidc\RequestedPermission;
 use Axiam\Sdk\Oidc\UmaChallenge;
 use Psr\Log\LoggerInterface;
@@ -78,6 +79,8 @@ final class AccessEnforcer
 
     private readonly LoggerInterface $logger;
 
+    private readonly ?McpGuardOptions $mcp;
+
     /**
      * @param AxiamClient          $client The shared client used for the actual
      *        `checkAccess` round-trip (REST by default, gRPC when the client is so
@@ -86,13 +89,27 @@ final class AccessEnforcer
      * @param LoggerInterface|null $logger Injectable logger (diagnostic-only: `action`
      *        + resolved `resourceId` on a deny/error, NEVER a token/credential value —
      *        CONTRACT.md §11.2.8). Defaults to a silent {@see NullLogger}.
+     * @param string|null $resourceMetadataUrl CONTRACT.md §28.5's opt-in option —
+     *        setting it adds a `WWW-Authenticate` challenge to a `require_access` denial
+     *        whose `reasonCode` is `no_grant` and whose `scope` argument was given (rule
+     *        5). `null` (the default) leaves this class's behaviour byte-for-byte
+     *        unchanged from before §28 existed. Setting it REQUIRES `$client` to have
+     *        been constructed with `expectedAudience` — refused at construction, naming
+     *        both options, when it was not (rule 2). A {@see UmaChallenger} challenge
+     *        takes precedence when both are configured (§20.3's ticket is per-route and
+     *        specific to the exact authority just refused; this one is the generic
+     *        hint) — {@see self::withChallenge()} is where that precedence is applied.
      */
     public function __construct(
         private readonly AxiamClient $client,
         ?LoggerInterface $logger = null,
         private readonly ?UmaChallenger $challenger = null,
+        ?string $resourceMetadataUrl = null,
     ) {
         $this->logger = $logger ?? new NullLogger();
+        $this->mcp = $resourceMetadataUrl !== null
+            ? McpGuardOptions::build(self::class, $resourceMetadataUrl, $client->expectedAudience())
+            : null;
     }
 
     /**
@@ -203,7 +220,7 @@ final class AccessEnforcer
         $subjectId = $identity['user_id'];
 
         try {
-            $allowed = $this->client->checkAccess($attribute->action, $resource, $attribute->scope, $subjectId);
+            $decision = $this->client->checkAccessDecision($attribute->action, $resource, $attribute->scope, $subjectId);
         } catch (NetworkError) {
             // Fail closed (CONTRACT.md §11.2.5): a transport failure is NEVER a
             // silent allow, and is distinguished from a genuine deny so operators can
@@ -231,10 +248,16 @@ final class AccessEnforcer
                 'resource_id' => $resource,
             ]);
 
-            return $this->withChallenge($this->authorizationDenied($e->getMessage()), $attribute->action, $resource);
+            return $this->withChallenge(
+                $this->authorizationDenied($e->getMessage()),
+                $attribute->action,
+                $resource,
+                scope: $attribute->scope,
+                reasonCode: null,
+            );
         }
 
-        if (!$allowed) {
+        if (!$decision->allowed) {
             $this->logger->debug('axiam_sdk: require_access denied', [
                 'action' => $attribute->action,
                 'resource_id' => $resource,
@@ -244,6 +267,8 @@ final class AccessEnforcer
                 $this->authorizationDenied(sprintf('forbidden: cannot %s %s', $attribute->action, $resource)),
                 $attribute->action,
                 $resource,
+                scope: $attribute->scope,
+                reasonCode: $decision->reasonCode,
             );
         }
 
@@ -301,8 +326,42 @@ final class AccessEnforcer
     }
 
     /**
-     * Adds `WWW-Authenticate: UMA` to a resource denial when — and only when — a
-     * {@see UmaChallenger} was configured and minting succeeded (CONTRACT.md §20.3).
+     * Adds a `WWW-Authenticate` challenge to a resource denial — CONTRACT.md §20.3's UMA
+     * challenge when a {@see UmaChallenger} was configured and minting succeeded, else
+     * CONTRACT.md §28.5 rule 5's `insufficient_scope` challenge when this class was
+     * configured for §28 and the decision qualifies. **UMA wins when both apply**: it
+     * carries a live ticket for the EXACT authority just refused, where §28's is the
+     * generic hint — and only one `WWW-Authenticate` value is ever emitted.
+     *
+     * @param string|null $scope The `require_access` call's own `scope` argument
+     *        (CONTRACT.md §28.5 rule 5 only applies when one was given).
+     * @param string|null $reasonCode The decision's `reason_code` (§11 rule 9), or
+     *        `null` when none is available (the server answered with a genuine HTTP
+     *        error rather than a `200` decision — CONTRACT.md §28.5 rule 5 does not
+     *        apply there either).
+     */
+    private function withChallenge(JsonResponse $denial, string $action, string $resourceId, ?string $scope, ?string $reasonCode): JsonResponse
+    {
+        $uma = $this->umaChallenge($action, $resourceId);
+        if ($uma !== null) {
+            $denial->headers->set('WWW-Authenticate', $uma);
+
+            return $denial;
+        }
+
+        if ($this->mcp !== null && $scope !== null && $reasonCode !== null) {
+            $challenge = $this->mcp->insufficientScopeChallenge($reasonCode, $scope);
+            if ($challenge !== null) {
+                $denial->headers->set('WWW-Authenticate', $challenge);
+            }
+        }
+
+        return $denial;
+    }
+
+    /**
+     * CONTRACT.md §20.3's UMA challenge — `null` when no {@see UmaChallenger} was
+     * configured, or when minting the ticket failed.
      *
      * The requested scope is the AXIAM *action* (§20.2): asking for anything else would
      * offer the caller authority other than the one they were denied, and would step
@@ -314,10 +373,10 @@ final class AccessEnforcer
      * into a 503 would give the outage a second consequence; letting them turn it into an
      * allow would be a security bug.
      */
-    private function withChallenge(JsonResponse $denial, string $action, string $resourceId): JsonResponse
+    private function umaChallenge(string $action, string $resourceId): ?string
     {
         if ($this->challenger === null) {
-            return $denial;
+            return null;
         }
 
         try {
@@ -331,15 +390,10 @@ final class AccessEnforcer
                 'resource_id' => $resourceId,
             ]);
 
-            return $denial;
+            return null;
         }
 
-        $denial->headers->set(
-            'WWW-Authenticate',
-            UmaChallenge::header($this->challenger->realm, $this->challenger->asUri, $ticket),
-        );
-
-        return $denial;
+        return UmaChallenge::header($this->challenger->realm, $this->challenger->asUri, $ticket);
     }
 
     /** 401 `authentication_failed` (CONTRACT.md §11.2.5). */

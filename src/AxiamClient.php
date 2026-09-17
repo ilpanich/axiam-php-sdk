@@ -35,6 +35,7 @@ use Axiam\Sdk\Oidc\FederationProviderList;
 use Axiam\Sdk\Oidc\SsoCompleteResult;
 use Axiam\Sdk\Oidc\SsoStartResult;
 use Axiam\Sdk\Oidc\UmaChallenge;
+use Axiam\Sdk\Rest\AccessDecision;
 use Axiam\Sdk\Rest\AuthMiddleware;
 use Axiam\Sdk\Rest\AuthzRestClient;
 use Axiam\Sdk\Rest\RefreshMiddleware;
@@ -780,6 +781,20 @@ final class AxiamClient
     }
 
     /**
+     * The `$expectedAudience` this client was constructed with (CONTRACT.md §10.1 rule
+     * 6), or `null` when no audience check is configured.
+     *
+     * Public so a §10 guard built around this client can read back its own audience
+     * configuration without a second, independently-configured copy —
+     * {@see \Axiam\Sdk\Mcp\McpGuardOptions::build()} (CONTRACT.md §28.5 rule 2) is the
+     * caller.
+     */
+    public function expectedAudience(): ?string
+    {
+        return $this->jwksVerifier->expectedAudience();
+    }
+
+    /**
      * Throws if {@see AxiamClient::close()} has been called (§18.1 rule 4).
      *
      * Use-after-close is an error, not a silent reconnect: a client that quietly
@@ -991,6 +1006,21 @@ final class AxiamClient
     {
         $this->ensureOpen();
         return $this->authzDispatcher->checkAccess($action, $resourceId, $scope, $subjectId);
+    }
+
+    /**
+     * `checkAccess`, returning the **full** decision including CONTRACT.md §11 rule 9's
+     * `reason_code` — see {@see \Axiam\Sdk\Rest\AccessDecision}'s own docblock for why
+     * that distinction matters. Delegates to {@see AuthzDispatcher} on whichever
+     * transport {@see self::checkAccess()} itself would use (REST default, gRPC when
+     * available), so the two never disagree about which transport ran.
+     *
+     * @param string|null $subjectId See {@see self::checkAccess()}'s own docblock.
+     */
+    public function checkAccessDecision(string $action, string $resourceId, ?string $scope = null, ?string $subjectId = null): AccessDecision
+    {
+        $this->ensureOpen();
+        return $this->authzDispatcher->checkAccessDecision($action, $resourceId, $scope, $subjectId);
     }
 
     /**

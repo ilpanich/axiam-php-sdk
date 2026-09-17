@@ -9,18 +9,31 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management\Models;
 
 /**
- * OpenID Connect surface controls (X7 G8, plan §4.6/§4.8). Two settings that are not password
- * rules, and are here because this is the org-baseline-plus-tenant-override surface every
- * other per-tenant control lives on. They are also the two settings in this model that are
- * *not* of the same kind as each other, so it is worth saying which is which: *
- * [`Self::sensitive_scopes_enabled`] **is** ordered. Releasing personal data is the
- * less-restrictive direction, so it is validated disable-only — the mirror image of
- * `mfa_enforced` — and a tenant can turn its organization's decision off but never on. *
- * [`Self::default_locale`] is **not** ordered, and no ordering is invented for it. A language
- * is a presentation preference; there is no sense in which Italian is stricter than French.
- * [`validate_tenant_override`] therefore does not check it and [`clamp_overrides_to_org`]
- * never clears it. The model's rule is "a tenant may only be more restrictive", which binds
- * every field that *has* a restrictiveness; a field that has none cannot violate it.
+ * OpenID Connect surface controls (X7 G8, plan §4.6/§4.8; T21.4). Settings that are not
+ * password rules, here because this is the org-baseline-plus-tenant-override surface every
+ * other per-tenant control lives on. They are not all of the same kind as each other, and
+ * which is which is the whole of what [`validate_tenant_override`] and
+ * [`clamp_overrides_to_org`] read, so it is set out rather than inferred. **Ordered** — a
+ * tenant may be stricter than its organization and never more permissive: *
+ * [`Self::sensitive_scopes_enabled`], validated **disable-only** — the mirror image of
+ * `mfa_enforced`, because releasing personal data is the less-restrictive direction, so a
+ * tenant can turn its organization's decision off but never on. *
+ * [`Self::dynamic_registration`], on the ladder `disabled` → `initial_access_token` →
+ * `anonymous`: a tenant may move down it and never up. * [`Self::dcr_max_clients`] and
+ * [`Self::dcr_unused_client_ttl_days`], on the ordinary `tenant <= org` rule — with the
+ * wrinkle that `0` on the second means *never sweep*, which is the longest window of all and
+ * is handled by [`dcr_ttl_strictness`]. **Not ordered**, therefore never validated against the
+ * baseline and never clamped: * [`Self::default_locale`]. A language is a presentation
+ * preference; there is no sense in which Italian is stricter than French. *
+ * [`Self::dcr_allowed_scopes`], [`Self::dcr_allowed_redirect_hosts`] and
+ * [`Self::external_client_allowed_resources`]. Each names per-tenant resources — *this*
+ * tenant's MCP servers, *this* tenant's callback hosts — and there is no sense in which one
+ * such list is stricter than another. A subset rule would force an organization to enumerate
+ * every tenant's resource servers in its own baseline before any tenant could name one. The
+ * model's rule is "a tenant may only be more restrictive", which binds every field that *has*
+ * a restrictiveness; a field that has none cannot violate it. One cross-field interlock spans
+ * both groups and is checked on the resolved policy rather than on either input: see
+ * [`validate_dcr_policy`].
  */
 final class OidcPolicy implements \JsonSerializable
 {
@@ -36,6 +49,23 @@ final class OidcPolicy implements \JsonSerializable
      *     client still has to register the scope, the request still has to ask for it, and the
      *     user still has to have consented. It is the first of four gates, and it is the only one
      *     an operator can close for everybody at once.
+     * @param list<string>|null $dcrAllowedRedirectHosts T21.4 — hosts a self-registered
+     *     client's `redirect_uris` may point at, as globs (`*.example.com`, or `*` for any). The
+     *     loopback hosts (`127.0.0.1`, `[::1]`, `localhost`) are always allowed whatever this
+     *     says, because RFC 8252 §7.3 is how every desktop MCP client receives its callback and a
+     *     tenant that forbade them would have turned registration on for nobody. (optional)
+     * @param list<string>|null $dcrAllowedScopes T21.4 — the scopes a self-registered client
+     *     may ask for. A `scope` a registration names that is not on this list is
+     *     `invalid_client_metadata`; an empty list means a self-registered client gets no scopes
+     *     at all, which is the honest default for a tenant that has turned registration on without
+     *     deciding what it grants. May not contain `address` or `phone` — see this module's
+     *     [`sensitive_scope_in_dcr_list`]. (optional)
+     * @param int|null $dcrMaxClients T21.4 — how many `managed_by: dcr` clients this tenant
+     *     may hold. See [`DEFAULT_DCR_MAX_CLIENTS`]. (optional)
+     * @param int|null $dcrUnusedClientTtlDays T21.4 — how long a `managed_by: dcr` client
+     *     survives without being authorized. See [`DEFAULT_DCR_UNUSED_CLIENT_TTL_DAYS`]. `0`
+     *     disables the sweep for this tenant, which an operator who prunes out of band may
+     *     legitimately want. (optional)
      * @param string|null $defaultLocale The BCP 47 tag the sign-in page falls back to when the
      *     relying party's `ui_locales` selects nothing (W5's chain, plan §4.6). `None` means "no
      *     tenant preference", which lands on the deployment default (`en`) — the behaviour every
@@ -45,10 +75,29 @@ final class OidcPolicy implements \JsonSerializable
      *     Stored as a string rather than as the `Locale` enum because that enum lives in
      *     `axiam-oauth2`, four layers above this crate, and the crate layering points inward.
      *     (optional)
+     * @param string|null $dynamicRegistration T21.4 — whether a client may register itself
+     *     (RFC 7591), and on what terms. `disabled` unless somebody says otherwise (I1).
+     *     (optional)
+     * @param list<string>|null $externalClientAllowedResources **D3** — the audiences an
+     *     externally registered client may address. The single most important field on this
+     *     policy, and the reason the settings handler refuses `dynamic_registration: anonymous`
+     *     while it is empty. A client an unrelated party registered cannot declare its own
+     *     `allowed_resources`; it inherits this list verbatim, so what a stranger can mint a token
+     *     *for* is a decision the tenant took in advance rather than one the registration request
+     *     makes. Empty means an externally registered client can obtain only today's `axiam:user`
+     *     tokens — which AXIAM's own APIs accept. That is why the interlock exists: the empty list
+     *     is not a safe default for an *open* registration endpoint, it is the most dangerous one.
+     *     Shared with T5 (CIMD), which inherits the same list for the same reason. (optional)
      */
     public function __construct(
         public readonly bool $sensitiveScopesEnabled,
+        public readonly ?array $dcrAllowedRedirectHosts = null,
+        public readonly ?array $dcrAllowedScopes = null,
+        public readonly ?int $dcrMaxClients = null,
+        public readonly ?int $dcrUnusedClientTtlDays = null,
         public readonly ?string $defaultLocale = null,
+        public readonly ?string $dynamicRegistration = null,
+        public readonly ?array $externalClientAllowedResources = null,
     ) {
     }
 
@@ -60,7 +109,13 @@ final class OidcPolicy implements \JsonSerializable
     {
         return new self(
             (bool) ModelDecode::need($data, 'sensitive_scopes_enabled', self::class),
+            isset($data['dcr_allowed_redirect_hosts']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_redirect_hosts'])) : null,
+            isset($data['dcr_allowed_scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_scopes'])) : null,
+            isset($data['dcr_max_clients']) ? (int) $data['dcr_max_clients'] : null,
+            isset($data['dcr_unused_client_ttl_days']) ? (int) $data['dcr_unused_client_ttl_days'] : null,
             isset($data['default_locale']) ? (string) $data['default_locale'] : null,
+            isset($data['dynamic_registration']) ? (string) $data['dynamic_registration'] : null,
+            isset($data['external_client_allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['external_client_allowed_resources'])) : null,
         );
     }
 
@@ -76,8 +131,26 @@ final class OidcPolicy implements \JsonSerializable
     {
         $out = [];
         $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
+        if ($this->dcrAllowedRedirectHosts !== null) {
+            $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
+        }
+        if ($this->dcrAllowedScopes !== null) {
+            $out['dcr_allowed_scopes'] = $this->dcrAllowedScopes;
+        }
+        if ($this->dcrMaxClients !== null) {
+            $out['dcr_max_clients'] = $this->dcrMaxClients;
+        }
+        if ($this->dcrUnusedClientTtlDays !== null) {
+            $out['dcr_unused_client_ttl_days'] = $this->dcrUnusedClientTtlDays;
+        }
         if ($this->defaultLocale !== null) {
             $out['default_locale'] = $this->defaultLocale;
+        }
+        if ($this->dynamicRegistration !== null) {
+            $out['dynamic_registration'] = $this->dynamicRegistration;
+        }
+        if ($this->externalClientAllowedResources !== null) {
+            $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
         }
 
         return $out;

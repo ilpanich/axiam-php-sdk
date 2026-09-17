@@ -326,6 +326,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('tls_client_auth', Models\ClientAuthMethod::fromWire('tls_client_auth')->value);
         self::assertSame('self_signed_tls_client_auth', Models\ClientAuthMethod::fromWire('self_signed_tls_client_auth')->value);
         self::assertSame('private_key_jwt', Models\ClientAuthMethod::fromWire('private_key_jwt')->value);
+        self::assertSame('none', Models\ClientAuthMethod::fromWire('none')->value);
     }
 
     /** `ClientProfile`: every case survives wire -> enum -> wire. */
@@ -541,6 +542,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testCreateOAuth2ClientRequestRoundTrips(): void
     {
         $wire = [
+            'allowed_resources' => [
+                'example',
+            ],
             'authn_request_params' => 'ignore',
             'backchannel_logout_uri' => 'example',
             'browser_sso' => true,
@@ -644,6 +648,51 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             [],
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'CreateReactorRequest decoded a field it cannot render again',
+        );
+    }
+
+    /** `CreateRegistrationTokenRequest`: a full wire object survives decode and re-render. */
+    public function testCreateRegistrationTokenRequestRoundTrips(): void
+    {
+        $wire = [
+            'expires_in_hours' => 1,
+            'name' => 'example',
+        ];
+
+        $model = Models\CreateRegistrationTokenRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'CreateRegistrationTokenRequest decoded a field it cannot render again',
+        );
+    }
+
+    /** `CreateRegistrationTokenResponse`: a full wire object survives decode and re-render. */
+    public function testCreateRegistrationTokenResponseRoundTrips(): void
+    {
+        $wire = [
+            'initial_access_token' => 'example',
+            'token' => [
+                'created_at' => '2026-08-26T00:00:00Z',
+                'created_by' => '11111111-1111-4111-8111-111111111111',
+                'expires_at' => '2026-08-26T00:00:00Z',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'name' => 'example',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                'used_at' => '2026-08-26T00:00:00Z',
+                'used_by_client_id' => 'example',
+            ],
+        ];
+
+        $model = Models\CreateRegistrationTokenResponse::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'CreateRegistrationTokenResponse decoded a field it cannot render again',
         );
     }
 
@@ -1294,6 +1343,14 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `ManagedBy`: every case survives wire -> enum -> wire. */
+    public function testManagedByRoundTrips(): void
+    {
+        self::assertSame('admin', Models\ManagedBy::fromWire('admin')->value);
+        self::assertSame('dcr', Models\ManagedBy::fromWire('dcr')->value);
+        self::assertSame('cimd', Models\ManagedBy::fromWire('cimd')->value);
+    }
+
     /** `MdsRefreshOutcomeInitial`: the `initial` arm decodes and re-renders. */
     public function testMdsRefreshOutcomeInitialRoundTrips(): void
     {
@@ -1582,6 +1639,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testOAuth2ClientResponseRoundTrips(): void
     {
         $wire = [
+            'allowed_resources' => [
+                'example',
+            ],
             'authn_request_params' => 'ignore',
             'browser_sso' => true,
             'client_id' => 'example',
@@ -1594,6 +1654,8 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'id' => '11111111-1111-4111-8111-111111111111',
             'jwks' => 'example',
             'jwks_uri' => 'example',
+            'last_authorized_at' => '2026-08-26T00:00:00Z',
+            'managed_by' => 'admin',
             'name' => 'example',
             'profile' => 'standard',
             'redirect_uris' => [
@@ -1706,7 +1768,19 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testOidcPolicyRoundTrips(): void
     {
         $wire = [
+            'dcr_allowed_redirect_hosts' => [
+                'example',
+            ],
+            'dcr_allowed_scopes' => [
+                'example',
+            ],
+            'dcr_max_clients' => 1,
+            'dcr_unused_client_ttl_days' => 1,
             'default_locale' => 'example',
+            'dynamic_registration' => 'example',
+            'external_client_allowed_resources' => [
+                'example',
+            ],
             'sensitive_scopes_enabled' => true,
         ];
 
@@ -2097,6 +2171,30 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `RegistrationTokenResponse`: a full wire object survives decode and re-render. */
+    public function testRegistrationTokenResponseRoundTrips(): void
+    {
+        $wire = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'expires_at' => '2026-08-26T00:00:00Z',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'used_at' => '2026-08-26T00:00:00Z',
+            'used_by_client_id' => 'example',
+        ];
+
+        $model = Models\RegistrationTokenResponse::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'RegistrationTokenResponse decoded a field it cannot render again',
+        );
+    }
+
     /** `ResolvedPermissionGrant`: a full wire object survives decode and re-render. */
     public function testResolvedPermissionGrantRoundTrips(): void
     {
@@ -2424,7 +2522,19 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'dcr_allowed_redirect_hosts' => [
+                    'example',
+                ],
+                'dcr_allowed_scopes' => [
+                    'example',
+                ],
+                'dcr_max_clients' => 1,
+                'dcr_unused_client_ttl_days' => 1,
                 'default_locale' => 'example',
+                'dynamic_registration' => 'example',
+                'external_client_allowed_resources' => [
+                    'example',
+                ],
                 'sensitive_scopes_enabled' => true,
             ],
             'opaque' => [
@@ -2594,11 +2704,23 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         $wire = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'dcr_allowed_redirect_hosts' => [
+                'example',
+            ],
+            'dcr_allowed_scopes' => [
+                'example',
+            ],
+            'dcr_max_clients' => 1,
+            'dcr_unused_client_ttl_days' => 1,
             'default_cert_validity_days' => 1,
             'default_locale' => 'example',
             'deletion_grace_period_days' => 1,
+            'dynamic_registration' => 'example',
             'email_verification_grace_period_hours' => 1,
             'email_verification_required' => true,
+            'external_client_allowed_resources' => [
+                'example',
+            ],
             'hibp_check_enabled' => true,
             'lockout_backoff_multiplier' => 1.5,
             'lockout_duration_secs' => 1,
@@ -2779,11 +2901,23 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         $wire = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'dcr_allowed_redirect_hosts' => [
+                'example',
+            ],
+            'dcr_allowed_scopes' => [
+                'example',
+            ],
+            'dcr_max_clients' => 1,
+            'dcr_unused_client_ttl_days' => 1,
             'default_cert_validity_days' => 1,
             'default_locale' => 'example',
             'deletion_grace_period_days' => 1,
+            'dynamic_registration' => 'example',
             'email_verification_grace_period_hours' => 1,
             'email_verification_required' => true,
+            'external_client_allowed_resources' => [
+                'example',
+            ],
             'hibp_check_enabled' => true,
             'lockout_backoff_multiplier' => 1.5,
             'lockout_duration_secs' => 1,
@@ -2995,6 +3129,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testUpdateOAuth2ClientRequestRoundTrips(): void
     {
         $wire = [
+            'allowed_resources' => [
+                'example',
+            ],
             'authn_request_params' => 'ignore',
             'backchannel_logout_uri' => 'example',
             'browser_sso' => true,
@@ -3371,6 +3508,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(154, $cases);
+        self::assertCount(158, $cases);
     }
 }
