@@ -134,7 +134,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   byte-identical to the previously-vendored copy. The re-synced `openapi.json`/
   `management-registry.json` moved the §27 management surface's own digest, so
   `scripts/gen_management.py` was re-run and its generated output re-committed
-  alongside — mechanical, no §27 behaviour change.
+  alongside — mechanical, no §27 behaviour change. **Superseded in part by F-28-01
+  below**: re-syncing from a phase branch is what contract 1.49 now forbids, and
+  the artefacts are re-synced once, from `main`, after Phase 21 lands.
+
+### Deferred
+
+- **F-28-01 — the vendored `openapi.json`, `management-registry.json` and
+  `CONTRACT.md` re-sync.** This repository's copies were re-synced above from a
+  **phase branch**, which kept moving afterwards; they match neither
+  `ilpanich/axiam`'s current tree nor the four SDK repositories that declined the
+  `openapi.json` re-sync. Across the eleven SDKs the T21.9 T9d cross-SDK review found
+  five distinct byte-states of `CONTRACT.md` and two of `openapi.json`, all calling
+  themselves contract 1.48 (CONTRACT.md §28.11 row R-1). Contract **1.49** states the
+  rule that was missing: a vendored artefact is re-synced from a **merged** `main`,
+  never a phase branch. All three are therefore re-synced here **once**, as F-28-01,
+  after AXIAM Phase 21 lands on `main`, together with a regeneration of the §27
+  management surface in the same commit. F-28-01 is recorded identically in all eleven
+  SDK repositories so that it cannot be lost.
+
+  Two findings the review recorded about this port rather than changed. **D-02 stands
+  as conformant.** `AccessEnforcer::enforceAuth()` receives the identity a §10 guard
+  already resolved, never the request, so it cannot tell "no credential" from
+  "credential presented and rejected" and its standalone `#[RequireAuth]` 401 carries
+  no challenge. Contract 1.49's §28.5 rule 4 now provides for exactly this shape — the
+  C++ port's bare `require_auth()` is in the same position — and notes that the 401 is
+  reachable only where the §10 guard did not run, whose own 401 already carried the
+  correct vector. **And `checkAccessDecision()` was verified not to add a second
+  network call**: the bare-bool `checkAccess()` delegates to it, `AccessEnforcer`
+  calls it once, and a caller using only `checkAccess()` sees exactly the behaviour it
+  saw before (CONTRACT.md §28.11 row R-11).
 
 ## [1.0.0-beta15] - 2026-09-15
 
