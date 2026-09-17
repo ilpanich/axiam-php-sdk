@@ -9,8 +9,11 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management;
 
 use Axiam\Sdk\Management\Models\CreateOAuth2ClientRequest;
+use Axiam\Sdk\Management\Models\CreateRegistrationTokenRequest;
+use Axiam\Sdk\Management\Models\CreateRegistrationTokenResponse;
 use Axiam\Sdk\Management\Models\OAuth2ClientCreatedResponse;
 use Axiam\Sdk\Management\Models\OAuth2ClientResponse;
+use Axiam\Sdk\Management\Models\RegistrationTokenResponse;
 use Axiam\Sdk\Management\Models\UpdateOAuth2ClientRequest;
 
 /**
@@ -140,5 +143,57 @@ final class Oauth2ClientsApi extends ManagementSupport
             [],
             null,
         );
+    }
+
+    /**
+     * `POST /api/v1/oauth2-clients/registration-tokens`
+     *
+     * `POST /api/v1/oauth2-clients/registration-tokens`.
+     * @param CreateRegistrationTokenRequest $body the request body
+     * @return CreateRegistrationTokenResponse
+     */
+    public function createRegistrationToken(
+        CreateRegistrationTokenRequest $body,
+    ): CreateRegistrationTokenResponse {
+        $decoded = $this->transport->send(
+            'oauth2_clients.create_registration_token',
+            'POST',
+            '/api/v1/oauth2-clients/registration-tokens',
+            [],
+            [],
+            $body->toArray(),
+        );
+
+        return CreateRegistrationTokenResponse::fromArray($decoded ?? []);
+    }
+
+    /**
+     * `GET /api/v1/oauth2-clients/registration-tokens`
+     *
+     * `GET /api/v1/oauth2-clients/registration-tokens`.
+     *
+     * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+     * plain list and never a `Page` (§27.4 rule 4).
+     * @return list<RegistrationTokenResponse>
+     */
+    public function listRegistrationTokens(): array
+    {
+        $decoded = $this->transport->send(
+            'oauth2_clients.list_registration_tokens',
+            'GET',
+            '/api/v1/oauth2-clients/registration-tokens',
+            [],
+            [],
+            null,
+        );
+
+        $items = [];
+        foreach ($decoded ?? [] as $item) {
+            if (is_array($item)) {
+                $items[] = RegistrationTokenResponse::fromArray($item);
+            }
+        }
+
+        return $items;
     }
 }

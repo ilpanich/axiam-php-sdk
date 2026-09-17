@@ -191,10 +191,11 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.46**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
-§15, §17, §19, §20, §22, §23, §24, §25, §26, §27 (including
+This SDK conforms to **contract 1.48**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+§15, §17, §19, §20, §22, §23, §24, §25, §26, §27, §28 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
-verification; the §17 decision memo and §19 telemetry hooks, contract 1.8) — the binding,
+verification; the §17 decision memo and §19 telemetry hooks, contract 1.8; §28 MCP
+resource-server helpers, contract 1.48, see below) — the binding,
 cross-language behavioral contract every
 AXIAM SDK implements: camelCase method names (§1) — including the gRPC-only `getUserInfo`
 operation (§1.1) — the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2,
@@ -213,8 +214,10 @@ webhook-signature verification (§13, see below), the opt-in §17 decision memo
 **conditional on `ext-ffi` and one shared library**, which is PHP's alone among the eleven
 SDKs), the §24 WebAuthn relying-party layer with its §24.6a JSON bridge and, since contract
 1.45, the session-less `webauthnSetupRegisterStart`/`webauthnSetupRegisterFinish` pair (see
-below), the §25 account-lifecycle and MFA-enrolment operations (see below), and §26 Pushed
-Authorization Requests (see below).
+below), the §25 account-lifecycle and MFA-enrolment operations (see below), §26 Pushed
+Authorization Requests (see below), and the §28 MCP resource-server helpers — the RFC 9728
+protected-resource metadata document and the RFC 6750 bearer challenge, opt-in and off by
+default (see below).
 
 §24.6b — the linked-API ceremony helper — is **deliberately absent**. PHP runs on a server,
 which has no authenticator, and §24.6b rule 2 forbids emulating one in software: a
@@ -1565,6 +1568,237 @@ See `examples/management_basics.php`, `examples/management_manifest.php`,
 a `Device` certificate from the tenant's signing CA, binds it to a service account, writes
 the one-time private key at `0600`, and then authenticates as the device over §6.1 mutual
 TLS with no password anywhere.
+
+## MCP resource-server helpers (`Axiam\Sdk\Mcp`, CONTRACT.md §28)
+
+The resource-server half of the Model Context Protocol authorization handshake: publish
+the RFC 9728 document that tells an MCP client which authorization server guards this
+resource, and put the RFC 6750 `WWW-Authenticate` challenge on the 401 that starts its
+discovery.
+
+**AXIAM is the authorization server and implements none of this.** Your MCP server is the
+resource server, and this is its side. Nothing here talks to AXIAM, performs any network
+I/O or touches the shared `AxiamClient`'s own session — both operations are pure local
+computation, like `oidcExchange`'s helpers and `UmaChallenge::parse()`. The *client*
+half — parsing a challenge, fetching a document, deciding whether to trust the
+authorization server it names — is deliberately not in the SDK: a helper that read a 401
+and acted on it would send a credential to whatever host the 401 asked it to.
+
+**It is opt-in and off by default.** With `resourceMetadataUrl` unset, `AxiamMiddleware`
+(Laravel) and `AxiamAuthSubscriber` (Symfony) behave byte-for-byte as they did before
+§28 existed: no header on any response, no status changed, no body changed, no path
+exempted.
+
+### The whole integration
+
+```php
+use Axiam\Sdk\AccessEnforcer;
+use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Laravel\AxiamMiddleware;
+use Axiam\Sdk\Mcp\Mcp;
+
+// 1. Describe the resource server. Validated here, at construction — before any
+//    route exists and before any request is served.
+$metadata = Mcp::protectedResourceMetadata(
+    resource: 'https://mcp.example.com/mcp',
+    authorizationServers: ['https://axiam.example.com'],
+    scopesSupported: ['mcp:read', 'mcp:tools'],
+);
+
+// 2. Configure the client and the guard FROM that value rather than by retyping the
+//    strings — retyping is how the guard and the document come to disagree.
+$client = new AxiamClient(
+    baseUrl: 'https://axiam.example.com',
+    tenant: 'acme-tenant',
+    expectedAudience: $metadata->document['resource'], // https://mcp.example.com/mcp
+);
+$middleware = new AxiamMiddleware($client, 'acme-tenant', $metadata->metadataUrl);
+
+// 3. Publish the document as a Laravel route. Passing $middleware is what lets the
+//    SDK check that the three strings agree; it throws at startup if they do not.
+Route::middleware('axiam.auth')->group(function () use ($middleware, $metadata) {
+    Route::serveProtectedResourceMetadata($metadata, $middleware);
+    Route::post('/mcp/tools', ToolsController::class);
+});
+```
+
+On Symfony, the third step is a controller you wire into your own routing configuration
+rather than a macro-registered route — Symfony's routing table is declarative config the
+SDK cannot hook at runtime, which is also why the plan names this surface "subscriber +
+controller" rather than "subscriber + route":
+
+```php
+use Axiam\Sdk\Symfony\AxiamAuthSubscriber;
+use Axiam\Sdk\Symfony\ProtectedResourceMetadataController;
+
+$subscriber = new AxiamAuthSubscriber($client, 'acme-tenant', $metadata->metadataUrl);
+// Tag $subscriber `kernel.event_subscriber` as usual (see "Framework integration" above).
+
+$controller = new ProtectedResourceMetadataController($metadata, $subscriber);
+// Wire $controller into routes.yaml/attributes at $metadata->metadataPath — the exact
+// derived path, e.g. `/.well-known/oauth-protected-resource/mcp`.
+```
+
+A request with no credential now gets what it needs to go and get one:
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer resource_metadata="https://mcp.example.com/.well-known/oauth-protected-resource/mcp"
+Content-Type: application/json
+
+{"error":"AuthError","message":"missing authentication credentials"}
+```
+
+and the document it points at answers without a credential:
+
+```json
+{
+  "resource": "https://mcp.example.com/mcp",
+  "authorization_servers": ["https://axiam.example.com"],
+  "scopes_supported": ["mcp:read", "mcp:tools"],
+  "bearer_methods_supported": ["header"]
+}
+```
+
+**The path is derived from the resource, not chosen.** RFC 9728 §3.1 inserts
+`/.well-known/oauth-protected-resource` between the authority and the path, so
+`https://mcp.example.com/mcp` publishes at `/.well-known/oauth-protected-resource/mcp` and
+`https://mcp.example.com` at the bare well-known path. A trailing slash is carried through
+rather than trimmed — it is part of the identifier the client compares, and two resources
+that differ only by it are two resources. Exactly one route is registered per call; a
+deployment fronting several resources calls `protectedResourceMetadata()` once per
+resource.
+
+**You do not have to order the routes.** Both `AxiamMiddleware` and
+`AxiamAuthSubscriber` exempt the document's path themselves, from the
+`resourceMetadataUrl` they were configured with — the guard checks the exact path on
+every request it sees, before it ever tries to extract a credential.
+
+### Announcing yourself obliges you to check
+
+**`expectedAudience` is mandatory once `resourceMetadataUrl` is set**, and both guards
+refuse the configuration at construction, naming both options. A resource server that
+publishes *"tokens for me carry this `aud`"* and then does not check `aud` has published a
+claim it does not honour — and a token minted for a **different** MCP server opens it.
+That is the confusion RFC 8707 exists to prevent, so it is impossible to configure rather
+than merely discouraged:
+
+```php
+new AxiamMiddleware($client, 'acme-tenant', $metadata->metadataUrl);
+// Axiam\Sdk\Management\ValidationError: resourceMetadataUrl: requires expectedAudience
+// to be set on the same AxiamClient (CONTRACT.md §28.5 rule 2) — …
+```
+
+With both set, a token carrying `aud: "axiam:user"` — a perfectly valid AXIAM token that
+simply was not minted for this resource — is a 401, exactly like a token minted for
+`https://other.example.com/mcp`.
+
+### The 403 that asks for a scope
+
+One class of 403 carries a challenge, and only one: an `AccessEnforcer` configured
+with `resourceMetadataUrl` whose `#[RequireAccess]`/`enforceAccess()` call **named a
+scope** and whose decision came back `allowed: false` with `reasonCode: "no_grant"`:
+
+```php
+$enforcer = new AccessEnforcer($client, resourceMetadataUrl: $metadata->metadataUrl);
+// #[RequireAccess(action: 'invoke', resourceParam: 'id', scope: 'mcp:tools')]
+```
+
+```http
+HTTP/1.1 403 Forbidden
+WWW-Authenticate: Bearer error="insufficient_scope", scope="mcp:tools", resource_metadata="https://mcp.example.com/.well-known/oauth-protected-resource/mcp"
+Content-Type: application/json
+
+{"error":"authorization_denied","message":"..."}
+```
+
+`insufficient_scope` is in the header and `authorization_denied` is in the body, and they
+are not two spellings of one thing: the body is the §11 error taxonomy, unchanged, and the
+header is the RFC 6750 hint. The scope named is the one the route asked for, **verbatim**
+— never synthesised, never derived from `action`/`resource`, never substituted from the
+document's `scopes_supported`, because where a deployment's AXIAM resource-scope names and
+its OAuth scope names differ, that mapping is the operator's decision and the SDK cannot
+see it.
+
+Every other 403 carries no header at all: a `require_access` with no `scope` argument, a
+`require_role` failure, a CSRF refusal, and — the one that matters — a decision whose
+`reasonCode` is `denied_by_rule`. `no_grant` means *ask for more*, which is what a
+challenge invites a client to do; `denied_by_rule` means *an administrator has already
+decided*, and challenging on it would send an MCP client all the way around the
+authorization loop to arrive at the identical 403. An absent or unrecognised `reasonCode`
+is not eligible either.
+
+Where a route also carries a §20.3 UMA challenge (a `UmaChallenger` configured on the same
+`AccessEnforcer`), the UMA challenge wins: it is per-route opt-in and carries a live ticket
+for the exact authority just refused, where this one is the generic hint. Only one
+`WWW-Authenticate` value is ever emitted.
+
+### The challenge says only what RFC 6750 can say
+
+Expired, not yet valid, wrong tenant, wrong audience, bad signature, a `cnf` the guard
+could not satisfy, a `sid` in the §10.4 revocation feed — all of them are `invalid_token`,
+indistinguishably. This SDK's own guards never emit an `error_description`, and add
+nothing to the response that tells them apart. It is a 401 to an unauthenticated stranger:
+every distinction it draws is an oracle.
+
+`Mcp::bearerChallenge(...)` exists for the challenge you build yourself, for your own
+`400`, and it takes `errorDescription` for that reason alone. It **refuses rather than
+escapes**: RFC 6750 restricts every parameter to a character set that cannot contain `"`
+or `\`, so a value needing an escape is a value that does not belong in a challenge.
+
+```php
+Mcp::bearerChallenge(
+    $metadata->metadataUrl,
+    error: 'invalid_request',
+    errorDescription: 'The access token is malformed',
+    scope: 'mcp:read mcp:tools',
+);
+// Bearer error="invalid_request", error_description="The access token is malformed",
+//   scope="mcp:read mcp:tools", resource_metadata="https://mcp.example.com/.well-known/…/mcp"
+
+Mcp::bearerChallenge($metadata->metadataUrl, errorDescription: 'he said "no"');
+// ValidationError — never a challenge containing \"
+```
+
+### Validation refuses; it never repairs
+
+Every §28.2 rule is checked by `Mcp::protectedResourceMetadata()` itself, and a violation
+throws `Axiam\Sdk\Management\ValidationError` (§2's taxonomy, unchanged — §28 adds no error
+type). Nothing is normalised, trimmed, lowercased or re-encoded to make it pass: that would
+publish a document describing a resource server that does not exist. The rules, in one
+list:
+
+| Member | Rule |
+|---|---|
+| `resource` | absolute URI with a scheme and an authority, **no query and no fragment**; a trailing slash is significant |
+| any URL | `https`, except on `127.0.0.1`, `[::1]` or `localhost` — there is no flag, env var or debug build that widens this |
+| `authorizationServers` | at least one entry, each an issuer **verbatim** (no `?tenant_id=`), no query, no fragment, no duplicates |
+| `scopesSupported` | RFC 6749 `NQCHAR` tokens, order preserved, no duplicates; an empty list **omits the member** |
+| `bearerMethodsSupported` | exactly `["header"]` — this SDK's guards read a bearer credential from the `Authorization` header alone |
+| `resourceDocumentation` | an absolute URL, query and fragment permitted; omitted when absent, never `null` |
+
+**Nothing in the document may come from a request.** `resource` and `authorizationServers`
+are configuration, and this SDK offers no option to build either from the `Host` header,
+the `Forwarded`/`X-Forwarded-*` family or the request URL. A document assembled from the
+request is a document an attacker can point at an authorization server of their choosing —
+the whole handshake redirected with one header.
+
+Nothing in §28 is wrapped in `Sensitive<T>` (§7), and that is a rule rather than an
+omission: the document is published unauthenticated to the world and the challenge goes to
+a caller who has just failed to authenticate, so both must stay readable. The corollary is
+the one that matters — **no part of the presented credential reaches either of them**, in
+any parameter, any header, any body or any log line the guard writes on the 401 path.
+
+### gRPC and AMQP
+
+CONTRACT.md §28.5 rule 8 makes exposing `bearerChallenge` to a gRPC guard's error mapping
+optional ("MAY attach the same string as `www-authenticate` metadata on an
+`UNAUTHENTICATED` status") and forbids an AMQP equivalent outright ("no client waiting on
+a response to re-authorize with"). This SDK's `Axiam\Sdk\Grpc` namespace is a **client**
+for AXIAM's own gRPC services (`checkAccess`, `getUserInfo`) — the opposite direction from
+§28, which is about a guard protecting *this application's own* endpoints — so there is no
+gRPC (or AMQP) resource-server guard here to wire the challenge into. §10's guard, and
+therefore all of §28, is a REST-only surface on this SDK today.
 
 ## TLS policy
 

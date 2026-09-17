@@ -16,8 +16,6 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
     /**
      * Constructs a OAuth2ClientCreatedResponse.
      * @param string $clientId the server's `client_id` field
-     * @param \Axiam\Sdk\Core\Sensitive $clientSecret the server's `client_secret` field — a
-     *     one-time secret (§27.5)
      * @param string $createdAt the server's `created_at` field
      * @param list<string> $grantTypes the server's `grant_types` field
      * @param string $id the server's `id` field
@@ -26,10 +24,16 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
      * @param list<string> $scopes the server's `scopes` field
      * @param string $tenantId the server's `tenant_id` field
      * @param string $updatedAt the server's `updated_at` field
+     * @param \Axiam\Sdk\Core\Sensitive|null $clientSecret The plaintext client secret, shown
+     *     exactly once. T21.2 — **absent** for a client registered with
+     *     `token_endpoint_auth_method: none`. A public client is created with no secret, so there
+     *     is nothing to show; the member is omitted rather than sent as `""`, which an operator
+     *     (or an SDK) would reasonably read as a secret that happens to be empty. Every
+     *     confidential registration — that is, every registration that existed before T21.2 —
+     *     carries it exactly as before. (optional)
      */
     public function __construct(
         public readonly string $clientId,
-        public readonly \Axiam\Sdk\Core\Sensitive $clientSecret,
         public readonly string $createdAt,
         public readonly array $grantTypes,
         public readonly string $id,
@@ -38,6 +42,7 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
         public readonly array $scopes,
         public readonly string $tenantId,
         public readonly string $updatedAt,
+        public readonly ?\Axiam\Sdk\Core\Sensitive $clientSecret = null,
     ) {
     }
 
@@ -49,7 +54,6 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
     {
         return new self(
             (string) ModelDecode::need($data, 'client_id', self::class),
-            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'client_secret', self::class)),
             (string) ModelDecode::need($data, 'created_at', self::class),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'grant_types', self::class))),
             (string) ModelDecode::need($data, 'id', self::class),
@@ -58,6 +62,7 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scopes', self::class))),
             (string) ModelDecode::need($data, 'tenant_id', self::class),
             (string) ModelDecode::need($data, 'updated_at', self::class),
+            isset($data['client_secret']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['client_secret']) : null,
         );
     }
 
@@ -73,7 +78,6 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
     {
         $out = [];
         $out['client_id'] = $this->clientId;
-        $out['client_secret'] = $this->clientSecret;
         $out['created_at'] = $this->createdAt;
         $out['grant_types'] = $this->grantTypes;
         $out['id'] = $this->id;
@@ -82,6 +86,9 @@ final class OAuth2ClientCreatedResponse implements \JsonSerializable
         $out['scopes'] = $this->scopes;
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
+        if ($this->clientSecret !== null) {
+            $out['client_secret'] = $this->clientSecret;
+        }
 
         return $out;
     }

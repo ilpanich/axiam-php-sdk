@@ -93,8 +93,9 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
                 $tenant = $config !== null
                     ? (string) $config->get('axiam.tenant', getenv('AXIAM_TENANT') ?: '')
                     : (string) (getenv('AXIAM_TENANT') ?: '');
+                $resourceMetadataUrl = self::resourceMetadataUrl($app);
 
-                return new AxiamMiddleware($app->make(AxiamClient::class), $tenant);
+                return new AxiamMiddleware($app->make(AxiamClient::class), $tenant, $resourceMetadataUrl);
             });
 
             $this->app->singleton(AxiamGate::class, static fn ($app): AxiamGate => new AxiamGate(
@@ -105,6 +106,7 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
             // axiam.access middleware here and (independently) the Symfony bridge.
             $this->app->singleton(AccessEnforcer::class, static fn ($app): AccessEnforcer => new AccessEnforcer(
                 $app->make(AxiamClient::class),
+                resourceMetadataUrl: self::resourceMetadataUrl($app),
             ));
 
             $this->app->singleton(AxiamAccessMiddleware::class, static fn ($app): AxiamAccessMiddleware => new AxiamAccessMiddleware(
@@ -143,6 +145,24 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
         }
 
         /**
+         * CONTRACT.md §28.5's opt-in option, read from `axiam.mcp.resource_metadata_url`
+         * (falling back to `AXIAM_MCP_RESOURCE_METADATA_URL`, matching every other
+         * config/env pair this provider reads) — shared by the {@see AxiamMiddleware}
+         * and {@see AccessEnforcer} singleton factories so the two agree without an
+         * application having to configure it twice. `null` when unset, which is §28's
+         * off-by-default state.
+         */
+        private static function resourceMetadataUrl(mixed $app): ?string
+        {
+            $config = $app->bound('config') ? $app->make('config') : null;
+            $value = $config !== null
+                ? $config->get('axiam.mcp.resource_metadata_url', getenv('AXIAM_MCP_RESOURCE_METADATA_URL') ?: null)
+                : (getenv('AXIAM_MCP_RESOURCE_METADATA_URL') ?: null);
+
+            return is_string($value) && $value !== '' ? $value : null;
+        }
+
+        /**
          * Registers the `axiam.auth` route-middleware alias so applications can guard routes with
          * `->middleware('axiam.auth')` (D-02, §10) instead of referencing the middleware class.
          */
@@ -173,6 +193,38 @@ if (class_exists(\Illuminate\Support\ServiceProvider::class)) {
                     function (string $loginPath = '/auth/axiam/login', string $callbackPath = '/auth/axiam/callback'): void {
                         \Illuminate\Support\Facades\Route::get($loginPath, OidcLoginController::class);
                         \Illuminate\Support\Facades\Route::get($callbackPath, OidcCallbackController::class);
+                    },
+                );
+            }
+
+            // CONTRACT.md §28.3: a route MACRO — calling
+            // Route::serveProtectedResourceMetadata($metadata) is what an application
+            // does to opt IN to publishing the RFC 9728 document; nothing here
+            // registers a route on its own, so a §1–§27-only consumer is completely
+            // unaffected. `$guard`, when given, is cross-checked against `$metadata`
+            // per §28.5 rule 3 before the route is registered; omit it when the guard
+            // runs in a separate process, where nothing can be cross-checked.
+            if (class_exists(\Illuminate\Support\Facades\Route::class)) {
+                \Illuminate\Support\Facades\Route::macro(
+                    'serveProtectedResourceMetadata',
+                    function (
+                        \Axiam\Sdk\Mcp\ProtectedResourceMetadata $metadata,
+                        ?AxiamMiddleware $guard = null,
+                    ): void {
+                        if ($guard !== null) {
+                            $guardOptions = $guard->mcpGuardOptions();
+                            if ($guardOptions !== null) {
+                                \Axiam\Sdk\Mcp\Mcp::checkGuardAgreement($metadata, $guardOptions, $guard->client()->expectedAudience());
+                            }
+                        }
+
+                        // §28.3 rule 4: identical for every caller — the closure below
+                        // builds the SAME response, from the SAME immutable $metadata,
+                        // on every request; nothing here varies per caller.
+                        \Illuminate\Support\Facades\Route::get(
+                            $metadata->metadataPath,
+                            static fn () => \Axiam\Sdk\Mcp\Mcp::toJsonResponse($metadata),
+                        );
                     },
                 );
             }

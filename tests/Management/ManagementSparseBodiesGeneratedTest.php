@@ -124,16 +124,16 @@ final class ManagementSparseBodiesGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * `UpdateOAuth2ClientRequest`: naming only `authn_request_params` sends only
-     * `authn_request_params`.
+     * `UpdateOAuth2ClientRequest`: naming only `allowed_resources` sends only
+     * `allowed_resources`.
      */
     public function testUpdateOAuth2ClientRequestOmitsWhatYouDidNotName(): void
     {
-        $body = new Models\UpdateOAuth2ClientRequest(authnRequestParams: Models\AuthnRequestParamsMode::Ignore);
+        $body = new Models\UpdateOAuth2ClientRequest(allowedResources: ['example']);
 
         $rendered = $body->toArray();
 
-        self::assertSame(['authn_request_params'], array_keys($rendered));
+        self::assertSame(['allowed_resources'], array_keys($rendered));
     }
 
     /**

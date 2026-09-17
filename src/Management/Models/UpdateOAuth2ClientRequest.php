@@ -19,6 +19,9 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
 {
     /**
      * Constructs a UpdateOAuth2ClientRequest.
+     * @param list<string>|null $allowedResources T21.3 — see
+     *     [`CreateOAuth2ClientRequest::allowed_resources`]. A whole-list replacement; `[]`
+     *     withdraws every target. (optional)
      * @param AuthnRequestParamsMode|null $authnRequestParams the server's
      *     `authn_request_params` field (optional)
      * @param string|null $backchannelLogoutUri Pass an empty string to clear a previously
@@ -53,6 +56,7 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
      *     `token_endpoint_auth_method` field (optional)
      */
     public function __construct(
+        public readonly ?array $allowedResources = null,
         public readonly ?AuthnRequestParamsMode $authnRequestParams = null,
         public readonly ?string $backchannelLogoutUri = null,
         public readonly ?bool $browserSso = null,
@@ -83,6 +87,7 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            isset($data['allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_resources'])) : null,
             isset($data['authn_request_params']) ? AuthnRequestParamsMode::fromWire((string) $data['authn_request_params']) : null,
             isset($data['backchannel_logout_uri']) ? (string) $data['backchannel_logout_uri'] : null,
             isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
@@ -117,6 +122,9 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        if ($this->allowedResources !== null) {
+            $out['allowed_resources'] = $this->allowedResources;
+        }
         if ($this->authnRequestParams !== null) {
             $out['authn_request_params'] = $this->authnRequestParams->value;
         }

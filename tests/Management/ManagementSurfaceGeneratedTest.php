@@ -12,7 +12,7 @@ use Axiam\Sdk\Management\Models;
 use Axiam\Sdk\Management\Page;
 
 /**
- * One case per CONTRACT.md §27 operation — all 160 of them.
+ * One case per CONTRACT.md §27 operation — all 162 of them.
  *
  * Each asserts three things about one operation: it issues the METHOD the registry names,
  * against the PATH the registry names, and — where the operation returns a body — that every
@@ -2387,6 +2387,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'items' => [
                 [
+                    'allowed_resources' => [
+                        'example',
+                    ],
                     'authn_request_params' => 'ignore',
                     'browser_sso' => true,
                     'client_id' => 'example',
@@ -2399,6 +2402,8 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'id' => '11111111-1111-4111-8111-111111111111',
                     'jwks' => 'example',
                     'jwks_uri' => 'example',
+                    'last_authorized_at' => '2026-08-26T00:00:00Z',
+                    'managed_by' => 'admin',
                     'name' => 'example',
                     'profile' => 'standard',
                     'redirect_uris' => [
@@ -2470,6 +2475,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testOauth2ClientsGetReachesItsRoute(): void
     {
         $mounted = [
+            'allowed_resources' => [
+                'example',
+            ],
             'authn_request_params' => 'ignore',
             'browser_sso' => true,
             'client_id' => 'example',
@@ -2482,6 +2490,8 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'id' => '11111111-1111-4111-8111-111111111111',
             'jwks' => 'example',
             'jwks_uri' => 'example',
+            'last_authorized_at' => '2026-08-26T00:00:00Z',
+            'managed_by' => 'admin',
             'name' => 'example',
             'profile' => 'standard',
             'redirect_uris' => [
@@ -2515,6 +2525,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testOauth2ClientsUpdateReachesItsRoute(): void
     {
         $mounted = [
+            'allowed_resources' => [
+                'example',
+            ],
             'authn_request_params' => 'ignore',
             'browser_sso' => true,
             'client_id' => 'example',
@@ -2527,6 +2540,8 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'id' => '11111111-1111-4111-8111-111111111111',
             'jwks' => 'example',
             'jwks_uri' => 'example',
+            'last_authorized_at' => '2026-08-26T00:00:00Z',
+            'managed_by' => 'admin',
             'name' => 'example',
             'profile' => 'standard',
             'redirect_uris' => [
@@ -2565,6 +2580,63 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $request = $this->lastRequest();
         self::assertSame('DELETE', $request->getMethod());
         self::assertSame('/api/v1/oauth2-clients/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /**
+     * `POST /api/v1/oauth2-clients/registration-tokens` — the
+     * `oauth2_clients.create_registration_token` operation.
+     */
+    public function testOauth2ClientsCreateRegistrationTokenReachesItsRoute(): void
+    {
+        $mounted = [
+            'initial_access_token' => 'example',
+            'token' => [
+                'created_at' => '2026-08-26T00:00:00Z',
+                'created_by' => '11111111-1111-4111-8111-111111111111',
+                'expires_at' => '2026-08-26T00:00:00Z',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'name' => 'example',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                'used_at' => '2026-08-26T00:00:00Z',
+                'used_by_client_id' => 'example',
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->oauth2Clients()->createRegistrationToken(new Models\CreateRegistrationTokenRequest('example'));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/oauth2-clients/registration-tokens', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `GET /api/v1/oauth2-clients/registration-tokens` — the
+     * `oauth2_clients.list_registration_tokens` operation.
+     */
+    public function testOauth2ClientsListRegistrationTokensReachesItsRoute(): void
+    {
+        $mounted = [
+            [
+                'created_at' => '2026-08-26T00:00:00Z',
+                'created_by' => '11111111-1111-4111-8111-111111111111',
+                'expires_at' => '2026-08-26T00:00:00Z',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'name' => 'example',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                'used_at' => '2026-08-26T00:00:00Z',
+                'used_by_client_id' => 'example',
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->oauth2Clients()->listRegistrationTokens();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/oauth2-clients/registration-tokens', $request->getUri()->getPath());
+        self::assertIsArray($result);
+        self::assertCount(1, $result);
+        $this->assertDecodedEveryField($mounted[0], $result[0]);
     }
 
     /** `GET /api/v1/federation-configs` — the `federation.list_configs` operation. */
@@ -3227,7 +3299,19 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'dcr_allowed_redirect_hosts' => [
+                    'example',
+                ],
+                'dcr_allowed_scopes' => [
+                    'example',
+                ],
+                'dcr_max_clients' => 1,
+                'dcr_unused_client_ttl_days' => 1,
                 'default_locale' => 'example',
+                'dynamic_registration' => 'example',
+                'external_client_allowed_resources' => [
+                    'example',
+                ],
                 'sensitive_scopes_enabled' => true,
             ],
             'opaque' => [
@@ -3295,7 +3379,19 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'dcr_allowed_redirect_hosts' => [
+                    'example',
+                ],
+                'dcr_allowed_scopes' => [
+                    'example',
+                ],
+                'dcr_max_clients' => 1,
+                'dcr_unused_client_ttl_days' => 1,
                 'default_locale' => 'example',
+                'dynamic_registration' => 'example',
+                'external_client_allowed_resources' => [
+                    'example',
+                ],
                 'sensitive_scopes_enabled' => true,
             ],
             'opaque' => [
@@ -3363,7 +3459,19 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'dcr_allowed_redirect_hosts' => [
+                    'example',
+                ],
+                'dcr_allowed_scopes' => [
+                    'example',
+                ],
+                'dcr_max_clients' => 1,
+                'dcr_unused_client_ttl_days' => 1,
                 'default_locale' => 'example',
+                'dynamic_registration' => 'example',
+                'external_client_allowed_resources' => [
+                    'example',
+                ],
                 'sensitive_scopes_enabled' => true,
             ],
             'opaque' => [
@@ -3431,7 +3539,19 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'dcr_allowed_redirect_hosts' => [
+                    'example',
+                ],
+                'dcr_allowed_scopes' => [
+                    'example',
+                ],
+                'dcr_max_clients' => 1,
+                'dcr_unused_client_ttl_days' => 1,
                 'default_locale' => 'example',
+                'dynamic_registration' => 'example',
+                'external_client_allowed_resources' => [
+                    'example',
+                ],
                 'sensitive_scopes_enabled' => true,
             ],
             'opaque' => [
@@ -3480,11 +3600,23 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'dcr_allowed_redirect_hosts' => [
+                'example',
+            ],
+            'dcr_allowed_scopes' => [
+                'example',
+            ],
+            'dcr_max_clients' => 1,
+            'dcr_unused_client_ttl_days' => 1,
             'default_cert_validity_days' => 1,
             'default_locale' => 'example',
             'deletion_grace_period_days' => 1,
+            'dynamic_registration' => 'example',
             'email_verification_grace_period_hours' => 1,
             'email_verification_required' => true,
+            'external_client_allowed_resources' => [
+                'example',
+            ],
             'hibp_check_enabled' => true,
             'lockout_backoff_multiplier' => 1.5,
             'lockout_duration_secs' => 1,
@@ -3524,11 +3656,23 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'dcr_allowed_redirect_hosts' => [
+                'example',
+            ],
+            'dcr_allowed_scopes' => [
+                'example',
+            ],
+            'dcr_max_clients' => 1,
+            'dcr_unused_client_ttl_days' => 1,
             'default_cert_validity_days' => 1,
             'default_locale' => 'example',
             'deletion_grace_period_days' => 1,
+            'dynamic_registration' => 'example',
             'email_verification_grace_period_hours' => 1,
             'email_verification_required' => true,
+            'external_client_allowed_resources' => [
+                'example',
+            ],
             'hibp_check_enabled' => true,
             'lockout_backoff_multiplier' => 1.5,
             'lockout_duration_secs' => 1,
@@ -4123,10 +4267,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * §27.9: all 160 registry operations are covered by a case above.
+     * §27.9: all 162 registry operations are covered by a case above.
      *
-     * Counted reflectively rather than written as a literal on both sides — `assertSame(160,
-     * 160)` is a tautology, and a case removed by a bad regeneration would still pass it.
+     * Counted reflectively rather than written as a literal on both sides — `assertSame(162,
+     * 162)` is a tautology, and a case removed by a bad regeneration would still pass it.
      */
     public function testEveryRegistryOperationHasACase(): void
     {
@@ -4136,6 +4280,6 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'ReachesItsRoute'),
         );
 
-        self::assertCount(160, $cases);
+        self::assertCount(162, $cases);
     }
 }

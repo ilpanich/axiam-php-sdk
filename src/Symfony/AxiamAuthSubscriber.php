@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Symfony;
 
 use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Mcp\McpGuardOptions;
 
 // D-01: the entire class definition is wrapped in an `interface_exists` guard (mirrors
 // the Laravel `AxiamServiceProvider`'s `class_exists` wrapper, defense-in-depth) so this
@@ -44,6 +45,15 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
      * where `axiam_access` reaches this app, the non-httpOnly `axiam_csrf` cookie does
      * too. This mirrors, locally, the same double-submit check the AXIAM server performs
      * on its own endpoints (§3).
+     *
+     * MCP resource-server helpers (CONTRACT.md §28, opt-in): supplying `$resourceMetadataUrl`
+     * turns on the RFC 6750 `WWW-Authenticate` challenge on every 401 this subscriber
+     * emits, and exempts the metadata document's own path from authentication — see
+     * {@see \Axiam\Sdk\Mcp\McpGuardOptions} for the precomputation and
+     * {@see ProtectedResourceMetadataController} for serving the document itself. With
+     * `$resourceMetadataUrl` unset (the default), this subscriber behaves byte-for-byte
+     * as it did before §28 existed — no header on any response, no status changed, no
+     * body changed, no path exempted.
      */
     final class AxiamAuthSubscriber implements \Symfony\Component\EventDispatcher\EventSubscriberInterface
     {
@@ -53,10 +63,55 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
         /** @var list<string> */
         private const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
+        private readonly ?McpGuardOptions $mcp;
+
+        /**
+         * @param AxiamClient $client Client used to verify the presented token against the
+         *                            cached JWKS.
+         * @param string      $tenant Tenant slug the verified token's claim must match.
+         * @param string|null $resourceMetadataUrl CONTRACT.md §28.5's opt-in option: the
+         *                            URL of this resource server's RFC 9728 metadata
+         *                            document (the `metadataUrl` a prior
+         *                            `Mcp::protectedResourceMetadata(...)` call
+         *                            returned). `null` (the default) leaves this
+         *                            subscriber's behaviour byte-for-byte unchanged from
+         *                            before §28 existed. Setting it REQUIRES `$client`
+         *                            to have been constructed with `expectedAudience` —
+         *                            refused at construction, naming both options, when
+         *                            it was not (§28.5 rule 2).
+         */
         public function __construct(
             private readonly AxiamClient $client,
             private readonly string $tenant,
+            ?string $resourceMetadataUrl = null,
         ) {
+            $this->mcp = $resourceMetadataUrl !== null
+                ? McpGuardOptions::build(self::class, $resourceMetadataUrl, $client->expectedAudience())
+                : null;
+        }
+
+        /**
+         * This subscriber's own CONTRACT.md §28.5 configuration, or `null` when
+         * `$resourceMetadataUrl` was not supplied at construction.
+         *
+         * Public so {@see ProtectedResourceMetadataController} can cross-check that the
+         * document it is about to publish agrees with THIS subscriber's own
+         * configuration (§28.5 rule 3) when both are wired together — never required,
+         * since the two may legitimately be configured in separate processes.
+         */
+        public function mcpGuardOptions(): ?McpGuardOptions
+        {
+            return $this->mcp;
+        }
+
+        /**
+         * The `AxiamClient` this subscriber verifies against — the same accessor
+         * {@see \Axiam\Sdk\Mcp\Mcp::checkGuardAgreement()} reads `expectedAudience()`
+         * from for the §28.5 rule 3 cross-check.
+         */
+        public function client(): AxiamClient
+        {
+            return $this->client;
         }
 
         /** @return array<string,string> */
@@ -85,9 +140,17 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
         {
             $request = $event->getRequest();
 
+            // CONTRACT.md §28.3 rule 2: the metadata document MUST be reachable with no
+            // credential of any kind. Where this subscriber listens on every request
+            // (the normal arrangement), it must exempt that one path itself — a
+            // document that 401s cannot start the handshake it exists to start.
+            if ($this->mcp !== null && $this->mcp->isMetadataDocumentRequest($request->getMethod(), $request->getPathInfo())) {
+                return;
+            }
+
             $credential = $this->extractToken($request);
             if ($credential === null) {
-                $event->setResponse($this->unauthorized('missing authentication credentials'));
+                $event->setResponse($this->unauthorized('missing authentication credentials', credentialPresented: false));
 
                 return;
             }
@@ -119,14 +182,14 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
             // service-account) principal (SEC-085).
             $claims = $this->client->verifyLocally($token, $this->tenant);
             if ($claims === null) {
-                $event->setResponse($this->unauthorized('invalid or expired token'));
+                $event->setResponse($this->unauthorized('invalid or expired token', credentialPresented: true));
 
                 return;
             }
 
             $requestedTenant = $request->headers->get('X-Tenant-ID');
             if (is_string($requestedTenant) && $requestedTenant !== '' && $requestedTenant !== ($claims['tenant_id'] ?? null)) {
-                $event->setResponse($this->unauthorized('invalid or expired token'));
+                $event->setResponse($this->unauthorized('invalid or expired token', credentialPresented: true));
 
                 return;
             }
@@ -136,7 +199,7 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
             if (!is_string($userId) || $userId === '' || !is_string($claimedTenantId) || $claimedTenantId === '') {
                 // A signature-valid token with a malformed claim shape must still degrade
                 // to the standardized 401, never an unhandled error further downstream.
-                $event->setResponse($this->unauthorized('invalid or expired token'));
+                $event->setResponse($this->unauthorized('invalid or expired token', credentialPresented: true));
 
                 return;
             }
@@ -217,15 +280,22 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
             return [];
         }
 
-        private function unauthorized(string $message): \Symfony\Component\HttpFoundation\JsonResponse
+        private function unauthorized(string $message, bool $credentialPresented): \Symfony\Component\HttpFoundation\JsonResponse
         {
             // CONTRACT.md §10: AuthError -> HTTP 401 with a standardized JSON error
             // body; no raw token value is ever included in the response (mirrors every
-            // sibling SDK).
-            return new \Symfony\Component\HttpFoundation\JsonResponse(
+            // sibling SDK). The JSON body is UNCHANGED by CONTRACT.md §28 (§28.5 rule
+            // 4) — only a header is added, and only when this subscriber was
+            // configured for it.
+            $response = new \Symfony\Component\HttpFoundation\JsonResponse(
                 ['error' => 'AuthError', 'message' => $message],
                 401,
             );
+            if ($this->mcp !== null) {
+                $response->headers->set('WWW-Authenticate', $this->mcp->challengeFor401($credentialPresented));
+            }
+
+            return $response;
         }
 
         private function csrfValidationFailed(): \Symfony\Component\HttpFoundation\JsonResponse

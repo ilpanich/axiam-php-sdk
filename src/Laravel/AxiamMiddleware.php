@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Laravel;
 
 use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Mcp\McpGuardOptions;
 use Closure;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,6 +44,15 @@ use Symfony\Component\HttpFoundation\Request;
  * any same-site deployment where `axiam_access` reaches this app, the non-httpOnly
  * `axiam_csrf` cookie does too. This mirrors, locally, the same double-submit check the
  * AXIAM server performs on its own endpoints (§3).
+ *
+ * MCP resource-server helpers (CONTRACT.md §28, opt-in): supplying `$resourceMetadataUrl`
+ * turns on the RFC 6750 `WWW-Authenticate` challenge on every 401 this middleware emits,
+ * and exempts the metadata document's own path from authentication — see
+ * {@see \Axiam\Sdk\Mcp\McpGuardOptions} for the precomputation and
+ * `Route::serveProtectedResourceMetadata()` (registered by {@see AxiamServiceProvider})
+ * for serving the document itself. With `$resourceMetadataUrl` unset (the default), this
+ * middleware behaves byte-for-byte as it did before §28 existed — no header on any
+ * response, no status changed, no body changed, no path exempted.
  */
 final class AxiamMiddleware
 {
@@ -52,16 +62,56 @@ final class AxiamMiddleware
     /** @var list<string> */
     private const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
+    private readonly ?McpGuardOptions $mcp;
+
     /**
      * @param AxiamClient $client Client used to verify the presented token against the cached JWKS.
      * @param string      $tenant Tenant slug the verified token's claim must match (cross-tenant
      *                            control: a JWKS is organization-wide, so a valid signature alone
      *                            never implies tenant authorization).
+     * @param string|null $resourceMetadataUrl CONTRACT.md §28.5's opt-in option: the URL
+     *                            of this resource server's RFC 9728 metadata document
+     *                            (the `metadataUrl` a prior
+     *                            `Mcp::protectedResourceMetadata(...)` call returned).
+     *                            `null` (the default) leaves this middleware's behaviour
+     *                            byte-for-byte unchanged from before §28 existed. Setting
+     *                            it REQUIRES `$client` to have been constructed with
+     *                            `expectedAudience` — refused at construction, naming
+     *                            both options, when it was not (§28.5 rule 2).
      */
     public function __construct(
         private readonly AxiamClient $client,
         private readonly string $tenant,
+        ?string $resourceMetadataUrl = null,
     ) {
+        $this->mcp = $resourceMetadataUrl !== null
+            ? McpGuardOptions::build(self::class, $resourceMetadataUrl, $client->expectedAudience())
+            : null;
+    }
+
+    /**
+     * This middleware's own CONTRACT.md §28.5 configuration, or `null` when
+     * `$resourceMetadataUrl` was not supplied at construction.
+     *
+     * Public so `Route::serveProtectedResourceMetadata()` (registered by
+     * {@see AxiamServiceProvider}) can cross-check that the document it is about to
+     * publish agrees with THIS middleware's own configuration (§28.5 rule 3) when both
+     * are given to it — never required, since the two may legitimately be configured in
+     * separate processes, in which case nothing can be cross-checked and nothing is.
+     */
+    public function mcpGuardOptions(): ?McpGuardOptions
+    {
+        return $this->mcp;
+    }
+
+    /**
+     * The `AxiamClient` this middleware verifies against — the same accessor
+     * {@see \Axiam\Sdk\Mcp\Mcp::checkGuardAgreement()} reads `expectedAudience()` from
+     * for the §28.5 rule 3 cross-check.
+     */
+    public function client(): AxiamClient
+    {
+        return $this->client;
     }
 
     /**
@@ -83,9 +133,17 @@ final class AxiamMiddleware
      */
     public function handle(Request $request, Closure $next): mixed
     {
+        // CONTRACT.md §28.3 rule 2: the metadata document MUST be reachable with no
+        // credential of any kind. Where this middleware is applied globally (the normal
+        // arrangement), it must exempt that one path itself — a document that 401s
+        // cannot start the handshake it exists to start.
+        if ($this->mcp !== null && $this->mcp->isMetadataDocumentRequest($request->getMethod(), $request->getPathInfo())) {
+            return $next($request);
+        }
+
         $credential = $this->extractToken($request);
         if ($credential === null) {
-            return $this->unauthorized('missing authentication credentials');
+            return $this->unauthorized('missing authentication credentials', credentialPresented: false);
         }
 
         if (
@@ -111,12 +169,12 @@ final class AxiamMiddleware
         // failed request as the app's own (usually service-account) principal (SEC-085).
         $claims = $this->client->verifyLocally($token, $this->tenant);
         if ($claims === null) {
-            return $this->unauthorized('invalid or expired token');
+            return $this->unauthorized('invalid or expired token', credentialPresented: true);
         }
 
         $requestedTenant = $request->headers->get('X-Tenant-ID');
         if (is_string($requestedTenant) && $requestedTenant !== '' && $requestedTenant !== ($claims['tenant_id'] ?? null)) {
-            return $this->unauthorized('invalid or expired token');
+            return $this->unauthorized('invalid or expired token', credentialPresented: true);
         }
 
         $userId = $claims['sub'] ?? null;
@@ -124,7 +182,7 @@ final class AxiamMiddleware
         if (!is_string($userId) || $userId === '' || !is_string($claimedTenantId) || $claimedTenantId === '') {
             // A signature-valid token with a malformed claim shape must still degrade to
             // the standardized 401, never an unhandled error further downstream.
-            return $this->unauthorized('invalid or expired token');
+            return $this->unauthorized('invalid or expired token', credentialPresented: true);
         }
 
         $request->attributes->set('axiam_user', [
@@ -202,11 +260,18 @@ final class AxiamMiddleware
         return [];
     }
 
-    private function unauthorized(string $message): JsonResponse
+    private function unauthorized(string $message, bool $credentialPresented): JsonResponse
     {
         // CONTRACT.md §10: AuthError -> HTTP 401 with a standardized JSON error body; no
         // raw token value is ever included in the response (mirrors every sibling SDK).
-        return new JsonResponse(['error' => 'AuthError', 'message' => $message], 401);
+        // The JSON body is UNCHANGED by CONTRACT.md §28 (§28.5 rule 4) — only a header
+        // is added, and only when this middleware was configured for it.
+        $response = new JsonResponse(['error' => 'AuthError', 'message' => $message], 401);
+        if ($this->mcp !== null) {
+            $response->headers->set('WWW-Authenticate', $this->mcp->challengeFor401($credentialPresented));
+        }
+
+        return $response;
     }
 
     private function csrfValidationFailed(): JsonResponse

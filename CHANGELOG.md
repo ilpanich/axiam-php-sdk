@@ -7,6 +7,135 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- MCP resource-server helpers — RFC 9728 protected-resource metadata and the RFC 6750
+  bearer challenge (CONTRACT.md §28, contract 1.48)
+
+- **The resource-server half of the Model Context Protocol authorization handshake, on
+  both framework surfaces.** `Axiam\Sdk\Mcp\Mcp::protectedResourceMetadata()` and
+  `::bearerChallenge()`, plus a `resourceMetadataUrl` constructor option on
+  `Laravel\AxiamMiddleware`, `Symfony\AxiamAuthSubscriber` and `AccessEnforcer`. AXIAM
+  is the authorization server and implements none of this; your MCP server is the
+  resource server, and this is its side.
+
+  ```php
+  $metadata = Mcp::protectedResourceMetadata(
+      resource: 'https://mcp.example.com/mcp',
+      authorizationServers: ['https://axiam.example.com'],
+      scopesSupported: ['mcp:read', 'mcp:tools'],
+  );
+  $client = new AxiamClient($baseUrl, $tenant, expectedAudience: $metadata->document['resource']);
+  $middleware = new AxiamMiddleware($client, $tenant, $metadata->metadataUrl);
+  Route::serveProtectedResourceMetadata($metadata, $middleware);
+  ```
+
+  Laravel gets a `Route::serveProtectedResourceMetadata()` macro (registered by
+  `AxiamServiceProvider`, alongside the existing `Route::axiamOidcLogin()` one); Symfony
+  gets an invokable `Symfony\ProtectedResourceMetadataController` the integrator wires
+  into their own routing configuration, since Symfony's routing table is declarative
+  config this SDK cannot hook at runtime.
+
+  **No operation performs network I/O**, so §16's retry policy and §9's single-flight
+  refresh do not apply and nothing here touches the shared `AxiamClient`'s own session —
+  both are pure local computation, like `UmaChallenge::parse()`. The *client* half of
+  the handshake is deliberately not shipped: a helper that read a 401 and acted on it
+  would send a credential to whatever host the 401 asked it to.
+
+- **Opt-in and off by default, and the regression proves it.** With
+  `resourceMetadataUrl` unset every guard behaves byte-for-byte as it did before: no
+  `WWW-Authenticate` on any response, no status changed, no body changed, and no path
+  exempted. The two framework test files (`tests/Mcp/McpLaravelTest.php`,
+  `tests/Mcp/McpSymfonyTest.php`) assert the header's *absence* explicitly rather than
+  asserting the status, because a 401 that grew a header is still a 401 — an
+  implementation that emitted a bare challenge unconditionally would pass every other
+  test in the suite.
+
+- **`expectedAudience` is now mandatory when `resourceMetadataUrl` is set**, and
+  `AxiamMiddleware`, `AxiamAuthSubscriber` and `AccessEnforcer` each refuse the
+  configuration at construction, naming both options (a `ValidationError`, §2's
+  taxonomy — §28 adds no new type). A resource server that publishes "tokens for me
+  carry this `aud`" and then does not check `aud` has published a claim it does not
+  honour, and a token minted for a *different* MCP server opens it. That is the
+  confusion RFC 8707 exists to prevent, so it is impossible to configure rather than
+  merely discouraged. `AxiamClient` gains a public `expectedAudience()` accessor so a
+  guard can read back its own §10.1 row 6 configuration without a second,
+  independently-set option for §28.
+
+  This changes nothing for an existing deployment: `resourceMetadataUrl` is new, so
+  there is no configuration that was valid before and is refused now.
+
+- **The document's path is derived from the resource, not chosen**, and exactly one
+  route is registered per call — RFC 9728 §3.1's insertion between the authority and
+  the path, with a trailing slash carried through rather than trimmed. It is served
+  `200 application/json` with `Cache-Control: public, max-age=3600` and
+  `Access-Control-Allow-Origin: *` (never `Access-Control-Allow-Credentials`), and
+  **without authentication**: `AxiamMiddleware`/`AxiamAuthSubscriber` exempt that one
+  path themselves, from the `resourceMetadataUrl` they were configured with, checked
+  before either guard ever tries to extract a credential.
+
+- **One class of 403 gains a header, and only one.** `AccessEnforcer::enforceAccess()`
+  now reaches the server through the transport-agnostic `AxiamClient::checkAccessDecision()`
+  / `AuthzDispatcher::checkAccessDecision()` (REST and gRPC both — new, additive; the
+  existing bare-`bool` `checkAccess()` is unchanged and delegates to it) so a `#[RequireAccess]`
+  call that named a `scope` whose decision came back `allowed: false` with
+  `reasonCode: "no_grant"` now carries `error="insufficient_scope", scope="…"`. The
+  JSON body does not change — it is still `authorization_denied`, and
+  `insufficient_scope` appears only in the header. A `denied_by_rule` decision, an
+  absent or unrecognised `reasonCode`, a denial with no `scope` argument, a
+  `require_role` failure and a CSRF refusal all carry no header: `no_grant` means *ask
+  for more*, which is what a challenge invites a client to do, and `denied_by_rule`
+  means *an administrator has already decided*. Where a route also carries a §20.3 UMA
+  challenge (a `UmaChallenger` configured on the same `AccessEnforcer`), the UMA
+  challenge wins and exactly one `WWW-Authenticate` value is ever emitted.
+
+- **The challenge never says why.** Expired, not yet valid, wrong tenant, wrong
+  audience, bad signature, a revoked `sid` — all of them are `invalid_token`,
+  indistinguishably, and the guard adds no `error_description`, no header and no body
+  field that tells them apart. A request that carried *no* credential gets a challenge
+  with no `error` parameter at all, which is a different answer and deliberately so.
+  `Mcp::bearerChallenge()` **refuses rather than escapes** any value outside RFC 6750's
+  character sets, raising `ValidationError` rather than emitting `\"`.
+
+- **Validation refuses; it never repairs.** `Mcp::protectedResourceMetadata()` applies
+  every §28.2 rule at construction — absolute URI with no query and no fragment,
+  `https` except on `127.0.0.1`/`[::1]`/`localhost`, at least one issuer with no
+  duplicates and no query, `NQCHAR` scope tokens in the caller's order,
+  `bearer_methods_supported` exactly `["header"]` — and raises `ValidationError` (§2's
+  taxonomy, unchanged; §28 adds no error type) rather than normalising, trimming,
+  lowercasing or re-encoding anything to make it pass. An empty `scopesSupported` and
+  an absent `resourceDocumentation` omit their members rather than emitting `null`.
+  Nothing in the document may come from a request, and there is no option that would
+  let it.
+
+- **gRPC and AMQP: no transport-appropriate equivalent exists on this SDK.**
+  CONTRACT.md §28.5 rule 8 makes exposing `bearerChallenge` to a gRPC resource-server
+  guard's error mapping optional and forbids an AMQP equivalent outright. This SDK's
+  `Axiam\Sdk\Grpc` namespace is a **client** for AXIAM's own gRPC services
+  (`checkAccess`, `getUserInfo`) — the opposite direction from §28 — and
+  `Axiam\Sdk\Amqp` is §8's HMAC-signed message bus, not a bearer-token guard. Neither
+  is the §10 guard §28 extends, so neither gains this option; §10 (and therefore all of
+  §28) stays a REST-only surface on this SDK. Recorded here rather than silently
+  skipped.
+
+- **Tests**: §28.9's five required tests, on the fixture §28.9 names, across three
+  files — `tests/Mcp/McpContractTest.php` for the two framework-independent ones
+  (document shape and validation negatives; challenge quoting and its refusals) and
+  `tests/Mcp/McpLaravelTest.php` / `tests/Mcp/McpSymfonyTest.php` for the three that
+  need a guard (401 with the challenge; 403 `insufficient_scope`; a token whose `aud`
+  is not the resource), plus the off-by-default regression on each surface — driving
+  a real `AxiamClient` through its `transportHandler` test seam, never a mock (the
+  class is `final`), the same idiom every other REST test in this suite uses.
+
+- **Contract**: the vendored `CONTRACT.md`, `openapi.json` and `management-registry.json`
+  are re-synced to **1.48** (§28, plus the RFC 8707 `openapi.json` additions T21.3
+  recorded unnumbered for this task to fold in, and 1.47's `token_endpoint_auth_methods_supported`
+  `none` addition — documentation/spec only, no SDK operation changes). `proto/` is
+  byte-identical to the previously-vendored copy. The re-synced `openapi.json`/
+  `management-registry.json` moved the §27 management surface's own digest, so
+  `scripts/gen_management.py` was re-run and its generated output re-committed
+  alongside — mechanical, no §27 behaviour change.
+
 ## [1.0.0-beta15] - 2026-09-15
 
 ### Added
