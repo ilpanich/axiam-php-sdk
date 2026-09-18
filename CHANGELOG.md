@@ -138,22 +138,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   below**: re-syncing from a phase branch is what contract 1.49 now forbids, and
   the artefacts are re-synced once, from `main`, after Phase 21 lands.
 
-### Deferred
+### Changed
 
-- **F-28-01 — the vendored `openapi.json`, `management-registry.json` and
-  `CONTRACT.md` re-sync.** This repository's copies were re-synced above from a
-  **phase branch**, which kept moving afterwards; they match neither
-  `ilpanich/axiam`'s current tree nor the four SDK repositories that declined the
-  `openapi.json` re-sync. Across the eleven SDKs the T21.9 T9d cross-SDK review found
-  five distinct byte-states of `CONTRACT.md` and two of `openapi.json`, all calling
-  themselves contract 1.48 (CONTRACT.md §28.11 row R-1). Contract **1.49** states the
-  rule that was missing: a vendored artefact is re-synced from a **merged** `main`,
-  never a phase branch. All three are therefore re-synced here **once**, as F-28-01,
-  after AXIAM Phase 21 lands on `main`, together with a regeneration of the §27
-  management surface in the same commit. F-28-01 is recorded identically in all eleven
-  SDK repositories so that it cannot be lost.
+- **F-28-01 — the vendored contract artefacts are re-synced from a merged `main`
+  (contract 1.49).** This repository's copies had been re-synced above from a
+  **phase branch**, which kept moving afterwards (CONTRACT.md §28.11 row R-1). They
+  are now re-synced once, from **`ilpanich/axiam` `main` @ `e4c62180e`**, as contract
+  1.49 requires:
 
-  Two findings the review recorded about this port rather than changed. **D-02 stands
+  | Artefact | Blob |
+  |---|---|
+  | `CONTRACT.md` (1.49) | `2493348c3285` |
+  | `openapi.json` | `b75e30eaa359` |
+  | `management-registry.json` | `4619f441aac0` |
+
+  `proto/` already matched and is unchanged. The §27 management surface is
+  regenerated in the same commit (`python3 scripts/gen_management.py`). The operation
+  set does not move — it was already 162 operations across 24 namespaces, including
+  `oauth2Clients` `createRegistrationToken` / `listRegistrationTokens`, from the
+  phase-branch registry — and only the registry's recorded spec digest changes. What
+  does change is one model: the new `CimdPolicy` (T21.5 client ID metadata
+  documents), carried as an optional `cimd` member on `OidcPolicy`,
+  `SetOrgSettings` and `TenantSettingsOverride`, with `fromArray`/`toArray`
+  round-tripping it. `ManagementSurfaceGeneratedTest` and
+  `ManagementModelRoundTripGeneratedTest` are regenerated with it. No hand-written
+  operation changes signature or behaviour. The README's conformance statement now
+  names contract 1.49.
+
+- **Two findings the T21.9 T9d review recorded about this port rather than
+  changed.** **D-02 stands
   as conformant.** `AccessEnforcer::enforceAuth()` receives the identity a §10 guard
   already resolved, never the request, so it cannot tell "no credential" from
   "credential presented and rejected" and its standalone `#[RequireAuth]` 401 carries

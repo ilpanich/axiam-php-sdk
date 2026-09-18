@@ -3299,6 +3299,21 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'cimd' => [
+                    'allow_http' => true,
+                    'confidential_only' => true,
+                    'enabled' => true,
+                    'max_cache_secs' => 1,
+                    'max_metadata_bytes' => 1,
+                    'min_cache_secs' => 1,
+                    'restrict_same_domain' => true,
+                    'trusted_client_id_domains' => [
+                        'example',
+                    ],
+                    'trusted_redirect_domains' => [
+                        'example',
+                    ],
+                ],
                 'dcr_allowed_redirect_hosts' => [
                     'example',
                 ],
@@ -3379,6 +3394,21 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'cimd' => [
+                    'allow_http' => true,
+                    'confidential_only' => true,
+                    'enabled' => true,
+                    'max_cache_secs' => 1,
+                    'max_metadata_bytes' => 1,
+                    'min_cache_secs' => 1,
+                    'restrict_same_domain' => true,
+                    'trusted_client_id_domains' => [
+                        'example',
+                    ],
+                    'trusted_redirect_domains' => [
+                        'example',
+                    ],
+                ],
                 'dcr_allowed_redirect_hosts' => [
                     'example',
                 ],
@@ -3459,6 +3489,21 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'cimd' => [
+                    'allow_http' => true,
+                    'confidential_only' => true,
+                    'enabled' => true,
+                    'max_cache_secs' => 1,
+                    'max_metadata_bytes' => 1,
+                    'min_cache_secs' => 1,
+                    'restrict_same_domain' => true,
+                    'trusted_client_id_domains' => [
+                        'example',
+                    ],
+                    'trusted_redirect_domains' => [
+                        'example',
+                    ],
+                ],
                 'dcr_allowed_redirect_hosts' => [
                     'example',
                 ],
@@ -3539,6 +3584,21 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'cimd' => [
+                    'allow_http' => true,
+                    'confidential_only' => true,
+                    'enabled' => true,
+                    'max_cache_secs' => 1,
+                    'max_metadata_bytes' => 1,
+                    'min_cache_secs' => 1,
+                    'restrict_same_domain' => true,
+                    'trusted_client_id_domains' => [
+                        'example',
+                    ],
+                    'trusted_redirect_domains' => [
+                        'example',
+                    ],
+                ],
                 'dcr_allowed_redirect_hosts' => [
                     'example',
                 ],
@@ -3600,6 +3660,21 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'cimd' => [
+                'allow_http' => true,
+                'confidential_only' => true,
+                'enabled' => true,
+                'max_cache_secs' => 1,
+                'max_metadata_bytes' => 1,
+                'min_cache_secs' => 1,
+                'restrict_same_domain' => true,
+                'trusted_client_id_domains' => [
+                    'example',
+                ],
+                'trusted_redirect_domains' => [
+                    'example',
+                ],
+            ],
             'dcr_allowed_redirect_hosts' => [
                 'example',
             ],
@@ -3656,6 +3731,21 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'cimd' => [
+                'allow_http' => true,
+                'confidential_only' => true,
+                'enabled' => true,
+                'max_cache_secs' => 1,
+                'max_metadata_bytes' => 1,
+                'min_cache_secs' => 1,
+                'restrict_same_domain' => true,
+                'trusted_client_id_domains' => [
+                    'example',
+                ],
+                'trusted_redirect_domains' => [
+                    'example',
+                ],
+            ],
             'dcr_allowed_redirect_hosts' => [
                 'example',
             ],

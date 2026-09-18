@@ -23,6 +23,7 @@ final class TenantSettingsOverride implements \JsonSerializable
      *     (optional)
      * @param bool|null $adminNotificationsEnabled the server's `admin_notifications_enabled`
      *     field (optional)
+     * @param CimdPolicy|null $cimd the server's `cimd` field (optional)
      * @param list<string>|null $dcrAllowedRedirectHosts the server's
      *     `dcr_allowed_redirect_hosts` field (optional)
      * @param list<string>|null $dcrAllowedScopes the server's `dcr_allowed_scopes` field
@@ -79,6 +80,7 @@ final class TenantSettingsOverride implements \JsonSerializable
     public function __construct(
         public readonly ?int $accessTokenLifetimeSecs = null,
         public readonly ?bool $adminNotificationsEnabled = null,
+        public readonly ?CimdPolicy $cimd = null,
         public readonly ?array $dcrAllowedRedirectHosts = null,
         public readonly ?array $dcrAllowedScopes = null,
         public readonly ?int $dcrMaxClients = null,
@@ -122,6 +124,7 @@ final class TenantSettingsOverride implements \JsonSerializable
         return new self(
             isset($data['access_token_lifetime_secs']) ? (int) $data['access_token_lifetime_secs'] : null,
             isset($data['admin_notifications_enabled']) ? (bool) $data['admin_notifications_enabled'] : null,
+            isset($data['cimd']) ? CimdPolicy::fromArray((array) $data['cimd']) : null,
             isset($data['dcr_allowed_redirect_hosts']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_redirect_hosts'])) : null,
             isset($data['dcr_allowed_scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_scopes'])) : null,
             isset($data['dcr_max_clients']) ? (int) $data['dcr_max_clients'] : null,
@@ -172,6 +175,9 @@ final class TenantSettingsOverride implements \JsonSerializable
         }
         if ($this->adminNotificationsEnabled !== null) {
             $out['admin_notifications_enabled'] = $this->adminNotificationsEnabled;
+        }
+        if ($this->cimd !== null) {
+            $out['cimd'] = $this->cimd->toArray();
         }
         if ($this->dcrAllowedRedirectHosts !== null) {
             $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;

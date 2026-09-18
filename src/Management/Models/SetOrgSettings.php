@@ -39,6 +39,9 @@ final class SetOrgSettings implements \JsonSerializable
      * @param bool $requireLowercase the server's `require_lowercase` field
      * @param bool $requireSymbols the server's `require_symbols` field
      * @param bool $requireUppercase the server's `require_uppercase` field
+     * @param CimdPolicy|null $cimd T21.5 — defaulted, so an API client written before this
+     *     task lands on `enabled: false`, which is what every deployment did before client ID
+     *     metadata documents existed (I1). (optional)
      * @param list<string>|null $dcrAllowedRedirectHosts the server's
      *     `dcr_allowed_redirect_hosts` field (optional)
      * @param list<string>|null $dcrAllowedScopes the server's `dcr_allowed_scopes` field
@@ -82,6 +85,7 @@ final class SetOrgSettings implements \JsonSerializable
         public readonly bool $requireLowercase,
         public readonly bool $requireSymbols,
         public readonly bool $requireUppercase,
+        public readonly ?CimdPolicy $cimd = null,
         public readonly ?array $dcrAllowedRedirectHosts = null,
         public readonly ?array $dcrAllowedScopes = null,
         public readonly ?int $dcrMaxClients = null,
@@ -125,6 +129,7 @@ final class SetOrgSettings implements \JsonSerializable
             (bool) ModelDecode::need($data, 'require_lowercase', self::class),
             (bool) ModelDecode::need($data, 'require_symbols', self::class),
             (bool) ModelDecode::need($data, 'require_uppercase', self::class),
+            isset($data['cimd']) ? CimdPolicy::fromArray((array) $data['cimd']) : null,
             isset($data['dcr_allowed_redirect_hosts']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_redirect_hosts'])) : null,
             isset($data['dcr_allowed_scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['dcr_allowed_scopes'])) : null,
             isset($data['dcr_max_clients']) ? (int) $data['dcr_max_clients'] : null,
@@ -172,6 +177,9 @@ final class SetOrgSettings implements \JsonSerializable
         $out['require_lowercase'] = $this->requireLowercase;
         $out['require_symbols'] = $this->requireSymbols;
         $out['require_uppercase'] = $this->requireUppercase;
+        if ($this->cimd !== null) {
+            $out['cimd'] = $this->cimd->toArray();
+        }
         if ($this->dcrAllowedRedirectHosts !== null) {
             $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
         }

@@ -318,6 +318,35 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('L3Plus', Models\CertificationLevel::fromWire('L3Plus')->value);
     }
 
+    /** `CimdPolicy`: a full wire object survives decode and re-render. */
+    public function testCimdPolicyRoundTrips(): void
+    {
+        $wire = [
+            'allow_http' => true,
+            'confidential_only' => true,
+            'enabled' => true,
+            'max_cache_secs' => 1,
+            'max_metadata_bytes' => 1,
+            'min_cache_secs' => 1,
+            'restrict_same_domain' => true,
+            'trusted_client_id_domains' => [
+                'example',
+            ],
+            'trusted_redirect_domains' => [
+                'example',
+            ],
+        ];
+
+        $model = Models\CimdPolicy::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'CimdPolicy decoded a field it cannot render again',
+        );
+    }
+
     /** `ClientAuthMethod`: every case survives wire -> enum -> wire. */
     public function testClientAuthMethodRoundTrips(): void
     {
@@ -1768,6 +1797,21 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testOidcPolicyRoundTrips(): void
     {
         $wire = [
+            'cimd' => [
+                'allow_http' => true,
+                'confidential_only' => true,
+                'enabled' => true,
+                'max_cache_secs' => 1,
+                'max_metadata_bytes' => 1,
+                'min_cache_secs' => 1,
+                'restrict_same_domain' => true,
+                'trusted_client_id_domains' => [
+                    'example',
+                ],
+                'trusted_redirect_domains' => [
+                    'example',
+                ],
+            ],
             'dcr_allowed_redirect_hosts' => [
                 'example',
             ],
@@ -2522,6 +2566,21 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'admin_notifications_enabled' => true,
             ],
             'oidc' => [
+                'cimd' => [
+                    'allow_http' => true,
+                    'confidential_only' => true,
+                    'enabled' => true,
+                    'max_cache_secs' => 1,
+                    'max_metadata_bytes' => 1,
+                    'min_cache_secs' => 1,
+                    'restrict_same_domain' => true,
+                    'trusted_client_id_domains' => [
+                        'example',
+                    ],
+                    'trusted_redirect_domains' => [
+                        'example',
+                    ],
+                ],
                 'dcr_allowed_redirect_hosts' => [
                     'example',
                 ],
@@ -2704,6 +2763,21 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         $wire = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'cimd' => [
+                'allow_http' => true,
+                'confidential_only' => true,
+                'enabled' => true,
+                'max_cache_secs' => 1,
+                'max_metadata_bytes' => 1,
+                'min_cache_secs' => 1,
+                'restrict_same_domain' => true,
+                'trusted_client_id_domains' => [
+                    'example',
+                ],
+                'trusted_redirect_domains' => [
+                    'example',
+                ],
+            ],
             'dcr_allowed_redirect_hosts' => [
                 'example',
             ],
@@ -2901,6 +2975,21 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         $wire = [
             'access_token_lifetime_secs' => 1,
             'admin_notifications_enabled' => true,
+            'cimd' => [
+                'allow_http' => true,
+                'confidential_only' => true,
+                'enabled' => true,
+                'max_cache_secs' => 1,
+                'max_metadata_bytes' => 1,
+                'min_cache_secs' => 1,
+                'restrict_same_domain' => true,
+                'trusted_client_id_domains' => [
+                    'example',
+                ],
+                'trusted_redirect_domains' => [
+                    'example',
+                ],
+            ],
             'dcr_allowed_redirect_hosts' => [
                 'example',
             ],
@@ -3508,6 +3597,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(158, $cases);
+        self::assertCount(159, $cases);
     }
 }
