@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-beta16] - 2026-09-19
+
 ### Added
+
+- MCP resource-server helpers (CONTRACT.md §28, contract 1.48)
 
 - MCP resource-server helpers — RFC 9728 protected-resource metadata and the RFC 6750
   bearer challenge (CONTRACT.md §28, contract 1.48)
@@ -140,6 +144,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- F-28-01 — re-sync CONTRACT.md 1.49, openapi.json and management-registry.json from axiam main @ e4c62180e
+
+- Record F-28-01 and the D-02 adjudication (T21.9 T9d)
+
 - **F-28-01 — the vendored contract artefacts are re-synced from a merged `main`
   (contract 1.49).** This repository's copies had been re-synced above from a
   **phase branch**, which kept moving afterwards (CONTRACT.md §28.11 row R-1). They
@@ -205,6 +213,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Re-synced from a merged `ilpanich/axiam` `main` @ `da94e1d04`: `CONTRACT.md`
   (blob `28c163e32d25`) and `management-registry.json` (blob `aab87fd79910`).
 
+### Fixed
+
+- 1.50 — initialAccessToken becomes Sensitive (#480)
 
 ## [1.0.0-beta15] - 2026-09-15
 
