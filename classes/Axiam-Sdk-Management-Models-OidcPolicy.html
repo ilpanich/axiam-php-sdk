@@ -128,25 +128,37 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">25</span>
+    <span class="phpdocumentor-element-found-in__line">38</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">OpenID Connect surface controls (X7 G8, plan §4.6/§4.8). Two settings that are not password
-rules, and are here because this is the org-baseline-plus-tenant-override surface every
-other per-tenant control lives on. They are also the two settings in this model that are
-*not* of the same kind as each other, so it is worth saying which is which: *
-[`Self::sensitive_scopes_enabled`] **is** ordered. Releasing personal data is the
-less-restrictive direction, so it is validated disable-only — the mirror image of
-`mfa_enforced` — and a tenant can turn its organization&#039;s decision off but never on. *
-[`Self::default_locale`] is **not** ordered, and no ordering is invented for it. A language
-is a presentation preference; there is no sense in which Italian is stricter than French.</p>
+            <p class="phpdocumentor-summary">OpenID Connect surface controls (X7 G8, plan §4.6/§4.8; T21.4). Settings that are not
+password rules, here because this is the org-baseline-plus-tenant-override surface every
+other per-tenant control lives on. They are not all of the same kind as each other, and
+which is which is the whole of what [`validate_tenant_override`] and
+[`clamp_overrides_to_org`] read, so it is set out rather than inferred. **Ordered** — a
+tenant may be stricter than its organization and never more permissive: *
+[`Self::sensitive_scopes_enabled`], validated **disable-only** — the mirror image of
+`mfa_enforced`, because releasing personal data is the less-restrictive direction, so a
+tenant can turn its organization&#039;s decision off but never on. *
+[`Self::dynamic_registration`], on the ladder `disabled` → `initial_access_token` →
+`anonymous`: a tenant may move down it and never up. * [`Self::dcr_max_clients`] and
+[`Self::dcr_unused_client_ttl_days`], on the ordinary `tenant &lt;= org` rule — with the
+wrinkle that `0` on the second means *never sweep*, which is the longest window of all and
+is handled by [`dcr_ttl_strictness`]. **Not ordered**, therefore never validated against the
+baseline and never clamped: * [`Self::default_locale`]. A language is a presentation
+preference; there is no sense in which Italian is stricter than French. *
+[`Self::dcr_allowed_scopes`], [`Self::dcr_allowed_redirect_hosts`] and
+[`Self::external_client_allowed_resources`]. Each names per-tenant resources — *this*
+tenant&#039;s MCP servers, *this* tenant&#039;s callback hosts — and there is no sense in which one
+such list is stricter than another. A subset rule would force an organization to enumerate
+every tenant&#039;s resource servers in its own baseline before any tenant could name one. The
+model&#039;s rule is &quot;a tenant may only be more restrictive&quot;, which binds every field that *has*
+a restrictiveness; a field that has none cannot violate it. One cross-field interlock spans
+both groups and is checked on the resolved policy rather than on either input: see
+[`validate_dcr_policy`].</p>
 
 
-    <section class="phpdocumentor-description"><p>[<code class="prettyprint">validate_tenant_override</code>] therefore does not check it and [<code class="prettyprint">clamp_overrides_to_org</code>]
-never clears it. The model's rule is &quot;a tenant may only be more restrictive&quot;, which binds
-every field that <em>has</em> a restrictiveness; a field that has none cannot violate it.</p>
-</section>
 
 
 
@@ -180,9 +192,51 @@ every field that <em>has</em> a restrictiveness; a field that has none cannot vi
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_cimd">$cimd</a>
+    <span>
+                        &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrAllowedRedirectHosts">$dcrAllowedRedirectHosts</a>
+    <span>
+                        &nbsp;: array&lt;string|int, mixed&gt;|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrAllowedScopes">$dcrAllowedScopes</a>
+    <span>
+                        &nbsp;: array&lt;string|int, mixed&gt;|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrMaxClients">$dcrMaxClients</a>
+    <span>
+                        &nbsp;: int|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrUnusedClientTtlDays">$dcrUnusedClientTtlDays</a>
+    <span>
+                        &nbsp;: int|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_defaultLocale">$defaultLocale</a>
     <span>
                         &nbsp;: string|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dynamicRegistration">$dynamicRegistration</a>
+    <span>
+                        &nbsp;: string|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_externalClientAllowedResources">$externalClientAllowedResources</a>
+    <span>
+                        &nbsp;: array&lt;string|int, mixed&gt;|null            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
@@ -247,6 +301,191 @@ every field that <em>has</em> a restrictiveness; a field that has none cannot vi
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_cimd">
+        $cimd
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_cimd" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">111</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null</span>
+    <span class="phpdocumentor-signature__name">$cimd</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_dcrAllowedRedirectHosts">
+        $dcrAllowedRedirectHosts
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrAllowedRedirectHosts" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">112</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;|null</span>
+    <span class="phpdocumentor-signature__name">$dcrAllowedRedirectHosts</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_dcrAllowedScopes">
+        $dcrAllowedScopes
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrAllowedScopes" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">113</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;|null</span>
+    <span class="phpdocumentor-signature__name">$dcrAllowedScopes</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_dcrMaxClients">
+        $dcrMaxClients
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrMaxClients" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">114</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">int|null</span>
+    <span class="phpdocumentor-signature__name">$dcrMaxClients</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_dcrUnusedClientTtlDays">
+        $dcrUnusedClientTtlDays
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrUnusedClientTtlDays" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">115</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">int|null</span>
+    <span class="phpdocumentor-signature__name">$dcrUnusedClientTtlDays</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_defaultLocale">
         $defaultLocale
         <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_defaultLocale" class="headerlink"><i class="fas fa-link"></i></a>
@@ -257,7 +496,7 @@ every field that <em>has</em> a restrictiveness; a field that has none cannot vi
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">51</span>
+    <span class="phpdocumentor-element-found-in__line">116</span>
 
     </aside>
 
@@ -267,6 +506,80 @@ every field that <em>has</em> a restrictiveness; a field that has none cannot vi
         <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__type">string|null</span>
     <span class="phpdocumentor-signature__name">$defaultLocale</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_dynamicRegistration">
+        $dynamicRegistration
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dynamicRegistration" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">117</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$dynamicRegistration</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_externalClientAllowedResources">
+        $externalClientAllowedResources
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_externalClientAllowedResources" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">118</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;|null</span>
+    <span class="phpdocumentor-signature__name">$externalClientAllowedResources</span>
      = <span class="phpdocumentor-signature__default-value">null</span></code>
 
     
@@ -294,7 +607,7 @@ every field that <em>has</em> a restrictiveness; a field that has none cannot vi
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">50</span>
+    <span class="phpdocumentor-element-found-in__line">110</span>
 
     </aside>
 
@@ -336,7 +649,7 @@ every field that <em>has</em> a restrictiveness; a field that has none cannot vi
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">49</span>
+    <span class="phpdocumentor-element-found-in__line">109</span>
 
     </aside>
 
@@ -344,7 +657,7 @@ every field that <em>has</em> a restrictiveness; a field that has none cannot vi
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sensitiveScopesEnabled</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultLocale</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sensitiveScopesEnabled</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cimd</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedRedirectHosts</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedScopes</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrMaxClients</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrUnusedClientTtlDays</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultLocale</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dynamicRegistration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$externalClientAllowedResources</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -371,6 +684,80 @@ an operator can close for everybody at once.</p>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$cimd</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>T21.5 — whether a URL-shaped <code class="prettyprint">client_id</code> is resolved by
+fetching the document it names, and on what terms. See [<code class="prettyprint">CimdPolicy</code>]; off unless
+somebody turns it on (I1). Nested, and therefore inherited or overridden <strong>whole</strong>: the
+fields are terms of one decision, and a half-merged posture is one neither the
+organization nor the tenant wrote. (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$dcrAllowedRedirectHosts</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>T21.4 — hosts a self-registered
+client's <code class="prettyprint">redirect_uris</code> may point at, as globs (<code class="prettyprint">*.example.com</code>, or <code class="prettyprint">*</code> for any). The
+loopback hosts (<code class="prettyprint">127.0.0.1</code>, <code class="prettyprint">[::1]</code>, <code class="prettyprint">localhost</code>) are always allowed whatever this
+says, because RFC 8252 §7.3 is how every desktop MCP client receives its callback and a
+tenant that forbade them would have turned registration on for nobody. (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$dcrAllowedScopes</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>T21.4 — the scopes a self-registered client
+may ask for. A <code class="prettyprint">scope</code> a registration names that is not on this list is
+<code class="prettyprint">invalid_client_metadata</code>; an empty list means a self-registered client gets no scopes
+at all, which is the honest default for a tenant that has turned registration on without
+deciding what it grants. May not contain <code class="prettyprint">address</code> or <code class="prettyprint">phone</code> — see this module's
+[<code class="prettyprint">sensitive_scope_in_dcr_list</code>]. (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$dcrMaxClients</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>T21.4 — how many externally registered clients this
+tenant may hold. See [<code class="prettyprint">DEFAULT_DCR_MAX_CLIENTS</code>]. <strong>Counted once per mechanism, against
+the same number</strong> (T21.8): <code class="prettyprint">managed_by: dcr</code> rows and <code class="prettyprint">managed_by: cimd</code> rows each have
+this many. So a tenant running both cannot have shadow rows materialised from documents
+exhaust the allowance for self-registration, or the reverse. The CIMD count is checked
+before* the document is fetched, so a tenant at its ceiling is not an outbound
+amplifier either. It keeps its <code class="prettyprint">dcr_</code> name because dynamic registration defined it, on
+the same precedent as [<code class="prettyprint">Self::dcr_allowed_scopes</code>]. (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$dcrUnusedClientTtlDays</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>T21.4 — how long an externally registered client
+survives without being used. See [<code class="prettyprint">DEFAULT_DCR_UNUSED_CLIENT_TTL_DAYS</code>]. <code class="prettyprint">0</code> disables
+the sweep for this tenant, which an operator who prunes out of band may legitimately
+want. <strong>Two sweeps read it, over different clocks</strong> (T21.8). A <code class="prettyprint">managed_by: dcr</code> row is
+measured from its last authorization, falling back to when it was registered. A
+<code class="prettyprint">managed_by: cimd</code> row is measured from the last time its document was <em>presented</em>,
+which every authorize, token and PAR request moves — so a document in daily use is never
+swept however old its registration is, and one nobody has presented since the window is,
+and re-materialises on the next request if it is still published. Like the ceiling, it
+keeps its <code class="prettyprint">dcr_</code> name. (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$defaultLocale</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
@@ -384,6 +771,35 @@ there: the parse is exact rather than a language lookup, so a stored <code class
 Stored as a string rather than as the <code class="prettyprint">Locale</code> enum because that enum lives in
 <code class="prettyprint">axiam-oauth2</code>, four layers above this crate, and the crate layering points inward.
 (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$dynamicRegistration</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>T21.4 — whether a client may register itself
+(RFC 7591), and on what terms. <code class="prettyprint">disabled</code> unless somebody says otherwise (I1).
+(optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$externalClientAllowedResources</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p><strong>D3</strong> — the audiences an
+externally registered client may address. The single most important field on this
+policy, and the reason the settings handler refuses <code class="prettyprint">dynamic_registration: anonymous</code>
+while it is empty. A client an unrelated party registered cannot declare its own
+<code class="prettyprint">allowed_resources</code>; it inherits this list verbatim, so what a stranger can mint a token
+for* is a decision the tenant took in advance rather than one the registration request
+makes. Empty means an externally registered client can obtain only today's <code class="prettyprint">axiam:user</code>
+tokens — which AXIAM's own APIs accept. That is why the interlock exists: the empty list
+is not a safe default for an <em>open</em> registration endpoint, it is the most dangerous one.
+Shared with T5 (CIMD), which inherits the same list for the same reason. (optional)</p>
 </section>
 
             </dd>
@@ -409,7 +825,7 @@ Stored as a string rather than as the <code class="prettyprint">Locale</code> en
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">59</span>
+    <span class="phpdocumentor-element-found-in__line">126</span>
 
     </aside>
 
@@ -460,7 +876,7 @@ Stored as a string rather than as the <code class="prettyprint">Locale</code> en
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">95</span>
+    <span class="phpdocumentor-element-found-in__line">190</span>
 
     </aside>
 
@@ -504,7 +920,7 @@ and nowhere else (§27.5).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">149</span>
 
     </aside>
 
@@ -555,7 +971,14 @@ omission means the first.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_cimd">$cimd</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrAllowedRedirectHosts">$dcrAllowedRedirectHosts</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrAllowedScopes">$dcrAllowedScopes</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrMaxClients">$dcrMaxClients</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dcrUnusedClientTtlDays">$dcrUnusedClientTtlDays</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_defaultLocale">$defaultLocale</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dynamicRegistration">$dynamicRegistration</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_externalClientAllowedResources">$externalClientAllowedResources</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_sensitiveScopesEnabled">$sensitiveScopesEnabled</a></li>
                                             </ul>
                 </li>

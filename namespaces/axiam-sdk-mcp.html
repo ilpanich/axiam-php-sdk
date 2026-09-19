@@ -94,21 +94,17 @@
             <div class="phpdocumentor-column -nine phpdocumentor-content">
                                 <section>
                                         <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
     </ul>
 
-    <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">OidcPolicy.php</h2>
-
-        
-        
-        
-        
-
+    <article class="phpdocumentor-element -namespace">
+        <h2 class="phpdocumentor-content__title">Mcp</h2>
 
         
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-management-models-oidcpolicy.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="namespaces/axiam-sdk-mcp.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -117,36 +113,21 @@
 
     <h4 id="toc-classes">
         Classes
-        <a href="files/src-management-models-oidcpolicy.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="namespaces/axiam-sdk-mcp.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\OidcPolicy">OidcPolicy</abbr></a></dt><dd>OpenID Connect surface controls (X7 G8, plan §4.6/§4.8; T21.4). Settings that are not
-password rules, here because this is the org-baseline-plus-tenant-override surface every
-other per-tenant control lives on. They are not all of the same kind as each other, and
-which is which is the whole of what [`validate_tenant_override`] and
-[`clamp_overrides_to_org`] read, so it is set out rather than inferred. **Ordered** — a
-tenant may be stricter than its organization and never more permissive: *
-[`Self::sensitive_scopes_enabled`], validated **disable-only** — the mirror image of
-`mfa_enforced`, because releasing personal data is the less-restrictive direction, so a
-tenant can turn its organization&#039;s decision off but never on. *
-[`Self::dynamic_registration`], on the ladder `disabled` → `initial_access_token` →
-`anonymous`: a tenant may move down it and never up. * [`Self::dcr_max_clients`] and
-[`Self::dcr_unused_client_ttl_days`], on the ordinary `tenant &lt;= org` rule — with the
-wrinkle that `0` on the second means *never sweep*, which is the longest window of all and
-is handled by [`dcr_ttl_strictness`]. **Not ordered**, therefore never validated against the
-baseline and never clamped: * [`Self::default_locale`]. A language is a presentation
-preference; there is no sense in which Italian is stricter than French. *
-[`Self::dcr_allowed_scopes`], [`Self::dcr_allowed_redirect_hosts`] and
-[`Self::external_client_allowed_resources`]. Each names per-tenant resources — *this*
-tenant&#039;s MCP servers, *this* tenant&#039;s callback hosts — and there is no sense in which one
-such list is stricter than another. A subset rule would force an organization to enumerate
-every tenant&#039;s resource servers in its own baseline before any tenant could name one. The
-model&#039;s rule is &quot;a tenant may only be more restrictive&quot;, which binds every field that *has*
-a restrictiveness; a field that has none cannot violate it. One cross-field interlock spans
-both groups and is checked on the resolved policy rather than on either input: see
-[`validate_dcr_policy`].</dd>    </dl>
-
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html"><abbr title="\Axiam\Sdk\Mcp\BearerChallengeError">BearerChallengeError</abbr></a></dt><dd>The three RFC 6750 §3.1 error codes a `WWW-Authenticate: Bearer` challenge may name
+(CONTRACT.md §28.4) — the complete vocabulary; nothing else, not even a well-formed
+OAuth error code such as `invalid_grant`, is accepted by {@see Mcp::bearerChallenge()}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Mcp-Mcp.html"><abbr title="\Axiam\Sdk\Mcp\Mcp">Mcp</abbr></a></dt><dd>MCP resource-server helpers (CONTRACT.md §28, RFC 9728 + RFC 6750) — the ONE §28
+implementation both {@see \Axiam\Sdk\Laravel\AxiamMiddleware} and
+{@see \Axiam\Sdk\Symfony\AxiamAuthSubscriber} are built on, mirroring how this SDK
+never duplicates a security-critical decision across its two framework bridges (D-02).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions">McpGuardOptions</abbr></a></dt><dd>Validates a §10 guard&#039;s CONTRACT.md §28.5 configuration and precomputes the challenge
+values it will emit, at guard-CONSTRUCTION time so that an invalid one is a startup
+failure rather than a surprise on the 401 path — the same discipline
+{@see \Axiam\Sdk\AxiamClient}&#039;s own constructor applies to every other CONDITIONAL
+option.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a></dt><dd>What {@see Mcp::protectedResourceMetadata()} returns: the RFC 9728 §2 document, the
+path it is served at, and the URL that path resolves to (CONTRACT.md §28.1).</dd>    </dl>
 
 
 
@@ -170,7 +151,7 @@ both groups and is checked on the resolved policy rather than on either input: s
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                        <li><a href="files/src-management-models-oidcpolicy.html#toc-classes">Classes</a></li>
+                                                                                                    <li><a href="namespaces/axiam-sdk-mcp.html#toc-classes">Classes</a></li>
                                                                                                                     </ul>
             </li>
 
@@ -192,7 +173,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     </section>
 </section>
         </div>
-        <a href="files/src-management-models-oidcpolicy.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="namespaces/axiam-sdk-mcp.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

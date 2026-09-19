@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">25</span>
+    <span class="phpdocumentor-element-found-in__line">28</span>
 
     </aside>
 
@@ -180,6 +180,13 @@ retry and §19 telemetry apply without this class doing anything to opt in (§27
 <dd>`POST /api/v1/oauth2-clients`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_createRegistrationToken">createRegistrationToken()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-CreateRegistrationTokenResponse.html"><abbr title="\Axiam\Sdk\Management\Models\CreateRegistrationTokenResponse">CreateRegistrationTokenResponse</abbr></a>    </span>
+</dt>
+<dd>`POST /api/v1/oauth2-clients/registration-tokens`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_delete">delete()</a>
     <span>
                                 &nbsp;: void    </span>
@@ -214,6 +221,13 @@ for why it copies.</dd>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html"><abbr title="\Axiam\Sdk\Management\Models\OAuth2ClientResponse">OAuth2ClientResponse</abbr></a>&gt;    </span>
 </dt>
 <dd>`GET /api/v1/oauth2-clients`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_listRegistrationTokens">listRegistrationTokens()</a>
+    <span>
+                                &nbsp;: array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html"><abbr title="\Axiam\Sdk\Management\Models\RegistrationTokenResponse">RegistrationTokenResponse</abbr></a>&gt;    </span>
+</dt>
+<dd>`GET /api/v1/oauth2-clients/registration-tokens`</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_update">update()</a>
@@ -323,7 +337,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">60</span>
+    <span class="phpdocumentor-element-found-in__line">63</span>
 
     </aside>
 
@@ -370,6 +384,61 @@ again, so a caller that does not persist it here cannot recover it (§27.5).</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_createRegistrationToken">
+        createRegistrationToken()
+        <a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_createRegistrationToken" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">158</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/oauth2-clients/registration-tokens`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">createRegistrationToken</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CreateRegistrationTokenRequest.html"><abbr title="\Axiam\Sdk\Management\Models\CreateRegistrationTokenRequest">CreateRegistrationTokenRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-CreateRegistrationTokenResponse.html"><abbr title="\Axiam\Sdk\Management\Models\CreateRegistrationTokenResponse">CreateRegistrationTokenResponse</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/oauth2-clients/registration-tokens</code>.</p>
+<p>The response carries a ONE-TIME secret (<code class="prettyprint">initial_access_token</code>): the server will not
+return it again, so a caller that does not persist it here cannot recover it (§27.5).</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CreateRegistrationTokenRequest.html"><abbr title="\Axiam\Sdk\Management\Models\CreateRegistrationTokenRequest">CreateRegistrationTokenRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-CreateRegistrationTokenResponse.html"><abbr title="\Axiam\Sdk\Management\Models\CreateRegistrationTokenResponse">CreateRegistrationTokenResponse</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_delete">
         delete()
         <a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_delete" class="headerlink"><i class="fas fa-link"></i></a>
@@ -378,7 +447,7 @@ again, so a caller that does not persist it here cannot recover it (§27.5).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">132</span>
+    <span class="phpdocumentor-element-found-in__line">135</span>
 
     </aside>
 
@@ -479,7 +548,7 @@ for why it copies.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">82</span>
+    <span class="phpdocumentor-element-found-in__line">85</span>
 
     </aside>
 
@@ -587,7 +656,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">40</span>
 
     </aside>
 
@@ -634,6 +703,49 @@ from it.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_listRegistrationTokens">
+        listRegistrationTokens()
+        <a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_listRegistrationTokens" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">182</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/oauth2-clients/registration-tokens`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">listRegistrationTokens</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html"><abbr title="\Axiam\Sdk\Management\Models\RegistrationTokenResponse">RegistrationTokenResponse</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/oauth2-clients/registration-tokens</code>.</p>
+<p>Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html"><abbr title="\Axiam\Sdk\Management\Models\RegistrationTokenResponse">RegistrationTokenResponse</abbr></a>&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_update">
         update()
         <a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_update" class="headerlink"><i class="fas fa-link"></i></a>
@@ -642,7 +754,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">105</span>
+    <span class="phpdocumentor-element-found-in__line">108</span>
 
     </aside>
 
@@ -714,11 +826,13 @@ from it.</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_create">create()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_createRegistrationToken">createRegistrationToken()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_delete">delete()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant">forTenant()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_get">get()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg">inOrg()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_listItems">listItems()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_listRegistrationTokens">listRegistrationTokens()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Oauth2ClientsApi.html#method_update">update()</a></li>
                                     </ul>
             </li>

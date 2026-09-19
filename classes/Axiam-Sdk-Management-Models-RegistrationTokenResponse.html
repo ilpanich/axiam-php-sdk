@@ -102,7 +102,7 @@
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    OAuth2ClientCreatedResponse
+    RegistrationTokenResponse
 
     
             <div class="phpdocumentor-element__package">
@@ -126,13 +126,14 @@
 </div>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">14</span>
+    <span class="phpdocumentor-element-found-in__line">15</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Response for client creation -- includes the one-time plaintext secret.</p>
+            <p class="phpdocumentor-summary">Metadata only. The handle exists in plaintext exactly once, in
+[`CreateRegistrationTokenResponse`].</p>
 
 
 
@@ -142,7 +143,7 @@
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -150,7 +151,7 @@
 
     <h4 id="toc-interfaces">
         Interfaces
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#toc-interfaces" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#toc-interfaces" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
@@ -163,101 +164,89 @@
 
 <h4 id="toc-properties">
     Properties
-    <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#toc-properties" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_clientId">$clientId</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_createdAt">$createdAt</a>
     <span>
                         &nbsp;: string            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_clientSecret">$clientSecret</a>
-    <span>
-                        &nbsp;: <a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null            </span>
-</dt>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_createdAt">$createdAt</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_createdBy">$createdBy</a>
     <span>
                         &nbsp;: string            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_grantTypes">$grantTypes</a>
-    <span>
-                        &nbsp;: array&lt;string|int, mixed&gt;            </span>
-</dt>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_id">$id</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_expiresAt">$expiresAt</a>
     <span>
                         &nbsp;: string            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_name">$name</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_id">$id</a>
     <span>
                         &nbsp;: string            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_redirectUris">$redirectUris</a>
-    <span>
-                        &nbsp;: array&lt;string|int, mixed&gt;            </span>
-</dt>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_scopes">$scopes</a>
-    <span>
-                        &nbsp;: array&lt;string|int, mixed&gt;            </span>
-</dt>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_tenantId">$tenantId</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_name">$name</a>
     <span>
                         &nbsp;: string            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_updatedAt">$updatedAt</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_tenantId">$tenantId</a>
     <span>
                         &nbsp;: string            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_usedAt">$usedAt</a>
+    <span>
+                        &nbsp;: string|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_usedByClientId">$usedByClientId</a>
+    <span>
+                        &nbsp;: string|null            </span>
 </dt>
 
     </dl>
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method___construct">__construct()</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method___construct">__construct()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
-<dd>Constructs a OAuth2ClientCreatedResponse.</dd>
+<dd>Constructs a RegistrationTokenResponse.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_fromArray">fromArray()</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_fromArray">fromArray()</a>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Rebuilds a OAuth2ClientCreatedResponse from one decoded JSON object.</dd>
+<dd>Rebuilds a RegistrationTokenResponse from one decoded JSON object.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_jsonSerialize">jsonSerialize()</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_jsonSerialize">jsonSerialize()</a>
     <span>
                                 &nbsp;: array&lt;string, mixed&gt;    </span>
 </dt>
 <dd>Renders this object for `json_encode()`.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_toArray">toArray()</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_toArray">toArray()</a>
     <span>
                                 &nbsp;: array&lt;string, mixed&gt;    </span>
 </dt>
@@ -273,7 +262,7 @@
     <section class="phpdocumentor-properties">
         <h3 class="phpdocumentor-elements__header" id="properties">
             Properties
-            <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#properties" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -283,91 +272,17 @@
             -public
                                                 -read-only                    "
 >
-    <h4 class="phpdocumentor-element__name" id="property_clientId">
-        $clientId
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_clientId" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">36</span>
-
-    </aside>
-
-    
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-        <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__type">string</span>
-    <span class="phpdocumentor-signature__name">$clientId</span>
-    </code>
-
-    
-    
-    
-
-        
-        
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -public
-                                                -read-only                    "
->
-    <h4 class="phpdocumentor-element__name" id="property_clientSecret">
-        $clientSecret
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_clientSecret" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">45</span>
-
-    </aside>
-
-    
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-        <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null</span>
-    <span class="phpdocumentor-signature__name">$clientSecret</span>
-     = <span class="phpdocumentor-signature__default-value">null</span></code>
-
-    
-    
-    
-
-        
-        
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -public
-                                                -read-only                    "
->
     <h4 class="phpdocumentor-element__name" id="property_createdAt">
         $createdAt
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_createdAt" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_createdAt" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -394,17 +309,17 @@
             -public
                                                 -read-only                    "
 >
-    <h4 class="phpdocumentor-element__name" id="property_grantTypes">
-        $grantTypes
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_grantTypes" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="property_createdBy">
+        $createdBy
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_createdBy" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">32</span>
 
     </aside>
 
@@ -412,8 +327,45 @@
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
         <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;</span>
-    <span class="phpdocumentor-signature__name">$grantTypes</span>
+            <span class="phpdocumentor-signature__type">string</span>
+    <span class="phpdocumentor-signature__name">$createdBy</span>
+    </code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_expiresAt">
+        $expiresAt
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_expiresAt" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">33</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">string</span>
+    <span class="phpdocumentor-signature__name">$expiresAt</span>
     </code>
 
     
@@ -433,15 +385,15 @@
 >
     <h4 class="phpdocumentor-element__name" id="property_id">
         $id
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_id" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_id" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
@@ -470,15 +422,15 @@
 >
     <h4 class="phpdocumentor-element__name" id="property_name">
         $name
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_name" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_name" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">40</span>
+    <span class="phpdocumentor-element-found-in__line">35</span>
 
     </aside>
 
@@ -505,91 +457,17 @@
             -public
                                                 -read-only                    "
 >
-    <h4 class="phpdocumentor-element__name" id="property_redirectUris">
-        $redirectUris
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_redirectUris" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">41</span>
-
-    </aside>
-
-    
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-        <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;</span>
-    <span class="phpdocumentor-signature__name">$redirectUris</span>
-    </code>
-
-    
-    
-    
-
-        
-        
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -public
-                                                -read-only                    "
->
-    <h4 class="phpdocumentor-element__name" id="property_scopes">
-        $scopes
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_scopes" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">42</span>
-
-    </aside>
-
-    
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-        <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;</span>
-    <span class="phpdocumentor-signature__name">$scopes</span>
-    </code>
-
-    
-    
-    
-
-        
-        
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -public
-                                                -read-only                    "
->
     <h4 class="phpdocumentor-element__name" id="property_tenantId">
         $tenantId
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_tenantId" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_tenantId" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">43</span>
+    <span class="phpdocumentor-element-found-in__line">36</span>
 
     </aside>
 
@@ -616,17 +494,17 @@
             -public
                                                 -read-only                    "
 >
-    <h4 class="phpdocumentor-element__name" id="property_updatedAt">
-        $updatedAt
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_updatedAt" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="property_usedAt">
+        $usedAt
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_usedAt" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
                         <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">44</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -634,9 +512,46 @@
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
         <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__type">string</span>
-    <span class="phpdocumentor-signature__name">$updatedAt</span>
-    </code>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$usedAt</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_usedByClientId">
+        $usedByClientId
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_usedByClientId" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">38</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$usedByClientId</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
 
     
     
@@ -651,7 +566,7 @@
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -662,21 +577,21 @@
 >
     <h4 class="phpdocumentor-element__name" id="method___construct">
         __construct()
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">35</span>
+    <span class="phpdocumentor-element-found-in__line">30</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Constructs a OAuth2ClientCreatedResponse.</p>
+        <p class="phpdocumentor-summary">Constructs a RegistrationTokenResponse.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$createdAt</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grantTypes</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$redirectUris</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scopes</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$updatedAt</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientSecret</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$createdAt</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$createdBy</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expiresAt</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$usedAt</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$usedByClientId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -685,29 +600,29 @@
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$clientId</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">client_id</code> field</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$createdAt</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">created_at</code> field</p>
+                    <section class="phpdocumentor-description"><p>Row creation time.</p>
 </section>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$grantTypes</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;</span>
+                <span class="phpdocumentor-argument-list__argument__name">$createdBy</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">grant_types</code> field</p>
+                    <section class="phpdocumentor-description"><p>The administrator who minted it.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$expiresAt</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>When it stops being usable.</p>
 </section>
 
             </dd>
@@ -716,7 +631,7 @@
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">id</code> field</p>
+                    <section class="phpdocumentor-description"><p>Row identity.</p>
 </section>
 
             </dd>
@@ -725,25 +640,7 @@
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">name</code> field</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$redirectUris</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">redirect_uris</code> field</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$scopes</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">scopes</code> field</p>
+                    <section class="phpdocumentor-description"><p>The operator-facing label.</p>
 </section>
 
             </dd>
@@ -752,31 +649,27 @@
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">tenant_id</code> field</p>
+                    <section class="phpdocumentor-description"><p>The tenant a registration on this token lands in.</p>
 </section>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$updatedAt</span>
-                : <span class="phpdocumentor-argument-list__argument__type">string</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>the server's <code class="prettyprint">updated_at</code> field</p>
-</section>
-
-            </dd>
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-argument-list__argument__name">$clientSecret</span>
-                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null</span>
+                <span class="phpdocumentor-argument-list__argument__name">$usedAt</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The plaintext client secret, shown
-exactly once. T21.2 — <strong>absent</strong> for a client registered with
-<code class="prettyprint">token_endpoint_auth_method: none</code>. A public client is created with no secret, so there
-is nothing to show; the member is omitted rather than sent as <code class="prettyprint">&quot;&quot;</code>, which an operator
-(or an SDK) would reasonably read as a secret that happens to be empty. Every
-confidential registration — that is, every registration that existed before T21.2 —
-carries it exactly as before. (optional)</p>
+                    <section class="phpdocumentor-description"><p>When it was spent, if it was. (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$usedByClientId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Reserved; always absent in this build. See
+<code class="prettyprint">axiam_core::models::oauth2_registration_token::OAuth2RegistrationToken::used_by_client_id</code>
+— the registration a token produced is recorded in the audit log, not here. (optional)</p>
 </section>
 
             </dd>
@@ -796,17 +689,17 @@ carries it exactly as before. (optional)</p>
 >
     <h4 class="phpdocumentor-element__name" id="method_fromArray">
         fromArray()
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_fromArray" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_fromArray" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">53</span>
+    <span class="phpdocumentor-element-found-in__line">46</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Rebuilds a OAuth2ClientCreatedResponse from one decoded JSON object.</p>
+        <p class="phpdocumentor-summary">Rebuilds a RegistrationTokenResponse from one decoded JSON object.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -847,13 +740,13 @@ carries it exactly as before. (optional)</p>
 >
     <h4 class="phpdocumentor-element__name" id="method_jsonSerialize">
         jsonSerialize()
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_jsonSerialize" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_jsonSerialize" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">105</span>
+    <span class="phpdocumentor-element-found-in__line">96</span>
 
     </aside>
 
@@ -891,13 +784,13 @@ and nowhere else (§27.5).</p>
 >
     <h4 class="phpdocumentor-element__name" id="method_toArray">
         toArray()
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_toArray" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_toArray" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OAuth2ClientCreatedResponse.php"><a href="files/src-management-models-oauth2clientcreatedresponse.html"><abbr title="src/Management/Models/OAuth2ClientCreatedResponse.php">OAuth2ClientCreatedResponse.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/RegistrationTokenResponse.php"><a href="files/src-management-models-registrationtokenresponse.html"><abbr title="src/Management/Models/RegistrationTokenResponse.php">RegistrationTokenResponse.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">77</span>
+    <span class="phpdocumentor-element-found-in__line">68</span>
 
     </aside>
 
@@ -940,34 +833,32 @@ omission means the first.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                            <li><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#toc-properties">Properties</a></li>
-                                                            <li><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#toc-methods">Methods</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#toc-properties">Properties</a></li>
+                                                            <li><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_clientId">$clientId</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_clientSecret">$clientSecret</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_createdAt">$createdAt</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_grantTypes">$grantTypes</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_id">$id</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_name">$name</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_redirectUris">$redirectUris</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_scopes">$scopes</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_tenantId">$tenantId</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#property_updatedAt">$updatedAt</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_createdAt">$createdAt</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_createdBy">$createdBy</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_expiresAt">$expiresAt</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_id">$id</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_name">$name</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_tenantId">$tenantId</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_usedAt">$usedAt</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_usedByClientId">$usedByClientId</a></li>
                                             </ul>
                 </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method___construct">__construct()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_fromArray">fromArray()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_jsonSerialize">jsonSerialize()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#method_toArray">toArray()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_fromArray">fromArray()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_jsonSerialize">jsonSerialize()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#method_toArray">toArray()</a></li>
                                     </ul>
             </li>
                     </ul>
@@ -987,7 +878,7 @@ omission means the first.</p>
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Management-Models-OAuth2ClientCreatedResponse.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

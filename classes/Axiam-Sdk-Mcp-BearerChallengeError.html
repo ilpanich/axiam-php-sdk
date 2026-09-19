@@ -96,16 +96,13 @@
                                         <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-laravel.html">Laravel</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-mcp.html">Mcp</a></li>
     </ul>
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    AxiamServiceProvider
+    BearerChallengeError
 
-        <span class="phpdocumentor-element__extends">
-        extends <abbr title="\Illuminate\Support\ServiceProvider">ServiceProvider</abbr>
-    </span>
     
             <div class="phpdocumentor-element__package">
             in package
@@ -125,28 +122,21 @@
 </div>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/BearerChallengeError.php"><a href="files/src-mcp-bearerchallengeerror.html"><abbr title="src/Mcp/BearerChallengeError.php">BearerChallengeError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">17</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Auto-discovered Laravel bridge entry point (D-01): listed under `composer.json`
-`extra.laravel.providers`, so a Laravel consumer gets this provider registered
-with ZERO manual wiring beyond `composer require axiam/axiam-sdk` (true
-zero-config auto-discovery, unlike the Symfony bridge which has no equivalent
-mechanism without a published Flex recipe).</p>
+            <p class="phpdocumentor-summary">The three RFC 6750 §3.1 error codes a `WWW-Authenticate: Bearer` challenge may name
+(CONTRACT.md §28.4) — the complete vocabulary; nothing else, not even a well-formed
+OAuth error code such as `invalid_grant`, is accepted by {@see Mcp::bearerChallenge()}.</p>
 
 
-    <section class="phpdocumentor-description"><p><code class="prettyprint">register()</code> binds a singleton <a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a> configured from
-<code class="prettyprint">config('axiam.*')</code> (falling back to <code class="prettyprint">AXIAM_*</code> environment variables so a
-consumer never needs to publish a config file to get started). <code class="prettyprint">boot()</code>
-registers the <code class="prettyprint">axiam.auth</code> middleware alias (<a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a>) and the
-<code class="prettyprint">axiam</code> Gate ability (<a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a>, D-02) — <code class="prettyprint">can:axiam,&lt;resource&gt;,&lt;action&gt;</code>
-route middleware then works out of the box — plus the <code class="prettyprint">axiam.access</code> middleware
-alias (<a href="classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamAccessMiddleware">AxiamAccessMiddleware</abbr></a>, backed by <a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a>, CONTRACT.md
-§11) for the declarative <code class="prettyprint">#[RequireAuth]</code>/<code class="prettyprint">#[RequireAccess]</code>/<code class="prettyprint">#[RequireRole]</code>
-helpers.</p>
+    <section class="phpdocumentor-description"><p>Class constants rather than a backed <code class="prettyprint">enum</code>, matching <a href="classes/Axiam-Sdk-Rest-ReasonCode.html"><abbr title="\Axiam\Sdk\Rest\ReasonCode">ReasonCode</abbr></a>'s
+own rationale: <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_bearerChallenge"><abbr title="\Axiam\Sdk\Mcp\Mcp::bearerChallenge()">Mcp::bearerChallenge()</abbr></a> takes this as an input it validates and
+refuses, never a value it reads back off the wire, so there is nothing here an enum's
+<code class="prettyprint">from()</code>/<code class="prettyprint">tryFrom()</code> would need to tolerate.</p>
 </section>
 
 
@@ -155,7 +145,7 @@ helpers.</p>
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -165,115 +155,145 @@ helpers.</p>
 
 
 
-
-
-
-<h4 id="toc-methods">
-    Methods
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a>
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INSUFFICIENT_SCOPE">INSUFFICIENT_SCOPE</a>
     <span>
-                                &nbsp;: void    </span>
+        &nbsp;: mixed&nbsp;= &#039;insufficient_scope&#039;                            </span>
 </dt>
-<dd>Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</dd>
+<dd>A `require_access` call that named a `scope` was denied with `reason_code: &quot;no_grant&quot;` (CONTRACT.md §28.5 rule 5).</dd>
 
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a>
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INVALID_REQUEST">INVALID_REQUEST</a>
     <span>
-                                &nbsp;: void    </span>
+        &nbsp;: mixed&nbsp;= &#039;invalid_request&#039;                            </span>
 </dt>
+<dd>Available to a caller building its own challenge for its own `400` (CONTRACT.md §28.4). Never emitted by this SDK&#039;s own guards.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INVALID_TOKEN">INVALID_TOKEN</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;invalid_token&#039;                            </span>
+</dt>
+<dd>A credential was presented and rejected — the ONLY reason this SDK&#039;s own guards ever name (CONTRACT.md §28.4).</dd>
 
     </dl>
 
 
 
-        
+
+
 
         
-
-            <section class="phpdocumentor-methods">
-        <h3 class="phpdocumentor-elements__header" id="methods">
-            Methods
-            <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_boot">
-        boot()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot" class="headerlink"><i class="fas fa-link"></i></a>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_INSUFFICIENT_SCOPE">
+        INSUFFICIENT_SCOPE
+        <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INSUFFICIENT_SCOPE" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
+
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/BearerChallengeError.php"><a href="files/src-mcp-bearerchallengeerror.html"><abbr title="src/Mcp/BearerChallengeError.php">BearerChallengeError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">169</span>
+    <span class="phpdocumentor-element-found-in__line">26</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</p>
+        <p class="phpdocumentor-summary">A `require_access` call that named a `scope` was denied with `reason_code: &quot;no_grant&quot;` (CONTRACT.md §28.5 rule 5).</p>
 
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">boot</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
     
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">INSUFFICIENT_SCOPE</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;insufficient_scope&#039;</span>
+</code>
+
+
     
     
     
 
         
-    
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="method_register">
-        register()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register" class="headerlink"><i class="fas fa-link"></i></a>
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_INVALID_REQUEST">
+        INVALID_REQUEST
+        <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INVALID_REQUEST" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
+
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/BearerChallengeError.php"><a href="files/src-mcp-bearerchallengeerror.html"><abbr title="src/Mcp/BearerChallengeError.php">BearerChallengeError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">20</span>
 
     </aside>
 
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">register</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+        <p class="phpdocumentor-summary">Available to a caller building its own challenge for its own `400` (CONTRACT.md §28.4). Never emitted by this SDK&#039;s own guards.</p>
 
-    <div class="phpdocumentor-label-line">
-        </div>
     
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">INVALID_REQUEST</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;invalid_request&#039;</span>
+</code>
+
+
     
     
     
 
         
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_INVALID_TOKEN">
+        INVALID_TOKEN
+        <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INVALID_TOKEN" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/BearerChallengeError.php"><a href="files/src-mcp-bearerchallengeerror.html"><abbr title="src/Mcp/BearerChallengeError.php">BearerChallengeError.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">23</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A credential was presented and rejected — the ONLY reason this SDK&#039;s own guards ever name (CONTRACT.md §28.4).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">INVALID_TOKEN</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;invalid_token&#039;</span>
+</code>
+
+
     
     
-</article>
+    
+
+        
+    </article>
             </section>
 
+        
+
+        
         
     </article>
                                 </section>
@@ -286,18 +306,19 @@ helpers.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods">Methods</a></li>
-                                    </ul>
+                                        <li><a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#toc-constants">Constants</a></li>
+                                                                            </ul>
             </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INSUFFICIENT_SCOPE">INSUFFICIENT_SCOPE</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INVALID_REQUEST">INVALID_REQUEST</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#constant_INVALID_TOKEN">INVALID_TOKEN</a></li>
+                                            </ul>
+                </li>
             
             
-                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
-            <li>
-                <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a></li>
-                                    </ul>
-            </li>
                     </ul>
     </section>
 
@@ -315,7 +336,7 @@ helpers.</p>
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

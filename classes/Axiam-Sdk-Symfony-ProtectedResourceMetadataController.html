@@ -96,16 +96,13 @@
                                         <ul class="phpdocumentor-breadcrumbs">
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
             <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
-            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-laravel.html">Laravel</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-symfony.html">Symfony</a></li>
     </ul>
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    AxiamServiceProvider
+    ProtectedResourceMetadataController
 
-        <span class="phpdocumentor-element__extends">
-        extends <abbr title="\Illuminate\Support\ServiceProvider">ServiceProvider</abbr>
-    </span>
     
             <div class="phpdocumentor-element__package">
             in package
@@ -125,28 +122,34 @@
 </div>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/ProtectedResourceMetadataController.php"><a href="files/src-symfony-protectedresourcemetadatacontroller.html"><abbr title="src/Symfony/ProtectedResourceMetadataController.php">ProtectedResourceMetadataController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">38</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Auto-discovered Laravel bridge entry point (D-01): listed under `composer.json`
-`extra.laravel.providers`, so a Laravel consumer gets this provider registered
-with ZERO manual wiring beyond `composer require axiam/axiam-sdk` (true
-zero-config auto-discovery, unlike the Symfony bridge which has no equivalent
-mechanism without a published Flex recipe).</p>
+            <p class="phpdocumentor-summary">Symfony&#039;s realization of CONTRACT.md §28.3&#039;s `serve_protected_resource_metadata`:
+an invokable controller that serves the RFC 9728 protected-resource metadata
+document, `200 application/json`, at the path {@see ProtectedResourceMetadata}
+derived from the `resource` it was built from.</p>
 
 
-    <section class="phpdocumentor-description"><p><code class="prettyprint">register()</code> binds a singleton <a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a> configured from
-<code class="prettyprint">config('axiam.*')</code> (falling back to <code class="prettyprint">AXIAM_*</code> environment variables so a
-consumer never needs to publish a config file to get started). <code class="prettyprint">boot()</code>
-registers the <code class="prettyprint">axiam.auth</code> middleware alias (<a href="classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamMiddleware">AxiamMiddleware</abbr></a>) and the
-<code class="prettyprint">axiam</code> Gate ability (<a href="classes/Axiam-Sdk-Laravel-AxiamGate.html"><abbr title="\Axiam\Sdk\Laravel\AxiamGate">AxiamGate</abbr></a>, D-02) — <code class="prettyprint">can:axiam,&lt;resource&gt;,&lt;action&gt;</code>
-route middleware then works out of the box — plus the <code class="prettyprint">axiam.access</code> middleware
-alias (<a href="classes/Axiam-Sdk-Laravel-AxiamAccessMiddleware.html"><abbr title="\Axiam\Sdk\Laravel\AxiamAccessMiddleware">AxiamAccessMiddleware</abbr></a>, backed by <a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a>, CONTRACT.md
-§11) for the declarative <code class="prettyprint">#[RequireAuth]</code>/<code class="prettyprint">#[RequireAccess]</code>/<code class="prettyprint">#[RequireRole]</code>
-helpers.</p>
+    <section class="phpdocumentor-description"><p>Named <code class="prettyprint">…Controller</code> rather than <code class="prettyprint">serveProtectedResourceMetadata</code> — the canonical
+name §28.7's naming map pins for PHP — because Symfony's routing table is
+declarative configuration (<code class="prettyprint">routes.yaml</code>/attributes) rather than a runtime call
+this SDK can hook, unlike Laravel's <code class="prettyprint">Route::serveProtectedResourceMetadata()</code>
+macro. The integrator wires this controller into their own routing configuration
+at <code class="prettyprint">$metadata-&gt;metadataPath</code> (see this repository's README for a worked example);
+this class supplies everything CONTRACT.md §28.3's response rules require once
+that route is hit, so nothing about the response itself is left to the
+integrator to get right.</p>
+<p>The response is <code class="prettyprint">200</code>, <code class="prettyprint">Content-Type: application/json</code>, the document body
+exactly, <code class="prettyprint">Cache-Control: public, max-age=3600</code> and
+<code class="prettyprint">Access-Control-Allow-Origin: *</code> — identical for every caller, no
+<code class="prettyprint">Access-Control-Allow-Credentials</code>, and reachable with <strong>no</strong> credential of any
+kind (§28.3 rules 1–6). <a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a> listens on every request and
+must itself exempt this exact path from authentication (see its own docblock);
+this controller carries no auth logic of its own to duplicate that with.</p>
 </section>
 
 
@@ -155,7 +158,7 @@ helpers.</p>
     
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -170,23 +173,22 @@ helpers.</p>
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a>
+    <a class="" href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#method___construct">__construct()</a>
     <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: mixed    </span>
 </dt>
-<dd>Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a>
+    <a class="" href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#method___invoke">__invoke()</a>
     <span>
-                                &nbsp;: void    </span>
+                                &nbsp;: <abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>    </span>
 </dt>
+<dd>Serves the document (CONTRACT.md §28.3).</dd>
 
     </dl>
 
@@ -199,7 +201,7 @@ helpers.</p>
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -208,30 +210,57 @@ helpers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_boot">
-        boot()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method___construct">
+        __construct()
+        <a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/ProtectedResourceMetadataController.php"><a href="files/src-symfony-protectedresourcemetadatacontroller.html"><abbr title="src/Symfony/ProtectedResourceMetadataController.php">ProtectedResourceMetadataController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">169</span>
+    <span class="phpdocumentor-element-found-in__line">52</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Registers the `axiam.auth` route-middleware alias so applications can guard routes with
-`-&gt;middleware(&#039;axiam.auth&#039;)` (D-02, §10) instead of referencing the middleware class.</p>
-
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">boot</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$metadata</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$guard</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
     
-    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$metadata</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The value a prior
+<code class="prettyprint">Mcp::protectedResourceMetadata(...)</code> call returned. Immutable, so the
+SAME response is served on every request (§28.3 rule 4).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$guard</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAuthSubscriber">AxiamAuthSubscriber</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Optionally, the subscriber this
+document's guard is configured from — passing it lets this controller
+apply CONTRACT.md §28.5 rule 3's cross-check (refuse at construction
+when the subscriber's <code class="prettyprint">resourceMetadataUrl</code>/<code class="prettyprint">expectedAudience</code>
+disagree with <code class="prettyprint">$metadata</code>) instead of silently publishing a document
+the guard does not agree with. Omit it when the guard runs in a
+separate process, where nothing can be cross-checked.</p>
+</section>
+
+            </dd>
+            </dl>
+
     
 
         
@@ -244,22 +273,23 @@ helpers.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_register">
-        register()
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="method___invoke">
+        __invoke()
+        <a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#method___invoke" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamServiceProvider.php"><a href="files/src-laravel-axiamserviceprovider.html"><abbr title="src/Laravel/AxiamServiceProvider.php">AxiamServiceProvider.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/ProtectedResourceMetadataController.php"><a href="files/src-symfony-protectedresourcemetadatacontroller.html"><abbr title="src/Symfony/ProtectedResourceMetadataController.php">ProtectedResourceMetadataController.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">65</span>
 
     </aside>
 
-    
+        <p class="phpdocumentor-summary">Serves the document (CONTRACT.md §28.3).</p>
+
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">register</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">__invoke</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -270,7 +300,11 @@ helpers.</p>
 
         
     
-    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr></span>
+            </section>
+
 </article>
             </section>
 
@@ -286,7 +320,7 @@ helpers.</p>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                <li><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#toc-methods">Methods</a></li>
+                                                                                <li><a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
             
@@ -294,8 +328,8 @@ helpers.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_boot">boot()</a></li>
-                                            <li class=""><a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#method_register">register()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#method___invoke">__invoke()</a></li>
                                     </ul>
             </li>
                     </ul>
@@ -315,7 +349,7 @@ helpers.</p>
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

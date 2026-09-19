@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+            <title>AXIAM PHP SDK</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png"/>
+    <link rel="icon" href="images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/base.css">
+            <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/template.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" integrity="sha256-ybRkN9dBjhcS2qrW1z+hfCxq+1aBdwyQM5wlQoQVt/0=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/themes/prism-okaidia.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.css">
+                <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2"></script>
+        <script src="js/template.js"></script>
+        <script src="js/search.js"></script>
+        <script defer src="js/searchIndex.js"></script>
+    </head>
+<body id="top">
+    <header class="phpdocumentor-header phpdocumentor-section">
+    <h1 class="phpdocumentor-title"><a href="" class="phpdocumentor-title__link">AXIAM PHP SDK</a></h1>
+    <input class="phpdocumentor-header__menu-button" type="checkbox" id="menu-button" name="menu-button" />
+    <label class="phpdocumentor-header__menu-icon" for="menu-button">
+        <i class="fas fa-bars"></i>
+    </label>
+    <section data-search-form class="phpdocumentor-search">
+    <label>
+        <span class="visually-hidden">Search for</span>
+        <svg class="phpdocumentor-search__icon" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+            <line x1="12.4892" y1="12.2727" x2="19.1559" y2="18.9393" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <input type="search" class="phpdocumentor-field phpdocumentor-search__field" placeholder="Loading .." disabled />
+    </label>
+</section>
+
+    <nav class="phpdocumentor-topnav">
+    <ul class="phpdocumentor-topnav__menu">
+        </ul>
+</nav>
+</header>
+
+    <main class="phpdocumentor">
+        <div class="phpdocumentor-section">
+            <input class="phpdocumentor-sidebar__menu-button" type="checkbox" id="sidebar-button" name="sidebar-button" />
+<label class="phpdocumentor-sidebar__menu-icon" for="sidebar-button">
+    Menu
+</label>
+<aside class="phpdocumentor-column -three phpdocumentor-sidebar">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
+            <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/axiam.html" class="">Axiam</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/axiam-sdk.html" class="">Sdk</a>
+                
+            </li>
+            </ul>
+
+                        </section>
+                <section class="phpdocumentor-sidebar__category -packages">
+            <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Application.html" class="">Application</a>
+</h4>
+
+                        </section>
+            
+    <section class="phpdocumentor-sidebar__category -reports">
+        <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
+    </section>
+
+    <section class="phpdocumentor-sidebar__category -indices">
+        <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
+    </section>
+</aside>
+
+            <div class="phpdocumentor-column -nine phpdocumentor-content">
+                                <section>
+                                        <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-mcp.html">Mcp</a></li>
+    </ul>
+
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    Mcp
+
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
+
+<div class="phpdocumentor-label-line">
+
+    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
+
+
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">32</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">MCP resource-server helpers (CONTRACT.md §28, RFC 9728 + RFC 6750) — the ONE §28
+implementation both {@see \Axiam\Sdk\Laravel\AxiamMiddleware} and
+{@see \Axiam\Sdk\Symfony\AxiamAuthSubscriber} are built on, mirroring how this SDK
+never duplicates a security-critical decision across its two framework bridges (D-02).</p>
+
+
+    <section class="phpdocumentor-description"><p>§28.0: this SDK implements the RESOURCE SERVER's half and nothing else. AXIAM is the
+authorization server and implements none of §28; the MCP client's half (parsing a
+challenge, fetching a document, deciding whether to trust the authorization server it
+names) is deliberately not in this contract version, for the same reason §20.3 stops
+at parsing a UMA challenge and goes no further.</p>
+<p><strong>No operation here performs network I/O</strong>, so §16 (retry) and §9 (single-flight
+refresh) do not apply and nothing in this class touches the SDK client's own session.
+Both operations are pure local computation, like <a href="classes/Axiam-Sdk-Oidc-UmaChallenge.html#method_parse"><abbr title="\Axiam\Sdk\Oidc\UmaChallenge::parse()">UmaChallenge::parse()</abbr></a>.</p>
+<p><strong>Nothing here is a source of truth about a token.</strong> The document is a claim a
+resource server publishes about itself; the challenge is a hint it gives a caller that
+already failed. Whether a request is authorized stays §10's and §11's decision,
+unchanged and unreachable from here.</p>
+</section>
+
+
+
+    
+    
+<h3 id="toc">
+    Table of Contents
+    <a href="classes/Axiam-Sdk-Mcp-Mcp.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h3>
+
+
+
+
+
+
+
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Mcp-Mcp.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-Mcp.html#constant_PROTECTED_RESOURCE_METADATA_PREFIX">PROTECTED_RESOURCE_METADATA_PREFIX</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;/.well-known/oauth-protected-resource&#039;                            </span>
+</dt>
+<dd>RFC 9728 §3.1&#039;s well-known prefix — the segment inserted between a resource&#039;s
+authority and its path to reach the document that describes it.</dd>
+
+    </dl>
+
+
+
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/Axiam-Sdk-Mcp-Mcp.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-Mcp.html#method_bearerChallenge">bearerChallenge()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>`bearerChallenge(...)` (CONTRACT.md §28.4) — build the **value** of a
+`WWW-Authenticate` header, never the whole header line and never a map. The caller
+sets the header.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-Mcp.html#method_checkGuardAgreement">checkGuardAgreement()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>CONTRACT.md §28.5 rule 3: where this SDK can see BOTH a §10 guard&#039;s §28
+configuration and the document about to be published for it, it MUST refuse a
+mismatch at startup rather than publish a document the guard disagrees with.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-Mcp.html#method_deriveMetadataPath">deriveMetadataPath()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>CONTRACT.md §28.3&#039;s derivation: RFC 9728 §3.1 inserts the well-known segment
+between the authority and the path. An empty path and a bare `/` both reach the
+root form; anything else is appended, **trailing slash included** — it is part of
+the identifier a client compares, and two resources that differ only by it are two
+resources.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-Mcp.html#method_pathOf">pathOf()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>The path component of an already-validated absolute URL — query and fragment
+stripped, an absent path normalised to `/`. Used by
+{@see McpGuardOptions::build()} to derive the path a §10 guard exempts from
+authentication (CONTRACT.md §28.3 rule 2) from the `resourceMetadataUrl` option it
+was given, without parsing the URL a second time with different rules.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-Mcp.html#method_protectedResourceMetadata">protectedResourceMetadata()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a>    </span>
+</dt>
+<dd>`protectedResourceMetadata(...)` (CONTRACT.md §28.1) — build and validate the RFC
+9728 protected-resource metadata document this server publishes about itself, and
+derive the path and URL it is served at.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Mcp-Mcp.html#method_toJsonResponse">toJsonResponse()</a>
+    <span>
+                                &nbsp;: <abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>    </span>
+</dt>
+<dd>The CONTRACT.md §28.3 response for the metadata document, ready to return from a
+route/controller: `200`, `application/json`, the document body, and the caching /
+CORS headers §28.3 rules 5–6 name. Shared by
+{@see \Axiam\Sdk\Laravel\AxiamServiceProvider}&#039;s `Route::serveProtectedResourceMetadata`
+macro and {@see \Axiam\Sdk\Symfony\ProtectedResourceMetadataController} so the two
+framework surfaces cannot drift on the response shape.</dd>
+
+    </dl>
+
+
+
+        
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Mcp-Mcp.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_PROTECTED_RESOURCE_METADATA_PREFIX">
+        PROTECTED_RESOURCE_METADATA_PREFIX
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#constant_PROTECTED_RESOURCE_METADATA_PREFIX" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">38</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">RFC 9728 §3.1&#039;s well-known prefix — the segment inserted between a resource&#039;s
+authority and its path to reach the document that describes it.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">PROTECTED_RESOURCE_METADATA_PREFIX</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;/.well-known/oauth-protected-resource&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+            </section>
+
+        
+
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/Axiam-Sdk-Mcp-Mcp.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_bearerChallenge">
+        bearerChallenge()
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_bearerChallenge" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">243</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`bearerChallenge(...)` (CONTRACT.md §28.4) — build the **value** of a
+`WWW-Authenticate` header, never the whole header line and never a map. The caller
+sets the header.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">bearerChallenge</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceMetadataUrl</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$error</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$errorDescription</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Parameters appear in a fixed order — <code class="prettyprint">error</code>, <code class="prettyprint">error_description</code>, <code class="prettyprint">scope</code>,
+<code class="prettyprint">resource_metadata</code> — separated by exactly <code class="prettyprint">, </code>. <code class="prettyprint">resource_metadata</code> is always
+present; the other three are omitted when not given.</p>
+<p><strong>Every value is quoted and no value is ever escaped.</strong> RFC 6750 §3 restricts each
+parameter to a character set that cannot contain <code class="prettyprint">&quot;</code> or <code class="prettyprint">\</code>, so a value needing an
+escape is a value that does not belong in a challenge: this method refuses it
+rather than escaping, truncating or stripping it. A challenge is built from the
+code's own constants and a route's own configuration, so an invalid one is a
+programming error, not a runtime condition to degrade around.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceMetadataUrl</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The document's URL — the one parameter that is
+always present. May carry a query and a fragment.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$error</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>One of <a href="classes/Axiam-Sdk-Mcp-BearerChallengeError.html"><abbr title="\Axiam\Sdk\Mcp\BearerChallengeError">BearerChallengeError</abbr></a>'s three constants, or
+<code class="prettyprint">null</code> when the request carried no authentication information at all.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$errorDescription</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>A human-readable description, for an
+application building <strong>its own</strong> challenge for its own <code class="prettyprint">400</code>. This SDK's
+own guards never set it — every reason a token is rejected collapses to
+<code class="prettyprint">invalid_token</code>, indistinguishably (CONTRACT.md §28.4), because every
+distinction a 401 draws for an unauthenticated stranger is an oracle.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$scope</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The scope the route asked for, verbatim — one or more
+tokens joined by a single space.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_bearerChallenge_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_bearerChallenge_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Management-ValidationError.html"><abbr title="\Axiam\Sdk\Management\ValidationError">ValidationError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>When any parameter is outside RFC 6750's syntax.</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_checkGuardAgreement">
+        checkGuardAgreement()
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_checkGuardAgreement" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">346</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">CONTRACT.md §28.5 rule 3: where this SDK can see BOTH a §10 guard&#039;s §28
+configuration and the document about to be published for it, it MUST refuse a
+mismatch at startup rather than publish a document the guard disagrees with.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">checkGuardAgreement</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$metadata</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions">McpGuardOptions</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$guard</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$guardExpectedAudience</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Called by <code class="prettyprint">Route::serveProtectedResourceMetadata()</code> (Laravel,
+<a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html"><abbr title="\Axiam\Sdk\Laravel\AxiamServiceProvider">AxiamServiceProvider</abbr></a>) and
+<a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html"><abbr title="\Axiam\Sdk\Symfony\ProtectedResourceMetadataController">ProtectedResourceMetadataController</abbr></a> whenever the
+integrator passes the guard alongside the document. Passing no guard is how an
+integrator whose guard runs in a SEPARATE process opts out — nothing can be
+checked there, and nothing is.</p>
+<p>Both comparisons are simple string equality (RFC 3986 §6.2.1): no normalisation,
+no case folding, no trailing-slash tolerance. The two strings are deliberately
+DIFFERENT ones — the resource and the metadata URL — so each is compared against
+its own counterpart, never against the other.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$metadata</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$guard</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions">McpGuardOptions</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$guardExpectedAudience</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_checkGuardAgreement_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_checkGuardAgreement_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Management-ValidationError.html"><abbr title="\Axiam\Sdk\Management\ValidationError">ValidationError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>When the guard's <code class="prettyprint">resourceMetadataUrl</code> is not exactly the
+document's <code class="prettyprint">metadataUrl</code>, or its expected audience is not exactly the
+document's <code class="prettyprint">resource</code>.</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_deriveMetadataPath">
+        deriveMetadataPath()
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_deriveMetadataPath" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">188</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">CONTRACT.md §28.3&#039;s derivation: RFC 9728 §3.1 inserts the well-known segment
+between the authority and the path. An empty path and a bare `/` both reach the
+root form; anything else is appended, **trailing slash included** — it is part of
+the identifier a client compares, and two resources that differ only by it are two
+resources.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">deriveMetadataPath</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourcePath</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourcePath</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_pathOf">
+        pathOf()
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_pathOf" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">204</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The path component of an already-validated absolute URL — query and fragment
+stripped, an absent path normalised to `/`. Used by
+{@see McpGuardOptions::build()} to derive the path a §10 guard exempts from
+authentication (CONTRACT.md §28.3 rule 2) from the `resourceMetadataUrl` option it
+was given, without parsing the URL a second time with different rules.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">pathOf</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$absoluteUrl</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$absoluteUrl</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_protectedResourceMetadata">
+        protectedResourceMetadata()
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_protectedResourceMetadata" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">94</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`protectedResourceMetadata(...)` (CONTRACT.md §28.1) — build and validate the RFC
+9728 protected-resource metadata document this server publishes about itself, and
+derive the path and URL it is served at.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">protectedResourceMetadata</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resource</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$authorizationServers</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scopesSupported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$bearerMethodsSupported</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">['header']</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceDocumentation</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><strong>Validation happens here and it refuses; it never repairs.</strong> Every §28.2 rule is
+checked before any route exists and before any request is served, and a violation
+throws <a href="classes/Axiam-Sdk-Management-ValidationError.html"><abbr title="\Axiam\Sdk\Management\ValidationError">ValidationError</abbr></a>. Nothing is normalised, trimmed, lowercased or
+re-encoded to make it pass: a value that needs adjusting is a configuration
+mistake an operator fixes in one line, and a helper that quietly fixed it would
+publish a document describing a resource server that does not exist.</p>
+<p><strong>Nothing in the document may come from a request</strong> (§28.2 rule 8). Both
+<code class="prettyprint">$resource</code> and <code class="prettyprint">$authorizationServers</code> are configuration; this method offers no
+way to build either from a <code class="prettyprint">Host</code> header, the <code class="prettyprint">Forwarded</code>/<code class="prettyprint">X-Forwarded-*</code> family
+or a request URL, because a document assembled from the request is a document an
+attacker can point at an authorization server of their choosing — the whole
+handshake redirected with one header.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resource</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Absolute URI with a scheme and an authority, no query and
+no fragment. <code class="prettyprint">https</code>, or <code class="prettyprint">http</code> only on <code class="prettyprint">127.0.0.1</code>, <code class="prettyprint">[::1]</code> or
+<code class="prettyprint">localhost</code>. A trailing slash is significant.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$authorizationServers</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The issuer identifiers of the
+authorization servers guarding this resource — at least one, each
+verbatim, no query, no fragment, no duplicates.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$scopesSupported</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The scope tokens this resource server
+understands. Order is preserved, duplicates are refused, and an empty list
+omits the member from the document.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$bearerMethodsSupported</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">['header']</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Defaults to <code class="prettyprint">['header']</code>, the only
+accepted value in this contract version.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceDocumentation</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Optional documentation page for a
+human. May carry a query and a fragment; omitted from the document when
+<code class="prettyprint">null</code>.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_protectedResourceMetadata_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_protectedResourceMetadata_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Management-ValidationError.html"><abbr title="\Axiam\Sdk\Management\ValidationError">ValidationError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>When any CONTRACT.md §28.2 rule is violated.</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_toJsonResponse">
+        toJsonResponse()
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_toJsonResponse" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Mcp/Mcp.php"><a href="files/src-mcp-mcp.html"><abbr title="src/Mcp/Mcp.php">Mcp.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">316</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The CONTRACT.md §28.3 response for the metadata document, ready to return from a
+route/controller: `200`, `application/json`, the document body, and the caching /
+CORS headers §28.3 rules 5–6 name. Shared by
+{@see \Axiam\Sdk\Laravel\AxiamServiceProvider}&#039;s `Route::serveProtectedResourceMetadata`
+macro and {@see \Axiam\Sdk\Symfony\ProtectedResourceMetadataController} so the two
+framework surfaces cannot drift on the response shape.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">toJsonResponse</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$metadata</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$metadata</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Mcp-ProtectedResourceMetadata.html"><abbr title="\Axiam\Sdk\Mcp\ProtectedResourceMetadata">ProtectedResourceMetadata</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr></span>
+            </section>
+
+</article>
+            </section>
+
+        
+    </article>
+                                </section>
+                <section class="phpdocumentor-on-this-page__sidebar">
+                                
+    <section class="phpdocumentor-on-this-page__content">
+        <strong class="phpdocumentor-on-this-page__title">On this page</strong>
+
+        <ul class="phpdocumentor-list -clean">
+            <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Mcp-Mcp.html#toc-constants">Constants</a></li>
+                                                                                <li><a href="classes/Axiam-Sdk-Mcp-Mcp.html#toc-methods">Methods</a></li>
+                                    </ul>
+            </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Mcp-Mcp.html#constant_PROTECTED_RESOURCE_METADATA_PREFIX">PROTECTED_RESOURCE_METADATA_PREFIX</a></li>
+                                            </ul>
+                </li>
+            
+            
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_bearerChallenge">bearerChallenge()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_checkGuardAgreement">checkGuardAgreement()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_deriveMetadataPath">deriveMetadataPath()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_pathOf">pathOf()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_protectedResourceMetadata">protectedResourceMetadata()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Mcp-Mcp.html#method_toJsonResponse">toJsonResponse()</a></li>
+                                    </ul>
+            </li>
+                    </ul>
+    </section>
+
+                </section>
+                            </div>
+            <section data-search-results class="phpdocumentor-search-results phpdocumentor-search-results--hidden">
+    <section class="phpdocumentor-search-results__dialog">
+        <header class="phpdocumentor-search-results__header">
+            <h2 class="phpdocumentor-search-results__title">Search results</h2>
+            <button class="phpdocumentor-search-results__close"><i class="fas fa-times"></i></button>
+        </header>
+        <section class="phpdocumentor-search-results__body">
+            <ul class="phpdocumentor-search-results__entries"></ul>
+        </section>
+    </section>
+</section>
+        </div>
+        <a href="classes/Axiam-Sdk-Mcp-Mcp.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+
+    </main>
+
+    <script>
+        cssVars({});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+</body>
+</html>

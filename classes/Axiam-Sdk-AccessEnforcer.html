@@ -123,7 +123,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">74</span>
+    <span class="phpdocumentor-element-found-in__line">75</span>
 
     </aside>
 
@@ -272,14 +272,14 @@ so an unauthenticated caller still gets 401, not 403.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">90</span>
+    <span class="phpdocumentor-element-found-in__line">103</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$client</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-UmaChallenger.html"><abbr title="\Axiam\Sdk\UmaChallenger">UmaChallenger</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$challenger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$client</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-UmaChallenger.html"><abbr title="\Axiam\Sdk\UmaChallenger">UmaChallenger</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$challenger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceMetadataUrl</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -319,6 +319,24 @@ CONTRACT.md §11.2.8). Defaults to a silent <abbr title="\Psr\Log\NullLogger">Nu
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceMetadataUrl</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>CONTRACT.md §28.5's opt-in option —
+setting it adds a <code class="prettyprint">WWW-Authenticate</code> challenge to a <code class="prettyprint">require_access</code> denial
+whose <code class="prettyprint">reasonCode</code> is <code class="prettyprint">no_grant</code> and whose <code class="prettyprint">scope</code> argument was given (rule
+5). <code class="prettyprint">null</code> (the default) leaves this class's behaviour byte-for-byte
+unchanged from before §28 existed. Setting it REQUIRES <code class="prettyprint">$client</code> to have
+been constructed with <code class="prettyprint">expectedAudience</code> — refused at construction, naming
+both options, when it was not (rule 2). A <a href="classes/Axiam-Sdk-UmaChallenger.html"><abbr title="\Axiam\Sdk\UmaChallenger">UmaChallenger</abbr></a> challenge
+takes precedence when both are configured (§20.3's ticket is per-route and
+specific to the exact authority just refused; this one is the generic
+hint) — <abbr title="\Axiam\Sdk\self::withChallenge()">self::withChallenge()</abbr> is where that precedence is applied.</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -341,7 +359,7 @@ CONTRACT.md §11.2.8). Defaults to a silent <abbr title="\Psr\Log\NullLogger">Nu
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">186</span>
+    <span class="phpdocumentor-element-found-in__line">203</span>
 
     </aside>
 
@@ -437,7 +455,7 @@ for the exact mapping).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">111</span>
+    <span class="phpdocumentor-element-found-in__line">128</span>
 
     </aside>
 
@@ -497,7 +515,7 @@ request attribute), or <code class="prettyprint">null</code> when no such identi
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">140</span>
+    <span class="phpdocumentor-element-found-in__line">157</span>
 
     </aside>
 

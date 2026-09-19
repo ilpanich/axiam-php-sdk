@@ -97,7 +97,7 @@
     </ul>
 
     <article class="phpdocumentor-element -file">
-        <h2 class="phpdocumentor-content__title">OidcPolicy.php</h2>
+        <h2 class="phpdocumentor-content__title">CimdPolicy.php</h2>
 
         
         
@@ -108,7 +108,7 @@
         
 <h3 id="toc">
     Table of Contents
-    <a href="files/src-management-models-oidcpolicy.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="files/src-management-models-cimdpolicy.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -117,35 +117,28 @@
 
     <h4 id="toc-classes">
         Classes
-        <a href="files/src-management-models-oidcpolicy.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="files/src-management-models-cimdpolicy.html#toc-classes" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <dl class="phpdocumentor-table-of-contents">
-                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\OidcPolicy">OidcPolicy</abbr></a></dt><dd>OpenID Connect surface controls (X7 G8, plan §4.6/§4.8; T21.4). Settings that are not
-password rules, here because this is the org-baseline-plus-tenant-override surface every
-other per-tenant control lives on. They are not all of the same kind as each other, and
-which is which is the whole of what [`validate_tenant_override`] and
-[`clamp_overrides_to_org`] read, so it is set out rather than inferred. **Ordered** — a
-tenant may be stricter than its organization and never more permissive: *
-[`Self::sensitive_scopes_enabled`], validated **disable-only** — the mirror image of
-`mfa_enforced`, because releasing personal data is the less-restrictive direction, so a
-tenant can turn its organization&#039;s decision off but never on. *
-[`Self::dynamic_registration`], on the ladder `disabled` → `initial_access_token` →
-`anonymous`: a tenant may move down it and never up. * [`Self::dcr_max_clients`] and
-[`Self::dcr_unused_client_ttl_days`], on the ordinary `tenant &lt;= org` rule — with the
-wrinkle that `0` on the second means *never sweep*, which is the longest window of all and
-is handled by [`dcr_ttl_strictness`]. **Not ordered**, therefore never validated against the
-baseline and never clamped: * [`Self::default_locale`]. A language is a presentation
-preference; there is no sense in which Italian is stricter than French. *
-[`Self::dcr_allowed_scopes`], [`Self::dcr_allowed_redirect_hosts`] and
-[`Self::external_client_allowed_resources`]. Each names per-tenant resources — *this*
-tenant&#039;s MCP servers, *this* tenant&#039;s callback hosts — and there is no sense in which one
-such list is stricter than another. A subset rule would force an organization to enumerate
-every tenant&#039;s resource servers in its own baseline before any tenant could name one. The
-model&#039;s rule is &quot;a tenant may only be more restrictive&quot;, which binds every field that *has*
-a restrictiveness; a field that has none cannot violate it. One cross-field interlock spans
-both groups and is checked on the resolved policy rather than on either input: see
-[`validate_dcr_policy`].</dd>    </dl>
+                    <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a></dt><dd>Whether, and on what terms, a `client_id` that is a URL is resolved by fetching the document
+it names (T21.5, `draft-ietf-oauth-client-id-metadata-document`). # Why this is one nested
+policy rather than nine fields Every field here is a term of a single decision — *do we
+fetch a stranger&#039;s URL and make a client out of what comes back* — and none of them means
+anything without [`Self::enabled`]. A tenant that states a CIMD posture states all of it; a
+tenant that states none inherits its organization&#039;s whole posture rather than half of one,
+which is the only merge that cannot produce a combination neither party wrote. # The two
+fields that can widen, and the seven that cannot [`Self::enabled`] and [`Self::allow_http`]
+are **ordered**: a tenant may turn either off but never on, exactly as
+`dynamic_registration` may only move down its ladder. Everything else names *this tenant&#039;s*
+domains or *this tenant&#039;s* bounds, and there is no sense in which one tenant&#039;s list of
+trusted publishers is stricter than another&#039;s — the same argument [`OidcPolicy`] already
+makes for `dcr_allowed_redirect_hosts`. # Every bound here is a security control
+[`Self::max_metadata_bytes`], [`Self::min_cache_secs`] and [`Self::max_cache_secs`] are not
+tuning knobs. They are, respectively, the ceiling on a read from an attacker-chosen URL, the
+floor under how often that read may be repeated, and the ceiling on how long its result may
+be trusted. Each is clamped again in code against the three constants above, so a settings
+row written by hand cannot lift them.</dd>    </dl>
 
 
 
@@ -170,7 +163,7 @@ both groups and is checked on the resolved policy rather than on either input: s
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                        <li><a href="files/src-management-models-oidcpolicy.html#toc-classes">Classes</a></li>
+                                                                                                        <li><a href="files/src-management-models-cimdpolicy.html#toc-classes">Classes</a></li>
                                                                                                                     </ul>
             </li>
 
@@ -192,7 +185,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     </section>
 </section>
         </div>
-        <a href="files/src-management-models-oidcpolicy.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="files/src-management-models-cimdpolicy.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

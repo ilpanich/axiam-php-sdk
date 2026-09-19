@@ -147,7 +147,10 @@ code, and redirects (or replies `200 JSON`) on success. See
 authorization request, parks its `state`/`nonce`/`code_verifier` in the
 configured {@see \Axiam\Sdk\Oidc\OidcStateStoreInterface}, and redirects the
 browser to the IdP. All security-critical logic lives in {@see OidcLoginFlow} —
-this class only translates its {@see OidcLoginOutcome} into an HTTP response.</dd>    </dl>
+this class only translates its {@see OidcLoginOutcome} into an HTTP response.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html"><abbr title="\Axiam\Sdk\Symfony\ProtectedResourceMetadataController">ProtectedResourceMetadataController</abbr></a></dt><dd>Symfony&#039;s realization of CONTRACT.md §28.3&#039;s `serve_protected_resource_metadata`:
+an invokable controller that serves the RFC 9728 protected-resource metadata
+document, `200 application/json`, at the path {@see ProtectedResourceMetadata}
+derived from the `resource` it was built from.</dd>    </dl>
 
 
 

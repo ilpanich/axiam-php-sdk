@@ -102,7 +102,7 @@
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    ClientAuthMethod
+    ManagedBy
 
             <span class="phpdocumentor-element__extends">
         : string
@@ -119,24 +119,26 @@
     </h2>
 
         <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ManagedBy.php"><a href="files/src-management-models-managedby.html"><abbr title="src/Management/Models/ManagedBy.php">ManagedBy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">30</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">How a client proves its identity at the token endpoint (RFC 8705 §2, OIDC Core §9 naming).</p>
+            <p class="phpdocumentor-summary">Who created a client registration (D5, T21.4). The discriminator that separates a
+registration an administrator made from one that arrived over an open endpoint. Three things
+read it and each would otherwise have to infer provenance from something that is not
+provenance: * `axiam_oauth2::fapi` refuses a FAPI profile on anything but
+[`Admin`](Self::Admin) (I5) — a client nobody vetted cannot be financial-grade; * the
+authorization endpoint forces a consent hop for every other value (D4) — an unrelated party
+gets a question put to the end user, whatever scopes it asked for; * the T21.4 sweeper
+deletes only [`Dcr`](Self::Dcr) rows, so an administrator&#039;s client is never swept however
+long it sits unused. [`Admin`](Self::Admin) is the serde default and therefore what every
+row written before T21.4 decodes to, which is the truth: they were all created through `POST
+/oauth2-clients` by somebody holding `oauth2_clients:create`.</p>
 
         
-            <section class="phpdocumentor-description"><p>Only the methods AXIAM actually implements are representable. <code class="prettyprint">None</code> — the public-client
-value — was deliberately absent until T21.2: adding it before the rest of the server
-understood one would have let an operator register a client whose authentication is silently
-skipped. The server understands one now (<code class="prettyprint">token.rs</code>'s <code class="prettyprint">authenticate_client_credential</code> has
-an arm that accepts <em>no</em> credential and refuses a presented one, the authorization endpoint
-derives its PKCE requirement from this enum, and the admin API refuses the method alongside
-any grant or binding that contradicts it), so the variant exists — and only that arm may
-ever treat a missing credential as success.</p>
-<p>An <strong>open</strong> enum. A value this SDK's copy of the spec does not list decodes to
+            <section class="phpdocumentor-description"><p>An <strong>open</strong> enum. A value this SDK's copy of the spec does not list decodes to
 <code class="prettyprint">self::Unknown</code> rather than failing the response it arrived in (CONTRACT.md §27.11 rule 1).
 Its own wire spelling is the empty string, which no server value is, so carrying an
 unrecognised value back into an update is refused by the server rather than written as a
@@ -149,7 +151,7 @@ spelling it never used. A <code class="prettyprint">match</code> over these case
         
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -162,54 +164,33 @@ spelling it never used. A <code class="prettyprint">match</code> over these case
 
 <h4 id="toc-cases">
     Cases
-    <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#toc-cases" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#toc-cases" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -case -">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretBasic">ClientSecretBasic</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Admin">Admin</a>
     <span>
-                &nbsp;= &#039;client_secret_basic&#039;                    </span>
+                &nbsp;= &#039;admin&#039;                    </span>
 </dt>
-<dd>The wire value `client_secret_basic`.</dd>
+<dd>The wire value `admin`.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -case -">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretPost">ClientSecretPost</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Cimd">Cimd</a>
     <span>
-                &nbsp;= &#039;client_secret_post&#039;                    </span>
+                &nbsp;= &#039;cimd&#039;                    </span>
 </dt>
-<dd>The wire value `client_secret_post`.</dd>
+<dd>The wire value `cimd`.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -case -">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_None">None</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Dcr">Dcr</a>
     <span>
-                &nbsp;= &#039;none&#039;                    </span>
+                &nbsp;= &#039;dcr&#039;                    </span>
 </dt>
-<dd>The wire value `none`.</dd>
+<dd>The wire value `dcr`.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -case -">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_PrivateKeyJwt">PrivateKeyJwt</a>
-    <span>
-                &nbsp;= &#039;private_key_jwt&#039;                    </span>
-</dt>
-<dd>The wire value `private_key_jwt`.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -case -">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_SelfSignedTlsClientAuth">SelfSignedTlsClientAuth</a>
-    <span>
-                &nbsp;= &#039;self_signed_tls_client_auth&#039;                    </span>
-</dt>
-<dd>The wire value `self_signed_tls_client_auth`.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -case -">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_TlsClientAuth">TlsClientAuth</a>
-    <span>
-                &nbsp;= &#039;tls_client_auth&#039;                    </span>
-</dt>
-<dd>The wire value `tls_client_auth`.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -case -">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_Unknown">Unknown</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Unknown">Unknown</a>
     <span>
                 &nbsp;= &#039;&#039;                    </span>
 </dt>
@@ -220,16 +201,16 @@ spelling it never used. A <code class="prettyprint">match</code> over these case
 
 <h4 id="toc-methods">
     Methods
-    <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a class="" href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#method_fromWire">fromWire()</a>
+    <a class="" href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#method_fromWire">fromWire()</a>
     <span>
                                 &nbsp;: self    </span>
 </dt>
-<dd>Parses a wire value into a ClientAuthMethod, mapping an unrecognised one to {@see
+<dd>Parses a wire value into a ManagedBy, mapping an unrecognised one to {@see
 self::Unknown}.</dd>
 
     </dl>
@@ -239,7 +220,7 @@ self::Unknown}.</dd>
             <section class="phpdocumentor-cases">
         <h3 class="phpdocumentor-elements__header" id="cases">
             Cases
-            <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#cases" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#cases" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -248,19 +229,19 @@ self::Unknown}.</dd>
             -enum-case
         "
 >
-    <h4 class="phpdocumentor-element__name" id="enumcase_ClientSecretPost">
-        ClientSecretPost
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretPost" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="enumcase_Admin">
+        Admin
+        <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Admin" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ManagedBy.php"><a href="files/src-management-models-managedby.html"><abbr title="src/Management/Models/ManagedBy.php">ManagedBy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">31</span>
+    <span class="phpdocumentor-element-found-in__line">33</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The wire value `client_secret_post`.</p>
+        <p class="phpdocumentor-summary">The wire value `admin`.</p>
 
     
     
@@ -275,19 +256,19 @@ self::Unknown}.</dd>
             -enum-case
         "
 >
-    <h4 class="phpdocumentor-element__name" id="enumcase_ClientSecretBasic">
-        ClientSecretBasic
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretBasic" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="enumcase_Dcr">
+        Dcr
+        <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Dcr" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ManagedBy.php"><a href="files/src-management-models-managedby.html"><abbr title="src/Management/Models/ManagedBy.php">ManagedBy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">36</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The wire value `client_secret_basic`.</p>
+        <p class="phpdocumentor-summary">The wire value `dcr`.</p>
 
     
     
@@ -302,100 +283,19 @@ self::Unknown}.</dd>
             -enum-case
         "
 >
-    <h4 class="phpdocumentor-element__name" id="enumcase_TlsClientAuth">
-        TlsClientAuth
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_TlsClientAuth" class="headerlink"><i class="fas fa-link"></i></a>
+    <h4 class="phpdocumentor-element__name" id="enumcase_Cimd">
+        Cimd
+        <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Cimd" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ManagedBy.php"><a href="files/src-management-models-managedby.html"><abbr title="src/Management/Models/ManagedBy.php">ManagedBy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">39</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">The wire value `tls_client_auth`.</p>
-
-    
-    
-    
-    
-
-        
-    </article>
-                    <article
-        class="
-            phpdocumentor-element
-            -enum-case
-        "
->
-    <h4 class="phpdocumentor-element__name" id="enumcase_SelfSignedTlsClientAuth">
-        SelfSignedTlsClientAuth
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_SelfSignedTlsClientAuth" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">40</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">The wire value `self_signed_tls_client_auth`.</p>
-
-    
-    
-    
-    
-
-        
-    </article>
-                    <article
-        class="
-            phpdocumentor-element
-            -enum-case
-        "
->
-    <h4 class="phpdocumentor-element__name" id="enumcase_PrivateKeyJwt">
-        PrivateKeyJwt
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_PrivateKeyJwt" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">43</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">The wire value `private_key_jwt`.</p>
-
-    
-    
-    
-    
-
-        
-    </article>
-                    <article
-        class="
-            phpdocumentor-element
-            -enum-case
-        "
->
-    <h4 class="phpdocumentor-element__name" id="enumcase_None">
-        None
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_None" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">46</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">The wire value `none`.</p>
+        <p class="phpdocumentor-summary">The wire value `cimd`.</p>
 
     
     
@@ -412,13 +312,13 @@ self::Unknown}.</dd>
 >
     <h4 class="phpdocumentor-element__name" id="enumcase_Unknown">
         Unknown
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_Unknown" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Unknown" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ManagedBy.php"><a href="files/src-management-models-managedby.html"><abbr title="src/Management/Models/ManagedBy.php">ManagedBy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">49</span>
+    <span class="phpdocumentor-element-found-in__line">42</span>
 
     </aside>
 
@@ -436,7 +336,7 @@ self::Unknown}.</dd>
             <section class="phpdocumentor-methods">
         <h3 class="phpdocumentor-elements__header" id="methods">
             Methods
-            <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+            <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
 
         </h3>
                     <article
@@ -447,17 +347,17 @@ self::Unknown}.</dd>
 >
     <h4 class="phpdocumentor-element__name" id="method_fromWire">
         fromWire()
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#method_fromWire" class="headerlink"><i class="fas fa-link"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#method_fromWire" class="headerlink"><i class="fas fa-link"></i></a>
 
     </h4>
     <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ClientAuthMethod.php"><a href="files/src-management-models-clientauthmethod.html"><abbr title="src/Management/Models/ClientAuthMethod.php">ClientAuthMethod.php</abbr></a></abbr>
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/ManagedBy.php"><a href="files/src-management-models-managedby.html"><abbr title="src/Management/Models/ManagedBy.php">ManagedBy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">59</span>
+    <span class="phpdocumentor-element-found-in__line">52</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Parses a wire value into a ClientAuthMethod, mapping an unrecognised one to {@see
+        <p class="phpdocumentor-summary">Parses a wire value into a ManagedBy, mapping an unrecognised one to {@see
 self::Unknown}.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
@@ -507,27 +407,24 @@ A <code class="prettyprint">match</code> over this enum needs an <code class="pr
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#toc-cases">Cases</a></li>
-                                                                <li><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#toc-methods">Methods</a></li>
+                                            <li><a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#toc-cases">Cases</a></li>
+                                                                <li><a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
                             <li class="phpdocumentor-on-this-page-section__title">Cases</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretPost">ClientSecretPost</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_ClientSecretBasic">ClientSecretBasic</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_TlsClientAuth">TlsClientAuth</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_SelfSignedTlsClientAuth">SelfSignedTlsClientAuth</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_PrivateKeyJwt">PrivateKeyJwt</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_None">None</a></li>
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#enumcase_Unknown">Unknown</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Admin">Admin</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Dcr">Dcr</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Cimd">Cimd</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#enumcase_Unknown">Unknown</a></li>
                                             </ul>
                 </li>
             
                             <li class="phpdocumentor-on-this-page-section__title">Methods</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#method_fromWire">fromWire()</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#method_fromWire">fromWire()</a></li>
                                             </ul>
                 </li>
                     </ul>
@@ -547,7 +444,7 @@ A <code class="prettyprint">match</code> over this enum needs an <code class="pr
     </section>
 </section>
         </div>
-        <a href="classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Axiam-Sdk-Management-Models-ManagedBy.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

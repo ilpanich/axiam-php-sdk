@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAuthSubscriber.php"><a href="files/src-symfony-axiamauthsubscriber.html"><abbr title="src/Symfony/AxiamAuthSubscriber.php">AxiamAuthSubscriber.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">48</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -161,6 +161,14 @@ automatically attached by the browser is not, and in any same-site deployment
 where <code class="prettyprint">axiam_access</code> reaches this app, the non-httpOnly <code class="prettyprint">axiam_csrf</code> cookie does
 too. This mirrors, locally, the same double-submit check the AXIAM server performs
 on its own endpoints (§3).</p>
+<p>MCP resource-server helpers (CONTRACT.md §28, opt-in): supplying <code class="prettyprint">$resourceMetadataUrl</code>
+turns on the RFC 6750 <code class="prettyprint">WWW-Authenticate</code> challenge on every 401 this subscriber
+emits, and exempts the metadata document's own path from authentication — see
+<a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions">McpGuardOptions</abbr></a> for the precomputation and
+<a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html"><abbr title="\Axiam\Sdk\Symfony\ProtectedResourceMetadataController">ProtectedResourceMetadataController</abbr></a> for serving the document itself. With
+<code class="prettyprint">$resourceMetadataUrl</code> unset (the default), this subscriber behaves byte-for-byte
+as it did before §28 existed — no header on any response, no status changed, no
+body changed, no path exempted.</p>
 </section>
 
 
@@ -202,10 +210,27 @@ on its own endpoints (§3).</p>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_client">client()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a>    </span>
+</dt>
+<dd>The `AxiamClient` this subscriber verifies against — the same accessor
+{@see \Axiam\Sdk\Mcp\Mcp::checkGuardAgreement()} reads `expectedAudience()`
+from for the §28.5 rule 3 cross-check.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_getSubscribedEvents">getSubscribedEvents()</a>
     <span>
                                 &nbsp;: array&lt;string, string&gt;    </span>
 </dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_mcpGuardOptions">mcpGuardOptions()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions">McpGuardOptions</abbr></a>|null    </span>
+</dt>
+<dd>This subscriber&#039;s own CONTRACT.md §28.5 configuration, or `null` when
+`$resourceMetadataUrl` was not supplied at construction.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_onKernelRequest">onKernelRequest()</a>
@@ -242,14 +267,14 @@ on its own endpoints (§3).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAuthSubscriber.php"><a href="files/src-symfony-axiamauthsubscriber.html"><abbr title="src/Symfony/AxiamAuthSubscriber.php">AxiamAuthSubscriber.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">56</span>
+    <span class="phpdocumentor-element-found-in__line">83</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$client</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenant</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$client</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenant</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceMetadataUrl</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -262,14 +287,37 @@ on its own endpoints (§3).</p>
                 : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                
+                    <section class="phpdocumentor-description"><p>Client used to verify the presented token against the
+cached JWKS.</p>
+</section>
+
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$tenant</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                
+                    <section class="phpdocumentor-description"><p>Tenant slug the verified token's claim must match.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceMetadataUrl</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>CONTRACT.md §28.5's opt-in option: the
+URL of this resource server's RFC 9728 metadata
+document (the <code class="prettyprint">metadataUrl</code> a prior
+<code class="prettyprint">Mcp::protectedResourceMetadata(...)</code> call
+returned). <code class="prettyprint">null</code> (the default) leaves this
+subscriber's behaviour byte-for-byte unchanged from
+before §28 existed. Setting it REQUIRES <code class="prettyprint">$client</code>
+to have been constructed with <code class="prettyprint">expectedAudience</code> —
+refused at construction, naming both options, when
+it was not (§28.5 rule 2).</p>
+</section>
+
             </dd>
             </dl>
 
@@ -278,6 +326,47 @@ on its own endpoints (§3).</p>
         
     
     
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_client">
+        client()
+        <a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_client" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAuthSubscriber.php"><a href="files/src-symfony-axiamauthsubscriber.html"><abbr title="src/Symfony/AxiamAuthSubscriber.php">AxiamAuthSubscriber.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">112</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The `AxiamClient` this subscriber verifies against — the same accessor
+{@see \Axiam\Sdk\Mcp\Mcp::checkGuardAgreement()} reads `expectedAudience()`
+from for the §28.5 rule 3 cross-check.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">client</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a></span>
+            </section>
+
 </article>
                     <article
         class="phpdocumentor-element
@@ -293,7 +382,7 @@ on its own endpoints (§3).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAuthSubscriber.php"><a href="files/src-symfony-axiamauthsubscriber.html"><abbr title="src/Symfony/AxiamAuthSubscriber.php">AxiamAuthSubscriber.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">63</span>
+    <span class="phpdocumentor-element-found-in__line">118</span>
 
     </aside>
 
@@ -323,6 +412,51 @@ on its own endpoints (§3).</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_mcpGuardOptions">
+        mcpGuardOptions()
+        <a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_mcpGuardOptions" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAuthSubscriber.php"><a href="files/src-symfony-axiamauthsubscriber.html"><abbr title="src/Symfony/AxiamAuthSubscriber.php">AxiamAuthSubscriber.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">102</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">This subscriber&#039;s own CONTRACT.md §28.5 configuration, or `null` when
+`$resourceMetadataUrl` was not supplied at construction.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">mcpGuardOptions</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions">McpGuardOptions</abbr></a>|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Public so <a href="classes/Axiam-Sdk-Symfony-ProtectedResourceMetadataController.html"><abbr title="\Axiam\Sdk\Symfony\ProtectedResourceMetadataController">ProtectedResourceMetadataController</abbr></a> can cross-check that the
+document it is about to publish agrees with THIS subscriber's own
+configuration (§28.5 rule 3) when both are wired together — never required,
+since the two may legitimately be configured in separate processes.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions">McpGuardOptions</abbr></a>|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_onKernelRequest">
         onKernelRequest()
         <a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_onKernelRequest" class="headerlink"><i class="fas fa-link"></i></a>
@@ -331,7 +465,7 @@ on its own endpoints (§3).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAuthSubscriber.php"><a href="files/src-symfony-axiamauthsubscriber.html"><abbr title="src/Symfony/AxiamAuthSubscriber.php">AxiamAuthSubscriber.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">84</span>
+    <span class="phpdocumentor-element-found-in__line">139</span>
 
     </aside>
 
@@ -397,7 +531,9 @@ custom request headers.</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_client">client()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_getSubscribedEvents">getSubscribedEvents()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_mcpGuardOptions">mcpGuardOptions()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html#method_onKernelRequest">onKernelRequest()</a></li>
                                     </ul>
             </li>

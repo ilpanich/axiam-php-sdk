@@ -235,6 +235,14 @@ checks (CONTRACT.md §10.1 rule 7 — RECOMMENDED 60 s).</dd>
 base64url-encoded SHA-256, **without** padding.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_expectedAudience">expectedAudience()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>The `$expectedAudience` this verifier was constructed with (CONTRACT.md §10.1
+rule 6), or `null` when no audience check is configured.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verify">verify()</a>
     <span>
                                 &nbsp;: array&lt;string, mixed&gt;|null    </span>
@@ -440,7 +448,7 @@ generally expect <code class="prettyprint">axiam:user</code>.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">445</span>
+    <span class="phpdocumentor-element-found-in__line">459</span>
 
     </aside>
 
@@ -489,6 +497,51 @@ base64-decode the body.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_expectedAudience">
+        expectedAudience()
+        <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_expectedAudience" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">155</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The `$expectedAudience` this verifier was constructed with (CONTRACT.md §10.1
+rule 6), or `null` when no audience check is configured.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">expectedAudience</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Public so a §10 guard built around this verifier can read back its own audience
+configuration — <a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html#method_build"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions::build()">McpGuardOptions::build()</abbr></a> (CONTRACT.md §28.5
+rule 2) reads it via <a href="classes/Axiam-Sdk-AxiamClient.html#method_expectedAudience"><abbr title="\Axiam\Sdk\AxiamClient::expectedAudience()">AxiamClient::expectedAudience()</abbr></a> rather than
+requiring a second, independently-configured audience option for §28.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_verify">
         verify()
         <a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verify" class="headerlink"><i class="fas fa-link"></i></a>
@@ -497,7 +550,7 @@ base64-decode the body.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">160</span>
+    <span class="phpdocumentor-element-found-in__line">174</span>
 
     </aside>
 
@@ -566,7 +619,7 @@ failure (never throws on attacker input).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">389</span>
+    <span class="phpdocumentor-element-found-in__line">403</span>
 
     </aside>
 
@@ -681,7 +734,7 @@ certificate, or null if none.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">519</span>
+    <span class="phpdocumentor-element-found-in__line">533</span>
 
     </aside>
 
@@ -747,7 +800,7 @@ issuer/audience/time/nonce-checked.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Auth/JwksVerifier.php"><a href="files/src-auth-jwksverifier.html"><abbr title="src/Auth/JwksVerifier.php">JwksVerifier.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">785</span>
+    <span class="phpdocumentor-element-found-in__line">799</span>
 
     </aside>
 
@@ -853,6 +906,7 @@ and request.</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_certificateThumbprintS256">certificateThumbprintS256()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_expectedAudience">expectedAudience()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verify">verify()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyCertificateBinding">verifyCertificateBinding()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html#method_verifyIdTokenSignature">verifyIdTokenSignature()</a></li>

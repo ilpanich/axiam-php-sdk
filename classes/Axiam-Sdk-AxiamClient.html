@@ -123,7 +123,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">102</span>
+    <span class="phpdocumentor-element-found-in__line">103</span>
 
     </aside>
 
@@ -259,6 +259,17 @@ relative to the rest of the SDK family).</dd>
 <dd>`checkAccess` — delegates to {@see AuthzDispatcher} (REST default, gRPC when available).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_checkAccessDecision">checkAccessDecision()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a>    </span>
+</dt>
+<dd>`checkAccess`, returning the **full** decision including CONTRACT.md §11 rule 9&#039;s
+`reason_code` — see {@see \Axiam\Sdk\Rest\AccessDecision}&#039;s own docblock for why
+that distinction matters. Delegates to {@see AuthzDispatcher} on whichever
+transport {@see self::checkAccess()} itself would use (REST default, gRPC when
+available), so the two never disagree about which transport ran.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_close">close()</a>
     <span>
                                 &nbsp;: void    </span>
@@ -322,6 +333,14 @@ attempt, for an application driving its own loop. Most callers want
 </dt>
 <dd>Transactional-mail transport, configurable at organization level and overridable per
 tenant.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_expectedAudience">expectedAudience()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>The `$expectedAudience` this client was constructed with (CONTRACT.md §10.1 rule
+6), or `null` when no audience check is configured.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_federation">federation()</a>
@@ -1005,7 +1024,7 @@ which this namespace configures.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">276</span>
+    <span class="phpdocumentor-element-found-in__line">277</span>
 
     </aside>
 
@@ -1270,7 +1289,7 @@ because a service-to-service guard legitimately expects a different audience.</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">814</span>
+    <span class="phpdocumentor-element-found-in__line">829</span>
 
     </aside>
 
@@ -1307,7 +1326,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">732</span>
+    <span class="phpdocumentor-element-found-in__line">733</span>
 
     </aside>
 
@@ -1346,7 +1365,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1013</span>
+    <span class="phpdocumentor-element-found-in__line">1043</span>
 
     </aside>
 
@@ -1395,7 +1414,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">639</span>
+    <span class="phpdocumentor-element-found-in__line">640</span>
 
     </aside>
 
@@ -1434,7 +1453,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1002</span>
+    <span class="phpdocumentor-element-found-in__line">1032</span>
 
     </aside>
 
@@ -1493,7 +1512,7 @@ relative to the rest of the SDK family).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">631</span>
+    <span class="phpdocumentor-element-found-in__line">632</span>
 
     </aside>
 
@@ -1532,7 +1551,7 @@ relative to the rest of the SDK family).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">990</span>
+    <span class="phpdocumentor-element-found-in__line">1005</span>
 
     </aside>
 
@@ -1604,6 +1623,82 @@ this method's pre-§11 behavior exactly.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_checkAccessDecision">
+        checkAccessDecision()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_checkAccessDecision" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1020</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`checkAccess`, returning the **full** decision including CONTRACT.md §11 rule 9&#039;s
+`reason_code` — see {@see \Axiam\Sdk\Rest\AccessDecision}&#039;s own docblock for why
+that distinction matters. Delegates to {@see AuthzDispatcher} on whichever
+transport {@see self::checkAccess()} itself would use (REST default, gRPC when
+available), so the two never disagree about which transport ran.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">checkAccessDecision</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$action</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$action</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$scope</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$subjectId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>See <abbr title="\Axiam\Sdk\self::checkAccess()">self::checkAccess()</abbr>'s own docblock.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_close">
         close()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_close" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1612,7 +1707,7 @@ this method's pre-§11 behavior exactly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">505</span>
+    <span class="phpdocumentor-element-found-in__line">506</span>
 
     </aside>
 
@@ -1658,7 +1753,7 @@ session is what you want.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2345</span>
+    <span class="phpdocumentor-element-found-in__line">2375</span>
 
     </aside>
 
@@ -1703,7 +1798,7 @@ session is what you want.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">884</span>
+    <span class="phpdocumentor-element-found-in__line">899</span>
 
     </aside>
 
@@ -1747,7 +1842,7 @@ this seam never surfaces the private key itself.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">869</span>
+    <span class="phpdocumentor-element-found-in__line">884</span>
 
     </aside>
 
@@ -1789,7 +1884,7 @@ this seam never surfaces the private key itself.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1209</span>
+    <span class="phpdocumentor-element-found-in__line">1239</span>
 
     </aside>
 
@@ -1874,7 +1969,7 @@ built without one.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1240</span>
+    <span class="phpdocumentor-element-found-in__line">1270</span>
 
     </aside>
 
@@ -1966,7 +2061,7 @@ the first poll), poll to completion.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1222</span>
+    <span class="phpdocumentor-element-found-in__line">1252</span>
 
     </aside>
 
@@ -2031,7 +2126,7 @@ attempt, for an application driving its own loop. Most callers want
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">690</span>
+    <span class="phpdocumentor-element-found-in__line">691</span>
 
     </aside>
 
@@ -2063,6 +2158,51 @@ tenant.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_expectedAudience">
+        expectedAudience()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_expectedAudience" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">792</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The `$expectedAudience` this client was constructed with (CONTRACT.md §10.1 rule
+6), or `null` when no audience check is configured.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">expectedAudience</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Public so a §10 guard built around this client can read back its own audience
+configuration without a second, independently-configured copy —
+<a href="classes/Axiam-Sdk-Mcp-McpGuardOptions.html#method_build"><abbr title="\Axiam\Sdk\Mcp\McpGuardOptions::build()">McpGuardOptions::build()</abbr></a> (CONTRACT.md §28.5 rule 2) is the
+caller.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_federation">
         federation()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_federation" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2071,7 +2211,7 @@ tenant.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">673</span>
+    <span class="phpdocumentor-element-found-in__line">674</span>
 
     </aside>
 
@@ -2110,7 +2250,7 @@ tenant.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1036</span>
+    <span class="phpdocumentor-element-found-in__line">1066</span>
 
     </aside>
 
@@ -2163,7 +2303,7 @@ response drives the shared single-flight refresh (§9) and retries once (§1.1.4
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">582</span>
+    <span class="phpdocumentor-element-found-in__line">583</span>
 
     </aside>
 
@@ -2202,7 +2342,7 @@ response drives the shared single-flight refresh (§9) and retries once (§1.1.4
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1434</span>
+    <span class="phpdocumentor-element-found-in__line">1464</span>
 
     </aside>
 
@@ -2295,7 +2435,7 @@ bare form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">904</span>
+    <span class="phpdocumentor-element-found-in__line">919</span>
 
     </aside>
 
@@ -2353,7 +2493,7 @@ challenge (HTTP 202) is an expected outcome, not an exception: callers MUST chec
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1189</span>
+    <span class="phpdocumentor-element-found-in__line">1219</span>
 
     </aside>
 
@@ -2445,7 +2585,7 @@ be performed by a public client (§12.1 note 4).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1688</span>
+    <span class="phpdocumentor-element-found-in__line">1718</span>
 
     </aside>
 
@@ -2569,7 +2709,7 @@ and this carries that call's failure instead</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">953</span>
+    <span class="phpdocumentor-element-found-in__line">968</span>
 
     </aside>
 
@@ -2607,7 +2747,7 @@ authorization decision, mirroring the Python/C# sibling SDKs).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1396</span>
+    <span class="phpdocumentor-element-found-in__line">1426</span>
 
     </aside>
 
@@ -2694,7 +2834,7 @@ authorization decision, mirroring the Python/C# sibling SDKs).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">524</span>
+    <span class="phpdocumentor-element-found-in__line">525</span>
 
     </aside>
 
@@ -2741,7 +2881,7 @@ forbids caching RESPONSES, and nothing here caches one.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2144</span>
+    <span class="phpdocumentor-element-found-in__line">2174</span>
 
     </aside>
 
@@ -2791,7 +2931,7 @@ forbids caching RESPONSES, and nothing here caches one.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2130</span>
+    <span class="phpdocumentor-element-found-in__line">2160</span>
 
     </aside>
 
@@ -2835,7 +2975,7 @@ profile action costs a round trip on every check that follows (§25.2 rule 3).</
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2184</span>
+    <span class="phpdocumentor-element-found-in__line">2214</span>
 
     </aside>
 
@@ -2895,7 +3035,7 @@ of a login (§25.2 rule 2) — including capturing the session's first CSRF toke
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2165</span>
+    <span class="phpdocumentor-element-found-in__line">2195</span>
 
     </aside>
 
@@ -2949,7 +3089,7 @@ credential.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">681</span>
+    <span class="phpdocumentor-element-found-in__line">682</span>
 
     </aside>
 
@@ -2988,7 +3128,7 @@ credential.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">665</span>
+    <span class="phpdocumentor-element-found-in__line">666</span>
 
     </aside>
 
@@ -3028,7 +3168,7 @@ speak to.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1082</span>
+    <span class="phpdocumentor-element-found-in__line">1112</span>
 
     </aside>
 
@@ -3114,7 +3254,7 @@ one tries to override an SDK-owned parameter (§12.1 rule 5).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1059</span>
+    <span class="phpdocumentor-element-found-in__line">1089</span>
 
     </aside>
 
@@ -3157,7 +3297,7 @@ differ from `$baseUrl` behind a proxy — never treated as an error (§12.3 rule
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1142</span>
+    <span class="phpdocumentor-element-found-in__line">1172</span>
 
     </aside>
 
@@ -3258,7 +3398,7 @@ when omitted.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1111</span>
+    <span class="phpdocumentor-element-found-in__line">1141</span>
 
     </aside>
 
@@ -3357,7 +3497,7 @@ comes from the application, not from here.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1169</span>
+    <span class="phpdocumentor-element-found-in__line">1199</span>
 
     </aside>
 
@@ -3440,7 +3580,7 @@ wrapped or bare form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1872</span>
+    <span class="phpdocumentor-element-found-in__line">1902</span>
 
     </aside>
 
@@ -3486,7 +3626,7 @@ stretching happens inside <code class="prettyprint">libaxiam_opaque_ffi</code>, 
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1780</span>
+    <span class="phpdocumentor-element-found-in__line">1810</span>
 
     </aside>
 
@@ -3566,7 +3706,7 @@ key-stretching function this SDK cannot ask for</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1804</span>
+    <span class="phpdocumentor-element-found-in__line">1834</span>
 
     </aside>
 
@@ -3644,7 +3784,7 @@ then — and on the same terms as <abbr title="\Axiam\Sdk\self::opaqueEnrollment
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">556</span>
+    <span class="phpdocumentor-element-found-in__line">557</span>
 
     </aside>
 
@@ -3684,7 +3824,7 @@ the SDK boundary (§27.0).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2317</span>
+    <span class="phpdocumentor-element-found-in__line">2347</span>
 
     </aside>
 
@@ -3741,7 +3881,7 @@ distinguishing them; this SDK does not distinguish them either (§25.4 rule 3).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">598</span>
+    <span class="phpdocumentor-element-found-in__line">599</span>
 
     </aside>
 
@@ -3780,7 +3920,7 @@ distinguishing them; this SDK does not distinguish them either (§25.4 rule 3).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">647</span>
+    <span class="phpdocumentor-element-found-in__line">648</span>
 
     </aside>
 
@@ -3819,7 +3959,7 @@ distinguishing them; this SDK does not distinguish them either (§25.4 rule 3).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">750</span>
+    <span class="phpdocumentor-element-found-in__line">751</span>
 
     </aside>
 
@@ -3859,7 +3999,7 @@ them so.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">741</span>
+    <span class="phpdocumentor-element-found-in__line">742</span>
 
     </aside>
 
@@ -3899,7 +4039,7 @@ caller, never to another user.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">715</span>
+    <span class="phpdocumentor-element-found-in__line">716</span>
 
     </aside>
 
@@ -3939,7 +4079,7 @@ SDK could previously reach.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">939</span>
+    <span class="phpdocumentor-element-found-in__line">954</span>
 
     </aside>
 
@@ -3976,7 +4116,7 @@ reactively on a `401`. A failure surfaces as {@see AuthError} with no retry (§9
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2287</span>
+    <span class="phpdocumentor-element-found-in__line">2317</span>
 
     </aside>
 
@@ -4026,7 +4166,7 @@ account-enumeration oracle its uniform response exists to prevent (§25.4).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2263</span>
+    <span class="phpdocumentor-element-found-in__line">2293</span>
 
     </aside>
 
@@ -4109,7 +4249,7 @@ state that must not be sent a live token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2226</span>
+    <span class="phpdocumentor-element-found-in__line">2256</span>
 
     </aside>
 
@@ -4170,7 +4310,7 @@ does not.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">764</span>
+    <span class="phpdocumentor-element-found-in__line">765</span>
 
     </aside>
 
@@ -4215,7 +4355,7 @@ pass the same identifier the implicit routes use.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">777</span>
+    <span class="phpdocumentor-element-found-in__line">778</span>
 
     </aside>
 
@@ -4259,7 +4399,7 @@ UUID, and the two are not interchangeable.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">606</span>
+    <span class="phpdocumentor-element-found-in__line">607</span>
 
     </aside>
 
@@ -4298,7 +4438,7 @@ UUID, and the two are not interchangeable.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1456</span>
+    <span class="phpdocumentor-element-found-in__line">1486</span>
 
     </aside>
 
@@ -4388,7 +4528,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">590</span>
+    <span class="phpdocumentor-element-found-in__line">591</span>
 
     </aside>
 
@@ -4427,7 +4567,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">706</span>
+    <span class="phpdocumentor-element-found-in__line">707</span>
 
     </aside>
 
@@ -4466,7 +4606,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">614</span>
+    <span class="phpdocumentor-element-found-in__line">615</span>
 
     </aside>
 
@@ -4505,7 +4645,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">623</span>
+    <span class="phpdocumentor-element-found-in__line">624</span>
 
     </aside>
 
@@ -4545,7 +4685,7 @@ with.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">698</span>
+    <span class="phpdocumentor-element-found-in__line">699</span>
 
     </aside>
 
@@ -4584,7 +4724,7 @@ with.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1495</span>
+    <span class="phpdocumentor-element-found-in__line">1525</span>
 
     </aside>
 
@@ -4646,7 +4786,7 @@ the SDK on the federation path.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1563</span>
+    <span class="phpdocumentor-element-found-in__line">1593</span>
 
     </aside>
 
@@ -4701,7 +4841,7 @@ makes exactly one wire call so that it cannot become a retry by accident
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1549</span>
+    <span class="phpdocumentor-element-found-in__line">1579</span>
 
     </aside>
 
@@ -4760,7 +4900,7 @@ provider issues no ID token at all (§12.1 note 11).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1512</span>
+    <span class="phpdocumentor-element-found-in__line">1542</span>
 
     </aside>
 
@@ -4839,7 +4979,7 @@ resolves.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1475</span>
+    <span class="phpdocumentor-element-found-in__line">1505</span>
 
     </aside>
 
@@ -4930,7 +5070,7 @@ itself (§12.1 note 7).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1532</span>
+    <span class="phpdocumentor-element-found-in__line">1562</span>
 
     </aside>
 
@@ -5022,7 +5162,7 @@ retried.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">565</span>
+    <span class="phpdocumentor-element-found-in__line">566</span>
 
     </aside>
 
@@ -5062,7 +5202,7 @@ to.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1265</span>
+    <span class="phpdocumentor-element-found-in__line">1295</span>
 
     </aside>
 
@@ -5185,7 +5325,7 @@ Never inferred from the token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1385</span>
+    <span class="phpdocumentor-element-found-in__line">1415</span>
 
     </aside>
 
@@ -5248,7 +5388,7 @@ Never inferred from the token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1331</span>
+    <span class="phpdocumentor-element-found-in__line">1361</span>
 
     </aside>
 
@@ -5300,7 +5440,7 @@ Never inferred from the token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1366</span>
+    <span class="phpdocumentor-element-found-in__line">1396</span>
 
     </aside>
 
@@ -5391,7 +5531,7 @@ client's credentials and carries no refresh token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1341</span>
+    <span class="phpdocumentor-element-found-in__line">1371</span>
 
     </aside>
 
@@ -5440,7 +5580,7 @@ client's credentials and carries no refresh token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1379</span>
+    <span class="phpdocumentor-element-found-in__line">1409</span>
 
     </aside>
 
@@ -5490,7 +5630,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1307</span>
+    <span class="phpdocumentor-element-found-in__line">1337</span>
 
     </aside>
 
@@ -5546,7 +5686,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1297</span>
+    <span class="phpdocumentor-element-found-in__line">1327</span>
 
     </aside>
 
@@ -5622,7 +5762,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1351</span>
+    <span class="phpdocumentor-element-found-in__line">1381</span>
 
     </aside>
 
@@ -5678,7 +5818,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1320</span>
+    <span class="phpdocumentor-element-found-in__line">1350</span>
 
     </aside>
 
@@ -5758,7 +5898,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">574</span>
+    <span class="phpdocumentor-element-found-in__line">575</span>
 
     </aside>
 
@@ -5798,7 +5938,7 @@ lockout state.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2204</span>
+    <span class="phpdocumentor-element-found-in__line">2234</span>
 
     </aside>
 
@@ -5854,7 +5994,7 @@ query-parameter convention does not reach it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1585</span>
+    <span class="phpdocumentor-element-found-in__line">1615</span>
 
     </aside>
 
@@ -5922,7 +6062,7 @@ and an authentication bypass in a request guard — see SEC-085.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1606</span>
+    <span class="phpdocumentor-element-found-in__line">1636</span>
 
     </aside>
 
@@ -5993,7 +6133,7 @@ application's own identity (SEC-085). Request guards must call
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1415</span>
+    <span class="phpdocumentor-element-found-in__line">1445</span>
 
     </aside>
 
@@ -6070,7 +6210,7 @@ at-least-once.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">922</span>
+    <span class="phpdocumentor-element-found-in__line">937</span>
 
     </aside>
 
@@ -6129,7 +6269,7 @@ public surface).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2490</span>
+    <span class="phpdocumentor-element-found-in__line">2520</span>
 
     </aside>
 
@@ -6189,7 +6329,7 @@ changed (§24.3).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2472</span>
+    <span class="phpdocumentor-element-found-in__line">2502</span>
 
     </aside>
 
@@ -6244,7 +6384,7 @@ is why the token is required here and absent there.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2526</span>
+    <span class="phpdocumentor-element-found-in__line">2556</span>
 
     </aside>
 
@@ -6302,7 +6442,7 @@ is why the token is required here and absent there.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2512</span>
+    <span class="phpdocumentor-element-found-in__line">2542</span>
 
     </aside>
 
@@ -6359,7 +6499,7 @@ one has no such step.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">724</span>
+    <span class="phpdocumentor-element-found-in__line">725</span>
 
     </aside>
 
@@ -6399,7 +6539,7 @@ over it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2429</span>
+    <span class="phpdocumentor-element-found-in__line">2459</span>
 
     </aside>
 
@@ -6469,7 +6609,7 @@ nothing.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2411</span>
+    <span class="phpdocumentor-element-found-in__line">2441</span>
 
     </aside>
 
@@ -6515,7 +6655,7 @@ state, not a transient one, and §24.4 rule 2 deliberately does not retry it.</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2582</span>
+    <span class="phpdocumentor-element-found-in__line">2612</span>
 
     </aside>
 
@@ -6598,7 +6738,7 @@ given one — the setup token is the only credential this pair accepts.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2552</span>
+    <span class="phpdocumentor-element-found-in__line">2582</span>
 
     </aside>
 
@@ -6659,7 +6799,7 @@ cannot reach — a configuration state, not a transient one, and (mirroring
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">656</span>
+    <span class="phpdocumentor-element-found-in__line">657</span>
 
     </aside>
 
@@ -6715,6 +6855,7 @@ which this namespace configures.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_can">can()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_certificates">certificates()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_checkAccess">checkAccess()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_checkAccessDecision">checkAccessDecision()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_close">close()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_confirmPasswordReset">confirmPasswordReset()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_debugClientCertOptions">debugClientCertOptions()</a></li>
@@ -6723,6 +6864,7 @@ which this namespace configures.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_deviceLogin">deviceLogin()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_devicePoll">devicePoll()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_emailConfig">emailConfig()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_expectedAudience">expectedAudience()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_federation">federation()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_getUserInfo">getUserInfo()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_groups">groups()</a></li>

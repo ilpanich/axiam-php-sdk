@@ -123,7 +123,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">42</span>
+    <span class="phpdocumentor-element-found-in__line">44</span>
 
     </aside>
 
@@ -208,6 +208,16 @@ reader), never a second independent refresh mechanism.</p>
 <dd>`checkAccess` (CONTRACT.md §1).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AuthzDispatcher.html#method_checkAccessDecision">checkAccessDecision()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a>    </span>
+</dt>
+<dd>`checkAccess`, returning the **full** decision including CONTRACT.md §11 rule 9&#039;s
+`reason_code` — the transport-agnostic counterpart of
+{@see \Axiam\Sdk\Rest\AuthzRestClient::checkAccessDecision()}, dispatched over
+whichever transport {@see self::checkAccess()} itself would have used.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AuthzDispatcher.html#method_getUserInfo">getUserInfo()</a>
     <span>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Auth-UserInfo.html"><abbr title="\Axiam\Sdk\Auth\UserInfo">UserInfo</abbr></a>    </span>
@@ -247,7 +257,7 @@ silently degrading.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">69</span>
+    <span class="phpdocumentor-element-found-in__line">71</span>
 
     </aside>
 
@@ -378,7 +388,7 @@ UNAUTHENTICATED <code class="prettyprint">AuthError</code> then surfaces directl
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">130</span>
+    <span class="phpdocumentor-element-found-in__line">167</span>
 
     </aside>
 
@@ -428,7 +438,7 @@ UNAUTHENTICATED <code class="prettyprint">AuthError</code> then surfaces directl
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">118</span>
+    <span class="phpdocumentor-element-found-in__line">155</span>
 
     </aside>
 
@@ -484,7 +494,7 @@ UNAUTHENTICATED <code class="prettyprint">AuthError</code> then surfaces directl
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">95</span>
+    <span class="phpdocumentor-element-found-in__line">97</span>
 
     </aside>
 
@@ -555,6 +565,85 @@ session subject), exactly as before this parameter was added.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_checkAccessDecision">
+        checkAccessDecision()
+        <a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_checkAccessDecision" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">114</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`checkAccess`, returning the **full** decision including CONTRACT.md §11 rule 9&#039;s
+`reason_code` — the transport-agnostic counterpart of
+{@see \Axiam\Sdk\Rest\AuthzRestClient::checkAccessDecision()}, dispatched over
+whichever transport {@see self::checkAccess()} itself would have used.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">checkAccessDecision</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$action</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Exists for <a href="classes/Axiam-Sdk-AccessEnforcer.html"><abbr title="\Axiam\Sdk\AccessEnforcer">AccessEnforcer</abbr></a>, which needs <code class="prettyprint">reasonCode</code> to decide
+whether a CONTRACT.md §28.5 rule 5 <code class="prettyprint">insufficient_scope</code> challenge applies to a
+denial — a distinction <abbr title="\Axiam\Sdk\self::checkAccess()">self::checkAccess()</abbr>'s bare <code class="prettyprint">bool</code> cannot carry.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$action</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$resourceId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$scope</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$subjectId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>See <abbr title="\Axiam\Sdk\self::checkAccess()">self::checkAccess()</abbr>'s own docblock.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Rest-AccessDecision.html"><abbr title="\Axiam\Sdk\Rest\AccessDecision">AccessDecision</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_getUserInfo">
         getUserInfo()
         <a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_getUserInfo" class="headerlink"><i class="fas fa-link"></i></a>
@@ -563,7 +652,7 @@ session subject), exactly as before this parameter was added.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AuthzDispatcher.php"><a href="files/src-authzdispatcher.html"><abbr title="src/AuthzDispatcher.php">AuthzDispatcher.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">185</span>
+    <span class="phpdocumentor-element-found-in__line">222</span>
 
     </aside>
 
@@ -633,6 +722,7 @@ scope (the server gates them; an absent optional is surfaced as <code class="pre
                                             <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_batchCheck">batchCheck()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_can">can()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_checkAccess">checkAccess()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_checkAccessDecision">checkAccessDecision()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AuthzDispatcher.html#method_getUserInfo">getUserInfo()</a></li>
                                     </ul>
             </li>
