@@ -15,12 +15,12 @@ final class CreateRegistrationTokenResponse implements \JsonSerializable
 {
     /**
      * Constructs a CreateRegistrationTokenResponse.
-     * @param string $initialAccessToken The plaintext handle, shown exactly once. Presented by
-     *     the registering client as `Authorization: Bearer <this>`.
+     * @param \Axiam\Sdk\Core\Sensitive $initialAccessToken The plaintext handle, shown exactly
+     *     once. Presented by the registering client as `Authorization: Bearer <this>`.
      * @param RegistrationTokenResponse $token The token's metadata.
      */
     public function __construct(
-        public readonly string $initialAccessToken,
+        public readonly \Axiam\Sdk\Core\Sensitive $initialAccessToken,
         public readonly RegistrationTokenResponse $token,
     ) {
     }
@@ -32,7 +32,7 @@ final class CreateRegistrationTokenResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            (string) ModelDecode::need($data, 'initial_access_token', self::class),
+            new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'initial_access_token', self::class)),
             RegistrationTokenResponse::fromArray((array) ModelDecode::need($data, 'token', self::class)),
         );
     }

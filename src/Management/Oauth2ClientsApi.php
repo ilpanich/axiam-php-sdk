@@ -149,6 +149,9 @@ final class Oauth2ClientsApi extends ManagementSupport
      * `POST /api/v1/oauth2-clients/registration-tokens`
      *
      * `POST /api/v1/oauth2-clients/registration-tokens`.
+     *
+     * The response carries a ONE-TIME secret (`initial_access_token`): the server will not
+     * return it again, so a caller that does not persist it here cannot recover it (§27.5).
      * @param CreateRegistrationTokenRequest $body the request body
      * @return CreateRegistrationTokenResponse
      */

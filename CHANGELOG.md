@@ -178,6 +178,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   calls it once, and a caller using only `checkAccess()` sees exactly the behaviour it
   saw before (CONTRACT.md §28.11 row R-11).
 
+- **Breaking, security fix — `CreateRegistrationTokenResponse::$initialAccessToken` is now
+  `\Axiam\Sdk\Core\Sensitive`, was `string`** (CONTRACT.md §27.5, contract 1.50,
+  ilpanich/axiam#480). The RFC 7591 §1.2 initial access token is returned exactly once and
+  is never retrievable afterwards, but it was missing from the registry's curated
+  `(schema, field)` table, so the generator emitted a bare `string` and the credential
+  appeared in every `print_r()`, `var_dump()` and log rendering of the model — the leak
+  §7 rule 1 and §27.5 exist to prevent. `management-registry.json` now publishes
+  `sensitive_response_fields: ["initial_access_token"]` for
+  `oauth2_clients.create_registration_token`, making it the **fifteenth** §27.5 operation,
+  and `scripts/gen_management.py` wraps the property like the fourteen before it.
+
+  Migration — read the token through the explicit reveal, at the one point of use:
+
+  ```php
+  $created = $client->management()->oauth2Clients()->createRegistrationToken($body);
+  // before: $token = $created->initialAccessToken;
+  $token = $created->initialAccessToken->reveal();
+  ```
+
+  There is deliberately **no** plain-`string` accessor kept alongside it: the plain
+  accessor is precisely the leak (contract 1.50). `Sensitive` implements
+  `JsonSerializable`, so the wire form is unchanged — `openapi.json` and `proto/` did not
+  move, only the SDK-side type.
+
+  Re-synced from a merged `ilpanich/axiam` `main` @ `da94e1d04`: `CONTRACT.md`
+  (blob `28c163e32d25`) and `management-registry.json` (blob `aab87fd79910`).
+
+
 ## [1.0.0-beta15] - 2026-09-15
 
 ### Added
