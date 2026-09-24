@@ -102,20 +102,30 @@ final class DecisionMemo
     }
 
     /**
-     * Builds the §17.1 rule 3 key: all four components, absent distinguished from
-     * present.
+     * Builds the §17.1 rule 3 key. Five components since contract 1.51 (C-12 item 2):
+     * `subjectId`, `resourceId`, `action`, `scope` and the ACTING TENANT — absent
+     * distinguished from present on every one of them.
+     *
+     * The acting tenant joined the key because it is now possible for one session to
+     * ask the same question of two tenants (§5.2 rule 1). Without it, a memoized answer
+     * for tenant A would be returned for tenant B within the TTL — the exact
+     * cross-tenant leak a memo exists to never cause. `null` (no acting tenant, the
+     * default for every client before 1.51) is one more distinct value, so a client
+     * that never calls `actingTenant()` gets byte-for-byte the same keys as before.
      */
     public static function key(
         ?string $subjectId,
         string $resourceId,
         string $action,
         ?string $scope,
+        ?string $actingTenant = null,
     ): string {
         return implode(self::SEP, [
             $subjectId ?? self::ABSENT,
             $resourceId,
             $action,
             $scope ?? self::ABSENT,
+            $actingTenant ?? self::ABSENT,
         ]);
     }
 

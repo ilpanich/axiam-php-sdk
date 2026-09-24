@@ -1409,6 +1409,13 @@ final class OidcClient
             throw NetworkError::fromResponse($response, 'ssoComplete: malformed response body');
         }
 
+        // CONTRACT.md §5.2 rule 1: SSO completes a session without a LoginUserInfo — a
+        // stale scope from an EARLIER login on this client must not keep gating
+        // actingTenant() after this succeeds. Placed after the malformed-body check, so
+        // a failed/malformed completion leaves whatever scope this client already held
+        // untouched.
+        $this->session->resetPrincipalScope();
+
         return new SsoCompleteResult(
             userId: $wire['user_id'],
             sessionId: $wire['session_id'],
@@ -2059,6 +2066,11 @@ final class OidcClient
     private function adoptCredential(Sensitive $accessToken): void
     {
         $this->session->adoptBearerCredential($accessToken);
+        // CONTRACT.md §5.2 rule 1: an adopted client-credentials/device-grant token
+        // carries no LoginUserInfo — a scope this client held from an earlier
+        // login()/verifyMfa() must not keep gating actingTenant() for a credential
+        // that is now a completely different principal (typically a service account).
+        $this->session->resetPrincipalScope();
     }
 
     /** Read a secret that the caller may have supplied wrapped or bare (§12.3 rule 6 judgment call). */
@@ -2318,6 +2330,10 @@ final class OidcClient
         ) {
             throw NetworkError::fromResponse($response, $operation . ': malformed response body');
         }
+
+        // CONTRACT.md §5.2 rule 1: see ssoComplete()'s identical comment — both
+        // federation completions establish a session without a LoginUserInfo.
+        $this->session->resetPrincipalScope();
 
         return new SsoCompleteResult(
             userId: $wire['user_id'],

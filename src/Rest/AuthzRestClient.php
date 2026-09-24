@@ -56,6 +56,11 @@ final class AuthzRestClient
      * @param bool                         $retry     §16.1 disable switch.
      * @param (callable(): float)|null     $jitter    Injected jitter draw, for tests.
      * @param (callable(float): void)|null $sleep     Injected sleep, for tests.
+     * @param (callable(): ?string)|null   $actingTenantAccessor Reads the CURRENT
+     *        acting tenant live (CONTRACT.md §5.2 rule 1, contract 1.51) — folded into
+     *        the §17 memo key so two handles acting on two tenants over one session
+     *        cannot read each other's cached decisions. `null` when omitted, exactly
+     *        the value every client had before 1.51.
      */
     public function __construct(
         private readonly Client $http,
@@ -64,6 +69,7 @@ final class AuthzRestClient
         private readonly bool $retry = true,
         private $jitter = null,
         private $sleep = null,
+        private $actingTenantAccessor = null,
     ) {
     }
 
@@ -174,7 +180,8 @@ final class AuthzRestClient
     ): AccessDecision {
         // §17: consult the memo first. Disabled by default, in which case this is
         // one array lookup that always misses.
-        $key = DecisionMemo::key($subjectId, $resourceId, $action, $scope);
+        $actingTenant = $this->actingTenantAccessor !== null ? ($this->actingTenantAccessor)() : null;
+        $key = DecisionMemo::key($subjectId, $resourceId, $action, $scope, $actingTenant);
         $memoized = $this->memo()->get($key);
         if ($memoized !== null) {
             return $memoized;

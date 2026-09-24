@@ -9,9 +9,10 @@ use Psr\Http\Message\RequestInterface;
 
 /**
  * `HandlerStack` middleware: injects `Authorization` (current access token) and
- * `X-Tenant-ID` on EVERY outgoing request, and `X-CSRF-Token` (captured from a prior
- * response, {@see Session::csrfToken()}) on state-changing requests
- * (CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).
+ * `X-Tenant-ID` on EVERY outgoing request, `X-Axiam-Tenant` (CONTRACT.md §5.2 rule 1,
+ * contract 1.51) on every request while an acting tenant is set, and `X-CSRF-Token`
+ * (captured from a prior response, {@see Session::csrfToken()}) on state-changing
+ * requests (CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).
  *
  * Registered on the `HandlerStack` closer to the base handler than
  * {@see RefreshMiddleware}, so a retried request (after a single-flight refresh) is
@@ -88,6 +89,15 @@ final class AuthMiddleware
             }
 
             $request = $request->withHeader('X-Tenant-ID', $this->session->tenant());
+
+            // CONTRACT.md §5.2 rule 1 (contract 1.51): sent ONLY while an acting tenant
+            // is set — a client that never called actingTenant() sends byte-for-byte
+            // what it sent before 1.51. Distinct from X-Tenant-ID above, which the
+            // server does not read as a tenant switch (§5's own callout).
+            $actingTenant = $this->session->actingTenant();
+            if ($actingTenant !== null) {
+                $request = $request->withHeader('X-Axiam-Tenant', $actingTenant);
+            }
 
             $noSessionCredentials = ($options[self::NO_SESSION_CREDENTIALS_OPTION] ?? false) === true;
 

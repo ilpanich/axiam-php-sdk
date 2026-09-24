@@ -102,6 +102,9 @@ use Psr\Log\NullLogger;
  */
 final class AxiamClient
 {
+    /** RFC 4122 UUID, case-insensitive — CONTRACT.md §5.2 rule 1's client-side check. */
+    private const UUID_RE = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
+
     private const LOGIN_PATH = '/api/v1/auth/login';
     private const MFA_VERIFY_PATH = '/api/v1/auth/mfa/verify';
     private const OPAQUE_REGISTER_START_PATH = '/api/v1/auth/opaque/register/start';
@@ -273,6 +276,18 @@ final class AxiamClient
      *        it (including one with no `aud`) is rejected. An app guarding a user-facing
      *        resource server should generally expect `axiam:user`; it is not defaulted,
      *        because a service-to-service guard legitimately expects a different audience.
+     * @param string|null $actingTenant CONTRACT.md §5.2 rule 1 (contract 1.51): the
+     *        construction-time form of the acting-tenant switch — the tenant UUID this
+     *        client acts on from its very first request, sent as `X-Axiam-Tenant` on
+     *        every `/api/v1` request while set. Meaningful only for an
+     *        **organization-level** principal (§5.2); nothing is gated here — construction
+     *        precedes the login that would reveal whether the principal really is one, and
+     *        a service account never receives a login result at all — only the value's
+     *        shape (a UUID) is checked. `null` (the default) sends no such header, byte-
+     *        for-byte what every client sent before 1.51. Distinct from `$tenant` above
+     *        (§5 rule 2's `X-Tenant-ID`, sent unconditionally and never read by the server
+     *        as a tenant switch). See {@see self::actingTenant()} for the on-client form
+     *        and its gating.
      */
     public function __construct(
         string $baseUrl,
@@ -295,6 +310,7 @@ final class AxiamClient
         bool $retryEnabled = true,
         float $decisionMemoTtlMs = 0.0,
         ?callable $telemetryHook = null,
+        ?string $actingTenant = null,
     ) {
         // §17.1 rule 1: off unless the caller asked for it. §19: inert unless a hook
         // was installed.
@@ -331,6 +347,14 @@ final class AxiamClient
             throw new \InvalidArgumentException(
                 'orgSlug must not be blank — omit it entirely, or name the organization (CONTRACT.md §5.1, §5.2.1)'
             );
+        }
+        // §5.2 rule 1: the server silently ignores an X-Axiam-Tenant value that does not
+        // parse as a UUID and answers for the caller's OWN tenant instead — reporting
+        // success about the wrong one. Refused client-side, with no wire call, before
+        // anything else can go out. Nothing is gated here (construction precedes login);
+        // see self::actingTenant() for the organization-level/reachable_tenant_ids gate.
+        if ($actingTenant !== null) {
+            self::assertUuidActingTenant($actingTenant);
         }
         // §6.1.1: PEM cert + PEM key are all-or-nothing. Presenting a half-configured client
         // identity is never valid, so reject exactly one at construction (clear, early error).
@@ -391,6 +415,8 @@ final class AxiamClient
         $this->plainHttp = new Client($commonConfig + ['handler' => $plainStack]);
 
         $this->session = new Session($baseUrl, $tenant, $this->plainHttp, $cookieJar);
+        // §5.2 rule 1: the construction-time form. Already validated as a UUID above.
+        $this->session->setActingTenant($actingTenant);
 
         // AuthMiddleware needs the Session instance it decorates requests for; pushed after
         // Session exists but before any request is actually sent (HandlerStack::resolve() is
@@ -423,6 +449,7 @@ final class AxiamClient
                 $this->decisionMemo,
                 $this->telemetry,
                 $retryEnabled,
+                actingTenantAccessor: fn (): ?string => $this->session->actingTenant(),
             ),
             restOnly: $resolvedRestOnly,
             grpcTarget: $grpcTarget,
@@ -485,6 +512,122 @@ final class AxiamClient
             // half-configured pair, so either half implies both.
             presentsClientCertificate: $clientCert !== null,
         );
+    }
+
+    // ------------------------------------------------------------------
+    // Acting tenant (CONTRACT.md §5.2 rule 1, contract 1.51)
+    // ------------------------------------------------------------------
+
+    /**
+     * Switches this client to act on `$tenantId` — CONTRACT.md §5.2 rule 1 (contract
+     * 1.51). Every subsequent `/api/v1` request this client makes carries
+     * `X-Axiam-Tenant: $tenantId`, until {@see self::clearActingTenant()} is called or
+     * another `actingTenant()` replaces it.
+     *
+     * Meaningful only for an **organization-level** principal; see the `$actingTenant`
+     * constructor parameter for what the header does and does not reach (not
+     * `X-Tenant-ID`, not a `{tenant_id}` management path, not gRPC — REST-only, §5.2
+     * rule 1's own text).
+     *
+     * **Mutates this client and returns it** (`self`), unlike the reference
+     * implementation's per-handle isolation (a new object sharing the session, leaving
+     * the original untouched). §5.2 rule 1 requires only that the header be sendable
+     * and clearable — it does not require handle isolation — and PHP's request
+     * lifecycle has no concurrent tasks sharing one client the way a long-lived
+     * process does, so the simpler, shared-state form is what this port ships. Two
+     * concurrent PHP requests never share one `AxiamClient` instance in the first
+     * place. Recorded here, in the README and in the CHANGELOG as a deliberate,
+     * documented difference (C-12).
+     *
+     * @throws \Axiam\Sdk\Core\NetworkError if `$tenantId` is not a UUID. The server
+     *         silently ignores an `X-Axiam-Tenant` value that does not parse and
+     *         answers for the caller's own tenant instead — reporting success about
+     *         the wrong tenant — so this is refused client-side, with no wire call.
+     * @throws \Axiam\Sdk\Core\AuthzError when this client holds a login result (§5.2.2)
+     *         that reported `organizationLevel: false` (an ordinary tenant principal is
+     *         a principal of exactly one tenant, and the server answers `403` to
+     *         anything else), or that reported `reachableTenantIds` not containing
+     *         `$tenantId` (§5.2.3 rule 4). A client holding no such result — a service
+     *         account from client credentials or the device login, an injected token,
+     *         a session completed without a user object — has nothing to gate on: the
+     *         header is sent as asked, and the server's `403` is the answer. An
+     *         **organization-level service account** is a supported design, and the
+     *         server honours the header for one on the same terms as for a user.
+     */
+    public function actingTenant(string $tenantId): self
+    {
+        self::assertUuidActingTenant($tenantId);
+        $this->assertActingTenantReachable($tenantId);
+        $this->session->setActingTenant($tenantId);
+
+        return $this;
+    }
+
+    /**
+     * Stops acting on another tenant: no further request sends `X-Axiam-Tenant`, and
+     * this client acts on its own tenant again (CONTRACT.md §5.2 rule 1's "a way to
+     * clear it").
+     */
+    public function clearActingTenant(): self
+    {
+        $this->session->setActingTenant(null);
+
+        return $this;
+    }
+
+    /**
+     * The tenant this client currently acts on, or `null` when it acts on its own
+     * tenant.
+     */
+    public function actingTenantId(): ?string
+    {
+        return $this->session->actingTenant();
+    }
+
+    /**
+     * CONTRACT.md §5.2 rule 1: refuses a non-UUID acting tenant client-side, with NO
+     * wire call, at both the construction-time and on-client forms.
+     */
+    private static function assertUuidActingTenant(string $tenantId): void
+    {
+        if (preg_match(self::UUID_RE, $tenantId) !== 1) {
+            throw NetworkError::fromMessage(sprintf(
+                'actingTenant: "%s" is not a UUID. The server silently ignores an X-Axiam-Tenant '
+                . 'value that does not parse and answers for the caller\'s own tenant instead, '
+                . 'reporting success about the wrong tenant — so this is refused client-side, '
+                . 'with no wire call (CONTRACT.md §5.2 rule 1).',
+                $tenantId,
+            ));
+        }
+    }
+
+    /**
+     * §5.2 rule 1's gate: when this client holds a login result that reported the
+     * principal's reach, refuse client-side rather than offer what the server would
+     * refuse. A client holding none has nothing to gate on.
+     */
+    private function assertActingTenantReachable(string $tenantId): void
+    {
+        $scope = $this->session->principalScope();
+        if ($scope === null) {
+            return;
+        }
+        if ($scope['organizationLevel'] !== true) {
+            throw new \Axiam\Sdk\Core\AuthzError(
+                'actingTenant: the signed-in principal is not organization-level, so it cannot '
+                . 'act on another tenant — the server would answer 403 (CONTRACT.md §5.2 rule 1)',
+                resourceId: $tenantId,
+            );
+        }
+        $reachable = $scope['reachableTenantIds'];
+        if ($reachable !== null && !\in_array($tenantId, $reachable, true)) {
+            throw new \Axiam\Sdk\Core\AuthzError(
+                'actingTenant: the signed-in principal\'s roles do not reach this tenant — it is '
+                . 'not in reachableTenantIds, and the server refuses the header with 403 '
+                . '(CONTRACT.md §5.2.3 rule 4)',
+                resourceId: $tenantId,
+            );
+        }
     }
 
     /**
@@ -983,6 +1126,9 @@ final class AxiamClient
         // Clears cookies/CSRF/local state (this plan's own behavior contract).
         $this->session->cookieJar()->clear();
         $this->session->resetCsrf();
+        // §5.2 rule 1: a logged-out client holds no login result — the next session
+        // (any principal) must not inherit this one's reach.
+        $this->session->resetPrincipalScope();
     }
 
     // ------------------------------------------------------------------
@@ -2084,6 +2230,12 @@ final class AxiamClient
         // Remember where this principal lives, so a later `opaqueEnrollmentForSelf`
         // seals against the account's own tenant without a second round trip.
         $this->principalTenantId = $principalTenantId;
+        // §5.2 rule 1: this client now holds a login result, so actingTenant() gates on
+        // what it reported. Shared by login/verifyMfa (via handleLoginResponse's 200
+        // branch), OPAQUE's finish (loginOpaque falls through to handleLoginResponse
+        // too) and the MFA/WebAuthn setup completions — every one of which the server
+        // answers with the same user object this method already requires.
+        $this->session->recordPrincipalScope($organizationLevel, $reachable);
 
         return new LoginResult(
             mfaRequired: false,
@@ -2677,6 +2829,11 @@ final class AxiamClient
         // §17.1 rule 9 / §24.3 rule 4: memo entries are keyed by subject, and this call
         // changes the subject.
         $this->onCredentialChange();
+        // §5.2 rule 1: WebAuthn AUTHENTICATION completes a session without a
+        // LoginUserInfo (unlike webauthnSetupRegisterFinish, which reuses
+        // loginResultFromSuccessBody and therefore SETS the scope). A stale scope from
+        // an earlier login must not keep gating actingTenant() after this call.
+        $this->session->resetPrincipalScope();
 
         $http = $this->postRawJson($path, $this->webauthnFinishBody($stateToken, $response, $operation));
         if ($http->getStatusCode() !== 200) {
