@@ -192,7 +192,7 @@ messages after the first connection loss and never recover on its own.
 ## Contract conformance
 
 This SDK conforms to **contract 1.51**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
-§15, §17, §19, §20, §22, §23, §24, §25, §26, §27, §28 (including
+§15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8; §28 MCP
 resource-server helpers, contract 1.48, see below) — the binding,
@@ -231,13 +231,30 @@ response back.
   `$client->actingTenant($uuid)` / `$client->clearActingTenant()` on an existing one, send
   `X-Axiam-Tenant` on every `/api/v1` request while set. Gated client-side on
   `organizationLevel`/`reachableTenantIds` once a login result reports them; a client
-  holding none has nothing to gate on and lets the server's `403` answer. **Mutates the
+  holding none has nothing to gate on and lets the server's `403` answer. **Which calls
+  set/reset the gate:** `login()`, `verifyMfa()`, OPAQUE's finish, and the MFA/WebAuthn
+  setup completions all SET it, since the server sends a user object on all five; WebAuthn
+  AUTHENTICATION, SSO/federation completions, `authenticateDevice()` and a
+  client-credentials/device-grant credential adoption RESET it to unknown, since none of
+  those carries a `LoginUserInfo`; and **`logout()` also resets it to unknown** — a
+  logged-out client holds no login result for the *next* session (any principal) to
+  wrongly inherit. **Mutates the
   client and returns it (`self`)** rather than returning a new handle over a shared
   session — the reference implementation's per-handle isolation exists for languages
   where one long-lived client is shared across concurrent tasks, which is not how a PHP
   request lifecycle works; recorded as a deliberate difference, not an oversight.
+  **This is a REST-only mechanism** (a §5.2 MUST): the server reads `X-Axiam-Tenant`
+  only in the `/api/v1` REST authentication extractor, so this header is never sent
+  with `checkAccess()`/`validateToken()`/`introspectToken()`'s gRPC transport, and
+  `actingTenant()`/`clearActingTenant()` never affect it — a gRPC call always acts on
+  the tenant its own bearer token's `tenant_id` claim carries, with no client-side
+  override.
 - **§6.1 rules 6-10 — `authenticateDevice()`.** `POST /api/v1/auth/device`, no body,
-  reachable only on a client built with `clientCert`/`clientKey`. Adopts the returned
+  reachable only on a client built with `clientCert`/`clientKey`. **§6.1 rule 7 is a
+  RUNTIME refusal, not a compile-time one** — PHP has no way to make
+  `authenticateDevice()` unreachable on a client built without a certificate the way a
+  statically-typed SDK's type system could; calling it on such a client throws
+  `AuthError`, with zero wire calls, the moment it is called. Adopts the returned
   token as a bearer credential (never a cookie — the server sets none on this route) and
   withholds any cookie left from an earlier `login()`/`verifyMfa()` session on the same
   client object, so a stale session cannot silently outrank the device's own credential.
@@ -264,8 +281,13 @@ response back.
     keyed on `(subject, role)`: a changed resource or `inherit` is an `Update`, done as
     unassign then assign, with the server binding's `tenant_scope` carried across and
     the previous binding restored (reported via `BindingRebindFailed`) if the
-    re-assignment fails. One role bound twice to a subject, or a global role bound with
-    `inherit: false`, is refused while the manifest is built — zero wire calls.
+    re-assignment fails. One role bound twice to a subject, or a role bound with
+    `inherit: false` when **that same manifest** declares the role `isGlobal: true`, is
+    refused while the manifest is built — zero wire calls. A global role is refused only
+    when its own `->role(..., isGlobal: true)` declaration is in this manifest; a
+    binding naming a role this manifest never declares as global (because it declares
+    it without that flag, or does not declare the role at all) is sent as-is and the
+    server's `400` is the answer.
   - **`service_accounts`** — `ServiceAccountSpec { key, name, description?, roles? }`,
     reconciled by `name` (the server does not enforce it unique, so an ambiguous match
     fails `plan()` before any write). `description` is the only field an `Update`
@@ -326,6 +348,8 @@ unparseable, or of the wrong JSON type is a rejection, never a skipped check.
 | 5 | `iss` | Checked **only** when `axiam.expected_issuer` / `AXIAM_EXPECTED_ISSUER` is set. Unset by default. |
 | 6 | `aud` | Checked **only** when `axiam.expected_audience` / `AXIAM_EXPECTED_AUDIENCE` is set. Unset by default; both the single-string and array forms are honoured. |
 | 7 | clock skew | `JwksVerifier::CLOCK_SKEW_LEEWAY_SECONDS` — a named 60-second constant applied to rules 2 and 3. Deliberately **not** operator-configurable. |
+| 8 | *(no claim check)* | Not a claim this verifier decodes — §10.1 rule 8, "the guard decides on the CALLER's credential and no other", is a control-flow discipline for whoever calls this class. **Both framework guards call `verifyLocally()`, never `verifyLocallyOrFallback()`**, so a certificate- or DPoP-bound token the guard has no transport evidence for is always refused behind them — a bound token is never silently admitted as a bearer credential (CONTRACT 1.52 N1, C-12). |
+| 9 | `cnf` (contract 1.51) | A token carrying `cnf` is **not a bearer token** and MUST NOT be admitted without evidence satisfying every constraint it names. `verifyLocally()`/`JwksVerifier::verify()` has no transport to ask for that evidence, so it applies this rule with NONE presented — refusing every bound token, admitting every unbound one. `AxiamClient::verifyWithProofs($token, $tenant, PresentedProofs)` / `JwksVerifier::verifyWithProofs()` is the same check with real evidence YOUR OWN connection established. |
 
 **What `firebase/php-jwt` does versus what §10.1 requires.** `JWT::decode()` validates
 `nbf`/`iat`/`exp` and rejects a non-numeric `exp` — but only when the claim is *present*

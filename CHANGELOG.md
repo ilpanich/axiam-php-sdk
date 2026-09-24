@@ -22,9 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   client-side (`NetworkError`), with zero wire calls. Gated on `organizationLevel`/
   `reachableTenantIds` once a login result reports them (login, verify-MFA, OPAQUE's
   finish, and the MFA/WebAuthn setup completions all set it; WebAuthn AUTHENTICATION,
-  SSO/federation and a client-credentials/device-grant credential adoption reset it to
-  unknown); a client holding no such result has nothing to gate on, and the server's
-  `403` is the answer. The §17 decision memo key gained a fifth component, the acting
+  SSO/federation, `authenticateDevice()`, a client-credentials/device-grant credential
+  adoption, **and `logout()`** reset it to unknown); a client holding no such result has
+  nothing to gate on, and the server's `403` is the answer. The §17 decision memo key
+  gained a fifth component, the acting
   tenant, so a memoized decision for one tenant can never answer a check against
   another. **Design difference from the reference implementation, recorded (C-12):**
   mutates the client and returns it (`self`) rather than returning a new handle over a
@@ -112,6 +113,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   verifyWithProofs()` and supplies the evidence its OWN connection established (never a
   request header — §10.1 rule 9 detail 2). An unbound token is unaffected.
 
+- **A device or adopted client-credentials token is never refreshed (CONTRACT.md §6.1
+  rule 11, C-12 N4.5), on either transport.** Neither credential has a refresh token
+  behind it — §6.1 rule 6 issues none for a device login, and RFC 6749 §4.4.3 issues
+  none for `client_credentials` — but both transports ignored which kind of credential
+  was active. REST: `RefreshMiddleware` triggered `Session::refreshIfNeeded()` on ANY
+  `401`, and once a device/adopted credential is active (no cookie), a real
+  `POST /api/v1/auth/refresh` went out using ITS claims. gRPC:
+  `AuthzDispatcher::validateToken()`/`introspectToken()`/`getUserInfo()` called their
+  shared `$refreshAccessor` unconditionally on any gRPC `UNAUTHENTICATED`. `Session::
+  canRefresh()` (true only for a cookie-sourced session) now gates both: REST returns
+  the untouched `401` instead of entering the guard, and gRPC skips `$refreshAccessor`
+  and rethrows the original `AuthError`. An application whose device or
+  client-credentials-adopted client was relying on a `401`/`UNAUTHENTICATED` being
+  transparently survived by a refresh it was never entitled to now sees it surfaced
+  directly. See `tests/SessionRefreshEdgeTest.php`,
+  `tests/Contract151DeviceAuthTest.php`, `tests/OidcTokenOpsTest.php`,
+  `tests/AuthzDispatcherTokenGrpcTest.php`.
+
+- **`logout()` now clears a stale device or adopted client-credentials token (CONTRACT.md
+  §6.1 rule 11, C-12 N4.4).** `Session::accessToken()` always prefers a cookie-sourced
+  token, so a device/adopted token from EARLIER in a client's life — merely SHADOWED,
+  never cleared, by a subsequent `login()`'s fresh cookie session — silently resurfaced
+  once `logout()` cleared that cookie again: a client that believed `logout()` had
+  ended its session was still authenticated as the stale device/service credential. The
+  new `Session::clearBearerCredential()` is now called alongside the cookie-jar clear,
+  after a successful server-side logout. See `tests/Contract151DeviceAuthTest.php`.
+
+- **A stated `metadata: []` is now sent and drift-checked, distinct from an unstated
+  field (CONTRACT.md §27.6.1, C-12 N6.5).** `ManifestBuilder::resource()`/`group()`
+  defaulted `$metadata` to `[]` and only sent it when `!== []`, so a caller who
+  explicitly asked for an empty metadata object was indistinguishable from a caller who
+  never mentioned metadata at all — both silently dropped the field. `$metadata` is now
+  `?array`, defaulting to `null` ("unstated"); `[]` is a stated empty object, sent on
+  `Create` and drift-checked on `Update`. The two `#[Managed*]` attributes
+  (`ManagedResource`, `ManagedGroup`) got the identical change. An application relying
+  on `metadata: []` being silently ignored now has that value actually sent. See
+  `tests/Management/Contract152ManifestC12Test.php`.
+
 ### Fixed
 
 - **`authenticateDevice()` no longer destroys a working session when the device login
@@ -163,6 +202,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `DEFAULT_TRUE_WHEN_ABSENT`), pinned in `tests/Management/Contract151ModelsTest.php`.
   `CertificateType` already decoded an unrecognised value (including the new `"Server"`)
   without failing the response — no change needed, only a test.
+
+- **`actingTenant()` now compares `reachableTenantIds` as UUIDs, not strings
+  (CONTRACT.md §5.2 rule 1, C-12 N5.6).** `\in_array($tenantId, $reachable, true)` was a
+  strict string comparison; the server's `reachable_tenant_ids` is always lower-case,
+  but `actingTenant()`'s own UUID check accepts either case. A caller who spelled a
+  genuinely reachable tenant's UUID with different letter case than the server sent it
+  in was refused with an `AuthzError` for a tenant they actually reach. Now compared
+  with `strcasecmp()`. See `tests/Contract151ActingTenantTest.php`.
+
+- **`plan()` now reports a pending grant or role binding as an `Update` (CONTRACT.md
+  §27.6.1, C-12 N6.4).** It stripped `grants`/`roles` out of drift entirely and never
+  checked whether they were actually granted/bound, so a role or group whose OWN
+  fields already matched the manifest reported `Unchanged` even when `apply()` against
+  the identical tenant state would still send a grant or binding for it. `plan()` now
+  makes the same read `apply()`'s reconciliation already made (never writing anything,
+  and never touched by `apply()`'s own call path, so `apply()`'s wire sequence is
+  unaffected) and reports the entity as `Update` with `$drift['grants']`/
+  `$drift['roles']` naming exactly the pending subset when one exists. See
+  `tests/Management/Contract151ManifestGrantsAndBindingsTest.php`.
+
+- **`ManifestEntity::drift()` no longer depends on key order (CONTRACT.md §27.6.1, C-12
+  N6.5).** It compared with a strict `!==`, which for PHP arrays depends on insertion
+  order — a server echoing the SAME `metadata` object back with its keys reordered read
+  as drift, and every `apply()` would re-send it forever. Drift is now JSON value
+  equality: a PHP list array is a JSON array (element order significant), every other
+  array is a JSON object (key order is not), recursively. See
+  `tests/Management/Contract152ManifestC12Test.php`.
+
+- **References in a manifest now resolve by kind (CONTRACT.md §27.6.1, C-12 N6.6).**
+  `ManifestValidation`'s dangling-reference check matched a `depends` entry (a
+  resource's `parent`, a binding's `role`/`resource`) against ANY entity of ANY kind
+  sharing that key — but manifest keys are unique only WITHIN their own kind, so a Role
+  and a Group can legally share one, and a role binding naming that key (intending the
+  Role) silently resolved against the Group instead, failing only later, mid-`apply()`,
+  with no rollback (§27.7). `ManifestEntity` gained `$expectedKinds`, populated by
+  `ManifestBuilder`, so each reference is now checked against the kind it actually
+  names. See `tests/Management/Contract152ManifestC12Test.php`.
 
 ## [1.0.0-beta16] - 2026-09-19
 
