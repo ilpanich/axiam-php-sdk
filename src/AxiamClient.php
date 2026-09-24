@@ -105,6 +105,9 @@ final class AxiamClient
     /** RFC 4122 UUID, case-insensitive — CONTRACT.md §5.2 rule 1's client-side check. */
     private const UUID_RE = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
 
+    /** CONTRACT.md §6.1 rules 6-10: the mTLS device login. */
+    private const DEVICE_AUTH_PATH = '/api/v1/auth/device';
+
     private const LOGIN_PATH = '/api/v1/auth/login';
     private const MFA_VERIFY_PATH = '/api/v1/auth/mfa/verify';
     private const OPAQUE_REGISTER_START_PATH = '/api/v1/auth/opaque/register/start';
@@ -1129,6 +1132,121 @@ final class AxiamClient
         // §5.2 rule 1: a logged-out client holds no login result — the next session
         // (any principal) must not inherit this one's reach.
         $this->session->resetPrincipalScope();
+    }
+
+    /**
+     * `authenticateDevice` — `POST /api/v1/auth/device` (CONTRACT.md §6.1 rules 6-10,
+     * contract 1.51): the mTLS device login. The client presents the X.509 identity
+     * certificate configured via `$clientCert`/`$clientKey`, and the server authenticates
+     * it, no request body, no tenant/credential needed beforehand.
+     *
+     * **Reachable only when this client was built with a client certificate** (§6.1
+     * rule 7). On a client built without one, this raises {@see AuthError} client-side,
+     * with ZERO wire calls — without a certificate the server would answer `401`
+     * anyway, so going to the wire gains nothing and turns a configuration mistake into
+     * an authentication failure.
+     *
+     * **Adopts the returned token as this client's credential**, exactly as a `login()`
+     * result is adopted — every subsequent `/api/v1` call (management, checkAccess,
+     * batchCheck, …) authenticates with it. The server sets NO cookie on this route,
+     * so the token travels as `Authorization: Bearer` via
+     * {@see \Axiam\Sdk\Session::adoptBearerCredential()}. The shared cookie jar is
+     * CLEARED first: {@see \Axiam\Sdk\Session::accessToken()} prefers a cookie-sourced
+     * token over an adopted one (§12.1's `login_client_credentials`-as-credential-source
+     * precedent), so a cookie left from an earlier `login()`/`verifyMfa()` session on
+     * this same client would otherwise silently outrank the device token and every
+     * subsequent call would run as that earlier session's principal — the exact
+     * theft-adjacent scenario §6.1 rule 9 exists to close. The decision memo is cleared
+     * (§17.1 rule 9: the subject changed) and the §5.2 acting-tenant gate is reset to
+     * unknown (a device holds no `LoginUserInfo`).
+     *
+     * **Every refusal is `401`** (§6.1 rule 8: an unknown, untrusted, expired, revoked
+     * or unbound certificate, and a `Server`-type certificate, all answer `401`
+     * `authentication_failed`), mapped to {@see AuthError} with the server's message.
+     * This *is* the login: a later `401` on this credential is returned to the caller
+     * as-is, never sent through the §9 refresh guard — there is no refresh token to
+     * spend (§6.1 rule 6), and the guard would fail before the wire anyway. A `429`
+     * (the route's per-client-IP rate limit, server default 60/min) is a
+     * {@see \Axiam\Sdk\Core\NetworkError}, not an {@see AuthError} — §16's ordinary
+     * mapping — and this call is attempted exactly once, like every login.
+     *
+     * **The token is certificate-bound** (§6.1 rule 9, `cnf.x5t#S256`) when AXIAM
+     * itself terminated the handshake. A REST request without the same certificate is
+     * `401`; a gRPC call is `UNAUTHENTICATED` on a listener that requests client
+     * certificates, and refused on every call on one that does not (the server default).
+     * §6.1 rule 4 already applies this client's certificate to BOTH transports, which is
+     * what makes that hold.
+     */
+    public function authenticateDevice(): \Axiam\Sdk\Auth\DeviceToken
+    {
+        $this->ensureOpen();
+        // §6.1 rule 7: client-side, zero wire calls, without a configured certificate.
+        if ($this->clientCertFile === null || $this->clientKeyFile === null) {
+            throw new AuthError(
+                'authenticateDevice: this client was built without a client certificate '
+                . '(clientCert/clientKey) — the server would answer 401 in any case, so this is '
+                . 'refused client-side, with no wire call (CONTRACT.md §6.1 rule 7)'
+            );
+        }
+
+        $this->onCredentialChange();
+        // §5.2 rule 1: a device holds no LoginUserInfo.
+        $this->session->resetPrincipalScope();
+        // See this method's own docblock: a stale cookie from an earlier session on
+        // this same client would otherwise silently outrank the adopted device token.
+        $this->session->cookieJar()->clear();
+
+        try {
+            $response = $this->plainHttp->post(self::DEVICE_AUTH_PATH);
+        } catch (RequestException $e) {
+            $errorResponse = $e instanceof BadResponseException ? $e->getResponse() : null;
+            if ($errorResponse !== null) {
+                throw $this->mapDeviceAuthError($errorResponse);
+            }
+
+            throw NetworkError::fromException($e, 'authenticateDevice request failed');
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, 'authenticateDevice request failed');
+        }
+
+        if ($response->getStatusCode() !== 200) {
+            throw $this->mapDeviceAuthError($response);
+        }
+
+        $wire = json_decode((string) $response->getBody(), true);
+        $accessToken = is_array($wire) ? ($wire['access_token'] ?? null) : null;
+        $tokenType = is_array($wire) ? ($wire['token_type'] ?? null) : null;
+        if (!is_string($accessToken) || $accessToken === '' || !is_string($tokenType) || $tokenType === '') {
+            throw NetworkError::fromResponse($response, 'authenticateDevice: malformed response body');
+        }
+
+        $sensitive = new Sensitive($accessToken);
+        $this->session->adoptBearerCredential($sensitive);
+
+        return new \Axiam\Sdk\Auth\DeviceToken(
+            accessToken: $sensitive,
+            tokenType: $tokenType,
+            expiresIn: (int) (is_array($wire) ? ($wire['expires_in'] ?? 0) : 0),
+        );
+    }
+
+    /**
+     * §6.1 rule 8: every refusal is `401` -> {@see AuthError}, verbatim from the
+     * server. `429` (the route's rate limit) and everything else fall through to the
+     * ordinary §2 mapping — never {@see AuthError}, never the §9 refresh guard.
+     */
+    private function mapDeviceAuthError(ResponseInterface $response): \Axiam\Sdk\Core\AxiamException
+    {
+        if ($response->getStatusCode() === 401) {
+            $wire = json_decode((string) $response->getBody(), true);
+            $message = is_array($wire) && is_string($wire['message'] ?? null)
+                ? $wire['message']
+                : 'authenticateDevice: authentication failed';
+
+            return new AuthError($message);
+        }
+
+        return ErrorMapper::fromResponse($response, 'authenticateDevice failed');
     }
 
     // ------------------------------------------------------------------
