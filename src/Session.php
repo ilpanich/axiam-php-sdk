@@ -178,6 +178,24 @@ final class Session
     }
 
     /**
+     * Clears the adopted bearer credential (CONTRACT.md §6.1 rule 11 / C-12 N4.4:
+     * "logout clears it"). Called only by {@see \Axiam\Sdk\AxiamClient::logout()},
+     * after a successful server-side logout — mirroring how the cookie jar, CSRF token
+     * and principal scope are also cleared only then, never on a refused call.
+     *
+     * Without this, a device token or adopted client-credentials token from EARLIER in
+     * this client's life — merely SHADOWED, never cleared, by a subsequent
+     * `login()`'s cookie session, since {@see self::accessToken()} always prefers a
+     * cookie-sourced token when one is present — resurfaces once `logout()` clears that
+     * cookie again: a client that believes it logged itself out would still be
+     * authenticated as the stale device/service credential.
+     */
+    public function clearBearerCredential(): void
+    {
+        $this->adoptedAccessToken = null;
+    }
+
+    /**
      * The tenant this client currently acts on (CONTRACT.md §5.2 rule 1), or `null`
      * when it acts on its own tenant — the state {@see \Axiam\Sdk\Rest\AuthMiddleware}
      * reads to decide whether to send `X-Axiam-Tenant` at all.

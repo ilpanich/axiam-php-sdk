@@ -745,4 +745,59 @@ final class Contract151DeviceAuthTest extends TestCase
             'no acting tenant configured means no X-Axiam-Tenant header, byte-for-byte as any other request',
         );
     }
+
+    // -----------------------------------------------------------------
+    // CONTRACT.md §6.1 rule 11 / C-12 N4.4: "logout clears it [the device
+    // credential]." Not in this SDK's findings list — found while checking
+    // N4.4's full lifecycle against every credential-adopting call this SDK
+    // has, and fixed here too.
+    // -----------------------------------------------------------------
+
+    /**
+     * Red on the unfixed code: `Session::accessToken()` prefers a cookie-sourced token,
+     * so a device token adopted earlier in this client's life is merely SHADOWED — never
+     * cleared — by a later `login()`'s fresh cookie session. `logout()` clears the
+     * cookie jar but never touches the adopted token, so once the cookie is gone again
+     * the stale device credential resurfaces as `Authorization: Bearer` on every request
+     * made AFTER logout() — a client that believes it logged itself out is still
+     * authenticated as the device.
+     */
+    public function testLogoutClearsAStaleAdoptedDeviceCredentialEvenAfterALaterLogin(): void
+    {
+        [$certPem, $keyPem] = $this->generateTestIdentity();
+
+        $history = [];
+        $transport = $this->rawHistoryTransport([
+            self::loginCookieResponse(),        // first login
+            self::deviceAuthOk('device-tok-1'), // device login -- adopts, clears the cookie jar
+            self::loginCookieResponse(),        // a SECOND login -- replaces the cookie session
+            new Response(200, [], '{}'),        // logout
+            self::checkAccessOk(),              // a request AFTER logout
+        ], $history);
+
+        $client = new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            orgId: '11111111-1111-4111-8111-111111111111',
+            clientCert: $certPem,
+            clientKey: $keyPem,
+            transportHandler: $transport,
+            retryEnabled: false,
+        );
+
+        $client->login('alice@example.test', 'pw');
+        $client->authenticateDevice();
+        $client->login('alice@example.test', 'pw');
+        $client->logout();
+
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+
+        self::assertCount(5, $history);
+        $postLogoutRequest = $history[4]['request'];
+        self::assertFalse(
+            $postLogoutRequest->hasHeader('Authorization'),
+            'a stale adopted device credential must not resurface after logout() '
+                . '(CONTRACT.md §6.1 rule 11, C-12 N4.4)',
+        );
+    }
 }

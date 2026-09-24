@@ -1156,6 +1156,10 @@ final class AxiamClient
         // §5.2 rule 1: a logged-out client holds no login result — the next session
         // (any principal) must not inherit this one's reach.
         $this->session->resetPrincipalScope();
+        // §6.1 rule 11 / C-12 N4.4: "logout clears it" — an EARLIER device or adopted
+        // client-credentials token, merely shadowed (never cleared) by this cookie
+        // session, must not resurface once the cookie above is gone again.
+        $this->session->clearBearerCredential();
     }
 
     /**
