@@ -169,6 +169,15 @@ final class Contract151ManifestGrantsAndBindingsTest extends ManagementTestCase
         $client = $this->signedInWith(
             self::page([self::permissionRow('documents:read')], 1),
             self::page([self::roleRow('auditor')], 1),
+            // roles()->listPermissions(ROLE_ID): the grant is ALREADY present, so this
+            // stays converged — CONTRACT 1.52 N6.4 (C-12) added this read; the two
+            // tests just below cover the case where it is not.
+            self::json(200, [[
+                'effect' => 'allow',
+                'permission' => self::permissionRow('documents:read'),
+                'scope_ids' => [],
+                'scopes' => [],
+            ]]),
         );
 
         $plan = $client->management()->manifest()->plan(
@@ -181,6 +190,147 @@ final class Contract151ManifestGrantsAndBindingsTest extends ManagementTestCase
         self::assertTrue($plan->isConverged(), 'grants must not surface as field drift on the role itself');
         foreach ($plan->changes as $change) {
             self::assertSame(ChangeAction::Unchanged, $change->action);
+        }
+    }
+
+    private static function findChange(\Axiam\Sdk\Management\Manifest\ManagementPlan $plan, string $entityKey): \Axiam\Sdk\Management\Manifest\PlannedChange
+    {
+        foreach ($plan->changes as $change) {
+            if ($change->entity->key === $entityKey) {
+                return $change;
+            }
+        }
+
+        self::fail(sprintf('plan has no change for entity key "%s"', $entityKey));
+    }
+
+    // -----------------------------------------------------------------
+    // CONTRACT 1.52 N6.4 (C-12): "plan reports a binding Update, not only
+    // apply." plan() used to strip grants/roles from drift entirely and never
+    // read whether they were actually granted/bound, so a role or group whose
+    // OWN fields already matched reported Unchanged even though apply() would
+    // still send a grant or a role assignment for it.
+    // -----------------------------------------------------------------
+
+    /**
+     * Red on the unfixed code: the role's own fields (name/description/is_global)
+     * already match, so plan() reported Unchanged — the pending grant was
+     * invisible to a caller inspecting the plan, even though apply() against the
+     * SAME tenant state would send `grantPermission`.
+     */
+    public function testPlanReportsAnUpdateWhenAGrantIsNotYetPresent(): void
+    {
+        $client = $this->signedInWith(
+            self::page([self::permissionRow('documents:read')], 1),
+            self::page([self::roleRow('auditor')], 1),
+            // roles()->listPermissions(ROLE_ID): nothing granted yet.
+            self::json(200, []),
+        );
+
+        $plan = $client->management()->manifest()->plan(
+            ManagementManifest::builder()
+                ->permission('read', 'documents:read', 'Read documents')
+                ->role('auditor', 'auditor', 'Read-only', grants: ['read' => 'allow'])
+                ->build(),
+        );
+
+        self::assertFalse($plan->isConverged(), 'a missing grant must show up as pending, not Unchanged');
+        $roleChange = self::findChange($plan, 'auditor');
+        self::assertSame(ChangeAction::Update, $roleChange->action, 'CONTRACT 1.52 N6.4 (C-12)');
+        self::assertSame(['read' => 'allow'], $roleChange->fields['grants'] ?? null);
+    }
+
+    /** The I4 twin: a grant that IS already present must still report Unchanged. */
+    public function testPlanReportsUnchangedWhenTheGrantIsAlreadyPresent(): void
+    {
+        $client = $this->signedInWith(
+            self::page([self::permissionRow('documents:read')], 1),
+            self::page([self::roleRow('auditor')], 1),
+            self::json(200, [[
+                'effect' => 'allow',
+                'permission' => self::permissionRow('documents:read'),
+                'scope_ids' => [],
+                'scopes' => [],
+            ]]),
+        );
+
+        $plan = $client->management()->manifest()->plan(
+            ManagementManifest::builder()
+                ->permission('read', 'documents:read', 'Read documents')
+                ->role('auditor', 'auditor', 'Read-only', grants: ['read' => 'allow'])
+                ->build(),
+        );
+
+        self::assertTrue($plan->isConverged());
+        self::assertSame(ChangeAction::Unchanged, self::findChange($plan, 'auditor')->action);
+    }
+
+    /**
+     * The role-binding twin: a group's own fields already match, but its declared
+     * role binding is not yet assigned.
+     */
+    public function testPlanReportsAnUpdateWhenARoleBindingIsNotYetPresent(): void
+    {
+        $client = $this->signedInWith(
+            self::page([self::roleRow('auditor')], 1),
+            self::page([self::groupRow('engineers')], 1),
+            // groups()->listRoles(GROUP_ID): nothing bound yet.
+            self::json(200, []),
+        );
+
+        $plan = $client->management()->manifest()->plan(
+            ManagementManifest::builder()
+                ->role('auditor', 'auditor', 'Read-only')
+                ->group('engineers', 'engineers', 'Engineering', roleKeys: ['auditor'])
+                ->build(),
+        );
+
+        self::assertFalse($plan->isConverged());
+        $groupChange = self::findChange($plan, 'engineers');
+        self::assertSame(ChangeAction::Update, $groupChange->action, 'CONTRACT 1.52 N6.4 (C-12)');
+        self::assertCount(1, $groupChange->fields['roles'] ?? []);
+    }
+
+    /**
+     * apply()'s own wire sequence and exact request indices — pinned by
+     * testFirstApplyGrantsThePermissionAndBindsTheRole() above and
+     * testASecondApplyGrantsNothingAlreadyPresent() — must be byte-for-byte
+     * unaffected by plan()'s new edge-inspection pass: apply() calls the
+     * internal planAgainst() directly, never the public plan() this fix
+     * changes, so it never performs the extra listPermissions()/listRoles()
+     * reads plan() now does. This test is the I4 twin proving that isolation:
+     * an apply() whose grants/bindings are ALREADY fully converged sends the
+     * exact same zero-write, six-read sequence as before.
+     */
+    public function testApplysOwnWireSequenceIsUnaffectedByPlansNewEdgeInspection(): void
+    {
+        $manifest = self::manifestWithGrantsAndBindings();
+
+        $client = $this->signedInWith(
+            self::page([self::permissionRow('documents:read')], 1),
+            self::page([self::roleRow('auditor')], 1),
+            self::page([self::groupRow('engineers')], 1),
+            self::json(200, [[
+                'effect' => 'allow',
+                'permission' => self::permissionRow('documents:read'),
+                'scope_ids' => [],
+                'scopes' => [],
+            ]]),
+            self::json(200, [[
+                'role' => self::roleRow('auditor'),
+                'resource_id' => null,
+            ]]),
+        );
+
+        $report = $client->management()->manifest()->apply($manifest);
+
+        self::assertTrue($report->isComplete(), $report->failure?->getMessage() ?? '');
+        self::assertSame([], $report->applied);
+        // login + 3 entity reads + 2 reconciliation reads = 6 requests, zero writes —
+        // identical to testASecondApplyGrantsNothingAlreadyPresent() above.
+        self::assertCount(6, $this->requests);
+        foreach ($this->sentMethods() as $method) {
+            self::assertSame('GET', $method);
         }
     }
 }
