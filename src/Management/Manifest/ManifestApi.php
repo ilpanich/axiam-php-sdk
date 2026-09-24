@@ -188,9 +188,12 @@ final class ManifestApi
     /**
      * Creates or updates one resource, returning its id.
      *
-     * `$manifest`/`$ids` are unused today; the next commit (§13 row 17 defect b) gives
-     * `Create` a `parent_id` resolved through them, so the signature is already shaped
-     * for it rather than changing again immediately after.
+     * §13 row 17 defect (b): on Create, resolves the resource's PARENT — its manifest-local
+     * key, carried as {@see ManifestEntity::$depends}'s one entry for a resource with a
+     * parent (see {@see ManifestBuilder::resource()}) — to the parent's server id via `$ids`,
+     * and sends it as `parent_id`. The parent is guaranteed to exist by this point: §27.6
+     * rule 5 sorts resources topologically, so a parent is always applied (and its id
+     * recorded into `$ids`) before any child that names it.
      *
      * @param array<string,mixed> $fields
      * @param array<string,array<string,string>> $ids
@@ -204,6 +207,7 @@ final class ManifestApi
                 name: self::str($fields, 'name'),
                 resourceType: self::str($fields, 'resource_type'),
                 metadata: $fields['metadata'] ?? null,
+                parentId: $this->resolveParentId($change->entity, $manifest, $ids),
             ));
 
             return $created->id;
@@ -216,6 +220,27 @@ final class ManifestApi
         ));
 
         return $updated->id;
+    }
+
+    /**
+     * The parent resource's server id for `$entity`, or `null` when it declares none.
+     *
+     * `$entity->depends` holds exactly the parent's manifest-local key for a resource with
+     * one ({@see ManifestBuilder::resource()}) — nothing else contributes a `depends` entry
+     * for a resource, so its presence/absence IS the parent question.
+     *
+     * @param array<string,array<string,string>> $ids
+     */
+    private function resolveParentId(ManifestEntity $entity, ManagementManifest $manifest, array $ids): ?string
+    {
+        $parentKey = $entity->depends[0] ?? null;
+        if ($parentKey === null) {
+            return null;
+        }
+
+        $parent = $this->findEntityByKey($manifest, ManifestKind::Resource, $parentKey);
+
+        return $this->resolveId($ids, ManifestKind::Resource, $parent->name);
     }
 
     /**
