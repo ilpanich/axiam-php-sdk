@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Management\Manifest;
 
+use Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse;
+
 /**
  * What {@see ManifestApi::apply()} actually did — including, when it stopped early, what
  * it had already done.
@@ -24,12 +26,19 @@ final class ApplyReport
      * @param PlannedChange|null  $failed    The change that failed, or `null` if none did.
      * @param \Throwable|null     $failure   Why it failed, or `null`.
      * @param list<PlannedChange> $remaining Changes never attempted because of the failure.
+     * @param list<ServiceAccountCreatedResponse> $createdServiceAccounts Every service
+     *        account this apply created, `client_secret` included — the ONE time it is
+     *        ever returned (§27.5 rule 5, CONTRACT.md §27.6.1 addition 3). Kept here even
+     *        when a LATER step of the same apply fails: the account and its secret exist
+     *        on the server regardless, and losing the report would lose the only chance
+     *        to read the secret at all. `apply()` never rotates one to reconcile drift.
      */
     public function __construct(
         public readonly array $applied,
         public readonly ?PlannedChange $failed = null,
         public readonly ?\Throwable $failure = null,
         public readonly array $remaining = [],
+        public readonly array $createdServiceAccounts = [],
     ) {
     }
 
@@ -37,6 +46,17 @@ final class ApplyReport
     public function isComplete(): bool
     {
         return $this->failed === null;
+    }
+
+    /**
+     * Every service account this apply created, with the one-time secret the server
+     * returned for it. See {@see self::$createdServiceAccounts}.
+     *
+     * @return list<ServiceAccountCreatedResponse>
+     */
+    public function createdServiceAccounts(): array
+    {
+        return $this->createdServiceAccounts;
     }
 
     /**

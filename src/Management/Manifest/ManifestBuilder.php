@@ -108,10 +108,12 @@ final class ManifestBuilder
     /**
      * Declares a group and the roles assigned to it.
      *
-     * @param string       $key         Manifest-local identity.
-     * @param string       $name        The group's name.
-     * @param string       $description Human-readable description.
-     * @param list<string> $roleKeys    Keys of roles this group carries.
+     * @param string $key         Manifest-local identity.
+     * @param string $name        The group's name.
+     * @param string $description Human-readable description.
+     * @param list<string|RoleBinding> $roleKeys Roles this group carries — a bare role
+     *        KEY (tenant-wide, exactly as before contract 1.51) or a {@see RoleBinding}
+     *        scoped to a resource (`RoleBinding::at()`/`::atOnly()`, §27.6.1 addition 2).
      * @param array<string,mixed> $metadata Free-form metadata.
      */
     public function group(
@@ -121,7 +123,8 @@ final class ManifestBuilder
         array $roleKeys = [],
         array $metadata = [],
     ): self {
-        $fields = ['name' => $name, 'description' => $description, 'roles' => $roleKeys];
+        $bindings = array_map(RoleBinding::from(...), $roleKeys);
+        $fields = ['name' => $name, 'description' => $description, 'roles' => $bindings];
         if ($metadata !== []) {
             $fields['metadata'] = $metadata;
         }
@@ -130,10 +133,72 @@ final class ManifestBuilder
             $key,
             $name,
             $fields,
-            $roleKeys,
+            self::bindingDependencies($bindings),
         );
 
         return $this;
+    }
+
+    /**
+     * Declares a service account and the roles bound to it (CONTRACT.md §27.6.1
+     * addition 3, contract 1.51).
+     *
+     * Reconciled by NAME, which the server does not keep unique — {@see ManifestApi}
+     * refuses `plan()`/`apply()` before any write when more than one existing account
+     * matches. `$description` is the only field an `Update` reconciles; `null` is silent,
+     * exactly like an unstated resource `metadata`. `apply()` never rotates a secret: a
+     * `Create`'s one-time `client_secret` is on {@see ApplyReport::createdServiceAccounts()}.
+     *
+     * @param string $key         Manifest-local identity, referred to by nothing else —
+     *                            a service account cannot itself hold another service
+     *                            account's role in contract 1.51.
+     * @param string $name        The account's name — its natural key, unenforced.
+     * @param string|null $description Human-readable description. `null` is silent.
+     * @param list<string|RoleBinding> $roleKeys Roles bound to this account — a bare
+     *        role KEY or a resource-scoped {@see RoleBinding}.
+     */
+    public function serviceAccount(
+        string $key,
+        string $name,
+        ?string $description = null,
+        array $roleKeys = [],
+    ): self {
+        $bindings = array_map(RoleBinding::from(...), $roleKeys);
+        $fields = ['name' => $name, 'roles' => $bindings];
+        if ($description !== null) {
+            $fields['description'] = $description;
+        }
+        $this->entities[] = new ManifestEntity(
+            ManifestKind::ServiceAccount,
+            $key,
+            $name,
+            $fields,
+            self::bindingDependencies($bindings),
+        );
+
+        return $this;
+    }
+
+    /**
+     * The manifest-local keys a list of role bindings depends on: every bound role's key,
+     * plus every scoped binding's resource key — so a dangling reference to either is
+     * caught by {@see ManifestValidation} before any request, exactly like a resource's
+     * `parent`.
+     *
+     * @param list<RoleBinding> $bindings
+     * @return list<string>
+     */
+    private static function bindingDependencies(array $bindings): array
+    {
+        $keys = [];
+        foreach ($bindings as $binding) {
+            $keys[$binding->role] = true;
+            if ($binding->resource !== null) {
+                $keys[$binding->resource] = true;
+            }
+        }
+
+        return array_keys($keys);
     }
 
     /**

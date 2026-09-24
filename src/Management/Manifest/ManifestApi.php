@@ -119,10 +119,17 @@ final class ManifestApi
         $pending = $plan->pending();
         $ids = $this->seedIds($existing);
 
+        // Grown as a `CreateServiceAccount` step runs — see applyServiceAccount(). Threaded
+        // into EVERY return below, success or failure, because the secret it carries is
+        // real the moment the server answers, whatever a LATER step in the same apply does
+        // (§27.5 rule 5).
+        $createdServiceAccounts = [];
+
         $applied = [];
         foreach ($pending as $index => $change) {
             try {
-                $ids[$change->entity->kind->value][$change->entity->name] = $this->perform($change, $manifest, $ids);
+                $ids[$change->entity->kind->value][$change->entity->name]
+                    = $this->perform($change, $manifest, $ids, $createdServiceAccounts);
             } catch (\Throwable $failure) {
                 // §27.7: stop here, do not undo what landed. The report is the recovery
                 // tool; see ApplyReport's class doc for why an automatic rollback would
@@ -132,6 +139,7 @@ final class ManifestApi
                     $change,
                     $failure,
                     array_values(\array_slice($pending, $index + 1)),
+                    $createdServiceAccounts,
                 );
             }
             $applied[] = $change;
@@ -147,6 +155,7 @@ final class ManifestApi
                     $edgeChange,
                     $failure,
                     array_values(\array_slice($edges, $index + 1)),
+                    $createdServiceAccounts,
                 );
             }
             // Recorded only when something actually reached the wire — a role/group
@@ -157,7 +166,7 @@ final class ManifestApi
             }
         }
 
-        return new ApplyReport($applied);
+        return new ApplyReport($applied, createdServiceAccounts: $createdServiceAccounts);
     }
 
     /**
@@ -171,9 +180,15 @@ final class ManifestApi
      *        applied so far this run (plus everything {@see self::seedIds()} found
      *        already existing) — how a resource's `parent_id` is resolved from its
      *        manifest-local parent KEY (§13 row 17 defect b).
+     * @param list<Models\ServiceAccountCreatedResponse> $createdServiceAccounts Appended
+     *        to when this step creates a service account — see {@see self::apply()}.
      */
-    private function perform(PlannedChange $change, ManagementManifest $manifest, array $ids): string
-    {
+    private function perform(
+        PlannedChange $change,
+        ManagementManifest $manifest,
+        array $ids,
+        array &$createdServiceAccounts,
+    ): string {
         $entity = $change->entity;
         $fields = $change->action === ChangeAction::Create ? $entity->fields : $change->fields;
 
@@ -182,6 +197,7 @@ final class ManifestApi
             ManifestKind::Permission => $this->applyPermission($change, $fields),
             ManifestKind::Role => $this->applyRole($change, $fields),
             ManifestKind::Group => $this->applyGroup($change, $fields),
+            ManifestKind::ServiceAccount => $this->applyServiceAccount($change, $fields, $createdServiceAccounts),
         };
     }
 
@@ -329,6 +345,41 @@ final class ManifestApi
     }
 
     /**
+     * Creates or updates one service account, returning its id (CONTRACT.md §27.6.1
+     * addition 3, contract 1.51). Role-binding reconciliation happens separately — see
+     * {@see self::reconcileEdges()}.
+     *
+     * `description` is the only field an `Update` sends — `name`/`status` are never
+     * manifest fields here (see {@see ManifestBuilder::serviceAccount()}) — and a
+     * `Create`'s response, `client_secret` included, is appended to `$createdServiceAccounts`
+     * for {@see ApplyReport} to carry, the ONE time that secret is ever returned. `apply()`
+     * never calls `rotateSecret()`.
+     *
+     * @param array<string,mixed> $fields
+     * @param list<Models\ServiceAccountCreatedResponse> $createdServiceAccounts
+     */
+    private function applyServiceAccount(PlannedChange $change, array $fields, array &$createdServiceAccounts): string
+    {
+        $accounts = $this->management->serviceAccounts();
+
+        if ($change->action === ChangeAction::Create) {
+            $created = $accounts->create(new Models\CreateServiceAccountRequest(
+                name: self::str($fields, 'name'),
+                description: isset($fields['description']) ? self::str($fields, 'description') : null,
+            ));
+            $createdServiceAccounts[] = $created;
+
+            return $created->id;
+        }
+
+        $updated = $accounts->update((string) $change->id, new Models\UpdateServiceAccount(
+            description: isset($fields['description']) ? self::str($fields, 'description') : null,
+        ));
+
+        return $updated->id;
+    }
+
+    /**
      * §13 row 17 defect (a): the role/group entities whose GRANTS/ROLES need
      * reconciling — every one the manifest declares at least one grant or role key for,
      * whether or not that role/group's own fields are `Create`, `Update` or `Unchanged`.
@@ -347,7 +398,7 @@ final class ManifestApi
             $entity = $change->entity;
             $edgeKey = match ($entity->kind) {
                 ManifestKind::Role => 'grants',
-                ManifestKind::Group => 'roles',
+                ManifestKind::Group, ManifestKind::ServiceAccount => 'roles',
                 default => null,
             };
             if ($edgeKey === null) {
@@ -382,8 +433,10 @@ final class ManifestApi
 
         return match ($entity->kind) {
             ManifestKind::Role => $this->reconcileRoleGrants($entity, $manifest, $ids),
-            ManifestKind::Group => $this->reconcileGroupRoles($entity, $manifest, $ids),
-            default => throw new ManifestException('unreachable: only roles and groups reconcile edges'),
+            ManifestKind::Group, ManifestKind::ServiceAccount => $this->reconcileRoleBindings($entity, $manifest, $ids),
+            default => throw new ManifestException(
+                'unreachable: only roles, groups and service accounts reconcile edges',
+            ),
         };
     }
 
@@ -427,39 +480,168 @@ final class ManifestApi
     }
 
     /**
+     * Reconciles one subject's (a group's or a service account's) role bindings —
+     * CONTRACT.md §27.6.1 addition 2, contract 1.51.
+     *
+     * ADDITIVE, exactly like {@see self::reconcileRoleGrants()}: a role the manifest does
+     * not name for this subject is never unassigned. For a role the manifest DOES name,
+     * three things can happen against the current assignment (found by role id — the
+     * server keys an assignment on `(subject, role)`, so there is at most one):
+     *
+     * - none exists: ASSIGN.
+     * - one exists with the SAME resource and `inherit`: nothing — already converged.
+     * - one exists with a DIFFERENT resource or `inherit`: UPDATE, as unassign then
+     *   assign (there is no update endpoint). The server assignment's `tenant_scope`
+     *   (§5.2.3, not a manifest field) is carried across unchanged. If the assign fails,
+     *   the previous assignment is put back and {@see BindingRebindFailed} carries both
+     *   results — thrown rather than returned, so {@see self::apply()}'s existing
+     *   `catch (\Throwable)` around this whole call records it on the report exactly like
+     *   any other step failure.
+     *
      * @param array<string,array<string,string>> $ids
+     *
+     * @return bool Whether any wire call was actually made — see
+     *              {@see self::reconcileRoleGrants()}'s identical contract.
+     *
+     * @throws BindingRebindFailed when an Update's re-assignment fails.
      */
-    private function reconcileGroupRoles(ManifestEntity $groupEntity, ManagementManifest $manifest, array $ids): bool
+    private function reconcileRoleBindings(ManifestEntity $entity, ManagementManifest $manifest, array $ids): bool
     {
-        /** @var list<string> $roleKeys */
-        $roleKeys = $groupEntity->fields['roles'] ?? [];
-        if ($roleKeys === []) {
+        /** @var list<RoleBinding> $bindings */
+        $bindings = $entity->fields['roles'] ?? [];
+        if ($bindings === []) {
             return false;
         }
 
-        $groupId = $this->resolveId($ids, ManifestKind::Group, $groupEntity->name);
-        $roles = $this->management->roles();
+        $kind = $entity->kind;
+        $subjectId = $this->resolveId($ids, $kind, $entity->name);
+        $current = $kind === ManifestKind::Group
+            ? $this->management->groups()->listRoles($subjectId)
+            : $this->management->serviceAccounts()->listRoles($subjectId);
 
-        $current = $this->management->groups()->listRoles($groupId);
-        $currentRoleIds = [];
+        /** @var array<string,Models\RoleAssignment> $byRoleId */
+        $byRoleId = [];
         foreach ($current as $assignment) {
-            $currentRoleIds[$assignment->role->id] = true;
+            $byRoleId[$assignment->role->id] = $assignment;
         }
 
         $sentAny = false;
-        foreach ($roleKeys as $roleKey) {
-            $role = $this->findEntityByKey($manifest, ManifestKind::Role, $roleKey);
+        foreach ($bindings as $binding) {
+            $role = $this->findEntityByKey($manifest, ManifestKind::Role, $binding->role);
             $roleId = $this->resolveId($ids, ManifestKind::Role, $role->name);
-
-            if (isset($currentRoleIds[$roleId])) {
-                continue; // already bound — never re-assigned, never unassigned for a dropped key
+            $resourceId = null;
+            if ($binding->resource !== null) {
+                $resource = $this->findEntityByKey($manifest, ManifestKind::Resource, $binding->resource);
+                $resourceId = $this->resolveId($ids, ManifestKind::Resource, $resource->name);
             }
 
-            $roles->assignToGroup($roleId, new Models\AssignRoleToGroupRequest(groupId: $groupId));
+            $existing = $byRoleId[$roleId] ?? null;
+            if ($existing === null) {
+                $this->assignRole($kind, $roleId, $subjectId, $resourceId, $binding->inherit, null);
+                $sentAny = true;
+                continue;
+            }
+
+            // Server assignments written before `inherit` existed report it as `null`,
+            // which means `true` — same reading as every other §27 response (RoleAssignment
+            // itself already defaults it that way in `fromArray()`).
+            $existingInherit = $existing->inherit ?? true;
+            if ($existing->resourceId === $resourceId && $existingInherit === $binding->inherit) {
+                continue; // already bound exactly as declared — never re-sent
+            }
+
+            $this->rebindRole($kind, $roleId, $subjectId, $resourceId, $binding->inherit, $existing);
             $sentAny = true;
         }
 
         return $sentAny;
+    }
+
+    /**
+     * One binding `Update`: unassign the current assignment, then assign the declared
+     * one. On a failed assign, restores the previous assignment (carrying its
+     * `tenant_scope` across, both times) and throws {@see BindingRebindFailed} naming
+     * both outcomes — the C-12 question 7 answer this port gives.
+     */
+    private function rebindRole(
+        ManifestKind $kind,
+        string $roleId,
+        string $subjectId,
+        ?string $resourceId,
+        bool $inherit,
+        Models\RoleAssignment $previous,
+    ): void {
+        $previousInherit = $previous->inherit ?? true;
+
+        $this->unassignRole($kind, $roleId, $subjectId, $previous->resourceId);
+        try {
+            $this->assignRole($kind, $roleId, $subjectId, $resourceId, $inherit, $previous->tenantScope);
+        } catch (\Throwable $assignFailure) {
+            try {
+                $this->assignRole(
+                    $kind,
+                    $roleId,
+                    $subjectId,
+                    $previous->resourceId,
+                    $previousInherit,
+                    $previous->tenantScope,
+                );
+            } catch (\Throwable $restoreFailure) {
+                throw new BindingRebindFailed($assignFailure->getMessage(), false, $restoreFailure->getMessage());
+            }
+            throw new BindingRebindFailed($assignFailure->getMessage(), true);
+        }
+    }
+
+    /**
+     * `roles.assign_to_*`, for whichever kind of subject — `inherit` reaches the wire
+     * only as `false` (CONTRACT.md §27.13 S-10 rule 1), so an inheritable binding's
+     * request body stays byte-for-byte what it was before contract 1.51.
+     *
+     * @param list<string>|null $tenantScope
+     */
+    private function assignRole(
+        ManifestKind $kind,
+        string $roleId,
+        string $subjectId,
+        ?string $resourceId,
+        bool $inherit,
+        ?array $tenantScope,
+    ): void {
+        $roles = $this->management->roles();
+        $inheritWire = $inherit ? null : false;
+
+        if ($kind === ManifestKind::Group) {
+            $roles->assignToGroup($roleId, new Models\AssignRoleToGroupRequest(
+                groupId: $subjectId,
+                inherit: $inheritWire,
+                resourceId: $resourceId,
+                tenantScope: $tenantScope,
+            ));
+
+            return;
+        }
+
+        $roles->assignToServiceAccount($roleId, new Models\AssignRoleToServiceAccountRequest(
+            serviceAccountId: $subjectId,
+            inherit: $inheritWire,
+            resourceId: $resourceId,
+            tenantScope: $tenantScope,
+        ));
+    }
+
+    /** `roles.unassign_from_*`. The resource names WHICH assignment: `null` removes the tenant-wide one. */
+    private function unassignRole(ManifestKind $kind, string $roleId, string $subjectId, ?string $resourceId): void
+    {
+        $roles = $this->management->roles();
+
+        if ($kind === ManifestKind::Group) {
+            $roles->unassignFromGroup($roleId, $subjectId, $resourceId);
+
+            return;
+        }
+
+        $roles->unassignFromServiceAccount($roleId, $subjectId, $resourceId);
     }
 
     /**
@@ -549,10 +731,70 @@ final class ManifestApi
                 ManifestKind::Permission => self::index($this->management->permissions()->listItems($page)->items),
                 ManifestKind::Role => self::index($this->management->roles()->listItems($page)->items),
                 ManifestKind::Group => self::index($this->management->groups()->listItems($page)->items),
+                ManifestKind::ServiceAccount => self::indexServiceAccounts(
+                    $this->management->serviceAccounts()->listItems($page)->items,
+                    $manifest,
+                ),
             };
         }
 
         return $state;
+    }
+
+    /**
+     * Keys a page of service accounts by `name`, like {@see self::index()} — with one
+     * difference `index()` cannot have: a service account's `name` is NOT a unique index
+     * on the server (only its `client_id` is), so a tenant can hold two accounts sharing
+     * one. `plan()`/`apply()` refuse BEFORE any write when more than one existing account
+     * matches a name this manifest actually declares — reconciling an arbitrary one of
+     * them would be a guess neither `plan()` nor an operator reading it could see was
+     * made.
+     *
+     * A duplicate among names the manifest does NOT mention is not this method's problem:
+     * nothing here reconciles it, so nothing here needs to be able to tell it apart from
+     * a single match.
+     *
+     * @param list<Models\ServiceAccountResponse> $items
+     * @return array<string,array<string,mixed>>
+     *
+     * @throws ManifestException when more than one existing account matches a declared name.
+     */
+    private static function indexServiceAccounts(array $items, ManagementManifest $manifest): array
+    {
+        $declaredNames = [];
+        foreach ($manifest->entities as $entity) {
+            if ($entity->kind === ManifestKind::ServiceAccount) {
+                $declaredNames[$entity->name] = true;
+            }
+        }
+
+        $out = [];
+        $seen = [];
+        foreach ($items as $item) {
+            if (!\is_object($item) || !method_exists($item, 'toArray')) {
+                continue;
+            }
+            /** @var array<string,mixed> $row */
+            $row = $item->toArray();
+            $name = $row['name'] ?? null;
+            if (!\is_string($name)) {
+                continue;
+            }
+
+            if (isset($seen[$name]) && isset($declaredNames[$name])) {
+                throw new ManifestException(sprintf(
+                    'service account %s is ambiguous: more than one existing account is named '
+                    . '%s, and a service account\'s name is not unique on the server — rename '
+                    . 'one, or remove it from the manifest',
+                    $name,
+                    $name,
+                ));
+            }
+            $seen[$name] = true;
+            $out[$name] = $row;
+        }
+
+        return $out;
     }
 
     /**
