@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 /**
  * examples/device_mtls_provisioning.php — provision an IoT device with a certificate from
- * the tenant's signing CA, then authenticate as that device over §6.1 mutual TLS.
+ * the tenant's signing CA, then authenticate as that device over §6.1 mutual TLS via the
+ * explicit device login, `authenticateDevice()` (§6.1 rules 6-10, contract 1.51).
  *
  * This is the flow AXIAM exists for at the edge: a device that holds no password, carries
  * no shared secret, and proves who it is with a private key that never left it.
@@ -175,9 +176,16 @@ $device = new AxiamClient(
 );
 
 try {
-    // No login() call: the TLS handshake IS the authentication. What the device can do
-    // from here is whatever its service account was granted — checked the same way any
-    // other subject's access is checked.
+    // §6.1 rules 6-10 (contract 1.51): the explicit device LOGIN. POST /api/v1/auth/device,
+    // no body, no password anywhere — the TLS handshake this client already presents its
+    // certificate on IS the authentication. Certificate-bound (§10.1 rule 9) when AXIAM
+    // itself terminated the handshake: from here every request this SAME client makes
+    // carries the adopted token, and a REST request without the same certificate is 401.
+    $deviceToken = $device->authenticateDevice();
+    printf("device authenticated: token_type=%s expires_in=%ds\n", $deviceToken->tokenType, $deviceToken->expiresIn);
+
+    // What the device can do from here is whatever its service account was granted —
+    // checked the same way any other subject's access is checked.
     $allowed = $device->can('telemetry:publish', env('AXIAM_RESOURCE_ID', $deviceSerial));
     printf("device may publish telemetry: %s\n", $allowed ? 'yes' : 'no');
 } catch (AxiamException $e) {

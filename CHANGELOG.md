@@ -7,6 +7,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Contract 1.51.** `CONTRACT.md`, `openapi.json` and `management-registry.json`
+  re-vendored from `ilpanich/axiam` `56fbe44` (`CONTRACT.md` sha256 starts
+  `0ac7fd75f83c…`); `proto/` was already identical. The §27 surface regenerated to 195
+  files (192 before).
+
+- **§5.2 rule 1 — the acting tenant.** `new AxiamClient(..., actingTenant: $uuid)` at
+  construction, and `$client->actingTenant($uuid)` / `$client->clearActingTenant()` on
+  an existing client, send `X-Axiam-Tenant` on every `/api/v1` request while set — never
+  on `X-Tenant-ID`'s behalf, and never on gRPC (the acting tenant is REST-only; the
+  server's gRPC interceptor reads no such metadata). A non-UUID value is refused
+  client-side (`NetworkError`), with zero wire calls. Gated on `organizationLevel`/
+  `reachableTenantIds` once a login result reports them (login, verify-MFA, OPAQUE's
+  finish, and the MFA/WebAuthn setup completions all set it; WebAuthn AUTHENTICATION,
+  SSO/federation and a client-credentials/device-grant credential adoption reset it to
+  unknown); a client holding no such result has nothing to gate on, and the server's
+  `403` is the answer. The §17 decision memo key gained a fifth component, the acting
+  tenant, so a memoized decision for one tenant can never answer a check against
+  another. **Design difference from the reference implementation, recorded (C-12):**
+  mutates the client and returns it (`self`) rather than returning a new handle over a
+  shared session — PHP's request lifecycle has no concurrent tasks sharing one client
+  the way a long-lived Rust/Go/Python process does.
+
+- **§6.1 rules 6-10 — `authenticateDevice()`.** `POST /api/v1/auth/device`, no request
+  body, reachable only on a client built with `clientCert`/`clientKey` (`AuthError`,
+  zero wire calls, otherwise). Returns `Auth\DeviceToken { accessToken: Sensitive,
+  tokenType, expiresIn }` and adopts it as this client's credential — the shared cookie
+  jar is cleared first, so a cookie left from an earlier `login()`/`verifyMfa()` session
+  on the same client object cannot silently outrank the device's own credential. Every
+  refusal is `401` → `AuthError`; a `429` is `NetworkError`, never `AuthError`, and the
+  call is never retried. Never enters the §9 single-flight refresh guard — there is no
+  refresh token to spend. See `examples/device_mtls_provisioning.php`.
+
+- **§1.1.1/§10.3 — `validateToken()`/`introspectToken()`.** gRPC wrappers over
+  `axiam.v1.TokenService/ValidateToken` and `/IntrospectToken` — the operations §10.3
+  has required an SDK validating over gRPC to read `cnf` from since contract 1.17, and
+  no PHP method wrapped until now. Return `Auth\TokenValidation`/`Auth\TokenIntrospection`,
+  each with `status(): TokenStatus` (`Inactive`/`Bearer`/`SenderConstrained`/
+  `Unverifiable`) and `verifyPossession(PresentedProofs)`, which apply §10.1 rule 9
+  through the SAME `JwksVerifier::verifyTokenBinding()` primitive local verification
+  uses — the two transports cannot disagree about whether a token is a bearer token.
+  gRPC-only; no REST substitution (`POST /oauth2/introspect` is a different operation).
+  `AxiamException|null` gRPC-only guard, zero-wire-call precondition with no caller
+  token, and the §9 refresh-retry-once, all mirror `getUserInfo()` exactly.
+
+- **§13 row 17 — the manifest reconciles role permission grants and group role
+  bindings.** `apply()` now grants every permission a role's manifest declaration names
+  and does not already have, and assigns every role a group's manifest declaration
+  names and does not already carry — additively (never revoking/unassigning something
+  the manifest simply does not mention), for every role/group the manifest declares at
+  least one grant/role for, whether or not that role/group's own fields needed a
+  `Create`/`Update`.
+
+- **§13 row 17 — the manifest sends a nested resource's `parent_id`.**
+  `resource($key, $name, $type, parentKey: '…')` now resolves the parent to its real
+  server id and sends it on `Create`. Previously the manifest ordered a child after its
+  parent but never told the server about the relationship, so a nested manifest was
+  created flat.
+
+### Breaking
+
+- **§10.1 rule 9 — `JwksVerifier::verify()` / `AxiamClient::verifyLocally()` now refuse
+  a sender-constrained token they have no evidence for**, instead of admitting it as an
+  ordinary bearer credential. `verifyLocally()` is the ONLY verification entry point the
+  Laravel/Symfony framework bridges (and every downstream request guard) call, and it
+  has no transport to ask for a peer certificate or a verified DPoP proof — so before
+  this fix, a certificate- or DPoP-bound token (every device token from §6.1, or any
+  DPoP-bound token) reached it with its `cnf` claim intact and unchecked, and was
+  admitted as though it carried no confirmation at all. This is the same defect found
+  independently in the Rust, TypeScript, Go, Python and C# ports. An application whose
+  request guard was unknowingly accepting bound tokens as bearer tokens will now see
+  those callers rejected (`verifyLocally()` returns `null`) until it switches to the new
+  `AxiamClient::verifyWithProofs($token, $tenant, PresentedProofs)` / `JwksVerifier::
+  verifyWithProofs()` and supplies the evidence its OWN connection established (never a
+  request header — §10.1 rule 9 detail 2). An unbound token is unaffected.
+
+### Fixed
+
+- **§27.6 declarative manifest, two pre-existing defects (§13 row 17).** `applyRole()`'s
+  docblock claimed it "reconciles its permission grants"; it never granted anything, and
+  `applyGroup()` had the identical gap for group role bindings — a `apply()` of a role
+  with grants reported success and granted nothing. A resource declared with a
+  `parentKey` was created flat: `CreateResourceRequest.parentId` has always existed and
+  was never sent. Both fixed; see Added above.
+
+- **`scripts/gen_management.py` — two generator defects the contract 1.51 re-vendor
+  exposed**, the same pair independently found and fixed in `ilpanich/axiam-rust-sdk`
+  (C-1): `SubjectAltName` is an externally tagged `oneOf`
+  (`{"dns": "…"}` / `{"ip": "…"}`); the generator recognised neither that shape nor any
+  `oneOf` without a discriminant field, and fell through to an empty class serializing
+  as `[]` (PHP's `json_encode([])`, not `{}`) — a request the server refuses. A required
+  `inherit` on the three role-side assignment listings, decoded with `ModelDecode::need()`,
+  would throw against a server older than contract 1.51 that never sends the field,
+  failing the whole listing — including the one `roles.list_groups`/`list_users`/
+  `list_service_accounts` a manifest reads to plan every binding. Both fixed in the
+  generator (`externally_tagged()`/`emit_external_union()`;
+  `DEFAULT_TRUE_WHEN_ABSENT`), pinned in `tests/Management/Contract151ModelsTest.php`.
+  `CertificateType` already decoded an unrecognised value (including the new `"Server"`)
+  without failing the response — no change needed, only a test.
+
 ## [1.0.0-beta16] - 2026-09-19
 
 ### Added

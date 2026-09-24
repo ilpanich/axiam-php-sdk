@@ -191,7 +191,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.50**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.51**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §22, §23, §24, §25, §26, §27, §28 (including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8; §28 MCP
@@ -224,6 +224,43 @@ which has no authenticator, and §24.6b rule 2 forbids emulating one in software
 "credential" held in process memory is not a second factor. The ceremony runs in the
 browser, and §24.6a's JSON bridge is the seam that carries the challenge out and the
 response back.
+
+### Contract 1.51
+
+- **§5.2 rule 1 — the acting tenant.** `actingTenant` at construction, and
+  `$client->actingTenant($uuid)` / `$client->clearActingTenant()` on an existing one, send
+  `X-Axiam-Tenant` on every `/api/v1` request while set. Gated client-side on
+  `organizationLevel`/`reachableTenantIds` once a login result reports them; a client
+  holding none has nothing to gate on and lets the server's `403` answer. **Mutates the
+  client and returns it (`self`)** rather than returning a new handle over a shared
+  session — the reference implementation's per-handle isolation exists for languages
+  where one long-lived client is shared across concurrent tasks, which is not how a PHP
+  request lifecycle works; recorded as a deliberate difference, not an oversight.
+- **§6.1 rules 6-10 — `authenticateDevice()`.** `POST /api/v1/auth/device`, no body,
+  reachable only on a client built with `clientCert`/`clientKey`. Adopts the returned
+  token as a bearer credential (never a cookie — the server sets none on this route) and
+  withholds any cookie left from an earlier `login()`/`verifyMfa()` session on the same
+  client object, so a stale session cannot silently outrank the device's own credential.
+  See `examples/device_mtls_provisioning.php`.
+- **§1.1.1/§10.3 — `validateToken()`/`introspectToken()`.** The gRPC `TokenService`
+  wrappers §10.3 has required since contract 1.17 and no PHP method reached until now.
+  Both return a typed result whose `status()`/`verifyPossession(PresentedProofs)` apply
+  §10.1 rule 9 — `valid`/`active` alone is never permission to proceed.
+- **§10.1 rule 9, fixed (BREAKING).** `verifyLocally()` — the entry point every request
+  guard and the Laravel/Symfony bridges use — now refuses a certificate- or DPoP-bound
+  token it has no evidence for, rather than admitting it as an ordinary bearer
+  credential. A guard with real connection evidence to offer calls
+  `verifyWithProofs($token, $tenant, PresentedProofs)` instead. See the CHANGELOG.
+- **§27.6.1 — the manifest additions**, read against the flat-entity tier (§27.10)
+  PHP's manifest already is:
+  - `resources[].metadata` — already supported before 1.51.
+  - **Two pre-existing defects, fixed**: a role's `grants` and a group's `roles` are now
+    actually reconciled (additively — `apply()`'s own docblock claimed this before it
+    was true), and a nested resource's `parent_id` now actually reaches the wire.
+  - **Declined**: the resource-scoped binding shape (`{role, resource, inherit}`) and
+    `service_accounts` — new 1.51 additions this port does not build; PHP's manifest
+    stays at the tier §27.10 already records (permissions/roles/groups/resources, no
+    `users`, no `scopes`), and this is that same tier gap, not a new one.
 
 ## Framework integration
 
@@ -1556,7 +1593,16 @@ Four properties are worth knowing before you run one against production:
 - **Ordering is derived, not declared.** By kind, then dependency, then key. The tie-break
   on key is what makes a plan stable across runs.
 - **Omission is never deletion.** There is no `ChangeAction::Delete` at all, so an
-  incomplete manifest cannot become a destructive one.
+  incomplete manifest cannot become a destructive one. This extends to `grants`/
+  `roleKeys`: `apply()` reconciles them **additively** — a permission granted or a role
+  bound by hand, outside the manifest, is left alone, and a key dropped from the
+  manifest is never revoked/unassigned on its behalf. Reconciliation runs for every
+  role/group the manifest grants or binds at least one thing to, whether or not that
+  role/group's own fields needed a `Create`/`Update` — a role that already exists,
+  unchanged, still receives a grant newly added to the manifest.
+- **A nested `resource(...)` is actually nested on the wire.** `resource('child', …,
+  parentKey: 'root')` sends `parent_id` on `Create`, resolved to the parent's real
+  server id (parents are always created before children — §27.6 rule 5's ordering).
 
 An incoherent manifest — a dangling reference, a cycle, a duplicate key — is refused
 *before* the first request, because discovering it halfway through an un-rollback-able
