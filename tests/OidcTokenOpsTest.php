@@ -15,6 +15,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * `oidcRefresh` / `loginClientCredentials` / `introspect` / `revoke` (CONTRACT.md
@@ -71,6 +72,41 @@ final class OidcTokenOpsTest extends TestCase
             oidcClientSecret: $withSecret ? self::CLIENT_SECRET : null,
             oidcTenantId: self::TENANT_UUID,
             transportHandler: $stack,
+        );
+    }
+
+    /**
+     * A RAW-callable transport, unlike {@see self::client()}'s `HandlerStack`-wrapped
+     * one: `HandlerStack::create()` bakes its OWN `http_errors` middleware directly
+     * around `axiam_auth`/`axiam_refresh` only when its base handler is a raw
+     * callable. A `HandlerStack` passed AS that base handler (what {@see self::client()}
+     * builds) carries its own nested `http_errors` that converts a 401 into an
+     * exception one layer too early, before `RefreshMiddleware` ever sees the raw
+     * response — see `Contract151DeviceAuthTest::rawHistoryTransport()`'s doc comment
+     * and `Sec085GuardCredentialSubstitutionTest::clientWithHealthySession()` for the
+     * same pattern. Needed here whenever a test must observe whether a 401 actually
+     * reaches the §9 refresh guard.
+     *
+     * @param list<Response> $queue
+     * @param list<array{request: RequestInterface}> $history
+     */
+    private function rawTransportClient(array $queue, array &$history): AxiamClient
+    {
+        $mock = new MockHandler($queue);
+        $transport = static function (RequestInterface $request, array $options) use ($mock, &$history) {
+            $history[] = ['request' => $request];
+
+            return $mock($request, $options);
+        };
+
+        return new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            oidcClientId: self::CLIENT_ID,
+            oidcClientSecret: self::CLIENT_SECRET,
+            oidcTenantId: self::TENANT_UUID,
+            transportHandler: $transport,
+            retryEnabled: false,
         );
     }
 
@@ -283,6 +319,67 @@ final class OidcTokenOpsTest extends TestCase
         // The SECOND request (checkAccess, over authzHttp) carries the adopted token.
         $authzRequest = $history[1]['request'];
         self::assertSame('Bearer adopted-access', $authzRequest->getHeaderLine('Authorization'));
+    }
+
+    /**
+     * CONTRACT.md §6.1 rule 11 / C-12 N4.5: "Check client-credentials adoption the
+     * same way [as the device credential]" — a `client_credentials` grant issues no
+     * refresh token (RFC 6749 §4.4.3), so an adopted access token must never enter
+     * the §9 cookie-session refresh guard either. Red on the unfixed code for the
+     * identical reason as `Contract151DeviceAuthTest`'s device-credential twin:
+     * `RefreshMiddleware` triggers `Session::refreshIfNeeded()` on ANY 401, and
+     * `Session::accessToken()` falls back to the adopted token once no cookie session
+     * exists.
+     */
+    public function testA401OnAnAdoptedClientCredentialsTokenNeverEntersTheRefreshGuard(): void
+    {
+        $adoptedJwt = self::jwtWithClaims([
+            'sub' => 'svc-1',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'org_id' => '11111111-1111-4111-8111-111111111111',
+        ]);
+
+        $history = [];
+        $client = $this->rawTransportClient([
+            new Response(200, [], (string) json_encode([
+                'access_token' => $adoptedJwt, 'token_type' => 'Bearer', 'expires_in' => 3600,
+            ])),
+            new Response(401, ['Content-Type' => 'application/json'], (string) json_encode(['message' => 'token expired'])),
+            // Spares: let the unfixed code consume a well-formed refresh + retry
+            // rather than blow up on an empty mock queue.
+            new Response(200, [], (string) json_encode(['access_token' => 'refreshed', 'token_type' => 'Bearer', 'expires_in' => 900])),
+            new Response(200, [], (string) json_encode(['allowed' => true])),
+        ], $history);
+
+        $client->loginClientCredentials(configuration: $this->configuration(), adoptAsCredential: true);
+
+        try {
+            $client->checkAccess('read', 'resource-1');
+            self::fail('expected AuthError');
+        } catch (AuthError $e) {
+            self::assertStringNotContainsString(
+                'token refresh failed',
+                $e->getMessage(),
+                'an adopted client-credentials token must never enter the §9 refresh guard (CONTRACT.md §6.1 rule 11, C-12 N4.5)',
+            );
+        }
+
+        self::assertCount(
+            2,
+            $history,
+            'no POST /api/v1/auth/refresh for an adopted client-credentials token (CONTRACT.md §6.1 rule 11, C-12 N4.5)',
+        );
+    }
+
+    /** @param array<string,mixed> $claims */
+    private static function jwtWithClaims(array $claims): string
+    {
+        $segment = static fn (array $data): string => rtrim(
+            strtr(base64_encode((string) json_encode($data)), '+/', '-_'),
+            '=',
+        );
+
+        return $segment(['alg' => 'none', 'typ' => 'JWT']) . '.' . $segment($claims) . '.signature';
     }
 
     public function testAdoptedCredentialIsNeverSentToOauth2Endpoints(): void

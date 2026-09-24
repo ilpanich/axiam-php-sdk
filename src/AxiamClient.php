@@ -465,6 +465,10 @@ final class AxiamClient
             // §1.1.4: getUserInfo's gRPC UNAUTHENTICATED retry drives the SAME single-flight
             // refresh guard (§9, D-06) the REST 401 path uses — never a second mechanism.
             refreshAccessor: fn (): mixed => $this->session->refreshIfNeeded()->wait(),
+            // CONTRACT.md §6.1 rule 11 / C-12 N4.5: never refreshed, on either transport —
+            // the SAME check RefreshMiddleware makes for REST, so a device or adopted
+            // client-credentials token's gRPC UNAUTHENTICATED never drives a refresh either.
+            canRefreshAccessor: fn (): bool => $this->session->canRefresh(),
         );
 
         // CONTRACT.md §12: built on $plainHttp (AuthMiddleware only, NEVER

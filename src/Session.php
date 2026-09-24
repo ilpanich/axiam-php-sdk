@@ -244,6 +244,32 @@ final class Session
     }
 
     /**
+     * Whether the credential {@see self::accessToken()} would currently return can be
+     * refreshed through the §9 `/api/v1/auth/refresh` guard (CONTRACT.md §6.1 rule 11,
+     * C-12 N4.5): true exactly when a cookie-sourced session exists — a real
+     * `login()`/`verifyMfa()`/OPAQUE/MFA-setup/WebAuthn-setup/SSO session has a
+     * server-stored refresh token behind its `axiam_access` cookie. An ADOPTED bearer
+     * credential — {@see \Axiam\Sdk\AxiamClient::authenticateDevice()}'s device token
+     * (§6.1 rule 6: no refresh token is ever issued for it), or a `client_credentials`/
+     * device-grant token adopted via {@see self::adoptBearerCredential()} (RFC 6749
+     * §4.4.3: `client_credentials` issues no `refresh_token` either) — has none, and
+     * MUST NEVER be refreshed, on either transport. Mirrors {@see self::accessToken()}'s
+     * own cookie-first precedence exactly, so this is true whenever THAT method would
+     * hand back a cookie-sourced token and false whenever it would fall back to the
+     * adopted one (or return `null`).
+     *
+     * Consulted by {@see \Axiam\Sdk\Rest\RefreshMiddleware} (REST, before ever calling
+     * {@see self::refreshIfNeeded()}) and {@see \Axiam\Sdk\AuthzDispatcher} (gRPC,
+     * before ever calling its own `$refreshAccessor`) — never by this class itself,
+     * which stays agnostic of which credential is "current" beyond what
+     * {@see self::accessToken()} already resolves.
+     */
+    public function canRefresh(): bool
+    {
+        return $this->cookieValue('axiam_access') !== null;
+    }
+
+    /**
      * The current access token, read live from the shared cookie jar's `axiam_access`
      * entry rather than cached separately — avoids a second, potentially-stale, copy
      * of the token (mirrors the Java SDK's `SessionState::cachedAccessToken()` and

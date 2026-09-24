@@ -50,6 +50,18 @@ final class RefreshMiddleware
                         return $response;
                     }
 
+                    // CONTRACT.md §6.1 rule 11 / C-12 N4.5: a device credential, or an
+                    // adopted client-credentials/device-grant token, has no refresh
+                    // token behind it and must NEVER enter the §9 guard — not even to
+                    // fail through it. Returning the untouched 401 here (rather than
+                    // calling refreshIfNeeded()) means the caller's ordinary
+                    // ErrorMapper-based mapping runs exactly as it would with this
+                    // middleware absent, instead of the guard's own synthesized
+                    // "token refresh failed" AuthError.
+                    if (!$this->session->canRefresh()) {
+                        return $response;
+                    }
+
                     // Single-flight: every concurrent 401-triggering request calls
                     // refreshIfNeeded() and is handed back the SAME Promise (D-06) —
                     // the retry below fires exactly once per request, no loop.
