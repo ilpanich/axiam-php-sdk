@@ -19,14 +19,17 @@ final class ManagedGroup
      * @param string       $name        The group's name on the server.
      * @param string       $description Human-readable description.
      * @param list<string> $roleKeys    KEYS of the roles this group carries.
-     * @param array<string,mixed> $metadata Free-form metadata.
+     * @param array<string,mixed>|null $metadata Free-form metadata. `null` (the
+     *        default) means UNSTATED; `[]` is a STATED empty object, distinct from
+     *        `null` — see {@see \Axiam\Sdk\Management\Manifest\ManifestBuilder::group()}'s
+     *        identical `$metadata` doc (CONTRACT 1.52 N6.5, C-12).
      */
     public function __construct(
         public readonly string $key,
         public readonly string $name,
         public readonly string $description = '',
         public readonly array $roleKeys = [],
-        public readonly array $metadata = [],
+        public readonly ?array $metadata = null,
     ) {
     }
 }

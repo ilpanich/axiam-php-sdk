@@ -55,13 +55,24 @@ final class ManifestValidation
     }
 
     /**
-     * Every `depends` entry must name an entity the manifest actually declares.
+     * Every `depends` entry must name an entity the manifest actually declares — OF THE
+     * RIGHT KIND (CONTRACT 1.52 N6.6, C-12: "references resolve by kind"). A resource's
+     * `parent` must be another Resource; a role binding's `role`/`resource` must be a
+     * Role/Resource respectively — {@see ManifestEntity::$expectedKinds} names which,
+     * per dependency key. A key that exists under a DIFFERENT kind (a role binding
+     * naming a Group's key, say) is exactly as dangling as a key that does not exist at
+     * all: the server has nothing to resolve it to as the reference intends.
+     *
+     * A dependency with no entry in `$expectedKinds` — a {@see ManifestEntity} built by
+     * hand rather than through {@see ManifestBuilder}, as some direct-construction tests
+     * do — falls back to matching ANY kind, the pre-N6.6 behavior, so it keeps working
+     * unchanged.
      *
      * A dangling reference is the failure mode this whole class exists for: it is
      * invisible until apply reaches the entity that needs it, by which point the objects
      * before it are already created.
      *
-     * @param array<string,true> $keys
+     * @param array<string,true> $keys The `kind:key` identity set {@see self::assertUniqueKeys()} built.
      */
     private static function assertNoDanglingReferences(ManagementManifest $manifest, array $keys): void
     {
@@ -72,12 +83,19 @@ final class ManifestValidation
 
         foreach ($manifest->entities as $entity) {
             foreach ($entity->depends as $dependency) {
-                if (!isset($byKey[$dependency])) {
+                $expectedKind = $entity->expectedKinds[$dependency] ?? null;
+
+                $resolved = $expectedKind !== null
+                    ? isset($keys[$expectedKind->value . ':' . $dependency])
+                    : isset($byKey[$dependency]);
+
+                if (!$resolved) {
                     throw new ManifestException(sprintf(
-                        '%s:%s depends on "%s", which this manifest does not declare',
+                        '%s:%s depends on "%s"%s, which this manifest does not declare',
                         $entity->kind->value,
                         $entity->key,
                         $dependency,
+                        $expectedKind !== null ? sprintf(' as a %s', $expectedKind->value) : '',
                     ));
                 }
             }

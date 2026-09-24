@@ -23,14 +23,17 @@ final class ManagedResource
      * @param string      $name      The resource's name on the server.
      * @param string      $type      Its `resource_type`.
      * @param string|null $parentKey The KEY of the parent resource, or `null` for a root.
-     * @param array<string,mixed> $metadata Free-form metadata.
+     * @param array<string,mixed>|null $metadata Free-form metadata. `null` (the
+     *        default) means UNSTATED; `[]` is a STATED empty object, distinct from
+     *        `null` — see {@see \Axiam\Sdk\Management\Manifest\ManifestBuilder::resource()}'s
+     *        identical `$metadata` doc (CONTRACT 1.52 N6.5, C-12).
      */
     public function __construct(
         public readonly string $key,
         public readonly string $name,
         public readonly string $type,
         public readonly ?string $parentKey = null,
-        public readonly array $metadata = [],
+        public readonly ?array $metadata = null,
     ) {
     }
 }
