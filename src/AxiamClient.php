@@ -1146,12 +1146,24 @@ final class AxiamClient
      * anyway, so going to the wire gains nothing and turns a configuration mistake into
      * an authentication failure.
      *
-     * **The request carries no cookie from an earlier session.** `$plainHttp` shares
-     * this client's ONE cookie jar (§4) with every other REST call, so the outgoing
-     * request is sent with Guzzle's per-request `cookies => false` override rather than
-     * by clearing the jar: a cookie left from an earlier `login()`/`verifyMfa()`
-     * session on this same client object must not reach this endpoint, but that prior
-     * session must otherwise survive a refusal intact (see below).
+     * **The request carries no credential from an earlier session.** `$plainHttp`
+     * shares this client's ONE cookie jar (§4) with every other REST call, and
+     * {@see AuthMiddleware} decorates EVERY same-origin request with
+     * `Authorization: Bearer` from {@see \Axiam\Sdk\Session::accessToken()} (which
+     * itself prefers a cookie-sourced token) and, on this `POST`, `X-CSRF-Token` — so
+     * withholding the `Cookie` header alone is not enough: a cookie left from an
+     * earlier `login()`/`verifyMfa()` session would still ride this call as a stale
+     * `Authorization: Bearer` (the same defect independently found and fixed in the
+     * C# port, `ilpanich/axiam-csharp-sdk#96`). The request is therefore sent with
+     * BOTH Guzzle's per-request `cookies => false` override AND
+     * {@see AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION} (the same option
+     * {@see self::postWithoutSessionCredentials()} uses for §24.1's `setup/register/*`
+     * pair) rather than by clearing the jar: neither the cookie, the stale bearer nor
+     * a stale `X-CSRF-Token` reaches this endpoint, while `X-Tenant-ID` and (when set)
+     * `X-Axiam-Tenant` still do — CONTRACT.md §5.2 rule 1/§5.2.2 rule 4 require both on
+     * every `/api/v1` request regardless of session credentials, and
+     * `NO_SESSION_CREDENTIALS_OPTION` does not touch either. The prior session must
+     * otherwise survive a refusal intact (see below).
      *
      * **Session state changes ONLY after a `200` with a well-formed body** — immediately
      * before adopting the token via {@see \Axiam\Sdk\Session::adoptBearerCredential()}.
@@ -1197,10 +1209,15 @@ final class AxiamClient
         }
 
         try {
-            // See this method's own docblock: the prior session's cookie must not
-            // reach this endpoint, withheld per-request — the jar itself is NOT
-            // touched here, so a refusal below leaves a working prior session intact.
-            $response = $this->plainHttp->post(self::DEVICE_AUTH_PATH, ['cookies' => false]);
+            // See this method's own docblock: the prior session's cookie, bearer and
+            // CSRF token must not reach this endpoint, withheld per-request — the jar
+            // itself is NOT touched here, so a refusal below leaves a working prior
+            // session intact. X-Tenant-ID/X-Axiam-Tenant are unaffected by
+            // NO_SESSION_CREDENTIALS_OPTION and are still sent (§5.2 rule 1/§5.2.2 rule 4).
+            $response = $this->plainHttp->post(self::DEVICE_AUTH_PATH, [
+                'cookies' => false,
+                AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION => true,
+            ]);
         } catch (RequestException $e) {
             $errorResponse = $e instanceof BadResponseException ? $e->getResponse() : null;
             if ($errorResponse !== null) {

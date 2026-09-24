@@ -65,8 +65,12 @@ final class Contract151DeviceAuthTest extends TestCase
      * @param list<Response> $queue
      * @param list<array{request: RequestInterface}> $history
      */
-    private function clientWithCertificate(array $queue, array &$history, float $decisionMemoTtlMs = 0.0): AxiamClient
-    {
+    private function clientWithCertificate(
+        array $queue,
+        array &$history,
+        float $decisionMemoTtlMs = 0.0,
+        ?string $actingTenant = null,
+    ): AxiamClient {
         [$certPem, $keyPem] = $this->generateTestIdentity();
 
         $handler = new MockHandler($queue);
@@ -82,6 +86,7 @@ final class Contract151DeviceAuthTest extends TestCase
             transportHandler: $stack,
             retryEnabled: false,
             decisionMemoTtlMs: $decisionMemoTtlMs,
+            actingTenant: $actingTenant,
         );
     }
 
@@ -97,7 +102,13 @@ final class Contract151DeviceAuthTest extends TestCase
 
         return new Response(
             200,
-            ['Set-Cookie' => 'axiam_access=' . $token . '; Path=/', 'Content-Type' => 'application/json'],
+            [
+                'Set-Cookie' => 'axiam_access=' . $token . '; Path=/',
+                'Content-Type' => 'application/json',
+                // Captured by Session::csrfToken() (§3) — present here so a test can
+                // prove it is (or is not) echoed back on a later state-changing request.
+                'X-CSRF-Token' => 'stale-csrf-from-prior-session',
+            ],
             (string) json_encode(['user' => ['id' => 'u1'] + $user]),
         );
     }
@@ -524,6 +535,116 @@ final class Contract151DeviceAuthTest extends TestCase
             'axiam_access=',
             $lastRequest->getHeaderLine('Cookie'),
             'no stale cookie once the device token is adopted',
+        );
+    }
+
+    // -----------------------------------------------------------------
+    // The device POST itself must carry no BEARER credential from an earlier
+    // session either — AuthMiddleware attaches Authorization/X-CSRF-Token from
+    // Session::accessToken()/csrfToken() to every same-origin request regardless
+    // of the Cookie header, so withholding the cookie alone is not enough
+    // (ilpanich/axiam-csharp-sdk#96 had the identical defect).
+    // -----------------------------------------------------------------
+
+    /**
+     * A prior cookie session's access token must not ride the device POST as a
+     * stale `Authorization: Bearer`, and its captured CSRF token must not ride it
+     * as `X-CSRF-Token` either.
+     */
+    public function testTheDevicePostCarriesNoAuthorizationOrCsrfHeaderFromAPriorCookieSession(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([
+            self::loginCookieResponse(),
+            self::deviceAuthOk('device-tok-1'),
+        ], $history);
+
+        $client->login('alice@example.test', 'pw');
+        $client->authenticateDevice();
+
+        self::assertCount(2, $history);
+        $deviceRequest = $history[1]['request'];
+        self::assertSame('/api/v1/auth/device', $deviceRequest->getUri()->getPath());
+        self::assertFalse(
+            $deviceRequest->hasHeader('Authorization'),
+            'the device POST must not carry the prior cookie session\'s access token as a bearer credential',
+        );
+        self::assertFalse(
+            $deviceRequest->hasHeader('X-CSRF-Token'),
+            'the device POST must not echo the prior session\'s captured CSRF token',
+        );
+    }
+
+    /**
+     * The SAME defect, one call later: once a FIRST device login has adopted a
+     * bearer credential, a SECOND `authenticateDevice()` call's own POST must not
+     * carry that adopted token either — `Session::accessToken()` falls back to it
+     * once the cookie jar is empty, and `cookieJar()->clear()`/`onCredentialChange()`
+     * never touch `$adoptedAccessToken`, only `adoptBearerCredential()` overwrites
+     * it (after a response). This case is also red on `origin/main`: the old
+     * jar-clear-before-send order never addressed the adopted-token source either.
+     */
+    public function testTheDevicePostCarriesNoAuthorizationFromAnAdoptedBearerOfAnEarlierDeviceLogin(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([
+            self::deviceAuthOk('first-device-tok'),
+            self::deviceAuthOk('second-device-tok'),
+        ], $history);
+
+        $client->authenticateDevice();
+        $client->authenticateDevice();
+
+        self::assertCount(2, $history);
+        $secondDeviceRequest = $history[1]['request'];
+        self::assertSame('/api/v1/auth/device', $secondDeviceRequest->getUri()->getPath());
+        self::assertFalse(
+            $secondDeviceRequest->hasHeader('Authorization'),
+            'the second device POST must not carry the first device login\'s adopted bearer token',
+        );
+    }
+
+    // -----------------------------------------------------------------
+    // The I4 twin of the above: withholding session CREDENTIALS must not withhold
+    // tenant ROUTING headers — CONTRACT.md §5.2 rule 1 / §5.2.2 rule 4 require
+    // X-Tenant-ID and (when set) X-Axiam-Tenant on every /api/v1 request
+    // regardless of session credentials.
+    // -----------------------------------------------------------------
+
+    public function testTheDevicePostStillCarriesTheTenantIdHeader(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([self::deviceAuthOk()], $history);
+
+        $client->authenticateDevice();
+
+        self::assertCount(1, $history);
+        self::assertSame(self::TENANT, $history[0]['request']->getHeaderLine('X-Tenant-ID'));
+    }
+
+    public function testTheDevicePostCarriesXAxiamTenantWhenAnActingTenantIsSetAndOmitsItOtherwise(): void
+    {
+        $withActing = [];
+        $clientWithActing = $this->clientWithCertificate(
+            [self::deviceAuthOk()],
+            $withActing,
+            actingTenant: '33333333-3333-4333-8333-333333333333',
+        );
+        $clientWithActing->authenticateDevice();
+        self::assertCount(1, $withActing);
+        self::assertSame(
+            '33333333-3333-4333-8333-333333333333',
+            $withActing[0]['request']->getHeaderLine('X-Axiam-Tenant'),
+            'an acting tenant must still reach the device POST',
+        );
+
+        $withoutActing = [];
+        $clientWithoutActing = $this->clientWithCertificate([self::deviceAuthOk()], $withoutActing);
+        $clientWithoutActing->authenticateDevice();
+        self::assertCount(1, $withoutActing);
+        self::assertFalse(
+            $withoutActing[0]['request']->hasHeader('X-Axiam-Tenant'),
+            'no acting tenant configured means no X-Axiam-Tenant header, byte-for-byte as any other request',
         );
     }
 }

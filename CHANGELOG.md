@@ -125,7 +125,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   clear / gate reset / jar clear happen only after a `200` with a well-formed body,
   immediately before `adoptBearerCredential()`. A refused or malformed device login
   now leaves the jar, the gate and the memo exactly as they were — matching how a
-  refused SSO completion elsewhere in this port already changes nothing. See
+  refused SSO completion elsewhere in this port already changes nothing.
+
+  **Follow-up (same fix): the device POST also carried a stale `Authorization: Bearer`
+  and `X-CSRF-Token`.** `AuthMiddleware` decorates every same-origin request with
+  `Authorization` from `Session::accessToken()` (cookie-sourced OR previously-adopted)
+  and, on `POST`, `X-CSRF-Token` from `Session::csrfToken()` — regardless of the
+  `Cookie` header, so withholding the cookie alone left a prior cookie session's
+  access token, or an earlier SUCCESSFUL device login's own adopted token, riding this
+  call as a bearer credential, plus a stale CSRF token (the same defect independently
+  found and fixed in the C# port, `ilpanich/axiam-csharp-sdk#96`). The request now
+  also carries `AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION => true` (the same
+  option `postWithoutSessionCredentials()` uses for the §24.1 `setup/register/*`
+  pair), which suppresses `Authorization`/`X-CSRF-Token` without touching
+  `X-Tenant-ID`/`X-Axiam-Tenant` — CONTRACT.md §5.2 rule 1/§5.2.2 rule 4 require both
+  on every `/api/v1` request regardless of session credentials. See
   `tests/Contract151DeviceAuthTest.php`.
 
 - **§27.6 declarative manifest, two pre-existing defects (§13 row 17).** `applyRole()`'s
