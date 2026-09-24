@@ -1904,8 +1904,20 @@ final class AxiamClient
     /**
      * Verify an INBOUND caller's token and nothing else — the seam every request guard
      * must use (CONTRACT.md §10.1 rule 8). Delegates straight to {@see JwksVerifier::verify()},
-     * which applies the full §10.1 minimum local-verification set, and returns `null` on
-     * any failure with **no fallback to another credential**.
+     * which applies the full §10.1 minimum local-verification set INCLUDING rule 9
+     * (contract 1.51), and returns `null` on any failure with **no fallback to another
+     * credential**.
+     *
+     * **Rule 9 (contract 1.51):** this method has no transport to ask for a peer
+     * certificate or a verified DPoP proof, so a token carrying `cnf` is REFUSED here
+     * unconditionally — accepting one without evidence would be exactly the
+     * bound-to-bearer downgrade rule 9 exists to prevent. Before this, a certificate- or
+     * DPoP-bound token reached this method with its `cnf` claim intact and unchecked, so
+     * a device token lifted off a device (or a DPoP-bound token replayed without its
+     * proof) was admitted here as an ordinary bearer credential — the same defect found
+     * independently in the Rust, TypeScript, Go, Python and C# ports. A guard that DOES
+     * have evidence to offer (an mTLS-terminating listener, a verified DPoP proof) calls
+     * {@see self::verifyWithProofs()} instead.
      *
      * This is deliberately the *only* verification entry point offered to the framework
      * bridges. Its sibling {@see self::verifyLocallyOrFallback()} substitutes this client's
@@ -1917,6 +1929,27 @@ final class AxiamClient
     public function verifyLocally(string $token, string $tenant): ?array
     {
         return $this->jwksVerifier->verify($token, $tenant);
+    }
+
+    /**
+     * {@see self::verifyLocally()}, applying CONTRACT.md §10.1 rule 9 against
+     * `$proofs` — evidence YOUR connection established for THIS request, never a value
+     * taken from a caller-settable request header (§10.1 rule 9 detail 2: e.g.
+     * `$_SERVER['SSL_CLIENT_CERT']`/the PSR-7 server params as set by the
+     * TLS-terminating web server, or an already-verified DPoP proof's `jkt`). An unbound
+     * token is accepted with or without proofs, exactly as {@see self::verifyLocally()}.
+     *
+     * The request guard to use when the deployment DOES have connection evidence to
+     * offer — an mTLS-terminating listener fronting a resource server that must accept
+     * device tokens, for instance. {@see self::verifyLocally()} stays the entry point
+     * for everything else, and always evaluates as though no evidence were available.
+     *
+     * @return array<string,mixed>|null Verified claims, or null — including when a bound
+     *                                   token's `cnf` is not satisfied by `$proofs`.
+     */
+    public function verifyWithProofs(string $token, string $tenant, \Axiam\Sdk\Auth\PresentedProofs $proofs): ?array
+    {
+        return $this->jwksVerifier->verifyWithProofs($token, $tenant, $proofs);
     }
 
     /**
