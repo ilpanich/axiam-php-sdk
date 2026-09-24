@@ -17,7 +17,9 @@ final class CreateIntermediateCaRequest implements \JsonSerializable
      * Constructs a CreateIntermediateCaRequest.
      * @param KeyAlgorithm $keyAlgorithm the server's `key_algorithm` field
      * @param string $parentCaId The organization CA that signs it.
-     * @param string $subject Subject for the signing CA, e.g. `CN=ACME R&D Signing CA`.
+     * @param string $subject The signing CA's common name, e.g. `ACME R&D Signing CA`. A
+     *     **common name**, not a distinguished name. A single `CN=` prefix is accepted and
+     *     stripped; anything else containing `=` is refused with `400`.
      * @param int $validityDays Validity duration in days, capped to the parent's own expiry.
      */
     public function __construct(

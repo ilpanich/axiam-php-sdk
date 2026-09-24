@@ -15,6 +15,8 @@ final class RoleServiceAccountAssignment implements \JsonSerializable
 {
     /**
      * Constructs a RoleServiceAccountAssignment.
+     * @param bool $inherit Whether the assignment also reaches the descendants of
+     *     `resource_id` (`true`, the default) or applies at that resource only (`false`).
      * @param ServiceAccountResponse $serviceAccount The assigned service account. Carries no
      *     secret — the client secret is returned once, at creation, and never again.
      * @param string|null $resourceId `None` means the role was assigned globally (no resource
@@ -24,6 +26,7 @@ final class RoleServiceAccountAssignment implements \JsonSerializable
      *     deliberately narrowed grant from an organization-wide one. (optional)
      */
     public function __construct(
+        public readonly bool $inherit,
         public readonly ServiceAccountResponse $serviceAccount,
         public readonly ?string $resourceId = null,
         public readonly ?array $tenantScope = null,
@@ -37,6 +40,7 @@ final class RoleServiceAccountAssignment implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            isset($data['inherit']) ? (bool) $data['inherit'] : true,
             ServiceAccountResponse::fromArray((array) ModelDecode::need($data, 'service_account', self::class)),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
             isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
@@ -54,6 +58,7 @@ final class RoleServiceAccountAssignment implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        $out['inherit'] = $this->inherit;
         $out['service_account'] = $this->serviceAccount->toArray();
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;

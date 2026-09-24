@@ -25,6 +25,7 @@ final class ManifestValidation
         $keys = self::assertUniqueKeys($manifest);
         self::assertNoDanglingReferences($manifest, $keys);
         self::assertNoCycles($manifest);
+        self::assertNoInvalidBindings($manifest);
     }
 
     /**
@@ -90,6 +91,63 @@ final class ManifestValidation
      * manifest can describe a shape that is not a tree. There is no ordering that
      * satisfies a cycle, so the only correct response is to refuse.
      */
+    /**
+     * The §27.6.1 addition 2 rules for role bindings — the two the server itself cannot
+     * be argued out of, so refusing them here (before any request) is strictly better
+     * than discovering a `409`/`400` partway through an `apply()` with no rollback:
+     *
+     * - The server keys an assignment on `(subject, role)` with no resource component
+     *   (`has_role` is `UNIQUE(in, out)`), so ONE role bound twice to one subject — at two
+     *   resources, or once plain and once scoped — describes a state it cannot hold.
+     * - A role with `is_global: true` applies everywhere and ignores the resource, so the
+     *   server refuses `inherit: false` on it with `400`. §27.6.1 lets an SDK say so
+     *   first when that role is declared in the SAME manifest (C-12 question 6: PHP
+     *   refuses, matching the reference).
+     */
+    private static function assertNoInvalidBindings(ManagementManifest $manifest): void
+    {
+        $globalRoleKeys = [];
+        foreach ($manifest->entities as $entity) {
+            if ($entity->kind === ManifestKind::Role && ($entity->fields['is_global'] ?? false) === true) {
+                $globalRoleKeys[$entity->key] = true;
+            }
+        }
+
+        foreach ($manifest->entities as $entity) {
+            if ($entity->kind !== ManifestKind::Group && $entity->kind !== ManifestKind::ServiceAccount) {
+                continue;
+            }
+
+            /** @var list<RoleBinding> $bindings */
+            $bindings = $entity->fields['roles'] ?? [];
+            $seenRoles = [];
+            foreach ($bindings as $binding) {
+                if (isset($seenRoles[$binding->role])) {
+                    throw new ManifestException(sprintf(
+                        '%s "%s" binds role "%s" more than once; a subject holds a role at most '
+                        . 'once, whatever the resource (the server keys assignments on subject '
+                        . 'and role, and answers 409 to a second)',
+                        $entity->kind->value,
+                        $entity->key,
+                        $binding->role,
+                    ));
+                }
+                $seenRoles[$binding->role] = true;
+
+                if (!$binding->inherit && isset($globalRoleKeys[$binding->role])) {
+                    throw new ManifestException(sprintf(
+                        '%s "%s" binds global role "%s" with inherit: false; a global role '
+                        . 'applies everywhere and ignores the resource, so the server refuses '
+                        . 'the flag',
+                        $entity->kind->value,
+                        $entity->key,
+                        $binding->role,
+                    ));
+                }
+            }
+        }
+    }
+
     private static function assertNoCycles(ManagementManifest $manifest): void
     {
         $edges = [];

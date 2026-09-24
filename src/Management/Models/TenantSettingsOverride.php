@@ -74,6 +74,10 @@ final class TenantSettingsOverride implements \JsonSerializable
      * @param bool|null $requireUppercase the server's `require_uppercase` field (optional)
      * @param bool|null $sensitiveScopesEnabled the server's `sensitive_scopes_enabled` field
      *     (optional)
+     * @param list<string>|null $serverCertAllowedNames S-7 — tighten-only: every entry must be
+     *     covered by an organization entry. An empty list means this tenant issues no `Server`
+     *     certificate at all, which is different from an absent field (inherit the organization's
+     *     list). (optional)
      * @param string|null $webauthnUserVerification the server's `webauthn_user_verification`
      *     field (optional)
      */
@@ -111,6 +115,7 @@ final class TenantSettingsOverride implements \JsonSerializable
         public readonly ?bool $requireSymbols = null,
         public readonly ?bool $requireUppercase = null,
         public readonly ?bool $sensitiveScopesEnabled = null,
+        public readonly ?array $serverCertAllowedNames = null,
         public readonly ?string $webauthnUserVerification = null,
     ) {
     }
@@ -155,6 +160,7 @@ final class TenantSettingsOverride implements \JsonSerializable
             isset($data['require_symbols']) ? (bool) $data['require_symbols'] : null,
             isset($data['require_uppercase']) ? (bool) $data['require_uppercase'] : null,
             isset($data['sensitive_scopes_enabled']) ? (bool) $data['sensitive_scopes_enabled'] : null,
+            isset($data['server_cert_allowed_names']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['server_cert_allowed_names'])) : null,
             isset($data['webauthn_user_verification']) ? (string) $data['webauthn_user_verification'] : null,
         );
     }
@@ -268,6 +274,9 @@ final class TenantSettingsOverride implements \JsonSerializable
         }
         if ($this->sensitiveScopesEnabled !== null) {
             $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
+        }
+        if ($this->serverCertAllowedNames !== null) {
+            $out['server_cert_allowed_names'] = $this->serverCertAllowedNames;
         }
         if ($this->webauthnUserVerification !== null) {
             $out['webauthn_user_verification'] = $this->webauthnUserVerification;

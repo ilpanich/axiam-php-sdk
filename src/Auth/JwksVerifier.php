@@ -44,6 +44,17 @@ use Psr\Http\Message\ResponseInterface;
  *     audience. Unset by default; both RFC 7519 shapes (single string, array) honoured.
  *  7. **clock skew** — {@see self::CLOCK_SKEW_LEEWAY_SECONDS}, a named 60-second
  *     constant applied to rules 2 and 3, deliberately not operator-configurable.
+ *  9. **`cnf` (contract 1.51)** — a token carrying `cnf` is not a bearer token and
+ *     MUST NOT be accepted without evidence satisfying every constraint it names.
+ *     {@see self::verify()} has no transport to ask for that evidence, so it applies
+ *     this rule with NONE presented — which refuses every bound token and accepts every
+ *     unbound one, exactly as before this rule existed for the tokens that never set
+ *     `cnf`. {@see self::verifyWithProofs()} is the same check with real evidence.
+ *
+ * (There is no rule 8 in this numbered list — §10.1 rule 8, "the guard decides on the
+ * caller's credential and no other", is a control-flow discipline for the CALLER of this
+ * class, not a claim this method checks; see {@see \Axiam\Sdk\AxiamClient::verifyLocally()}
+ * vs `verifyLocallyOrFallback()`.)
  *
  * What `firebase/php-jwt` does versus what §10.1 requires: `JWT::decode()` validates
  * `nbf`/`iat`/`exp` and rejects a non-numeric `exp` — but ONLY when the claim is
@@ -159,8 +170,20 @@ final class JwksVerifier
 
     /**
      * Verifies a token against the COMPLETE CONTRACT.md §10.1 minimum local-verification
-     * set — see the class docblock for the seven rules and for what `firebase/php-jwt`
-     * does versus what §10.1 requires.
+     * set, INCLUDING rule 9 — see the class docblock for the rules and for what
+     * `firebase/php-jwt` does versus what §10.1 requires.
+     *
+     * **This is the guard entry point** — the one {@see \Axiam\Sdk\AxiamClient::verifyLocally()}
+     * / `verifyLocallyOrFallback()` and the Laravel/Symfony framework bridges call — and
+     * it has no transport to ask for a peer certificate or a DPoP proof. A token carrying
+     * `cnf` is therefore REFUSED here, unconditionally: this method has no evidence for
+     * it, and accepting one anyway would be exactly the downgrade rule 9 exists to
+     * prevent (contract 1.51 — before this, a bound token reached this call with its
+     * claim intact and no check against it, which is the SEC-071/SEC-080-shaped defect
+     * the same fan-out found independently in the Rust, TypeScript, Go, Python and C#
+     * ports). A resource server that DOES want to accept bound tokens on this entry
+     * point calls {@see self::verifyWithProofs()} instead, supplying the evidence its
+     * OWN connection established (never a request header — §10.1 rule 9 detail 2).
      *
      * @param string $expectedTenantId The configured tenant the token's `tenant_id` must
      *                                 equal (§10.1 rule 4). An empty string fails closed:
@@ -172,6 +195,28 @@ final class JwksVerifier
      *                                   failure (never throws on attacker input).
      */
     public function verify(string $jwt, string $expectedTenantId): ?array
+    {
+        return $this->verifyWithProofs($jwt, $expectedTenantId, PresentedProofs::none());
+    }
+
+    /**
+     * {@see self::verify()}, plus rule 9 applied against `$proofs` — what YOUR
+     * connection established for THIS request (the peer certificate's `x5t#S256`, an
+     * ALREADY-VERIFIED DPoP proof's `jkt`), never a value taken from a caller-settable
+     * request header (§10.1 rule 9 detail 2). An unbound token is accepted with or
+     * without proofs, exactly as {@see self::verify()} — rule 9 constrains tokens that
+     * claim a constraint, it does not make evidence mandatory.
+     *
+     * A resource server whose guard entry point has connection evidence to offer (an
+     * mTLS-terminating listener, a DPoP-verifying middleware) should route through this
+     * method rather than {@see self::verify()}, which always evaluates as though no
+     * evidence were available.
+     *
+     * @return array<string,mixed>|null Verified claims, or null on any verification
+     *                                   failure, INCLUDING a bound token whose `cnf` is
+     *                                   not satisfied by `$proofs`.
+     */
+    public function verifyWithProofs(string $jwt, string $expectedTenantId, PresentedProofs $proofs): ?array
     {
         if ($expectedTenantId === '') {
             // §10.1 rule 4: "no configured tenant to compare against MUST fail closed".
@@ -229,15 +274,22 @@ final class JwksVerifier
             return null;
         }
 
+        // Rule 9 (contract 1.51): a token carrying `cnf` is not a bearer token and MUST
+        // NOT be accepted without evidence satisfying it. `verify()` calls this with
+        // PresentedProofs::none(), so an unbound token still passes (the first row of
+        // the rule-9 table) while a bound one is refused here for want of evidence.
+        if (!self::verifyTokenBinding($claims, $proofs)) {
+            return null;
+        }
+
         // CONTRACT.md §10.4 (contract 1.44) — LAST, and only after every §10.1 rule has
         // already decided to accept. The feed "only ever rejects" (rule 4), so running it
         // here rather than earlier is what makes that true: a token that fails a §10.1
         // rule is rejected whatever the feed says, and the feed is not consulted — nor
         // fetched — for it at all.
         //
-        // This sits in verify() and NOT in verifyIdTokenSignature(), so the §12.4
-        // ID-token path cannot reach it: an ID token carries no AXIAM session and has no
-        // `sid` to match.
+        // This sits here and NOT in verifyIdTokenSignature(), so the §12.4 ID-token path
+        // cannot reach it: an ID token carries no AXIAM session and has no `sid` to match.
         if ($this->revocationFeed !== null) {
             $sid = $claims['sid'] ?? null;
 

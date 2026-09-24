@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Tests;
 
 use Axiam\Sdk\Auth\JwksVerifier;
+use Axiam\Sdk\Auth\PresentedProofs;
 use Firebase\JWT\JWT;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -400,23 +401,49 @@ final class Contract101LocalVerificationTest extends TestCase
     }
 
     /**
-     * `verify()` deliberately does not apply rule 9 — it has no transport to ask for a
-     * peer certificate. Asserted so the split cannot be collapsed by accident: a resource
-     * server accepting bound tokens must call `verifyCertificateBinding()` as well.
+     * Contract 1.51: `verify()` now APPLIES rule 9 — it has no transport to ask for a
+     * peer certificate, so it applies the rule with NO evidence, which refuses every
+     * bound token unconditionally. Before this fix, `verify()` returned the claims with
+     * the `cnf` intact and unchecked (this test's own previous name and body asserted
+     * exactly that — `testRule9VerifyDoesNotApplyItButCarriesTheClaimThrough` — the
+     * defect this port's C-6 task fixes, the same one found independently in the Rust,
+     * TypeScript, Go, Python and C# ports: a device- or DPoP-bound token reaching this
+     * entry point was admitted as an ordinary bearer credential). Inverted, not
+     * deleted: a resource server that DOES have evidence to offer now calls
+     * {@see JwksVerifier::verifyWithProofs()}, asserted right after.
      */
-    public function testRule9VerifyDoesNotApplyItButCarriesTheClaimThrough(): void
+    public function testRule9VerifyNowRefusesABoundTokenItHasNoEvidenceFor(): void
     {
         $token = $this->sign($this->validClaims() + ['cnf' => ['x5t#S256' => self::THUMBPRINT]]);
+
+        $claims = $this->verifier($this->servedKeys())->verify($token, self::TENANT);
+
+        self::assertNull($claims, 'verify() has no evidence for a bound token and must refuse it');
+    }
+
+    /** The evidence-aware sibling {@see JwksVerifier::verifyWithProofs()} accepts it. */
+    public function testRule9VerifyWithProofsAcceptsABoundTokenWithMatchingEvidence(): void
+    {
+        $token = $this->sign($this->validClaims() + ['cnf' => ['x5t#S256' => self::THUMBPRINT]]);
+        $verifier = $this->verifier($this->servedKeys());
+
+        $accepted = $verifier->verifyWithProofs($token, self::TENANT, PresentedProofs::certificate(self::THUMBPRINT));
+        $refusedNoProof = $verifier->verifyWithProofs($token, self::TENANT, PresentedProofs::none());
+        $refusedWrongProof = $verifier->verifyWithProofs($token, self::TENANT, PresentedProofs::certificate(self::OTHER_THUMBPRINT));
+
+        self::assertIsArray($accepted);
+        self::assertNull($refusedNoProof);
+        self::assertNull($refusedWrongProof);
+    }
+
+    /** The positive regression: an UNBOUND token still passes verify() exactly as before. */
+    public function testRule9VerifyStillAcceptsAnUnboundToken(): void
+    {
+        $token = $this->sign($this->validClaims());
+
         $claims = $this->verifier($this->servedKeys())->verify($token, self::TENANT);
 
         self::assertIsArray($claims);
-        // Nested objects come back as stdClass from firebase/php-jwt — asserting
-        // the real shape here is the point, since an implementation that only
-        // handles arrays rejects every bound token.
-        self::assertInstanceOf(\stdClass::class, $claims['cnf']);
-        self::assertSame(self::THUMBPRINT, $claims['cnf']->{'x5t#S256'});
-        self::assertTrue(JwksVerifier::verifyCertificateBinding($claims, self::THUMBPRINT));
-        self::assertFalse(JwksVerifier::verifyCertificateBinding($claims, null));
     }
 
     /**

@@ -80,6 +80,36 @@ final class Session
     private ?Sensitive $adoptedAccessToken = null;
 
     /**
+     * CONTRACT.md §5.2 rule 1 (contract 1.51): the tenant this client currently ACTS ON,
+     * sent as `X-Axiam-Tenant` by {@see \Axiam\Sdk\Rest\AuthMiddleware} on every
+     * `/api/v1` request while set, and on NO request while `null` (the default — byte-
+     * for-byte what every request sent before 1.51). Distinct from `$tenant` above,
+     * which is the constructor's OWN tenant slug and is always sent as `X-Tenant-ID`
+     * (§5 rule 2) regardless of this value. Deliberately shared, mutable session state
+     * rather than per-handle: PHP's request lifecycle has no concurrent tasks sharing
+     * one client the way a long-lived Rust/Go process does, so
+     * {@see \Axiam\Sdk\AxiamClient::actingTenant()}/`clearActingTenant()` mutate this in
+     * place and return `$this`, a deliberate simplification from the reference
+     * implementation's per-handle isolation, recorded in the README/CHANGELOG.
+     */
+    private ?string $actingTenant = null;
+
+    /**
+     * CONTRACT.md §5.2/§5.2.3 — what the last completed login reported about the
+     * principal's reach, or `null` when this client holds no such result (a service
+     * account, an injected token, or a session completed without a `LoginUserInfo` —
+     * OPAQUE, SSO and WebAuthn AUTHENTICATION reset it; password login, verify-MFA,
+     * OPAQUE's finish and the MFA/WebAuthn SETUP completions set it, since the server
+     * sends a user object on all five). `null` on purpose rather than a defaulted
+     * `false`: "the server did not say" must not gate
+     * {@see \Axiam\Sdk\AxiamClient::actingTenant()} as though the server had said
+     * "not organization-level" — that would refuse a caller the server would admit.
+     *
+     * @var array{organizationLevel: bool, reachableTenantIds: ?list<string>}|null
+     */
+    private ?array $principalScope = null;
+
+    /**
      * @param string         $baseUrl   AXIAM server base URL (HTTPS; `http://` is rejected
      *                                  except on loopback).
      * @param string         $tenant    Tenant slug every request is scoped to.
@@ -145,6 +175,61 @@ final class Session
     public function adoptBearerCredential(Sensitive $accessToken): void
     {
         $this->adoptedAccessToken = $accessToken;
+    }
+
+    /**
+     * The tenant this client currently acts on (CONTRACT.md §5.2 rule 1), or `null`
+     * when it acts on its own tenant — the state {@see \Axiam\Sdk\Rest\AuthMiddleware}
+     * reads to decide whether to send `X-Axiam-Tenant` at all.
+     */
+    public function actingTenant(): ?string
+    {
+        return $this->actingTenant;
+    }
+
+    /**
+     * Sets, or clears (`null`), the acting tenant (CONTRACT.md §5.2 rule 1). The caller
+     * ({@see \Axiam\Sdk\AxiamClient::actingTenant()}/`clearActingTenant()`) is
+     * responsible for validating `$tenantId` as a UUID first — this setter trusts it.
+     */
+    public function setActingTenant(?string $tenantId): void
+    {
+        $this->actingTenant = $tenantId;
+    }
+
+    /**
+     * What the last completed login reported about the principal's reach (CONTRACT.md
+     * §5.2/§5.2.3), or `null` when this client holds no such result. See
+     * {@see self::$principalScope}'s own doc for which sessions set/reset it.
+     *
+     * @return array{organizationLevel: bool, reachableTenantIds: ?list<string>}|null
+     */
+    public function principalScope(): ?array
+    {
+        return $this->principalScope;
+    }
+
+    /**
+     * Records what a just-completed login/verify-MFA/OPAQUE-finish/setup-completion
+     * reported about the principal's reach (§5.2/§5.2.3).
+     *
+     * @param list<string>|null $reachableTenantIds
+     */
+    public function recordPrincipalScope(bool $organizationLevel, ?array $reachableTenantIds): void
+    {
+        $this->principalScope = ['organizationLevel' => $organizationLevel, 'reachableTenantIds' => $reachableTenantIds];
+    }
+
+    /**
+     * Resets the principal scope to "unknown" (§5.2 rule 1): a session that just
+     * completed WITHOUT reporting a `LoginUserInfo` — WebAuthn authentication, SSO, a
+     * device login, or an ordinary logout — must not let
+     * {@see \Axiam\Sdk\AxiamClient::actingTenant()} keep gating on a PREVIOUS
+     * principal's reach.
+     */
+    public function resetPrincipalScope(): void
+    {
+        $this->principalScope = null;
     }
 
     /**

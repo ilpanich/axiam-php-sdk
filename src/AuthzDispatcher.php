@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk;
 
+use Axiam\Sdk\Auth\TokenIntrospection;
+use Axiam\Sdk\Auth\TokenValidation;
 use Axiam\Sdk\Auth\UserInfo;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\NetworkError;
@@ -46,6 +48,8 @@ final class AuthzDispatcher
     private ?\Axiam\Sdk\Grpc\AuthzGrpcClient $grpcClient = null;
 
     private ?\Axiam\Sdk\Grpc\UserInfoGrpcClient $userInfoClient = null;
+
+    private ?\Axiam\Sdk\Grpc\TokenGrpcClient $tokenClient = null;
 
     /**
      * @param callable(): (string|null) $tokenAccessor Reads the CURRENT access token
@@ -281,6 +285,129 @@ final class AuthzDispatcher
             // can distinguish "scope not granted" from "granted but empty".
             email: $response->hasEmail() ? $response->getEmail() : null,
             preferredUsername: $response->hasPreferredUsername() ? $response->getPreferredUsername() : null,
+        );
+    }
+
+    /**
+     * `validateToken` (CONTRACT.md §1.1.1/§10.3, contract 1.51) — signature + expiry,
+     * plus the confirmation §10.3 exists for. Wraps `axiam.v1.TokenService/ValidateToken`.
+     *
+     * The CALLER'S own token authenticates the RPC (via the same channel machinery every
+     * other gRPC call here uses); `$inspectedAccessToken` — a DIFFERENT credential — is
+     * the one being asked about (§1.1.1 rule 1). Behaviour otherwise mirrors
+     * {@see self::getUserInfo()} exactly: §1.1 rule 3's client-side precondition (no
+     * caller token -> {@see AuthError}, zero wire calls), no REST substitution (§1.1.1
+     * rule 7), and a gRPC `UNAUTHENTICATED` on the CALLER'S credential drives the shared
+     * §9 single-flight refresh and retries once.
+     */
+    public function validateToken(Sensitive|string $inspectedAccessToken): TokenValidation
+    {
+        $this->assertCallerToken('validateToken');
+        $this->assertGrpcAvailable('validateToken');
+
+        return $this->withRefreshRetry(
+            fn (): TokenValidation => $this->tokenClient()->validateToken($inspectedAccessToken),
+        );
+    }
+
+    /**
+     * `introspectToken` (CONTRACT.md §1.1.1/§10.3, contract 1.51) — the RFC 7662 set,
+     * plus the confirmation. Wraps `axiam.v1.TokenService/IntrospectToken`. See
+     * {@see self::validateToken()} for the shared rules; this is its RFC-7662 sibling.
+     */
+    public function introspectToken(Sensitive|string $inspectedAccessToken): TokenIntrospection
+    {
+        $this->assertCallerToken('introspectToken');
+        $this->assertGrpcAvailable('introspectToken');
+
+        return $this->withRefreshRetry(
+            fn (): TokenIntrospection => $this->tokenClient()->introspectToken($inspectedAccessToken),
+        );
+    }
+
+    /**
+     * §1.1 rule 3 / §1.1.1 rule 2: with no CALLER token, raise {@see AuthError}
+     * client-side, with zero wire calls. The interceptor's `UNAUTHENTICATED` would
+     * otherwise send the call to the refresh guard with nothing to refresh.
+     */
+    private function assertCallerToken(string $operation): void
+    {
+        $token = $this->tokenAccessor !== null ? ($this->tokenAccessor)() : null;
+        if (!\is_string($token) || $token === '') {
+            throw new AuthError(sprintf(
+                '%s requires a prior successful login (no access token available) — CONTRACT.md §1.1 rule 3',
+                $operation,
+            ));
+        }
+    }
+
+    /**
+     * §1.1.1 rule 7 / §1.1 rule 6: gRPC-only, no REST substitution. On a REST-only
+     * runtime this operation is genuinely unavailable.
+     */
+    private function assertGrpcAvailable(string $operation): void
+    {
+        if ($this->restOnly || !extension_loaded('grpc')) {
+            throw NetworkError::fromException(
+                new \RuntimeException(sprintf(
+                    'the grpc PECL extension is required (%s is a gRPC-only operation with no REST fallback)',
+                    $operation,
+                )),
+                $operation . ' unavailable',
+            );
+        }
+    }
+
+    /**
+     * §9 refresh-and-retry-once, shared by {@see self::validateToken()} and
+     * {@see self::introspectToken()} — the same shape as
+     * {@see self::getUserInfoWithRefreshRetry()}, generalised over the return type. An
+     * {@see AuthError} — the taxonomy type {@see \Axiam\Sdk\Grpc\TokenGrpcClient} maps a
+     * gRPC `UNAUTHENTICATED` to — drives the shared refresh (`$refreshAccessor`) exactly
+     * once and re-runs `$rpc` exactly once. A second failure (or an absent
+     * `$refreshAccessor`) propagates unchanged (§9.3).
+     *
+     * @template T
+     *
+     * @param callable(): T $rpc
+     *
+     * @return T
+     */
+    private function withRefreshRetry(callable $rpc): mixed
+    {
+        try {
+            return $rpc();
+        } catch (AuthError $e) {
+            if ($this->refreshAccessor === null) {
+                throw $e;
+            }
+            ($this->refreshAccessor)();
+
+            return $rpc();
+        }
+    }
+
+    /**
+     * Lazily constructs the token gRPC client the FIRST time
+     * {@see self::validateToken()}/{@see self::introspectToken()} actually needs it
+     * (`??=`) — the exact sibling of {@see self::userInfoClient()}, referenced ONLY from
+     * inside those methods' `extension_loaded('grpc')` guard (Pitfall 4 / T-22-16).
+     * Reuses the SAME target/tenant/token/TLS configuration as the other channels
+     * (§1.1.1 rule 1 — "the SDK's existing channel", not a second one).
+     */
+    private function tokenClient(): \Axiam\Sdk\Grpc\TokenGrpcClient
+    {
+        return $this->tokenClient ??= new \Axiam\Sdk\Grpc\TokenGrpcClient(
+            $this->grpcTarget ?? throw new \Axiam\Sdk\Core\AxiamException(
+                'AuthzDispatcher: grpcTarget must be configured to use the gRPC transport',
+            ),
+            $this->tokenAccessor ?? static fn (): ?string => null,
+            $this->tenantId ?? throw new \Axiam\Sdk\Core\AxiamException(
+                'AuthzDispatcher: tenantId must be configured to use the gRPC transport',
+            ),
+            $this->customCaPem,
+            $this->clientCertPem,
+            $this->clientKey,
         );
     }
 

@@ -102,6 +102,12 @@ use Psr\Log\NullLogger;
  */
 final class AxiamClient
 {
+    /** RFC 4122 UUID, case-insensitive — CONTRACT.md §5.2 rule 1's client-side check. */
+    private const UUID_RE = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
+
+    /** CONTRACT.md §6.1 rules 6-10: the mTLS device login. */
+    private const DEVICE_AUTH_PATH = '/api/v1/auth/device';
+
     private const LOGIN_PATH = '/api/v1/auth/login';
     private const MFA_VERIFY_PATH = '/api/v1/auth/mfa/verify';
     private const OPAQUE_REGISTER_START_PATH = '/api/v1/auth/opaque/register/start';
@@ -273,6 +279,18 @@ final class AxiamClient
      *        it (including one with no `aud`) is rejected. An app guarding a user-facing
      *        resource server should generally expect `axiam:user`; it is not defaulted,
      *        because a service-to-service guard legitimately expects a different audience.
+     * @param string|null $actingTenant CONTRACT.md §5.2 rule 1 (contract 1.51): the
+     *        construction-time form of the acting-tenant switch — the tenant UUID this
+     *        client acts on from its very first request, sent as `X-Axiam-Tenant` on
+     *        every `/api/v1` request while set. Meaningful only for an
+     *        **organization-level** principal (§5.2); nothing is gated here — construction
+     *        precedes the login that would reveal whether the principal really is one, and
+     *        a service account never receives a login result at all — only the value's
+     *        shape (a UUID) is checked. `null` (the default) sends no such header, byte-
+     *        for-byte what every client sent before 1.51. Distinct from `$tenant` above
+     *        (§5 rule 2's `X-Tenant-ID`, sent unconditionally and never read by the server
+     *        as a tenant switch). See {@see self::actingTenant()} for the on-client form
+     *        and its gating.
      */
     public function __construct(
         string $baseUrl,
@@ -295,6 +313,7 @@ final class AxiamClient
         bool $retryEnabled = true,
         float $decisionMemoTtlMs = 0.0,
         ?callable $telemetryHook = null,
+        ?string $actingTenant = null,
     ) {
         // §17.1 rule 1: off unless the caller asked for it. §19: inert unless a hook
         // was installed.
@@ -331,6 +350,14 @@ final class AxiamClient
             throw new \InvalidArgumentException(
                 'orgSlug must not be blank — omit it entirely, or name the organization (CONTRACT.md §5.1, §5.2.1)'
             );
+        }
+        // §5.2 rule 1: the server silently ignores an X-Axiam-Tenant value that does not
+        // parse as a UUID and answers for the caller's OWN tenant instead — reporting
+        // success about the wrong one. Refused client-side, with no wire call, before
+        // anything else can go out. Nothing is gated here (construction precedes login);
+        // see self::actingTenant() for the organization-level/reachable_tenant_ids gate.
+        if ($actingTenant !== null) {
+            self::assertUuidActingTenant($actingTenant);
         }
         // §6.1.1: PEM cert + PEM key are all-or-nothing. Presenting a half-configured client
         // identity is never valid, so reject exactly one at construction (clear, early error).
@@ -391,6 +418,8 @@ final class AxiamClient
         $this->plainHttp = new Client($commonConfig + ['handler' => $plainStack]);
 
         $this->session = new Session($baseUrl, $tenant, $this->plainHttp, $cookieJar);
+        // §5.2 rule 1: the construction-time form. Already validated as a UUID above.
+        $this->session->setActingTenant($actingTenant);
 
         // AuthMiddleware needs the Session instance it decorates requests for; pushed after
         // Session exists but before any request is actually sent (HandlerStack::resolve() is
@@ -423,6 +452,7 @@ final class AxiamClient
                 $this->decisionMemo,
                 $this->telemetry,
                 $retryEnabled,
+                actingTenantAccessor: fn (): ?string => $this->session->actingTenant(),
             ),
             restOnly: $resolvedRestOnly,
             grpcTarget: $grpcTarget,
@@ -485,6 +515,122 @@ final class AxiamClient
             // half-configured pair, so either half implies both.
             presentsClientCertificate: $clientCert !== null,
         );
+    }
+
+    // ------------------------------------------------------------------
+    // Acting tenant (CONTRACT.md §5.2 rule 1, contract 1.51)
+    // ------------------------------------------------------------------
+
+    /**
+     * Switches this client to act on `$tenantId` — CONTRACT.md §5.2 rule 1 (contract
+     * 1.51). Every subsequent `/api/v1` request this client makes carries
+     * `X-Axiam-Tenant: $tenantId`, until {@see self::clearActingTenant()} is called or
+     * another `actingTenant()` replaces it.
+     *
+     * Meaningful only for an **organization-level** principal; see the `$actingTenant`
+     * constructor parameter for what the header does and does not reach (not
+     * `X-Tenant-ID`, not a `{tenant_id}` management path, not gRPC — REST-only, §5.2
+     * rule 1's own text).
+     *
+     * **Mutates this client and returns it** (`self`), unlike the reference
+     * implementation's per-handle isolation (a new object sharing the session, leaving
+     * the original untouched). §5.2 rule 1 requires only that the header be sendable
+     * and clearable — it does not require handle isolation — and PHP's request
+     * lifecycle has no concurrent tasks sharing one client the way a long-lived
+     * process does, so the simpler, shared-state form is what this port ships. Two
+     * concurrent PHP requests never share one `AxiamClient` instance in the first
+     * place. Recorded here, in the README and in the CHANGELOG as a deliberate,
+     * documented difference (C-12).
+     *
+     * @throws \Axiam\Sdk\Core\NetworkError if `$tenantId` is not a UUID. The server
+     *         silently ignores an `X-Axiam-Tenant` value that does not parse and
+     *         answers for the caller's own tenant instead — reporting success about
+     *         the wrong tenant — so this is refused client-side, with no wire call.
+     * @throws \Axiam\Sdk\Core\AuthzError when this client holds a login result (§5.2.2)
+     *         that reported `organizationLevel: false` (an ordinary tenant principal is
+     *         a principal of exactly one tenant, and the server answers `403` to
+     *         anything else), or that reported `reachableTenantIds` not containing
+     *         `$tenantId` (§5.2.3 rule 4). A client holding no such result — a service
+     *         account from client credentials or the device login, an injected token,
+     *         a session completed without a user object — has nothing to gate on: the
+     *         header is sent as asked, and the server's `403` is the answer. An
+     *         **organization-level service account** is a supported design, and the
+     *         server honours the header for one on the same terms as for a user.
+     */
+    public function actingTenant(string $tenantId): self
+    {
+        self::assertUuidActingTenant($tenantId);
+        $this->assertActingTenantReachable($tenantId);
+        $this->session->setActingTenant($tenantId);
+
+        return $this;
+    }
+
+    /**
+     * Stops acting on another tenant: no further request sends `X-Axiam-Tenant`, and
+     * this client acts on its own tenant again (CONTRACT.md §5.2 rule 1's "a way to
+     * clear it").
+     */
+    public function clearActingTenant(): self
+    {
+        $this->session->setActingTenant(null);
+
+        return $this;
+    }
+
+    /**
+     * The tenant this client currently acts on, or `null` when it acts on its own
+     * tenant.
+     */
+    public function actingTenantId(): ?string
+    {
+        return $this->session->actingTenant();
+    }
+
+    /**
+     * CONTRACT.md §5.2 rule 1: refuses a non-UUID acting tenant client-side, with NO
+     * wire call, at both the construction-time and on-client forms.
+     */
+    private static function assertUuidActingTenant(string $tenantId): void
+    {
+        if (preg_match(self::UUID_RE, $tenantId) !== 1) {
+            throw NetworkError::fromMessage(sprintf(
+                'actingTenant: "%s" is not a UUID. The server silently ignores an X-Axiam-Tenant '
+                . 'value that does not parse and answers for the caller\'s own tenant instead, '
+                . 'reporting success about the wrong tenant — so this is refused client-side, '
+                . 'with no wire call (CONTRACT.md §5.2 rule 1).',
+                $tenantId,
+            ));
+        }
+    }
+
+    /**
+     * §5.2 rule 1's gate: when this client holds a login result that reported the
+     * principal's reach, refuse client-side rather than offer what the server would
+     * refuse. A client holding none has nothing to gate on.
+     */
+    private function assertActingTenantReachable(string $tenantId): void
+    {
+        $scope = $this->session->principalScope();
+        if ($scope === null) {
+            return;
+        }
+        if ($scope['organizationLevel'] !== true) {
+            throw new \Axiam\Sdk\Core\AuthzError(
+                'actingTenant: the signed-in principal is not organization-level, so it cannot '
+                . 'act on another tenant — the server would answer 403 (CONTRACT.md §5.2 rule 1)',
+                resourceId: $tenantId,
+            );
+        }
+        $reachable = $scope['reachableTenantIds'];
+        if ($reachable !== null && !\in_array($tenantId, $reachable, true)) {
+            throw new \Axiam\Sdk\Core\AuthzError(
+                'actingTenant: the signed-in principal\'s roles do not reach this tenant — it is '
+                . 'not in reachableTenantIds, and the server refuses the header with 403 '
+                . '(CONTRACT.md §5.2.3 rule 4)',
+                resourceId: $tenantId,
+            );
+        }
     }
 
     /**
@@ -983,6 +1129,124 @@ final class AxiamClient
         // Clears cookies/CSRF/local state (this plan's own behavior contract).
         $this->session->cookieJar()->clear();
         $this->session->resetCsrf();
+        // §5.2 rule 1: a logged-out client holds no login result — the next session
+        // (any principal) must not inherit this one's reach.
+        $this->session->resetPrincipalScope();
+    }
+
+    /**
+     * `authenticateDevice` — `POST /api/v1/auth/device` (CONTRACT.md §6.1 rules 6-10,
+     * contract 1.51): the mTLS device login. The client presents the X.509 identity
+     * certificate configured via `$clientCert`/`$clientKey`, and the server authenticates
+     * it, no request body, no tenant/credential needed beforehand.
+     *
+     * **Reachable only when this client was built with a client certificate** (§6.1
+     * rule 7). On a client built without one, this raises {@see AuthError} client-side,
+     * with ZERO wire calls — without a certificate the server would answer `401`
+     * anyway, so going to the wire gains nothing and turns a configuration mistake into
+     * an authentication failure.
+     *
+     * **Adopts the returned token as this client's credential**, exactly as a `login()`
+     * result is adopted — every subsequent `/api/v1` call (management, checkAccess,
+     * batchCheck, …) authenticates with it. The server sets NO cookie on this route,
+     * so the token travels as `Authorization: Bearer` via
+     * {@see \Axiam\Sdk\Session::adoptBearerCredential()}. The shared cookie jar is
+     * CLEARED first: {@see \Axiam\Sdk\Session::accessToken()} prefers a cookie-sourced
+     * token over an adopted one (§12.1's `login_client_credentials`-as-credential-source
+     * precedent), so a cookie left from an earlier `login()`/`verifyMfa()` session on
+     * this same client would otherwise silently outrank the device token and every
+     * subsequent call would run as that earlier session's principal — the exact
+     * theft-adjacent scenario §6.1 rule 9 exists to close. The decision memo is cleared
+     * (§17.1 rule 9: the subject changed) and the §5.2 acting-tenant gate is reset to
+     * unknown (a device holds no `LoginUserInfo`).
+     *
+     * **Every refusal is `401`** (§6.1 rule 8: an unknown, untrusted, expired, revoked
+     * or unbound certificate, and a `Server`-type certificate, all answer `401`
+     * `authentication_failed`), mapped to {@see AuthError} with the server's message.
+     * This *is* the login: a later `401` on this credential is returned to the caller
+     * as-is, never sent through the §9 refresh guard — there is no refresh token to
+     * spend (§6.1 rule 6), and the guard would fail before the wire anyway. A `429`
+     * (the route's per-client-IP rate limit, server default 60/min) is a
+     * {@see \Axiam\Sdk\Core\NetworkError}, not an {@see AuthError} — §16's ordinary
+     * mapping — and this call is attempted exactly once, like every login.
+     *
+     * **The token is certificate-bound** (§6.1 rule 9, `cnf.x5t#S256`) when AXIAM
+     * itself terminated the handshake. A REST request without the same certificate is
+     * `401`; a gRPC call is `UNAUTHENTICATED` on a listener that requests client
+     * certificates, and refused on every call on one that does not (the server default).
+     * §6.1 rule 4 already applies this client's certificate to BOTH transports, which is
+     * what makes that hold.
+     */
+    public function authenticateDevice(): \Axiam\Sdk\Auth\DeviceToken
+    {
+        $this->ensureOpen();
+        // §6.1 rule 7: client-side, zero wire calls, without a configured certificate.
+        if ($this->clientCertFile === null || $this->clientKeyFile === null) {
+            throw new AuthError(
+                'authenticateDevice: this client was built without a client certificate '
+                . '(clientCert/clientKey) — the server would answer 401 in any case, so this is '
+                . 'refused client-side, with no wire call (CONTRACT.md §6.1 rule 7)'
+            );
+        }
+
+        $this->onCredentialChange();
+        // §5.2 rule 1: a device holds no LoginUserInfo.
+        $this->session->resetPrincipalScope();
+        // See this method's own docblock: a stale cookie from an earlier session on
+        // this same client would otherwise silently outrank the adopted device token.
+        $this->session->cookieJar()->clear();
+
+        try {
+            $response = $this->plainHttp->post(self::DEVICE_AUTH_PATH);
+        } catch (RequestException $e) {
+            $errorResponse = $e instanceof BadResponseException ? $e->getResponse() : null;
+            if ($errorResponse !== null) {
+                throw $this->mapDeviceAuthError($errorResponse);
+            }
+
+            throw NetworkError::fromException($e, 'authenticateDevice request failed');
+        } catch (GuzzleException $e) {
+            throw NetworkError::fromException($e, 'authenticateDevice request failed');
+        }
+
+        if ($response->getStatusCode() !== 200) {
+            throw $this->mapDeviceAuthError($response);
+        }
+
+        $wire = json_decode((string) $response->getBody(), true);
+        $accessToken = is_array($wire) ? ($wire['access_token'] ?? null) : null;
+        $tokenType = is_array($wire) ? ($wire['token_type'] ?? null) : null;
+        if (!is_string($accessToken) || $accessToken === '' || !is_string($tokenType) || $tokenType === '') {
+            throw NetworkError::fromResponse($response, 'authenticateDevice: malformed response body');
+        }
+
+        $sensitive = new Sensitive($accessToken);
+        $this->session->adoptBearerCredential($sensitive);
+
+        return new \Axiam\Sdk\Auth\DeviceToken(
+            accessToken: $sensitive,
+            tokenType: $tokenType,
+            expiresIn: (int) (is_array($wire) ? ($wire['expires_in'] ?? 0) : 0),
+        );
+    }
+
+    /**
+     * §6.1 rule 8: every refusal is `401` -> {@see AuthError}, verbatim from the
+     * server. `429` (the route's rate limit) and everything else fall through to the
+     * ordinary §2 mapping — never {@see AuthError}, never the §9 refresh guard.
+     */
+    private function mapDeviceAuthError(ResponseInterface $response): \Axiam\Sdk\Core\AxiamException
+    {
+        if ($response->getStatusCode() === 401) {
+            $wire = json_decode((string) $response->getBody(), true);
+            $message = is_array($wire) && is_string($wire['message'] ?? null)
+                ? $wire['message']
+                : 'authenticateDevice: authentication failed';
+
+            return new AuthError($message);
+        }
+
+        return ErrorMapper::fromResponse($response, 'authenticateDevice failed');
     }
 
     // ------------------------------------------------------------------
@@ -1066,6 +1330,44 @@ final class AxiamClient
     public function getUserInfo(): UserInfo
     {
         return $this->authzDispatcher->getUserInfo();
+    }
+
+    /**
+     * `validateToken` — `axiam.v1.TokenService/ValidateToken` (CONTRACT.md §1.1.1/§10.3,
+     * contract 1.51). Signature + expiry, plus the confirmation (`cnf`) a resource server
+     * validating over gRPC needs in order not to accept a sender-constrained token as a
+     * bearer token (§10.1 rule 9).
+     *
+     * `$inspectedAccessToken` is the token being asked about — a DIFFERENT credential
+     * from this client's OWN session token, which authenticates the RPC itself. The two
+     * are never confused: there is no default that falls one back to the other
+     * (§1.1.1 rule 1). `$inspectedAccessToken` is secret material and SHOULD be passed
+     * as {@see Sensitive}.
+     *
+     * `$result->valid` is NOT permission to proceed — read `$result->status()`, or call
+     * `$result->verifyPossession($proofs)` with the proofs YOUR connection established.
+     * Requires a prior successful {@see self::login()} on THIS client (the caller's own
+     * credential) — with none, raises {@see AuthError} before any wire call — and,
+     * being gRPC-only, requires the `grpc` PECL extension plus a configured
+     * `grpcTarget`; there is NO REST substitution (§1.1.1 rule 7; `POST /oauth2/introspect`
+     * is a different operation, RFC 7662 §2.1 client authentication, not this one). A
+     * gRPC `UNAUTHENTICATED` on the caller's own credential drives the shared
+     * single-flight refresh (§9) and retries once.
+     */
+    public function validateToken(Sensitive|string $inspectedAccessToken): \Axiam\Sdk\Auth\TokenValidation
+    {
+        return $this->authzDispatcher->validateToken($inspectedAccessToken);
+    }
+
+    /**
+     * `introspectToken` — `axiam.v1.TokenService/IntrospectToken` (CONTRACT.md
+     * §1.1.1/§10.3, contract 1.51). The RFC 7662 set, plus the confirmation. See
+     * {@see self::validateToken()} for the shared rules this method follows exactly; the
+     * only difference is the richer RFC-7662-shaped return value.
+     */
+    public function introspectToken(Sensitive|string $inspectedAccessToken): \Axiam\Sdk\Auth\TokenIntrospection
+    {
+        return $this->authzDispatcher->introspectToken($inspectedAccessToken);
     }
 
     // ------------------------------------------------------------------
@@ -1602,8 +1904,20 @@ final class AxiamClient
     /**
      * Verify an INBOUND caller's token and nothing else — the seam every request guard
      * must use (CONTRACT.md §10.1 rule 8). Delegates straight to {@see JwksVerifier::verify()},
-     * which applies the full §10.1 minimum local-verification set, and returns `null` on
-     * any failure with **no fallback to another credential**.
+     * which applies the full §10.1 minimum local-verification set INCLUDING rule 9
+     * (contract 1.51), and returns `null` on any failure with **no fallback to another
+     * credential**.
+     *
+     * **Rule 9 (contract 1.51):** this method has no transport to ask for a peer
+     * certificate or a verified DPoP proof, so a token carrying `cnf` is REFUSED here
+     * unconditionally — accepting one without evidence would be exactly the
+     * bound-to-bearer downgrade rule 9 exists to prevent. Before this, a certificate- or
+     * DPoP-bound token reached this method with its `cnf` claim intact and unchecked, so
+     * a device token lifted off a device (or a DPoP-bound token replayed without its
+     * proof) was admitted here as an ordinary bearer credential — the same defect found
+     * independently in the Rust, TypeScript, Go, Python and C# ports. A guard that DOES
+     * have evidence to offer (an mTLS-terminating listener, a verified DPoP proof) calls
+     * {@see self::verifyWithProofs()} instead.
      *
      * This is deliberately the *only* verification entry point offered to the framework
      * bridges. Its sibling {@see self::verifyLocallyOrFallback()} substitutes this client's
@@ -1615,6 +1929,27 @@ final class AxiamClient
     public function verifyLocally(string $token, string $tenant): ?array
     {
         return $this->jwksVerifier->verify($token, $tenant);
+    }
+
+    /**
+     * {@see self::verifyLocally()}, applying CONTRACT.md §10.1 rule 9 against
+     * `$proofs` — evidence YOUR connection established for THIS request, never a value
+     * taken from a caller-settable request header (§10.1 rule 9 detail 2: e.g.
+     * `$_SERVER['SSL_CLIENT_CERT']`/the PSR-7 server params as set by the
+     * TLS-terminating web server, or an already-verified DPoP proof's `jkt`). An unbound
+     * token is accepted with or without proofs, exactly as {@see self::verifyLocally()}.
+     *
+     * The request guard to use when the deployment DOES have connection evidence to
+     * offer — an mTLS-terminating listener fronting a resource server that must accept
+     * device tokens, for instance. {@see self::verifyLocally()} stays the entry point
+     * for everything else, and always evaluates as though no evidence were available.
+     *
+     * @return array<string,mixed>|null Verified claims, or null — including when a bound
+     *                                   token's `cnf` is not satisfied by `$proofs`.
+     */
+    public function verifyWithProofs(string $token, string $tenant, \Axiam\Sdk\Auth\PresentedProofs $proofs): ?array
+    {
+        return $this->jwksVerifier->verifyWithProofs($token, $tenant, $proofs);
     }
 
     /**
@@ -2084,6 +2419,12 @@ final class AxiamClient
         // Remember where this principal lives, so a later `opaqueEnrollmentForSelf`
         // seals against the account's own tenant without a second round trip.
         $this->principalTenantId = $principalTenantId;
+        // §5.2 rule 1: this client now holds a login result, so actingTenant() gates on
+        // what it reported. Shared by login/verifyMfa (via handleLoginResponse's 200
+        // branch), OPAQUE's finish (loginOpaque falls through to handleLoginResponse
+        // too) and the MFA/WebAuthn setup completions — every one of which the server
+        // answers with the same user object this method already requires.
+        $this->session->recordPrincipalScope($organizationLevel, $reachable);
 
         return new LoginResult(
             mfaRequired: false,
@@ -2677,6 +3018,11 @@ final class AxiamClient
         // §17.1 rule 9 / §24.3 rule 4: memo entries are keyed by subject, and this call
         // changes the subject.
         $this->onCredentialChange();
+        // §5.2 rule 1: WebAuthn AUTHENTICATION completes a session without a
+        // LoginUserInfo (unlike webauthnSetupRegisterFinish, which reuses
+        // loginResultFromSuccessBody and therefore SETS the scope). A stale scope from
+        // an earlier login must not keep gating actingTenant() after this call.
+        $this->session->resetPrincipalScope();
 
         $http = $this->postRawJson($path, $this->webauthnFinishBody($stateToken, $response, $operation));
         if ($http->getStatusCode() !== 200) {

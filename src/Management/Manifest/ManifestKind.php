@@ -25,4 +25,12 @@ enum ManifestKind: string
 
     /** A group, plus the roles assigned to it. Depends on roles. */
     case Group = 'group';
+
+    /**
+     * A service account, plus the roles bound to it (CONTRACT.md §27.6.1 addition 3,
+     * contract 1.51). Depends on roles and resources. Ordered LAST (§27.6 rule 5): a
+     * service account's own natural key (its `name`) is not enforced unique by the
+     * server, so nothing else in a manifest can reasonably depend on one.
+     */
+    case ServiceAccount = 'service_account';
 }

@@ -16,6 +16,8 @@ final class RoleGroupAssignment implements \JsonSerializable
     /**
      * Constructs a RoleGroupAssignment.
      * @param Group $group The assigned group.
+     * @param bool $inherit Whether the assignment also reaches the descendants of
+     *     `resource_id` (`true`, the default) or applies at that resource only (`false`).
      * @param string|null $resourceId `None` means the role was assigned globally (no resource
      *     scope). (optional)
      * @param list<string>|null $tenantScope The tenants this assignment reaches, or omitted
@@ -24,6 +26,7 @@ final class RoleGroupAssignment implements \JsonSerializable
      */
     public function __construct(
         public readonly Group $group,
+        public readonly bool $inherit,
         public readonly ?string $resourceId = null,
         public readonly ?array $tenantScope = null,
     ) {
@@ -37,6 +40,7 @@ final class RoleGroupAssignment implements \JsonSerializable
     {
         return new self(
             Group::fromArray((array) ModelDecode::need($data, 'group', self::class)),
+            isset($data['inherit']) ? (bool) $data['inherit'] : true,
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
             isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
         );
@@ -54,6 +58,7 @@ final class RoleGroupAssignment implements \JsonSerializable
     {
         $out = [];
         $out['group'] = $this->group->toArray();
+        $out['inherit'] = $this->inherit;
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
         }

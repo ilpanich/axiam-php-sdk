@@ -88,6 +88,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     {
         $wire = [
             'group_id' => '11111111-1111-4111-8111-111111111111',
+            'inherit' => true,
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'tenant_scope' => [
                 '11111111-1111-4111-8111-111111111111',
@@ -108,6 +109,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testAssignRoleToServiceAccountRequestRoundTrips(): void
     {
         $wire = [
+            'inherit' => true,
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'service_account_id' => '11111111-1111-4111-8111-111111111111',
             'tenant_scope' => [
@@ -129,6 +131,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testAssignRoleToUserRequestRoundTrips(): void
     {
         $wire = [
+            'inherit' => true,
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'tenant_scope' => [
                 '11111111-1111-4111-8111-111111111111',
@@ -279,6 +282,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         $wire = [
             'default_cert_validity_days' => 1,
             'max_cert_validity_days' => 1,
+            'server_cert_allowed_names' => [
+                'example',
+            ],
         ];
 
         $model = Models\CertificatePolicy::fromArray($wire);
@@ -305,6 +311,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('User', Models\CertificateType::fromWire('User')->value);
         self::assertSame('Service', Models\CertificateType::fromWire('Service')->value);
         self::assertSame('Device', Models\CertificateType::fromWire('Device')->value);
+        self::assertSame('Server', Models\CertificateType::fromWire('Server')->value);
     }
 
     /** `CertificationLevel`: every case survives wire -> enum -> wire. */
@@ -439,6 +446,11 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'key_algorithm' => 'Rsa4096',
             'metadata' => [],
             'subject' => 'example',
+            'subject_alt_names' => [
+                [
+                    'dns' => 'example',
+                ],
+            ],
             'validity_days' => 1,
         ];
 
@@ -2345,6 +2357,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testRoleAssignmentRoundTrips(): void
     {
         $wire = [
+            'inherit' => true,
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'role' => [
                 'created_at' => '2026-08-26T00:00:00Z',
@@ -2383,6 +2396,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'tenant_id' => '11111111-1111-4111-8111-111111111111',
                 'updated_at' => '2026-08-26T00:00:00Z',
             ],
+            'inherit' => true,
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'tenant_scope' => [
                 '11111111-1111-4111-8111-111111111111',
@@ -2403,6 +2417,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testRoleServiceAccountAssignmentRoundTrips(): void
     {
         $wire = [
+            'inherit' => true,
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'service_account' => [
                 'client_id' => 'example',
@@ -2433,6 +2448,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testRoleUserAssignmentRoundTrips(): void
     {
         $wire = [
+            'inherit' => true,
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'tenant_scope' => [
                 '11111111-1111-4111-8111-111111111111',
@@ -2545,6 +2561,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'certificate' => [
                 'default_cert_validity_days' => 1,
                 'max_cert_validity_days' => 1,
+                'server_cert_allowed_names' => [
+                    'example',
+                ],
             ],
             'created_at' => '2026-08-26T00:00:00Z',
             'email' => [
@@ -2814,6 +2833,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_symbols' => true,
             'require_uppercase' => true,
             'sensitive_scopes_enabled' => true,
+            'server_cert_allowed_names' => [
+                'example',
+            ],
             'webauthn_user_verification' => 'example',
         ];
 
@@ -2861,6 +2883,11 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'csr_pem' => 'example',
             'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
             'metadata' => [],
+            'subject_alt_names' => [
+                [
+                    'dns' => 'example',
+                ],
+            ],
             'validity_days' => 1,
         ];
 
@@ -3026,6 +3053,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_symbols' => true,
             'require_uppercase' => true,
             'sensitive_scopes_enabled' => true,
+            'server_cert_allowed_names' => [
+                'example',
+            ],
             'webauthn_user_verification' => 'example',
         ];
 

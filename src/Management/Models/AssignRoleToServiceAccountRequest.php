@@ -16,6 +16,14 @@ final class AssignRoleToServiceAccountRequest implements \JsonSerializable
     /**
      * Constructs a AssignRoleToServiceAccountRequest.
      * @param string $serviceAccountId the server's `service_account_id` field
+     * @param bool|null $inherit Whether the assignment also reaches the descendants of
+     *     `resource_id`. Omitted — the default — or `true` is today's behaviour: a resource-scoped
+     *     assignment applies at its resource and everywhere below it. `false` applies it at
+     *     `resource_id` only, "here and no further", for allow and deny grants alike. Refused with
+     *     400 when `false` is sent with no `resource_id` (a tenant-wide assignment has no node to
+     *     stop at) or for a role with `is_global: true` (a global role applies everywhere by
+     *     definition). The flag is part of the assignment: to change it, unassign and assign
+     *     again. (optional)
      * @param string|null $resourceId the server's `resource_id` field (optional)
      * @param list<string>|null $tenantScope The tenants this assignment reaches. Only
      *     meaningful for an assignment made in an organization's scope, whose global roles
@@ -27,6 +35,7 @@ final class AssignRoleToServiceAccountRequest implements \JsonSerializable
      */
     public function __construct(
         public readonly string $serviceAccountId,
+        public readonly ?bool $inherit = null,
         public readonly ?string $resourceId = null,
         public readonly ?array $tenantScope = null,
     ) {
@@ -40,6 +49,7 @@ final class AssignRoleToServiceAccountRequest implements \JsonSerializable
     {
         return new self(
             (string) ModelDecode::need($data, 'service_account_id', self::class),
+            isset($data['inherit']) ? (bool) $data['inherit'] : null,
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
             isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
         );
@@ -57,6 +67,9 @@ final class AssignRoleToServiceAccountRequest implements \JsonSerializable
     {
         $out = [];
         $out['service_account_id'] = $this->serviceAccountId;
+        if ($this->inherit !== null) {
+            $out['inherit'] = $this->inherit;
+        }
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
         }

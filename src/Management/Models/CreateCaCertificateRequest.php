@@ -16,7 +16,9 @@ final class CreateCaCertificateRequest implements \JsonSerializable
     /**
      * Constructs a CreateCaCertificateRequest.
      * @param KeyAlgorithm $keyAlgorithm the server's `key_algorithm` field
-     * @param string $subject the server's `subject` field
+     * @param string $subject The CA's common name, e.g. `ACME Corp Root CA`. A **common
+     *     name**, not a distinguished name. A single `CN=` prefix is accepted and stripped;
+     *     anything else containing `=` — `O=Acme, CN=ACME Corp Root CA` — is refused with `400`.
      * @param int $validityDays Validity duration in days.
      * @param string|null $intermediateSubject Common name for the signing intermediate —
      *     `vault_pki` custody only. Under that custodian Vault generates a root and an

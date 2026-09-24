@@ -29,7 +29,9 @@ final class GeneratedCaCertificate implements \JsonSerializable
      *     *signs*, which under `vault_pki` custody is the intermediate rather than the root
      *     beneath which it was created.
      * @param CertificateStatus $status the server's `status` field
-     * @param string $subject The certificate subject (e.g., `CN=ACME Corp Root CA`).
+     * @param string $subject The CA's common name, e.g. `ACME Corp Root CA`. The normalised
+     *     value: a `CN=` prefix in the request is understood and stripped, so this always says
+     *     what the certificate's subject DN says (DF-023).
      * @param string|null $chainPem The issuers above [`Self::public_cert_pem`], concatenated
      *     PEM, nearest issuer first and the root last. `None` for a CA that is its own root, which
      *     is every CA AXIAM generated before Vault's PKI engine was an option. Present for a

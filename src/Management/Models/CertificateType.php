@@ -28,6 +28,9 @@ enum CertificateType: string
     /** The wire value `Device`. */
     case Device = 'Device';
 
+    /** The wire value `Server`. */
+    case Server = 'Server';
+
     /** A value this SDK's copy of the spec does not list; see the type's summary. */
     case Unknown = '';
 
