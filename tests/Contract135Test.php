@@ -323,7 +323,7 @@ final class Contract135Test extends TestCase
         $userId = '77777777-7777-4777-8777-777777777777';
 
         $omitted = (new AssignRoleToUserRequest($userId))->jsonSerialize();
-        $empty = (new AssignRoleToUserRequest($userId, null, []))->jsonSerialize();
+        $empty = (new AssignRoleToUserRequest($userId, tenantScope: []))->jsonSerialize();
 
         self::assertArrayNotHasKey('tenant_scope', $omitted);
         self::assertArrayNotHasKey(
@@ -343,9 +343,9 @@ final class Contract135Test extends TestCase
         $id = '99999999-9999-4999-8999-999999999999';
 
         foreach ([
-            'users' => (new AssignRoleToUserRequest($id, null, [$scoped]))->jsonSerialize(),
-            'groups' => (new AssignRoleToGroupRequest($id, null, [$scoped]))->jsonSerialize(),
-            'service accounts' => (new AssignRoleToServiceAccountRequest($id, null, [$scoped]))->jsonSerialize(),
+            'users' => (new AssignRoleToUserRequest($id, tenantScope: [$scoped]))->jsonSerialize(),
+            'groups' => (new AssignRoleToGroupRequest($id, tenantScope: [$scoped]))->jsonSerialize(),
+            'service accounts' => (new AssignRoleToServiceAccountRequest($id, tenantScope: [$scoped]))->jsonSerialize(),
         ] as $which => $body) {
             self::assertSame([$scoped], $body['tenant_scope'] ?? null, $which);
         }

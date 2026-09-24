@@ -17,10 +17,20 @@ final class CertificatePolicy implements \JsonSerializable
      * Constructs a CertificatePolicy.
      * @param int $defaultCertValidityDays the server's `default_cert_validity_days` field
      * @param int $maxCertValidityDays the server's `max_cert_validity_days` field
+     * @param list<string>|null $serverCertAllowedNames The names a `Server` certificate may be
+     *     issued for (S-7, DF-001): DNS suffixes (`.lakeside.internal`, strictly below), exact
+     *     hosts (`lakeside.internal`) and IP prefixes (`10.0.0.0/8`, `fd00::/8`). See
+     *     [`crate::models::server_names`] for the matching rules. **Empty by default, and empty
+     *     refuses every `Server` request** (I1). A certificate for a name, signed under the
+     *     organization root, is trusted by every relying party that trusts that root, so the list
+     *     is written where the root is owned. A tenant override may only remove an entry or narrow
+     *     one; when the baseline later shrinks, the tenant's effective list is the intersection of
+     *     the two. (optional)
      */
     public function __construct(
         public readonly int $defaultCertValidityDays,
         public readonly int $maxCertValidityDays,
+        public readonly ?array $serverCertAllowedNames = null,
     ) {
     }
 
@@ -33,6 +43,7 @@ final class CertificatePolicy implements \JsonSerializable
         return new self(
             (int) ModelDecode::need($data, 'default_cert_validity_days', self::class),
             (int) ModelDecode::need($data, 'max_cert_validity_days', self::class),
+            isset($data['server_cert_allowed_names']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['server_cert_allowed_names'])) : null,
         );
     }
 
@@ -49,6 +60,9 @@ final class CertificatePolicy implements \JsonSerializable
         $out = [];
         $out['default_cert_validity_days'] = $this->defaultCertValidityDays;
         $out['max_cert_validity_days'] = $this->maxCertValidityDays;
+        if ($this->serverCertAllowedNames !== null) {
+            $out['server_cert_allowed_names'] = $this->serverCertAllowedNames;
+        }
 
         return $out;
     }

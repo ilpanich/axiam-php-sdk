@@ -15,6 +15,8 @@ final class RoleUserAssignment implements \JsonSerializable
 {
     /**
      * Constructs a RoleUserAssignment.
+     * @param bool $inherit Whether the assignment also reaches the descendants of
+     *     `resource_id` (`true`, the default) or applies at that resource only (`false`).
      * @param UserResponse $user The assigned user.
      * @param string|null $resourceId `None` means the role was assigned globally (no resource
      *     scope). (optional)
@@ -23,6 +25,7 @@ final class RoleUserAssignment implements \JsonSerializable
      *     deliberately narrowed grant from an organization-wide one. (optional)
      */
     public function __construct(
+        public readonly bool $inherit,
         public readonly UserResponse $user,
         public readonly ?string $resourceId = null,
         public readonly ?array $tenantScope = null,
@@ -36,6 +39,7 @@ final class RoleUserAssignment implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            isset($data['inherit']) ? (bool) $data['inherit'] : true,
             UserResponse::fromArray((array) ModelDecode::need($data, 'user', self::class)),
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
             isset($data['tenant_scope']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['tenant_scope'])) : null,
@@ -53,6 +57,7 @@ final class RoleUserAssignment implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        $out['inherit'] = $this->inherit;
         $out['user'] = $this->user->toArray();
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;

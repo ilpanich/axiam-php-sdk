@@ -29,6 +29,7 @@ declare(strict_types=1);
 const PROTO_FILES = [
     'axiam/v1/authorization.proto',
     'axiam/v1/userinfo.proto',
+    'axiam/v1/token.proto',
 ];
 const BUILD_DIR = 'build/grpc-gen';
 const NAMESPACE_PREFIX = 'Axiam/Sdk/Grpc/Gen';

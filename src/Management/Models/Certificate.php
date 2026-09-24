@@ -29,7 +29,9 @@ final class Certificate implements \JsonSerializable
      * @param string $notBefore Validity start.
      * @param string $publicCertPem PEM-encoded public certificate.
      * @param CertificateStatus $status the server's `status` field
-     * @param string $subject The certificate subject (e.g., `CN=device-001`).
+     * @param string $subject The certificate's common name, e.g. `device-001`. The normalised
+     *     value: a `CN=` prefix in the request is understood and stripped, so this always says
+     *     what the certificate's subject DN says (DF-023).
      * @param string $tenantId The tenant this certificate belongs to.
      * @param string|null $boundServiceAccountId Resolved by the list projection only. The
      *     server resolves this for a whole page in one query, so it is populated by `list` and is

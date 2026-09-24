@@ -21,6 +21,12 @@ final class CreateCertificateRequest implements \JsonSerializable
      * @param string $subject the server's `subject` field
      * @param int $validityDays Validity duration in days.
      * @param mixed $metadata the server's `metadata` field (optional)
+     * @param list<SubjectAltNameVariant>|null $subjectAltNames The names a `Server`
+     *     certificate is issued for, as `[{"dns": "api.lakeside.internal"}, {"ip": "10.0.0.5"}]`.
+     *     Required for `cert_type: Server` and refused for every other type. Each name, and the
+     *     common name, must be admitted by the tenant's effective `server_cert_allowed_names`,
+     *     which is empty — refusing every `Server` request — until an organization administrator
+     *     lists names. (optional)
      */
     public function __construct(
         public readonly CertificateType $certType,
@@ -29,6 +35,7 @@ final class CreateCertificateRequest implements \JsonSerializable
         public readonly string $subject,
         public readonly int $validityDays,
         public readonly mixed $metadata = null,
+        public readonly ?array $subjectAltNames = null,
     ) {
     }
 
@@ -45,6 +52,7 @@ final class CreateCertificateRequest implements \JsonSerializable
             (string) ModelDecode::need($data, 'subject', self::class),
             (int) ModelDecode::need($data, 'validity_days', self::class),
             isset($data['metadata']) ? $data['metadata'] : null,
+            isset($data['subject_alt_names']) ? array_values(array_map(static fn (mixed $v): SubjectAltNameVariant => SubjectAltName::fromArray((array) $v), (array) $data['subject_alt_names'])) : null,
         );
     }
 
@@ -66,6 +74,9 @@ final class CreateCertificateRequest implements \JsonSerializable
         $out['validity_days'] = $this->validityDays;
         if ($this->metadata !== null) {
             $out['metadata'] = $this->metadata;
+        }
+        if ($this->subjectAltNames !== null) {
+            $out['subject_alt_names'] = array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames);
         }
 
         return $out;

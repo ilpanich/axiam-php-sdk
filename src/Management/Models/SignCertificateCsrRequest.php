@@ -24,6 +24,11 @@ final class SignCertificateCsrRequest implements \JsonSerializable
      * @param string $issuerCaId the server's `issuer_ca_id` field
      * @param int $validityDays Validity duration in days.
      * @param mixed $metadata the server's `metadata` field (optional)
+     * @param list<SubjectAltNameVariant>|null $subjectAltNames See
+     *     [`CreateCertificateRequest::subject_alt_names`]. Stated here and never in the CSR, which
+     *     is still refused if it requests a `subjectAltName`. Under a CA whose key is held by
+     *     `vault_pki` a `Server` request on this path is refused; use `POST /api/v1/certificates`.
+     *     (optional)
      */
     public function __construct(
         public readonly CertificateType $certType,
@@ -31,6 +36,7 @@ final class SignCertificateCsrRequest implements \JsonSerializable
         public readonly string $issuerCaId,
         public readonly int $validityDays,
         public readonly mixed $metadata = null,
+        public readonly ?array $subjectAltNames = null,
     ) {
     }
 
@@ -46,6 +52,7 @@ final class SignCertificateCsrRequest implements \JsonSerializable
             (string) ModelDecode::need($data, 'issuer_ca_id', self::class),
             (int) ModelDecode::need($data, 'validity_days', self::class),
             isset($data['metadata']) ? $data['metadata'] : null,
+            isset($data['subject_alt_names']) ? array_values(array_map(static fn (mixed $v): SubjectAltNameVariant => SubjectAltName::fromArray((array) $v), (array) $data['subject_alt_names'])) : null,
         );
     }
 
@@ -66,6 +73,9 @@ final class SignCertificateCsrRequest implements \JsonSerializable
         $out['validity_days'] = $this->validityDays;
         if ($this->metadata !== null) {
             $out['metadata'] = $this->metadata;
+        }
+        if ($this->subjectAltNames !== null) {
+            $out['subject_alt_names'] = array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames);
         }
 
         return $out;

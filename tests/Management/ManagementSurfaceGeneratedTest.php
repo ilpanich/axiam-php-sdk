@@ -435,6 +435,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     {
         $mounted = [
             [
+                'inherit' => true,
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
                 'role' => [
                     'created_at' => '2026-08-26T00:00:00Z',
@@ -664,6 +665,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     {
         $mounted = [
             [
+                'inherit' => true,
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
                 'role' => [
                     'created_at' => '2026-08-26T00:00:00Z',
@@ -863,6 +865,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     {
         $mounted = [
             [
+                'inherit' => true,
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
                 'tenant_scope' => [
                     '11111111-1111-4111-8111-111111111111',
@@ -934,6 +937,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'tenant_id' => '11111111-1111-4111-8111-111111111111',
                     'updated_at' => '2026-08-26T00:00:00Z',
                 ],
+                'inherit' => true,
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
                 'tenant_scope' => [
                     '11111111-1111-4111-8111-111111111111',
@@ -1046,6 +1050,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     {
         $mounted = [
             [
+                'inherit' => true,
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
                 'service_account' => [
                     'client_id' => 'example',
@@ -1624,6 +1629,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     {
         $mounted = [
             [
+                'inherit' => true,
                 'resource_id' => '11111111-1111-4111-8111-111111111111',
                 'role' => [
                     'created_at' => '2026-08-26T00:00:00Z',
@@ -3278,6 +3284,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'certificate' => [
                 'default_cert_validity_days' => 1,
                 'max_cert_validity_days' => 1,
+                'server_cert_allowed_names' => [
+                    'example',
+                ],
             ],
             'created_at' => '2026-08-26T00:00:00Z',
             'email' => [
@@ -3373,6 +3382,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'certificate' => [
                 'default_cert_validity_days' => 1,
                 'max_cert_validity_days' => 1,
+                'server_cert_allowed_names' => [
+                    'example',
+                ],
             ],
             'created_at' => '2026-08-26T00:00:00Z',
             'email' => [
@@ -3468,6 +3480,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'certificate' => [
                 'default_cert_validity_days' => 1,
                 'max_cert_validity_days' => 1,
+                'server_cert_allowed_names' => [
+                    'example',
+                ],
             ],
             'created_at' => '2026-08-26T00:00:00Z',
             'email' => [
@@ -3563,6 +3578,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'certificate' => [
                 'default_cert_validity_days' => 1,
                 'max_cert_validity_days' => 1,
+                'server_cert_allowed_names' => [
+                    'example',
+                ],
             ],
             'created_at' => '2026-08-26T00:00:00Z',
             'email' => [
@@ -3711,6 +3729,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'require_symbols' => true,
             'require_uppercase' => true,
             'sensitive_scopes_enabled' => true,
+            'server_cert_allowed_names' => [
+                'example',
+            ],
             'webauthn_user_verification' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
@@ -3782,6 +3803,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'require_symbols' => true,
             'require_uppercase' => true,
             'sensitive_scopes_enabled' => true,
+            'server_cert_allowed_names' => [
+                'example',
+            ],
             'webauthn_user_verification' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);

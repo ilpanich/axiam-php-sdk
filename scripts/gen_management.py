@@ -84,6 +84,21 @@ EXAMPLE_TIME = "2026-08-26T00:00:00Z"
 # answers 400.
 OMIT_WHEN_EMPTY = {"tenantScope"}
 
+# Required boolean response fields a server older than the one this SDK was generated
+# against omits, and whose absence has one defined meaning: `true`.
+#
+# CONTRACT.md §27.13 S-10 rule 3: `inherit` is required on the three role-side
+# assignment listings (`RoleGroupAssignment` and its two siblings) and optional on the
+# subject-side `RoleAssignment`, where "an SDK MUST read absent as `true` ... which is
+# also what a server that predates the field means by omitting it." A required `bool`
+# decoded with `ModelDecode::need()` would instead fail the WHOLE listing against that
+# server -- and `roles.list_users`/`list_groups`/`list_service_accounts` is what the
+# §27.6 manifest reads to plan every binding. Reading the same absence the same way on
+# both sides of the wire is the rule applied, not a relaxation of it: a server that DOES
+# send the field is decoded exactly as before. A name list, like OMIT_WHEN_EMPTY,
+# because "absent means true" is a fact about this one field, not about every bool.
+DEFAULT_TRUE_WHEN_ABSENT = {"inherit"}
+
 
 def emit_guard(name: str) -> str:
     """The `jsonSerialize` guard for an optional field."""
@@ -283,6 +298,39 @@ def discriminated(schema: Any) -> tuple[str, list[tuple[str, Any]]] | None:
     return (tag or "", arms)
 
 
+def externally_tagged(schema: Any) -> list[tuple[str, Any]] | None:
+    """Detect an externally-tagged union: ``oneOf`` of single-key objects.
+
+    ``SubjectAltName`` (contract 1.51, §27.13 S-7) is ``{"dns": "…"} | {"ip": "…"}`` --
+    each arm an object with exactly one required property, and the property's NAME is
+    the discriminant. Neither {@see discriminated} (which wants a tag field with a
+    pinned enum value) nor the plain-class path (which reads top-level ``properties``
+    and finds none, since everything is inside ``oneOf``) recognises this shape, and the
+    plain-class path used to emit a struct with no fields -- it compiled, it serialized
+    as ``{}``, and the server refuses ``{}``. Returns ``[(key, value_schema), ...]`` or
+    ``None``.
+    """
+    variants = schema.get("oneOf") if isinstance(schema, dict) else None
+    if not isinstance(variants, list) or len(variants) < 2 or "properties" in schema:
+        return None
+    arms: list[tuple[str, Any]] = []
+    seen: set[str] = set()
+    for variant in variants:
+        if not isinstance(variant, dict) or "$ref" in variant or "allOf" in variant:
+            return None
+        props = variant.get("properties") or {}
+        if len(props) != 1:
+            return None
+        (key, value), = props.items()
+        if variant.get("required") != [key]:
+            return None
+        if key in seen:
+            return None
+        seen.add(key)
+        arms.append((key, value))
+    return arms
+
+
 def sensitive_map() -> dict[str, set[str]]:
     """Which fields of which schemas carry a secret, per the registry."""
     out: dict[str, set[str]] = {}
@@ -361,6 +409,8 @@ def _classify() -> tuple[set[str], set[str]]:
         if isinstance(schema.get("enum"), list):
             enums.add(pascal(name))
         elif discriminated(schema):
+            unions.add(pascal(name))
+        elif externally_tagged(schema):
             unions.add(pascal(name))
     return enums, unions
 
@@ -740,7 +790,9 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         out.append("        return new self(")
         for f in fields:
             src = f"$data['{f['wire']}']"
-            if f["required"]:
+            if f["required"] and f["wire"] in DEFAULT_TRUE_WHEN_ABSENT:
+                out.append(f"            isset({src}) ? {decode_expr(f, src)} : true,")
+            elif f["required"]:
                 need = f"ModelDecode::need($data, '{f['wire']}', self::class)"
                 out.append(f"            {decode_expr(f, need)},")
             else:
@@ -952,6 +1004,134 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
     return files
 
 
+def emit_external_union(name: str, schema: Any, arms: list[tuple[str, Any]]) -> dict[str, str]:
+    """An externally-tagged union: ``{"dns": "…"} | {"ip": "…"}`` -- one interface plus
+    one class per arm, exactly {@see emit_union}'s shape, but with no separate tag
+    field: the SINGLE property's NAME is the discriminant, both in the request body and
+    in the arm class itself. ``SubjectAltName`` (contract 1.51, §27.13 S-7) is this
+    shape, and getting it wrong means a struct that serializes as ``{}`` -- which
+    compiles, sends, and the server refuses.
+    """
+    files: dict[str, str] = {}
+    description = schema.get("description") or f"The `{name}` union from the server's OpenAPI document."
+    keys = [key for key, _ in arms]
+
+    iface = [header(MODELS_NS)]
+    iface.extend(docblock(
+        escape(description) + "\n\nExternally tagged: the wire object has exactly ONE key, "
+        f"one of {', '.join(f'`{k}`' for k in keys)}, and that key IS the discriminant -- "
+        f"there is no separate tag field. Use {{@see {name}::fromArray()}} to decode one; "
+        "each arm is a separate class implementing this interface.",
+    ))
+    iface.append(f"interface {name}Variant extends \\JsonSerializable")
+    iface.append("{")
+    iface.extend(docblock(
+        "Renders this variant to its wire form: `{\"<key>\": <value>}`.",
+        "    ",
+        ["@return array<string,mixed>"],
+    ))
+    iface.append("    public function toArray(): array;")
+    iface.append("}")
+    files[f"{MODELS_DIR}/{name}Variant.php"] = "\n".join(iface) + "\n"
+
+    dispatch = [header(MODELS_NS)]
+    dispatch.extend(docblock(
+        escape(description) + f"\n\nThe decoder for the externally-tagged union. Every arm is "
+        f"a {name}Variant; this class exists only to pick the right one, by which of "
+        f"{', '.join(f'`{k}`' for k in keys)} the wire object carries.",
+    ))
+    dispatch.append(f"final class {name}")
+    dispatch.append("{")
+    dispatch.extend(docblock(
+        f"Decodes one externally-tagged {name} object into its variant.",
+        "    ",
+        [
+            "@param array<string,mixed> $data The raw wire object.",
+            f"@throws \\Axiam\\Sdk\\Core\\AxiamException when none of "
+            f"{', '.join(f'`{k}`' for k in keys)} is present.",
+        ],
+    ))
+    dispatch.append(f"    public static function fromArray(array $data): {name}Variant")
+    dispatch.append("    {")
+    for key in keys:
+        arm = f"{name}{pascal(key)}"
+        dispatch.append(f"        if (array_key_exists('{key}', $data)) {{")
+        dispatch.append(f"            return {arm}::fromArray($data);")
+        dispatch.append("        }")
+    dispatch.append("")
+    dispatch.append("        throw new \\Axiam\\Sdk\\Core\\AxiamException(sprintf(")
+    keys_literal = ", ".join(f"'{k}'" for k in keys)
+    dispatch.append(f"            'unknown {name}: none of %s is present',")
+    dispatch.append(f"            implode(', ', [{keys_literal}]),")
+    dispatch.append("        ));")
+    dispatch.append("    }")
+    dispatch.append("}")
+    files[f"{MODELS_DIR}/{name}.php"] = "\n".join(dispatch) + "\n"
+
+    for key, value_schema in arms:
+        arm = f"{name}{pascal(key)}"
+        decl, doc = php_type(value_schema)
+        field = {
+            "wire": key, "name": prop(key), "decl": decl, "doc": doc,
+            "required": True, "schema": value_schema, "secret": False,
+            "description": value_schema.get("description") if isinstance(value_schema, dict) else None,
+        }
+
+        body = [header(MODELS_NS)]
+        body.extend(docblock(f"The `{escape(key)}` arm of {{@see {name}}} (`{{\"{escape(key)}\": …}}`)."))
+        body.append(f"final class {arm} implements {name}Variant")
+        body.append("{")
+        body.extend(docblock(
+            f"Constructs the `{escape(key)}` arm.",
+            "    ",
+            [f"@param {field['doc']} ${field['name']} {field_doc(field)}"],
+        ))
+        body.append("    public function __construct(")
+        body.append(f"        public readonly {field['decl']} ${field['name']},")
+        body.append("    ) {")
+        body.append("    }")
+        body.append("")
+        body.extend(docblock(
+            f"Rebuilds the `{escape(key)}` arm from one decoded JSON object.",
+            "    ",
+            ["@param array<string,mixed> $data The raw wire object."],
+        ))
+        body.append("    public static function fromArray(array $data): self")
+        body.append("    {")
+        need = f"ModelDecode::need($data, '{key}', self::class)"
+        body.append(f"        return new self({decode_expr(field, need)});")
+        body.append("    }")
+        body.append("")
+        body.extend(docblock(
+            f"Renders this arm to its wire form: `{{\"{escape(key)}\": …}}`. The key IS the "
+            "discriminant -- there is no separate tag field to re-attach.",
+            "    ",
+            ["@return array<string,mixed>"],
+        ))
+        body.append("    public function toArray(): array")
+        body.append("    {")
+        body.append(f"        return ['{key}' => {encode_expr(field)}];")
+        body.append("    }")
+        body.append("")
+        body.extend(docblock(
+            "Renders this object for `json_encode()`.\n\n"
+            "Any {@see " + SENSITIVE + "} it carries stays WRAPPED here, so a log line or a "
+            "`json_encode($model)` in application code prints `[SENSITIVE]`. The one place a "
+            "secret is revealed is {@see \\Axiam\\Sdk\\Management\\ManagementTransport}, on "
+            "the way to the wire and nowhere else (§27.5).",
+            "    ",
+            ["@return array<string,mixed>"],
+        ))
+        body.append("    public function jsonSerialize(): array")
+        body.append("    {")
+        body.append("        return $this->toArray();")
+        body.append("    }")
+        body.append("}")
+        files[f"{MODELS_DIR}/{arm}.php"] = "\n".join(body) + "\n"
+
+    return files
+
+
 def emit_models() -> dict[str, str]:
     """Every model file, keyed by repo-relative path."""
     secrets = sensitive_map()
@@ -966,6 +1146,10 @@ def emit_models() -> dict[str, str]:
         union = discriminated(schema)
         if union:
             files.update(emit_union(rendered, schema, union[0], union[1]))
+            continue
+        external = externally_tagged(schema)
+        if external:
+            files.update(emit_external_union(rendered, schema, external))
             continue
         files[f"{MODELS_DIR}/{rendered}.php"] = emit_class(
             rendered, secrets.get(name, set()), name in replacements)
@@ -1376,6 +1560,12 @@ def example_for(name: str, depth: int = 0) -> Any:
         for key, sub in (resolved.get("properties") or {}).items():
             out[key] = example_json(sub, depth + 1)
         return out
+    external = externally_tagged(schema)
+    if external:
+        # Externally tagged: the first arm's key doubles as the wire object's only
+        # property AND its discriminant -- there is no separate tag field to add.
+        key, value_schema = external[0]
+        return {key: example_json(value_schema, depth + 1)}
     props, _, _ = flatten(name)
     return {k: example_json(v, depth + 1) for k, v in props.items()}
 
@@ -1487,6 +1677,12 @@ def model_literal(name: str, depth: int = 0) -> str:
         required = set(resolved.get("required") or [])
         args = [php_value_literal(s, False, depth + 1) for k, s in props.items() if k in required]
         return f"new Models\\{arm}(" + ", ".join(args) + ")"
+    external = externally_tagged(schema)
+    if external:
+        # The first arm, one constructor argument: the arm's single property.
+        key, value_schema = external[0]
+        arm = f"{rendered}{pascal(key)}"
+        return f"new Models\\{arm}(" + php_value_literal(value_schema, False, depth + 1) + ")"
 
     secrets = sensitive_map().get(name, set())
     fields, _ = field_list(name, secrets)
