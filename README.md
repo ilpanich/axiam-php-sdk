@@ -257,10 +257,22 @@ response back.
   - **Two pre-existing defects, fixed**: a role's `grants` and a group's `roles` are now
     actually reconciled (additively — `apply()`'s own docblock claimed this before it
     was true), and a nested resource's `parent_id` now actually reaches the wire.
-  - **Declined**: the resource-scoped binding shape (`{role, resource, inherit}`) and
-    `service_accounts` — new 1.51 additions this port does not build; PHP's manifest
-    stays at the tier §27.10 already records (permissions/roles/groups/resources, no
-    `users`, no `scopes`), and this is that same tier gap, not a new one.
+  - **The resource-scoped binding shape**, `{role, resource, inherit}` —
+    `RoleBinding::at($role, $resource)` / `::atOnly($role, $resource)` — on group and
+    service-account role bindings, alongside the plain role-key shape every manifest
+    already used. `inherit` reaches the wire only as `false`. A subject's binding is
+    keyed on `(subject, role)`: a changed resource or `inherit` is an `Update`, done as
+    unassign then assign, with the server binding's `tenant_scope` carried across and
+    the previous binding restored (reported via `BindingRebindFailed`) if the
+    re-assignment fails. One role bound twice to a subject, or a global role bound with
+    `inherit: false`, is refused while the manifest is built — zero wire calls.
+  - **`service_accounts`** — `ServiceAccountSpec { key, name, description?, roles? }`,
+    reconciled by `name` (the server does not enforce it unique, so an ambiguous match
+    fails `plan()` before any write). `description` is the only field an `Update`
+    reconciles. A `Create`'s one-time `client_secret` is on
+    `ApplyReport::createdServiceAccounts()`, kept even when a later step of the same
+    `apply()` fails — `apply()` never rotates one. Service accounts and their bindings
+    are applied last (§27.6 rule 5).
 
 ## Framework integration
 
@@ -1603,6 +1615,17 @@ Four properties are worth knowing before you run one against production:
 - **A nested `resource(...)` is actually nested on the wire.** `resource('child', …,
   parentKey: 'root')` sends `parent_id` on `Create`, resolved to the parent's real
   server id (parents are always created before children — §27.6 rule 5's ordering).
+- **A role binding can name a resource (§27.6.1 addition 2, contract 1.51).**
+  `roleKeys: [RoleBinding::at('contractor', 'site')]` alongside plain keys — mix both in
+  one `roleKeys` list. `RoleBinding::atOnly(...)` stops the binding at that resource
+  (`inherit: false`, sent only when set). A subject holding one role at two resources —
+  or once plain and once scoped — is refused while the manifest is *built*, before a
+  client exists to send anything: the server keys an assignment on `(subject, role)`, so
+  that state cannot be held.
+- **`service_accounts` is a manifest section (§27.6.1 addition 3, contract 1.51).**
+  `->serviceAccount('fleet', 'device-fleet', roleKeys: [...])`, reconciled by name.
+  `apply()`'s report carries the one-time `client_secret` a `Create` mints —
+  `$report->createdServiceAccounts()` — and never rotates one to converge drift.
 
 An incoherent manifest — a dangling reference, a cycle, a duplicate key — is refused
 *before* the first request, because discovering it halfway through an un-rollback-able

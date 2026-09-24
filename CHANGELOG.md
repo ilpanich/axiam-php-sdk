@@ -67,6 +67,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   parent but never told the server about the relationship, so a nested manifest was
   created flat.
 
+- **§27.6.1 addition 2 — resource-scoped role bindings.** `RoleBinding::at($role,
+  $resource)` / `::atOnly($role, $resource)` join the plain role-key shape in a group's
+  or service account's `roleKeys`. `inherit` reaches the wire only as `false`. A
+  binding's natural key is `(subject, role)`: a server assignment with a different
+  resource or `inherit` is an `Update`, performed as unassign-then-assign, carrying the
+  server assignment's `tenant_scope` across unchanged; a failed re-assignment restores
+  the previous binding and the failure is `BindingRebindFailed { restored, restoreError
+  }` on `ApplyReport::$failure` (**C-12 question 7**: PHP's answer matches the
+  reference — the previous binding is put back, and BOTH outcomes are reported, never
+  just the first). A subject binding one role twice — plain and scoped alike — or a
+  *global* role bound with `inherit: false`, is refused while the manifest is *built*,
+  before a client exists to send anything (**C-12 question 6**: PHP refuses, matching
+  the reference; §27.6.1 only lets an SDK do so, it does not require it). Previously
+  declined; the decision is reversed — see `claude_dev/dogfooding-findings-fix-plan.md`
+  §13 row 17 and the orchestrator's C-6 review.
+
+- **§27.6.1 addition 3 — `service_accounts` in the manifest.**
+  `->serviceAccount($key, $name, description: …, roleKeys: […])`, reconciled by `name`
+  — which the server does not keep unique, so `plan()`/`apply()` refuse, before any
+  write, when more than one existing account matches. `description` is the only field
+  an `Update` reconciles. A `Create`'s one-time `client_secret` lands on
+  `ApplyReport::createdServiceAccounts()`, kept even when a *later* step of the same
+  `apply()` fails; `apply()` never calls `rotateSecret()`. Service accounts and their
+  bindings are reconciled last (§27.6 rule 5). Previously declined; the decision is
+  reversed — see above.
+
 ### Breaking
 
 - **§10.1 rule 9 — `JwksVerifier::verify()` / `AxiamClient::verifyLocally()` now refuse
