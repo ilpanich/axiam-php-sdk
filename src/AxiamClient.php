@@ -1332,6 +1332,44 @@ final class AxiamClient
         return $this->authzDispatcher->getUserInfo();
     }
 
+    /**
+     * `validateToken` — `axiam.v1.TokenService/ValidateToken` (CONTRACT.md §1.1.1/§10.3,
+     * contract 1.51). Signature + expiry, plus the confirmation (`cnf`) a resource server
+     * validating over gRPC needs in order not to accept a sender-constrained token as a
+     * bearer token (§10.1 rule 9).
+     *
+     * `$inspectedAccessToken` is the token being asked about — a DIFFERENT credential
+     * from this client's OWN session token, which authenticates the RPC itself. The two
+     * are never confused: there is no default that falls one back to the other
+     * (§1.1.1 rule 1). `$inspectedAccessToken` is secret material and SHOULD be passed
+     * as {@see Sensitive}.
+     *
+     * `$result->valid` is NOT permission to proceed — read `$result->status()`, or call
+     * `$result->verifyPossession($proofs)` with the proofs YOUR connection established.
+     * Requires a prior successful {@see self::login()} on THIS client (the caller's own
+     * credential) — with none, raises {@see AuthError} before any wire call — and,
+     * being gRPC-only, requires the `grpc` PECL extension plus a configured
+     * `grpcTarget`; there is NO REST substitution (§1.1.1 rule 7; `POST /oauth2/introspect`
+     * is a different operation, RFC 7662 §2.1 client authentication, not this one). A
+     * gRPC `UNAUTHENTICATED` on the caller's own credential drives the shared
+     * single-flight refresh (§9) and retries once.
+     */
+    public function validateToken(Sensitive|string $inspectedAccessToken): \Axiam\Sdk\Auth\TokenValidation
+    {
+        return $this->authzDispatcher->validateToken($inspectedAccessToken);
+    }
+
+    /**
+     * `introspectToken` — `axiam.v1.TokenService/IntrospectToken` (CONTRACT.md
+     * §1.1.1/§10.3, contract 1.51). The RFC 7662 set, plus the confirmation. See
+     * {@see self::validateToken()} for the shared rules this method follows exactly; the
+     * only difference is the richer RFC-7662-shaped return value.
+     */
+    public function introspectToken(Sensitive|string $inspectedAccessToken): \Axiam\Sdk\Auth\TokenIntrospection
+    {
+        return $this->authzDispatcher->introspectToken($inspectedAccessToken);
+    }
+
     // ------------------------------------------------------------------
     // OIDC / SSO relying-party helpers (CONTRACT.md §12, contract 1.4)
     //
