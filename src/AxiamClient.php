@@ -1146,19 +1146,38 @@ final class AxiamClient
      * anyway, so going to the wire gains nothing and turns a configuration mistake into
      * an authentication failure.
      *
-     * **Adopts the returned token as this client's credential**, exactly as a `login()`
-     * result is adopted — every subsequent `/api/v1` call (management, checkAccess,
-     * batchCheck, …) authenticates with it. The server sets NO cookie on this route,
-     * so the token travels as `Authorization: Bearer` via
-     * {@see \Axiam\Sdk\Session::adoptBearerCredential()}. The shared cookie jar is
-     * CLEARED first: {@see \Axiam\Sdk\Session::accessToken()} prefers a cookie-sourced
-     * token over an adopted one (§12.1's `login_client_credentials`-as-credential-source
-     * precedent), so a cookie left from an earlier `login()`/`verifyMfa()` session on
-     * this same client would otherwise silently outrank the device token and every
-     * subsequent call would run as that earlier session's principal — the exact
-     * theft-adjacent scenario §6.1 rule 9 exists to close. The decision memo is cleared
-     * (§17.1 rule 9: the subject changed) and the §5.2 acting-tenant gate is reset to
-     * unknown (a device holds no `LoginUserInfo`).
+     * **The request carries no credential from an earlier session.** `$plainHttp`
+     * shares this client's ONE cookie jar (§4) with every other REST call, and
+     * {@see AuthMiddleware} decorates EVERY same-origin request with
+     * `Authorization: Bearer` from {@see \Axiam\Sdk\Session::accessToken()} (which
+     * itself prefers a cookie-sourced token) and, on this `POST`, `X-CSRF-Token` — so
+     * withholding the `Cookie` header alone is not enough: a cookie left from an
+     * earlier `login()`/`verifyMfa()` session would still ride this call as a stale
+     * `Authorization: Bearer` (the same defect independently found and fixed in the
+     * C# port, `ilpanich/axiam-csharp-sdk#96`). The request is therefore sent with
+     * BOTH Guzzle's per-request `cookies => false` override AND
+     * {@see AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION} (the same option
+     * {@see self::postWithoutSessionCredentials()} uses for §24.1's `setup/register/*`
+     * pair) rather than by clearing the jar: neither the cookie, the stale bearer nor
+     * a stale `X-CSRF-Token` reaches this endpoint, while `X-Tenant-ID` and (when set)
+     * `X-Axiam-Tenant` still do — CONTRACT.md §5.2 rule 1/§5.2.2 rule 4 require both on
+     * every `/api/v1` request regardless of session credentials, and
+     * `NO_SESSION_CREDENTIALS_OPTION` does not touch either. The prior session must
+     * otherwise survive a refusal intact (see below).
+     *
+     * **Session state changes ONLY after a `200` with a well-formed body** — immediately
+     * before adopting the token via {@see \Axiam\Sdk\Session::adoptBearerCredential()}.
+     * Only then: the shared cookie jar is cleared ({@see \Axiam\Sdk\Session::accessToken()}
+     * prefers a cookie-sourced token over an adopted one, §12.1's
+     * `login_client_credentials`-as-credential-source precedent, so a leftover cookie
+     * would otherwise silently outrank the device token and every subsequent call would
+     * run as that earlier session's principal — the exact theft-adjacent scenario §6.1
+     * rule 9 exists to close); the decision memo is cleared (§17.1 rule 9: the subject
+     * changed); and the §5.2 acting-tenant gate is reset to unknown (a device holds no
+     * `LoginUserInfo`). A REFUSED or malformed device login leaves the jar, the gate and
+     * the memo exactly as they were — a caller who was mid-session when this call was
+     * refused keeps a working session, matching how a refused SSO completion elsewhere
+     * in this port changes nothing.
      *
      * **Every refusal is `401`** (§6.1 rule 8: an unknown, untrusted, expired, revoked
      * or unbound certificate, and a `Server`-type certificate, all answer `401`
@@ -1189,15 +1208,16 @@ final class AxiamClient
             );
         }
 
-        $this->onCredentialChange();
-        // §5.2 rule 1: a device holds no LoginUserInfo.
-        $this->session->resetPrincipalScope();
-        // See this method's own docblock: a stale cookie from an earlier session on
-        // this same client would otherwise silently outrank the adopted device token.
-        $this->session->cookieJar()->clear();
-
         try {
-            $response = $this->plainHttp->post(self::DEVICE_AUTH_PATH);
+            // See this method's own docblock: the prior session's cookie, bearer and
+            // CSRF token must not reach this endpoint, withheld per-request — the jar
+            // itself is NOT touched here, so a refusal below leaves a working prior
+            // session intact. X-Tenant-ID/X-Axiam-Tenant are unaffected by
+            // NO_SESSION_CREDENTIALS_OPTION and are still sent (§5.2 rule 1/§5.2.2 rule 4).
+            $response = $this->plainHttp->post(self::DEVICE_AUTH_PATH, [
+                'cookies' => false,
+                AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION => true,
+            ]);
         } catch (RequestException $e) {
             $errorResponse = $e instanceof BadResponseException ? $e->getResponse() : null;
             if ($errorResponse !== null) {
@@ -1221,6 +1241,13 @@ final class AxiamClient
         }
 
         $sensitive = new Sensitive($accessToken);
+
+        // Only now — a 200 with a well-formed body — does this call change session
+        // state, immediately before adopting the token (see this method's own docblock).
+        $this->onCredentialChange();
+        // §5.2 rule 1: a device holds no LoginUserInfo.
+        $this->session->resetPrincipalScope();
+        $this->session->cookieJar()->clear();
         $this->session->adoptBearerCredential($sensitive);
 
         return new \Axiam\Sdk\Auth\DeviceToken(
