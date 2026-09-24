@@ -627,7 +627,7 @@ final class AxiamClient
             );
         }
         $reachable = $scope['reachableTenantIds'];
-        if ($reachable !== null && !\in_array($tenantId, $reachable, true)) {
+        if ($reachable !== null && !self::reachableTenantIdsContain($reachable, $tenantId)) {
             throw new \Axiam\Sdk\Core\AuthzError(
                 'actingTenant: the signed-in principal\'s roles do not reach this tenant — it is '
                 . 'not in reachableTenantIds, and the server refuses the header with 403 '
@@ -635,6 +635,26 @@ final class AxiamClient
                 resourceId: $tenantId,
             );
         }
+    }
+
+    /**
+     * Whether `$tenantId` is one of `$reachable` — compared as UUIDs, never as strings
+     * (CONTRACT.md §5.2 rule 1 / C-12 N5.6): case and formatting MUST NOT decide reach.
+     * A plain `\in_array(..., true)` would refuse a caller who spells a reachable
+     * tenant's UUID with different letter case than the server happened to send it in
+     * `reachable_tenant_ids` — the exact same tenant, described differently.
+     *
+     * @param list<string> $reachable
+     */
+    private static function reachableTenantIdsContain(array $reachable, string $tenantId): bool
+    {
+        foreach ($reachable as $candidate) {
+            if (strcasecmp($candidate, $tenantId) === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
