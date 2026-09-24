@@ -34,12 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **§6.1 rules 6-10 — `authenticateDevice()`.** `POST /api/v1/auth/device`, no request
   body, reachable only on a client built with `clientCert`/`clientKey` (`AuthError`,
   zero wire calls, otherwise). Returns `Auth\DeviceToken { accessToken: Sensitive,
-  tokenType, expiresIn }` and adopts it as this client's credential — the shared cookie
-  jar is cleared first, so a cookie left from an earlier `login()`/`verifyMfa()` session
-  on the same client object cannot silently outrank the device's own credential. Every
-  refusal is `401` → `AuthError`; a `429` is `NetworkError`, never `AuthError`, and the
-  call is never retried. Never enters the §9 single-flight refresh guard — there is no
-  refresh token to spend. See `examples/device_mtls_provisioning.php`.
+  tokenType, expiresIn }` and adopts it as this client's credential on a successful
+  `200`; the request is sent with the shared cookie jar withheld per-request (Guzzle's
+  `cookies => false`, see Fixed below), so a cookie left from an earlier
+  `login()`/`verifyMfa()` session on the same client object cannot silently outrank the
+  device's own credential. Every refusal is `401` → `AuthError`; a `429` is
+  `NetworkError`, never `AuthError`, and the call is never retried. Never enters the §9
+  single-flight refresh guard — there is no refresh token to spend. See
+  `examples/device_mtls_provisioning.php`.
 
 - **§1.1.1/§10.3 — `validateToken()`/`introspectToken()`.** gRPC wrappers over
   `axiam.v1.TokenService/ValidateToken` and `/IntrospectToken` — the operations §10.3
@@ -111,6 +113,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   request header — §10.1 rule 9 detail 2). An unbound token is unaffected.
 
 ### Fixed
+
+- **`authenticateDevice()` no longer destroys a working session when the device login
+  is refused (CONTRACT.md §6.1 rules 6-10, §5.2 rule 1, §17).** It used to clear the
+  §17 decision memo, reset the §5.2 acting-tenant gate, and clear the shared cookie jar
+  BEFORE sending `POST /api/v1/auth/device` — so a `401` (untrusted/expired/revoked/
+  unbound certificate, or a `Server`-type certificate), a `429`, or a malformed `200`
+  body threw away a caller's working prior session for nothing, even though the call
+  itself failed. The wire request now withholds the prior session's cookie
+  per-request (`['cookies' => false]`) rather than by clearing the jar, and the memo
+  clear / gate reset / jar clear happen only after a `200` with a well-formed body,
+  immediately before `adoptBearerCredential()`. A refused or malformed device login
+  now leaves the jar, the gate and the memo exactly as they were — matching how a
+  refused SSO completion elsewhere in this port already changes nothing. See
+  `tests/Contract151DeviceAuthTest.php`.
 
 - **§27.6 declarative manifest, two pre-existing defects (§13 row 17).** `applyRole()`'s
   docblock claimed it "reconciles its permission grants"; it never granted anything, and

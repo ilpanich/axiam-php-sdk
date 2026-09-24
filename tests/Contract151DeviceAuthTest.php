@@ -65,7 +65,7 @@ final class Contract151DeviceAuthTest extends TestCase
      * @param list<Response> $queue
      * @param list<array{request: RequestInterface}> $history
      */
-    private function clientWithCertificate(array $queue, array &$history): AxiamClient
+    private function clientWithCertificate(array $queue, array &$history, float $decisionMemoTtlMs = 0.0): AxiamClient
     {
         [$certPem, $keyPem] = $this->generateTestIdentity();
 
@@ -81,7 +81,30 @@ final class Contract151DeviceAuthTest extends TestCase
             clientKey: $keyPem,
             transportHandler: $stack,
             retryEnabled: false,
+            decisionMemoTtlMs: $decisionMemoTtlMs,
         );
+    }
+
+    /** An unsigned but well-shaped JWT — enough for the SDK's own unverified claim reads. */
+    private static function loginCookieResponse(array $user = []): Response
+    {
+        $token = self::unsignedJwt([
+            'sub' => 'u1',
+            'jti' => 'sid-1',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'org_id' => '11111111-1111-4111-8111-111111111111',
+        ]);
+
+        return new Response(
+            200,
+            ['Set-Cookie' => 'axiam_access=' . $token . '; Path=/', 'Content-Type' => 'application/json'],
+            (string) json_encode(['user' => ['id' => 'u1'] + $user]),
+        );
+    }
+
+    private static function checkAccessOk(): Response
+    {
+        return new Response(200, ['Content-Type' => 'application/json'], '{"allowed":true,"reason_code":"allowed"}');
     }
 
     private static function deviceAuthOk(string $token = 'device-tok-1', int $expiresIn = 900): Response
@@ -291,5 +314,216 @@ final class Contract151DeviceAuthTest extends TestCase
         );
 
         return $segment(['alg' => 'none', 'typ' => 'JWT']) . '.' . $segment($claims) . '.signature';
+    }
+
+    // -----------------------------------------------------------------
+    // A refused device login must not destroy a working prior session
+    // (CONTRACT.md §6.1 rules 6-10, §5.2 rule 1, §17)
+    // -----------------------------------------------------------------
+
+    /** The device POST itself — not just later requests — must carry no session cookie. */
+    public function testTheDevicePostItselfCarriesNoCookieFromThePriorSession(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([
+            self::loginCookieResponse(),
+            self::deviceAuthOk('device-tok-1'),
+        ], $history);
+
+        $client->login('alice@example.test', 'pw');
+        $client->authenticateDevice();
+
+        self::assertCount(2, $history);
+        $deviceRequest = $history[1]['request'];
+        self::assertSame('/api/v1/auth/device', $deviceRequest->getUri()->getPath());
+        self::assertSame(
+            '',
+            $deviceRequest->getHeaderLine('Cookie'),
+            'the device POST itself must carry no cookie from the prior session',
+        );
+    }
+
+    /**
+     * A 401 refusal must leave the prior session exactly as it was: the cookie jar
+     * still holds the earlier session's cookie, the §5.2 acting-tenant gate is
+     * unchanged, and the §17 decision memo is unchanged.
+     *
+     * Red on the unfixed code: `authenticateDevice()` calls `onCredentialChange()`,
+     * `resetPrincipalScope()` and `cookieJar()->clear()` BEFORE the wire call, so all
+     * three fire regardless of the response.
+     */
+    public function testA401LeavesCookieJarSessionScopeAndMemoUnchanged(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([
+            self::loginCookieResponse(['organization_level' => false]),
+            self::checkAccessOk(), // memoizes ('read', 'doc-1')
+            new Response(401, [], (string) json_encode(['message' => 'unknown certificate'])),
+            self::checkAccessOk(), // ('read', 'doc-2') — a memo MISS, must reach the wire
+        ], $history, decisionMemoTtlMs: 5000.0);
+
+        $client->login('alice@example.test', 'pw');
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+
+        // §5.2 rule 1: organization_level=false gates the acting-tenant switch client-side.
+        try {
+            $client->actingTenant('33333333-3333-4333-8333-333333333333');
+            self::fail('expected AuthzError before the refused device login');
+        } catch (AuthzError) {
+        }
+
+        try {
+            $client->authenticateDevice();
+            self::fail('expected AuthError');
+        } catch (AuthError) {
+        }
+
+        // The jar: a fresh (memo-missing) check must still reach the wire carrying the
+        // ORIGINAL session cookie.
+        self::assertTrue($client->checkAccess('read', 'doc-2'));
+        self::assertCount(4, $history);
+        $lastRequest = $history[3]['request'];
+        self::assertStringContainsString(
+            'axiam_access=',
+            $lastRequest->getHeaderLine('Cookie'),
+            'the prior session cookie must still reach the wire after a refused device login',
+        );
+
+        // The scope gate: unchanged by the refusal, so the same switch is refused again.
+        try {
+            $client->actingTenant('33333333-3333-4333-8333-333333333333');
+            self::fail('expected AuthzError still — the gate must be unchanged by the refusal');
+        } catch (AuthzError) {
+        }
+
+        // The memo: repeating the FIRST check makes no additional wire call.
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+        self::assertCount(4, $history, 'the memoized decision for doc-1 must still be served without a wire call');
+    }
+
+    /** The I3 twin of the 401 case: a 429 must be equally non-destructive. */
+    public function testA429LeavesCookieJarSessionScopeAndMemoUnchanged(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([
+            self::loginCookieResponse(['organization_level' => false]),
+            self::checkAccessOk(),
+            new Response(429, ['Retry-After' => '1'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
+            self::checkAccessOk(),
+        ], $history, decisionMemoTtlMs: 5000.0);
+
+        $client->login('alice@example.test', 'pw');
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+
+        try {
+            $client->actingTenant('33333333-3333-4333-8333-333333333333');
+            self::fail('expected AuthzError before the refused device login');
+        } catch (AuthzError) {
+        }
+
+        try {
+            $client->authenticateDevice();
+            self::fail('expected NetworkError');
+        } catch (NetworkError) {
+        }
+
+        self::assertTrue($client->checkAccess('read', 'doc-2'));
+        self::assertCount(4, $history);
+        self::assertStringContainsString(
+            'axiam_access=',
+            $history[3]['request']->getHeaderLine('Cookie'),
+            'the prior session cookie must still reach the wire after a 429-refused device login',
+        );
+
+        try {
+            $client->actingTenant('33333333-3333-4333-8333-333333333333');
+            self::fail('expected AuthzError still — the gate must be unchanged by the refusal');
+        } catch (AuthzError) {
+        }
+
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+        self::assertCount(4, $history, 'the memoized decision for doc-1 must still be served without a wire call');
+    }
+
+    /** The I3 twin again: a well-formed-status, malformed-body 200 is just as non-destructive. */
+    public function testAMalformedTwoHundredBodyLeavesCookieJarSessionScopeAndMemoUnchanged(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([
+            self::loginCookieResponse(['organization_level' => false]),
+            self::checkAccessOk(),
+            new Response(200, ['Content-Type' => 'application/json'], '{"not_a_token_field":true}'),
+            self::checkAccessOk(),
+        ], $history, decisionMemoTtlMs: 5000.0);
+
+        $client->login('alice@example.test', 'pw');
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+
+        try {
+            $client->actingTenant('33333333-3333-4333-8333-333333333333');
+            self::fail('expected AuthzError before the refused device login');
+        } catch (AuthzError) {
+        }
+
+        try {
+            $client->authenticateDevice();
+            self::fail('expected NetworkError for a malformed body');
+        } catch (NetworkError) {
+        }
+
+        self::assertTrue($client->checkAccess('read', 'doc-2'));
+        self::assertCount(4, $history);
+        self::assertStringContainsString(
+            'axiam_access=',
+            $history[3]['request']->getHeaderLine('Cookie'),
+            'the prior session cookie must still reach the wire after a malformed-body device login',
+        );
+
+        try {
+            $client->actingTenant('33333333-3333-4333-8333-333333333333');
+            self::fail('expected AuthzError still — the gate must be unchanged by the refusal');
+        } catch (AuthzError) {
+        }
+
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+        self::assertCount(4, $history, 'the memoized decision for doc-1 must still be served without a wire call');
+    }
+
+    /**
+     * The I4 twin: a SUCCESSFUL device login must still adopt the bearer token, and
+     * later requests must carry it and no stale cookie — proving the fix does not
+     * over-reach into withholding the reset on the path where it belongs.
+     */
+    public function testASuccessfulDeviceLoginStillAdoptsTheBearerAndClearsThePriorSession(): void
+    {
+        $history = [];
+        $client = $this->clientWithCertificate([
+            self::loginCookieResponse(['organization_level' => false]),
+            self::checkAccessOk(), // memoizes ('read', 'doc-1') under the PRIOR subject
+            self::deviceAuthOk('device-tok-1'),
+            self::checkAccessOk(), // ('read', 'doc-1') again — must be a memo MISS: new subject
+        ], $history, decisionMemoTtlMs: 5000.0);
+
+        $client->login('alice@example.test', 'pw');
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+
+        $token = $client->authenticateDevice();
+        self::assertSame('device-tok-1', $token->accessToken->reveal());
+
+        // §5.2 rule 1: the gate resets to unknown — nothing to gate on for a device.
+        $client->actingTenant('33333333-3333-4333-8333-333333333333');
+        self::assertSame('33333333-3333-4333-8333-333333333333', $client->actingTenantId());
+
+        // §17.1 rule 9: repeating the SAME check is a memo miss now (subject changed),
+        // so it reaches the wire — and it must carry the device bearer, no stale cookie.
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+        self::assertCount(4, $history);
+        $lastRequest = $history[3]['request'];
+        self::assertSame('Bearer device-tok-1', $lastRequest->getHeaderLine('Authorization'));
+        self::assertStringNotContainsString(
+            'axiam_access=',
+            $lastRequest->getHeaderLine('Cookie'),
+            'no stale cookie once the device token is adopted',
+        );
     }
 }
