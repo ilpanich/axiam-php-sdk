@@ -287,6 +287,12 @@ final class Contract151ManifestServiceAccountsTest extends ManagementTestCase
             self::page([self::roleRow()], 1),
             self::page([self::groupRow()], 1),
             self::page([self::serviceAccountRow('device-fleet', 'ffffffff-ffff-4fff-8fff-ffffffffffff')], 1),
+            // CONTRACT 1.52 N6.4 (C-12): plan() now also reads the group's role
+            // bindings (groups()->listRoles) to report a binding Update when one is
+            // pending — already reconciled by the first apply() above, so this
+            // confirms the read alone does not turn a converged plan into a pending
+            // one.
+            self::json(200, [self::assignmentRow(self::roleRow(), inherit: true, resourceId: self::SITE_ID)]),
 
             // -- second apply(): entities unchanged, binding already reconciled --
             self::page([self::resourceRow()], 1),

@@ -465,6 +465,10 @@ final class AxiamClient
             // §1.1.4: getUserInfo's gRPC UNAUTHENTICATED retry drives the SAME single-flight
             // refresh guard (§9, D-06) the REST 401 path uses — never a second mechanism.
             refreshAccessor: fn (): mixed => $this->session->refreshIfNeeded()->wait(),
+            // CONTRACT.md §6.1 rule 11 / C-12 N4.5: never refreshed, on either transport —
+            // the SAME check RefreshMiddleware makes for REST, so a device or adopted
+            // client-credentials token's gRPC UNAUTHENTICATED never drives a refresh either.
+            canRefreshAccessor: fn (): bool => $this->session->canRefresh(),
         );
 
         // CONTRACT.md §12: built on $plainHttp (AuthMiddleware only, NEVER
@@ -623,7 +627,7 @@ final class AxiamClient
             );
         }
         $reachable = $scope['reachableTenantIds'];
-        if ($reachable !== null && !\in_array($tenantId, $reachable, true)) {
+        if ($reachable !== null && !self::reachableTenantIdsContain($reachable, $tenantId)) {
             throw new \Axiam\Sdk\Core\AuthzError(
                 'actingTenant: the signed-in principal\'s roles do not reach this tenant — it is '
                 . 'not in reachableTenantIds, and the server refuses the header with 403 '
@@ -631,6 +635,26 @@ final class AxiamClient
                 resourceId: $tenantId,
             );
         }
+    }
+
+    /**
+     * Whether `$tenantId` is one of `$reachable` — compared as UUIDs, never as strings
+     * (CONTRACT.md §5.2 rule 1 / C-12 N5.6): case and formatting MUST NOT decide reach.
+     * A plain `\in_array(..., true)` would refuse a caller who spells a reachable
+     * tenant's UUID with different letter case than the server happened to send it in
+     * `reachable_tenant_ids` — the exact same tenant, described differently.
+     *
+     * @param list<string> $reachable
+     */
+    private static function reachableTenantIdsContain(array $reachable, string $tenantId): bool
+    {
+        foreach ($reachable as $candidate) {
+            if (strcasecmp($candidate, $tenantId) === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1132,6 +1156,10 @@ final class AxiamClient
         // §5.2 rule 1: a logged-out client holds no login result — the next session
         // (any principal) must not inherit this one's reach.
         $this->session->resetPrincipalScope();
+        // §6.1 rule 11 / C-12 N4.4: "logout clears it" — an EARLIER device or adopted
+        // client-credentials token, merely shadowed (never cleared) by this cookie
+        // session, must not resurface once the cookie above is gone again.
+        $this->session->clearBearerCredential();
     }
 
     /**

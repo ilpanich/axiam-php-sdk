@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Tests;
 
 use Axiam\Sdk\Core\AuthError;
+use Axiam\Sdk\Core\Sensitive;
 use Axiam\Sdk\Session;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -126,5 +127,48 @@ final class SessionRefreshEdgeTest extends TestCase
 
         $this->expectException(AuthError::class);
         $session->refreshIfNeeded()->wait();
+    }
+
+    // -----------------------------------------------------------------
+    // canRefresh() (CONTRACT.md §6.1 rule 11 / C-12 N4.5): true only when a
+    // cookie-sourced session exists. An ADOPTED bearer credential (a device
+    // token, or a client-credentials/device-grant token adopted via
+    // adoptBearerCredential()) has no refresh token behind it — REST's
+    // RefreshMiddleware and gRPC's AuthzDispatcher both gate on this before
+    // ever calling refreshIfNeeded()/POSTing /api/v1/auth/refresh.
+    // -----------------------------------------------------------------
+
+    public function testCanRefreshIsFalseWithNoCredentialAtAll(): void
+    {
+        $session = new Session(self::BASE_URL, self::TENANT, $this->idleClient(), new CookieJar());
+
+        self::assertFalse($session->canRefresh());
+    }
+
+    public function testCanRefreshIsTrueWithACookieSourcedSession(): void
+    {
+        $session = $this->sessionWithToken('h.payload.s');
+
+        self::assertTrue($session->canRefresh());
+    }
+
+    public function testCanRefreshIsFalseWithOnlyAnAdoptedBearerCredential(): void
+    {
+        $session = new Session(self::BASE_URL, self::TENANT, $this->idleClient(), new CookieJar());
+        $session->adoptBearerCredential(new Sensitive($this->jwtWithClaims(['tenant_id' => 't', 'org_id' => 'o'])));
+
+        // Sanity: accessToken() really does fall back to the adopted token, so this
+        // is the exact state RefreshMiddleware/AuthzDispatcher observe after a device
+        // login or an adopted client-credentials grant.
+        self::assertNotNull($session->accessToken());
+        self::assertFalse($session->canRefresh());
+    }
+
+    public function testCanRefreshIsTrueWhenACookieOutranksAnAlsoAdoptedBearerCredential(): void
+    {
+        $session = $this->sessionWithToken($this->jwtWithClaims(['tenant_id' => 't', 'org_id' => 'o']));
+        $session->adoptBearerCredential(new Sensitive('some-other-adopted-token'));
+
+        self::assertTrue($session->canRefresh(), 'a real cookie session still takes precedence (Session::accessToken()\'s own rule)');
     }
 }

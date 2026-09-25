@@ -622,6 +622,104 @@ final class Contract151DeviceAuthTest extends TestCase
         self::assertSame(self::TENANT, $history[0]['request']->getHeaderLine('X-Tenant-ID'));
     }
 
+    // -----------------------------------------------------------------
+    // CONTRACT.md §6.1 rule 11 / C-12 N4.5: the device credential is never
+    // refreshed, on either transport. This is THE login — there is no
+    // refresh token to spend, so a later 401 on the adopted device token
+    // must never reach POST /api/v1/auth/refresh.
+    // -----------------------------------------------------------------
+
+    /**
+     * A RAW-callable transport (not a nested `HandlerStack`, unlike
+     * {@see self::clientWithCertificate()}): `HandlerStack::create()` puts its OWN
+     * default middlewares — `http_errors` included — directly around `axiam_auth`/
+     * `axiam_refresh`, which is what makes `RefreshMiddleware` see the RAW 401
+     * response rather than an already-thrown exception from a redundant, nested
+     * `http_errors` layer. A `HandlerStack`-wrapped `MockHandler` passed as
+     * `transportHandler` (as {@see self::clientWithCertificate()} builds, for the
+     * cookie/bearer-withholding tests above, which never depend on this ordering)
+     * would convert the 401 to an exception ONE LAYER TOO EARLY and this test would
+     * pass vacuously regardless of the fix — see
+     * `tests/Sec085GuardCredentialSubstitutionTest.php`'s `clientWithHealthySession()`
+     * for the same raw-callable pattern this mirrors.
+     *
+     * @param list<Response> $queue
+     * @param list<array{request: RequestInterface}> $history
+     */
+    private function rawHistoryTransport(array $queue, array &$history): callable
+    {
+        $mock = new MockHandler($queue);
+
+        return static function (RequestInterface $request, array $options) use ($mock, &$history) {
+            $history[] = ['request' => $request];
+
+            return $mock($request, $options);
+        };
+    }
+
+    /**
+     * Red on the unfixed code: RefreshMiddleware triggers `Session::refreshIfNeeded()`
+     * on ANY 401 regardless of what kind of credential is active. After a device
+     * login the cookie jar is empty and `Session::accessToken()` falls back to the
+     * adopted device token, so `buildRefreshCall()` decodes ITS claims and posts
+     * `/api/v1/auth/refresh` — a real wire call this credential must never make
+     * (§6.1 rule 6: no refresh token was ever issued for it), and a caller who
+     * catches `AuthError` sees the refresh guard's own synthesized message instead
+     * of the server's.
+     */
+    public function testA401OnTheAdoptedDeviceCredentialNeverEntersTheRefreshGuard(): void
+    {
+        [$certPem, $keyPem] = $this->generateTestIdentity();
+
+        $deviceJwt = self::unsignedJwt([
+            'sub' => 'device-1',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'org_id' => '11111111-1111-4111-8111-111111111111',
+        ]);
+
+        $history = [];
+        $transport = $this->rawHistoryTransport([
+            self::deviceAuthOk($deviceJwt),
+            new Response(401, ['Content-Type' => 'application/json'], (string) json_encode(['message' => 'device token expired'])),
+            // Two spare responses: if the unfixed code wrongly reaches /auth/refresh
+            // and then retries the original checkAccess, this lets both consume a
+            // well-formed reply rather than blow up on an empty mock queue, so the
+            // assertions below — not an unrelated `OutOfBoundsException` — are what
+            // actually goes red.
+            new Response(200, [], (string) json_encode(['access_token' => 'refreshed', 'token_type' => 'Bearer', 'expires_in' => 900])),
+            self::checkAccessOk(),
+        ], $history);
+
+        $client = new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            orgId: '11111111-1111-4111-8111-111111111111',
+            clientCert: $certPem,
+            clientKey: $keyPem,
+            transportHandler: $transport,
+            retryEnabled: false,
+        );
+
+        $client->authenticateDevice();
+
+        try {
+            $client->checkAccess('read', 'doc-1');
+            self::fail('expected AuthError');
+        } catch (AuthError $e) {
+            self::assertStringNotContainsString(
+                'token refresh failed',
+                $e->getMessage(),
+                'a device credential must never enter the §9 refresh guard (CONTRACT.md §6.1 rule 11, C-12 N4.5)',
+            );
+        }
+
+        self::assertCount(
+            2,
+            $history,
+            'no POST /api/v1/auth/refresh for a device credential (CONTRACT.md §6.1 rule 11, C-12 N4.5)',
+        );
+    }
+
     public function testTheDevicePostCarriesXAxiamTenantWhenAnActingTenantIsSetAndOmitsItOtherwise(): void
     {
         $withActing = [];
@@ -645,6 +743,61 @@ final class Contract151DeviceAuthTest extends TestCase
         self::assertFalse(
             $withoutActing[0]['request']->hasHeader('X-Axiam-Tenant'),
             'no acting tenant configured means no X-Axiam-Tenant header, byte-for-byte as any other request',
+        );
+    }
+
+    // -----------------------------------------------------------------
+    // CONTRACT.md §6.1 rule 11 / C-12 N4.4: "logout clears it [the device
+    // credential]." Not in this SDK's findings list — found while checking
+    // N4.4's full lifecycle against every credential-adopting call this SDK
+    // has, and fixed here too.
+    // -----------------------------------------------------------------
+
+    /**
+     * Red on the unfixed code: `Session::accessToken()` prefers a cookie-sourced token,
+     * so a device token adopted earlier in this client's life is merely SHADOWED — never
+     * cleared — by a later `login()`'s fresh cookie session. `logout()` clears the
+     * cookie jar but never touches the adopted token, so once the cookie is gone again
+     * the stale device credential resurfaces as `Authorization: Bearer` on every request
+     * made AFTER logout() — a client that believes it logged itself out is still
+     * authenticated as the device.
+     */
+    public function testLogoutClearsAStaleAdoptedDeviceCredentialEvenAfterALaterLogin(): void
+    {
+        [$certPem, $keyPem] = $this->generateTestIdentity();
+
+        $history = [];
+        $transport = $this->rawHistoryTransport([
+            self::loginCookieResponse(),        // first login
+            self::deviceAuthOk('device-tok-1'), // device login -- adopts, clears the cookie jar
+            self::loginCookieResponse(),        // a SECOND login -- replaces the cookie session
+            new Response(200, [], '{}'),        // logout
+            self::checkAccessOk(),              // a request AFTER logout
+        ], $history);
+
+        $client = new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            orgId: '11111111-1111-4111-8111-111111111111',
+            clientCert: $certPem,
+            clientKey: $keyPem,
+            transportHandler: $transport,
+            retryEnabled: false,
+        );
+
+        $client->login('alice@example.test', 'pw');
+        $client->authenticateDevice();
+        $client->login('alice@example.test', 'pw');
+        $client->logout();
+
+        self::assertTrue($client->checkAccess('read', 'doc-1'));
+
+        self::assertCount(5, $history);
+        $postLogoutRequest = $history[4]['request'];
+        self::assertFalse(
+            $postLogoutRequest->hasHeader('Authorization'),
+            'a stale adopted device credential must not resurface after logout() '
+                . '(CONTRACT.md §6.1 rule 11, C-12 N4.4)',
         );
     }
 }

@@ -25,17 +25,21 @@ final class ManifestBuilder
      * @param string      $type     Its `resource_type`.
      * @param string|null $parentKey The KEY of the parent resource, not its UUID — a
      *                               manifest cannot know a UUID that does not exist yet.
-     * @param array<string,mixed> $metadata Free-form metadata.
+     * @param array<string,mixed>|null $metadata Free-form metadata. `null` (the
+     *        default) means UNSTATED — this declaration says nothing about metadata,
+     *        so it is never sent and never checked for drift. `[]` is a STATED empty
+     *        object (CONTRACT 1.52 N6.5, C-12): sent on `Create`, and checked for
+     *        drift on `Update` like any other stated value — distinct from `null`.
      */
     public function resource(
         string $key,
         string $name,
         string $type,
         ?string $parentKey = null,
-        array $metadata = [],
+        ?array $metadata = null,
     ): self {
         $fields = ['name' => $name, 'resource_type' => $type];
-        if ($metadata !== []) {
+        if ($metadata !== null) {
             $fields['metadata'] = $metadata;
         }
         $this->entities[] = new ManifestEntity(
@@ -44,6 +48,7 @@ final class ManifestBuilder
             $name,
             $fields,
             $parentKey !== null ? [$parentKey] : [],
+            $parentKey !== null ? [$parentKey => ManifestKind::Resource] : [],
         );
 
         return $this;
@@ -114,26 +119,31 @@ final class ManifestBuilder
      * @param list<string|RoleBinding> $roleKeys Roles this group carries — a bare role
      *        KEY (tenant-wide, exactly as before contract 1.51) or a {@see RoleBinding}
      *        scoped to a resource (`RoleBinding::at()`/`::atOnly()`, §27.6.1 addition 2).
-     * @param array<string,mixed> $metadata Free-form metadata.
+     * @param array<string,mixed>|null $metadata Free-form metadata. `null` (the
+     *        default) means UNSTATED; `[]` is a STATED empty object, distinct from
+     *        `null` — see {@see self::resource()}'s identical `$metadata` doc
+     *        (CONTRACT 1.52 N6.5, C-12).
      */
     public function group(
         string $key,
         string $name,
         string $description,
         array $roleKeys = [],
-        array $metadata = [],
+        ?array $metadata = null,
     ): self {
         $bindings = array_map(RoleBinding::from(...), $roleKeys);
         $fields = ['name' => $name, 'description' => $description, 'roles' => $bindings];
-        if ($metadata !== []) {
+        if ($metadata !== null) {
             $fields['metadata'] = $metadata;
         }
+        $expectedKinds = self::bindingDependencies($bindings);
         $this->entities[] = new ManifestEntity(
             ManifestKind::Group,
             $key,
             $name,
             $fields,
-            self::bindingDependencies($bindings),
+            array_keys($expectedKinds),
+            $expectedKinds,
         );
 
         return $this;
@@ -168,37 +178,42 @@ final class ManifestBuilder
         if ($description !== null) {
             $fields['description'] = $description;
         }
+        $expectedKinds = self::bindingDependencies($bindings);
         $this->entities[] = new ManifestEntity(
             ManifestKind::ServiceAccount,
             $key,
             $name,
             $fields,
-            self::bindingDependencies($bindings),
+            array_keys($expectedKinds),
+            $expectedKinds,
         );
 
         return $this;
     }
 
     /**
-     * The manifest-local keys a list of role bindings depends on: every bound role's key,
-     * plus every scoped binding's resource key — so a dangling reference to either is
-     * caught by {@see ManifestValidation} before any request, exactly like a resource's
-     * `parent`.
+     * The manifest-local keys a list of role bindings depends on, mapped to the KIND
+     * each must resolve to: every bound role's key (a {@see ManifestKind::Role}), plus
+     * every scoped binding's resource key (a {@see ManifestKind::Resource}) — so a
+     * dangling OR wrong-kind reference to either is caught by {@see ManifestValidation}
+     * before any request, exactly like a resource's `parent` (CONTRACT 1.52 N6.6, C-12:
+     * "references resolve by kind" — a role key that names a group, say, is a dangling
+     * reference too).
      *
      * @param list<RoleBinding> $bindings
-     * @return list<string>
+     * @return array<string,ManifestKind>
      */
     private static function bindingDependencies(array $bindings): array
     {
-        $keys = [];
+        $kinds = [];
         foreach ($bindings as $binding) {
-            $keys[$binding->role] = true;
+            $kinds[$binding->role] = ManifestKind::Role;
             if ($binding->resource !== null) {
-                $keys[$binding->resource] = true;
+                $kinds[$binding->resource] = ManifestKind::Resource;
             }
         }
 
-        return array_keys($keys);
+        return $kinds;
     }
 
     /**

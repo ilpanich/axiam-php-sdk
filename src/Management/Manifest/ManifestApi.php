@@ -49,7 +49,151 @@ final class ManifestApi
         // that check. apply() relies on this too: it calls plan() first.
         $manifest->ordered();
 
-        return $this->planAgainst($manifest, $this->currentState($manifest));
+        $existing = $this->currentState($manifest);
+        $plan = $this->planAgainst($manifest, $existing);
+
+        // CONTRACT 1.52 N6.4 (C-12): "plan reports a binding Update, not only apply."
+        // A read-only pass, ADDITIVE to planAgainst()'s field-level drift — never
+        // called by apply() (which calls planAgainst() directly, never this method),
+        // so apply()'s own wire sequence is byte-for-byte unaffected by it.
+        return $this->withPendingEdges($manifest, $plan, $this->seedIds($existing));
+    }
+
+    /**
+     * Upgrades a Role/Group/ServiceAccount's `PlannedChange` to `Update` — augmenting
+     * its `$drift` with a `grants`/`roles` entry naming exactly the pending subset —
+     * whenever the manifest declares a grant or role binding for it that is NOT yet
+     * present on the server. `Create`d entities are left alone: nothing exists yet to
+     * read, and `Create` already signals that every declared grant/binding is new.
+     *
+     * Read-only, exactly like {@see self::reconcileRoleGrants()}/
+     * {@see self::reconcileRoleBindings()}'s own detection step, but this method never
+     * sends anything — those two remain the only callers that write, and they keep
+     * reading fresh state of their own right before doing so (state may have moved
+     * since this plan was computed), so this pass changes nothing about what `apply()`
+     * itself reads or sends.
+     *
+     * @param array<string,array<string,string>> $ids
+     */
+    private function withPendingEdges(ManagementManifest $manifest, ManagementPlan $plan, array $ids): ManagementPlan
+    {
+        $changes = [];
+        foreach ($plan->changes as $change) {
+            $entity = $change->entity;
+            $edgeKey = match ($entity->kind) {
+                ManifestKind::Role => 'grants',
+                ManifestKind::Group, ManifestKind::ServiceAccount => 'roles',
+                default => null,
+            };
+
+            if ($change->action === ChangeAction::Create || $edgeKey === null || ($entity->fields[$edgeKey] ?? []) === []) {
+                $changes[] = $change;
+                continue;
+            }
+
+            $pending = $entity->kind === ManifestKind::Role
+                ? $this->pendingGrants($entity, $manifest, $ids)
+                : $this->pendingBindings($entity, $manifest, $ids);
+
+            if ($pending === []) {
+                $changes[] = $change;
+                continue;
+            }
+
+            $drift = $change->fields;
+            $drift[$edgeKey] = $pending;
+            $changes[] = new PlannedChange($entity, ChangeAction::Update, $drift, $change->id);
+        }
+
+        return new ManagementPlan($changes);
+    }
+
+    /**
+     * The subset of `$roleEntity`'s declared grants that are NOT already present on the
+     * server — the read-only twin of {@see self::reconcileRoleGrants()}'s own detection
+     * step, used by {@see self::withPendingEdges()} (never by {@see self::apply()}).
+     *
+     * @param array<string,array<string,string>> $ids
+     * @return array<string,string> permission KEY => effect
+     */
+    private function pendingGrants(ManifestEntity $roleEntity, ManagementManifest $manifest, array $ids): array
+    {
+        /** @var array<string,string> $grants */
+        $grants = $roleEntity->fields['grants'] ?? [];
+        if ($grants === []) {
+            return [];
+        }
+
+        $roleId = $this->resolveId($ids, ManifestKind::Role, $roleEntity->name);
+        $current = $this->management->roles()->listPermissions($roleId);
+        $currentPermissionIds = [];
+        foreach ($current as $grant) {
+            $currentPermissionIds[$grant->permission->id] = true;
+        }
+
+        $pending = [];
+        foreach ($grants as $permissionKey => $effect) {
+            $permission = $this->findEntityByKey($manifest, ManifestKind::Permission, $permissionKey);
+            $permissionId = $this->resolveId($ids, ManifestKind::Permission, $permission->name);
+            if (!isset($currentPermissionIds[$permissionId])) {
+                $pending[$permissionKey] = $effect;
+            }
+        }
+
+        return $pending;
+    }
+
+    /**
+     * The subset of `$entity`'s declared role bindings that are NOT already bound
+     * exactly as declared (a plain assign, or one needing a rebind) — the read-only
+     * twin of {@see self::reconcileRoleBindings()}'s own detection step, used by
+     * {@see self::withPendingEdges()} (never by {@see self::apply()}).
+     *
+     * @param array<string,array<string,string>> $ids
+     * @return list<RoleBinding>
+     */
+    private function pendingBindings(ManifestEntity $entity, ManagementManifest $manifest, array $ids): array
+    {
+        /** @var list<RoleBinding> $bindings */
+        $bindings = $entity->fields['roles'] ?? [];
+        if ($bindings === []) {
+            return [];
+        }
+
+        $kind = $entity->kind;
+        $subjectId = $this->resolveId($ids, $kind, $entity->name);
+        $current = $kind === ManifestKind::Group
+            ? $this->management->groups()->listRoles($subjectId)
+            : $this->management->serviceAccounts()->listRoles($subjectId);
+
+        /** @var array<string,Models\RoleAssignment> $byRoleId */
+        $byRoleId = [];
+        foreach ($current as $assignment) {
+            $byRoleId[$assignment->role->id] = $assignment;
+        }
+
+        $pending = [];
+        foreach ($bindings as $binding) {
+            $role = $this->findEntityByKey($manifest, ManifestKind::Role, $binding->role);
+            $roleId = $this->resolveId($ids, ManifestKind::Role, $role->name);
+            $resourceId = null;
+            if ($binding->resource !== null) {
+                $resource = $this->findEntityByKey($manifest, ManifestKind::Resource, $binding->resource);
+                $resourceId = $this->resolveId($ids, ManifestKind::Resource, $resource->name);
+            }
+
+            $existing = $byRoleId[$roleId] ?? null;
+            if ($existing !== null) {
+                $existingInherit = $existing->inherit ?? true;
+                if ($existing->resourceId === $resourceId && $existingInherit === $binding->inherit) {
+                    continue; // already bound exactly as declared
+                }
+            }
+
+            $pending[] = $binding;
+        }
+
+        return $pending;
     }
 
     /**

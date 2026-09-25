@@ -273,6 +273,51 @@ final class Contract151ActingTenantTest extends TestCase
         self::assertSame(self::TARGET_TENANT, $this->requests[\count($this->requests) - 1]->getHeaderLine('X-Axiam-Tenant'));
     }
 
+    /**
+     * CONTRACT 1.52 N5.6 (C-12): "Tenant ids compare as UUIDs, never as strings. Case
+     * and formatting MUST NOT decide reach." The server sends `reachable_tenant_ids`
+     * lower-case (as every other id on the wire); a caller passing the SAME tenant
+     * upper-case is still reaching a tenant they reach — a formatting difference, not a
+     * different tenant — and must not be refused.
+     *
+     * Uses a UUID with actual hex LETTERS (`self::TARGET_TENANT`/`self::OTHER_TENANT`
+     * are all-digit, so `strtoupper()` on them is a silent no-op and would make this
+     * test pass vacuously even on the unfixed, strict-string-compare code).
+     */
+    public function testActingTenantSucceedsInsideReachableTenantIdsRegardlessOfCase(): void
+    {
+        $target = 'aabbccdd-1234-4abc-8def-abcdefabcdef';
+        $client = $this->client([
+            self::loginSuccess(['organization_level' => true, 'reachable_tenant_ids' => [$target]]),
+            self::checkAccessOk(),
+        ]);
+        $client->login('alice@example.test', 'pw');
+
+        $client->actingTenant(strtoupper($target));
+        $client->checkAccess('read', 'doc-1');
+
+        self::assertSame(
+            strtoupper($target),
+            $this->requests[\count($this->requests) - 1]->getHeaderLine('X-Axiam-Tenant'),
+            'CONTRACT 1.52 N5.6 (C-12)',
+        );
+    }
+
+    /** The I4 twin: a genuinely different tenant, even one with hex letters, still refuses. */
+    public function testActingTenantIsStillRefusedForAGenuinelyDifferentTenantRegardlessOfCase(): void
+    {
+        $target = 'aabbccdd-1234-4abc-8def-abcdefabcdef';
+        $other = 'eeff0011-1234-4abc-8def-abcdefabcdef';
+        $client = $this->client([self::loginSuccess([
+            'organization_level' => true,
+            'reachable_tenant_ids' => [$target],
+        ])]);
+        $client->login('alice@example.test', 'pw');
+
+        $this->expectException(AuthzError::class);
+        $client->actingTenant(strtoupper($other));
+    }
+
     /** A client holding no login result has nothing to gate on — the server's 403 answers. */
     public function testActingTenantIsUngatedBeforeAnyLogin(): void
     {

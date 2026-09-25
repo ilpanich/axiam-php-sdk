@@ -166,6 +166,44 @@ final class AuthzDispatcherTokenGrpcTest extends TestCase
         self::assertCount(2, $tokenClient->calls);
     }
 
+    /**
+     * CONTRACT.md §6.1 rule 11 / C-12 N4.5: "Never refreshed, on either transport."
+     * `withRefreshRetry()` currently calls `$refreshAccessor` unconditionally on any
+     * `AuthError` from a gRPC `UNAUTHENTICATED`, with no way to know the CALLER's
+     * current credential cannot be refreshed (a device token, or an adopted
+     * client-credentials token — neither has a refresh token behind it). Wired via
+     * `canRefreshAccessor`, mirroring how `AxiamClient` wires `refreshAccessor` to
+     * `Session::refreshIfNeeded()->wait()` — here to `Session::canRefresh()`.
+     */
+    public function testValidateTokenNeverRefreshesWhenTheCurrentCredentialCannotBeRefreshed(): void
+    {
+        $refreshCalls = 0;
+        $dispatcher = new AuthzDispatcher(
+            restClient: $this->restClient(),
+            grpcTarget: 'api.axiam.test:9443',
+            tenantId: 'tenant-1',
+            tokenAccessor: static fn (): ?string => 'device-tok-1',
+            refreshAccessor: function () use (&$refreshCalls): void {
+                ++$refreshCalls;
+            },
+            canRefreshAccessor: static fn (): bool => false,
+        );
+
+        $tokenClient = $this->invokePrivate($dispatcher, 'tokenClient');
+        $tokenClient->queuedResponses[] = null;
+        $tokenClient->queuedStatuses[] = (object) ['code' => \Grpc\STATUS_UNAUTHENTICATED, 'details' => 'device token expired'];
+
+        try {
+            $dispatcher->validateToken(new Sensitive('inspected'));
+            self::fail('expected AuthError');
+        } catch (AuthError $e) {
+            self::assertStringContainsString('device token expired', $e->getMessage());
+        }
+
+        self::assertSame(0, $refreshCalls, 'a non-refreshable credential must never drive the §9 refresh guard');
+        self::assertCount(1, $tokenClient->calls, 'no retry — the RPC is attempted exactly once');
+    }
+
     public function testValidateTokenWithNoCallerTokenNeverConstructsTheGrpcClient(): void
     {
         \Grpc\BaseStub::$instanceCount = 0;

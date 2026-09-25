@@ -178,6 +178,24 @@ final class Session
     }
 
     /**
+     * Clears the adopted bearer credential (CONTRACT.md §6.1 rule 11 / C-12 N4.4:
+     * "logout clears it"). Called only by {@see \Axiam\Sdk\AxiamClient::logout()},
+     * after a successful server-side logout — mirroring how the cookie jar, CSRF token
+     * and principal scope are also cleared only then, never on a refused call.
+     *
+     * Without this, a device token or adopted client-credentials token from EARLIER in
+     * this client's life — merely SHADOWED, never cleared, by a subsequent
+     * `login()`'s cookie session, since {@see self::accessToken()} always prefers a
+     * cookie-sourced token when one is present — resurfaces once `logout()` clears that
+     * cookie again: a client that believes it logged itself out would still be
+     * authenticated as the stale device/service credential.
+     */
+    public function clearBearerCredential(): void
+    {
+        $this->adoptedAccessToken = null;
+    }
+
+    /**
      * The tenant this client currently acts on (CONTRACT.md §5.2 rule 1), or `null`
      * when it acts on its own tenant — the state {@see \Axiam\Sdk\Rest\AuthMiddleware}
      * reads to decide whether to send `X-Axiam-Tenant` at all.
@@ -241,6 +259,32 @@ final class Session
     public function resetCsrf(): void
     {
         $this->csrfToken = null;
+    }
+
+    /**
+     * Whether the credential {@see self::accessToken()} would currently return can be
+     * refreshed through the §9 `/api/v1/auth/refresh` guard (CONTRACT.md §6.1 rule 11,
+     * C-12 N4.5): true exactly when a cookie-sourced session exists — a real
+     * `login()`/`verifyMfa()`/OPAQUE/MFA-setup/WebAuthn-setup/SSO session has a
+     * server-stored refresh token behind its `axiam_access` cookie. An ADOPTED bearer
+     * credential — {@see \Axiam\Sdk\AxiamClient::authenticateDevice()}'s device token
+     * (§6.1 rule 6: no refresh token is ever issued for it), or a `client_credentials`/
+     * device-grant token adopted via {@see self::adoptBearerCredential()} (RFC 6749
+     * §4.4.3: `client_credentials` issues no `refresh_token` either) — has none, and
+     * MUST NEVER be refreshed, on either transport. Mirrors {@see self::accessToken()}'s
+     * own cookie-first precedence exactly, so this is true whenever THAT method would
+     * hand back a cookie-sourced token and false whenever it would fall back to the
+     * adopted one (or return `null`).
+     *
+     * Consulted by {@see \Axiam\Sdk\Rest\RefreshMiddleware} (REST, before ever calling
+     * {@see self::refreshIfNeeded()}) and {@see \Axiam\Sdk\AuthzDispatcher} (gRPC,
+     * before ever calling its own `$refreshAccessor`) — never by this class itself,
+     * which stays agnostic of which credential is "current" beyond what
+     * {@see self::accessToken()} already resolves.
+     */
+    public function canRefresh(): bool
+    {
+        return $this->cookieValue('axiam_access') !== null;
     }
 
     /**

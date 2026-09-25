@@ -67,10 +67,21 @@ final class AuthzDispatcher
      *        credentials. Must be present iff `$clientCertPem` is.
      * @param callable(): void $refreshAccessor Drives the shared §9 single-flight token
      *        refresh (expected to be `Session::refreshIfNeeded()->wait()` or equivalent) —
-     *        used ONLY by {@see self::getUserInfo()} to refresh-and-retry once on a gRPC
+     *        used by {@see self::getUserInfo()}/{@see self::validateToken()}/
+     *        {@see self::introspectToken()} to refresh-and-retry once on a gRPC
      *        `UNAUTHENTICATED` (CONTRACT.md §1.1.4), exactly as REST does on a 401. Never a
      *        second, independent refresh mechanism (D-06); `null` disables the retry (the
      *        UNAUTHENTICATED `AuthError` then surfaces directly).
+     * @param callable(): bool $canRefreshAccessor CONTRACT.md §6.1 rule 11 / C-12 N4.5:
+     *        "never refreshed, on either transport" — reads whether the CALLER's current
+     *        credential can be refreshed at all (expected to be `Session::canRefresh()` or
+     *        equivalent). A device credential, or an adopted client-credentials/device-grant
+     *        token, has no refresh token behind it: on an `UNAUTHENTICATED`, this is
+     *        consulted BEFORE `$refreshAccessor` is ever invoked, so such a credential's
+     *        failure surfaces as-is instead of driving a `/api/v1/auth/refresh` call that
+     *        could never have succeeded for it. `null` (the default) means "always
+     *        refreshable" — the pre-N4.5 behavior, unchanged for a caller that never wires
+     *        this in.
      */
     public function __construct(
         private readonly AuthzRestClient $restClient,
@@ -83,6 +94,7 @@ final class AuthzDispatcher
         private readonly ?string $clientCertPem = null,
         private readonly ?Sensitive $clientKey = null,
         private readonly mixed $refreshAccessor = null,
+        private readonly mixed $canRefreshAccessor = null,
     ) {
     }
 
@@ -265,13 +277,24 @@ final class AuthzDispatcher
         try {
             return $rpc();
         } catch (AuthError $e) {
-            if ($this->refreshAccessor === null) {
+            if ($this->refreshAccessor === null || !$this->canRefresh()) {
                 throw $e;
             }
             ($this->refreshAccessor)();
 
             return $rpc();
         }
+    }
+
+    /**
+     * CONTRACT.md §6.1 rule 11 / C-12 N4.5: true when `$canRefreshAccessor` is unset
+     * (the pre-N4.5 default, "always refreshable") or reports the current credential
+     * as refreshable. False short-circuits {@see self::getUserInfoWithRefreshRetry()}/
+     * {@see self::withRefreshRetry()} before `$refreshAccessor` is ever invoked.
+     */
+    private function canRefresh(): bool
+    {
+        return $this->canRefreshAccessor === null || (bool) ($this->canRefreshAccessor)();
     }
 
     /** Maps the wire {@see GetUserInfoResponse} to the typed {@see UserInfo} (§1.1.5). */
@@ -378,7 +401,7 @@ final class AuthzDispatcher
         try {
             return $rpc();
         } catch (AuthError $e) {
-            if ($this->refreshAccessor === null) {
+            if ($this->refreshAccessor === null || !$this->canRefresh()) {
                 throw $e;
             }
             ($this->refreshAccessor)();
