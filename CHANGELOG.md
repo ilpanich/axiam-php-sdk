@@ -7,15 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- **CONTRACT.md re-vendored at contract 1.52.** Copied byte for byte from axiam `80bc7aa`
-  (sha256 `c7954eec…`), the merge of the C-12 cross-SDK conformance review
-  (ilpanich/axiam#500). 1.52 changes no wire behaviour: it writes rules N1–N6, which
-  this SDK's C-12 fixes (#75) already implement. The README's conformance line
-  moves to 1.52.
+## [1.0.0-beta17] - 2026-09-25
 
 ### Added
+
+- Resource-scoped role bindings and service accounts (CONTRACT §27.6.1)
+
+- Validate_token / introspect_token (CONTRACT §1.1.1, §10.3, contract 1.51)
+
+- AuthenticateDevice(), the mTLS device login (CONTRACT §6.1 rules 6-10)
+
+- Acting tenant, X-Axiam-Tenant (CONTRACT §5.2 rule 1, contract 1.51)
+
+- Re-vendor contract 1.51 and regenerate the §27 surface
 
 - **Contract 1.51.** `CONTRACT.md`, `openapi.json` and `management-registry.json`
   re-vendored from `ilpanich/axiam` `56fbe44` (`CONTRACT.md` sha256 starts
@@ -104,62 +108,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bindings are reconciled last (§27.6 rule 5). Previously declined; the decision is
   reversed — see above.
 
-### Breaking
+### Changed
 
-- **§10.1 rule 9 — `JwksVerifier::verify()` / `AxiamClient::verifyLocally()` now refuse
-  a sender-constrained token they have no evidence for**, instead of admitting it as an
-  ordinary bearer credential. `verifyLocally()` is the ONLY verification entry point the
-  Laravel/Symfony framework bridges (and every downstream request guard) call, and it
-  has no transport to ask for a peer certificate or a verified DPoP proof — so before
-  this fix, a certificate- or DPoP-bound token (every device token from §6.1, or any
-  DPoP-bound token) reached it with its `cnf` claim intact and unchecked, and was
-  admitted as though it carried no confirmation at all. This is the same defect found
-  independently in the Rust, TypeScript, Go, Python and C# ports. An application whose
-  request guard was unknowingly accepting bound tokens as bearer tokens will now see
-  those callers rejected (`verifyLocally()` returns `null`) until it switches to the new
-  `AxiamClient::verifyWithProofs($token, $tenant, PresentedProofs)` / `JwksVerifier::
-  verifyWithProofs()` and supplies the evidence its OWN connection established (never a
-  request header — §10.1 rule 9 detail 2). An unbound token is unaffected.
+- Re-vendor CONTRACT.md at contract 1.52
 
-- **A device or adopted client-credentials token is never refreshed (CONTRACT.md §6.1
-  rule 11, C-12 N4.5), on either transport.** Neither credential has a refresh token
-  behind it — §6.1 rule 6 issues none for a device login, and RFC 6749 §4.4.3 issues
-  none for `client_credentials` — but both transports ignored which kind of credential
-  was active. REST: `RefreshMiddleware` triggered `Session::refreshIfNeeded()` on ANY
-  `401`, and once a device/adopted credential is active (no cookie), a real
-  `POST /api/v1/auth/refresh` went out using ITS claims. gRPC:
-  `AuthzDispatcher::validateToken()`/`introspectToken()`/`getUserInfo()` called their
-  shared `$refreshAccessor` unconditionally on any gRPC `UNAUTHENTICATED`. `Session::
-  canRefresh()` (true only for a cookie-sourced session) now gates both: REST returns
-  the untouched `401` instead of entering the guard, and gRPC skips `$refreshAccessor`
-  and rethrows the original `AuthError`. An application whose device or
-  client-credentials-adopted client was relying on a `401`/`UNAUTHENTICATED` being
-  transparently survived by a refresh it was never entitled to now sees it surfaced
-  directly. See `tests/SessionRefreshEdgeTest.php`,
-  `tests/Contract151DeviceAuthTest.php`, `tests/OidcTokenOpsTest.php`,
-  `tests/AuthzDispatcherTokenGrpcTest.php`.
+- README/CHANGELOG for the C-12 fixes and the review's remaining findings
 
-- **`logout()` now clears a stale device or adopted client-credentials token (CONTRACT.md
-  §6.1 rule 11, C-12 N4.4).** `Session::accessToken()` always prefers a cookie-sourced
-  token, so a device/adopted token from EARLIER in a client's life — merely SHADOWED,
-  never cleared, by a subsequent `login()`'s fresh cookie session — silently resurfaced
-  once `logout()` cleared that cookie again: a client that believed `logout()` had
-  ended its session was still authenticated as the stale device/service credential. The
-  new `Session::clearBearerCredential()` is now called alongside the cookie-jar clear,
-  after a successful server-side logout. See `tests/Contract151DeviceAuthTest.php`.
+- Remove the two 1.51 manifest declines, answer C-12 questions 6-7
 
-- **A stated `metadata: []` is now sent and drift-checked, distinct from an unstated
-  field (CONTRACT.md §27.6.1, C-12 N6.5).** `ManifestBuilder::resource()`/`group()`
-  defaulted `$metadata` to `[]` and only sent it when `!== []`, so a caller who
-  explicitly asked for an empty metadata object was indistinguishable from a caller who
-  never mentioned metadata at all — both silently dropped the field. `$metadata` is now
-  `?array`, defaulting to `null` ("unstated"); `[]` is a stated empty object, sent on
-  `Create` and drift-checked on `Update`. The two `#[Managed*]` attributes
-  (`ManagedResource`, `ManagedGroup`) got the identical change. An application relying
-  on `metadata: []` being silently ignored now has that value actually sent. See
-  `tests/Management/Contract152ManifestC12Test.php`.
+- README conformance at contract 1.51, CHANGELOG, the device example
+
+- **CONTRACT.md re-vendored at contract 1.52.** Copied byte for byte from axiam `80bc7aa`
+  (sha256 `c7954eec…`), the merge of the C-12 cross-SDK conformance review
+  (ilpanich/axiam#500). 1.52 changes no wire behaviour: it writes rules N1–N6, which
+  this SDK's C-12 fixes (#75) already implement. The README's conformance line
+  moves to 1.52.
 
 ### Fixed
+
+- Logout() clears a stale adopted device/client-credentials token
+
+- Compare reachableTenantIds as UUIDs, not strings
+
+- Expressible {} metadata, order-independent drift, kind-aware refs
+
+- Plan() reports a pending grant or role binding as Update
+
+- Never refresh a device or adopted client-credentials token
+
+- Withhold bearer and CSRF token too, not just the cookie
+
+- A refused device login no longer destroys the prior session
+
+- Send a resource's parent_id on Create (§13 row 17, defect b)
+
+- Reconcile role permission grants and group role bindings (§13 row 17, defect a)
+
+- JwksVerifier::verify() enforces §10.1 rule 9 (contract 1.51)
 
 - **`authenticateDevice()` no longer destroys a working session when the device login
   is refused (CONTRACT.md §6.1 rules 6-10, §5.2 rule 1, §17).** It used to clear the
@@ -247,6 +232,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with no rollback (§27.7). `ManifestEntity` gained `$expectedKinds`, populated by
   `ManifestBuilder`, so each reference is now checked against the kind it actually
   names. See `tests/Management/Contract152ManifestC12Test.php`.
+
+### Breaking
+
+- **§10.1 rule 9 — `JwksVerifier::verify()` / `AxiamClient::verifyLocally()` now refuse
+  a sender-constrained token they have no evidence for**, instead of admitting it as an
+  ordinary bearer credential. `verifyLocally()` is the ONLY verification entry point the
+  Laravel/Symfony framework bridges (and every downstream request guard) call, and it
+  has no transport to ask for a peer certificate or a verified DPoP proof — so before
+  this fix, a certificate- or DPoP-bound token (every device token from §6.1, or any
+  DPoP-bound token) reached it with its `cnf` claim intact and unchecked, and was
+  admitted as though it carried no confirmation at all. This is the same defect found
+  independently in the Rust, TypeScript, Go, Python and C# ports. An application whose
+  request guard was unknowingly accepting bound tokens as bearer tokens will now see
+  those callers rejected (`verifyLocally()` returns `null`) until it switches to the new
+  `AxiamClient::verifyWithProofs($token, $tenant, PresentedProofs)` / `JwksVerifier::
+  verifyWithProofs()` and supplies the evidence its OWN connection established (never a
+  request header — §10.1 rule 9 detail 2). An unbound token is unaffected.
+
+- **A device or adopted client-credentials token is never refreshed (CONTRACT.md §6.1
+  rule 11, C-12 N4.5), on either transport.** Neither credential has a refresh token
+  behind it — §6.1 rule 6 issues none for a device login, and RFC 6749 §4.4.3 issues
+  none for `client_credentials` — but both transports ignored which kind of credential
+  was active. REST: `RefreshMiddleware` triggered `Session::refreshIfNeeded()` on ANY
+  `401`, and once a device/adopted credential is active (no cookie), a real
+  `POST /api/v1/auth/refresh` went out using ITS claims. gRPC:
+  `AuthzDispatcher::validateToken()`/`introspectToken()`/`getUserInfo()` called their
+  shared `$refreshAccessor` unconditionally on any gRPC `UNAUTHENTICATED`. `Session::
+  canRefresh()` (true only for a cookie-sourced session) now gates both: REST returns
+  the untouched `401` instead of entering the guard, and gRPC skips `$refreshAccessor`
+  and rethrows the original `AuthError`. An application whose device or
+  client-credentials-adopted client was relying on a `401`/`UNAUTHENTICATED` being
+  transparently survived by a refresh it was never entitled to now sees it surfaced
+  directly. See `tests/SessionRefreshEdgeTest.php`,
+  `tests/Contract151DeviceAuthTest.php`, `tests/OidcTokenOpsTest.php`,
+  `tests/AuthzDispatcherTokenGrpcTest.php`.
+
+- **`logout()` now clears a stale device or adopted client-credentials token (CONTRACT.md
+  §6.1 rule 11, C-12 N4.4).** `Session::accessToken()` always prefers a cookie-sourced
+  token, so a device/adopted token from EARLIER in a client's life — merely SHADOWED,
+  never cleared, by a subsequent `login()`'s fresh cookie session — silently resurfaced
+  once `logout()` cleared that cookie again: a client that believed `logout()` had
+  ended its session was still authenticated as the stale device/service credential. The
+  new `Session::clearBearerCredential()` is now called alongside the cookie-jar clear,
+  after a successful server-side logout. See `tests/Contract151DeviceAuthTest.php`.
+
+- **A stated `metadata: []` is now sent and drift-checked, distinct from an unstated
+  field (CONTRACT.md §27.6.1, C-12 N6.5).** `ManifestBuilder::resource()`/`group()`
+  defaulted `$metadata` to `[]` and only sent it when `!== []`, so a caller who
+  explicitly asked for an empty metadata object was indistinguishable from a caller who
+  never mentioned metadata at all — both silently dropped the field. `$metadata` is now
+  `?array`, defaulting to `null` ("unstated"); `[]` is a stated empty object, sent on
+  `Create` and drift-checked on `Update`. The two `#[Managed*]` attributes
+  (`ManagedResource`, `ManagedGroup`) got the identical change. An application relying
+  on `metadata: []` being silently ignored now has that value actually sent. See
+  `tests/Management/Contract152ManifestC12Test.php`.
 
 ## [1.0.0-beta16] - 2026-09-19
 
