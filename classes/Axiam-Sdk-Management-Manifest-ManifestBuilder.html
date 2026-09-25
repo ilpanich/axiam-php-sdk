@@ -198,6 +198,14 @@ act as changing one.</p>
 </dt>
 <dd>Declares a role and the permissions granted to it.</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_serviceAccount">serviceAccount()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Declares a service account and the roles bound to it (CONTRACT.md §27.6.1
+addition 3, contract 1.51).</dd>
+
     </dl>
 
 
@@ -226,7 +234,7 @@ act as changing one.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">147</span>
+    <span class="phpdocumentor-element-found-in__line">227</span>
 
     </aside>
 
@@ -284,7 +292,7 @@ was written rather than at the point somebody applies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">117</span>
+    <span class="phpdocumentor-element-found-in__line">127</span>
 
     </aside>
 
@@ -292,7 +300,7 @@ was written rather than at the point somebody applies it.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">group</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$key</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$description</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$roleKeys</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$metadata</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+                    <span class="phpdocumentor-signature__name">group</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$key</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$description</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string|<a href="classes/Axiam-Sdk-Management-Manifest-RoleBinding.html"><abbr title="\Axiam\Sdk\Management\Manifest\RoleBinding">RoleBinding</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$roleKeys</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$metadata</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -329,19 +337,24 @@ was written rather than at the point somebody applies it.</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$roleKeys</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string|<a href="classes/Axiam-Sdk-Management-Manifest-RoleBinding.html"><abbr title="\Axiam\Sdk\Management\Manifest\RoleBinding">RoleBinding</abbr></a>&gt;</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Keys of roles this group carries.</p>
+                    <section class="phpdocumentor-description"><p>Roles this group carries — a bare role
+KEY (tenant-wide, exactly as before contract 1.51) or a <a href="classes/Axiam-Sdk-Management-Manifest-RoleBinding.html"><abbr title="\Axiam\Sdk\Management\Manifest\RoleBinding">RoleBinding</abbr></a>
+scoped to a resource (<code class="prettyprint">RoleBinding::at()</code>/<code class="prettyprint">::atOnly()</code>, §27.6.1 addition 2).</p>
 </section>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$metadata</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;</span>
-                 = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Free-form metadata.</p>
+                    <section class="phpdocumentor-description"><p>Free-form metadata. <code class="prettyprint">null</code> (the
+default) means UNSTATED; <code class="prettyprint">[]</code> is a STATED empty object, distinct from
+<code class="prettyprint">null</code> — see <abbr title="\Axiam\Sdk\Management\Manifest\self::resource()">self::resource()</abbr>'s identical <code class="prettyprint">$metadata</code> doc
+(CONTRACT 1.52 N6.5, C-12).</p>
 </section>
 
             </dd>
@@ -371,7 +384,7 @@ was written rather than at the point somebody applies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">59</span>
+    <span class="phpdocumentor-element-found-in__line">64</span>
 
     </aside>
 
@@ -440,7 +453,7 @@ was written rather than at the point somebody applies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">30</span>
+    <span class="phpdocumentor-element-found-in__line">34</span>
 
     </aside>
 
@@ -448,7 +461,7 @@ was written rather than at the point somebody applies it.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">resource</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$key</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$type</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$parentKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$metadata</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+                    <span class="phpdocumentor-signature__name">resource</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$key</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$type</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$parentKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$metadata</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -495,10 +508,14 @@ manifest cannot know a UUID that does not exist yet.</p>
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$metadata</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;</span>
-                 = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string, mixed&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>Free-form metadata.</p>
+                    <section class="phpdocumentor-description"><p>Free-form metadata. <code class="prettyprint">null</code> (the
+default) means UNSTATED — this declaration says nothing about metadata,
+so it is never sent and never checked for drift. <code class="prettyprint">[]</code> is a STATED empty
+object (CONTRACT 1.52 N6.5, C-12): sent on <code class="prettyprint">Create</code>, and checked for
+drift on <code class="prettyprint">Update</code> like any other stated value — distinct from <code class="prettyprint">null</code>.</p>
 </section>
 
             </dd>
@@ -528,7 +545,7 @@ manifest cannot know a UUID that does not exist yet.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">85</span>
+    <span class="phpdocumentor-element-found-in__line">90</span>
 
     </aside>
 
@@ -606,6 +623,94 @@ therefore a strong statement, not a default that a narrower allow can reverse.</
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_serviceAccount">
+        serviceAccount()
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_serviceAccount" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">170</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Declares a service account and the roles bound to it (CONTRACT.md §27.6.1
+addition 3, contract 1.51).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">serviceAccount</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$key</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$description</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string|<a href="classes/Axiam-Sdk-Management-Manifest-RoleBinding.html"><abbr title="\Axiam\Sdk\Management\Manifest\RoleBinding">RoleBinding</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$roleKeys</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Reconciled by NAME, which the server does not keep unique — <a href="classes/Axiam-Sdk-Management-Manifest-ManifestApi.html"><abbr title="\Axiam\Sdk\Management\Manifest\ManifestApi">ManifestApi</abbr></a>
+refuses <code class="prettyprint">plan()</code>/<code class="prettyprint">apply()</code> before any write when more than one existing account
+matches. <code class="prettyprint">$description</code> is the only field an <code class="prettyprint">Update</code> reconciles; <code class="prettyprint">null</code> is silent,
+exactly like an unstated resource <code class="prettyprint">metadata</code>. <code class="prettyprint">apply()</code> never rotates a secret: a
+<code class="prettyprint">Create</code>'s one-time <code class="prettyprint">client_secret</code> is on <abbr title="\Axiam\Sdk\Management\Manifest\ApplyReport::createdServiceAccounts()">ApplyReport::createdServiceAccounts()</abbr>.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$key</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Manifest-local identity, referred to by nothing else —
+a service account cannot itself hold another service
+account's role in contract 1.51.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$name</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The account's name — its natural key, unenforced.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$description</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Human-readable description. <code class="prettyprint">null</code> is silent.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$roleKeys</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string|<a href="classes/Axiam-Sdk-Management-Manifest-RoleBinding.html"><abbr title="\Axiam\Sdk\Management\Manifest\RoleBinding">RoleBinding</abbr></a>&gt;</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Roles bound to this account — a bare
+role KEY or a resource-scoped <a href="classes/Axiam-Sdk-Management-Manifest-RoleBinding.html"><abbr title="\Axiam\Sdk\Management\Manifest\RoleBinding">RoleBinding</abbr></a>.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
             </section>
 
         
@@ -633,6 +738,7 @@ therefore a strong statement, not a default that a narrower allow can reverse.</
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_permission">permission()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_resource">resource()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_role">role()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_serviceAccount">serviceAccount()</a></li>
                                     </ul>
             </li>
                     </ul>

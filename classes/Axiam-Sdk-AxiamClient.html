@@ -214,11 +214,39 @@ client is destroyed, so no PEM material (least of all the private key) outlives 
 object on disk. A no-op when mTLS was not configured.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_actingTenant">actingTenant()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Switches this client to act on `$tenantId` — CONTRACT.md §5.2 rule 1 (contract
+1.51). Every subsequent `/api/v1` request this client makes carries
+`X-Axiam-Tenant: $tenantId`, until {@see self::clearActingTenant()} is called or
+another `actingTenant()` replaces it.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_actingTenantId">actingTenantId()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>The tenant this client currently acts on, or `null` when it acts on its own
+tenant.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_audit">audit()</a>
     <span>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Management-AuditApi.html"><abbr title="\Axiam\Sdk\Management\AuditApi">AuditApi</abbr></a>    </span>
 </dt>
 <dd>Append-only audit log, read-only by construction.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_authenticateDevice">authenticateDevice()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Auth-DeviceToken.html"><abbr title="\Axiam\Sdk\Auth\DeviceToken">DeviceToken</abbr></a>    </span>
+</dt>
+<dd>`authenticateDevice` — `POST /api/v1/auth/device` (CONTRACT.md §6.1 rules 6-10,
+contract 1.51): the mTLS device login. The client presents the X.509 identity
+certificate configured via `$clientCert`/`$clientKey`, and the server authenticates
+it, no request body, no tenant/credential needed beforehand.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_batchCheck">batchCheck()</a>
@@ -268,6 +296,15 @@ relative to the rest of the SDK family).</dd>
 that distinction matters. Delegates to {@see AuthzDispatcher} on whichever
 transport {@see self::checkAccess()} itself would use (REST default, gRPC when
 available), so the two never disagree about which transport ran.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_clearActingTenant">clearActingTenant()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Stops acting on another tenant: no further request sends `X-Axiam-Tenant`, and
+this client acts on its own tenant again (CONTRACT.md §5.2 rule 1&#039;s &quot;a way to
+clear it&quot;).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_close">close()</a>
@@ -377,6 +414,16 @@ a token is active and, if so, for its metadata. Requires confidential-client
 credentials (§12.1 note 4). A `401` here is a client-credential failure surfaced
 as {@see \Axiam\Sdk\Core\OAuthProtocolError} and NEVER enters the §9 refresh guard
 (§12.3 rule 3).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_introspectToken">introspectToken()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Auth-TokenIntrospection.html"><abbr title="\Axiam\Sdk\Auth\TokenIntrospection">TokenIntrospection</abbr></a>    </span>
+</dt>
+<dd>`introspectToken` — `axiam.v1.TokenService/IntrospectToken` (CONTRACT.md
+§1.1.1/§10.3, contract 1.51). The RFC 7662 set, plus the confirmation. See
+{@see self::validateToken()} for the shared rules this method follows exactly; the
+only difference is the richer RFC-7662-shaped return value.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_login">login()</a>
@@ -870,6 +917,16 @@ and deliberately **no** exchange of the ticket it finds.</dd>
 lockout state.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_validateToken">validateToken()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Auth-TokenValidation.html"><abbr title="\Axiam\Sdk\Auth\TokenValidation">TokenValidation</abbr></a>    </span>
+</dt>
+<dd>`validateToken` — `axiam.v1.TokenService/ValidateToken` (CONTRACT.md §1.1.1/§10.3,
+contract 1.51). Signature + expiry, plus the confirmation (`cnf`) a resource server
+validating over gRPC needs in order not to accept a sender-constrained token as a
+bearer token (§10.1 rule 9).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_verifyEmail">verifyEmail()</a>
     <span>
                                 &nbsp;: void    </span>
@@ -883,8 +940,9 @@ lockout state.</dd>
 </dt>
 <dd>Verify an INBOUND caller&#039;s token and nothing else — the seam every request guard
 must use (CONTRACT.md §10.1 rule 8). Delegates straight to {@see JwksVerifier::verify()},
-which applies the full §10.1 minimum local-verification set, and returns `null` on
-any failure with **no fallback to another credential**.</dd>
+which applies the full §10.1 minimum local-verification set INCLUDING rule 9
+(contract 1.51), and returns `null` on any failure with **no fallback to another
+credential**.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_verifyLocallyOrFallback">verifyLocallyOrFallback()</a>
@@ -915,6 +973,15 @@ shared single-flight refresh (§9, D-06) and re-verifies the FRESH access token.
 {@see self::login()} when {@see LoginResult::$mfaRequired} was `true`. `$challengeToken`
 is the `Sensitive`-wrapped value from that `LoginResult` (D-11: never a raw string on the
 public surface).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_verifyWithProofs">verifyWithProofs()</a>
+    <span>
+                                &nbsp;: array&lt;string, mixed&gt;|null    </span>
+</dt>
+<dd>{@see self::verifyLocally()}, applying CONTRACT.md §10.1 rule 9 against
+`$proofs` — evidence YOUR connection established for THIS request, never a value
+taken from a caller-settable request header (§10.1 rule 9 detail 2: e.g.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-AxiamClient.html#method_webauthnAuthenticateFinish">webauthnAuthenticateFinish()</a>
@@ -1024,14 +1091,14 @@ which this namespace configures.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">277</span>
+    <span class="phpdocumentor-element-found-in__line">295</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenant</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgSlug</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCa</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientCert</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restOnly</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cacheTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">300</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grpcTarget</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$transportHandler</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$oidcClientId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$oidcClientSecret</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$oidcTenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedIssuer</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedAudience</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$retryEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">true</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">float&nbsp;</span><span class="phpdocumentor-signature__argument__name">$decisionMemoTtlMs</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">0.0</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$telemetryHook</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenant</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgSlug</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$customCa</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientCert</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientKey</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$restOnly</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cacheTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">300</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$grpcTarget</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$transportHandler</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$oidcClientId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$oidcClientSecret</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$oidcTenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedIssuer</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedAudience</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$retryEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">true</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">float&nbsp;</span><span class="phpdocumentor-signature__argument__name">$decisionMemoTtlMs</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">0.0</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$telemetryHook</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$actingTenant</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1267,6 +1334,26 @@ because a service-to-service guard legitimately expects a different audience.</p
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$actingTenant</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>CONTRACT.md §5.2 rule 1 (contract 1.51): the
+construction-time form of the acting-tenant switch — the tenant UUID this
+client acts on from its very first request, sent as <code class="prettyprint">X-Axiam-Tenant</code> on
+every <code class="prettyprint">/api/v1</code> request while set. Meaningful only for an
+<em>organization-level</em>* principal (§5.2); nothing is gated here — construction
+precedes the login that would reveal whether the principal really is one, and
+a service account never receives a login result at all — only the value's
+shape (a UUID) is checked. <code class="prettyprint">null</code> (the default) sends no such header, byte-
+for-byte what every client sent before 1.51. Distinct from <code class="prettyprint">$tenant</code> above
+(§5 rule 2's <code class="prettyprint">X-Tenant-ID</code>, sent unconditionally and never read by the server
+as a tenant switch). See <abbr title="\Axiam\Sdk\self::actingTenant()">self::actingTenant()</abbr> for the on-client form
+and its gating.</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -1289,7 +1376,7 @@ because a service-to-service guard legitimately expects a different audience.</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">829</span>
+    <span class="phpdocumentor-element-found-in__line">999</span>
 
     </aside>
 
@@ -1318,6 +1405,146 @@ object on disk. A no-op when mTLS was not configured.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_actingTenant">
+        actingTenant()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_actingTenant" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">564</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Switches this client to act on `$tenantId` — CONTRACT.md §5.2 rule 1 (contract
+1.51). Every subsequent `/api/v1` request this client makes carries
+`X-Axiam-Tenant: $tenantId`, until {@see self::clearActingTenant()} is called or
+another `actingTenant()` replaces it.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">actingTenant</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Meaningful only for an <strong>organization-level</strong> principal; see the <code class="prettyprint">$actingTenant</code>
+constructor parameter for what the header does and does not reach (not
+<code class="prettyprint">X-Tenant-ID</code>, not a <code class="prettyprint">{tenant_id}</code> management path, not gRPC — REST-only, §5.2
+rule 1's own text).</p>
+<p><strong>Mutates this client and returns it</strong> (<code class="prettyprint">self</code>), unlike the reference
+implementation's per-handle isolation (a new object sharing the session, leaving
+the original untouched). §5.2 rule 1 requires only that the header be sendable
+and clearable — it does not require handle isolation — and PHP's request
+lifecycle has no concurrent tasks sharing one client the way a long-lived
+process does, so the simpler, shared-state form is what this port ships. Two
+concurrent PHP requests never share one <code class="prettyprint">AxiamClient</code> instance in the first
+place. Recorded here, in the README and in the CHANGELOG as a deliberate,
+documented difference (C-12).</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_actingTenant_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_actingTenant_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>if <code class="prettyprint">$tenantId</code> is not a UUID. The server
+silently ignores an <code class="prettyprint">X-Axiam-Tenant</code> value that does not parse and
+answers for the caller's own tenant instead — reporting success about
+the wrong tenant — so this is refused client-side, with no wire call.</p>
+</section>
+
+                                    </dd>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Core-AuthzError.html"><abbr title="\Axiam\Sdk\Core\AuthzError">AuthzError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>when this client holds a login result (§5.2.2)
+that reported <code class="prettyprint">organizationLevel: false</code> (an ordinary tenant principal is
+a principal of exactly one tenant, and the server answers <code class="prettyprint">403</code> to
+anything else), or that reported <code class="prettyprint">reachableTenantIds</code> not containing
+<code class="prettyprint">$tenantId</code> (§5.2.3 rule 4). A client holding no such result — a service
+account from client credentials or the device login, an injected token,
+a session completed without a user object — has nothing to gate on: the
+header is sent as asked, and the server's <code class="prettyprint">403</code> is the answer. An
+<strong>organization-level service account</strong> is a supported design, and the
+server honours the header for one on the same terms as for a user.</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_actingTenantId">
+        actingTenantId()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_actingTenantId" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">589</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The tenant this client currently acts on, or `null` when it acts on its own
+tenant.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">actingTenantId</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_audit">
         audit()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_audit" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1326,7 +1553,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">733</span>
+    <span class="phpdocumentor-element-found-in__line">903</span>
 
     </aside>
 
@@ -1357,6 +1584,100 @@ object on disk. A no-op when mTLS was not configured.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_authenticateDevice">
+        authenticateDevice()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_authenticateDevice" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1227</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`authenticateDevice` — `POST /api/v1/auth/device` (CONTRACT.md §6.1 rules 6-10,
+contract 1.51): the mTLS device login. The client presents the X.509 identity
+certificate configured via `$clientCert`/`$clientKey`, and the server authenticates
+it, no request body, no tenant/credential needed beforehand.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">authenticateDevice</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-DeviceToken.html"><abbr title="\Axiam\Sdk\Auth\DeviceToken">DeviceToken</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><strong>Reachable only when this client was built with a client certificate</strong> (§6.1
+rule 7). On a client built without one, this raises <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> client-side,
+with ZERO wire calls — without a certificate the server would answer <code class="prettyprint">401</code>
+anyway, so going to the wire gains nothing and turns a configuration mistake into
+an authentication failure.</p>
+<p><strong>The request carries no credential from an earlier session.</strong> <code class="prettyprint">$plainHttp</code>
+shares this client's ONE cookie jar (§4) with every other REST call, and
+<a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html"><abbr title="\Axiam\Sdk\Rest\AuthMiddleware">AuthMiddleware</abbr></a> decorates EVERY same-origin request with
+<code class="prettyprint">Authorization: Bearer</code> from <a href="classes/Axiam-Sdk-Session.html#method_accessToken"><abbr title="\Axiam\Sdk\Session::accessToken()">Session::accessToken()</abbr></a> (which
+itself prefers a cookie-sourced token) and, on this <code class="prettyprint">POST</code>, <code class="prettyprint">X-CSRF-Token</code> — so
+withholding the <code class="prettyprint">Cookie</code> header alone is not enough: a cookie left from an
+earlier <code class="prettyprint">login()</code>/<code class="prettyprint">verifyMfa()</code> session would still ride this call as a stale
+<code class="prettyprint">Authorization: Bearer</code> (the same defect independently found and fixed in the
+C# port, <code class="prettyprint">ilpanich/axiam-csharp-sdk#96</code>). The request is therefore sent with
+BOTH Guzzle's per-request <code class="prettyprint">cookies =&gt; false</code> override AND
+<a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html#constant_NO_SESSION_CREDENTIALS_OPTION"><abbr title="\Axiam\Sdk\Rest\AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION">AuthMiddleware::NO_SESSION_CREDENTIALS_OPTION</abbr></a> (the same option
+<abbr title="\Axiam\Sdk\self::postWithoutSessionCredentials()">self::postWithoutSessionCredentials()</abbr> uses for §24.1's <code class="prettyprint">setup/register/*</code>
+pair) rather than by clearing the jar: neither the cookie, the stale bearer nor
+a stale <code class="prettyprint">X-CSRF-Token</code> reaches this endpoint, while <code class="prettyprint">X-Tenant-ID</code> and (when set)
+<code class="prettyprint">X-Axiam-Tenant</code> still do — CONTRACT.md §5.2 rule 1/§5.2.2 rule 4 require both on
+every <code class="prettyprint">/api/v1</code> request regardless of session credentials, and
+<code class="prettyprint">NO_SESSION_CREDENTIALS_OPTION</code> does not touch either. The prior session must
+otherwise survive a refusal intact (see below).</p>
+<p><strong>Session state changes ONLY after a <code class="prettyprint">200</code> with a well-formed body</strong> — immediately
+before adopting the token via <a href="classes/Axiam-Sdk-Session.html#method_adoptBearerCredential"><abbr title="\Axiam\Sdk\Session::adoptBearerCredential()">Session::adoptBearerCredential()</abbr></a>.
+Only then: the shared cookie jar is cleared (<a href="classes/Axiam-Sdk-Session.html#method_accessToken"><abbr title="\Axiam\Sdk\Session::accessToken()">Session::accessToken()</abbr></a>
+prefers a cookie-sourced token over an adopted one, §12.1's
+<code class="prettyprint">login_client_credentials</code>-as-credential-source precedent, so a leftover cookie
+would otherwise silently outrank the device token and every subsequent call would
+run as that earlier session's principal — the exact theft-adjacent scenario §6.1
+rule 9 exists to close); the decision memo is cleared (§17.1 rule 9: the subject
+changed); and the §5.2 acting-tenant gate is reset to unknown (a device holds no
+<code class="prettyprint">LoginUserInfo</code>). A REFUSED or malformed device login leaves the jar, the gate and
+the memo exactly as they were — a caller who was mid-session when this call was
+refused keeps a working session, matching how a refused SSO completion elsewhere
+in this port changes nothing.</p>
+<p><strong>Every refusal is <code class="prettyprint">401</code></strong> (§6.1 rule 8: an unknown, untrusted, expired, revoked
+or unbound certificate, and a <code class="prettyprint">Server</code>-type certificate, all answer <code class="prettyprint">401</code>
+<code class="prettyprint">authentication_failed</code>), mapped to <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> with the server's message.
+This <em>is</em> the login: a later <code class="prettyprint">401</code> on this credential is returned to the caller
+as-is, never sent through the §9 refresh guard — there is no refresh token to
+spend (§6.1 rule 6), and the guard would fail before the wire anyway. A <code class="prettyprint">429</code>
+(the route's per-client-IP rate limit, server default 60/min) is a
+<a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a>, not an <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> — §16's ordinary
+mapping — and this call is attempted exactly once, like every login.</p>
+<p><strong>The token is certificate-bound</strong> (§6.1 rule 9, <code class="prettyprint">cnf.x5t#S256</code>) when AXIAM
+itself terminated the handshake. A REST request without the same certificate is
+<code class="prettyprint">401</code>; a gRPC call is <code class="prettyprint">UNAUTHENTICATED</code> on a listener that requests client
+certificates, and refused on every call on one that does not (the server default).
+§6.1 rule 4 already applies this client's certificate to BOTH transports, which is
+what makes that hold.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-DeviceToken.html"><abbr title="\Axiam\Sdk\Auth\DeviceToken">DeviceToken</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_batchCheck">
         batchCheck()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_batchCheck" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1365,7 +1686,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1043</span>
+    <span class="phpdocumentor-element-found-in__line">1362</span>
 
     </aside>
 
@@ -1414,7 +1735,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">640</span>
+    <span class="phpdocumentor-element-found-in__line">810</span>
 
     </aside>
 
@@ -1453,7 +1774,7 @@ object on disk. A no-op when mTLS was not configured.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1032</span>
+    <span class="phpdocumentor-element-found-in__line">1351</span>
 
     </aside>
 
@@ -1512,7 +1833,7 @@ relative to the rest of the SDK family).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">632</span>
+    <span class="phpdocumentor-element-found-in__line">802</span>
 
     </aside>
 
@@ -1551,7 +1872,7 @@ relative to the rest of the SDK family).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1005</span>
+    <span class="phpdocumentor-element-found-in__line">1324</span>
 
     </aside>
 
@@ -1631,7 +1952,7 @@ this method's pre-§11 behavior exactly.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1020</span>
+    <span class="phpdocumentor-element-found-in__line">1339</span>
 
     </aside>
 
@@ -1699,6 +2020,47 @@ available), so the two never disagree about which transport ran.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_clearActingTenant">
+        clearActingTenant()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_clearActingTenant" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">578</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Stops acting on another tenant: no further request sends `X-Axiam-Tenant`, and
+this client acts on its own tenant again (CONTRACT.md §5.2 rule 1&#039;s &quot;a way to
+clear it&quot;).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">clearActingTenant</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_close">
         close()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_close" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1707,7 +2069,7 @@ available), so the two never disagree about which transport ran.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">506</span>
+    <span class="phpdocumentor-element-found-in__line">676</span>
 
     </aside>
 
@@ -1753,7 +2115,7 @@ session is what you want.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2375</span>
+    <span class="phpdocumentor-element-found-in__line">2771</span>
 
     </aside>
 
@@ -1798,7 +2160,7 @@ session is what you want.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">899</span>
+    <span class="phpdocumentor-element-found-in__line">1069</span>
 
     </aside>
 
@@ -1842,7 +2204,7 @@ this seam never surfaces the private key itself.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">884</span>
+    <span class="phpdocumentor-element-found-in__line">1054</span>
 
     </aside>
 
@@ -1884,7 +2246,7 @@ this seam never surfaces the private key itself.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1239</span>
+    <span class="phpdocumentor-element-found-in__line">1596</span>
 
     </aside>
 
@@ -1969,7 +2331,7 @@ built without one.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1270</span>
+    <span class="phpdocumentor-element-found-in__line">1627</span>
 
     </aside>
 
@@ -2061,7 +2423,7 @@ the first poll), poll to completion.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1252</span>
+    <span class="phpdocumentor-element-found-in__line">1609</span>
 
     </aside>
 
@@ -2126,7 +2488,7 @@ attempt, for an application driving its own loop. Most callers want
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">691</span>
+    <span class="phpdocumentor-element-found-in__line">861</span>
 
     </aside>
 
@@ -2166,7 +2528,7 @@ tenant.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">792</span>
+    <span class="phpdocumentor-element-found-in__line">962</span>
 
     </aside>
 
@@ -2211,7 +2573,7 @@ caller.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">674</span>
+    <span class="phpdocumentor-element-found-in__line">844</span>
 
     </aside>
 
@@ -2250,7 +2612,7 @@ caller.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1066</span>
+    <span class="phpdocumentor-element-found-in__line">1385</span>
 
     </aside>
 
@@ -2303,7 +2665,7 @@ response drives the shared single-flight refresh (§9) and retries once (§1.1.4
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">583</span>
+    <span class="phpdocumentor-element-found-in__line">753</span>
 
     </aside>
 
@@ -2342,7 +2704,7 @@ response drives the shared single-flight refresh (§9) and retries once (§1.1.4
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1464</span>
+    <span class="phpdocumentor-element-found-in__line">1821</span>
 
     </aside>
 
@@ -2427,6 +2789,58 @@ bare form.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_introspectToken">
+        introspectToken()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_introspectToken" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1423</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`introspectToken` — `axiam.v1.TokenService/IntrospectToken` (CONTRACT.md
+§1.1.1/§10.3, contract 1.51). The RFC 7662 set, plus the confirmation. See
+{@see self::validateToken()} for the shared rules this method follows exactly; the
+only difference is the richer RFC-7662-shaped return value.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">introspectToken</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$inspectedAccessToken</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-TokenIntrospection.html"><abbr title="\Axiam\Sdk\Auth\TokenIntrospection">TokenIntrospection</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$inspectedAccessToken</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-TokenIntrospection.html"><abbr title="\Axiam\Sdk\Auth\TokenIntrospection">TokenIntrospection</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_login">
         login()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_login" class="headerlink"><i class="fas fa-link"></i></a>
@@ -2435,7 +2849,7 @@ bare form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">919</span>
+    <span class="phpdocumentor-element-found-in__line">1089</span>
 
     </aside>
 
@@ -2493,7 +2907,7 @@ challenge (HTTP 202) is an expected outcome, not an exception: callers MUST chec
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1219</span>
+    <span class="phpdocumentor-element-found-in__line">1576</span>
 
     </aside>
 
@@ -2585,7 +2999,7 @@ be performed by a public client (§12.1 note 4).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1718</span>
+    <span class="phpdocumentor-element-found-in__line">2108</span>
 
     </aside>
 
@@ -2709,7 +3123,7 @@ and this carries that call's failure instead</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">968</span>
+    <span class="phpdocumentor-element-found-in__line">1138</span>
 
     </aside>
 
@@ -2747,7 +3161,7 @@ authorization decision, mirroring the Python/C# sibling SDKs).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1426</span>
+    <span class="phpdocumentor-element-found-in__line">1783</span>
 
     </aside>
 
@@ -2834,7 +3248,7 @@ authorization decision, mirroring the Python/C# sibling SDKs).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">525</span>
+    <span class="phpdocumentor-element-found-in__line">695</span>
 
     </aside>
 
@@ -2881,7 +3295,7 @@ forbids caching RESPONSES, and nothing here caches one.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2174</span>
+    <span class="phpdocumentor-element-found-in__line">2570</span>
 
     </aside>
 
@@ -2931,7 +3345,7 @@ forbids caching RESPONSES, and nothing here caches one.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2160</span>
+    <span class="phpdocumentor-element-found-in__line">2556</span>
 
     </aside>
 
@@ -2975,7 +3389,7 @@ profile action costs a round trip on every check that follows (§25.2 rule 3).</
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2214</span>
+    <span class="phpdocumentor-element-found-in__line">2610</span>
 
     </aside>
 
@@ -3035,7 +3449,7 @@ of a login (§25.2 rule 2) — including capturing the session's first CSRF toke
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2195</span>
+    <span class="phpdocumentor-element-found-in__line">2591</span>
 
     </aside>
 
@@ -3089,7 +3503,7 @@ credential.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">682</span>
+    <span class="phpdocumentor-element-found-in__line">852</span>
 
     </aside>
 
@@ -3128,7 +3542,7 @@ credential.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">666</span>
+    <span class="phpdocumentor-element-found-in__line">836</span>
 
     </aside>
 
@@ -3168,7 +3582,7 @@ speak to.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1112</span>
+    <span class="phpdocumentor-element-found-in__line">1469</span>
 
     </aside>
 
@@ -3254,7 +3668,7 @@ one tries to override an SDK-owned parameter (§12.1 rule 5).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1089</span>
+    <span class="phpdocumentor-element-found-in__line">1446</span>
 
     </aside>
 
@@ -3297,7 +3711,7 @@ differ from `$baseUrl` behind a proxy — never treated as an error (§12.3 rule
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1172</span>
+    <span class="phpdocumentor-element-found-in__line">1529</span>
 
     </aside>
 
@@ -3398,7 +3812,7 @@ when omitted.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1141</span>
+    <span class="phpdocumentor-element-found-in__line">1498</span>
 
     </aside>
 
@@ -3497,7 +3911,7 @@ comes from the application, not from here.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1199</span>
+    <span class="phpdocumentor-element-found-in__line">1556</span>
 
     </aside>
 
@@ -3580,7 +3994,7 @@ wrapped or bare form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1902</span>
+    <span class="phpdocumentor-element-found-in__line">2292</span>
 
     </aside>
 
@@ -3626,7 +4040,7 @@ stretching happens inside <code class="prettyprint">libaxiam_opaque_ffi</code>, 
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1810</span>
+    <span class="phpdocumentor-element-found-in__line">2200</span>
 
     </aside>
 
@@ -3706,7 +4120,7 @@ key-stretching function this SDK cannot ask for</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1834</span>
+    <span class="phpdocumentor-element-found-in__line">2224</span>
 
     </aside>
 
@@ -3784,7 +4198,7 @@ then — and on the same terms as <abbr title="\Axiam\Sdk\self::opaqueEnrollment
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">557</span>
+    <span class="phpdocumentor-element-found-in__line">727</span>
 
     </aside>
 
@@ -3824,7 +4238,7 @@ the SDK boundary (§27.0).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2347</span>
+    <span class="phpdocumentor-element-found-in__line">2743</span>
 
     </aside>
 
@@ -3881,7 +4295,7 @@ distinguishing them; this SDK does not distinguish them either (§25.4 rule 3).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">599</span>
+    <span class="phpdocumentor-element-found-in__line">769</span>
 
     </aside>
 
@@ -3920,7 +4334,7 @@ distinguishing them; this SDK does not distinguish them either (§25.4 rule 3).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">648</span>
+    <span class="phpdocumentor-element-found-in__line">818</span>
 
     </aside>
 
@@ -3959,7 +4373,7 @@ distinguishing them; this SDK does not distinguish them either (§25.4 rule 3).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">751</span>
+    <span class="phpdocumentor-element-found-in__line">921</span>
 
     </aside>
 
@@ -3999,7 +4413,7 @@ them so.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">742</span>
+    <span class="phpdocumentor-element-found-in__line">912</span>
 
     </aside>
 
@@ -4039,7 +4453,7 @@ caller, never to another user.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">716</span>
+    <span class="phpdocumentor-element-found-in__line">886</span>
 
     </aside>
 
@@ -4079,7 +4493,7 @@ SDK could previously reach.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">954</span>
+    <span class="phpdocumentor-element-found-in__line">1124</span>
 
     </aside>
 
@@ -4116,7 +4530,7 @@ reactively on a `401`. A failure surfaces as {@see AuthError} with no retry (§9
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2317</span>
+    <span class="phpdocumentor-element-found-in__line">2713</span>
 
     </aside>
 
@@ -4166,7 +4580,7 @@ account-enumeration oracle its uniform response exists to prevent (§25.4).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2293</span>
+    <span class="phpdocumentor-element-found-in__line">2689</span>
 
     </aside>
 
@@ -4249,7 +4663,7 @@ state that must not be sent a live token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2256</span>
+    <span class="phpdocumentor-element-found-in__line">2652</span>
 
     </aside>
 
@@ -4310,7 +4724,7 @@ does not.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">765</span>
+    <span class="phpdocumentor-element-found-in__line">935</span>
 
     </aside>
 
@@ -4355,7 +4769,7 @@ pass the same identifier the implicit routes use.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">778</span>
+    <span class="phpdocumentor-element-found-in__line">948</span>
 
     </aside>
 
@@ -4399,7 +4813,7 @@ UUID, and the two are not interchangeable.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">607</span>
+    <span class="phpdocumentor-element-found-in__line">777</span>
 
     </aside>
 
@@ -4438,7 +4852,7 @@ UUID, and the two are not interchangeable.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1486</span>
+    <span class="phpdocumentor-element-found-in__line">1843</span>
 
     </aside>
 
@@ -4528,7 +4942,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">591</span>
+    <span class="phpdocumentor-element-found-in__line">761</span>
 
     </aside>
 
@@ -4567,7 +4981,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">707</span>
+    <span class="phpdocumentor-element-found-in__line">877</span>
 
     </aside>
 
@@ -4606,7 +5020,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">615</span>
+    <span class="phpdocumentor-element-found-in__line">785</span>
 
     </aside>
 
@@ -4645,7 +5059,7 @@ form.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">624</span>
+    <span class="phpdocumentor-element-found-in__line">794</span>
 
     </aside>
 
@@ -4685,7 +5099,7 @@ with.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">699</span>
+    <span class="phpdocumentor-element-found-in__line">869</span>
 
     </aside>
 
@@ -4724,7 +5138,7 @@ with.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1525</span>
+    <span class="phpdocumentor-element-found-in__line">1882</span>
 
     </aside>
 
@@ -4786,7 +5200,7 @@ the SDK on the federation path.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1593</span>
+    <span class="phpdocumentor-element-found-in__line">1950</span>
 
     </aside>
 
@@ -4841,7 +5255,7 @@ makes exactly one wire call so that it cannot become a retry by accident
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1579</span>
+    <span class="phpdocumentor-element-found-in__line">1936</span>
 
     </aside>
 
@@ -4900,7 +5314,7 @@ provider issues no ID token at all (§12.1 note 11).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1542</span>
+    <span class="phpdocumentor-element-found-in__line">1899</span>
 
     </aside>
 
@@ -4979,7 +5393,7 @@ resolves.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1505</span>
+    <span class="phpdocumentor-element-found-in__line">1862</span>
 
     </aside>
 
@@ -5070,7 +5484,7 @@ itself (§12.1 note 7).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1562</span>
+    <span class="phpdocumentor-element-found-in__line">1919</span>
 
     </aside>
 
@@ -5162,7 +5576,7 @@ retried.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">566</span>
+    <span class="phpdocumentor-element-found-in__line">736</span>
 
     </aside>
 
@@ -5202,7 +5616,7 @@ to.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1295</span>
+    <span class="phpdocumentor-element-found-in__line">1652</span>
 
     </aside>
 
@@ -5325,7 +5739,7 @@ Never inferred from the token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1415</span>
+    <span class="phpdocumentor-element-found-in__line">1772</span>
 
     </aside>
 
@@ -5388,7 +5802,7 @@ Never inferred from the token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1361</span>
+    <span class="phpdocumentor-element-found-in__line">1718</span>
 
     </aside>
 
@@ -5440,7 +5854,7 @@ Never inferred from the token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1396</span>
+    <span class="phpdocumentor-element-found-in__line">1753</span>
 
     </aside>
 
@@ -5531,7 +5945,7 @@ client's credentials and carries no refresh token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1371</span>
+    <span class="phpdocumentor-element-found-in__line">1728</span>
 
     </aside>
 
@@ -5580,7 +5994,7 @@ client's credentials and carries no refresh token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1409</span>
+    <span class="phpdocumentor-element-found-in__line">1766</span>
 
     </aside>
 
@@ -5630,7 +6044,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1337</span>
+    <span class="phpdocumentor-element-found-in__line">1694</span>
 
     </aside>
 
@@ -5686,7 +6100,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1327</span>
+    <span class="phpdocumentor-element-found-in__line">1684</span>
 
     </aside>
 
@@ -5762,7 +6176,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1381</span>
+    <span class="phpdocumentor-element-found-in__line">1738</span>
 
     </aside>
 
@@ -5818,7 +6232,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1350</span>
+    <span class="phpdocumentor-element-found-in__line">1707</span>
 
     </aside>
 
@@ -5898,7 +6312,7 @@ and deliberately **no** exchange of the ticket it finds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">575</span>
+    <span class="phpdocumentor-element-found-in__line">745</span>
 
     </aside>
 
@@ -5930,6 +6344,73 @@ lockout state.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_validateToken">
+        validateToken()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_validateToken" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1412</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`validateToken` — `axiam.v1.TokenService/ValidateToken` (CONTRACT.md §1.1.1/§10.3,
+contract 1.51). Signature + expiry, plus the confirmation (`cnf`) a resource server
+validating over gRPC needs in order not to accept a sender-constrained token as a
+bearer token (§10.1 rule 9).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">validateToken</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$inspectedAccessToken</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-TokenValidation.html"><abbr title="\Axiam\Sdk\Auth\TokenValidation">TokenValidation</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">$inspectedAccessToken</code> is the token being asked about — a DIFFERENT credential
+from this client's OWN session token, which authenticates the RPC itself. The two
+are never confused: there is no default that falls one back to the other
+(§1.1.1 rule 1). <code class="prettyprint">$inspectedAccessToken</code> is secret material and SHOULD be passed
+as <a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>.</p>
+<p><code class="prettyprint">$result-&gt;valid</code> is NOT permission to proceed — read <code class="prettyprint">$result-&gt;status()</code>, or call
+<code class="prettyprint">$result-&gt;verifyPossession($proofs)</code> with the proofs YOUR connection established.
+Requires a prior successful <abbr title="\Axiam\Sdk\self::login()">self::login()</abbr> on THIS client (the caller's own
+credential) — with none, raises <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> before any wire call — and,
+being gRPC-only, requires the <code class="prettyprint">grpc</code> PECL extension plus a configured
+<code class="prettyprint">grpcTarget</code>; there is NO REST substitution (§1.1.1 rule 7; <code class="prettyprint">POST /oauth2/introspect</code>
+is a different operation, RFC 7662 §2.1 client authentication, not this one). A
+gRPC <code class="prettyprint">UNAUTHENTICATED</code> on the caller's own credential drives the shared
+single-flight refresh (§9) and retries once.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$inspectedAccessToken</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Auth-TokenValidation.html"><abbr title="\Axiam\Sdk\Auth\TokenValidation">TokenValidation</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_verifyEmail">
         verifyEmail()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyEmail" class="headerlink"><i class="fas fa-link"></i></a>
@@ -5938,7 +6419,7 @@ lockout state.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2234</span>
+    <span class="phpdocumentor-element-found-in__line">2630</span>
 
     </aside>
 
@@ -5994,14 +6475,15 @@ query-parameter convention does not reach it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1615</span>
+    <span class="phpdocumentor-element-found-in__line">1984</span>
 
     </aside>
 
         <p class="phpdocumentor-summary">Verify an INBOUND caller&#039;s token and nothing else — the seam every request guard
 must use (CONTRACT.md §10.1 rule 8). Delegates straight to {@see JwksVerifier::verify()},
-which applies the full §10.1 minimum local-verification set, and returns `null` on
-any failure with **no fallback to another credential**.</p>
+which applies the full §10.1 minimum local-verification set INCLUDING rule 9
+(contract 1.51), and returns `null` on any failure with **no fallback to another
+credential**.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -6010,7 +6492,17 @@ any failure with **no fallback to another credential**.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>This is deliberately the <em>only</em> verification entry point offered to the framework
+        <section class="phpdocumentor-description"><p><strong>Rule 9 (contract 1.51):</strong> this method has no transport to ask for a peer
+certificate or a verified DPoP proof, so a token carrying <code class="prettyprint">cnf</code> is REFUSED here
+unconditionally — accepting one without evidence would be exactly the
+bound-to-bearer downgrade rule 9 exists to prevent. Before this, a certificate- or
+DPoP-bound token reached this method with its <code class="prettyprint">cnf</code> claim intact and unchecked, so
+a device token lifted off a device (or a DPoP-bound token replayed without its
+proof) was admitted here as an ordinary bearer credential — the same defect found
+independently in the Rust, TypeScript, Go, Python and C# ports. A guard that DOES
+have evidence to offer (an mTLS-terminating listener, a verified DPoP proof) calls
+<abbr title="\Axiam\Sdk\self::verifyWithProofs()">self::verifyWithProofs()</abbr> instead.</p>
+<p>This is deliberately the <em>only</em> verification entry point offered to the framework
 bridges. Its sibling <abbr title="\Axiam\Sdk\self::verifyLocallyOrFallback()">self::verifyLocallyOrFallback()</abbr> substitutes this client's
 own session when verification fails, which is correct for the SDK's outbound calls
 and an authentication bypass in a request guard — see SEC-085.</p>
@@ -6062,7 +6554,7 @@ and an authentication bypass in a request guard — see SEC-085.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1636</span>
+    <span class="phpdocumentor-element-found-in__line">2026</span>
 
     </aside>
 
@@ -6133,7 +6625,7 @@ application's own identity (SEC-085). Request guards must call
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1445</span>
+    <span class="phpdocumentor-element-found-in__line">1802</span>
 
     </aside>
 
@@ -6210,7 +6702,7 @@ at-least-once.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">937</span>
+    <span class="phpdocumentor-element-found-in__line">1107</span>
 
     </aside>
 
@@ -6261,6 +6753,84 @@ public surface).</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_verifyWithProofs">
+        verifyWithProofs()
+        <a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyWithProofs" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">2005</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">{@see self::verifyLocally()}, applying CONTRACT.md §10.1 rule 9 against
+`$proofs` — evidence YOUR connection established for THIS request, never a value
+taken from a caller-settable request header (§10.1 rule 9 detail 2: e.g.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">verifyWithProofs</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenant</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Auth-PresentedProofs.html"><abbr title="\Axiam\Sdk\Auth\PresentedProofs">PresentedProofs</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$proofs</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;string, mixed&gt;|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">$_SERVER['SSL_CLIENT_CERT']</code>/the PSR-7 server params as set by the
+TLS-terminating web server, or an already-verified DPoP proof's <code class="prettyprint">jkt</code>). An unbound
+token is accepted with or without proofs, exactly as <abbr title="\Axiam\Sdk\self::verifyLocally()">self::verifyLocally()</abbr>.</p>
+<p>The request guard to use when the deployment DOES have connection evidence to
+offer — an mTLS-terminating listener fronting a resource server that must accept
+device tokens, for instance. <abbr title="\Axiam\Sdk\self::verifyLocally()">self::verifyLocally()</abbr> stays the entry point
+for everything else, and always evaluates as though no evidence were available.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$token</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenant</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$proofs</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Auth-PresentedProofs.html"><abbr title="\Axiam\Sdk\Auth\PresentedProofs">PresentedProofs</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;string, mixed&gt;|null</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>Verified claims, or null — including when a bound
+token's <code class="prettyprint">cnf</code> is not satisfied by <code class="prettyprint">$proofs</code>.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_webauthnAuthenticateFinish">
         webauthnAuthenticateFinish()
         <a href="classes/Axiam-Sdk-AxiamClient.html#method_webauthnAuthenticateFinish" class="headerlink"><i class="fas fa-link"></i></a>
@@ -6269,7 +6839,7 @@ public surface).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2520</span>
+    <span class="phpdocumentor-element-found-in__line">2916</span>
 
     </aside>
 
@@ -6329,7 +6899,7 @@ changed (§24.3).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2502</span>
+    <span class="phpdocumentor-element-found-in__line">2898</span>
 
     </aside>
 
@@ -6384,7 +6954,7 @@ is why the token is required here and absent there.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2556</span>
+    <span class="phpdocumentor-element-found-in__line">2952</span>
 
     </aside>
 
@@ -6442,7 +7012,7 @@ is why the token is required here and absent there.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2542</span>
+    <span class="phpdocumentor-element-found-in__line">2938</span>
 
     </aside>
 
@@ -6499,7 +7069,7 @@ one has no such step.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">725</span>
+    <span class="phpdocumentor-element-found-in__line">895</span>
 
     </aside>
 
@@ -6539,7 +7109,7 @@ over it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2459</span>
+    <span class="phpdocumentor-element-found-in__line">2855</span>
 
     </aside>
 
@@ -6609,7 +7179,7 @@ nothing.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2441</span>
+    <span class="phpdocumentor-element-found-in__line">2837</span>
 
     </aside>
 
@@ -6655,7 +7225,7 @@ state, not a transient one, and §24.4 rule 2 deliberately does not retry it.</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2612</span>
+    <span class="phpdocumentor-element-found-in__line">3008</span>
 
     </aside>
 
@@ -6738,7 +7308,7 @@ given one — the setup token is the only credential this pair accepts.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2582</span>
+    <span class="phpdocumentor-element-found-in__line">2978</span>
 
     </aside>
 
@@ -6799,7 +7369,7 @@ cannot reach — a configuration state, not a transient one, and (mirroring
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AxiamClient.php"><a href="files/src-axiamclient.html"><abbr title="src/AxiamClient.php">AxiamClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">657</span>
+    <span class="phpdocumentor-element-found-in__line">827</span>
 
     </aside>
 
@@ -6849,13 +7419,17 @@ which this namespace configures.</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method___destruct">__destruct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_actingTenant">actingTenant()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_actingTenantId">actingTenantId()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_audit">audit()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_authenticateDevice">authenticateDevice()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_batchCheck">batchCheck()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_caCertificates">caCertificates()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_can">can()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_certificates">certificates()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_checkAccess">checkAccess()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_checkAccessDecision">checkAccessDecision()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_clearActingTenant">clearActingTenant()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_close">close()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_confirmPasswordReset">confirmPasswordReset()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_debugClientCertOptions">debugClientCertOptions()</a></li>
@@ -6869,6 +7443,7 @@ which this namespace configures.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_getUserInfo">getUserInfo()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_groups">groups()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_introspect">introspect()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_introspectToken">introspectToken()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_login">login()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_loginClientCredentials">loginClientCredentials()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_loginOpaque">loginOpaque()</a></li>
@@ -6927,11 +7502,13 @@ which this namespace configures.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_umaRequestTicket">umaRequestTicket()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_umaUpdateResource">umaUpdateResource()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_users">users()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_validateToken">validateToken()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyEmail">verifyEmail()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyLocally">verifyLocally()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyLocallyOrFallback">verifyLocallyOrFallback()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyLogoutToken">verifyLogoutToken()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyMfa">verifyMfa()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_verifyWithProofs">verifyWithProofs()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_webauthnAuthenticateFinish">webauthnAuthenticateFinish()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_webauthnAuthenticateStart">webauthnAuthenticateStart()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AxiamClient.html#method_webauthnDiscoverableFinish">webauthnDiscoverableFinish()</a></li>

@@ -125,7 +125,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">20</span>
+    <span class="phpdocumentor-element-found-in__line">22</span>
 
     </aside>
 
@@ -173,6 +173,12 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_createdServiceAccounts">$createdServiceAccounts</a>
+    <span>
+                        &nbsp;: array&lt;string|int, mixed&gt;            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_failed">$failed</a>
     <span>
                         &nbsp;: <a href="classes/Axiam-Sdk-Management-Manifest-PlannedChange.html"><abbr title="\Axiam\Sdk\Management\Manifest\PlannedChange">PlannedChange</abbr></a>|null            </span>
@@ -203,6 +209,14 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_createdServiceAccounts">createdServiceAccounts()</a>
+    <span>
+                                &nbsp;: array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountCreatedResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse">ServiceAccountCreatedResponse</abbr></a>&gt;    </span>
+</dt>
+<dd>Every service account this apply created, with the one-time secret the server
+returned for it. See {@see self::$createdServiceAccounts}.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_describe">describe()</a>
@@ -248,7 +262,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -275,6 +289,43 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_createdServiceAccounts">
+        $createdServiceAccounts
+        <a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_createdServiceAccounts" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">41</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;</span>
+    <span class="phpdocumentor-signature__name">$createdServiceAccounts</span>
+     = <span class="phpdocumentor-signature__default-value">[]</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_failed">
         $failed
         <a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_failed" class="headerlink"><i class="fas fa-link"></i></a>
@@ -285,7 +336,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">30</span>
+    <span class="phpdocumentor-element-found-in__line">38</span>
 
     </aside>
 
@@ -322,7 +373,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">31</span>
+    <span class="phpdocumentor-element-found-in__line">39</span>
 
     </aside>
 
@@ -359,7 +410,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">32</span>
+    <span class="phpdocumentor-element-found-in__line">40</span>
 
     </aside>
 
@@ -401,14 +452,14 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">36</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Manifest-PlannedChange.html"><abbr title="\Axiam\Sdk\Management\Manifest\PlannedChange">PlannedChange</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$applied</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Manifest-PlannedChange.html"><abbr title="\Axiam\Sdk\Management\Manifest\PlannedChange">PlannedChange</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$failed</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Throwable">Throwable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$failure</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Manifest-PlannedChange.html"><abbr title="\Axiam\Sdk\Management\Manifest\PlannedChange">PlannedChange</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$remaining</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Manifest-PlannedChange.html"><abbr title="\Axiam\Sdk\Management\Manifest\PlannedChange">PlannedChange</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$applied</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Manifest-PlannedChange.html"><abbr title="\Axiam\Sdk\Management\Manifest\PlannedChange">PlannedChange</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$failed</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Throwable">Throwable</abbr>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$failure</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Manifest-PlannedChange.html"><abbr title="\Axiam\Sdk\Management\Manifest\PlannedChange">PlannedChange</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$remaining</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountCreatedResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse">ServiceAccountCreatedResponse</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$createdServiceAccounts</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -452,6 +503,20 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
 </section>
 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$createdServiceAccounts</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountCreatedResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse">ServiceAccountCreatedResponse</abbr></a>&gt;</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Every service
+account this apply created, <code class="prettyprint">client_secret</code> included — the ONE time it is
+ever returned (§27.5 rule 5, CONTRACT.md §27.6.1 addition 3). Kept here even
+when a LATER step of the same apply fails: the account and its secret exist
+on the server regardless, and losing the report would lose the only chance
+to read the secret at all. <code class="prettyprint">apply()</code> never rotates one to reconcile drift.</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -459,6 +524,46 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
         
     
     
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_createdServiceAccounts">
+        createdServiceAccounts()
+        <a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_createdServiceAccounts" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">57</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Every service account this apply created, with the one-time secret the server
+returned for it. See {@see self::$createdServiceAccounts}.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">createdServiceAccounts</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountCreatedResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse">ServiceAccountCreatedResponse</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array&lt;int, <a href="classes/Axiam-Sdk-Management-Models-ServiceAccountCreatedResponse.html"><abbr title="\Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse">ServiceAccountCreatedResponse</abbr></a>&gt;</span>
+            </section>
+
 </article>
                     <article
         class="phpdocumentor-element
@@ -474,7 +579,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">47</span>
+    <span class="phpdocumentor-element-found-in__line">67</span>
 
     </aside>
 
@@ -513,7 +618,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ApplyReport.php"><a href="files/src-management-manifest-applyreport.html"><abbr title="src/Management/Manifest/ApplyReport.php">ApplyReport.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">37</span>
+    <span class="phpdocumentor-element-found-in__line">46</span>
 
     </aside>
 
@@ -561,6 +666,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
                 <li>
                     <ul class="phpdocumentor-list -clean">
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_applied">$applied</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_createdServiceAccounts">$createdServiceAccounts</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_failed">$failed</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_failure">$failure</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#property_remaining">$remaining</a></li>
@@ -571,6 +677,7 @@ why it stopped; <code class="prettyprint">$remaining</code> is what was never at
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_createdServiceAccounts">createdServiceAccounts()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_describe">describe()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_isComplete">isComplete()</a></li>
                                     </ul>

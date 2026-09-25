@@ -217,6 +217,15 @@ of the token (mirrors the Java SDK&#039;s `SessionState::cachedAccessToken()` an
 the Go SDK&#039;s `cookieValue()` helper).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_actingTenant">actingTenant()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>The tenant this client currently acts on (CONTRACT.md §5.2 rule 1), or `null`
+when it acts on its own tenant — the state {@see \Axiam\Sdk\Rest\AuthMiddleware}
+reads to decide whether to send `X-Axiam-Tenant` at all.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_adoptBearerCredential">adoptBearerCredential()</a>
     <span>
                                 &nbsp;: void    </span>
@@ -236,6 +245,25 @@ excludes that path unconditionally). A cookie-sourced access token from a real
 <dd>AXIAM server base URL this session is bound to.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_canRefresh">canRefresh()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Whether the credential {@see self::accessToken()} would currently return can be
+refreshed through the §9 `/api/v1/auth/refresh` guard (CONTRACT.md §6.1 rule 11,
+C-12 N4.5): true exactly when a cookie-sourced session exists — a real
+`login()`/`verifyMfa()`/OPAQUE/MFA-setup/WebAuthn-setup/SSO session has a
+server-stored refresh token behind its `axiam_access` cookie. An ADOPTED bearer
+credential — {@see \Axiam\Sdk\AxiamClient::authenticateDevice()}&#039;s device token
+(§6.1 rule 6: no refresh token is ever issued for it), or a `client_credentials`/
+device-grant token adopted via {@see self::adoptBearerCredential()} (RFC 6749
+§4.4.3: `client_credentials` issues no `refresh_token` either) — has none, and
+MUST NEVER be refreshed, on either transport. Mirrors {@see self::accessToken()}&#039;s
+own cookie-first precedence exactly, so this is true whenever THAT method would
+hand back a cookie-sourced token and false whenever it would fall back to the
+adopted one (or return `null`).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_captureCsrfTokenFromResponse">captureCsrfTokenFromResponse()</a>
     <span>
                                 &nbsp;: void    </span>
@@ -245,6 +273,16 @@ excludes that path unconditionally). A cookie-sourced access token from a real
 a response body, but the server ALSO freshly sets `X-CSRF-Token` on that same
 response (exactly as `login()`&#039;s response does), so this wraps the same private
 capture logic {@see self::refreshIfNeeded()} already uses.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_clearBearerCredential">clearBearerCredential()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Clears the adopted bearer credential (CONTRACT.md §6.1 rule 11 / C-12 N4.4:
+&quot;logout clears it&quot;). Called only by {@see \Axiam\Sdk\AxiamClient::logout()},
+after a successful server-side logout — mirroring how the cookie jar, CSRF token
+and principal scope are also cleared only then, never on a refused call.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_cookieJar">cookieJar()</a>
@@ -259,6 +297,23 @@ capture logic {@see self::refreshIfNeeded()} already uses.</dd>
                                 &nbsp;: string|null    </span>
 </dt>
 <dd>§3 non-browser CSRF: the most recently captured `X-CSRF-Token` response header.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_principalScope">principalScope()</a>
+    <span>
+                                &nbsp;: array{organizationLevel: bool, reachableTenantIds: ?list<string>}|null    </span>
+</dt>
+<dd>What the last completed login reported about the principal&#039;s reach (CONTRACT.md
+§5.2/§5.2.3), or `null` when this client holds no such result. See
+{@see self::$principalScope}&#039;s own doc for which sessions set/reset it.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_recordPrincipalScope">recordPrincipalScope()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Records what a just-completed login/verify-MFA/OPAQUE-finish/setup-completion
+reported about the principal&#039;s reach (§5.2/§5.2.3).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_refreshGuard">refreshGuard()</a>
@@ -295,6 +350,26 @@ outcome, never on both, never on neither.</dd>
 logged-out session never echoes a stale `X-CSRF-Token` on a subsequent (re-authenticated)
 request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
 {@see self::refreshIfNeeded()}&#039;s existing behavior in any other way.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_resetPrincipalScope">resetPrincipalScope()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Resets the principal scope to &quot;unknown&quot; (§5.2 rule 1): a session that just
+completed WITHOUT reporting a `LoginUserInfo` — WebAuthn authentication, SSO, a
+device login, or an ordinary logout — must not let
+{@see \Axiam\Sdk\AxiamClient::actingTenant()} keep gating on a PREVIOUS
+principal&#039;s reach.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Session.html#method_setActingTenant">setActingTenant()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>Sets, or clears (`null`), the acting tenant (CONTRACT.md §5.2 rule 1). The caller
+({@see \Axiam\Sdk\AxiamClient::actingTenant()}/`clearActingTenant()`) is
+responsible for validating `$tenantId` as a UUID first — this setter trusts it.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_tenant">tenant()</a>
@@ -406,7 +481,7 @@ already-consumed (single-use, rotating) refresh token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">92</span>
+    <span class="phpdocumentor-element-found-in__line">122</span>
 
     </aside>
 
@@ -483,7 +558,7 @@ that does not persist them fails every request after login.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">167</span>
+    <span class="phpdocumentor-element-found-in__line">296</span>
 
     </aside>
 
@@ -517,6 +592,47 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_actingTenant">
+        actingTenant()
+        <a href="classes/Axiam-Sdk-Session.html#method_actingTenant" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">203</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The tenant this client currently acts on (CONTRACT.md §5.2 rule 1), or `null`
+when it acts on its own tenant — the state {@see \Axiam\Sdk\Rest\AuthMiddleware}
+reads to decide whether to send `X-Axiam-Tenant` at all.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">actingTenant</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_adoptBearerCredential">
         adoptBearerCredential()
         <a href="classes/Axiam-Sdk-Session.html#method_adoptBearerCredential" class="headerlink"><i class="fas fa-link"></i></a>
@@ -525,7 +641,7 @@ the Go SDK&#039;s `cookieValue()` helper).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">145</span>
+    <span class="phpdocumentor-element-found-in__line">175</span>
 
     </aside>
 
@@ -575,7 +691,7 @@ excludes that path unconditionally). A cookie-sourced access token from a real
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">102</span>
+    <span class="phpdocumentor-element-found-in__line">132</span>
 
     </aside>
 
@@ -606,6 +722,63 @@ excludes that path unconditionally). A cookie-sourced access token from a real
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_canRefresh">
+        canRefresh()
+        <a href="classes/Axiam-Sdk-Session.html#method_canRefresh" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">285</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Whether the credential {@see self::accessToken()} would currently return can be
+refreshed through the §9 `/api/v1/auth/refresh` guard (CONTRACT.md §6.1 rule 11,
+C-12 N4.5): true exactly when a cookie-sourced session exists — a real
+`login()`/`verifyMfa()`/OPAQUE/MFA-setup/WebAuthn-setup/SSO session has a
+server-stored refresh token behind its `axiam_access` cookie. An ADOPTED bearer
+credential — {@see \Axiam\Sdk\AxiamClient::authenticateDevice()}&#039;s device token
+(§6.1 rule 6: no refresh token is ever issued for it), or a `client_credentials`/
+device-grant token adopted via {@see self::adoptBearerCredential()} (RFC 6749
+§4.4.3: `client_credentials` issues no `refresh_token` either) — has none, and
+MUST NEVER be refreshed, on either transport. Mirrors {@see self::accessToken()}&#039;s
+own cookie-first precedence exactly, so this is true whenever THAT method would
+hand back a cookie-sourced token and false whenever it would fall back to the
+adopted one (or return `null`).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">canRefresh</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Consulted by <a href="classes/Axiam-Sdk-Rest-RefreshMiddleware.html"><abbr title="\Axiam\Sdk\Rest\RefreshMiddleware">RefreshMiddleware</abbr></a> (REST, before ever calling
+<abbr title="\Axiam\Sdk\self::refreshIfNeeded()">self::refreshIfNeeded()</abbr>) and <a href="classes/Axiam-Sdk-AuthzDispatcher.html"><abbr title="\Axiam\Sdk\AuthzDispatcher">AuthzDispatcher</abbr></a> (gRPC,
+before ever calling its own <code class="prettyprint">$refreshAccessor</code>) — never by this class itself,
+which stays agnostic of which credential is &quot;current&quot; beyond what
+<abbr title="\Axiam\Sdk\self::accessToken()">self::accessToken()</abbr> already resolves.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_captureCsrfTokenFromResponse">
         captureCsrfTokenFromResponse()
         <a href="classes/Axiam-Sdk-Session.html#method_captureCsrfTokenFromResponse" class="headerlink"><i class="fas fa-link"></i></a>
@@ -614,7 +787,7 @@ excludes that path unconditionally). A cookie-sourced access token from a real
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">132</span>
+    <span class="phpdocumentor-element-found-in__line">162</span>
 
     </aside>
 
@@ -655,6 +828,51 @@ capture logic {@see self::refreshIfNeeded()} already uses.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_clearBearerCredential">
+        clearBearerCredential()
+        <a href="classes/Axiam-Sdk-Session.html#method_clearBearerCredential" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">193</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Clears the adopted bearer credential (CONTRACT.md §6.1 rule 11 / C-12 N4.4:
+&quot;logout clears it&quot;). Called only by {@see \Axiam\Sdk\AxiamClient::logout()},
+after a successful server-side logout — mirroring how the cookie jar, CSRF token
+and principal scope are also cleared only then, never on a refused call.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">clearBearerCredential</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Without this, a device token or adopted client-credentials token from EARLIER in
+this client's life — merely SHADOWED, never cleared, by a subsequent
+<code class="prettyprint">login()</code>'s cookie session, since <abbr title="\Axiam\Sdk\self::accessToken()">self::accessToken()</abbr> always prefers a
+cookie-sourced token when one is present — resurfaces once <code class="prettyprint">logout()</code> clears that
+cookie again: a client that believes it logged itself out would still be
+authenticated as the stale device/service credential.</p>
+</section>
+
+    
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_cookieJar">
         cookieJar()
         <a href="classes/Axiam-Sdk-Session.html#method_cookieJar" class="headerlink"><i class="fas fa-link"></i></a>
@@ -663,7 +881,7 @@ capture logic {@see self::refreshIfNeeded()} already uses.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">114</span>
+    <span class="phpdocumentor-element-found-in__line">144</span>
 
     </aside>
 
@@ -702,7 +920,7 @@ capture logic {@see self::refreshIfNeeded()} already uses.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">120</span>
+    <span class="phpdocumentor-element-found-in__line">150</span>
 
     </aside>
 
@@ -733,6 +951,100 @@ capture logic {@see self::refreshIfNeeded()} already uses.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_principalScope">
+        principalScope()
+        <a href="classes/Axiam-Sdk-Session.html#method_principalScope" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">225</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">What the last completed login reported about the principal&#039;s reach (CONTRACT.md
+§5.2/§5.2.3), or `null` when this client holds no such result. See
+{@see self::$principalScope}&#039;s own doc for which sessions set/reset it.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">principalScope</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{organizationLevel: bool, reachableTenantIds: ?list<string>}|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{organizationLevel: bool, reachableTenantIds: ?list<string>}|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_recordPrincipalScope">
+        recordPrincipalScope()
+        <a href="classes/Axiam-Sdk-Session.html#method_recordPrincipalScope" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">236</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Records what a just-completed login/verify-MFA/OPAQUE-finish/setup-completion
+reported about the principal&#039;s reach (§5.2/§5.2.3).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">recordPrincipalScope</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$organizationLevel</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reachableTenantIds</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$organizationLevel</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$reachableTenantIds</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_refreshGuard">
         refreshGuard()
         <a href="classes/Axiam-Sdk-Session.html#method_refreshGuard" class="headerlink"><i class="fas fa-link"></i></a>
@@ -741,7 +1053,7 @@ capture logic {@see self::refreshIfNeeded()} already uses.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">266</span>
+    <span class="phpdocumentor-element-found-in__line">395</span>
 
     </aside>
 
@@ -858,7 +1170,7 @@ in flight).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">201</span>
+    <span class="phpdocumentor-element-found-in__line">330</span>
 
     </aside>
 
@@ -904,7 +1216,7 @@ outcome, never on both, never on neither.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">156</span>
+    <span class="phpdocumentor-element-found-in__line">259</span>
 
     </aside>
 
@@ -934,6 +1246,92 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_resetPrincipalScope">
+        resetPrincipalScope()
+        <a href="classes/Axiam-Sdk-Session.html#method_resetPrincipalScope" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">248</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Resets the principal scope to &quot;unknown&quot; (§5.2 rule 1): a session that just
+completed WITHOUT reporting a `LoginUserInfo` — WebAuthn authentication, SSO, a
+device login, or an ordinary logout — must not let
+{@see \Axiam\Sdk\AxiamClient::actingTenant()} keep gating on a PREVIOUS
+principal&#039;s reach.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">resetPrincipalScope</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_setActingTenant">
+        setActingTenant()
+        <a href="classes/Axiam-Sdk-Session.html#method_setActingTenant" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">213</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Sets, or clears (`null`), the acting tenant (CONTRACT.md §5.2 rule 1). The caller
+({@see \Axiam\Sdk\AxiamClient::actingTenant()}/`clearActingTenant()`) is
+responsible for validating `$tenantId` as a UUID first — this setter trusts it.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">setActingTenant</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_tenant">
         tenant()
         <a href="classes/Axiam-Sdk-Session.html#method_tenant" class="headerlink"><i class="fas fa-link"></i></a>
@@ -942,7 +1340,7 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">108</span>
+    <span class="phpdocumentor-element-found-in__line">138</span>
 
     </aside>
 
@@ -999,14 +1397,21 @@ request. Purely additive: does not change {@see self::csrfToken()}&#039;s or
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_accessToken">accessToken()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_actingTenant">actingTenant()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_adoptBearerCredential">adoptBearerCredential()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_baseUrl">baseUrl()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_canRefresh">canRefresh()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_captureCsrfTokenFromResponse">captureCsrfTokenFromResponse()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_clearBearerCredential">clearBearerCredential()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_cookieJar">cookieJar()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_csrfToken">csrfToken()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_principalScope">principalScope()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_recordPrincipalScope">recordPrincipalScope()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_refreshGuard">refreshGuard()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_refreshIfNeeded">refreshIfNeeded()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_resetCsrf">resetCsrf()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_resetPrincipalScope">resetPrincipalScope()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Session.html#method_setActingTenant">setActingTenant()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Session.html#method_tenant">tenant()</a></li>
                                     </ul>
             </li>

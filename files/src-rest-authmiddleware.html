@@ -122,9 +122,10 @@
     </h4>
     <dl class="phpdocumentor-table-of-contents">
                     <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html"><abbr title="\Axiam\Sdk\Rest\AuthMiddleware">AuthMiddleware</abbr></a></dt><dd>`HandlerStack` middleware: injects `Authorization` (current access token) and
-`X-Tenant-ID` on EVERY outgoing request, and `X-CSRF-Token` (captured from a prior
-response, {@see Session::csrfToken()}) on state-changing requests
-(CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).</dd>    </dl>
+`X-Tenant-ID` on EVERY outgoing request, `X-Axiam-Tenant` (CONTRACT.md §5.2 rule 1,
+contract 1.51) on every request while an acting tenant is set, and `X-CSRF-Token`
+(captured from a prior response, {@see Session::csrfToken()}) on state-changing
+requests (CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).</dd>    </dl>
 
 
 

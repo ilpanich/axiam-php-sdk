@@ -266,7 +266,7 @@ retry, telemetry) holds here too.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestApi.php"><a href="files/src-management-manifest-manifestapi.html"><abbr title="src/Management/Manifest/ManifestApi.php">ManifestApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">83</span>
+    <span class="phpdocumentor-element-found-in__line">255</span>
 
     </aside>
 
@@ -283,6 +283,15 @@ retry, telemetry) holds here too.</p>
 computed against the tenant's state NOW. A plan handed in from an earlier run
 describes a tenant that may have moved since, and applying it would either duplicate
 work or fail on a conflict — either way acting on a world that no longer exists.</p>
+<p>Two phases. First, every entity's own Create/Update lands, in the manifest's
+derived order — this is §27.6 rule 5's ordering, and it is what makes the second
+phase possible: a role exists before anything tries to grant it a permission. Second,
+§13 row 17's fix: role permission grants and group role bindings are reconciled —
+ADDITIVELY, never revoked or unassigned (§27.6 rule 4's &quot;omission is never deletion&quot;,
+extended to edges the same way it already governs entities) — for every role/group
+the manifest declares grants/roles for, whether or not that role/group's OWN fields
+needed a Create or Update. A role that already exists, unchanged, with a grant added
+to the manifest since the last apply still gets that grant on this run.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>

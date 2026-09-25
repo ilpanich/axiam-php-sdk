@@ -124,14 +124,15 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">29</span>
 
     </aside>
 
             <p class="phpdocumentor-summary">`HandlerStack` middleware: injects `Authorization` (current access token) and
-`X-Tenant-ID` on EVERY outgoing request, and `X-CSRF-Token` (captured from a prior
-response, {@see Session::csrfToken()}) on state-changing requests
-(CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).</p>
+`X-Tenant-ID` on EVERY outgoing request, `X-Axiam-Tenant` (CONTRACT.md §5.2 rule 1,
+contract 1.51) on every request while an acting tenant is set, and `X-CSRF-Token`
+(captured from a prior response, {@see Session::csrfToken()}) on state-changing
+requests (CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).</p>
 
 
     <section class="phpdocumentor-description"><p>Registered on the <code class="prettyprint">HandlerStack</code> closer to the base handler than
@@ -233,7 +234,7 @@ bearer token and — on state-changing methods (§3) — the `X-CSRF-Token` head
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">44</span>
+    <span class="phpdocumentor-element-found-in__line">45</span>
 
     </aside>
 
@@ -272,7 +273,7 @@ When this option is present the session token is never consulted.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -325,7 +326,7 @@ a request carrying this option still carries it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">60</span>
+    <span class="phpdocumentor-element-found-in__line">61</span>
 
     </aside>
 
@@ -371,7 +372,7 @@ a request carrying this option still carries it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/AuthMiddleware.php"><a href="files/src-rest-authmiddleware.html"><abbr title="src/Rest/AuthMiddleware.php">AuthMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">76</span>
 
     </aside>
 

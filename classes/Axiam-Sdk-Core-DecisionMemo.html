@@ -249,8 +249,9 @@ silently giving them the maximum safe value beats failing construction.</dd>
     <span>
                                 &nbsp;: string    </span>
 </dt>
-<dd>Builds the §17.1 rule 3 key: all four components, absent distinguished from
-present.</dd>
+<dd>Builds the §17.1 rule 3 key. Five components since contract 1.51 (C-12 item 2):
+`subjectId`, `resourceId`, `action`, `scope` and the ACTING TENANT — absent
+distinguished from present on every one of them.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Core-DecisionMemo.html#method_put">put()</a>
@@ -426,7 +427,7 @@ be tested without waiting.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/DecisionMemo.php"><a href="files/src-core-decisionmemo.html"><abbr title="src/Core/DecisionMemo.php">DecisionMemo.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">182</span>
+    <span class="phpdocumentor-element-found-in__line">192</span>
 
     </aside>
 
@@ -465,7 +466,7 @@ otherwise read the previous principal's decisions.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/DecisionMemo.php"><a href="files/src-core-decisionmemo.html"><abbr title="src/Core/DecisionMemo.php">DecisionMemo.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">216</span>
+    <span class="phpdocumentor-element-found-in__line">226</span>
 
     </aside>
 
@@ -582,7 +583,7 @@ otherwise read the previous principal's decisions.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/DecisionMemo.php"><a href="files/src-core-decisionmemo.html"><abbr title="src/Core/DecisionMemo.php">DecisionMemo.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">125</span>
+    <span class="phpdocumentor-element-found-in__line">135</span>
 
     </aside>
 
@@ -631,21 +632,29 @@ otherwise read the previous principal's decisions.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/DecisionMemo.php"><a href="files/src-core-decisionmemo.html"><abbr title="src/Core/DecisionMemo.php">DecisionMemo.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">108</span>
+    <span class="phpdocumentor-element-found-in__line">116</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Builds the §17.1 rule 3 key: all four components, absent distinguished from
-present.</p>
+        <p class="phpdocumentor-summary">Builds the §17.1 rule 3 key. Five components since contract 1.51 (C-12 item 2):
+`subjectId`, `resourceId`, `action`, `scope` and the ACTING TENANT — absent
+distinguished from present on every one of them.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">key</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$action</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">key</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$subjectId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resourceId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$action</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$actingTenant</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><p>The acting tenant joined the key because it is now possible for one session to
+ask the same question of two tenants (§5.2 rule 1). Without it, a memoized answer
+for tenant A would be returned for tenant B within the TTL — the exact
+cross-tenant leak a memo exists to never cause. <code class="prettyprint">null</code> (no acting tenant, the
+default for every client before 1.51) is one more distinct value, so a client
+that never calls <code class="prettyprint">actingTenant()</code> gets byte-for-byte the same keys as before.</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -676,6 +685,13 @@ present.</p>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$actingTenant</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
             </dl>
 
     
@@ -702,7 +718,7 @@ present.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/DecisionMemo.php"><a href="files/src-core-decisionmemo.html"><abbr title="src/Core/DecisionMemo.php">DecisionMemo.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">155</span>
+    <span class="phpdocumentor-element-found-in__line">165</span>
 
     </aside>
 
@@ -758,7 +774,7 @@ TTL-long outage, and memoizing it as an allow is unthinkable.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Core/DecisionMemo.php"><a href="files/src-core-decisionmemo.html"><abbr title="src/Core/DecisionMemo.php">DecisionMemo.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">199</span>
+    <span class="phpdocumentor-element-found-in__line">209</span>
 
     </aside>
 
