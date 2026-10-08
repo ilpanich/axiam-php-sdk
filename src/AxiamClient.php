@@ -173,6 +173,21 @@ final class AxiamClient
     /** §16.1 retry switch, forwarded to the §27 management transport. */
     private readonly bool $retryEnabled;
 
+    /**
+     * A transport that carries NOTHING of the session (CONTRACT.md §28.12.2 rule 3,
+     * §32.7): no cookie jar, no {@see AuthMiddleware}, no {@see RefreshMiddleware}, and
+     * redirects off. Same §6 TLS policy and §6.1 client identity as the other two. Used by
+     * the RFC 7592 client-configuration operations and the SSF receiver, whose requests
+     * carry their own bearer and must never carry this client's.
+     */
+    private readonly Client $bareHttp;
+
+    /** CONTRACT.md §28.12 engine, built on {@see self::$bareHttp}. */
+    private readonly \Axiam\Sdk\Oidc\ClientRegistrationClient $registrations;
+
+    /** The configured AXIAM base URL, as given. */
+    private readonly string $baseUrl;
+
     /** §27 management surface. Built on first use; see {@see self::management()}. */
     private ?\Axiam\Sdk\Management\ManagementApi $management = null;
 
@@ -416,6 +431,25 @@ final class AxiamClient
         // which must never trigger an unrelated token-refresh attempt on their own failures.
         $plainStack = HandlerStack::create($transportHandler);
         $this->plainHttp = new Client($commonConfig + ['handler' => $plainStack]);
+
+        // CONTRACT.md §28.12.2 rule 3 / §32.7: the session-free transport. Built from the
+        // same TLS settings but WITHOUT the shared cookie jar, without any middleware, and
+        // with redirects off, so a bearer handed to it can neither pick up the session's
+        // credentials nor be carried to another host by a 3xx.
+        $bareConfig = $commonConfig;
+        unset($bareConfig['cookies']);
+        $this->bareHttp = new Client($bareConfig + [
+            'handler' => HandlerStack::create($transportHandler),
+            'cookies' => false,
+            'allow_redirects' => false,
+        ]);
+        $this->baseUrl = $baseUrl;
+        $this->registrations = new \Axiam\Sdk\Oidc\ClientRegistrationClient(
+            $this->bareHttp,
+            $baseUrl,
+            $retryEnabled,
+            $this->telemetry,
+        );
 
         $this->session = new Session($baseUrl, $tenant, $this->plainHttp, $cookieJar);
         // §5.2 rule 1: the construction-time form. Already validated as a UUID above.
@@ -1705,6 +1739,95 @@ final class AxiamClient
             $tenantId,
             $configuration,
         );
+    }
+
+    // ------------------------------------------------------------------
+    // RFC 7592 client configuration (CONTRACT.md §28.12, contract 1.53)
+    // ------------------------------------------------------------------
+
+    /**
+     * `GET registration_client_uri` (RFC 7592 §2.1, CONTRACT.md §28.12) — read this
+     * client's own registration, as a client that registered itself through
+     * `POST /oauth2/register` (RFC 7591).
+     *
+     * The result carries neither the token nor the client secret (the server never returns
+     * them on a read), but it does carry every member an update needs — so the usual update
+     * is "read, change a field, update".
+     *
+     * `$registrationClientUri` is used **verbatim**, query included, and only when its
+     * scheme, host and port are this client's base URL's (and `https`, unless the base URL
+     * is `http` on a loopback host); any other URI is refused locally, before any request.
+     * The token travels as `Authorization: Bearer` and nothing of this client's session goes
+     * with it. Retried per §16 on a transport failure, a `5xx`, `408` or `429` — never on
+     * another `4xx`.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError for a URI at another origin — local,
+     *         with no request sent.
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for an answer carrying `error`, at any
+     *         status: `401 invalid_token` is an unknown client, a wrong or rotated-away token,
+     *         another tenant's client or a client with no token — the server never says
+     *         which — and it never refreshes this client's session (§28.12.2 rule 3).
+     */
+    public function readClientRegistration(
+        string $registrationClientUri,
+        Sensitive $registrationAccessToken,
+    ): \Axiam\Sdk\Oidc\ClientRegistration {
+        $this->ensureOpen();
+
+        return $this->registrations->read($registrationClientUri, $registrationAccessToken);
+    }
+
+    /**
+     * `PUT registration_client_uri` (RFC 7592 §2.2, CONTRACT.md §28.12) — **replace** this
+     * client's registration, and receive a **rotated** registration access token.
+     *
+     * `$metadata` is the **whole** registration: a member it omits is a member the server
+     * deletes. Start from {@see self::readClientRegistration()}'s result, which carries every
+     * member (`jwks` / `jwks_uri` and any member this SDK does not model included), and
+     * change what you mean to change. The SDK sets `client_id` to `$metadata->clientId` and
+     * never sends `registration_access_token`, `registration_client_uri`,
+     * `client_secret_expires_at`, `client_id_issued_at` or `client_secret`.
+     *
+     * **Persist the returned `registrationAccessToken` before doing anything else.** From
+     * the moment the server answers it is the only valid token: the one you presented is
+     * dead for every operation.
+     *
+     * **Never retried** — not on a transport error, not on a `5xx`. An update that reached
+     * the server and lost its response has already rotated the token, and repeating it with
+     * the old one is a `401` that locks you out of your own registration. On a lost answer,
+     * read the registration with the token you hold: a `401` means the update landed.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError for a URI at another origin (local).
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for `invalid_client_metadata`,
+     *         `invalid_redirect_uri`, `invalid_request` or `invalid_token`; a refusal does not
+     *         rotate the token.
+     */
+    public function updateClientRegistration(
+        string $registrationClientUri,
+        Sensitive $registrationAccessToken,
+        \Axiam\Sdk\Oidc\ClientRegistration $metadata,
+    ): \Axiam\Sdk\Oidc\ClientRegistration {
+        $this->ensureOpen();
+
+        return $this->registrations->update($registrationClientUri, $registrationAccessToken, $metadata);
+    }
+
+    /**
+     * `DELETE registration_client_uri` (RFC 7592 §2.3, CONTRACT.md §28.12) — delete this
+     * client's registration. A `204` returns normally.
+     *
+     * **Never retried**: a retry after a lost `204` would read `401` and report a successful
+     * deletion as a failure.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError for a URI at another origin (local).
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for an answer carrying `error`.
+     */
+    public function deleteClientRegistration(
+        string $registrationClientUri,
+        Sensitive $registrationAccessToken,
+    ): void {
+        $this->ensureOpen();
+        $this->registrations->delete($registrationClientUri, $registrationAccessToken);
     }
 
     /**
