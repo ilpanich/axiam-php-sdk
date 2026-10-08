@@ -75,6 +75,9 @@ final class SsfReceiver
 
     private ?string $resolvedJwksUri = null;
 
+    /** The HTTP status of `poll()`'s latest attempt (`null` for a transport failure), for §16. */
+    private ?int $lastStatus = null;
+
     /** @var (callable(): (Sensitive|string))|null */
     private $accessTokenProvider;
 
@@ -219,16 +222,14 @@ final class SsfReceiver
         $url = rtrim($this->baseUrl, '/') . '/ssf/v1/poll/' . rawurlencode($streamId);
         $body = (string) json_encode((object) ($options ?? new SsfPollOptions())->toArray(), JSON_UNESCAPED_SLASHES);
 
-        $lastStatus = null;
-        $retryable = static function () use (&$lastStatus): bool {
-            return $lastStatus === null || $lastStatus >= 500 || $lastStatus === 408 || $lastStatus === 429;
-        };
+        $this->lastStatus = null;
+        $retryable = fn (): bool => $this->lastAttemptWasTransient();
         $response = RetryPolicy::execute(
             'ssf.poll',
             $this->retryEnabled,
             $this->telemetry ?? new TelemetryDispatcher(null),
-            function () use ($url, $token, $body, &$lastStatus): ResponseInterface {
-                $lastStatus = null;
+            function () use ($url, $token, $body): ResponseInterface {
+                $this->lastStatus = null;
                 try {
                     $response = $this->http->request('POST', $url, [
                         'http_errors' => false,
@@ -243,8 +244,8 @@ final class SsfReceiver
                 } catch (GuzzleException $e) {
                     throw NetworkError::fromException($e, 'ssf.poll request failed');
                 }
-                $lastStatus = $response->getStatusCode();
-                if ($lastStatus < 200 || $lastStatus >= 300) {
+                $this->lastStatus = $response->getStatusCode();
+                if ($this->lastStatus < 200 || $this->lastStatus >= 300) {
                     throw ManagementErrorMapper::fromResponse($response, 'ssf.poll');
                 }
 
@@ -538,5 +539,16 @@ final class SsfReceiver
             sprintf('ssf.receiver: %s %s (CONTRACT.md §32.7)', $field, $why),
             [new FieldError($field, $why)],
         );
+    }
+
+    /**
+     * §16's predicate: a transport failure (no status), a `5xx`, `408` or `429` may be
+     * retried; any other `4xx` is an answer and is not.
+     */
+    private function lastAttemptWasTransient(): bool
+    {
+        $status = $this->lastStatus;
+
+        return $status === null || $status >= 500 || $status === 408 || $status === 429;
     }
 }

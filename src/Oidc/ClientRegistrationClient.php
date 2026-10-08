@@ -47,6 +47,13 @@ final class ClientRegistrationClient
     private const LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '::1'];
 
     /**
+     * The HTTP status of the read's latest attempt (`null` for a transport failure), so the §16
+     * predicate can tell a `5xx` from the bodiless `400` §2 also maps to NetworkError — that
+     * one is an answer, not a fault.
+     */
+    private ?int $lastStatus = null;
+
+    /**
      * @param ClientInterface     $http         A transport with no cookie jar, no session
      *                                          middleware and redirects off.
      * @param string              $baseUrl      The configured AXIAM base URL.
@@ -69,21 +76,17 @@ final class ClientRegistrationClient
     {
         $this->checkUri($uri, 'read_client_registration');
 
-        // The status of the last attempt, so the §16 predicate can tell a `5xx` from the
-        // bodiless `400` §2 also maps to NetworkError — that one is an answer, not a fault.
-        $lastStatus = null;
-        $retryable = static function () use (&$lastStatus): bool {
-            return $lastStatus === null || $lastStatus >= 500 || $lastStatus === 408 || $lastStatus === 429;
-        };
+        $this->lastStatus = null;
+        $retryable = fn (): bool => $this->lastAttemptWasTransient();
 
         return RetryPolicy::execute(
             'read_client_registration',
             $this->retryEnabled,
             $this->telemetry,
-            function () use ($uri, $token, &$lastStatus): ClientRegistration {
-                $lastStatus = null;
+            function () use ($uri, $token): ClientRegistration {
+                $this->lastStatus = null;
                 $response = $this->send('GET', $uri, $token, null, 'read_client_registration');
-                $lastStatus = $response->getStatusCode();
+                $this->lastStatus = $response->getStatusCode();
 
                 return self::decode($response, 'read_client_registration');
             },
@@ -209,5 +212,16 @@ final class ClientRegistrationClient
         }
 
         return ClientRegistration::fromArray($wire);
+    }
+
+    /**
+     * §16's predicate: a transport failure (no status), a `5xx`, `408` or `429` may be
+     * retried; any other `4xx` is an answer and is not.
+     */
+    private function lastAttemptWasTransient(): bool
+    {
+        $status = $this->lastStatus;
+
+        return $status === null || $status >= 500 || $status === 408 || $status === 429;
     }
 }
