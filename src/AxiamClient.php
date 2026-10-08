@@ -1830,6 +1830,62 @@ final class AxiamClient
         $this->registrations->delete($registrationClientUri, $registrationAccessToken);
     }
 
+    // ------------------------------------------------------------------
+    // SSF receiver helper (CONTRACT.md §32.7, contract 1.56)
+    // ------------------------------------------------------------------
+
+    /**
+     * An SSF receiver — the helper a relying party uses to verify the Security Event Tokens
+     * AXIAM pushes to it and to poll a poll stream (CONTRACT.md §32.7). See
+     * {@see \Axiam\Sdk\Ssf\SsfReceiver::verifySet()} and
+     * {@see \Axiam\Sdk\Ssf\SsfReceiver::poll()}.
+     *
+     * The receiver fetches the JWKS and polls over this client's session-free transport: this
+     * client's §6 TLS policy and §6.1 identity, but no cookies, no session token and no
+     * redirects. `poll()` calls `{base URL}/ssf/v1/poll/{stream_id}`.
+     *
+     * @param string $issuer The transmitter's issuer — the tenant's issuer, e.g.
+     *        `https://iam.example/t/{tenant_id}` — compared with `iss` exactly.
+     * @param string $audience This receiver's audience: the stream's `audience`.
+     * @param string|null $jwksUri The JWKS (AXIAM: `{issuer}/oauth2/jwks`); exactly one of this
+     *        and `$discoveryUrl`.
+     * @param string|null $discoveryUrl The SSF configuration document; its `jwks_uri` is used and
+     *        its `issuer` must be `$issuer`.
+     * @param (callable(): (Sensitive|string))|null $accessTokenProvider The bearer `poll()`
+     *        presents: a client-credentials token carrying `ssf.manage`. `null` for push only.
+     * @param int $replayWindowSeconds At least, and by default, seven days.
+     * @param \Axiam\Sdk\Ssf\ReplayStore|null $replayStore Shared store for several processes;
+     *        in-memory when omitted.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError locally, for a replay window under seven
+     *         days, an empty issuer or audience, or not exactly one key source.
+     */
+    public function ssfReceiver(
+        string $issuer,
+        string $audience,
+        ?string $jwksUri = null,
+        ?string $discoveryUrl = null,
+        ?callable $accessTokenProvider = null,
+        int $replayWindowSeconds = \Axiam\Sdk\Ssf\SsfReceiver::MIN_REPLAY_WINDOW_SECONDS,
+        ?\Axiam\Sdk\Ssf\ReplayStore $replayStore = null,
+    ): \Axiam\Sdk\Ssf\SsfReceiver {
+        $this->ensureOpen();
+
+        return new \Axiam\Sdk\Ssf\SsfReceiver(
+            http: $this->bareHttp,
+            baseUrl: $this->baseUrl,
+            issuer: $issuer,
+            audience: $audience,
+            jwksUri: $jwksUri,
+            discoveryUrl: $discoveryUrl,
+            accessTokenProvider: $accessTokenProvider,
+            replayWindowSeconds: $replayWindowSeconds,
+            replayStore: $replayStore,
+            retryEnabled: $this->retryEnabled,
+            telemetry: $this->telemetry,
+        );
+    }
+
     /**
      * `POST /uma2/rreg/resource_set` (CONTRACT.md §20.1) — register a UMA resource set.
      *
