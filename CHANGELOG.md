@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Contract 1.58.** `CONTRACT.md`, `openapi.json` and `management-registry.json` re-vendored
+  (190 operations across 28 namespaces); the §27 surface regenerated. The README's
+  conformance statement now names contract 1.58: §28.12, §29, §30, §31, §32 and §33, with
+  §32.7 and §33.2 signed (`EdDSA`, `ES256`).
+- **§28.12 — RFC 7592 client configuration.** `readClientRegistration`,
+  `updateClientRegistration`, `deleteClientRegistration` on `AxiamClient` and
+  `Oidc\ClientRegistration` (unknown members kept in `$extra`; the token and the client
+  secret `Sensitive`). The URI must be at the configured AXIAM origin (local
+  `ValidationError` otherwise); the requests carry only the registration bearer, on a new
+  session-free transport (no cookies, no session token, no redirects); update and delete are
+  never retried; a `401` never enters §9.
+- **§29 / §30 / §31 / §32 — the `saml`, `directory`, `scim_targets` and `ssf` namespaces**,
+  with the contract's call-site rules in their docblocks (generator `CALL_SITE_NOTES`), the
+  explicit-null marker `Management\JsonNull` (`UpdateDirectoryConfig::$groupBaseDn` /
+  `$groupFilter`, `SamlIdpInfo`'s credential ids), `ParseSamlSpMetadata::fromUrl()` /
+  `::fromXml()` with both-or-neither refused locally (`Management\ManagementChecks`), and
+  `Management\ReadModifyWrite` for the four replacement updates. `ValidationError` gained
+  `serverMessage`, the server's `message` member.
+- **§32.7 — the SSF receiver helper**, `$client->ssfReceiver(...)` → `Ssf\SsfReceiver`
+  (`verifySet`, `poll`), with `SetVerificationError` / `SetFailureReason`, `SetErr`,
+  `SsfPollOptions`, a pluggable `ReplayStore` (in-memory default, seven-day window floor) and
+  `SsfEventTypes`. A forced JWKS refetch on an unknown `kid` happens at most once per 60 s.
+- **§33 — CIBA.** `cibaInitiate`, `cibaPoll`, `cibaAwait` (injectable `CibaClock`) and
+  `cibaHandlePing` on `AxiamClient`; `CibaInitiateRequest`, `CibaInitiateResponse`,
+  `CibaDeliveryMode`; `OAuthProtocolError::isAccessDenied()` / `isExpiredToken()`. The §33.2
+  signed form via `CibaRequestSigner::fromPem()` for `EdDSA` and `ES256`.
+- **§21.3.1 (amended in 1.58)** — `MtlsEndpointAliases::$backchannel_authentication_endpoint`,
+  the seventh alias, and the four CIBA members on `OidcConfiguration`.
+
+### Changed
+
+- `SamlIdpInfo::$activeCredentialId` / `$nextCredentialId` and
+  `UpdateDirectoryConfig::$groupBaseDn` / `$groupFilter` are typed `string|JsonNull|null`.
+- The open-union `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` arms drop any member named
+  like a secret from `$raw`.
+
+### Not shipped
+
+- **`PS256` for the §33.2 signed request.** `firebase/php-jwt` signs it only through
+  phpseclib 3, which this SDK does not depend on; `CibaRequestSigner::fromPem()` refuses it
+  locally with a `ValidationError`.
+
 ## [1.0.0-beta17] - 2026-09-25
 
 ### Added
