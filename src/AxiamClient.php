@@ -680,7 +680,7 @@ final class AxiamClient
     }
 
     /**
-     * The CONTRACT.md §27 management surface: 147 operations across 24 namespaces.
+     * The CONTRACT.md §27 management surface: 190 operations across 28 namespaces.
      *
      * `$client->management()->users()->listItems()`. Built on the same Guzzle client that
      * carries {@see \Axiam\Sdk\Rest\AuthMiddleware} and
@@ -861,6 +861,42 @@ final class AxiamClient
     public function emailConfig(): \Axiam\Sdk\Management\EmailConfigApi
     {
         return $this->management()->emailConfig();
+    }
+
+    /**
+     * A tenant's LDAP / Active Directory identity source (CONTRACT §30): its configuration,
+     * account linking, and the sync job's status.
+     */
+    public function directory(): \Axiam\Sdk\Management\DirectoryApi
+    {
+        return $this->management()->directory();
+    }
+
+    /**
+     * A tenant's SAML 2.0 identity provider (CONTRACT §29): service providers, SP-metadata
+     * import, and the IdP signing-credential lifecycle.
+     */
+    public function saml(): \Axiam\Sdk\Management\SamlApi
+    {
+        return $this->management()->saml();
+    }
+
+    /**
+     * A tenant's Shared Signals Framework streams (CONTRACT §32): which receiver gets which
+     * CAEP and RISC security events.
+     */
+    public function ssf(): \Axiam\Sdk\Management\SsfApi
+    {
+        return $this->management()->ssf();
+    }
+
+    /**
+     * A tenant's outbound SCIM targets (CONTRACT §31): the downstream SCIM 2.0 service
+     * providers AXIAM pushes users and groups to.
+     */
+    public function scimTargets(): \Axiam\Sdk\Management\ScimTargetsApi
+    {
+        return $this->management()->scimTargets();
     }
 
     /**

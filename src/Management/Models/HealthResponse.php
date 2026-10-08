@@ -9,16 +9,24 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management\Models;
 
 /**
- * The `HealthResponse` schema from the server's OpenAPI document.
+ * Response body for `GET /health`. `profile` and `unavailable` are additive (G-8, D-59): a
+ * client that reads only `status` is unaffected.
  */
 final class HealthResponse implements \JsonSerializable
 {
     /**
      * Constructs a HealthResponse.
+     * @param string $profile The messaging profile this process runs: `full` (RabbitMQ is
+     *     used) or `minimal` (`AXIAM__AMQP__ENABLED=false`, no broker).
      * @param string $status the server's `status` field
+     * @param list<string>|null $unavailable Present only in the `minimal` profile: the
+     *     capabilities it does not provide — `reactors`, `amqp_authz`, `amqp_audit_ingestion` and
+     *     `decision_cache_broadcast`. Absent in `full`. (optional)
      */
     public function __construct(
+        public readonly string $profile,
         public readonly string $status,
+        public readonly ?array $unavailable = null,
     ) {
     }
 
@@ -29,7 +37,9 @@ final class HealthResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            (string) ModelDecode::need($data, 'profile', self::class),
             (string) ModelDecode::need($data, 'status', self::class),
+            isset($data['unavailable']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['unavailable'])) : null,
         );
     }
 
@@ -44,7 +54,11 @@ final class HealthResponse implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        $out['profile'] = $this->profile;
         $out['status'] = $this->status;
+        if ($this->unavailable !== null) {
+            $out['unavailable'] = $this->unavailable;
+        }
 
         return $out;
     }

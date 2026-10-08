@@ -12,7 +12,7 @@ use Axiam\Sdk\Management\Models;
 use Axiam\Sdk\Management\Page;
 
 /**
- * One case per CONTRACT.md §27 operation — all 162 of them.
+ * One case per CONTRACT.md §27 operation — all 190 of them.
  *
  * Each asserts three things about one operation: it issues the METHOD the registry names,
  * against the PATH the registry names, and — where the operation returns a body — that every
@@ -2397,6 +2397,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                         'example',
                     ],
                     'authn_request_params' => 'ignore',
+                    'backchannel_authentication_request_signing_alg' => 'PS256',
+                    'backchannel_client_notification_endpoint' => 'example',
+                    'backchannel_token_delivery_mode' => 'poll',
                     'browser_sso' => true,
                     'client_id' => 'example',
                     'created_at' => '2026-08-26T00:00:00Z',
@@ -2485,6 +2488,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'example',
             ],
             'authn_request_params' => 'ignore',
+            'backchannel_authentication_request_signing_alg' => 'PS256',
+            'backchannel_client_notification_endpoint' => 'example',
+            'backchannel_token_delivery_mode' => 'poll',
             'browser_sso' => true,
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
@@ -2535,6 +2541,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'example',
             ],
             'authn_request_params' => 'ignore',
+            'backchannel_authentication_request_signing_alg' => 'PS256',
+            'backchannel_client_notification_endpoint' => 'example',
+            'backchannel_token_delivery_mode' => 'poll',
             'browser_sso' => true,
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
@@ -3277,6 +3286,1015 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $this->assertDecodedEveryField($mounted, $result);
     }
 
+    /** `GET /api/v1/tenants/{tenant_id}/directory` — the `directory.get` operation. */
+    public function testDirectoryGetReachesItsRoute(): void
+    {
+        $mounted = [
+            'base_dn' => 'example',
+            'bind_dn' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'enabled' => true,
+            'group_base_dn' => 'example',
+            'group_filter' => 'example',
+            'group_mappings' => [
+                [
+                    'directory_group_dn' => 'example',
+                    'group_id' => '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+            'group_member_attribute' => 'example',
+            'group_nesting_depth' => 1,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'jit_provisioning' => true,
+            'kind' => 'open_ldap',
+            'start_tls' => true,
+            'sync_interval_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'trust_anchors_pem' => [
+                'example',
+            ],
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'url' => 'example',
+            'user_attribute_map' => [
+                'display_name' => 'example',
+                'email' => 'example',
+                'external_id' => 'example',
+                'username' => 'example',
+            ],
+            'user_filter' => 'example',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->directory()->get();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/directory', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `PUT /api/v1/tenants/{tenant_id}/directory` — the `directory.set` operation. */
+    public function testDirectorySetReachesItsRoute(): void
+    {
+        $mounted = [
+            'base_dn' => 'example',
+            'bind_dn' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'enabled' => true,
+            'group_base_dn' => 'example',
+            'group_filter' => 'example',
+            'group_mappings' => [
+                [
+                    'directory_group_dn' => 'example',
+                    'group_id' => '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+            'group_member_attribute' => 'example',
+            'group_nesting_depth' => 1,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'jit_provisioning' => true,
+            'kind' => 'open_ldap',
+            'start_tls' => true,
+            'sync_interval_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'trust_anchors_pem' => [
+                'example',
+            ],
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'url' => 'example',
+            'user_attribute_map' => [
+                'display_name' => 'example',
+                'email' => 'example',
+                'external_id' => 'example',
+                'username' => 'example',
+            ],
+            'user_filter' => 'example',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->directory()->set(new Models\SetDirectoryConfig('example', 'example', true, Models\DirectoryKind::OpenLdap, true, 'example', 'example'));
+
+        $request = $this->lastRequest();
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/directory', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `PATCH /api/v1/tenants/{tenant_id}/directory` — the `directory.update` operation. */
+    public function testDirectoryUpdateReachesItsRoute(): void
+    {
+        $mounted = [
+            'base_dn' => 'example',
+            'bind_dn' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'enabled' => true,
+            'group_base_dn' => 'example',
+            'group_filter' => 'example',
+            'group_mappings' => [
+                [
+                    'directory_group_dn' => 'example',
+                    'group_id' => '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+            'group_member_attribute' => 'example',
+            'group_nesting_depth' => 1,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'jit_provisioning' => true,
+            'kind' => 'open_ldap',
+            'start_tls' => true,
+            'sync_interval_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'trust_anchors_pem' => [
+                'example',
+            ],
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'url' => 'example',
+            'user_attribute_map' => [
+                'display_name' => 'example',
+                'email' => 'example',
+                'external_id' => 'example',
+                'username' => 'example',
+            ],
+            'user_filter' => 'example',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->directory()->update(new Models\UpdateDirectoryConfig());
+
+        $request = $this->lastRequest();
+        self::assertSame('PATCH', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/directory', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `DELETE /api/v1/tenants/{tenant_id}/directory` — the `directory.delete` operation. */
+    public function testDirectoryDeleteReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->directory()->delete();
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/directory', $request->getUri()->getPath());
+    }
+
+    /**
+     * `POST /api/v1/tenants/{tenant_id}/directory/links` — the `directory.link_account`
+     * operation.
+     */
+    public function testDirectoryLinkAccountReachesItsRoute(): void
+    {
+        $mounted = [
+            'certificates_revoked' => 1,
+            'directory_external_id' => 'example',
+            'user_id' => '11111111-1111-4111-8111-111111111111',
+            'was_already_linked' => true,
+            'webauthn_credentials_deleted' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->directory()->linkAccount(new Models\LinkDirectoryAccount('11111111-1111-4111-8111-111111111111'));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/directory/links', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `GET /api/v1/tenants/{tenant_id}/directory/sync-status` — the
+     * `directory.get_sync_status` operation.
+     */
+    public function testDirectoryGetSyncStatusReachesItsRoute(): void
+    {
+        $mounted = [
+            'full_required' => true,
+            'has_watermark' => true,
+            'last_attempt_at' => '2026-08-26T00:00:00Z',
+            'last_full_run_at' => '2026-08-26T00:00:00Z',
+            'last_result' => 'example',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->directory()->getSyncStatus();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/directory/sync-status', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `GET /api/v1/tenants/{tenant_id}/saml/idp` — the `saml.get_idp` operation. */
+    public function testSamlGetIdpReachesItsRoute(): void
+    {
+        $mounted = [
+            'active_credential_id' => '11111111-1111-4111-8111-111111111111',
+            'entity_id' => 'example',
+            'metadata_served' => true,
+            'metadata_url' => 'example',
+            'next_credential_id' => '11111111-1111-4111-8111-111111111111',
+            'saml_available' => true,
+            'saml_idp_enabled' => true,
+            'slo_url' => 'example',
+            'sso_url' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->getIdp();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/idp', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `GET /api/v1/tenants/{tenant_id}/saml/service-providers` — the
+     * `saml.list_service_providers` operation.
+     */
+    public function testSamlListServiceProvidersReachesItsRoute(): void
+    {
+        $mounted = [
+            'items' => [
+                [
+                    'acs_urls' => [
+                        [
+                            'binding' => 'http_post',
+                            'index' => 1,
+                            'is_default' => true,
+                            'url' => 'example',
+                        ],
+                    ],
+                    'allow_idp_initiated' => true,
+                    'allowed_groups' => [
+                        '11111111-1111-4111-8111-111111111111',
+                    ],
+                    'attribute_mappings' => [
+                        [
+                            'name_format' => 'example',
+                            'saml_name' => 'example',
+                            'source' => 'username',
+                        ],
+                    ],
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'display_name' => 'example',
+                    'enabled' => true,
+                    'encrypt_assertions' => true,
+                    'entity_id' => 'example',
+                    'id' => '11111111-1111-4111-8111-111111111111',
+                    'name_id_format' => 'persistent',
+                    'sign_responses' => true,
+                    'slo_binding' => 'http_post',
+                    'slo_url' => 'example',
+                    'sp_encryption_cert_pem' => 'example',
+                    'sp_signing_cert_pem' => 'example',
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                    'want_authn_requests_signed' => true,
+                ],
+            ],
+            'total' => 1,
+            'offset' => 0,
+            'limit' => 50,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->listServiceProviders();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/service-providers', $request->getUri()->getPath());
+        self::assertInstanceOf(Page::class, $result);
+        self::assertSame(1, $result->total);
+        self::assertCount(1, $result->items);
+        $this->assertDecodedEveryField($mounted['items'][0], $result->items[0]);
+    }
+
+    /**
+     * `POST /api/v1/tenants/{tenant_id}/saml/service-providers` — the
+     * `saml.create_service_provider` operation.
+     */
+    public function testSamlCreateServiceProviderReachesItsRoute(): void
+    {
+        $mounted = [
+            'acs_urls' => [
+                [
+                    'binding' => 'http_post',
+                    'index' => 1,
+                    'is_default' => true,
+                    'url' => 'example',
+                ],
+            ],
+            'allow_idp_initiated' => true,
+            'allowed_groups' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+            'attribute_mappings' => [
+                [
+                    'name_format' => 'example',
+                    'saml_name' => 'example',
+                    'source' => 'username',
+                ],
+            ],
+            'created_at' => '2026-08-26T00:00:00Z',
+            'display_name' => 'example',
+            'enabled' => true,
+            'encrypt_assertions' => true,
+            'entity_id' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name_id_format' => 'persistent',
+            'sign_responses' => true,
+            'slo_binding' => 'http_post',
+            'slo_url' => 'example',
+            'sp_encryption_cert_pem' => 'example',
+            'sp_signing_cert_pem' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'want_authn_requests_signed' => true,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->createServiceProvider(new Models\SamlServiceProviderInput([new Models\AcsEndpoint(Models\SamlBinding::HttpPost, 1, 'example')], 'example', 'example'));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/service-providers', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `GET /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}` — the
+     * `saml.get_service_provider` operation.
+     */
+    public function testSamlGetServiceProviderReachesItsRoute(): void
+    {
+        $mounted = [
+            'acs_urls' => [
+                [
+                    'binding' => 'http_post',
+                    'index' => 1,
+                    'is_default' => true,
+                    'url' => 'example',
+                ],
+            ],
+            'allow_idp_initiated' => true,
+            'allowed_groups' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+            'attribute_mappings' => [
+                [
+                    'name_format' => 'example',
+                    'saml_name' => 'example',
+                    'source' => 'username',
+                ],
+            ],
+            'created_at' => '2026-08-26T00:00:00Z',
+            'display_name' => 'example',
+            'enabled' => true,
+            'encrypt_assertions' => true,
+            'entity_id' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name_id_format' => 'persistent',
+            'sign_responses' => true,
+            'slo_binding' => 'http_post',
+            'slo_url' => 'example',
+            'sp_encryption_cert_pem' => 'example',
+            'sp_signing_cert_pem' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'want_authn_requests_signed' => true,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->getServiceProvider('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/service-providers/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `PUT /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}` — the
+     * `saml.update_service_provider` operation.
+     */
+    public function testSamlUpdateServiceProviderReachesItsRoute(): void
+    {
+        $mounted = [
+            'acs_urls' => [
+                [
+                    'binding' => 'http_post',
+                    'index' => 1,
+                    'is_default' => true,
+                    'url' => 'example',
+                ],
+            ],
+            'allow_idp_initiated' => true,
+            'allowed_groups' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+            'attribute_mappings' => [
+                [
+                    'name_format' => 'example',
+                    'saml_name' => 'example',
+                    'source' => 'username',
+                ],
+            ],
+            'created_at' => '2026-08-26T00:00:00Z',
+            'display_name' => 'example',
+            'enabled' => true,
+            'encrypt_assertions' => true,
+            'entity_id' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name_id_format' => 'persistent',
+            'sign_responses' => true,
+            'slo_binding' => 'http_post',
+            'slo_url' => 'example',
+            'sp_encryption_cert_pem' => 'example',
+            'sp_signing_cert_pem' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'want_authn_requests_signed' => true,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->updateServiceProvider('11111111-1111-4111-8111-111111111111', new Models\SamlServiceProviderInput([new Models\AcsEndpoint(Models\SamlBinding::HttpPost, 1, 'example')], 'example', 'example'));
+
+        $request = $this->lastRequest();
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/service-providers/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `DELETE /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}` — the
+     * `saml.delete_service_provider` operation.
+     */
+    public function testSamlDeleteServiceProviderReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->saml()->deleteServiceProvider('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/service-providers/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /**
+     * `POST /api/v1/tenants/{tenant_id}/saml/parse-sp-metadata` — the `saml.parse_sp_metadata`
+     * operation.
+     */
+    public function testSamlParseSpMetadataReachesItsRoute(): void
+    {
+        $mounted = [
+            'encryption_certificate_fingerprint' => 'example',
+            'service_provider' => [
+                'acs_urls' => [
+                    [
+                        'binding' => null,
+                        'index' => 1,
+                        'is_default' => true,
+                        'url' => 'example',
+                    ],
+                ],
+                'allow_idp_initiated' => true,
+                'allowed_groups' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
+                'attribute_mappings' => [
+                    [
+                        'name_format' => 'example',
+                        'saml_name' => 'example',
+                        'source' => null,
+                    ],
+                ],
+                'display_name' => 'example',
+                'enabled' => true,
+                'encrypt_assertions' => true,
+                'entity_id' => 'example',
+                'name_id_format' => 'persistent',
+                'sign_responses' => true,
+                'slo_binding' => 'http_post',
+                'slo_url' => 'example',
+                'sp_encryption_cert_pem' => 'example',
+                'sp_signing_cert_pem' => 'example',
+                'want_authn_requests_signed' => true,
+            ],
+            'signing_certificate_fingerprint' => 'example',
+            'warnings' => [
+                'example',
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->parseSpMetadata(new Models\ParseSamlSpMetadata());
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/parse-sp-metadata', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `GET /api/v1/tenants/{tenant_id}/saml/idp-credentials` — the `saml.list_idp_credentials`
+     * operation.
+     */
+    public function testSamlListIdpCredentialsReachesItsRoute(): void
+    {
+        $mounted = [
+            [
+                'certificate_pem' => 'example',
+                'created_at' => '2026-08-26T00:00:00Z',
+                'fingerprint' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+                'not_after' => '2026-08-26T00:00:00Z',
+                'not_before' => '2026-08-26T00:00:00Z',
+                'retired_at' => '2026-08-26T00:00:00Z',
+                'serial' => 'example',
+                'status' => 'active',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->listIdpCredentials();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/idp-credentials', $request->getUri()->getPath());
+        self::assertIsArray($result);
+        self::assertCount(1, $result);
+        $this->assertDecodedEveryField($mounted[0], $result[0]);
+    }
+
+    /**
+     * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials` — the
+     * `saml.issue_idp_credential` operation.
+     */
+    public function testSamlIssueIdpCredentialReachesItsRoute(): void
+    {
+        $mounted = [
+            'certificate_pem' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'fingerprint' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+            'not_after' => '2026-08-26T00:00:00Z',
+            'not_before' => '2026-08-26T00:00:00Z',
+            'retired_at' => '2026-08-26T00:00:00Z',
+            'serial' => 'example',
+            'status' => 'active',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->issueIdpCredential(new Models\IssueSamlIdpCredential('11111111-1111-4111-8111-111111111111', Models\SamlIdpSlot::Active));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/idp-credentials', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/promote` — the
+     * `saml.promote_idp_credential` operation.
+     */
+    public function testSamlPromoteIdpCredentialReachesItsRoute(): void
+    {
+        $mounted = [
+            'active' => [
+                'certificate_pem' => 'example',
+                'created_at' => '2026-08-26T00:00:00Z',
+                'fingerprint' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+                'not_after' => '2026-08-26T00:00:00Z',
+                'not_before' => '2026-08-26T00:00:00Z',
+                'retired_at' => '2026-08-26T00:00:00Z',
+                'serial' => 'example',
+                'status' => 'active',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            ],
+            'retired' => [
+                'certificate_pem' => 'example',
+                'created_at' => '2026-08-26T00:00:00Z',
+                'fingerprint' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+                'not_after' => '2026-08-26T00:00:00Z',
+                'not_before' => '2026-08-26T00:00:00Z',
+                'retired_at' => '2026-08-26T00:00:00Z',
+                'serial' => 'example',
+                'status' => 'active',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            ],
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->promoteIdpCredential('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/idp-credentials/11111111-1111-4111-8111-111111111111/promote', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/retire` — the
+     * `saml.retire_idp_credential` operation.
+     */
+    public function testSamlRetireIdpCredentialReachesItsRoute(): void
+    {
+        $mounted = [
+            'certificate_pem' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'fingerprint' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+            'not_after' => '2026-08-26T00:00:00Z',
+            'not_before' => '2026-08-26T00:00:00Z',
+            'retired_at' => '2026-08-26T00:00:00Z',
+            'serial' => 'example',
+            'status' => 'active',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->saml()->retireIdpCredential('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/saml/idp-credentials/11111111-1111-4111-8111-111111111111/retire', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `GET /api/v1/tenants/{tenant_id}/ssf/streams` — the `ssf.list_streams` operation. */
+    public function testSsfListStreamsReachesItsRoute(): void
+    {
+        $mounted = [
+            'items' => [
+                [
+                    'audience' => 'example',
+                    'authorization_header_set' => true,
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'delivery_method' => 'push',
+                    'description' => 'example',
+                    'endpoint_url' => 'example',
+                    'events_allowed' => [
+                        'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+                    ],
+                    'events_delivered' => [
+                        'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+                    ],
+                    'events_requested' => [
+                        'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+                    ],
+                    'id' => '11111111-1111-4111-8111-111111111111',
+                    'last_verification_at' => '2026-08-26T00:00:00Z',
+                    'receiver_client_id' => 'example',
+                    'status' => 'enabled',
+                    'status_actor' => 'admin',
+                    'status_reason' => 'example',
+                    'subject_format' => 'iss_sub',
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'transmitter_active' => true,
+                    'transmitter_inactive_reason' => 'example',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                ],
+            ],
+            'total' => 1,
+            'offset' => 0,
+            'limit' => 50,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->ssf()->listStreams();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/ssf/streams', $request->getUri()->getPath());
+        self::assertInstanceOf(Page::class, $result);
+        self::assertSame(1, $result->total);
+        self::assertCount(1, $result->items);
+        $this->assertDecodedEveryField($mounted['items'][0], $result->items[0]);
+    }
+
+    /** `POST /api/v1/tenants/{tenant_id}/ssf/streams` — the `ssf.create_stream` operation. */
+    public function testSsfCreateStreamReachesItsRoute(): void
+    {
+        $mounted = [
+            'audience' => 'example',
+            'authorization_header_set' => true,
+            'created_at' => '2026-08-26T00:00:00Z',
+            'delivery_method' => 'push',
+            'description' => 'example',
+            'endpoint_url' => 'example',
+            'events_allowed' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_delivered' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_requested' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'last_verification_at' => '2026-08-26T00:00:00Z',
+            'receiver_client_id' => 'example',
+            'status' => 'enabled',
+            'status_actor' => 'admin',
+            'status_reason' => 'example',
+            'subject_format' => 'iss_sub',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'transmitter_active' => true,
+            'transmitter_inactive_reason' => 'example',
+            'updated_at' => '2026-08-26T00:00:00Z',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->ssf()->createStream(new Models\SsfStreamInput('example', Models\SsfDeliveryMethod::Push, [Models\SsfEventType::SessionRevoked], 'example'));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/ssf/streams', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `GET /api/v1/tenants/{tenant_id}/ssf/streams/{stream_id}` — the `ssf.get_stream`
+     * operation.
+     */
+    public function testSsfGetStreamReachesItsRoute(): void
+    {
+        $mounted = [
+            'audience' => 'example',
+            'authorization_header_set' => true,
+            'created_at' => '2026-08-26T00:00:00Z',
+            'delivery_method' => 'push',
+            'description' => 'example',
+            'endpoint_url' => 'example',
+            'events_allowed' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_delivered' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_requested' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'last_verification_at' => '2026-08-26T00:00:00Z',
+            'receiver_client_id' => 'example',
+            'status' => 'enabled',
+            'status_actor' => 'admin',
+            'status_reason' => 'example',
+            'subject_format' => 'iss_sub',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'transmitter_active' => true,
+            'transmitter_inactive_reason' => 'example',
+            'updated_at' => '2026-08-26T00:00:00Z',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->ssf()->getStream('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/ssf/streams/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `PUT /api/v1/tenants/{tenant_id}/ssf/streams/{stream_id}` — the `ssf.update_stream`
+     * operation.
+     */
+    public function testSsfUpdateStreamReachesItsRoute(): void
+    {
+        $mounted = [
+            'audience' => 'example',
+            'authorization_header_set' => true,
+            'created_at' => '2026-08-26T00:00:00Z',
+            'delivery_method' => 'push',
+            'description' => 'example',
+            'endpoint_url' => 'example',
+            'events_allowed' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_delivered' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_requested' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'last_verification_at' => '2026-08-26T00:00:00Z',
+            'receiver_client_id' => 'example',
+            'status' => 'enabled',
+            'status_actor' => 'admin',
+            'status_reason' => 'example',
+            'subject_format' => 'iss_sub',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'transmitter_active' => true,
+            'transmitter_inactive_reason' => 'example',
+            'updated_at' => '2026-08-26T00:00:00Z',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->ssf()->updateStream('11111111-1111-4111-8111-111111111111', new Models\SsfStreamInput('example', Models\SsfDeliveryMethod::Push, [Models\SsfEventType::SessionRevoked], 'example'));
+
+        $request = $this->lastRequest();
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/ssf/streams/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /**
+     * `DELETE /api/v1/tenants/{tenant_id}/ssf/streams/{stream_id}` — the `ssf.delete_stream`
+     * operation.
+     */
+    public function testSsfDeleteStreamReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->ssf()->deleteStream('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/tenants/11111111-1111-4111-8111-111111111111/ssf/streams/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /** `GET /api/v1/scim-targets` — the `scim_targets.list` operation. */
+    public function testScimTargetsListReachesItsRoute(): void
+    {
+        $mounted = [
+            'items' => [
+                [
+                    'auth' => [
+                        'type' => 'bearer',
+                    ],
+                    'base_url' => 'example',
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'deprovision' => 'deactivate',
+                    'enabled' => true,
+                    'id' => '11111111-1111-4111-8111-111111111111',
+                    'name' => 'example',
+                    'push_groups' => true,
+                    'scope' => [
+                        'type' => 'all_users',
+                    ],
+                    'state' => [
+                        'consecutive_failures' => 1,
+                        'dead_lettered_total' => 1,
+                        'last_failure_at' => '2026-08-26T00:00:00Z',
+                        'last_failure_reason' => 'example',
+                        'last_reconciled_at' => '2026-08-26T00:00:00Z',
+                        'last_success_at' => '2026-08-26T00:00:00Z',
+                    ],
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                    'user_name_from' => 'username',
+                ],
+            ],
+            'total' => 1,
+            'offset' => 0,
+            'limit' => 50,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->scimTargets()->listItems();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/scim-targets', $request->getUri()->getPath());
+        self::assertInstanceOf(Page::class, $result);
+        self::assertSame(1, $result->total);
+        self::assertCount(1, $result->items);
+        $this->assertDecodedEveryField($mounted['items'][0], $result->items[0]);
+    }
+
+    /** `POST /api/v1/scim-targets` — the `scim_targets.create` operation. */
+    public function testScimTargetsCreateReachesItsRoute(): void
+    {
+        $mounted = [
+            'auth' => [
+                'type' => 'bearer',
+            ],
+            'base_url' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'deprovision' => 'deactivate',
+            'enabled' => true,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name' => 'example',
+            'push_groups' => true,
+            'scope' => [
+                'type' => 'all_users',
+            ],
+            'state' => [
+                'consecutive_failures' => 1,
+                'dead_lettered_total' => 1,
+                'last_failure_at' => '2026-08-26T00:00:00Z',
+                'last_failure_reason' => 'example',
+                'last_reconciled_at' => '2026-08-26T00:00:00Z',
+                'last_success_at' => '2026-08-26T00:00:00Z',
+            ],
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'user_name_from' => 'username',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->scimTargets()->create(new Models\ScimTargetInput(new Models\ScimTargetAuthBearer(), 'example', 'example', new Models\ScimTargetScopeAllUsers()));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/scim-targets', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `GET /api/v1/scim-targets/{id}` — the `scim_targets.get` operation. */
+    public function testScimTargetsGetReachesItsRoute(): void
+    {
+        $mounted = [
+            'auth' => [
+                'type' => 'bearer',
+            ],
+            'base_url' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'deprovision' => 'deactivate',
+            'enabled' => true,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name' => 'example',
+            'push_groups' => true,
+            'scope' => [
+                'type' => 'all_users',
+            ],
+            'state' => [
+                'consecutive_failures' => 1,
+                'dead_lettered_total' => 1,
+                'last_failure_at' => '2026-08-26T00:00:00Z',
+                'last_failure_reason' => 'example',
+                'last_reconciled_at' => '2026-08-26T00:00:00Z',
+                'last_success_at' => '2026-08-26T00:00:00Z',
+            ],
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'user_name_from' => 'username',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->scimTargets()->get('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/scim-targets/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `PUT /api/v1/scim-targets/{id}` — the `scim_targets.update` operation. */
+    public function testScimTargetsUpdateReachesItsRoute(): void
+    {
+        $mounted = [
+            'auth' => [
+                'type' => 'bearer',
+            ],
+            'base_url' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'deprovision' => 'deactivate',
+            'enabled' => true,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name' => 'example',
+            'push_groups' => true,
+            'scope' => [
+                'type' => 'all_users',
+            ],
+            'state' => [
+                'consecutive_failures' => 1,
+                'dead_lettered_total' => 1,
+                'last_failure_at' => '2026-08-26T00:00:00Z',
+                'last_failure_reason' => 'example',
+                'last_reconciled_at' => '2026-08-26T00:00:00Z',
+                'last_success_at' => '2026-08-26T00:00:00Z',
+            ],
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'user_name_from' => 'username',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->scimTargets()->update('11111111-1111-4111-8111-111111111111', new Models\ScimTargetInput(new Models\ScimTargetAuthBearer(), 'example', 'example', new Models\ScimTargetScopeAllUsers()));
+
+        $request = $this->lastRequest();
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('/api/v1/scim-targets/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `DELETE /api/v1/scim-targets/{id}` — the `scim_targets.delete` operation. */
+    public function testScimTargetsDeleteReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->scimTargets()->delete('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/scim-targets/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /** `POST /api/v1/scim-targets/{id}/reconcile` — the `scim_targets.reconcile` operation. */
+    public function testScimTargetsReconcileReachesItsRoute(): void
+    {
+        $mounted = [
+            'status' => 'example',
+            'target_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->scimTargets()->reconcile('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/scim-targets/11111111-1111-4111-8111-111111111111/reconcile', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
     /** `GET /api/v1/organizations/{org_id}/settings` — the `settings.get_org` operation. */
     public function testSettingsGetOrgReachesItsRoute(): void
     {
@@ -3336,7 +4354,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'external_client_allowed_resources' => [
                     'example',
                 ],
+                'saml_idp_enabled' => true,
                 'sensitive_scopes_enabled' => true,
+                'ssf_enabled' => true,
+                'ssf_inactive_reason' => 'example',
             ],
             'opaque' => [
                 'opaque_ksf' => 'example',
@@ -3434,7 +4455,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'external_client_allowed_resources' => [
                     'example',
                 ],
+                'saml_idp_enabled' => true,
                 'sensitive_scopes_enabled' => true,
+                'ssf_enabled' => true,
+                'ssf_inactive_reason' => 'example',
             ],
             'opaque' => [
                 'opaque_ksf' => 'example',
@@ -3532,7 +4556,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'external_client_allowed_resources' => [
                     'example',
                 ],
+                'saml_idp_enabled' => true,
                 'sensitive_scopes_enabled' => true,
+                'ssf_enabled' => true,
+                'ssf_inactive_reason' => 'example',
             ],
             'opaque' => [
                 'opaque_ksf' => 'example',
@@ -3630,7 +4657,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                 'external_client_allowed_resources' => [
                     'example',
                 ],
+                'saml_idp_enabled' => true,
                 'sensitive_scopes_enabled' => true,
+                'ssf_enabled' => true,
+                'ssf_inactive_reason' => 'example',
             ],
             'opaque' => [
                 'opaque_ksf' => 'example',
@@ -3728,10 +4758,12 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'saml_idp_enabled' => true,
             'sensitive_scopes_enabled' => true,
             'server_cert_allowed_names' => [
                 'example',
             ],
+            'ssf_enabled' => true,
             'webauthn_user_verification' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
@@ -3802,10 +4834,12 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'saml_idp_enabled' => true,
             'sensitive_scopes_enabled' => true,
             'server_cert_allowed_names' => [
                 'example',
             ],
+            'ssf_enabled' => true,
             'webauthn_user_verification' => 'example',
         ];
         $client = $this->signedInClient(200, $mounted);
@@ -4317,7 +5351,11 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testPlatformHealthReachesItsRoute(): void
     {
         $mounted = [
+            'profile' => 'example',
             'status' => 'example',
+            'unavailable' => [
+                'example',
+            ],
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->platform()->health();
@@ -4381,10 +5419,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * §27.9: all 162 registry operations are covered by a case above.
+     * §27.9: all 190 registry operations are covered by a case above.
      *
-     * Counted reflectively rather than written as a literal on both sides — `assertSame(162,
-     * 162)` is a tautology, and a case removed by a bad regeneration would still pass it.
+     * Counted reflectively rather than written as a literal on both sides — `assertSame(190,
+     * 190)` is a tautology, and a case removed by a bad regeneration would still pass it.
      */
     public function testEveryRegistryOperationHasACase(): void
     {
@@ -4394,6 +5432,6 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'ReachesItsRoute'),
         );
 
-        self::assertCount(162, $cases);
+        self::assertCount(190, $cases);
     }
 }

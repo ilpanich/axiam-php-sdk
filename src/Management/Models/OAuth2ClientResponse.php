@@ -51,6 +51,12 @@ final class OAuth2ClientResponse implements \JsonSerializable
      * @param ClientAuthMethod $tokenEndpointAuthMethod the server's
      *     `token_endpoint_auth_method` field
      * @param string $updatedAt the server's `updated_at` field
+     * @param CibaRequestSigningAlg|null $backchannelAuthenticationRequestSigningAlg the
+     *     server's `backchannel_authentication_request_signing_alg` field (optional)
+     * @param string|null $backchannelClientNotificationEndpoint G-7 — the ping-mode
+     *     notification endpoint. (optional)
+     * @param CibaDeliveryMode|null $backchannelTokenDeliveryMode the server's
+     *     `backchannel_token_delivery_mode` field (optional)
      * @param string|null $jwks X5.1 — echoed so an operator can confirm which key source is
      *     registered. The document itself is public key material, so returning it leaks nothing; a
      *     `jwks_uri` is likewise public by construction. (optional)
@@ -89,6 +95,9 @@ final class OAuth2ClientResponse implements \JsonSerializable
         public readonly bool $tlsClientCertificateBoundAccessTokens,
         public readonly ClientAuthMethod $tokenEndpointAuthMethod,
         public readonly string $updatedAt,
+        public readonly ?CibaRequestSigningAlg $backchannelAuthenticationRequestSigningAlg = null,
+        public readonly ?string $backchannelClientNotificationEndpoint = null,
+        public readonly ?CibaDeliveryMode $backchannelTokenDeliveryMode = null,
         public readonly ?string $jwks = null,
         public readonly ?string $jwksUri = null,
         public readonly ?string $lastAuthorizedAt = null,
@@ -125,6 +134,9 @@ final class OAuth2ClientResponse implements \JsonSerializable
             (bool) ModelDecode::need($data, 'tls_client_certificate_bound_access_tokens', self::class),
             ClientAuthMethod::fromWire((string) ModelDecode::need($data, 'token_endpoint_auth_method', self::class)),
             (string) ModelDecode::need($data, 'updated_at', self::class),
+            isset($data['backchannel_authentication_request_signing_alg']) ? CibaRequestSigningAlg::fromWire((string) $data['backchannel_authentication_request_signing_alg']) : null,
+            isset($data['backchannel_client_notification_endpoint']) ? (string) $data['backchannel_client_notification_endpoint'] : null,
+            isset($data['backchannel_token_delivery_mode']) ? CibaDeliveryMode::fromWire((string) $data['backchannel_token_delivery_mode']) : null,
             isset($data['jwks']) ? (string) $data['jwks'] : null,
             isset($data['jwks_uri']) ? (string) $data['jwks_uri'] : null,
             isset($data['last_authorized_at']) ? (string) $data['last_authorized_at'] : null,
@@ -165,6 +177,15 @@ final class OAuth2ClientResponse implements \JsonSerializable
         $out['tls_client_certificate_bound_access_tokens'] = $this->tlsClientCertificateBoundAccessTokens;
         $out['token_endpoint_auth_method'] = $this->tokenEndpointAuthMethod->value;
         $out['updated_at'] = $this->updatedAt;
+        if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
+            $out['backchannel_authentication_request_signing_alg'] = $this->backchannelAuthenticationRequestSigningAlg->value;
+        }
+        if ($this->backchannelClientNotificationEndpoint !== null) {
+            $out['backchannel_client_notification_endpoint'] = $this->backchannelClientNotificationEndpoint;
+        }
+        if ($this->backchannelTokenDeliveryMode !== null) {
+            $out['backchannel_token_delivery_mode'] = $this->backchannelTokenDeliveryMode->value;
+        }
         if ($this->jwks !== null) {
             $out['jwks'] = $this->jwks;
         }

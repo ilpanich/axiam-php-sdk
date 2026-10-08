@@ -7,7 +7,7 @@ namespace Axiam\Sdk\Management;
 use Axiam\Sdk\Core\AxiamException;
 
 /**
- * Base class for the 24 generated namespace handles (CONTRACT.md §27.2).
+ * Base class for the 28 generated namespace handles (CONTRACT.md §27.2).
  *
  * Holds the two things every handle needs and nothing else: the shared
  * {@see ManagementTransport} and the {@see NamespaceScope} its routes substitute.

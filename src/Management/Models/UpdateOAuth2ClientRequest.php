@@ -24,8 +24,16 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
      *     withdraws every target. (optional)
      * @param AuthnRequestParamsMode|null $authnRequestParams the server's
      *     `authn_request_params` field (optional)
+     * @param string|null $backchannelAuthenticationRequestSigningAlg G-7 — see the create DTO.
+     *     `""` clears. (optional)
+     * @param string|null $backchannelClientNotificationEndpoint G-7 — see the create DTO. `""`
+     *     clears. (optional)
      * @param string|null $backchannelLogoutUri Pass an empty string to clear a previously
      *     registered URI — the one edit an operator makes when an RP is decommissioned. (optional)
+     * @param string|null $backchannelTokenDeliveryMode G-7 — see the create DTO. `""` clears.
+     *     (optional)
+     * @param bool|null $backchannelUserCodeParameter G-7 — `true` refused, as on create.
+     *     (optional)
      * @param bool|null $browserSso X7.3 — see [`CreateOAuth2ClientRequest::browser_sso`].
      *     (optional)
      * @param bool|null $dpopBoundAccessTokens the server's `dpop_bound_access_tokens` field
@@ -58,7 +66,11 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
     public function __construct(
         public readonly ?array $allowedResources = null,
         public readonly ?AuthnRequestParamsMode $authnRequestParams = null,
+        public readonly ?string $backchannelAuthenticationRequestSigningAlg = null,
+        public readonly ?string $backchannelClientNotificationEndpoint = null,
         public readonly ?string $backchannelLogoutUri = null,
+        public readonly ?string $backchannelTokenDeliveryMode = null,
+        public readonly ?bool $backchannelUserCodeParameter = null,
         public readonly ?bool $browserSso = null,
         public readonly ?bool $dpopBoundAccessTokens = null,
         public readonly ?bool $dpopRequireNonce = null,
@@ -89,7 +101,11 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
         return new self(
             isset($data['allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_resources'])) : null,
             isset($data['authn_request_params']) ? AuthnRequestParamsMode::fromWire((string) $data['authn_request_params']) : null,
+            isset($data['backchannel_authentication_request_signing_alg']) ? (string) $data['backchannel_authentication_request_signing_alg'] : null,
+            isset($data['backchannel_client_notification_endpoint']) ? (string) $data['backchannel_client_notification_endpoint'] : null,
             isset($data['backchannel_logout_uri']) ? (string) $data['backchannel_logout_uri'] : null,
+            isset($data['backchannel_token_delivery_mode']) ? (string) $data['backchannel_token_delivery_mode'] : null,
+            isset($data['backchannel_user_code_parameter']) ? (bool) $data['backchannel_user_code_parameter'] : null,
             isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
             isset($data['dpop_bound_access_tokens']) ? (bool) $data['dpop_bound_access_tokens'] : null,
             isset($data['dpop_require_nonce']) ? (bool) $data['dpop_require_nonce'] : null,
@@ -128,8 +144,20 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
         if ($this->authnRequestParams !== null) {
             $out['authn_request_params'] = $this->authnRequestParams->value;
         }
+        if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
+            $out['backchannel_authentication_request_signing_alg'] = $this->backchannelAuthenticationRequestSigningAlg;
+        }
+        if ($this->backchannelClientNotificationEndpoint !== null) {
+            $out['backchannel_client_notification_endpoint'] = $this->backchannelClientNotificationEndpoint;
+        }
         if ($this->backchannelLogoutUri !== null) {
             $out['backchannel_logout_uri'] = $this->backchannelLogoutUri;
+        }
+        if ($this->backchannelTokenDeliveryMode !== null) {
+            $out['backchannel_token_delivery_mode'] = $this->backchannelTokenDeliveryMode;
+        }
+        if ($this->backchannelUserCodeParameter !== null) {
+            $out['backchannel_user_code_parameter'] = $this->backchannelUserCodeParameter;
         }
         if ($this->browserSso !== null) {
             $out['browser_sso'] = $this->browserSso;

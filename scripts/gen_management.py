@@ -58,7 +58,11 @@ declare(strict_types=1);
 # §27.4 rule 3: `{org_id}` always defaults from the client. `{tenant_id}`
 # defaults from the client only where it names the *context*; in `tenants` and
 # the signing-CA routes it names the object being acted on.
-IMPLICIT_TENANT_NAMESPACES = {"email_config", "settings", "webauthn_policy"}
+IMPLICIT_TENANT_NAMESPACES = {
+    "email_config", "settings", "webauthn_policy",
+    # CONTRACT §30 / §29 / §32: `{tenant_id}` is the context of every route here.
+    "directory", "saml", "ssf",
+}
 
 # Schema names that would collide with a type this SDK already exports. The models
 # live in their own PHP namespace (Axiam\Sdk\Management\Models), so a collision can
@@ -98,6 +102,14 @@ OMIT_WHEN_EMPTY = {"tenantScope"}
 # send the field is decoded exactly as before. A name list, like OMIT_WHEN_EMPTY,
 # because "absent means true" is a fact about this one field, not about every bool.
 DEFAULT_TRUE_WHEN_ABSENT = {"inherit"}
+
+# `type`-tagged unions that are OPEN: an unrecognised tag decodes to a `<Name>Unknown`
+# arm instead of throwing, and that arm refuses to serialize. CONTRACT.md §31.2: an
+# unknown `ScimTargetAuth`/`ScimTargetScope` `type` "MUST decode without failing and
+# MUST NOT be sent" -- a newer server adding an auth method must not break listing the
+# targets that use it, and the SDK must not write back a body it cannot represent.
+# A name list because every earlier union is closed by contract and tested as such.
+OPEN_UNIONS = {"ScimTargetAuth", "ScimTargetScope"}
 
 
 def emit_guard(name: str) -> str:
@@ -488,7 +500,14 @@ def nullable(decl: str) -> str:
 
 
 def enum_case(value: str) -> str:
-    """A PHP enum case name for a wire value (``pending_review`` -> ``PendingReview``)."""
+    """A PHP enum case name for a wire value (``pending_review`` -> ``PendingReview``).
+
+    A URI value (§32's ``SsfEventType``: ``https://schemas.openid.net/secevent/caep/
+    event-type/session-revoked``) is named from its last path segment
+    (``SessionRevoked``); the full URI stays the case's wire value.
+    """
+    if "/" in value:
+        value = value.rstrip("/").rsplit("/", 1)[-1]
     name = pascal(value)
     if not name or not name[0].isalpha():
         name = f"Value{name}"
@@ -856,6 +875,7 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
     """
     files: dict[str, str] = {}
     description = schema.get("description") or f"The `{name}` union from the server's OpenAPI document."
+    is_open = name in OPEN_UNIONS
 
     iface = [header(MODELS_NS)]
     iface.extend(docblock(
@@ -877,7 +897,10 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
     dispatch = [header(MODELS_NS)]
     dispatch.extend(docblock(
         escape(description) + f"\n\nThe decoder for the `{tag}`-tagged union. Every arm is a "
-        f"{name}Variant; this class exists only to pick the right one.",
+        f"{name}Variant; this class exists only to pick the right one."
+        + (f"\n\nAn **open** union: a `{tag}` this SDK does not know decodes to {{@see "
+           f"{name}Unknown}} instead of failing, and that arm refuses to be sent."
+           if is_open else ""),
     ))
     dispatch.append(f"final class {name}")
     dispatch.append("{")
@@ -886,8 +909,9 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
         "    ",
         [
             "@param array<string,mixed> $data The raw wire object.",
+        ] + ([] if is_open else [
             f"@throws \\Axiam\\Sdk\\Core\\AxiamException when `{tag}` is missing or unknown.",
-        ],
+        ]),
     ))
     dispatch.append(f"    public static function fromArray(array $data): {name}Variant")
     dispatch.append("    {")
@@ -897,9 +921,12 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
     for value, payload in arms:
         arm = f"{name}{pascal(value)}"
         dispatch.append(f"            '{value}' => {arm}::fromArray($data),")
-    dispatch.append("            default => throw new \\Axiam\\Sdk\\Core\\AxiamException(")
-    dispatch.append(f"                sprintf('unknown {name} {tag} \"%s\"', is_string($tag) ? $tag : gettype($tag)),")
-    dispatch.append("            ),")
+    if is_open:
+        dispatch.append(f"            default => {name}Unknown::fromArray($data),")
+    else:
+        dispatch.append("            default => throw new \\Axiam\\Sdk\\Core\\AxiamException(")
+        dispatch.append(f"                sprintf('unknown {name} {tag} \"%s\"', is_string($tag) ? $tag : gettype($tag)),")
+        dispatch.append("            ),")
     dispatch.append("        };")
     dispatch.append("    }")
     dispatch.append("}")
@@ -1001,7 +1028,78 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
         body.append("}")
         files[f"{MODELS_DIR}/{arm}.php"] = "\n".join(body) + "\n"
 
+    if is_open:
+        files[f"{MODELS_DIR}/{name}Unknown.php"] = emit_unknown_arm(name, tag)
+
     return files
+
+
+def emit_unknown_arm(name: str, tag: str) -> str:
+    """The `<Name>Unknown` arm of an open union (see ``OPEN_UNIONS``).
+
+    It keeps the tag and the raw object so a caller can inspect what the server sent,
+    and both render paths throw: a body carrying it cannot be sent (CONTRACT.md §31.2).
+    """
+    arm = f"{name}Unknown"
+    exc = "\\Axiam\\Sdk\\Core\\AxiamException"
+    body = [header(MODELS_NS)]
+    body.extend(docblock(
+        f"A {{@see {name}}} whose `{tag}` this SDK's copy of the spec does not list.\n\n"
+        "Decoding one never fails, so a record using a newer variant still lists and reads. "
+        "It can never be sent: {@see self::toArray()} and {@see self::jsonSerialize()} throw, "
+        "because re-sending a body this SDK cannot represent would silently rewrite it.",
+    ))
+    body.append(f"final class {arm} implements {name}Variant")
+    body.append("{")
+    body.extend(docblock(
+        f"Constructs the unknown arm from what the server sent.",
+        "    ",
+        [
+            f"@param string|null $tag The unrecognised `{tag}` value, or null when absent or not a string.",
+            "@param array<string,mixed> $raw The raw wire object, unmodified.",
+        ],
+    ))
+    body.append("    public function __construct(")
+    body.append("        public readonly ?string $tag,")
+    body.append("        public readonly array $raw,")
+    body.append("    ) {")
+    body.append("    }")
+    body.append("")
+    body.extend(docblock(
+        "Keeps one decoded JSON object as-is. Never throws.",
+        "    ",
+        ["@param array<string,mixed> $data The raw wire object."],
+    ))
+    body.append("    public static function fromArray(array $data): self")
+    body.append("    {")
+    body.append(f"        $tag = $data['{tag}'] ?? null;")
+    body.append("")
+    body.append("        return new self(\\is_string($tag) ? $tag : null, $data);")
+    body.append("    }")
+    body.append("")
+    body.extend(docblock(
+        "Refuses to render: an unknown variant MUST NOT be sent (CONTRACT.md §31.2).",
+        "    ",
+        ["@return array<string,mixed>", f"@throws {exc} always."],
+    ))
+    body.append("    public function toArray(): array")
+    body.append("    {")
+    body.append(f"        throw new {exc}(")
+    body.append(f"            sprintf('refusing to send an unknown {name} {tag} \"%s\"', $this->tag ?? ''),")
+    body.append("        );")
+    body.append("    }")
+    body.append("")
+    body.extend(docblock(
+        "Refuses to render for `json_encode()`, for the same reason as {@see self::toArray()}.",
+        "    ",
+        ["@return array<string,mixed>", f"@throws {exc} always."],
+    ))
+    body.append("    public function jsonSerialize(): array")
+    body.append("    {")
+    body.append("        return $this->toArray();")
+    body.append("    }")
+    body.append("}")
+    return "\n".join(body) + "\n"
 
 
 def emit_external_union(name: str, schema: Any, arms: list[tuple[str, Any]]) -> dict[str, str]:
@@ -1971,6 +2069,25 @@ def emit_roundtrip_test() -> str:
                 block.append("            array_values(array_diff(array_keys($wire), array_keys($model->toArray()))),")
                 block.append(f"            '{arm} decoded a field it cannot render again',")
                 block.append("        );")
+                block.append("    }")
+                cases.append("\n".join(block))
+            if name in OPEN_UNIONS:
+                # §31.2: an unknown tag decodes (no throw) and then refuses to be sent.
+                arm = f"{name}Unknown"
+                count += 1
+                block = inline_doc(
+                    f"`{arm}`: an unrecognised `{tag}` decodes, and refuses to render.", "    ")
+                block.append(f"    public function test{arm}RoundTrips(): void")
+                block.append("    {")
+                block.append(f"        $wire = ['{tag}' => 'from_a_newer_server', 'extra' => 1];")
+                block.append("")
+                block.append(f"        $model = Models\\{name}::fromArray($wire);")
+                block.append("")
+                block.append(f"        self::assertInstanceOf(Models\\{arm}::class, $model);")
+                block.append("        self::assertSame('from_a_newer_server', $model->tag);")
+                block.append("        self::assertSame($wire, $model->raw);")
+                block.append("        $this->expectException(\\Axiam\\Sdk\\Core\\AxiamException::class);")
+                block.append("        json_encode($model, JSON_THROW_ON_ERROR);")
                 block.append("    }")
                 cases.append("\n".join(block))
             continue

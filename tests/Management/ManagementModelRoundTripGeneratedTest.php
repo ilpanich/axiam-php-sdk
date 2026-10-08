@@ -24,6 +24,26 @@ use PHPUnit\Framework\TestCase;
  */
 final class ManagementModelRoundTripGeneratedTest extends TestCase
 {
+    /** `AcsEndpoint`: a full wire object survives decode and re-render. */
+    public function testAcsEndpointRoundTrips(): void
+    {
+        $wire = [
+            'binding' => 'http_post',
+            'index' => 1,
+            'is_default' => true,
+            'url' => 'example',
+        ];
+
+        $model = Models\AcsEndpoint::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'AcsEndpoint decoded a field it cannot render again',
+        );
+    }
+
     /** `ActorType`: every case survives wire -> enum -> wire. */
     public function testActorTypeRoundTrips(): void
     {
@@ -155,6 +175,37 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('none', Models\AttestationMode::fromWire('none')->value);
         self::assertSame('indirect', Models\AttestationMode::fromWire('indirect')->value);
         self::assertSame('direct_required', Models\AttestationMode::fromWire('direct_required')->value);
+    }
+
+    /** `AttributeMapping`: a full wire object survives decode and re-render. */
+    public function testAttributeMappingRoundTrips(): void
+    {
+        $wire = [
+            'name_format' => 'example',
+            'saml_name' => 'example',
+            'source' => 'username',
+        ];
+
+        $model = Models\AttributeMapping::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'AttributeMapping decoded a field it cannot render again',
+        );
+    }
+
+    /** `AttributeSource`: every case survives wire -> enum -> wire. */
+    public function testAttributeSourceRoundTrips(): void
+    {
+        self::assertSame('username', Models\AttributeSource::fromWire('username')->value);
+        self::assertSame('email', Models\AttributeSource::fromWire('email')->value);
+        self::assertSame('display_name', Models\AttributeSource::fromWire('display_name')->value);
+        self::assertSame('given_name', Models\AttributeSource::fromWire('given_name')->value);
+        self::assertSame('family_name', Models\AttributeSource::fromWire('family_name')->value);
+        self::assertSame('groups', Models\AttributeSource::fromWire('groups')->value);
+        self::assertSame('roles', Models\AttributeSource::fromWire('roles')->value);
     }
 
     /** `AuditLogEntry`: a full wire object survives decode and re-render. */
@@ -323,6 +374,21 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('L2Plus', Models\CertificationLevel::fromWire('L2Plus')->value);
         self::assertSame('L3', Models\CertificationLevel::fromWire('L3')->value);
         self::assertSame('L3Plus', Models\CertificationLevel::fromWire('L3Plus')->value);
+    }
+
+    /** `CibaDeliveryMode`: every case survives wire -> enum -> wire. */
+    public function testCibaDeliveryModeRoundTrips(): void
+    {
+        self::assertSame('poll', Models\CibaDeliveryMode::fromWire('poll')->value);
+        self::assertSame('ping', Models\CibaDeliveryMode::fromWire('ping')->value);
+    }
+
+    /** `CibaRequestSigningAlg`: every case survives wire -> enum -> wire. */
+    public function testCibaRequestSigningAlgRoundTrips(): void
+    {
+        self::assertSame('PS256', Models\CibaRequestSigningAlg::fromWire('PS256')->value);
+        self::assertSame('ES256', Models\CibaRequestSigningAlg::fromWire('ES256')->value);
+        self::assertSame('EdDSA', Models\CibaRequestSigningAlg::fromWire('EdDSA')->value);
     }
 
     /** `CimdPolicy`: a full wire object survives decode and re-render. */
@@ -587,7 +653,11 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'example',
             ],
             'authn_request_params' => 'ignore',
+            'backchannel_authentication_request_signing_alg' => 'example',
+            'backchannel_client_notification_endpoint' => 'example',
             'backchannel_logout_uri' => 'example',
+            'backchannel_token_delivery_mode' => 'example',
+            'backchannel_user_code_parameter' => true,
             'browser_sso' => true,
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
@@ -924,6 +994,110 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             [],
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'CreateWebhookRequest decoded a field it cannot render again',
+        );
+    }
+
+    /** `DeprovisionPolicy`: every case survives wire -> enum -> wire. */
+    public function testDeprovisionPolicyRoundTrips(): void
+    {
+        self::assertSame('deactivate', Models\DeprovisionPolicy::fromWire('deactivate')->value);
+        self::assertSame('delete', Models\DeprovisionPolicy::fromWire('delete')->value);
+    }
+
+    /** `DirectoryConfig`: a full wire object survives decode and re-render. */
+    public function testDirectoryConfigRoundTrips(): void
+    {
+        $wire = [
+            'base_dn' => 'example',
+            'bind_dn' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'enabled' => true,
+            'group_base_dn' => 'example',
+            'group_filter' => 'example',
+            'group_mappings' => [
+                [
+                    'directory_group_dn' => 'example',
+                    'group_id' => '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+            'group_member_attribute' => 'example',
+            'group_nesting_depth' => 1,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'jit_provisioning' => true,
+            'kind' => 'open_ldap',
+            'start_tls' => true,
+            'sync_interval_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'trust_anchors_pem' => [
+                'example',
+            ],
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'url' => 'example',
+            'user_attribute_map' => [
+                'display_name' => 'example',
+                'email' => 'example',
+                'external_id' => 'example',
+                'username' => 'example',
+            ],
+            'user_filter' => 'example',
+        ];
+
+        $model = Models\DirectoryConfig::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'DirectoryConfig decoded a field it cannot render again',
+        );
+    }
+
+    /** `DirectoryKind`: every case survives wire -> enum -> wire. */
+    public function testDirectoryKindRoundTrips(): void
+    {
+        self::assertSame('open_ldap', Models\DirectoryKind::fromWire('open_ldap')->value);
+        self::assertSame('active_directory', Models\DirectoryKind::fromWire('active_directory')->value);
+    }
+
+    /** `DirectoryLinkResult`: a full wire object survives decode and re-render. */
+    public function testDirectoryLinkResultRoundTrips(): void
+    {
+        $wire = [
+            'certificates_revoked' => 1,
+            'directory_external_id' => 'example',
+            'user_id' => '11111111-1111-4111-8111-111111111111',
+            'was_already_linked' => true,
+            'webauthn_credentials_deleted' => 1,
+        ];
+
+        $model = Models\DirectoryLinkResult::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'DirectoryLinkResult decoded a field it cannot render again',
+        );
+    }
+
+    /** `DirectorySyncStatus`: a full wire object survives decode and re-render. */
+    public function testDirectorySyncStatusRoundTrips(): void
+    {
+        $wire = [
+            'full_required' => true,
+            'has_watermark' => true,
+            'last_attempt_at' => '2026-08-26T00:00:00Z',
+            'last_full_run_at' => '2026-08-26T00:00:00Z',
+            'last_result' => 'example',
+        ];
+
+        $model = Models\DirectorySyncStatus::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'DirectorySyncStatus decoded a field it cannot render again',
         );
     }
 
@@ -1322,11 +1496,33 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `GroupMapping`: a full wire object survives decode and re-render. */
+    public function testGroupMappingRoundTrips(): void
+    {
+        $wire = [
+            'directory_group_dn' => 'example',
+            'group_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+
+        $model = Models\GroupMapping::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'GroupMapping decoded a field it cannot render again',
+        );
+    }
+
     /** `HealthResponse`: a full wire object survives decode and re-render. */
     public function testHealthResponseRoundTrips(): void
     {
         $wire = [
+            'profile' => 'example',
             'status' => 'example',
+            'unavailable' => [
+                'example',
+            ],
         ];
 
         $model = Models\HealthResponse::fromArray($wire);
@@ -1357,11 +1553,47 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `IssueSamlIdpCredential`: a full wire object survives decode and re-render. */
+    public function testIssueSamlIdpCredentialRoundTrips(): void
+    {
+        $wire = [
+            'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+            'slot' => 'active',
+            'validity_days' => 1,
+        ];
+
+        $model = Models\IssueSamlIdpCredential::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'IssueSamlIdpCredential decoded a field it cannot render again',
+        );
+    }
+
     /** `KeyAlgorithm`: every case survives wire -> enum -> wire. */
     public function testKeyAlgorithmRoundTrips(): void
     {
         self::assertSame('Rsa4096', Models\KeyAlgorithm::fromWire('Rsa4096')->value);
         self::assertSame('Ed25519', Models\KeyAlgorithm::fromWire('Ed25519')->value);
+    }
+
+    /** `LinkDirectoryAccount`: a full wire object survives decode and re-render. */
+    public function testLinkDirectoryAccountRoundTrips(): void
+    {
+        $wire = [
+            'user_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+
+        $model = Models\LinkDirectoryAccount::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'LinkDirectoryAccount decoded a field it cannot render again',
+        );
     }
 
     /** `LockoutPolicy`: a full wire object survives decode and re-render. */
@@ -1576,6 +1808,13 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `NameIdFormat`: every case survives wire -> enum -> wire. */
+    public function testNameIdFormatRoundTrips(): void
+    {
+        self::assertSame('persistent', Models\NameIdFormat::fromWire('persistent')->value);
+        self::assertSame('email_address', Models\NameIdFormat::fromWire('email_address')->value);
+    }
+
     /** `NotificationEventType`: every case survives wire -> enum -> wire. */
     public function testNotificationEventTypeRoundTrips(): void
     {
@@ -1596,6 +1835,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('user_updated', Models\NotificationEventType::fromWire('user_updated')->value);
         self::assertSame('service_account_created', Models\NotificationEventType::fromWire('service_account_created')->value);
         self::assertSame('service_account_deleted', Models\NotificationEventType::fromWire('service_account_deleted')->value);
+        self::assertSame('scim_delivery_failed', Models\NotificationEventType::fromWire('scim_delivery_failed')->value);
     }
 
     /** `NotificationPolicy`: a full wire object survives decode and re-render. */
@@ -1684,6 +1924,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'example',
             ],
             'authn_request_params' => 'ignore',
+            'backchannel_authentication_request_signing_alg' => 'PS256',
+            'backchannel_client_notification_endpoint' => 'example',
+            'backchannel_token_delivery_mode' => 'poll',
             'browser_sso' => true,
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
@@ -1837,7 +2080,10 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'external_client_allowed_resources' => [
                 'example',
             ],
+            'saml_idp_enabled' => true,
             'sensitive_scopes_enabled' => true,
+            'ssf_enabled' => true,
+            'ssf_inactive_reason' => 'example',
         ];
 
         $model = Models\OidcPolicy::fromArray($wire);
@@ -1906,6 +2152,24 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             [],
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'Organization decoded a field it cannot render again',
+        );
+    }
+
+    /** `ParseSamlSpMetadata`: a full wire object survives decode and re-render. */
+    public function testParseSamlSpMetadataRoundTrips(): void
+    {
+        $wire = [
+            'metadata_url' => 'example',
+            'metadata_xml' => 'example',
+        ];
+
+        $model = Models\ParseSamlSpMetadata::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ParseSamlSpMetadata decoded a field it cannot render again',
         );
     }
 
@@ -2497,6 +2761,486 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `SamlBinding`: every case survives wire -> enum -> wire. */
+    public function testSamlBindingRoundTrips(): void
+    {
+        self::assertSame('http_post', Models\SamlBinding::fromWire('http_post')->value);
+        self::assertSame('http_redirect', Models\SamlBinding::fromWire('http_redirect')->value);
+    }
+
+    /** `SamlIdpCredential`: a full wire object survives decode and re-render. */
+    public function testSamlIdpCredentialRoundTrips(): void
+    {
+        $wire = [
+            'certificate_pem' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'fingerprint' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+            'not_after' => '2026-08-26T00:00:00Z',
+            'not_before' => '2026-08-26T00:00:00Z',
+            'retired_at' => '2026-08-26T00:00:00Z',
+            'serial' => 'example',
+            'status' => 'active',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+
+        $model = Models\SamlIdpCredential::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SamlIdpCredential decoded a field it cannot render again',
+        );
+    }
+
+    /** `SamlIdpCredentialPromotion`: a full wire object survives decode and re-render. */
+    public function testSamlIdpCredentialPromotionRoundTrips(): void
+    {
+        $wire = [
+            'active' => [
+                'certificate_pem' => 'example',
+                'created_at' => '2026-08-26T00:00:00Z',
+                'fingerprint' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+                'not_after' => '2026-08-26T00:00:00Z',
+                'not_before' => '2026-08-26T00:00:00Z',
+                'retired_at' => '2026-08-26T00:00:00Z',
+                'serial' => 'example',
+                'status' => 'active',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            ],
+            'retired' => [
+                'certificate_pem' => 'example',
+                'created_at' => '2026-08-26T00:00:00Z',
+                'fingerprint' => 'example',
+                'id' => '11111111-1111-4111-8111-111111111111',
+                'issuer_ca_id' => '11111111-1111-4111-8111-111111111111',
+                'not_after' => '2026-08-26T00:00:00Z',
+                'not_before' => '2026-08-26T00:00:00Z',
+                'retired_at' => '2026-08-26T00:00:00Z',
+                'serial' => 'example',
+                'status' => 'active',
+                'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            ],
+        ];
+
+        $model = Models\SamlIdpCredentialPromotion::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SamlIdpCredentialPromotion decoded a field it cannot render again',
+        );
+    }
+
+    /** `SamlIdpCredentialStatus`: every case survives wire -> enum -> wire. */
+    public function testSamlIdpCredentialStatusRoundTrips(): void
+    {
+        self::assertSame('active', Models\SamlIdpCredentialStatus::fromWire('active')->value);
+        self::assertSame('next', Models\SamlIdpCredentialStatus::fromWire('next')->value);
+        self::assertSame('retired', Models\SamlIdpCredentialStatus::fromWire('retired')->value);
+    }
+
+    /** `SamlIdpInfo`: a full wire object survives decode and re-render. */
+    public function testSamlIdpInfoRoundTrips(): void
+    {
+        $wire = [
+            'active_credential_id' => '11111111-1111-4111-8111-111111111111',
+            'entity_id' => 'example',
+            'metadata_served' => true,
+            'metadata_url' => 'example',
+            'next_credential_id' => '11111111-1111-4111-8111-111111111111',
+            'saml_available' => true,
+            'saml_idp_enabled' => true,
+            'slo_url' => 'example',
+            'sso_url' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+
+        $model = Models\SamlIdpInfo::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SamlIdpInfo decoded a field it cannot render again',
+        );
+    }
+
+    /** `SamlIdpSlot`: every case survives wire -> enum -> wire. */
+    public function testSamlIdpSlotRoundTrips(): void
+    {
+        self::assertSame('active', Models\SamlIdpSlot::fromWire('active')->value);
+        self::assertSame('next', Models\SamlIdpSlot::fromWire('next')->value);
+    }
+
+    /** `SamlServiceProvider`: a full wire object survives decode and re-render. */
+    public function testSamlServiceProviderRoundTrips(): void
+    {
+        $wire = [
+            'acs_urls' => [
+                [
+                    'binding' => 'http_post',
+                    'index' => 1,
+                    'is_default' => true,
+                    'url' => 'example',
+                ],
+            ],
+            'allow_idp_initiated' => true,
+            'allowed_groups' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+            'attribute_mappings' => [
+                [
+                    'name_format' => 'example',
+                    'saml_name' => 'example',
+                    'source' => 'username',
+                ],
+            ],
+            'created_at' => '2026-08-26T00:00:00Z',
+            'display_name' => 'example',
+            'enabled' => true,
+            'encrypt_assertions' => true,
+            'entity_id' => 'example',
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name_id_format' => 'persistent',
+            'sign_responses' => true,
+            'slo_binding' => 'http_post',
+            'slo_url' => 'example',
+            'sp_encryption_cert_pem' => 'example',
+            'sp_signing_cert_pem' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'want_authn_requests_signed' => true,
+        ];
+
+        $model = Models\SamlServiceProvider::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SamlServiceProvider decoded a field it cannot render again',
+        );
+    }
+
+    /** `SamlServiceProviderInput`: a full wire object survives decode and re-render. */
+    public function testSamlServiceProviderInputRoundTrips(): void
+    {
+        $wire = [
+            'acs_urls' => [
+                [
+                    'binding' => 'http_post',
+                    'index' => 1,
+                    'is_default' => true,
+                    'url' => 'example',
+                ],
+            ],
+            'allow_idp_initiated' => true,
+            'allowed_groups' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+            'attribute_mappings' => [
+                [
+                    'name_format' => 'example',
+                    'saml_name' => 'example',
+                    'source' => 'username',
+                ],
+            ],
+            'display_name' => 'example',
+            'enabled' => true,
+            'encrypt_assertions' => true,
+            'entity_id' => 'example',
+            'name_id_format' => 'persistent',
+            'sign_responses' => true,
+            'slo_binding' => 'http_post',
+            'slo_url' => 'example',
+            'sp_encryption_cert_pem' => 'example',
+            'sp_signing_cert_pem' => 'example',
+            'want_authn_requests_signed' => true,
+        ];
+
+        $model = Models\SamlServiceProviderInput::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SamlServiceProviderInput decoded a field it cannot render again',
+        );
+    }
+
+    /** `SamlSpMetadataDraft`: a full wire object survives decode and re-render. */
+    public function testSamlSpMetadataDraftRoundTrips(): void
+    {
+        $wire = [
+            'encryption_certificate_fingerprint' => 'example',
+            'service_provider' => [
+                'acs_urls' => [
+                    [
+                        'binding' => null,
+                        'index' => 1,
+                        'is_default' => true,
+                        'url' => 'example',
+                    ],
+                ],
+                'allow_idp_initiated' => true,
+                'allowed_groups' => [
+                    '11111111-1111-4111-8111-111111111111',
+                ],
+                'attribute_mappings' => [
+                    [
+                        'name_format' => 'example',
+                        'saml_name' => 'example',
+                        'source' => null,
+                    ],
+                ],
+                'display_name' => 'example',
+                'enabled' => true,
+                'encrypt_assertions' => true,
+                'entity_id' => 'example',
+                'name_id_format' => 'persistent',
+                'sign_responses' => true,
+                'slo_binding' => 'http_post',
+                'slo_url' => 'example',
+                'sp_encryption_cert_pem' => 'example',
+                'sp_signing_cert_pem' => 'example',
+                'want_authn_requests_signed' => true,
+            ],
+            'signing_certificate_fingerprint' => 'example',
+            'warnings' => [
+                'example',
+            ],
+        ];
+
+        $model = Models\SamlSpMetadataDraft::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SamlSpMetadataDraft decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimReconcileAccepted`: a full wire object survives decode and re-render. */
+    public function testScimReconcileAcceptedRoundTrips(): void
+    {
+        $wire = [
+            'status' => 'example',
+            'target_id' => '11111111-1111-4111-8111-111111111111',
+        ];
+
+        $model = Models\ScimReconcileAccepted::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ScimReconcileAccepted decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimTargetAuthBearer`: the `bearer` arm decodes and re-renders. */
+    public function testScimTargetAuthBearerRoundTrips(): void
+    {
+        $wire = [
+            'type' => 'bearer',
+        ];
+
+        $model = Models\ScimTargetAuth::fromArray($wire);
+
+        self::assertInstanceOf(Models\ScimTargetAuthBearer::class, $model);
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($model->toArray()))),
+            'ScimTargetAuthBearer decoded a field it cannot render again',
+        );
+    }
+
+    /**
+     * `ScimTargetAuthOauth2ClientCredentials`: the `oauth2_client_credentials` arm decodes and
+     * re-renders.
+     */
+    public function testScimTargetAuthOauth2ClientCredentialsRoundTrips(): void
+    {
+        $wire = [
+            'type' => 'oauth2_client_credentials',
+            'client_id' => 'example',
+            'scope' => 'example',
+            'token_url' => 'example',
+        ];
+
+        $model = Models\ScimTargetAuth::fromArray($wire);
+
+        self::assertInstanceOf(Models\ScimTargetAuthOauth2ClientCredentials::class, $model);
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($model->toArray()))),
+            'ScimTargetAuthOauth2ClientCredentials decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimTargetAuthUnknown`: an unrecognised `type` decodes, and refuses to render. */
+    public function testScimTargetAuthUnknownRoundTrips(): void
+    {
+        $wire = ['type' => 'from_a_newer_server', 'extra' => 1];
+
+        $model = Models\ScimTargetAuth::fromArray($wire);
+
+        self::assertInstanceOf(Models\ScimTargetAuthUnknown::class, $model);
+        self::assertSame('from_a_newer_server', $model->tag);
+        self::assertSame($wire, $model->raw);
+        $this->expectException(\Axiam\Sdk\Core\AxiamException::class);
+        json_encode($model, JSON_THROW_ON_ERROR);
+    }
+
+    /** `ScimTargetDeliveryState`: a full wire object survives decode and re-render. */
+    public function testScimTargetDeliveryStateRoundTrips(): void
+    {
+        $wire = [
+            'consecutive_failures' => 1,
+            'dead_lettered_total' => 1,
+            'last_failure_at' => '2026-08-26T00:00:00Z',
+            'last_failure_reason' => 'example',
+            'last_reconciled_at' => '2026-08-26T00:00:00Z',
+            'last_success_at' => '2026-08-26T00:00:00Z',
+        ];
+
+        $model = Models\ScimTargetDeliveryState::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ScimTargetDeliveryState decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimTargetInput`: a full wire object survives decode and re-render. */
+    public function testScimTargetInputRoundTrips(): void
+    {
+        $wire = [
+            'auth' => [
+                'type' => 'bearer',
+            ],
+            'base_url' => 'example',
+            'credential' => 'example',
+            'deprovision' => 'deactivate',
+            'enabled' => true,
+            'name' => 'example',
+            'push_groups' => true,
+            'scope' => [
+                'type' => 'all_users',
+            ],
+            'user_name_from' => 'username',
+        ];
+
+        $model = Models\ScimTargetInput::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ScimTargetInput decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimTargetResponse`: a full wire object survives decode and re-render. */
+    public function testScimTargetResponseRoundTrips(): void
+    {
+        $wire = [
+            'auth' => [
+                'type' => 'bearer',
+            ],
+            'base_url' => 'example',
+            'created_at' => '2026-08-26T00:00:00Z',
+            'deprovision' => 'deactivate',
+            'enabled' => true,
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'name' => 'example',
+            'push_groups' => true,
+            'scope' => [
+                'type' => 'all_users',
+            ],
+            'state' => [
+                'consecutive_failures' => 1,
+                'dead_lettered_total' => 1,
+                'last_failure_at' => '2026-08-26T00:00:00Z',
+                'last_failure_reason' => 'example',
+                'last_reconciled_at' => '2026-08-26T00:00:00Z',
+                'last_success_at' => '2026-08-26T00:00:00Z',
+            ],
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'user_name_from' => 'username',
+        ];
+
+        $model = Models\ScimTargetResponse::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ScimTargetResponse decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimTargetScopeAllUsers`: the `all_users` arm decodes and re-renders. */
+    public function testScimTargetScopeAllUsersRoundTrips(): void
+    {
+        $wire = [
+            'type' => 'all_users',
+        ];
+
+        $model = Models\ScimTargetScope::fromArray($wire);
+
+        self::assertInstanceOf(Models\ScimTargetScopeAllUsers::class, $model);
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($model->toArray()))),
+            'ScimTargetScopeAllUsers decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimTargetScopeGroups`: the `groups` arm decodes and re-renders. */
+    public function testScimTargetScopeGroupsRoundTrips(): void
+    {
+        $wire = [
+            'type' => 'groups',
+            'group_ids' => [
+                '11111111-1111-4111-8111-111111111111',
+            ],
+        ];
+
+        $model = Models\ScimTargetScope::fromArray($wire);
+
+        self::assertInstanceOf(Models\ScimTargetScopeGroups::class, $model);
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($model->toArray()))),
+            'ScimTargetScopeGroups decoded a field it cannot render again',
+        );
+    }
+
+    /** `ScimTargetScopeUnknown`: an unrecognised `type` decodes, and refuses to render. */
+    public function testScimTargetScopeUnknownRoundTrips(): void
+    {
+        $wire = ['type' => 'from_a_newer_server', 'extra' => 1];
+
+        $model = Models\ScimTargetScope::fromArray($wire);
+
+        self::assertInstanceOf(Models\ScimTargetScopeUnknown::class, $model);
+        self::assertSame('from_a_newer_server', $model->tag);
+        self::assertSame($wire, $model->raw);
+        $this->expectException(\Axiam\Sdk\Core\AxiamException::class);
+        json_encode($model, JSON_THROW_ON_ERROR);
+    }
+
     /** `ScimTokenResponse`: a full wire object survives decode and re-render. */
     public function testScimTokenResponseRoundTrips(): void
     {
@@ -2613,7 +3357,10 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'external_client_allowed_resources' => [
                     'example',
                 ],
+                'saml_idp_enabled' => true,
                 'sensitive_scopes_enabled' => true,
+                'ssf_enabled' => true,
+                'ssf_inactive_reason' => 'example',
             ],
             'opaque' => [
                 'opaque_ksf' => 'example',
@@ -2732,6 +3479,51 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `SetDirectoryConfig`: a full wire object survives decode and re-render. */
+    public function testSetDirectoryConfigRoundTrips(): void
+    {
+        $wire = [
+            'base_dn' => 'example',
+            'bind_dn' => 'example',
+            'bind_secret' => 'example',
+            'enabled' => true,
+            'group_base_dn' => 'example',
+            'group_filter' => 'example',
+            'group_mappings' => [
+                [
+                    'directory_group_dn' => 'example',
+                    'group_id' => '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+            'group_member_attribute' => 'example',
+            'group_nesting_depth' => 1,
+            'jit_provisioning' => true,
+            'kind' => 'open_ldap',
+            'start_tls' => true,
+            'sync_interval_secs' => 1,
+            'trust_anchors_pem' => [
+                'example',
+            ],
+            'url' => 'example',
+            'user_attribute_map' => [
+                'display_name' => 'example',
+                'email' => 'example',
+                'external_id' => 'example',
+                'username' => 'example',
+            ],
+            'user_filter' => 'example',
+        ];
+
+        $model = Models\SetDirectoryConfig::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SetDirectoryConfig decoded a field it cannot render again',
+        );
+    }
+
     /** `SetMtlsTrustAnchor`: a full wire object survives decode and re-render. */
     public function testSetMtlsTrustAnchorRoundTrips(): void
     {
@@ -2832,10 +3624,12 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'saml_idp_enabled' => true,
             'sensitive_scopes_enabled' => true,
             'server_cert_allowed_names' => [
                 'example',
             ],
+            'ssf_enabled' => true,
             'webauthn_user_verification' => 'example',
         ];
 
@@ -2964,6 +3758,120 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `SsfDeliveryMethod`: every case survives wire -> enum -> wire. */
+    public function testSsfDeliveryMethodRoundTrips(): void
+    {
+        self::assertSame('push', Models\SsfDeliveryMethod::fromWire('push')->value);
+        self::assertSame('poll', Models\SsfDeliveryMethod::fromWire('poll')->value);
+    }
+
+    /** `SsfEventType`: every case survives wire -> enum -> wire. */
+    public function testSsfEventTypeRoundTrips(): void
+    {
+        self::assertSame('https://schemas.openid.net/secevent/caep/event-type/session-revoked', Models\SsfEventType::fromWire('https://schemas.openid.net/secevent/caep/event-type/session-revoked')->value);
+        self::assertSame('https://schemas.openid.net/secevent/caep/event-type/credential-change', Models\SsfEventType::fromWire('https://schemas.openid.net/secevent/caep/event-type/credential-change')->value);
+        self::assertSame('https://schemas.openid.net/secevent/caep/event-type/assurance-level-change', Models\SsfEventType::fromWire('https://schemas.openid.net/secevent/caep/event-type/assurance-level-change')->value);
+        self::assertSame('https://schemas.openid.net/secevent/risc/event-type/account-disabled', Models\SsfEventType::fromWire('https://schemas.openid.net/secevent/risc/event-type/account-disabled')->value);
+        self::assertSame('https://schemas.openid.net/secevent/risc/event-type/account-enabled', Models\SsfEventType::fromWire('https://schemas.openid.net/secevent/risc/event-type/account-enabled')->value);
+        self::assertSame('https://schemas.openid.net/secevent/risc/event-type/account-purged', Models\SsfEventType::fromWire('https://schemas.openid.net/secevent/risc/event-type/account-purged')->value);
+    }
+
+    /** `SsfStatusActor`: every case survives wire -> enum -> wire. */
+    public function testSsfStatusActorRoundTrips(): void
+    {
+        self::assertSame('admin', Models\SsfStatusActor::fromWire('admin')->value);
+        self::assertSame('receiver', Models\SsfStatusActor::fromWire('receiver')->value);
+    }
+
+    /** `SsfStream`: a full wire object survives decode and re-render. */
+    public function testSsfStreamRoundTrips(): void
+    {
+        $wire = [
+            'audience' => 'example',
+            'authorization_header_set' => true,
+            'created_at' => '2026-08-26T00:00:00Z',
+            'delivery_method' => 'push',
+            'description' => 'example',
+            'endpoint_url' => 'example',
+            'events_allowed' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_delivered' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_requested' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'last_verification_at' => '2026-08-26T00:00:00Z',
+            'receiver_client_id' => 'example',
+            'status' => 'enabled',
+            'status_actor' => 'admin',
+            'status_reason' => 'example',
+            'subject_format' => 'iss_sub',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'transmitter_active' => true,
+            'transmitter_inactive_reason' => 'example',
+            'updated_at' => '2026-08-26T00:00:00Z',
+        ];
+
+        $model = Models\SsfStream::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SsfStream decoded a field it cannot render again',
+        );
+    }
+
+    /** `SsfStreamInput`: a full wire object survives decode and re-render. */
+    public function testSsfStreamInputRoundTrips(): void
+    {
+        $wire = [
+            'audience' => 'example',
+            'authorization_header' => 'example',
+            'clear_authorization_header' => true,
+            'delivery_method' => 'push',
+            'description' => 'example',
+            'endpoint_url' => 'example',
+            'events_allowed' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'events_requested' => [
+                'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
+            ],
+            'receiver_client_id' => 'example',
+            'status' => 'enabled',
+            'status_reason' => 'example',
+            'subject_format' => 'iss_sub',
+        ];
+
+        $model = Models\SsfStreamInput::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'SsfStreamInput decoded a field it cannot render again',
+        );
+    }
+
+    /** `SsfStreamStatus`: every case survives wire -> enum -> wire. */
+    public function testSsfStreamStatusRoundTrips(): void
+    {
+        self::assertSame('enabled', Models\SsfStreamStatus::fromWire('enabled')->value);
+        self::assertSame('paused', Models\SsfStreamStatus::fromWire('paused')->value);
+        self::assertSame('disabled', Models\SsfStreamStatus::fromWire('disabled')->value);
+    }
+
+    /** `SsfSubjectFormat`: every case survives wire -> enum -> wire. */
+    public function testSsfSubjectFormatRoundTrips(): void
+    {
+        self::assertSame('iss_sub', Models\SsfSubjectFormat::fromWire('iss_sub')->value);
+        self::assertSame('email', Models\SsfSubjectFormat::fromWire('email')->value);
+    }
+
     /** `Tenant`: a full wire object survives decode and re-render. */
     public function testTenantRoundTrips(): void
     {
@@ -3052,10 +3960,12 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'require_lowercase' => true,
             'require_symbols' => true,
             'require_uppercase' => true,
+            'saml_idp_enabled' => true,
             'sensitive_scopes_enabled' => true,
             'server_cert_allowed_names' => [
                 'example',
             ],
+            'ssf_enabled' => true,
             'webauthn_user_verification' => 'example',
         ];
 
@@ -3147,6 +4057,51 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     {
         self::assertSame('allow', Models\UnknownAaguidAction::fromWire('allow')->value);
         self::assertSame('deny', Models\UnknownAaguidAction::fromWire('deny')->value);
+    }
+
+    /** `UpdateDirectoryConfig`: a full wire object survives decode and re-render. */
+    public function testUpdateDirectoryConfigRoundTrips(): void
+    {
+        $wire = [
+            'base_dn' => 'example',
+            'bind_dn' => 'example',
+            'bind_secret' => 'example',
+            'enabled' => true,
+            'group_base_dn' => 'example',
+            'group_filter' => 'example',
+            'group_mappings' => [
+                [
+                    'directory_group_dn' => 'example',
+                    'group_id' => '11111111-1111-4111-8111-111111111111',
+                ],
+            ],
+            'group_member_attribute' => 'example',
+            'group_nesting_depth' => 1,
+            'jit_provisioning' => true,
+            'kind' => 'open_ldap',
+            'start_tls' => true,
+            'sync_interval_secs' => 1,
+            'trust_anchors_pem' => [
+                'example',
+            ],
+            'url' => 'example',
+            'user_attribute_map' => [
+                'display_name' => 'example',
+                'email' => 'example',
+                'external_id' => 'example',
+                'username' => 'example',
+            ],
+            'user_filter' => 'example',
+        ];
+
+        $model = Models\UpdateDirectoryConfig::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'UpdateDirectoryConfig decoded a field it cannot render again',
+        );
     }
 
     /** `UpdateFederationConfigRequest`: a full wire object survives decode and re-render. */
@@ -3252,7 +4207,11 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                 'example',
             ],
             'authn_request_params' => 'ignore',
+            'backchannel_authentication_request_signing_alg' => 'example',
+            'backchannel_client_notification_endpoint' => 'example',
             'backchannel_logout_uri' => 'example',
+            'backchannel_token_delivery_mode' => 'example',
+            'backchannel_user_code_parameter' => true,
             'browser_sso' => true,
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
@@ -3499,6 +4458,33 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `UserAttributeMap`: a full wire object survives decode and re-render. */
+    public function testUserAttributeMapRoundTrips(): void
+    {
+        $wire = [
+            'display_name' => 'example',
+            'email' => 'example',
+            'external_id' => 'example',
+            'username' => 'example',
+        ];
+
+        $model = Models\UserAttributeMap::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'UserAttributeMap decoded a field it cannot render again',
+        );
+    }
+
+    /** `UserNameSource`: every case survives wire -> enum -> wire. */
+    public function testUserNameSourceRoundTrips(): void
+    {
+        self::assertSame('username', Models\UserNameSource::fromWire('username')->value);
+        self::assertSame('email', Models\UserNameSource::fromWire('email')->value);
+    }
+
     /** `UserResponse`: a full wire object survives decode and re-render. */
     public function testUserResponseRoundTrips(): void
     {
@@ -3627,6 +4613,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(159, $cases);
+        self::assertCount(204, $cases);
     }
 }

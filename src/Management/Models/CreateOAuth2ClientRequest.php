@@ -42,8 +42,24 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
      *     **refused on a `fapi2` client** at both this gate and the authorization endpoint — the
      *     two are different answers to the same question about what a request from this client
      *     means. (optional)
+     * @param string|null $backchannelAuthenticationRequestSigningAlg G-7 — CIBA Core §4:
+     *     `PS256`, `ES256` or `EdDSA`. When set, every backchannel authentication request must be
+     *     a signed `request` JWT under this algorithm, verified against `jwks` or `jwks_uri`
+     *     (exactly one is required; an inline `jwks` must hold a key of the algorithm). Required
+     *     for a `fapi2` client holding the CIBA grant. (optional)
+     * @param string|null $backchannelClientNotificationEndpoint G-7 — CIBA Core §4: where a
+     *     ping-mode client is notified. Required in ping mode and refused in poll mode; an
+     *     absolute `https` URL held to the webhook address policy (no credentials, no fragment, no
+     *     private, loopback or internal host). (optional)
      * @param string|null $backchannelLogoutUri B5 — where OIDC back-channel logout tokens are
      *     delivered. Omit for a client that does not participate. (optional)
+     * @param string|null $backchannelTokenDeliveryMode G-7 — CIBA Core §4
+     *     `backchannel_token_delivery_mode`: `poll` or `ping`. Required when `grant_types` holds
+     *     `urn:openid:params:grant-type:ciba`, refused otherwise; `push` is not offered. A CIBA
+     *     client must be confidential; a `fapi2` one must also register
+     *     `backchannel_authentication_request_signing_alg`. (optional)
+     * @param bool|null $backchannelUserCodeParameter G-7 — CIBA Core §4. `true` is
+     *     **refused**: this server holds no user code to verify. (optional)
      * @param bool|null $browserSso X7.3 — whether an unauthenticated authorization request
      *     from this client may be answered with a redirect to the login page rather than the `401`
      *     AXIAM answers today. Accepted and stored, but **nothing reads it yet**: the login hop it
@@ -103,7 +119,11 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         public readonly array $scopes,
         public readonly ?array $allowedResources = null,
         public readonly ?AuthnRequestParamsMode $authnRequestParams = null,
+        public readonly ?string $backchannelAuthenticationRequestSigningAlg = null,
+        public readonly ?string $backchannelClientNotificationEndpoint = null,
         public readonly ?string $backchannelLogoutUri = null,
+        public readonly ?string $backchannelTokenDeliveryMode = null,
+        public readonly ?bool $backchannelUserCodeParameter = null,
         public readonly ?bool $browserSso = null,
         public readonly ?bool $dpopBoundAccessTokens = null,
         public readonly ?bool $dpopRequireNonce = null,
@@ -134,7 +154,11 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'scopes', self::class))),
             isset($data['allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_resources'])) : null,
             isset($data['authn_request_params']) ? AuthnRequestParamsMode::fromWire((string) $data['authn_request_params']) : null,
+            isset($data['backchannel_authentication_request_signing_alg']) ? (string) $data['backchannel_authentication_request_signing_alg'] : null,
+            isset($data['backchannel_client_notification_endpoint']) ? (string) $data['backchannel_client_notification_endpoint'] : null,
             isset($data['backchannel_logout_uri']) ? (string) $data['backchannel_logout_uri'] : null,
+            isset($data['backchannel_token_delivery_mode']) ? (string) $data['backchannel_token_delivery_mode'] : null,
+            isset($data['backchannel_user_code_parameter']) ? (bool) $data['backchannel_user_code_parameter'] : null,
             isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
             isset($data['dpop_bound_access_tokens']) ? (bool) $data['dpop_bound_access_tokens'] : null,
             isset($data['dpop_require_nonce']) ? (bool) $data['dpop_require_nonce'] : null,
@@ -173,8 +197,20 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         if ($this->authnRequestParams !== null) {
             $out['authn_request_params'] = $this->authnRequestParams->value;
         }
+        if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
+            $out['backchannel_authentication_request_signing_alg'] = $this->backchannelAuthenticationRequestSigningAlg;
+        }
+        if ($this->backchannelClientNotificationEndpoint !== null) {
+            $out['backchannel_client_notification_endpoint'] = $this->backchannelClientNotificationEndpoint;
+        }
         if ($this->backchannelLogoutUri !== null) {
             $out['backchannel_logout_uri'] = $this->backchannelLogoutUri;
+        }
+        if ($this->backchannelTokenDeliveryMode !== null) {
+            $out['backchannel_token_delivery_mode'] = $this->backchannelTokenDeliveryMode;
+        }
+        if ($this->backchannelUserCodeParameter !== null) {
+            $out['backchannel_user_code_parameter'] = $this->backchannelUserCodeParameter;
         }
         if ($this->browserSso !== null) {
             $out['browser_sso'] = $this->browserSso;

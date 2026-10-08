@@ -70,6 +70,9 @@ enum NotificationEventType: string
     /** The wire value `service_account_deleted`. */
     case ServiceAccountDeleted = 'service_account_deleted';
 
+    /** The wire value `scim_delivery_failed`. */
+    case ScimDeliveryFailed = 'scim_delivery_failed';
+
     /** A value this SDK's copy of the spec does not list; see the type's summary. */
     case Unknown = '';
 
