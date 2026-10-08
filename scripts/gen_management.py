@@ -1251,7 +1251,8 @@ def emit_unknown_arm(name: str, tag: str) -> str:
         "    ",
         [
             f"@param string|null $tag The unrecognised `{tag}` value, or null when absent or not a string.",
-            "@param array<string,mixed> $raw The raw wire object, unmodified.",
+            "@param array<string,mixed> $raw The raw wire object, minus any member named like a "
+            "secret (see {@see self::fromArray()}).",
         ],
     ))
     body.append("    public function __construct(")
@@ -1261,13 +1262,18 @@ def emit_unknown_arm(name: str, tag: str) -> str:
     body.append("    }")
     body.append("")
     body.extend(docblock(
-        "Keeps one decoded JSON object as-is. Never throws.",
+        "Keeps one decoded JSON object, never throwing -- but drops any member named like a "
+        "secret (`credential`, `client_secret`, `authorization_header`, `bind_secret`, "
+        "`private_key_pem`): no response may carry one (CONTRACT.md §31.2, §32.5), and a "
+        "decoder that meets one MUST drop it rather than surface it.",
         "    ",
         ["@param array<string,mixed> $data The raw wire object."],
     ))
     body.append("    public static function fromArray(array $data): self")
     body.append("    {")
     body.append(f"        $tag = $data['{tag}'] ?? null;")
+    body.append("        unset($data['credential'], $data['client_secret'], $data['authorization_header'], "
+                "$data['bind_secret'], $data['private_key_pem']);")
     body.append("")
     body.append("        return new self(\\is_string($tag) ? $tag : null, $data);")
     body.append("    }")

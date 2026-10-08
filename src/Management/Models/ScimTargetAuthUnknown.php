@@ -21,7 +21,8 @@ final class ScimTargetAuthUnknown implements ScimTargetAuthVariant
      * Constructs the unknown arm from what the server sent.
      * @param string|null $tag The unrecognised `type` value, or null when absent or not a
      *     string.
-     * @param array<string,mixed> $raw The raw wire object, unmodified.
+     * @param array<string,mixed> $raw The raw wire object, minus any member named like a
+     *     secret (see {@see self::fromArray()}).
      */
     public function __construct(
         public readonly ?string $tag,
@@ -30,12 +31,16 @@ final class ScimTargetAuthUnknown implements ScimTargetAuthVariant
     }
 
     /**
-     * Keeps one decoded JSON object as-is. Never throws.
+     * Keeps one decoded JSON object, never throwing -- but drops any member named like a
+     * secret (`credential`, `client_secret`, `authorization_header`, `bind_secret`,
+     * `private_key_pem`): no response may carry one (CONTRACT.md §31.2, §32.5), and a decoder
+     * that meets one MUST drop it rather than surface it.
      * @param array<string,mixed> $data The raw wire object.
      */
     public static function fromArray(array $data): self
     {
         $tag = $data['type'] ?? null;
+        unset($data['credential'], $data['client_secret'], $data['authorization_header'], $data['bind_secret'], $data['private_key_pem']);
 
         return new self(\is_string($tag) ? $tag : null, $data);
     }
