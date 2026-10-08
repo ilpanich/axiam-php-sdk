@@ -49,9 +49,20 @@ final class ManagementErrorMapper
         }
 
         if ($status === 400 || $status === 422) {
+            $decoded = json_decode((string) $response->getBody(), true);
+            $serverMessage = \is_array($decoded) && \is_string($decoded['message'] ?? null) && $decoded['message'] !== ''
+                ? $decoded['message']
+                : null;
+
+            // The server's `message` names the field and the rule (CONTRACT.md §29.4, §30.4)
+            // and, by the server's own rules, never echoes a secret, a URL or a certificate —
+            // so it is carried, for the person reading the error. Never parsed.
             return new ValidationError(
-                sprintf('%s: invalid request (HTTP %d)', $context, $status),
-                self::fieldErrors($response),
+                $serverMessage === null
+                    ? sprintf('%s: invalid request (HTTP %d)', $context, $status)
+                    : sprintf('%s: invalid request (HTTP %d): %s', $context, $status, $serverMessage),
+                self::fieldErrors($decoded),
+                $serverMessage,
             );
         }
 
@@ -68,9 +79,8 @@ final class ManagementErrorMapper
      *
      * @return list<FieldError>
      */
-    private static function fieldErrors(ResponseInterface $response): array
+    private static function fieldErrors(mixed $decoded): array
     {
-        $decoded = json_decode((string) $response->getBody(), true);
         if (!\is_array($decoded)) {
             return [];
         }

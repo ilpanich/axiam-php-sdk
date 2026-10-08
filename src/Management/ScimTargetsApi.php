@@ -51,6 +51,9 @@ final class ScimTargetsApi extends ManagementSupport
      * `POST /api/v1/scim-targets`
      *
      * `POST /api/v1/scim-targets`.
+     *
+     * `credential` is required here (§31.3 rule 2). It is write-only: no response ever carries
+     * it, and the SDK keeps no copy.
      * @param ScimTargetInput $body the request body
      * @return ScimTargetResponse
      */
@@ -95,6 +98,14 @@ final class ScimTargetsApi extends ManagementSupport
      * `PUT /api/v1/scim-targets/{id}`
      *
      * `PUT /api/v1/scim-targets/{id}`.
+     *
+     * **The credential is bound to its URL** (§31.3 rule 2): absent `credential` keeps the
+     * stored one -- except that changing `base_url` of a bearer target, `auth.token_url` or
+     * `base_url` of a client-credentials target, or `auth.type`, without `credential` in the
+     * same write is refused `400` and changes nothing. The SDK holds no credential to re-send.
+     * Every other member left out takes its default -- start from {@see
+     * \Axiam\Sdk\Management\ReadModifyWrite::scimTarget()}. An update overtaken by another
+     * administrator's write is `409` (§31.3 rule 4): reload, then retry yourself.
      * @param string $id the `{id}` path parameter
      * @param ScimTargetInput $body the request body
      * @return ScimTargetResponse
@@ -124,6 +135,10 @@ final class ScimTargetsApi extends ManagementSupport
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
      * \Axiam\Sdk\Management\NotFoundError} rather than succeeding quietly.
+     *
+     * **Deprovisions nothing downstream** (§31.3 rule 8): the users and groups AXIAM created
+     * in the service provider stay there, and AXIAM no longer knows them. To remove them, set
+     * `deprovision` to `delete`, let AXIAM push, and only then delete the target.
      * @param string $id the `{id}` path parameter
      */
     public function delete(
@@ -143,6 +158,11 @@ final class ScimTargetsApi extends ManagementSupport
      * `POST /api/v1/scim-targets/{id}/reconcile`
      *
      * `POST /api/v1/scim-targets/{id}/reconcile`.
+     *
+     * Starts a reconciliation in the background and answers `202`; its outcome is on the
+     * target's `state` (§31.3 rule 7). `409` while a run holds the claim, within five minutes
+     * of the last one, or for a disabled target. Not retried, and nothing here polls for the
+     * run to finish.
      * @param string $id the `{id}` path parameter
      * @return ScimReconcileAccepted
      */

@@ -111,6 +111,172 @@ DEFAULT_TRUE_WHEN_ABSENT = {"inherit"}
 # A name list because every earlier union is closed by contract and tested as such.
 OPEN_UNIONS = {"ScimTargetAuth", "ScimTargetScope"}
 
+# Optional fields where an explicit JSON `null` and an ABSENT member mean different things
+# (CONTRACT.md §27.4 rule 5, "null is not absent"). Everywhere else this generator folds
+# both into PHP `null` and omits it from the wire; these four keep them apart with the
+# {@see \Axiam\Sdk\Management\JsonNull} marker:
+#
+# - §30.2: on `directory.update` an explicit `null` for `group_base_dn` / `group_filter`
+#   CLEARS the stored value, while absent keeps it. A sparse body that could only omit
+#   could never clear them.
+# - §29.8 test 8: `SamlIdpInfo`'s two credential ids are null when the slot is empty, and
+#   a decoder MUST keep that null apart from a member a server did not send.
+#
+# A name list, because the distinction is a fact about these four fields and changing the
+# meaning of `null` on every other optional field would break every caller of them.
+JSON_NULL = "\\Axiam\\Sdk\\Management\\JsonNull"
+EXPLICIT_NULL_FIELDS = {
+    ("UpdateDirectoryConfig", "group_base_dn"),
+    ("UpdateDirectoryConfig", "group_filter"),
+    ("SamlIdpInfo", "active_credential_id"),
+    ("SamlIdpInfo", "next_credential_id"),
+}
+
+# Operations whose body has a constraint the server would otherwise be left to refuse, and
+# that the contract requires the SDK to refuse LOCALLY, before any I/O: the generated
+# method calls the named static check on {@see \Axiam\Sdk\Management\ManagementChecks}
+# first. CONTRACT.md §29.2: `ParseSamlSpMetadata` is EXACTLY ONE of `metadata_xml` and
+# `metadata_url`; both or neither "MUST be impossible or a local ValidationError -- not a
+# request the server refuses".
+PRECHECKS: dict[str, str] = {
+    "saml.parse_sp_metadata": "parseSpMetadataExactlyOne",
+}
+
+# The request body the generated surface test sends to a PRECHECKS operation: the
+# required-fields-only fixture every other operation gets would be refused locally.
+PRECHECK_FIXTURES: dict[str, str] = {
+    "saml.parse_sp_metadata": "Models\\ParseSamlSpMetadata::fromUrl('https://example.test/metadata')",
+}
+
+# Named constructors emitted on a model, as (method name, wire field, doc). CONTRACT.md
+# §29.2's "two methods" form of the exactly-one rule: each sets one member and leaves the
+# other absent, so the common case cannot be written wrongly at all; the plain constructor
+# stays for symmetry and is what PRECHECKS guards.
+FACTORIES: dict[str, list[tuple[str, str, str]]] = {
+    "ParseSamlSpMetadata": [
+        ("fromUrl", "metadata_url",
+         "A request for the server to fetch the SP's metadata from `$value` (`https` only, "
+         "through its SSRF guard). Leaves `metadata_xml` absent."),
+        ("fromXml", "metadata_xml",
+         "A request carrying the SP's metadata document itself (at most 512 KiB). Leaves "
+         "`metadata_url` absent."),
+    ],
+}
+
+# Call-site documentation the contract REQUIRES on specific operations, appended to the
+# generated docblock (CONTRACT.md §29.3, §30.3, §31.3, §32.3 -- "an SDK MUST say so at the
+# call site"). Adapted to PHP's names; one paragraph each.
+CALL_SITE_NOTES: dict[str, str] = {
+    "directory.set": (
+        "**Moving the connection requires the secret again** (§30.3 rule 2): a `set` that "
+        "changes `url`, `start_tls`, `bind_dn` or `trust_anchors_pem` without `bindSecret` is "
+        "refused `400` and changes nothing. The SDK holds no copy of the secret and cannot "
+        "re-send one for you. `bindSecret` is required while the tenant has no configuration; "
+        "otherwise absent keeps the stored secret. Every other optional member left out is "
+        "**reset to its default** -- start from {@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::directoryConfig()}. "
+        "An enabled directory and an effective `opaque_mode = required` never coexist (`409`); "
+        "without the deployment's directory key a write carrying a secret is `503`."
+    ),
+    "directory.update": (
+        "**Moving the connection requires the secret again** (§30.3 rule 2): an `update` that "
+        "changes `url`, `start_tls`, `bind_dn` or `trust_anchors_pem` without `bindSecret` is "
+        "refused `400` and changes nothing; the SDK holds no copy of the secret to re-send. A "
+        "member left `null` is not sent and stays as stored; `groupBaseDn` / `groupFilter` set "
+        "to {@see \\Axiam\\Sdk\\Management\\JsonNull::Null} are sent as `null` and clear the value. "
+        "An enabled directory and an effective `opaque_mode = required` never coexist (`409`)."
+    ),
+    "directory.delete": (
+        "**Deleting stops the directory, and only that** (§30.3 rule 5): directory accounts "
+        "can no longer sign in with a password -- there is no fallback to a local hash -- and "
+        "the sync stops. Sessions, refresh tokens and passkeys those accounts already hold keep "
+        "working until they expire or the accounts are deactivated. There is no unlink: a "
+        "linked account stays a directory account."
+    ),
+    "directory.link_account": (
+        "**Signs the account's owner out everywhere** (§30.3 rule 6): linking deletes the "
+        "account's WebAuthn credentials and federation links, revokes its `User` certificates, "
+        "all its sessions and its OAuth2 refresh tokens (TOTP is kept). The entry is found by "
+        "the account's own username; a repeat on an already-linked account answers "
+        "`was_already_linked` and repeats the revocations."
+    ),
+    "saml.create_service_provider": (
+        "`sp_signing_cert_pem` must be RSA (2048 bits or more) or ECDSA on P-256, P-384 or "
+        "P-521; an **ECDSA certificate verifies HTTP-POST requests only** -- the HTTP-Redirect "
+        "binding is RSA-only (§29.3 rule 2). `encrypt_assertions: true` is refused while "
+        "encryption is unimplemented. `entity_id` is unique per tenant (`409`) and immutable "
+        "once created."
+    ),
+    "saml.update_service_provider": (
+        "An omitted member takes its **default**, not its stored value: `enabled` and "
+        "`sign_responses` default to `true`, `name_id_format` to `persistent`, the other flags "
+        "to `false`, certificates and `slo_url` / `slo_binding` to null, the lists to empty "
+        "(§29.2). Start from `getServiceProvider()` and "
+        "{@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::samlServiceProvider()}. `entity_id` is "
+        "immutable: changing it is `400` -- register a new service provider instead (§29.3 "
+        "rule 3). An ECDSA `sp_signing_cert_pem` verifies HTTP-POST requests only; "
+        "HTTP-Redirect is RSA-only."
+    ),
+    "saml.delete_service_provider": (
+        "Ends no session: users already signed in to the SP stay signed in there until their "
+        "SP session ends (§29.3 rule 5)."
+    ),
+    "saml.parse_sp_metadata": (
+        "**Parses and stores nothing** (§29.3 rule 6): the result is a draft to review and "
+        "pass to `createServiceProvider()`. Exactly one of `metadata_xml` and `metadata_url` "
+        "must be set -- use `ParseSamlSpMetadata::fromUrl()` or `::fromXml()`; both or neither "
+        "is refused locally with a {@see \\Axiam\\Sdk\\Management\\ValidationError}, before any "
+        "request. The metadata's own signature is not evaluated. `503` in a server built "
+        "without SAML."
+    ),
+    "saml.issue_idp_credential": (
+        "Generates an RSA-4096 key on the server, which takes seconds; the key is never "
+        "returned. An occupied slot is `409` (§29.3 rule 7)."
+    ),
+    "saml.promote_idp_credential": (
+        "`credential_id` must be the tenant's current `next` credential; in one transaction "
+        "the old `active` is retired -- its key destroyed -- and `next` becomes `active` "
+        "(§29.3 rule 7)."
+    ),
+    "saml.retire_idp_credential": (
+        "**Retiring the `active` credential with no successor stops SAML sign-on for the "
+        "whole tenant at once** (§29.3 rule 7) -- it is the incident response to a leaked key. "
+        "The key is destroyed. The safe rotation is: issue into `next`, wait until every SP "
+        "has refreshed the metadata, then promote."
+    ),
+    "ssf.update_stream": (
+        "An omitted optional member takes its default (§32.2) -- **except "
+        "`authorization_header`, which absent keeps the stored one** -- unless the update moves "
+        "`endpoint_url` to another scheme, host or port while a header is stored: then it must "
+        "carry `authorization_header` again or `clear_authorization_header: true`, else `400` "
+        "(§32.3 rule 5). Start from {@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::ssfStream()}. An "
+        "update overtaken by the receiver's own write is `409`: read the stream again."
+    ),
+    "scim_targets.create": (
+        "`credential` is required here (§31.3 rule 2). It is write-only: no response ever "
+        "carries it, and the SDK keeps no copy."
+    ),
+    "scim_targets.update": (
+        "**The credential is bound to its URL** (§31.3 rule 2): absent `credential` keeps the "
+        "stored one -- except that changing `base_url` of a bearer target, `auth.token_url` or "
+        "`base_url` of a client-credentials target, or `auth.type`, without `credential` in "
+        "the same write is refused `400` and changes nothing. The SDK holds no credential to "
+        "re-send. Every other member left out takes its default -- start from "
+        "{@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::scimTarget()}. An update overtaken by "
+        "another administrator's write is `409` (§31.3 rule 4): reload, then retry yourself."
+    ),
+    "scim_targets.delete": (
+        "**Deprovisions nothing downstream** (§31.3 rule 8): the users and groups AXIAM "
+        "created in the service provider stay there, and AXIAM no longer knows them. To remove "
+        "them, set `deprovision` to `delete`, let AXIAM push, and only then delete the target."
+    ),
+    "scim_targets.reconcile": (
+        "Starts a reconciliation in the background and answers `202`; its outcome is on the "
+        "target's `state` (§31.3 rule 7). `409` while a run holds the claim, within five "
+        "minutes of the last one, or for a disabled target. Not retried, and nothing here "
+        "polls for the run to finish."
+    ),
+}
+
 
 def emit_guard(name: str) -> str:
     """The `jsonSerialize` guard for an optional field."""
@@ -599,6 +765,7 @@ def field_list(schema_name: str, secrets: set[str]) -> tuple[list[dict[str, Any]
             "required": is_required,
             "schema": schema,
             "secret": wire in secrets,
+            "explicit_null": (schema_name, wire) in EXPLICIT_NULL_FIELDS,
             "description": schema.get("description") if isinstance(schema, dict) else None,
         })
     # PHP forbids a required parameter after an optional one, so required fields must
@@ -777,6 +944,12 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
     tags = []
     for f in fields:
         optional = "" if f["required"] else " (optional)"
+        if f["explicit_null"]:
+            tags.append(
+                f"@param {f['doc'].removesuffix('|null')}|{JSON_NULL}|null ${f['name']} {field_doc(f)} "
+                f"`null` leaves the member ABSENT; {{@see {JSON_NULL}::Null}} is an explicit JSON "
+                "`null`, which is not the same thing (§27.4 rule 5)." + optional)
+            continue
         suffix = "" if f["required"] or f["doc"] == "mixed" or f["doc"].endswith("|null") else "|null"
         tags.append(f"@param {f['doc']}{suffix} ${f['name']} {field_doc(f)}{optional}")
     out.extend(docblock(f"Constructs a {name}.", "    ", tags) if fields
@@ -789,11 +962,23 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         out.append("    public function __construct(")
         for f in fields:
             decl = f["decl"] if f["required"] else nullable(f["decl"])
+            if f["explicit_null"]:
+                decl = f"{f['decl'].lstrip('?')}|{JSON_NULL}|null"
             default = "" if f["required"] else " = null"
             out.append(f"        public readonly {decl} ${f['name']}{default},")
         out.append("    ) {")
         out.append("    }")
     out.append("")
+
+    # --- named constructors (FACTORIES) ---
+    for fname, wire, fdoc in FACTORIES.get(name, []):
+        field = next(f for f in fields if f["wire"] == wire)
+        out.extend(docblock(fdoc, "    ", [f"@param {field['doc']} $value the `{wire}` member"]))
+        out.append(f"    public static function {fname}({field['decl'].lstrip('?')} $value): self")
+        out.append("    {")
+        out.append(f"        return new self({field['name']}: $value);")
+        out.append("    }")
+        out.append("")
 
     # --- fromArray ---
     out.extend(docblock(
@@ -814,6 +999,11 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
             elif f["required"]:
                 need = f"ModelDecode::need($data, '{f['wire']}', self::class)"
                 out.append(f"            {decode_expr(f, need)},")
+            elif f["explicit_null"]:
+                # Absent stays PHP null; a JSON null becomes the marker (§27.4 rule 5).
+                out.append(
+                    f"            array_key_exists('{f['wire']}', $data) ? ({src} === null ? "
+                    f"{JSON_NULL}::Null : {decode_expr(f, src)}) : null,")
             else:
                 out.append(f"            isset({src}) ? {decode_expr(f, src)} : null,")
         out.append("        );")
@@ -839,6 +1029,11 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
             expr = encode_expr(f)
             if f["required"]:
                 out.append(f"        $out['{f['wire']}'] = {expr};")
+            elif f["explicit_null"]:
+                out.append(emit_guard(f['name']))
+                out.append(f"            $out['{f['wire']}'] = $this->{f['name']} instanceof "
+                           f"{JSON_NULL} ? null : {expr};")
+                out.append("        }")
             else:
                 out.append(emit_guard(f['name']))
                 out.append(f"            $out['{f['wire']}'] = {expr};")
@@ -1374,7 +1569,7 @@ def spec_description(op: dict[str, Any]) -> str | None:
     return escape(text) if text else None
 
 
-def operation_doc(op: dict[str, Any], name: str) -> str:
+def operation_doc(op: dict[str, Any], name: str, canonical: str = "") -> str:
     """The docblock summary for one generated operation."""
     described = spec_description(op)
     lead = described or f"`{op['method']} {op['path']}`."
@@ -1407,6 +1602,8 @@ def operation_doc(op: dict[str, Any], name: str) -> str:
             "return it again, so a caller that does not persist it here cannot recover it "
             "(§27.5)."
         )
+    if canonical in CALL_SITE_NOTES:
+        lead += "\n\n" + escape(CALL_SITE_NOTES[canonical])
     return lead
 
 
@@ -1420,7 +1617,7 @@ def emit_operation(namespace: str, opname: str, op: dict[str, Any]) -> list[str]
     tags = [f"@param {p['doc']} ${p['name']} {p['text']}" for p in params]
     if doc_ret != "void":
         tags.append(f"@return {doc_ret}")
-    out = docblock(operation_doc(op, name), "    ", tags)
+    out = docblock(operation_doc(op, name, canonical), "    ", tags)
 
     if params:
         out.append(f"    public function {name}(")
@@ -1447,6 +1644,10 @@ def emit_operation(namespace: str, opname: str, op: dict[str, Any]) -> list[str]
     qv = "[" + ", ".join(query_entries) + "]" if query_entries else "[]"
 
     body_param = next((p for p in params if p["kind"] == "body"), None)
+    if canonical in PRECHECKS:
+        # Refused locally, before any I/O (see PRECHECKS).
+        out.append(f"        ManagementChecks::{PRECHECKS[canonical]}(${body_param['name']});")
+        out.append("")
 
     if op["response"]["kind"] == "page":
         model = pascal(op["response"]["schema"].lstrip("[]"))
@@ -1796,7 +1997,10 @@ def call_arguments(namespace: str, op: dict[str, Any]) -> list[str]:
         if p["kind"] == "path":
             args.append(f"'{EXAMPLE_UUID}'")
         elif p["kind"] == "body":
-            args.append(model_literal(op["request_schema"].lstrip("[]")))
+            canonical = next(
+                (f"{namespace}.{name}" for name, o in REGISTRY["namespaces"][namespace]["operations"].items()
+                 if o is op), "")
+            args.append(PRECHECK_FIXTURES.get(canonical) or model_literal(op["request_schema"].lstrip("[]")))
         elif p["kind"] == "page":
             continue
         elif p["required"]:

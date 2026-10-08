@@ -30,6 +30,26 @@ final class ParseSamlSpMetadata implements \JsonSerializable
     }
 
     /**
+     * A request for the server to fetch the SP's metadata from `$value` (`https` only, through
+     * its SSRF guard). Leaves `metadata_xml` absent.
+     * @param string $value the `metadata_url` member
+     */
+    public static function fromUrl(string $value): self
+    {
+        return new self(metadataUrl: $value);
+    }
+
+    /**
+     * A request carrying the SP's metadata document itself (at most 512 KiB). Leaves
+     * `metadata_url` absent.
+     * @param string $value the `metadata_xml` member
+     */
+    public static function fromXml(string $value): self
+    {
+        return new self(metadataXml: $value);
+    }
+
+    /**
      * Rebuilds a ParseSamlSpMetadata from one decoded JSON object.
      * @param array<string,mixed> $data The raw wire object.
      */

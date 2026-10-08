@@ -3777,7 +3777,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             ],
         ];
         $client = $this->signedInClient(200, $mounted);
-        $result = $client->management()->saml()->parseSpMetadata(new Models\ParseSamlSpMetadata());
+        $result = $client->management()->saml()->parseSpMetadata(Models\ParseSamlSpMetadata::fromUrl('https://example.test/metadata'));
 
         $request = $this->lastRequest();
         self::assertSame('POST', $request->getMethod());

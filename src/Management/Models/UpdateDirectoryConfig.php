@@ -27,8 +27,12 @@ final class UpdateDirectoryConfig implements \JsonSerializable
      *     [`SetDirectoryConfig::bind_secret`]; absent keeps the stored secret, subject to the same
      *     P23W2-01 rule. (optional)
      * @param bool|null $enabled See [`SetDirectoryConfig::enabled`]. (optional)
-     * @param string|null $groupBaseDn Explicit `null` clears it. (optional)
-     * @param string|null $groupFilter Explicit `null` clears it. (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $groupBaseDn Explicit `null` clears
+     *     it. `null` leaves the member ABSENT; {@see \Axiam\Sdk\Management\JsonNull::Null} is an
+     *     explicit JSON `null`, which is not the same thing (§27.4 rule 5). (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $groupFilter Explicit `null` clears
+     *     it. `null` leaves the member ABSENT; {@see \Axiam\Sdk\Management\JsonNull::Null} is an
+     *     explicit JSON `null`, which is not the same thing (§27.4 rule 5). (optional)
      * @param list<GroupMapping>|null $groupMappings Replaces the whole table when present.
      *     (optional)
      * @param string|null $groupMemberAttribute See
@@ -53,8 +57,8 @@ final class UpdateDirectoryConfig implements \JsonSerializable
         public readonly ?string $bindDn = null,
         public readonly ?\Axiam\Sdk\Core\Sensitive $bindSecret = null,
         public readonly ?bool $enabled = null,
-        public readonly ?string $groupBaseDn = null,
-        public readonly ?string $groupFilter = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $groupBaseDn = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $groupFilter = null,
         public readonly ?array $groupMappings = null,
         public readonly ?string $groupMemberAttribute = null,
         public readonly ?int $groupNestingDepth = null,
@@ -80,8 +84,8 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             isset($data['bind_dn']) ? (string) $data['bind_dn'] : null,
             isset($data['bind_secret']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['bind_secret']) : null,
             isset($data['enabled']) ? (bool) $data['enabled'] : null,
-            isset($data['group_base_dn']) ? (string) $data['group_base_dn'] : null,
-            isset($data['group_filter']) ? (string) $data['group_filter'] : null,
+            array_key_exists('group_base_dn', $data) ? ($data['group_base_dn'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['group_base_dn']) : null,
+            array_key_exists('group_filter', $data) ? ($data['group_filter'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['group_filter']) : null,
             isset($data['group_mappings']) ? array_values(array_map(static fn (mixed $v): GroupMapping => GroupMapping::fromArray((array) $v), (array) $data['group_mappings'])) : null,
             isset($data['group_member_attribute']) ? (string) $data['group_member_attribute'] : null,
             isset($data['group_nesting_depth']) ? (int) $data['group_nesting_depth'] : null,
@@ -120,10 +124,10 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             $out['enabled'] = $this->enabled;
         }
         if ($this->groupBaseDn !== null) {
-            $out['group_base_dn'] = $this->groupBaseDn;
+            $out['group_base_dn'] = $this->groupBaseDn instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->groupBaseDn;
         }
         if ($this->groupFilter !== null) {
-            $out['group_filter'] = $this->groupFilter;
+            $out['group_filter'] = $this->groupFilter instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->groupFilter;
         }
         if ($this->groupMappings !== null) {
             $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->toArray(), $this->groupMappings);

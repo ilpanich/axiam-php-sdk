@@ -27,8 +27,14 @@ final class SamlIdpInfo implements \JsonSerializable
      * @param string $sloUrl The single-logout endpoint.
      * @param string $ssoUrl The single-sign-on endpoint.
      * @param string $tenantId The tenant.
-     * @param string|null $activeCredentialId The `active` credential, or null. (optional)
-     * @param string|null $nextCredentialId The `next` credential, or null. (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $activeCredentialId The `active`
+     *     credential, or null. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $nextCredentialId The `next`
+     *     credential, or null. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
      */
     public function __construct(
         public readonly string $entityId,
@@ -39,8 +45,8 @@ final class SamlIdpInfo implements \JsonSerializable
         public readonly string $sloUrl,
         public readonly string $ssoUrl,
         public readonly string $tenantId,
-        public readonly ?string $activeCredentialId = null,
-        public readonly ?string $nextCredentialId = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $activeCredentialId = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $nextCredentialId = null,
     ) {
     }
 
@@ -59,8 +65,8 @@ final class SamlIdpInfo implements \JsonSerializable
             (string) ModelDecode::need($data, 'slo_url', self::class),
             (string) ModelDecode::need($data, 'sso_url', self::class),
             (string) ModelDecode::need($data, 'tenant_id', self::class),
-            isset($data['active_credential_id']) ? (string) $data['active_credential_id'] : null,
-            isset($data['next_credential_id']) ? (string) $data['next_credential_id'] : null,
+            array_key_exists('active_credential_id', $data) ? ($data['active_credential_id'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['active_credential_id']) : null,
+            array_key_exists('next_credential_id', $data) ? ($data['next_credential_id'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['next_credential_id']) : null,
         );
     }
 
@@ -84,10 +90,10 @@ final class SamlIdpInfo implements \JsonSerializable
         $out['sso_url'] = $this->ssoUrl;
         $out['tenant_id'] = $this->tenantId;
         if ($this->activeCredentialId !== null) {
-            $out['active_credential_id'] = $this->activeCredentialId;
+            $out['active_credential_id'] = $this->activeCredentialId instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->activeCredentialId;
         }
         if ($this->nextCredentialId !== null) {
-            $out['next_credential_id'] = $this->nextCredentialId;
+            $out['next_credential_id'] = $this->nextCredentialId instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->nextCredentialId;
         }
 
         return $out;

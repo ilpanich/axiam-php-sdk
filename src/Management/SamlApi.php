@@ -78,6 +78,11 @@ final class SamlApi extends ManagementSupport
      * `POST /api/v1/tenants/{tenant_id}/saml/service-providers`
      *
      * `POST /api/v1/tenants/{tenant_id}/saml/service-providers`.
+     *
+     * `sp_signing_cert_pem` must be RSA (2048 bits or more) or ECDSA on P-256, P-384 or P-521;
+     * an **ECDSA certificate verifies HTTP-POST requests only** -- the HTTP-Redirect binding
+     * is RSA-only (§29.3 rule 2). `encrypt_assertions: true` is refused while encryption is
+     * unimplemented. `entity_id` is unique per tenant (`409`) and immutable once created.
      * @param SamlServiceProviderInput $body the request body
      * @return SamlServiceProvider
      */
@@ -123,6 +128,14 @@ final class SamlApi extends ManagementSupport
      * every member the body omits takes its default, it is not kept. `entity_id` is immutable.
      *
      * `PUT /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}`.
+     *
+     * An omitted member takes its **default**, not its stored value: `enabled` and
+     * `sign_responses` default to `true`, `name_id_format` to `persistent`, the other flags to
+     * `false`, certificates and `slo_url` / `slo_binding` to null, the lists to empty (§29.2).
+     * Start from `getServiceProvider()` and {@see
+     * \Axiam\Sdk\Management\ReadModifyWrite::samlServiceProvider()}. `entity_id` is immutable:
+     * changing it is `400` -- register a new service provider instead (§29.3 rule 3). An ECDSA
+     * `sp_signing_cert_pem` verifies HTTP-POST requests only; HTTP-Redirect is RSA-only.
      * @param string $spId the `{sp_id}` path parameter
      * @param SamlServiceProviderInput $body the request body
      * @return SamlServiceProvider
@@ -152,6 +165,9 @@ final class SamlApi extends ManagementSupport
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
      * \Axiam\Sdk\Management\NotFoundError} rather than succeeding quietly.
+     *
+     * Ends no session: users already signed in to the SP stay signed in there until their SP
+     * session ends (§29.3 rule 5).
      * @param string $spId the `{sp_id}` path parameter
      */
     public function deleteServiceProvider(
@@ -171,12 +187,20 @@ final class SamlApi extends ManagementSupport
      * `POST /api/v1/tenants/{tenant_id}/saml/parse-sp-metadata`
      *
      * `POST /api/v1/tenants/{tenant_id}/saml/parse-sp-metadata`.
+     *
+     * **Parses and stores nothing** (§29.3 rule 6): the result is a draft to review and pass
+     * to `createServiceProvider()`. Exactly one of `metadata_xml` and `metadata_url` must be
+     * set -- use `ParseSamlSpMetadata::fromUrl()` or `::fromXml()`; both or neither is refused
+     * locally with a {@see \Axiam\Sdk\Management\ValidationError}, before any request. The
+     * metadata's own signature is not evaluated. `503` in a server built without SAML.
      * @param ParseSamlSpMetadata $body the request body
      * @return SamlSpMetadataDraft
      */
     public function parseSpMetadata(
         ParseSamlSpMetadata $body,
     ): SamlSpMetadataDraft {
+        ManagementChecks::parseSpMetadataExactlyOne($body);
+
         $decoded = $this->transport->send(
             'saml.parse_sp_metadata',
             'POST',
@@ -223,6 +247,9 @@ final class SamlApi extends ManagementSupport
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials`
      *
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials`.
+     *
+     * Generates an RSA-4096 key on the server, which takes seconds; the key is never returned.
+     * An occupied slot is `409` (§29.3 rule 7).
      * @param IssueSamlIdpCredential $body the request body
      * @return SamlIdpCredential
      */
@@ -245,6 +272,10 @@ final class SamlApi extends ManagementSupport
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/promote`
      *
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/promote`.
+     *
+     * `credential_id` must be the tenant's current `next` credential; in one transaction the
+     * old `active` is retired -- its key destroyed -- and `next` becomes `active` (§29.3 rule
+     * 7).
      * @param string $credentialId the `{credential_id}` path parameter
      * @return SamlIdpCredentialPromotion
      */
@@ -267,6 +298,11 @@ final class SamlApi extends ManagementSupport
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/retire`
      *
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/retire`.
+     *
+     * **Retiring the `active` credential with no successor stops SAML sign-on for the whole
+     * tenant at once** (§29.3 rule 7) -- it is the incident response to a leaked key. The key
+     * is destroyed. The safe rotation is: issue into `next`, wait until every SP has refreshed
+     * the metadata, then promote.
      * @param string $credentialId the `{credential_id}` path parameter
      * @return SamlIdpCredential
      */

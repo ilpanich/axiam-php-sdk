@@ -18,11 +18,19 @@ use Axiam\Sdk\Core\NetworkError;
 final class ValidationError extends NetworkError
 {
     /**
-     * @param string           $message Human-readable summary of the rejection.
-     * @param list<FieldError> $fields  Per-field complaints; empty when the server sent none.
+     * @param string           $message       Human-readable summary of the rejection.
+     * @param list<FieldError> $fields        Per-field complaints; empty when the server sent none.
+     * @param string|null      $serverMessage The server's own `message` member, verbatim, when
+     *                                        its body carried one — it names the field and the
+     *                                        rule (§29.4, §30.4). For a person to read: its
+     *                                        wording may change, so never parse it. `null` for a
+     *                                        local refusal and for a body without one.
      */
-    public function __construct(string $message, public readonly array $fields = [])
-    {
+    public function __construct(
+        string $message,
+        public readonly array $fields = [],
+        public readonly ?string $serverMessage = null,
+    ) {
         parent::__construct($message);
     }
 }

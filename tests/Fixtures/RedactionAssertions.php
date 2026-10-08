@@ -15,7 +15,7 @@ namespace Axiam\Sdk\Tests\Fixtures;
 trait RedactionAssertions
 {
     /** A random value of `$bytes` bytes as hex, with a recognisable prefix. */
-    private static function runtimeSecret(string $prefix, int $bytes = 20): string
+    protected static function runtimeSecret(string $prefix, int $bytes = 20): string
     {
         return $prefix . bin2hex(random_bytes($bytes));
     }
@@ -24,7 +24,7 @@ trait RedactionAssertions
      * Every stringification sink a value can reach: `print_r`, `var_export`, `var_dump`,
      * `json_encode`, `serialize`, and a string cast when the value has one.
      */
-    private static function renderings(mixed $value): string
+    protected static function renderings(mixed $value): string
     {
         ob_start();
         var_dump($value);
@@ -49,7 +49,7 @@ trait RedactionAssertions
     }
 
     /** Asserts that no 8-character substring of `$secret` occurs in `$haystack`. */
-    private static function assertNoFragment(string $haystack, string $secret): void
+    protected static function assertNoFragment(string $haystack, string $secret): void
     {
         $last = max(0, strlen($secret) - 8);
         for ($i = 0; $i <= $last; $i++) {
@@ -61,7 +61,7 @@ trait RedactionAssertions
     }
 
     /** Asserts `$actual` equals the secret `$expected`, printing neither on failure. */
-    private static function assertSecretEquals(string $expected, mixed $actual, string $what): void
+    protected static function assertSecretEquals(string $expected, mixed $actual, string $what): void
     {
         self::assertTrue($actual === $expected, $what . ': the value on the wire is not the expected secret');
     }
