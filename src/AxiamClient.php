@@ -552,6 +552,8 @@ final class AxiamClient
             // §6.1 is all-or-nothing: the guard above has already refused a
             // half-configured pair, so either half implies both.
             presentsClientCertificate: $clientCert !== null,
+            retryEnabled: $retryEnabled,
+            telemetry: $this->telemetry,
         );
     }
 
@@ -1828,6 +1830,81 @@ final class AxiamClient
     ): void {
         $this->ensureOpen();
         $this->registrations->delete($registrationClientUri, $registrationAccessToken);
+    }
+
+    // ------------------------------------------------------------------
+    // CIBA (CONTRACT.md §33, contract 1.58)
+    // ------------------------------------------------------------------
+
+    /**
+     * `POST /oauth2/bc-authorize` (CONTRACT.md §33.1) — ask AXIAM to authenticate a user on
+     * another device. **Never retried**, and a success proves nothing about the user; see
+     * {@see OidcEngine::cibaInitiate()}.
+     *
+     * The client authenticates with its `oidcClientSecret`, or — a `tls_client_auth` client —
+     * with its §6.1 certificate alone; a client with neither is refused locally.
+     *
+     * @param \Axiam\Sdk\Oidc\CibaClock|null $clock Stamps the response's `receivedAt` (tests).
+     * @throws AuthError locally, for a client with no credential or a server without CIBA.
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for the server's refusals.
+     */
+    public function cibaInitiate(
+        \Axiam\Sdk\Oidc\CibaInitiateRequest $request,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        ?\Axiam\Sdk\Oidc\CibaClock $clock = null,
+    ): \Axiam\Sdk\Oidc\CibaInitiateResponse {
+        $this->ensureOpen();
+
+        return $this->oidc->cibaInitiate($request, $tenantId, $configuration, $clock);
+    }
+
+    /**
+     * One CIBA token request (CONTRACT.md §33.1). `access_denied` and `expired_token` are
+     * {@see \Axiam\Sdk\Core\OAuthProtocolError}s told apart by `isAccessDenied()` /
+     * `isExpiredToken()`. **Store the tokens first**: a request is redeemed once. See
+     * {@see OidcEngine::cibaPoll()}.
+     */
+    public function cibaPoll(
+        Sensitive $authReqId,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): OidcTokenSet {
+        $this->ensureOpen();
+
+        return $this->oidc->cibaPoll($authReqId, $tenantId, $configuration);
+    }
+
+    /**
+     * Poll for a CIBA request's outcome until it is decided or expires, honouring `interval`
+     * and `slow_down` (CONTRACT.md §33.7). Returns the token set without adopting it. See
+     * {@see OidcEngine::cibaAwait()}, including the ping-mode fallback.
+     *
+     * @param \Axiam\Sdk\Oidc\CibaClock|null $clock The clock to wait on (tests).
+     */
+    public function cibaAwait(
+        \Axiam\Sdk\Oidc\CibaInitiateResponse $initiated,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        ?\Axiam\Sdk\Oidc\CibaClock $clock = null,
+    ): OidcTokenSet {
+        $this->ensureOpen();
+
+        return $this->oidc->cibaAwait($initiated, $tenantId, $configuration, $clock);
+    }
+
+    /**
+     * Verify a CIBA ping's bearer and return the `auth_req_id` it names (CONTRACT.md §33.1) —
+     * pure, no I/O. Answer the ping, then {@see self::cibaPoll()}. See
+     * {@see OidcEngine::cibaHandlePing()}.
+     *
+     * @param array<string|int, string|list<string>> $headers The ping request's headers.
+     * @throws AuthError when the `Authorization` header is not exactly the expected bearer.
+     * @throws \Axiam\Sdk\Management\ValidationError when the body is not a ping body.
+     */
+    public function cibaHandlePing(array $headers, string $body, Sensitive $expectedToken): Sensitive
+    {
+        return OidcEngine::cibaHandlePing($headers, $body, $expectedToken);
     }
 
     // ------------------------------------------------------------------

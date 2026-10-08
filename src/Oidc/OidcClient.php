@@ -10,7 +10,9 @@ use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\OAuthProtocolError;
+use Axiam\Sdk\Core\RetryPolicy;
 use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Core\TelemetryDispatcher;
 use Axiam\Sdk\Rest\AuthMiddleware;
 use Axiam\Sdk\Session;
 use GuzzleHttp\Client;
@@ -132,6 +134,10 @@ final class OidcClient
          * going over mutual TLS" has a whole-client answer here rather than a per-call one.
          */
         private readonly bool $presentsClientCertificate = false,
+        /** §16.1's switch, for the calls this engine retries (`cibaPoll`). */
+        private readonly bool $retryEnabled = true,
+        /** §19, notified before a retry wait; inert when omitted. */
+        private readonly ?TelemetryDispatcher $telemetry = null,
     ) {
         $this->discoveryTtlSeconds = max($discoveryTtlSeconds, self::MIN_DISCOVERY_TTL_SECONDS);
         $this->clockSkewSec = IdTokenValidator::resolveClockSkewSec($clockSkewSec);
@@ -1759,6 +1765,380 @@ final class OidcClient
         }
 
         return $strings;
+    }
+
+    // -------------------------------------------------------------------------
+    // §33 CIBA — client-initiated backchannel authentication (contract 1.58)
+    // -------------------------------------------------------------------------
+
+    /** `grant_type` of the CIBA token request (CIBA Core §10.1). */
+    public const CIBA_GRANT_TYPE = 'urn:openid:params:grant-type:ciba';
+
+    /** The interval used when the initiate response carries none (§33.7 rule 2). */
+    public const DEFAULT_CIBA_INTERVAL_SECONDS = 5;
+
+    /** Seconds added to the CIBA interval per `slow_down`, permanently (§33.7 rule 3). */
+    public const CIBA_SLOW_DOWN_INCREMENT_SECONDS = 5;
+
+    /** The lifetime of a signed request this SDK mints: inside the server's 60-minute bound. */
+    public const CIBA_SIGNED_REQUEST_LIFETIME_SECONDS = 300;
+
+    /**
+     * `POST /oauth2/bc-authorize` (CIBA Core §7, CONTRACT.md §33.1) — ask AXIAM to authenticate
+     * a user **on another device**.
+     *
+     * The client authenticates with the credential this SDK uses at `/oauth2/token`: its
+     * `client_secret` (`client_secret_post`), or — for a `tls_client_auth` client — the §6.1
+     * certificate, sending `client_id` only. A CIBA client is never public, so a client with
+     * neither is refused locally. `tenant_id` travels in the query, never the body; on an mTLS
+     * call the discovery document's `mtls_endpoint_aliases` entry is preferred.
+     *
+     * **Never retried** — not on a transport error, a `5xx` or a `429` (§33.7 rule 1): every
+     * accepted call stores a request and may notify a person. On a lost answer, let it expire
+     * and ask again deliberately.
+     *
+     * **A success proves nothing about the user** (§33.3 rule 4): AXIAM answers a hint that
+     * names nobody, a locked user and a real one identically.
+     *
+     * @throws AuthError locally, when the client has no credential, or when the discovery
+     *         document advertises no `backchannel_authentication_endpoint`.
+     * @throws OAuthProtocolError for the server's refusals at any status — for example
+     *         `invalid_binding_message` with its `errorDescription`, or a `429`'s
+     *         `rate_limit_exceeded`.
+     */
+    public function cibaInitiate(
+        CibaInitiateRequest $request,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        ?CibaClock $clock = null,
+    ): CibaInitiateResponse {
+        $form = $this->cibaClientAuthentication('cibaInitiate');
+        $configuration ??= $this->oidcDiscover();
+        $endpoint = $this->preferredEndpoint(
+            $configuration,
+            static fn (MtlsEndpointAliases $a): ?string => $a->backchannel_authentication_endpoint,
+            $configuration->backchannel_authentication_endpoint,
+        );
+        if ($endpoint === null) {
+            throw new AuthError(
+                'the authorization server\'s discovery document advertises no '
+                . 'backchannel_authentication_endpoint: this server does not support CIBA '
+                . '(CONTRACT.md §33.1)'
+            );
+        }
+        $url = $this->endpointUrl($endpoint, $tenantId);
+
+        if ($request->signer !== null) {
+            // §33.2's signed form: client authentication + `request`, and nothing else.
+            $form['request'] = $this->cibaSignedRequest($request, $request->signer, $form['client_id'], $configuration->issuer)->reveal();
+        } else {
+            foreach ($request->members() as $member => $value) {
+                $form[$member] = $value instanceof Sensitive ? $value->reveal() : (string) $value;
+            }
+        }
+
+        // postForm() is a single request: nothing here retries it.
+        $response = $this->postForm($url, $form, 'ciba_initiate request failed');
+        $wire = self::decodeJsonObject($response, 'ciba_initiate: response body is not a JSON object');
+        $authReqId = $wire['auth_req_id'] ?? null;
+        $expiresIn = $wire['expires_in'] ?? null;
+        if (!is_string($authReqId) || $authReqId === '' || !is_int($expiresIn)) {
+            throw NetworkError::fromMessage('ciba_initiate: malformed CibaInitiateResponse (missing auth_req_id/expires_in)');
+        }
+        $interval = $wire['interval'] ?? null;
+
+        return new CibaInitiateResponse(
+            authReqId: new Sensitive($authReqId),
+            expiresIn: $expiresIn,
+            // §33.7 rule 2: absent (or a meaningless 0) is 5 s — never a faster floor.
+            interval: is_int($interval) && $interval > 0 ? $interval : self::DEFAULT_CIBA_INTERVAL_SECONDS,
+            receivedAt: ($clock ?? new SystemCibaClock())->now(),
+        );
+    }
+
+    /**
+     * `POST /oauth2/token` with `grant_type=urn:openid:params:grant-type:ciba` (CIBA Core §10.1,
+     * CONTRACT.md §33.1) — **one** token request, with the same client authentication as
+     * {@see self::cibaInitiate()} and the mTLS alias rule of every token call.
+     *
+     * The answers of §33.3 rule 6 surface as {@see OAuthProtocolError}: `authorization_pending`
+     * and `slow_down` (non-terminal), `access_denied` and `expired_token` (terminal, and told
+     * apart by {@see OAuthProtocolError::isAccessDenied()} /
+     * {@see OAuthProtocolError::isExpiredToken()}), `invalid_grant`. A protocol answer is never
+     * retried; a transport failure, a `5xx`, `408` or a bodiless `429` is retried per §16 within
+     * this call; any other `4xx` is not.
+     *
+     * **Store the returned tokens before anything else**: a request is redeemed once, and a
+     * second `cibaPoll` for it is `invalid_grant` (§33.7 rule 7). The ID token is validated as
+     * for every other grant (no nonce). The set is returned, not adopted as this client's
+     * credential.
+     *
+     * @throws AuthError locally, when the client has no credential.
+     */
+    public function cibaPoll(
+        Sensitive $authReqId,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): OidcTokenSet {
+        $status = null;
+
+        return $this->cibaPollTracked($authReqId, $tenantId, $configuration, $status);
+    }
+
+    /**
+     * Poll for `$initiated`'s outcome until it is decided or expires (CONTRACT.md §33.1,
+     * §33.7). Surfaces nothing to the user — AXIAM notified them.
+     *
+     * - The first poll waits one `interval` (the response's, or 5 s): polling earlier only
+     *   earns `slow_down` and a longer wait.
+     * - `slow_down` adds 5 s to the interval, cumulatively and permanently;
+     *   `authorization_pending` never lowers it.
+     * - A transport failure, `5xx` or `429` (`rate_limit_exceeded`) that outlived §16 is not
+     *   terminal: the loop waits the interval and polls again.
+     * - Polling stops at `receivedAt + expiresIn`, even if the server has not said
+     *   `expired_token`; the same `expired_token` {@see OAuthProtocolError} is then raised
+     *   locally, without a request.
+     * - Anything else — `access_denied`, `expired_token`, `invalid_grant`, an unknown code, the
+     *   call refused — is raised.
+     *
+     * Returns the token set without adopting it as this client's credential (the posture of
+     * `deviceLogin` and `loginClientCredentials` without their opt-in flag).
+     *
+     * In **ping** mode do not loop from the start: answer the ping, call
+     * {@see self::cibaPoll()} once from the ping handler (again at `interval` after
+     * `slow_down` / `authorization_pending`), and fall back to this loop only once half of
+     * `expiresIn` has passed without a ping (§33.7 rule 6) — a ping is delivered at least once,
+     * never exactly once, and may not arrive at all.
+     *
+     * @param CibaClock|null $clock The clock to wait on; {@see SystemCibaClock} when omitted.
+     */
+    public function cibaAwait(
+        CibaInitiateResponse $initiated,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        ?CibaClock $clock = null,
+    ): OidcTokenSet {
+        $clock ??= new SystemCibaClock();
+        $configuration ??= $this->oidcDiscover();
+        $deadline = $initiated->receivedAt + $initiated->expiresIn;
+        $interval = $initiated->interval > 0 ? $initiated->interval : self::DEFAULT_CIBA_INTERVAL_SECONDS;
+
+        while (true) {
+            // §33.7 rule 4: the deadline is authoritative. Checked before sleeping, so no
+            // request is made that could only be refused, and reported under the server's
+            // own code.
+            if ($clock->now() + $interval >= $deadline) {
+                throw new OAuthProtocolError(
+                    'expired_token',
+                    'the CIBA request expired before it was decided (client-side deadline from '
+                    . 'expires_in; CONTRACT.md §33.7 rule 4)',
+                );
+            }
+            $clock->sleep($interval);
+
+            $status = null;
+            try {
+                return $this->cibaPollTracked($initiated->authReqId, $tenantId, $configuration, $status);
+            } catch (OAuthProtocolError $e) {
+                if ($e->error === 'authorization_pending' || $e->error === 'rate_limit_exceeded') {
+                    continue;
+                }
+                if ($e->error === 'slow_down') {
+                    $interval += self::CIBA_SLOW_DOWN_INCREMENT_SECONDS;
+                    continue;
+                }
+                throw $e;
+            } catch (NetworkError $e) {
+                // §33.7 rule 5: a transport failure, 5xx, 408 or 429 that survived §16 counts
+                // as one interval. A bodiless 4xx is an answer, not a fault.
+                if ($status === null || $status >= 500 || $status === 408 || $status === 429) {
+                    continue;
+                }
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * Check a ping AXIAM delivered to your notification endpoint, and return the `auth_req_id`
+     * it names (CIBA Core §10.2, CONTRACT.md §33.1). **No I/O.**
+     *
+     * 1. Exactly one `Authorization` header (names compared case-insensitively), whose value is
+     *    the scheme `Bearer` (any case), one space, and `$expectedToken` — compared in constant
+     *    time ({@see hash_equals()}). Otherwise an {@see AuthError} whose message names no value.
+     * 2. A JSON object with a non-empty string `auth_req_id`; any other member is ignored.
+     *    Otherwise a local {@see \Axiam\Sdk\Management\ValidationError}.
+     *
+     * It neither answers the HTTP request nor calls the token endpoint: answer `204` as soon
+     * as this returns, **then** call {@see self::cibaPoll()} — AXIAM retries a ping that is not
+     * answered quickly, and the ping says only that the request was decided, never how. Nor
+     * does it check that the `auth_req_id` is one you issued: the token endpoint answers
+     * `invalid_grant` for any other.
+     *
+     * @param array<string|int, string|list<string>> $headers The request's headers: a PSR-7
+     *        `getHeaders()` map (name => list of values), a `getallheaders()` map
+     *        (name => value), or a mix.
+     * @param string    $body          The raw request body.
+     * @param Sensitive $expectedToken The `client_notification_token` you sent with the request.
+     */
+    public static function cibaHandlePing(array $headers, string $body, Sensitive $expectedToken): Sensitive
+    {
+        $refused = static fn (): AuthError => new AuthError(
+            'ciba ping refused: the Authorization header is not the expected bearer (CONTRACT.md §33.1)',
+        );
+
+        $values = [];
+        foreach ($headers as $name => $value) {
+            if (strcasecmp((string) $name, 'authorization') !== 0) {
+                continue;
+            }
+            foreach ((array) $value as $one) {
+                $values[] = (string) $one;
+            }
+        }
+        if (count($values) !== 1) {
+            throw $refused();
+        }
+        $space = strpos($values[0], ' ');
+        if ($space === false) {
+            throw $refused();
+        }
+        $scheme = substr($values[0], 0, $space);
+        $presented = substr($values[0], $space + 1);
+        $expected = $expectedToken->reveal();
+        // Exactly one space: a token never starts with one, so "Bearer  x" is refused here.
+        if (strcasecmp($scheme, 'bearer') !== 0 || $presented === '' || $expected === ''
+            || !hash_equals($expected, $presented)) {
+            throw $refused();
+        }
+
+        $parsed = json_decode($body);
+        if (!$parsed instanceof \stdClass) {
+            throw new \Axiam\Sdk\Management\ValidationError(
+                'ciba_handle_ping: the ping body is not a JSON object (CONTRACT.md §33.1)',
+                [new \Axiam\Sdk\Management\FieldError('body', 'not a JSON object')],
+            );
+        }
+        $authReqId = $parsed->auth_req_id ?? null;
+        if (!is_string($authReqId) || $authReqId === '') {
+            throw new \Axiam\Sdk\Management\ValidationError(
+                'ciba_handle_ping: the ping body carries no non-empty auth_req_id string (CONTRACT.md §33.1)',
+                [new \Axiam\Sdk\Management\FieldError('auth_req_id', 'not a non-empty string')],
+            );
+        }
+
+        return new Sensitive($authReqId);
+    }
+
+    /**
+     * One CIBA token request, reporting the HTTP status of the attempt that decided it in
+     * `$status` (`null` for a transport failure) so {@see self::cibaAwait()} can tell a fault
+     * from an answer.
+     */
+    private function cibaPollTracked(
+        Sensitive $authReqId,
+        ?string $tenantId,
+        ?OidcConfiguration $configuration,
+        ?int &$status,
+    ): OidcTokenSet {
+        $form = $this->cibaClientAuthentication('cibaPoll');
+        $configuration ??= $this->oidcDiscover();
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->token_endpoint,
+                $configuration->token_endpoint,
+            ),
+            $tenantId,
+        );
+        $form = ['grant_type' => self::CIBA_GRANT_TYPE, 'auth_req_id' => $authReqId->reveal()] + $form;
+
+        $retryable = static function () use (&$status): bool {
+            return $status === null || $status >= 500 || $status === 408 || $status === 429;
+        };
+        $response = RetryPolicy::execute(
+            'ciba_poll',
+            $this->retryEnabled,
+            $this->telemetry ?? new TelemetryDispatcher(null),
+            function () use ($url, $form, &$status): ResponseInterface {
+                $status = null;
+                try {
+                    $response = $this->http->post($url, [
+                        'form_params' => $form,
+                        'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+                        'http_errors' => false,
+                    ]);
+                } catch (GuzzleException $e) {
+                    throw NetworkError::fromException($e, 'ciba_poll request failed');
+                }
+                $status = $response->getStatusCode();
+                if ($status < 200 || $status >= 300) {
+                    // A body carrying `error` is an OAuthProtocolError — an AuthError, which
+                    // §16 never retries; a bodiless status maps per §2.
+                    throw ErrorMapper::fromOAuth2Response($response, 'ciba_poll request failed');
+                }
+
+                return $response;
+            },
+            null,
+            null,
+            $retryable,
+        );
+
+        // §33.7 rule 7: the 200 is consumed before anything else, and never re-requested.
+        $wire = self::decodeJsonObject($response, 'ciba_poll: response body is not a JSON object');
+
+        return $this->toTokenSet($wire, $configuration, null);
+    }
+
+    /**
+     * The client-authentication members for a CIBA call: `client_id`, plus `client_secret`
+     * (`client_secret_post`) — or `client_id` alone for a `tls_client_auth` client presenting
+     * its §6.1 certificate. A CIBA client is never public (§33.1), so neither is refused.
+     *
+     * @return array{client_id: string, client_secret?: string}
+     */
+    private function cibaClientAuthentication(string $operation): array
+    {
+        $form = ['client_id' => $this->requireClientId($operation)];
+        if ($this->clientSecret !== null) {
+            $form['client_secret'] = $this->clientSecret->reveal();
+        } elseif (!$this->presentsClientCertificate) {
+            throw new AuthError(sprintf(
+                '%s requires client authentication: a CIBA client is never public — construct the '
+                . 'client with an oidcClientSecret or a §6.1 client certificate (CONTRACT.md §33.1)',
+                $operation,
+            ));
+        }
+
+        return $form;
+    }
+
+    /**
+     * The CIBA Core §7.1.1 signed request: every member inside the JWT (`requested_expiry` as
+     * a number), plus `iss` = the client id, `aud` = the issuer, `iat` = `nbf` = now,
+     * `exp` = now + 300 s and a fresh 128-bit `jti`.
+     */
+    private function cibaSignedRequest(
+        CibaInitiateRequest $request,
+        CibaRequestSigner $signer,
+        string $clientId,
+        string $issuer,
+    ): Sensitive {
+        $now = time();
+        $claims = [
+            'iss' => $clientId,
+            'aud' => $issuer,
+            'iat' => $now,
+            'nbf' => $now,
+            'exp' => $now + self::CIBA_SIGNED_REQUEST_LIFETIME_SECONDS,
+            'jti' => bin2hex(random_bytes(16)),
+        ];
+        foreach ($request->members() as $member => $value) {
+            $claims[$member] = $value instanceof Sensitive ? $value->reveal() : $value;
+        }
+
+        return $signer->sign($claims);
     }
 
     // -------------------------------------------------------------------------

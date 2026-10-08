@@ -30,4 +30,22 @@ final class OAuthProtocolError extends AuthError
     ) {
         parent::__construct(sprintf('%s: %s', $error, $errorDescription));
     }
+
+    /**
+     * Whether this is `access_denied` — at a CIBA or device poll, the user refused
+     * (CONTRACT.md §33.4, §14.2 rule 3). Distinct from {@see self::isExpiredToken()}.
+     */
+    public function isAccessDenied(): bool
+    {
+        return $this->error === 'access_denied';
+    }
+
+    /**
+     * Whether this is `expired_token` — at a CIBA or device poll, nobody decided in time; also
+     * what `cibaAwait` raises locally at its deadline (CONTRACT.md §33.4, §33.7 rule 4).
+     */
+    public function isExpiredToken(): bool
+    {
+        return $this->error === 'expired_token';
+    }
 }

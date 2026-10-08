@@ -420,13 +420,17 @@ final class SsfReceiver
         }
         $keys = [];
         foreach ($entries as $jwk) {
-            if (!is_array($jwk) || ($jwk['kty'] ?? null) !== 'OKP' || ($jwk['crv'] ?? null) !== 'Ed25519'
-                || !is_string($jwk['kid'] ?? null) || !is_string($jwk['x'] ?? null)) {
+            if (!is_array($jwk) || ($jwk['kty'] ?? null) !== 'OKP' || ($jwk['crv'] ?? null) !== 'Ed25519') {
                 continue;
             }
-            $x = self::base64UrlDecode($jwk['x']);
+            $kid = $jwk['kid'] ?? null;
+            $encoded = $jwk['x'] ?? null;
+            if (!is_string($kid) || !is_string($encoded)) {
+                continue;
+            }
+            $x = self::base64UrlDecode($encoded);
             if ($x !== null && strlen($x) === SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES) {
-                $keys[$jwk['kid']] = $x;
+                $keys[$kid] = $x;
             }
         }
         $this->keys = $keys;

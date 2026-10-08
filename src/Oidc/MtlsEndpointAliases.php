@@ -5,21 +5,23 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Oidc;
 
 /**
- * RFC 8705 §5 `mtls_endpoint_aliases` — the six endpoints re-based on the host that
- * performs the mutual-TLS handshake (wire schema `MtlsEndpointAliases`, contract 1.40).
+ * RFC 8705 §5 `mtls_endpoint_aliases` — the seven endpoints re-based on the host that
+ * performs the mutual-TLS handshake (wire schema `MtlsEndpointAliases`, contract 1.40;
+ * the seventh, CIBA's `backchannel_authentication_endpoint`, contract 1.58 — CONTRACT.md §21.3.1
+ * as amended by §33).
  *
  * A TLS listener decides whether to request a client certificate during the handshake,
  * before it has seen any HTTP, so "ask for a certificate on `/oauth2/token` but not on
  * `/oauth2/authorize`" is not something one listener can do. A deployment wanting both
  * runs two, and this object names the second.
  *
- * Only these six are ever aliased. `authorization_endpoint` and `end_session_endpoint` are
+ * Only these seven are ever aliased. `authorization_endpoint` and `end_session_endpoint` are
  * front-channel and `jwks_uri` is public key material, so CONTRACT.md §21.3 rule 2 forbids
  * synthesising an alias for any of them — sending a browser to an mTLS host raises a native
  * certificate-chooser dialog most users cannot answer. `issuer` is not an endpoint and does
  * not move either: §12.4 rule 3 still compares `iss` against it by exact string.
  *
- * **Every property is nullable**, though the server's schema marks all six required. AXIAM
+ * **Every property is nullable**, though the server's schema marks them required. AXIAM
  * builds them from one path through a shared macro and so always publishes the complete
  * set, but RFC 8705 §5 permits an OP to alias fewer, and the shape of this member must
  * never be why a client stops working — the same principle rule 2 point 1 states for the
@@ -35,6 +37,7 @@ final class MtlsEndpointAliases
      * @param string|null $introspection_endpoint RFC 7662 §2.1 — authenticates the caller.
      * @param string|null $device_authorization_endpoint RFC 8628 §3.1 — authenticates the client.
      * @param string|null $pushed_authorization_request_endpoint RFC 9126 §2 — authenticates the client.
+     * @param string|null $backchannel_authentication_endpoint CIBA Core §7 — authenticates the client (contract 1.58): a `tls_client_auth` CIBA client presents its certificate here as at the token endpoint.
      */
     public function __construct(
         public readonly ?string $token_endpoint = null,
@@ -43,6 +46,7 @@ final class MtlsEndpointAliases
         public readonly ?string $introspection_endpoint = null,
         public readonly ?string $device_authorization_endpoint = null,
         public readonly ?string $pushed_authorization_request_endpoint = null,
+        public readonly ?string $backchannel_authentication_endpoint = null,
     ) {
     }
 
@@ -70,6 +74,7 @@ final class MtlsEndpointAliases
             introspection_endpoint: $optionalString($wire['introspection_endpoint'] ?? null),
             device_authorization_endpoint: $optionalString($wire['device_authorization_endpoint'] ?? null),
             pushed_authorization_request_endpoint: $optionalString($wire['pushed_authorization_request_endpoint'] ?? null),
+            backchannel_authentication_endpoint: $optionalString($wire['backchannel_authentication_endpoint'] ?? null),
         );
     }
 }

@@ -22,7 +22,7 @@ use Psr\Http\Message\RequestInterface;
  * - a call going over mTLS prefers the alias;
  * - a call NOT going over mTLS keeps the top-level entry;
  * - an ABSENT member means "no separate mTLS host", never "unsupported";
- * - only the six listed endpoints are ever aliased — not `authorization_endpoint`,
+ * - only the seven listed endpoints are ever aliased (six until contract 1.58 added CIBA's) — not `authorization_endpoint`,
  *   `end_session_endpoint` or `jwks_uri`;
  * - `issuer` is not an endpoint, does not move, and still governs `iss` validation by
  *   exact string.
@@ -48,7 +48,7 @@ final class MtlsEndpointAliasesTest extends TestCase
         $this->requested = [];
     }
 
-    /** All six aliases on the mTLS origin. @return array<string,string> */
+    /** All seven aliases on the mTLS origin (CONTRACT.md §21.3.1 vector A). @return array<string,string> */
     private function allAliases(): array
     {
         return [
@@ -58,6 +58,7 @@ final class MtlsEndpointAliasesTest extends TestCase
             'introspection_endpoint' => self::MTLS_BASE_URL . '/oauth2/introspect',
             'device_authorization_endpoint' => self::MTLS_BASE_URL . '/oauth2/device_authorization',
             'pushed_authorization_request_endpoint' => self::MTLS_BASE_URL . '/oauth2/par',
+            'backchannel_authentication_endpoint' => self::MTLS_BASE_URL . '/oauth2/bc-authorize',
         ];
     }
 
@@ -86,6 +87,7 @@ final class MtlsEndpointAliasesTest extends TestCase
             'grant_types_supported' => ['authorization_code', 'refresh_token', 'client_credentials'],
             'device_authorization_endpoint' => self::BASE_URL . '/oauth2/device_authorization',
             'pushed_authorization_request_endpoint' => self::BASE_URL . '/oauth2/par',
+            'backchannel_authentication_endpoint' => self::BASE_URL . '/oauth2/bc-authorize',
             'end_session_endpoint' => self::BASE_URL . '/oauth2/end_session',
             'backchannel_logout_supported' => true,
             'backchannel_logout_session_supported' => true,
@@ -114,6 +116,10 @@ final class MtlsEndpointAliasesTest extends TestCase
                 'expires_in' => 60,
             ])),
             '/oauth2/introspect' => new Response(200, [], (string) json_encode(['active' => true])),
+            '/oauth2/bc-authorize' => new Response(200, [], (string) json_encode([
+                'auth_req_id' => bin2hex(random_bytes(16)),
+                'expires_in' => 300,
+            ])),
             '/oauth2/revoke' => new Response(200, [], '{}'),
             default => new Response(200, [], (string) json_encode([
                 'access_token' => 'access-token-value',
@@ -275,9 +281,10 @@ final class MtlsEndpointAliasesTest extends TestCase
         $configuration = $client->oidcDiscover();
         $request = $client->oidcBegin($configuration, 'https://app.example.com/cb');
         $client->oidcPar($request, 'https://app.example.com/cb');
+        $client->cibaInitiate(new \Axiam\Sdk\Oidc\CibaInitiateRequest('openid', loginHint: 'ada'));
 
         foreach (['/oauth2/token', '/oauth2/introspect', '/oauth2/revoke',
-                  '/oauth2/device_authorization', '/oauth2/par'] as $path) {
+                  '/oauth2/device_authorization', '/oauth2/par', '/oauth2/bc-authorize'] as $path) {
             $this->assertOnly($path, self::MTLS_BASE_URL);
         }
     }
@@ -368,11 +375,12 @@ final class MtlsEndpointAliasesTest extends TestCase
         self::assertSame(self::BASE_URL . '/oauth2/jwks', $configuration->jwks_uri);
     }
 
-    public function testTheAliasTypeCarriesOnlyTheSixAliasableEndpoints(): void
+    public function testTheAliasTypeCarriesOnlyTheSevenAliasableEndpoints(): void
     {
         // Naming them as a closed set is what makes authorization_endpoint,
-        // end_session_endpoint and jwks_uri unrepresentable rather than merely unused. A
-        // seventh property here would be an alias the SDK could synthesise.
+        // end_session_endpoint and jwks_uri unrepresentable rather than merely unused. An
+        // eighth property here would be an alias the SDK could synthesise. Seven since
+        // contract 1.58 amended §21.3.1 vector A with CIBA's backchannel endpoint.
         $properties = array_map(
             static fn (\ReflectionProperty $p): string => $p->getName(),
             (new \ReflectionClass(MtlsEndpointAliases::class))->getProperties(),
@@ -380,6 +388,7 @@ final class MtlsEndpointAliasesTest extends TestCase
         sort($properties);
 
         self::assertSame([
+            'backchannel_authentication_endpoint',
             'device_authorization_endpoint',
             'introspection_endpoint',
             'pushed_authorization_request_endpoint',
