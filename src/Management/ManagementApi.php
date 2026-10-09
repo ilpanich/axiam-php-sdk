@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management;
 
 /**
- * The CONTRACT.md §27 management surface: 162 operations across 24 namespaces.
+ * The CONTRACT.md §27 management surface: 190 operations across 28 namespaces.
  *
  * Reached as `$client->management()`. This class holds nothing but the shared {@see
  * ManagementTransport} and the client's default scope; each accessor below hands back a
@@ -268,6 +268,72 @@ final class ManagementApi
     public function emailConfig(): EmailConfigApi
     {
         return new EmailConfigApi(
+            $this->transport,
+            new NamespaceScope(),
+            $this->orgId,
+            $this->tenantId,
+        );
+    }
+
+    /**
+     * A tenant's LDAP / Active Directory identity source (CONTRACT §30): the one
+     * configuration, the explicit act that links an existing local account to its directory
+     * entry, and a read-only view of the sync job. Signing in needs nothing new -- a directory
+     * account calls the same §1 `login`.
+     */
+    public function directory(): DirectoryApi
+    {
+        return new DirectoryApi(
+            $this->transport,
+            new NamespaceScope(),
+            $this->orgId,
+            $this->tenantId,
+        );
+    }
+
+    /**
+     * A tenant's SAML 2.0 identity provider (CONTRACT §29): the registry of service providers,
+     * the import of an SP's metadata into a *draft* registration (never a write), and the
+     * lifecycle of the IdP signing credential. The protocol itself -- single sign-on, single
+     * logout, the IdP metadata document -- is browser and SP-to-IdP surface under
+     * /saml/v2/{tenant_id}, an SP's own SAML library speaks to it, and it is not in this
+     * registry.
+     */
+    public function saml(): SamlApi
+    {
+        return new SamlApi(
+            $this->transport,
+            new NamespaceScope(),
+            $this->orgId,
+            $this->tenantId,
+        );
+    }
+
+    /**
+     * A tenant's Shared Signals Framework streams (CONTRACT §32): which receiver -- an OAuth2
+     * client of the tenant -- receives which CAEP and RISC security events, as SETs pushed to
+     * its endpoint or polled. The receiver's own protocol (transmitter metadata, the SSF
+     * stream management API, polling) is not in this registry.
+     */
+    public function ssf(): SsfApi
+    {
+        return new SsfApi(
+            $this->transport,
+            new NamespaceScope(),
+            $this->orgId,
+            $this->tenantId,
+        );
+    }
+
+    /**
+     * A tenant's outbound SCIM targets (CONTRACT §31): the downstream SCIM 2.0 service
+     * providers AXIAM pushes the tenant's users and groups to, each with its delivery state.
+     * The credential AXIAM pushes with is write-only. Deleting a target does not deprovision
+     * anything downstream.
+     */
+    public function scimTargets(): ScimTargetsApi
+    {
+        return new ScimTargetsApi(
             $this->transport,
             new NamespaceScope(),
             $this->orgId,

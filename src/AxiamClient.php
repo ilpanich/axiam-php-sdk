@@ -173,6 +173,21 @@ final class AxiamClient
     /** §16.1 retry switch, forwarded to the §27 management transport. */
     private readonly bool $retryEnabled;
 
+    /**
+     * A transport that carries NOTHING of the session (CONTRACT.md §28.12.2 rule 3,
+     * §32.7): no cookie jar, no {@see AuthMiddleware}, no {@see RefreshMiddleware}, and
+     * redirects off. Same §6 TLS policy and §6.1 client identity as the other two. Used by
+     * the RFC 7592 client-configuration operations and the SSF receiver, whose requests
+     * carry their own bearer and must never carry this client's.
+     */
+    private readonly Client $bareHttp;
+
+    /** CONTRACT.md §28.12 engine, built on {@see self::$bareHttp}. */
+    private readonly \Axiam\Sdk\Oidc\ClientRegistrationClient $registrations;
+
+    /** The configured AXIAM base URL, as given. */
+    private readonly string $baseUrl;
+
     /** §27 management surface. Built on first use; see {@see self::management()}. */
     private ?\Axiam\Sdk\Management\ManagementApi $management = null;
 
@@ -417,6 +432,25 @@ final class AxiamClient
         $plainStack = HandlerStack::create($transportHandler);
         $this->plainHttp = new Client($commonConfig + ['handler' => $plainStack]);
 
+        // CONTRACT.md §28.12.2 rule 3 / §32.7: the session-free transport. Built from the
+        // same TLS settings but WITHOUT the shared cookie jar, without any middleware, and
+        // with redirects off, so a bearer handed to it can neither pick up the session's
+        // credentials nor be carried to another host by a 3xx.
+        $bareConfig = $commonConfig;
+        unset($bareConfig['cookies']);
+        $this->bareHttp = new Client($bareConfig + [
+            'handler' => HandlerStack::create($transportHandler),
+            'cookies' => false,
+            'allow_redirects' => false,
+        ]);
+        $this->baseUrl = $baseUrl;
+        $this->registrations = new \Axiam\Sdk\Oidc\ClientRegistrationClient(
+            $this->bareHttp,
+            $baseUrl,
+            $retryEnabled,
+            $this->telemetry,
+        );
+
         $this->session = new Session($baseUrl, $tenant, $this->plainHttp, $cookieJar);
         // §5.2 rule 1: the construction-time form. Already validated as a UUID above.
         $this->session->setActingTenant($actingTenant);
@@ -518,6 +552,8 @@ final class AxiamClient
             // §6.1 is all-or-nothing: the guard above has already refused a
             // half-configured pair, so either half implies both.
             presentsClientCertificate: $clientCert !== null,
+            retryEnabled: $retryEnabled,
+            telemetry: $this->telemetry,
         );
     }
 
@@ -680,7 +716,7 @@ final class AxiamClient
     }
 
     /**
-     * The CONTRACT.md §27 management surface: 147 operations across 24 namespaces.
+     * The CONTRACT.md §27 management surface: 190 operations across 28 namespaces.
      *
      * `$client->management()->users()->listItems()`. Built on the same Guzzle client that
      * carries {@see \Axiam\Sdk\Rest\AuthMiddleware} and
@@ -861,6 +897,42 @@ final class AxiamClient
     public function emailConfig(): \Axiam\Sdk\Management\EmailConfigApi
     {
         return $this->management()->emailConfig();
+    }
+
+    /**
+     * A tenant's LDAP / Active Directory identity source (CONTRACT §30): its configuration,
+     * account linking, and the sync job's status.
+     */
+    public function directory(): \Axiam\Sdk\Management\DirectoryApi
+    {
+        return $this->management()->directory();
+    }
+
+    /**
+     * A tenant's SAML 2.0 identity provider (CONTRACT §29): service providers, SP-metadata
+     * import, and the IdP signing-credential lifecycle.
+     */
+    public function saml(): \Axiam\Sdk\Management\SamlApi
+    {
+        return $this->management()->saml();
+    }
+
+    /**
+     * A tenant's Shared Signals Framework streams (CONTRACT §32): which receiver gets which
+     * CAEP and RISC security events.
+     */
+    public function ssf(): \Axiam\Sdk\Management\SsfApi
+    {
+        return $this->management()->ssf();
+    }
+
+    /**
+     * A tenant's outbound SCIM targets (CONTRACT §31): the downstream SCIM 2.0 service
+     * providers AXIAM pushes users and groups to.
+     */
+    public function scimTargets(): \Axiam\Sdk\Management\ScimTargetsApi
+    {
+        return $this->management()->scimTargets();
     }
 
     /**
@@ -1668,6 +1740,226 @@ final class AxiamClient
             $resource,
             $tenantId,
             $configuration,
+        );
+    }
+
+    // ------------------------------------------------------------------
+    // RFC 7592 client configuration (CONTRACT.md §28.12, contract 1.53)
+    // ------------------------------------------------------------------
+
+    /**
+     * `GET registration_client_uri` (RFC 7592 §2.1, CONTRACT.md §28.12) — read this
+     * client's own registration, as a client that registered itself through
+     * `POST /oauth2/register` (RFC 7591).
+     *
+     * The result carries neither the token nor the client secret (the server never returns
+     * them on a read), but it does carry every member an update needs — so the usual update
+     * is "read, change a field, update".
+     *
+     * `$registrationClientUri` is used **verbatim**, query included, and only when its
+     * scheme, host and port are this client's base URL's (and `https`, unless the base URL
+     * is `http` on a loopback host); any other URI is refused locally, before any request.
+     * The token travels as `Authorization: Bearer` and nothing of this client's session goes
+     * with it. Retried per §16 on a transport failure, a `5xx`, `408` or `429` — never on
+     * another `4xx`.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError for a URI at another origin — local,
+     *         with no request sent.
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for an answer carrying `error`, at any
+     *         status: `401 invalid_token` is an unknown client, a wrong or rotated-away token,
+     *         another tenant's client or a client with no token — the server never says
+     *         which — and it never refreshes this client's session (§28.12.2 rule 3).
+     */
+    public function readClientRegistration(
+        string $registrationClientUri,
+        Sensitive $registrationAccessToken,
+    ): \Axiam\Sdk\Oidc\ClientRegistration {
+        $this->ensureOpen();
+
+        return $this->registrations->read($registrationClientUri, $registrationAccessToken);
+    }
+
+    /**
+     * `PUT registration_client_uri` (RFC 7592 §2.2, CONTRACT.md §28.12) — **replace** this
+     * client's registration, and receive a **rotated** registration access token.
+     *
+     * `$metadata` is the **whole** registration: a member it omits is a member the server
+     * deletes. Start from {@see self::readClientRegistration()}'s result, which carries every
+     * member (`jwks` / `jwks_uri` and any member this SDK does not model included), and
+     * change what you mean to change. The SDK sets `client_id` to `$metadata->clientId` and
+     * never sends `registration_access_token`, `registration_client_uri`,
+     * `client_secret_expires_at`, `client_id_issued_at` or `client_secret`.
+     *
+     * **Persist the returned `registrationAccessToken` before doing anything else.** From
+     * the moment the server answers it is the only valid token: the one you presented is
+     * dead for every operation.
+     *
+     * **Never retried** — not on a transport error, not on a `5xx`. An update that reached
+     * the server and lost its response has already rotated the token, and repeating it with
+     * the old one is a `401` that locks you out of your own registration. On a lost answer,
+     * read the registration with the token you hold: a `401` means the update landed.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError for a URI at another origin (local).
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for `invalid_client_metadata`,
+     *         `invalid_redirect_uri`, `invalid_request` or `invalid_token`; a refusal does not
+     *         rotate the token.
+     */
+    public function updateClientRegistration(
+        string $registrationClientUri,
+        Sensitive $registrationAccessToken,
+        \Axiam\Sdk\Oidc\ClientRegistration $metadata,
+    ): \Axiam\Sdk\Oidc\ClientRegistration {
+        $this->ensureOpen();
+
+        return $this->registrations->update($registrationClientUri, $registrationAccessToken, $metadata);
+    }
+
+    /**
+     * `DELETE registration_client_uri` (RFC 7592 §2.3, CONTRACT.md §28.12) — delete this
+     * client's registration. A `204` returns normally.
+     *
+     * **Never retried**: a retry after a lost `204` would read `401` and report a successful
+     * deletion as a failure.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError for a URI at another origin (local).
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for an answer carrying `error`.
+     */
+    public function deleteClientRegistration(
+        string $registrationClientUri,
+        Sensitive $registrationAccessToken,
+    ): void {
+        $this->ensureOpen();
+        $this->registrations->delete($registrationClientUri, $registrationAccessToken);
+    }
+
+    // ------------------------------------------------------------------
+    // CIBA (CONTRACT.md §33, contract 1.58)
+    // ------------------------------------------------------------------
+
+    /**
+     * `POST /oauth2/bc-authorize` (CONTRACT.md §33.1) — ask AXIAM to authenticate a user on
+     * another device. **Never retried**, and a success proves nothing about the user; see
+     * {@see OidcEngine::cibaInitiate()}.
+     *
+     * The client authenticates with its `oidcClientSecret`, or — a `tls_client_auth` client —
+     * with its §6.1 certificate alone; a client with neither is refused locally.
+     *
+     * @param \Axiam\Sdk\Oidc\CibaClock|null $clock Stamps the response's `receivedAt` (tests).
+     * @throws AuthError locally, for a client with no credential or a server without CIBA.
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError for the server's refusals.
+     */
+    public function cibaInitiate(
+        \Axiam\Sdk\Oidc\CibaInitiateRequest $request,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        ?\Axiam\Sdk\Oidc\CibaClock $clock = null,
+    ): \Axiam\Sdk\Oidc\CibaInitiateResponse {
+        $this->ensureOpen();
+
+        return $this->oidc->cibaInitiate($request, $tenantId, $configuration, $clock);
+    }
+
+    /**
+     * One CIBA token request (CONTRACT.md §33.1). `access_denied` and `expired_token` are
+     * {@see \Axiam\Sdk\Core\OAuthProtocolError}s told apart by `isAccessDenied()` /
+     * `isExpiredToken()`. **Store the tokens first**: a request is redeemed once. See
+     * {@see OidcEngine::cibaPoll()}.
+     */
+    public function cibaPoll(
+        Sensitive $authReqId,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+    ): OidcTokenSet {
+        $this->ensureOpen();
+
+        return $this->oidc->cibaPoll($authReqId, $tenantId, $configuration);
+    }
+
+    /**
+     * Poll for a CIBA request's outcome until it is decided or expires, honouring `interval`
+     * and `slow_down` (CONTRACT.md §33.7). Returns the token set without adopting it. See
+     * {@see OidcEngine::cibaAwait()}, including the ping-mode fallback.
+     *
+     * @param \Axiam\Sdk\Oidc\CibaClock|null $clock The clock to wait on (tests).
+     */
+    public function cibaAwait(
+        \Axiam\Sdk\Oidc\CibaInitiateResponse $initiated,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        ?\Axiam\Sdk\Oidc\CibaClock $clock = null,
+    ): OidcTokenSet {
+        $this->ensureOpen();
+
+        return $this->oidc->cibaAwait($initiated, $tenantId, $configuration, $clock);
+    }
+
+    /**
+     * Verify a CIBA ping's bearer and return the `auth_req_id` it names (CONTRACT.md §33.1) —
+     * pure, no I/O. Answer the ping, then {@see self::cibaPoll()}. See
+     * {@see OidcEngine::cibaHandlePing()}.
+     *
+     * @param array<string|int, string|list<string>> $headers The ping request's headers.
+     * @throws AuthError when the `Authorization` header is not exactly the expected bearer.
+     * @throws \Axiam\Sdk\Management\ValidationError when the body is not a ping body.
+     */
+    public function cibaHandlePing(array $headers, string $body, Sensitive $expectedToken): Sensitive
+    {
+        return OidcEngine::cibaHandlePing($headers, $body, $expectedToken);
+    }
+
+    // ------------------------------------------------------------------
+    // SSF receiver helper (CONTRACT.md §32.7, contract 1.56)
+    // ------------------------------------------------------------------
+
+    /**
+     * An SSF receiver — the helper a relying party uses to verify the Security Event Tokens
+     * AXIAM pushes to it and to poll a poll stream (CONTRACT.md §32.7). See
+     * {@see \Axiam\Sdk\Ssf\SsfReceiver::verifySet()} and
+     * {@see \Axiam\Sdk\Ssf\SsfReceiver::poll()}.
+     *
+     * The receiver fetches the JWKS and polls over this client's session-free transport: this
+     * client's §6 TLS policy and §6.1 identity, but no cookies, no session token and no
+     * redirects. `poll()` calls `{base URL}/ssf/v1/poll/{stream_id}`.
+     *
+     * @param string $issuer The transmitter's issuer — the tenant's issuer, e.g.
+     *        `https://iam.example/t/{tenant_id}` — compared with `iss` exactly.
+     * @param string $audience This receiver's audience: the stream's `audience`.
+     * @param string|null $jwksUri The JWKS (AXIAM: `{issuer}/oauth2/jwks`); exactly one of this
+     *        and `$discoveryUrl`.
+     * @param string|null $discoveryUrl The SSF configuration document; its `jwks_uri` is used and
+     *        its `issuer` must be `$issuer`.
+     * @param (callable(): (Sensitive|string))|null $accessTokenProvider The bearer `poll()`
+     *        presents: a client-credentials token carrying `ssf.manage`. `null` for push only.
+     * @param int $replayWindowSeconds At least, and by default, seven days.
+     * @param \Axiam\Sdk\Ssf\ReplayStore|null $replayStore Shared store for several processes;
+     *        in-memory when omitted.
+     *
+     * @throws \Axiam\Sdk\Management\ValidationError locally, for a replay window under seven
+     *         days, an empty issuer or audience, or not exactly one key source.
+     */
+    public function ssfReceiver(
+        string $issuer,
+        string $audience,
+        ?string $jwksUri = null,
+        ?string $discoveryUrl = null,
+        ?callable $accessTokenProvider = null,
+        int $replayWindowSeconds = \Axiam\Sdk\Ssf\SsfReceiver::MIN_REPLAY_WINDOW_SECONDS,
+        ?\Axiam\Sdk\Ssf\ReplayStore $replayStore = null,
+    ): \Axiam\Sdk\Ssf\SsfReceiver {
+        $this->ensureOpen();
+
+        return new \Axiam\Sdk\Ssf\SsfReceiver(
+            http: $this->bareHttp,
+            baseUrl: $this->baseUrl,
+            issuer: $issuer,
+            audience: $audience,
+            jwksUri: $jwksUri,
+            discoveryUrl: $discoveryUrl,
+            accessTokenProvider: $accessTokenProvider,
+            replayWindowSeconds: $replayWindowSeconds,
+            replayStore: $replayStore,
+            retryEnabled: $this->retryEnabled,
+            telemetry: $this->telemetry,
         );
     }
 

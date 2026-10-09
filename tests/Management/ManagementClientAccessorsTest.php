@@ -39,9 +39,9 @@ final class ManagementClientAccessorsTest extends ManagementTestCase
                 "§27.3 puts `{$name}` on the client, not only behind management()",
             );
         }
-        // 24 namespaces. Pinned so a partial regeneration that dropped one fails here
-        // rather than quietly shipping 23.
-        self::assertCount(24, $onAggregate);
+        // 28 namespaces. Pinned so a partial regeneration that dropped one fails here
+        // rather than quietly shipping 27.
+        self::assertCount(28, $onAggregate);
     }
 
     /** Both forms reach the same route with the client's own scope. */

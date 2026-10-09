@@ -169,6 +169,26 @@ final class ManagementSparseBodiesGeneratedTest extends ManagementTestCase
         self::assertSame(['enabled'], array_keys($rendered));
     }
 
+    /** `UpdateDirectoryConfig`: naming only `base_dn` sends only `base_dn`. */
+    public function testUpdateDirectoryConfigOmitsWhatYouDidNotName(): void
+    {
+        $body = new Models\UpdateDirectoryConfig(baseDn: 'example');
+
+        $rendered = $body->toArray();
+
+        self::assertSame(['base_dn'], array_keys($rendered));
+    }
+
+    /** `ParseSamlSpMetadata`: naming only `metadata_url` sends only `metadata_url`. */
+    public function testParseSamlSpMetadataOmitsWhatYouDidNotName(): void
+    {
+        $body = new Models\ParseSamlSpMetadata(metadataUrl: 'example');
+
+        $rendered = $body->toArray();
+
+        self::assertSame(['metadata_url'], array_keys($rendered));
+    }
+
     /**
      * `TenantSettingsOverride`: naming only `access_token_lifetime_secs` sends only
      * `access_token_lifetime_secs`.
@@ -215,6 +235,8 @@ final class ManagementSparseBodiesGeneratedTest extends ManagementTestCase
         self::assertSame([], (new Models\UpdateFederationConfigRequest())->toArray());
         self::assertSame([], (new Models\UpdateNotificationRuleRequest())->toArray());
         self::assertSame([], (new Models\EmailConfigOverride())->toArray());
+        self::assertSame([], (new Models\UpdateDirectoryConfig())->toArray());
+        self::assertSame([], (new Models\ParseSamlSpMetadata())->toArray());
         self::assertSame([], (new Models\TenantSettingsOverride())->toArray());
         self::assertSame([], (new Models\UpdateReactorRequest())->toArray());
     }

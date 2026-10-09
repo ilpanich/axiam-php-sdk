@@ -58,7 +58,11 @@ declare(strict_types=1);
 # §27.4 rule 3: `{org_id}` always defaults from the client. `{tenant_id}`
 # defaults from the client only where it names the *context*; in `tenants` and
 # the signing-CA routes it names the object being acted on.
-IMPLICIT_TENANT_NAMESPACES = {"email_config", "settings", "webauthn_policy"}
+IMPLICIT_TENANT_NAMESPACES = {
+    "email_config", "settings", "webauthn_policy",
+    # CONTRACT §30 / §29 / §32: `{tenant_id}` is the context of every route here.
+    "directory", "saml", "ssf",
+}
 
 # Schema names that would collide with a type this SDK already exports. The models
 # live in their own PHP namespace (Axiam\Sdk\Management\Models), so a collision can
@@ -98,6 +102,180 @@ OMIT_WHEN_EMPTY = {"tenantScope"}
 # send the field is decoded exactly as before. A name list, like OMIT_WHEN_EMPTY,
 # because "absent means true" is a fact about this one field, not about every bool.
 DEFAULT_TRUE_WHEN_ABSENT = {"inherit"}
+
+# `type`-tagged unions that are OPEN: an unrecognised tag decodes to a `<Name>Unknown`
+# arm instead of throwing, and that arm refuses to serialize. CONTRACT.md §31.2: an
+# unknown `ScimTargetAuth`/`ScimTargetScope` `type` "MUST decode without failing and
+# MUST NOT be sent" -- a newer server adding an auth method must not break listing the
+# targets that use it, and the SDK must not write back a body it cannot represent.
+# A name list because every earlier union is closed by contract and tested as such.
+OPEN_UNIONS = {"ScimTargetAuth", "ScimTargetScope"}
+
+# Optional fields where an explicit JSON `null` and an ABSENT member mean different things
+# (CONTRACT.md §27.4 rule 5, "null is not absent"). Everywhere else this generator folds
+# both into PHP `null` and omits it from the wire; these four keep them apart with the
+# {@see \Axiam\Sdk\Management\JsonNull} marker:
+#
+# - §30.2: on `directory.update` an explicit `null` for `group_base_dn` / `group_filter`
+#   CLEARS the stored value, while absent keeps it. A sparse body that could only omit
+#   could never clear them.
+# - §29.8 test 8: `SamlIdpInfo`'s two credential ids are null when the slot is empty, and
+#   a decoder MUST keep that null apart from a member a server did not send.
+#
+# A name list, because the distinction is a fact about these four fields and changing the
+# meaning of `null` on every other optional field would break every caller of them.
+JSON_NULL = "\\Axiam\\Sdk\\Management\\JsonNull"
+EXPLICIT_NULL_FIELDS = {
+    ("UpdateDirectoryConfig", "group_base_dn"),
+    ("UpdateDirectoryConfig", "group_filter"),
+    ("SamlIdpInfo", "active_credential_id"),
+    ("SamlIdpInfo", "next_credential_id"),
+}
+
+# Operations whose body has a constraint the server would otherwise be left to refuse, and
+# that the contract requires the SDK to refuse LOCALLY, before any I/O: the generated
+# method calls the named static check on {@see \Axiam\Sdk\Management\ManagementChecks}
+# first. CONTRACT.md §29.2: `ParseSamlSpMetadata` is EXACTLY ONE of `metadata_xml` and
+# `metadata_url`; both or neither "MUST be impossible or a local ValidationError -- not a
+# request the server refuses".
+PRECHECKS: dict[str, str] = {
+    "saml.parse_sp_metadata": "parseSpMetadataExactlyOne",
+}
+
+# The request body the generated surface test sends to a PRECHECKS operation: the
+# required-fields-only fixture every other operation gets would be refused locally.
+PRECHECK_FIXTURES: dict[str, str] = {
+    "saml.parse_sp_metadata": "Models\\ParseSamlSpMetadata::fromUrl('https://example.test/metadata')",
+}
+
+# Named constructors emitted on a model, as (method name, wire field, doc). CONTRACT.md
+# §29.2's "two methods" form of the exactly-one rule: each sets one member and leaves the
+# other absent, so the common case cannot be written wrongly at all; the plain constructor
+# stays for symmetry and is what PRECHECKS guards.
+FACTORIES: dict[str, list[tuple[str, str, str]]] = {
+    "ParseSamlSpMetadata": [
+        ("fromUrl", "metadata_url",
+         "A request for the server to fetch the SP's metadata from `$value` (`https` only, "
+         "through its SSRF guard). Leaves `metadata_xml` absent."),
+        ("fromXml", "metadata_xml",
+         "A request carrying the SP's metadata document itself (at most 512 KiB). Leaves "
+         "`metadata_url` absent."),
+    ],
+}
+
+# Call-site documentation the contract REQUIRES on specific operations, appended to the
+# generated docblock (CONTRACT.md §29.3, §30.3, §31.3, §32.3 -- "an SDK MUST say so at the
+# call site"). Adapted to PHP's names; one paragraph each.
+CALL_SITE_NOTES: dict[str, str] = {
+    "directory.set": (
+        "**Moving the connection requires the secret again** (§30.3 rule 2): a `set` that "
+        "changes `url`, `start_tls`, `bind_dn` or `trust_anchors_pem` without `bindSecret` is "
+        "refused `400` and changes nothing. The SDK holds no copy of the secret and cannot "
+        "re-send one for you. `bindSecret` is required while the tenant has no configuration; "
+        "otherwise absent keeps the stored secret. Every other optional member left out is "
+        "**reset to its default** -- start from {@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::directoryConfig()}. "
+        "An enabled directory and an effective `opaque_mode = required` never coexist (`409`); "
+        "without the deployment's directory key a write carrying a secret is `503`."
+    ),
+    "directory.update": (
+        "**Moving the connection requires the secret again** (§30.3 rule 2): an `update` that "
+        "changes `url`, `start_tls`, `bind_dn` or `trust_anchors_pem` without `bindSecret` is "
+        "refused `400` and changes nothing; the SDK holds no copy of the secret to re-send. A "
+        "member left `null` is not sent and stays as stored; `groupBaseDn` / `groupFilter` set "
+        "to {@see \\Axiam\\Sdk\\Management\\JsonNull::Null} are sent as `null` and clear the value. "
+        "An enabled directory and an effective `opaque_mode = required` never coexist (`409`)."
+    ),
+    "directory.delete": (
+        "**Deleting stops the directory, and only that** (§30.3 rule 5): directory accounts "
+        "can no longer sign in with a password -- there is no fallback to a local hash -- and "
+        "the sync stops. Sessions, refresh tokens and passkeys those accounts already hold keep "
+        "working until they expire or the accounts are deactivated. There is no unlink: a "
+        "linked account stays a directory account."
+    ),
+    "directory.link_account": (
+        "**Signs the account's owner out everywhere** (§30.3 rule 6): linking deletes the "
+        "account's WebAuthn credentials and federation links, revokes its `User` certificates, "
+        "all its sessions and its OAuth2 refresh tokens (TOTP is kept). The entry is found by "
+        "the account's own username; a repeat on an already-linked account answers "
+        "`was_already_linked` and repeats the revocations."
+    ),
+    "saml.create_service_provider": (
+        "`sp_signing_cert_pem` must be RSA (2048 bits or more) or ECDSA on P-256, P-384 or "
+        "P-521; an **ECDSA certificate verifies HTTP-POST requests only** -- the HTTP-Redirect "
+        "binding is RSA-only (§29.3 rule 2). `encrypt_assertions: true` is refused while "
+        "encryption is unimplemented. `entity_id` is unique per tenant (`409`) and immutable "
+        "once created."
+    ),
+    "saml.update_service_provider": (
+        "An omitted member takes its **default**, not its stored value: `enabled` and "
+        "`sign_responses` default to `true`, `name_id_format` to `persistent`, the other flags "
+        "to `false`, certificates and `slo_url` / `slo_binding` to null, the lists to empty "
+        "(§29.2). Start from `getServiceProvider()` and "
+        "{@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::samlServiceProvider()}. `entity_id` is "
+        "immutable: changing it is `400` -- register a new service provider instead (§29.3 "
+        "rule 3). An ECDSA `sp_signing_cert_pem` verifies HTTP-POST requests only; "
+        "HTTP-Redirect is RSA-only."
+    ),
+    "saml.delete_service_provider": (
+        "Ends no session: users already signed in to the SP stay signed in there until their "
+        "SP session ends (§29.3 rule 5)."
+    ),
+    "saml.parse_sp_metadata": (
+        "**Parses and stores nothing** (§29.3 rule 6): the result is a draft to review and "
+        "pass to `createServiceProvider()`. Exactly one of `metadata_xml` and `metadata_url` "
+        "must be set -- use `ParseSamlSpMetadata::fromUrl()` or `::fromXml()`; both or neither "
+        "is refused locally with a {@see \\Axiam\\Sdk\\Management\\ValidationError}, before any "
+        "request. The metadata's own signature is not evaluated. `503` in a server built "
+        "without SAML."
+    ),
+    "saml.issue_idp_credential": (
+        "Generates an RSA-4096 key on the server, which takes seconds; the key is never "
+        "returned. An occupied slot is `409` (§29.3 rule 7)."
+    ),
+    "saml.promote_idp_credential": (
+        "`credential_id` must be the tenant's current `next` credential; in one transaction "
+        "the old `active` is retired -- its key destroyed -- and `next` becomes `active` "
+        "(§29.3 rule 7)."
+    ),
+    "saml.retire_idp_credential": (
+        "**Retiring the `active` credential with no successor stops SAML sign-on for the "
+        "whole tenant at once** (§29.3 rule 7) -- it is the incident response to a leaked key. "
+        "The key is destroyed. The safe rotation is: issue into `next`, wait until every SP "
+        "has refreshed the metadata, then promote."
+    ),
+    "ssf.update_stream": (
+        "An omitted optional member takes its default (§32.2) -- **except "
+        "`authorization_header`, which absent keeps the stored one** -- unless the update moves "
+        "`endpoint_url` to another scheme, host or port while a header is stored: then it must "
+        "carry `authorization_header` again or `clear_authorization_header: true`, else `400` "
+        "(§32.3 rule 5). Start from {@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::ssfStream()}. An "
+        "update overtaken by the receiver's own write is `409`: read the stream again."
+    ),
+    "scim_targets.create": (
+        "`credential` is required here (§31.3 rule 2). It is write-only: no response ever "
+        "carries it, and the SDK keeps no copy."
+    ),
+    "scim_targets.update": (
+        "**The credential is bound to its URL** (§31.3 rule 2): absent `credential` keeps the "
+        "stored one -- except that changing `base_url` of a bearer target, `auth.token_url` or "
+        "`base_url` of a client-credentials target, or `auth.type`, without `credential` in "
+        "the same write is refused `400` and changes nothing. The SDK holds no credential to "
+        "re-send. Every other member left out takes its default -- start from "
+        "{@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::scimTarget()}. An update overtaken by "
+        "another administrator's write is `409` (§31.3 rule 4): reload, then retry yourself."
+    ),
+    "scim_targets.delete": (
+        "**Deprovisions nothing downstream** (§31.3 rule 8): the users and groups AXIAM "
+        "created in the service provider stay there, and AXIAM no longer knows them. To remove "
+        "them, set `deprovision` to `delete`, let AXIAM push, and only then delete the target."
+    ),
+    "scim_targets.reconcile": (
+        "Starts a reconciliation in the background and answers `202`; its outcome is on the "
+        "target's `state` (§31.3 rule 7). `409` while a run holds the claim, within five "
+        "minutes of the last one, or for a disabled target. Not retried, and nothing here "
+        "polls for the run to finish."
+    ),
+}
 
 
 def emit_guard(name: str) -> str:
@@ -488,7 +666,14 @@ def nullable(decl: str) -> str:
 
 
 def enum_case(value: str) -> str:
-    """A PHP enum case name for a wire value (``pending_review`` -> ``PendingReview``)."""
+    """A PHP enum case name for a wire value (``pending_review`` -> ``PendingReview``).
+
+    A URI value (§32's ``SsfEventType``: ``https://schemas.openid.net/secevent/caep/
+    event-type/session-revoked``) is named from its last path segment
+    (``SessionRevoked``); the full URI stays the case's wire value.
+    """
+    if "/" in value:
+        value = value.rstrip("/").rsplit("/", 1)[-1]
     name = pascal(value)
     if not name or not name[0].isalpha():
         name = f"Value{name}"
@@ -580,6 +765,7 @@ def field_list(schema_name: str, secrets: set[str]) -> tuple[list[dict[str, Any]
             "required": is_required,
             "schema": schema,
             "secret": wire in secrets,
+            "explicit_null": (schema_name, wire) in EXPLICIT_NULL_FIELDS,
             "description": schema.get("description") if isinstance(schema, dict) else None,
         })
     # PHP forbids a required parameter after an optional one, so required fields must
@@ -758,6 +944,12 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
     tags = []
     for f in fields:
         optional = "" if f["required"] else " (optional)"
+        if f["explicit_null"]:
+            tags.append(
+                f"@param {f['doc'].removesuffix('|null')}|{JSON_NULL}|null ${f['name']} {field_doc(f)} "
+                f"`null` leaves the member ABSENT; {{@see {JSON_NULL}::Null}} is an explicit JSON "
+                "`null`, which is not the same thing (§27.4 rule 5)." + optional)
+            continue
         suffix = "" if f["required"] or f["doc"] == "mixed" or f["doc"].endswith("|null") else "|null"
         tags.append(f"@param {f['doc']}{suffix} ${f['name']} {field_doc(f)}{optional}")
     out.extend(docblock(f"Constructs a {name}.", "    ", tags) if fields
@@ -770,11 +962,23 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         out.append("    public function __construct(")
         for f in fields:
             decl = f["decl"] if f["required"] else nullable(f["decl"])
+            if f["explicit_null"]:
+                decl = f"{f['decl'].lstrip('?')}|{JSON_NULL}|null"
             default = "" if f["required"] else " = null"
             out.append(f"        public readonly {decl} ${f['name']}{default},")
         out.append("    ) {")
         out.append("    }")
     out.append("")
+
+    # --- named constructors (FACTORIES) ---
+    for fname, wire, fdoc in FACTORIES.get(name, []):
+        field = next(f for f in fields if f["wire"] == wire)
+        out.extend(docblock(fdoc, "    ", [f"@param {field['doc']} $value the `{wire}` member"]))
+        out.append(f"    public static function {fname}({field['decl'].lstrip('?')} $value): self")
+        out.append("    {")
+        out.append(f"        return new self({field['name']}: $value);")
+        out.append("    }")
+        out.append("")
 
     # --- fromArray ---
     out.extend(docblock(
@@ -795,6 +999,11 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
             elif f["required"]:
                 need = f"ModelDecode::need($data, '{f['wire']}', self::class)"
                 out.append(f"            {decode_expr(f, need)},")
+            elif f["explicit_null"]:
+                # Absent stays PHP null; a JSON null becomes the marker (§27.4 rule 5).
+                out.append(
+                    f"            array_key_exists('{f['wire']}', $data) ? ({src} === null ? "
+                    f"{JSON_NULL}::Null : {decode_expr(f, src)}) : null,")
             else:
                 out.append(f"            isset({src}) ? {decode_expr(f, src)} : null,")
         out.append("        );")
@@ -820,6 +1029,11 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
             expr = encode_expr(f)
             if f["required"]:
                 out.append(f"        $out['{f['wire']}'] = {expr};")
+            elif f["explicit_null"]:
+                out.append(emit_guard(f['name']))
+                out.append(f"            $out['{f['wire']}'] = $this->{f['name']} instanceof "
+                           f"{JSON_NULL} ? null : {expr};")
+                out.append("        }")
             else:
                 out.append(emit_guard(f['name']))
                 out.append(f"            $out['{f['wire']}'] = {expr};")
@@ -856,6 +1070,7 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
     """
     files: dict[str, str] = {}
     description = schema.get("description") or f"The `{name}` union from the server's OpenAPI document."
+    is_open = name in OPEN_UNIONS
 
     iface = [header(MODELS_NS)]
     iface.extend(docblock(
@@ -877,7 +1092,10 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
     dispatch = [header(MODELS_NS)]
     dispatch.extend(docblock(
         escape(description) + f"\n\nThe decoder for the `{tag}`-tagged union. Every arm is a "
-        f"{name}Variant; this class exists only to pick the right one.",
+        f"{name}Variant; this class exists only to pick the right one."
+        + (f"\n\nAn **open** union: a `{tag}` this SDK does not know decodes to {{@see "
+           f"{name}Unknown}} instead of failing, and that arm refuses to be sent."
+           if is_open else ""),
     ))
     dispatch.append(f"final class {name}")
     dispatch.append("{")
@@ -886,8 +1104,9 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
         "    ",
         [
             "@param array<string,mixed> $data The raw wire object.",
+        ] + ([] if is_open else [
             f"@throws \\Axiam\\Sdk\\Core\\AxiamException when `{tag}` is missing or unknown.",
-        ],
+        ]),
     ))
     dispatch.append(f"    public static function fromArray(array $data): {name}Variant")
     dispatch.append("    {")
@@ -897,9 +1116,12 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
     for value, payload in arms:
         arm = f"{name}{pascal(value)}"
         dispatch.append(f"            '{value}' => {arm}::fromArray($data),")
-    dispatch.append("            default => throw new \\Axiam\\Sdk\\Core\\AxiamException(")
-    dispatch.append(f"                sprintf('unknown {name} {tag} \"%s\"', is_string($tag) ? $tag : gettype($tag)),")
-    dispatch.append("            ),")
+    if is_open:
+        dispatch.append(f"            default => {name}Unknown::fromArray($data),")
+    else:
+        dispatch.append("            default => throw new \\Axiam\\Sdk\\Core\\AxiamException(")
+        dispatch.append(f"                sprintf('unknown {name} {tag} \"%s\"', is_string($tag) ? $tag : gettype($tag)),")
+        dispatch.append("            ),")
     dispatch.append("        };")
     dispatch.append("    }")
     dispatch.append("}")
@@ -1001,7 +1223,84 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
         body.append("}")
         files[f"{MODELS_DIR}/{arm}.php"] = "\n".join(body) + "\n"
 
+    if is_open:
+        files[f"{MODELS_DIR}/{name}Unknown.php"] = emit_unknown_arm(name, tag)
+
     return files
+
+
+def emit_unknown_arm(name: str, tag: str) -> str:
+    """The `<Name>Unknown` arm of an open union (see ``OPEN_UNIONS``).
+
+    It keeps the tag and the raw object so a caller can inspect what the server sent,
+    and both render paths throw: a body carrying it cannot be sent (CONTRACT.md §31.2).
+    """
+    arm = f"{name}Unknown"
+    exc = "\\Axiam\\Sdk\\Core\\AxiamException"
+    body = [header(MODELS_NS)]
+    body.extend(docblock(
+        f"A {{@see {name}}} whose `{tag}` this SDK's copy of the spec does not list.\n\n"
+        "Decoding one never fails, so a record using a newer variant still lists and reads. "
+        "It can never be sent: {@see self::toArray()} and {@see self::jsonSerialize()} throw, "
+        "because re-sending a body this SDK cannot represent would silently rewrite it.",
+    ))
+    body.append(f"final class {arm} implements {name}Variant")
+    body.append("{")
+    body.extend(docblock(
+        f"Constructs the unknown arm from what the server sent.",
+        "    ",
+        [
+            f"@param string|null $tag The unrecognised `{tag}` value, or null when absent or not a string.",
+            "@param array<string,mixed> $raw The raw wire object, minus any member named like a "
+            "secret (see {@see self::fromArray()}).",
+        ],
+    ))
+    body.append("    public function __construct(")
+    body.append("        public readonly ?string $tag,")
+    body.append("        public readonly array $raw,")
+    body.append("    ) {")
+    body.append("    }")
+    body.append("")
+    body.extend(docblock(
+        "Keeps one decoded JSON object, never throwing -- but drops any member named like a "
+        "secret (`credential`, `client_secret`, `authorization_header`, `bind_secret`, "
+        "`private_key_pem`): no response may carry one (CONTRACT.md §31.2, §32.5), and a "
+        "decoder that meets one MUST drop it rather than surface it.",
+        "    ",
+        ["@param array<string,mixed> $data The raw wire object."],
+    ))
+    body.append("    public static function fromArray(array $data): self")
+    body.append("    {")
+    body.append(f"        $tag = $data['{tag}'] ?? null;")
+    body.append("        unset($data['credential'], $data['client_secret'], $data['authorization_header'], "
+                "$data['bind_secret'], $data['private_key_pem']);")
+    body.append("")
+    body.append("        return new self(\\is_string($tag) ? $tag : null, $data);")
+    body.append("    }")
+    body.append("")
+    body.extend(docblock(
+        "Refuses to render: an unknown variant MUST NOT be sent (CONTRACT.md §31.2).",
+        "    ",
+        ["@return array<string,mixed>", f"@throws {exc} always."],
+    ))
+    body.append("    public function toArray(): array")
+    body.append("    {")
+    body.append(f"        throw new {exc}(")
+    body.append(f"            sprintf('refusing to send an unknown {name} {tag} \"%s\"', $this->tag ?? ''),")
+    body.append("        );")
+    body.append("    }")
+    body.append("")
+    body.extend(docblock(
+        "Refuses to render for `json_encode()`, for the same reason as {@see self::toArray()}.",
+        "    ",
+        ["@return array<string,mixed>", f"@throws {exc} always."],
+    ))
+    body.append("    public function jsonSerialize(): array")
+    body.append("    {")
+    body.append("        return $this->toArray();")
+    body.append("    }")
+    body.append("}")
+    return "\n".join(body) + "\n"
 
 
 def emit_external_union(name: str, schema: Any, arms: list[tuple[str, Any]]) -> dict[str, str]:
@@ -1276,7 +1575,7 @@ def spec_description(op: dict[str, Any]) -> str | None:
     return escape(text) if text else None
 
 
-def operation_doc(op: dict[str, Any], name: str) -> str:
+def operation_doc(op: dict[str, Any], name: str, canonical: str = "") -> str:
     """The docblock summary for one generated operation."""
     described = spec_description(op)
     lead = described or f"`{op['method']} {op['path']}`."
@@ -1309,6 +1608,8 @@ def operation_doc(op: dict[str, Any], name: str) -> str:
             "return it again, so a caller that does not persist it here cannot recover it "
             "(§27.5)."
         )
+    if canonical in CALL_SITE_NOTES:
+        lead += "\n\n" + escape(CALL_SITE_NOTES[canonical])
     return lead
 
 
@@ -1322,7 +1623,7 @@ def emit_operation(namespace: str, opname: str, op: dict[str, Any]) -> list[str]
     tags = [f"@param {p['doc']} ${p['name']} {p['text']}" for p in params]
     if doc_ret != "void":
         tags.append(f"@return {doc_ret}")
-    out = docblock(operation_doc(op, name), "    ", tags)
+    out = docblock(operation_doc(op, name, canonical), "    ", tags)
 
     if params:
         out.append(f"    public function {name}(")
@@ -1349,6 +1650,10 @@ def emit_operation(namespace: str, opname: str, op: dict[str, Any]) -> list[str]
     qv = "[" + ", ".join(query_entries) + "]" if query_entries else "[]"
 
     body_param = next((p for p in params if p["kind"] == "body"), None)
+    if canonical in PRECHECKS:
+        # Refused locally, before any I/O (see PRECHECKS).
+        out.append(f"        ManagementChecks::{PRECHECKS[canonical]}(${body_param['name']});")
+        out.append("")
 
     if op["response"]["kind"] == "page":
         model = pascal(op["response"]["schema"].lstrip("[]"))
@@ -1698,7 +2003,10 @@ def call_arguments(namespace: str, op: dict[str, Any]) -> list[str]:
         if p["kind"] == "path":
             args.append(f"'{EXAMPLE_UUID}'")
         elif p["kind"] == "body":
-            args.append(model_literal(op["request_schema"].lstrip("[]")))
+            canonical = next(
+                (f"{namespace}.{name}" for name, o in REGISTRY["namespaces"][namespace]["operations"].items()
+                 if o is op), "")
+            args.append(PRECHECK_FIXTURES.get(canonical) or model_literal(op["request_schema"].lstrip("[]")))
         elif p["kind"] == "page":
             continue
         elif p["required"]:
@@ -1971,6 +2279,25 @@ def emit_roundtrip_test() -> str:
                 block.append("            array_values(array_diff(array_keys($wire), array_keys($model->toArray()))),")
                 block.append(f"            '{arm} decoded a field it cannot render again',")
                 block.append("        );")
+                block.append("    }")
+                cases.append("\n".join(block))
+            if name in OPEN_UNIONS:
+                # §31.2: an unknown tag decodes (no throw) and then refuses to be sent.
+                arm = f"{name}Unknown"
+                count += 1
+                block = inline_doc(
+                    f"`{arm}`: an unrecognised `{tag}` decodes, and refuses to render.", "    ")
+                block.append(f"    public function test{arm}RoundTrips(): void")
+                block.append("    {")
+                block.append(f"        $wire = ['{tag}' => 'from_a_newer_server', 'extra' => 1];")
+                block.append("")
+                block.append(f"        $model = Models\\{name}::fromArray($wire);")
+                block.append("")
+                block.append(f"        self::assertInstanceOf(Models\\{arm}::class, $model);")
+                block.append("        self::assertSame('from_a_newer_server', $model->tag);")
+                block.append("        self::assertSame($wire, $model->raw);")
+                block.append("        $this->expectException(\\Axiam\\Sdk\\Core\\AxiamException::class);")
+                block.append("        json_encode($model, JSON_THROW_ON_ERROR);")
                 block.append("    }")
                 cases.append("\n".join(block))
             continue

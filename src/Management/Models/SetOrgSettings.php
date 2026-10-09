@@ -59,11 +59,17 @@ final class SetOrgSettings implements \JsonSerializable
      * @param string|null $opaqueKsf the server's `opaque_ksf` field (optional)
      * @param string|null $opaqueMode the server's `opaque_mode` field (optional)
      * @param string|null $opaqueSuite the server's `opaque_suite` field (optional)
+     * @param bool|null $samlIdpEnabled G-2 / D-20 — defaulted, so an API client written before
+     *     the SAML identity provider existed lands on `false`, which is what every deployment did
+     *     before (I1). (optional)
      * @param bool|null $sensitiveScopesEnabled the server's `sensitive_scopes_enabled` field
      *     (optional)
      * @param list<string>|null $serverCertAllowedNames S-7 — defaulted to empty, so an API
      *     client written before the field lands on "no `Server` certificate is issued" (I1).
      *     (optional)
+     * @param bool|null $ssfEnabled G-5 / D-45 — defaulted, so an API client written before the
+     *     SSF transmitter existed lands on `false`, which is what every deployment did before
+     *     (I1). (optional)
      * @param string|null $webauthnUserVerification the server's `webauthn_user_verification`
      *     field (optional)
      */
@@ -100,8 +106,10 @@ final class SetOrgSettings implements \JsonSerializable
         public readonly ?string $opaqueKsf = null,
         public readonly ?string $opaqueMode = null,
         public readonly ?string $opaqueSuite = null,
+        public readonly ?bool $samlIdpEnabled = null,
         public readonly ?bool $sensitiveScopesEnabled = null,
         public readonly ?array $serverCertAllowedNames = null,
+        public readonly ?bool $ssfEnabled = null,
         public readonly ?string $webauthnUserVerification = null,
     ) {
     }
@@ -145,8 +153,10 @@ final class SetOrgSettings implements \JsonSerializable
             isset($data['opaque_ksf']) ? (string) $data['opaque_ksf'] : null,
             isset($data['opaque_mode']) ? (string) $data['opaque_mode'] : null,
             isset($data['opaque_suite']) ? (string) $data['opaque_suite'] : null,
+            isset($data['saml_idp_enabled']) ? (bool) $data['saml_idp_enabled'] : null,
             isset($data['sensitive_scopes_enabled']) ? (bool) $data['sensitive_scopes_enabled'] : null,
             isset($data['server_cert_allowed_names']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['server_cert_allowed_names'])) : null,
+            isset($data['ssf_enabled']) ? (bool) $data['ssf_enabled'] : null,
             isset($data['webauthn_user_verification']) ? (string) $data['webauthn_user_verification'] : null,
         );
     }
@@ -218,11 +228,17 @@ final class SetOrgSettings implements \JsonSerializable
         if ($this->opaqueSuite !== null) {
             $out['opaque_suite'] = $this->opaqueSuite;
         }
+        if ($this->samlIdpEnabled !== null) {
+            $out['saml_idp_enabled'] = $this->samlIdpEnabled;
+        }
         if ($this->sensitiveScopesEnabled !== null) {
             $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
         }
         if ($this->serverCertAllowedNames !== null) {
             $out['server_cert_allowed_names'] = $this->serverCertAllowedNames;
+        }
+        if ($this->ssfEnabled !== null) {
+            $out['ssf_enabled'] = $this->ssfEnabled;
         }
         if ($this->webauthnUserVerification !== null) {
             $out['webauthn_user_verification'] = $this->webauthnUserVerification;

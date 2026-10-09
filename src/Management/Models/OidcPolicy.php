@@ -17,23 +17,25 @@ namespace Axiam\Sdk\Management\Models;
  * tenant may be stricter than its organization and never more permissive: *
  * [`Self::sensitive_scopes_enabled`], validated **disable-only** — the mirror image of
  * `mfa_enforced`, because releasing personal data is the less-restrictive direction, so a
- * tenant can turn its organization's decision off but never on. *
- * [`Self::dynamic_registration`], on the ladder `disabled` → `initial_access_token` →
- * `anonymous`: a tenant may move down it and never up. * [`Self::dcr_max_clients`] and
- * [`Self::dcr_unused_client_ttl_days`], on the ordinary `tenant <= org` rule — with the
- * wrinkle that `0` on the second means *never sweep*, which is the longest window of all and
- * is handled by [`dcr_ttl_strictness`]. **Not ordered**, therefore never validated against the
- * baseline and never clamped: * [`Self::default_locale`]. A language is a presentation
- * preference; there is no sense in which Italian is stricter than French. *
- * [`Self::dcr_allowed_scopes`], [`Self::dcr_allowed_redirect_hosts`] and
- * [`Self::external_client_allowed_resources`]. Each names per-tenant resources — *this*
- * tenant's MCP servers, *this* tenant's callback hosts — and there is no sense in which one
- * such list is stricter than another. A subset rule would force an organization to enumerate
- * every tenant's resource servers in its own baseline before any tenant could name one. The
- * model's rule is "a tenant may only be more restrictive", which binds every field that *has*
- * a restrictiveness; a field that has none cannot violate it. One cross-field interlock spans
- * both groups and is checked on the resolved policy rather than on either input: see
- * [`validate_dcr_policy`].
+ * tenant can turn its organization's decision off but never on. * [`Self::saml_idp_enabled`],
+ * validated **disable-only** exactly like [`Self::sensitive_scopes_enabled`] (D-20): a tenant
+ * may turn its organization's `true` off and never its `false` on. * [`Self::ssf_enabled`],
+ * validated **disable-only** the same way (D-45). * [`Self::dynamic_registration`], on the
+ * ladder `disabled` → `initial_access_token` → `anonymous`: a tenant may move down it and
+ * never up. * [`Self::dcr_max_clients`] and [`Self::dcr_unused_client_ttl_days`], on the
+ * ordinary `tenant <= org` rule — with the wrinkle that `0` on the second means *never sweep*,
+ * which is the longest window of all and is handled by [`dcr_ttl_strictness`]. **Not
+ * ordered**, therefore never validated against the baseline and never clamped: *
+ * [`Self::default_locale`]. A language is a presentation preference; there is no sense in
+ * which Italian is stricter than French. * [`Self::dcr_allowed_scopes`],
+ * [`Self::dcr_allowed_redirect_hosts`] and [`Self::external_client_allowed_resources`]. Each
+ * names per-tenant resources — *this* tenant's MCP servers, *this* tenant's callback hosts —
+ * and there is no sense in which one such list is stricter than another. A subset rule would
+ * force an organization to enumerate every tenant's resource servers in its own baseline
+ * before any tenant could name one. The model's rule is "a tenant may only be more
+ * restrictive", which binds every field that *has* a restrictiveness; a field that has none
+ * cannot violate it. One cross-field interlock spans both groups and is checked on the
+ * resolved policy rather than on either input: see [`validate_dcr_policy`].
  */
 final class OidcPolicy implements \JsonSerializable
 {
@@ -105,6 +107,30 @@ final class OidcPolicy implements \JsonSerializable
      *     tokens — which AXIAM's own APIs accept. That is why the interlock exists: the empty list
      *     is not a safe default for an *open* registration endpoint, it is the most dangerous one.
      *     Shared with T5 (CIMD), which inherits the same list for the same reason. (optional)
+     * @param bool|null $samlIdpEnabled G-2 / D-20 — whether this tenant may act as a SAML 2.0
+     *     identity provider: publish IdP metadata and accept `AuthnRequest`s on
+     *     `/saml/v2/{tenant}/{metadata,sso,slo}`. **Off unless an organization turns it on.** A
+     *     SAML IdP issues assertions that other systems accept as proof of identity, so a
+     *     deployment that has never decided to be one issues none, and the three endpoints answer
+     *     `404` as if they did not exist. The switch lives on this policy, beside the other OpenID
+     *     Provider surface controls, because the SSO endpoint is the same browser login hop and OP
+     *     session with a different wire format. **Disable-only**, with the shape of
+     *     [`Self::sensitive_scopes_enabled`]: a tenant may turn its organization's `true` off but
+     *     never its `false` on, because the decision to issue identity assertions on behalf of the
+     *     organization's tenants is the organization's. A deployment built without the `saml`
+     *     feature answers `404` whatever this says; the setting is a capability, not a grant (each
+     *     SP must still be registered, and `allow_idp_initiated` is its own opt-in). (optional)
+     * @param bool|null $ssfEnabled G-5 / D-45 — whether the tenant is a Shared Signals
+     *     Framework transmitter: its `/.well-known/ssf-configuration` is served, its receivers can
+     *     use the stream management API, and events are signed and transmitted on its streams.
+     *     Default **`false`**. **Disable-only**, with the shape of [`Self::saml_idp_enabled`]:
+     *     sending security events about the organization's users to third parties is the
+     *     organization's decision. Streams can be registered while it is off; they carry nothing
+     *     until it is on. (optional)
+     * @param string|null $ssfInactiveReason **Read-only**, D-55: set on a settings response
+     *     when `ssf_enabled` is on but the transmitter is inactive anyway, saying why — the
+     *     deployment holds more than one tenant and serves no per-tenant issuers. Never stored.
+     *     (optional)
      */
     public function __construct(
         public readonly bool $sensitiveScopesEnabled,
@@ -116,6 +142,9 @@ final class OidcPolicy implements \JsonSerializable
         public readonly ?string $defaultLocale = null,
         public readonly ?string $dynamicRegistration = null,
         public readonly ?array $externalClientAllowedResources = null,
+        public readonly ?bool $samlIdpEnabled = null,
+        public readonly ?bool $ssfEnabled = null,
+        public readonly ?string $ssfInactiveReason = null,
     ) {
     }
 
@@ -135,6 +164,9 @@ final class OidcPolicy implements \JsonSerializable
             isset($data['default_locale']) ? (string) $data['default_locale'] : null,
             isset($data['dynamic_registration']) ? (string) $data['dynamic_registration'] : null,
             isset($data['external_client_allowed_resources']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['external_client_allowed_resources'])) : null,
+            isset($data['saml_idp_enabled']) ? (bool) $data['saml_idp_enabled'] : null,
+            isset($data['ssf_enabled']) ? (bool) $data['ssf_enabled'] : null,
+            isset($data['ssf_inactive_reason']) ? (string) $data['ssf_inactive_reason'] : null,
         );
     }
 
@@ -173,6 +205,15 @@ final class OidcPolicy implements \JsonSerializable
         }
         if ($this->externalClientAllowedResources !== null) {
             $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
+        }
+        if ($this->samlIdpEnabled !== null) {
+            $out['saml_idp_enabled'] = $this->samlIdpEnabled;
+        }
+        if ($this->ssfEnabled !== null) {
+            $out['ssf_enabled'] = $this->ssfEnabled;
+        }
+        if ($this->ssfInactiveReason !== null) {
+            $out['ssf_inactive_reason'] = $this->ssfInactiveReason;
         }
 
         return $out;

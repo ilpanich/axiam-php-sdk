@@ -191,11 +191,13 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.52**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
-§15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28 (including
+This SDK conforms to **contract 1.58**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+§15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33,
+with §32.7 and §33.2 signed (the signed form for `EdDSA` and `ES256`; **`PS256` is not
+shipped**, see [CIBA](#ciba-contractmd-33) below for why), including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8; §28 MCP
-resource-server helpers, contract 1.48, see below) — the binding,
+resource-server helpers, contract 1.48, see below — the binding,
 cross-language behavioral contract every
 AXIAM SDK implements: camelCase method names (§1) — including the gRPC-only `getUserInfo`
 operation (§1.1) — the `AuthError`/`AuthzError`/`NetworkError` typed exception hierarchy (§2,
@@ -224,6 +226,35 @@ which has no authenticator, and §24.6b rule 2 forbids emulating one in software
 "credential" held in process memory is not a second factor. The ceremony runs in the
 browser, and §24.6a's JSON bridge is the seam that carries the challenge out and the
 response back.
+
+§28.12, §29, §30, §31, §32, §32.7 and §33 are named rather than folded into a range because
+they landed after this SDK already stated its earlier sections: widening a range silently would
+turn a statement that was true when written into a different claim without anyone editing it.
+The §21.3.1 amendment of contract 1.58 — the seventh `mtls_endpoint_aliases` member,
+`backchannel_authentication_endpoint` — is decoded and honoured on an mTLS CIBA call; it is
+part of the §21 claim, not of §33's.
+
+### Contract 1.53 – 1.58 — what this SDK ships
+
+| Section | Here |
+|---|---|
+| §28.12 RFC 7592 client configuration | `readClientRegistration`, `updateClientRegistration`, `deleteClientRegistration` on `AxiamClient`; `Axiam\Sdk\Oidc\ClientRegistration` |
+| §29 SAML service providers | `$client->saml()` — eleven generated operations with the §29.3 call-site notes; `ParseSamlSpMetadata::fromUrl()` / `::fromXml()`, both-or-neither refused locally |
+| §30 directory | `$client->directory()` — six generated operations; `bindSecret` `Sensitive`; an explicit `null` on `update` through `JsonNull::Null` |
+| §31 outbound SCIM targets | `$client->scimTargets()` — six generated operations; `credential` `Sensitive` |
+| §32 SSF streams | `$client->ssf()` — five generated operations; `authorizationHeader` `Sensitive` |
+| §32.7 SSF receiver helper | `$client->ssfReceiver(...)` → `Axiam\Sdk\Ssf\SsfReceiver::verifySet()` / `poll()` |
+| §33 CIBA | `cibaInitiate`, `cibaPoll`, `cibaAwait`, `cibaHandlePing` on `AxiamClient` |
+| §33.2 signed request | `CibaRequestSigner::fromPem()` — `EdDSA` and `ES256`; `PS256` refused locally |
+| §21.3.1 (amended) | `MtlsEndpointAliases::$backchannel_authentication_endpoint`, the seventh alias |
+
+**Carve-out — `PS256` for the §33.2 signed request.** This SDK's JOSE library,
+`firebase/php-jwt`, signs `PS256` only through phpseclib **3**, which is not a dependency of
+this package (the phpseclib a Composer install may pull in transitively for `php-amqplib`
+is version 4, whose namespace php-jwt does not load). Rather than depend on a transitive
+package or fail at the first request, `CibaRequestSigner::fromPem(CibaSigningAlg::PS256, …)`
+is refused locally with a `ValidationError`. A client that must sign CIBA requests registers
+`ES256` or `EdDSA`.
 
 ### Contract 1.51
 
@@ -1476,7 +1507,7 @@ Worked end to end in [`examples/par_login.php`](examples/par_login.php).
 
 ## Management API (`Axiam\Sdk\Management`, CONTRACT.md §27)
 
-The administrative surface: **160 operations across 24 namespaces**, generated from the
+The administrative surface: **190 operations across 28 namespaces**, generated from the
 vendored `management-registry.json` and `openapi.json` by `scripts/gen_management.py` and
 committed, so building this package needs no Python. CI re-runs the generator with
 `--check` on every PR, which is what stops the committed surface from drifting away from
@@ -1484,7 +1515,7 @@ the contract it claims to implement.
 
 The namespace handles sit **directly on the client** — `$client->roles()`,
 `$client->serviceAccounts()->rotateSecret($id)`, the form §27.3's PHP row shows — and the
-same 24 handles are also reachable behind one accessor, `$client->management()` (§27.2
+same 28 handles are also reachable behind one accessor, `$client->management()` (§27.2
 rule 4), which reads better where a call site is already dense with §1 methods. The two
 forms are **equivalent**: the direct accessors forward to `management()`, so rule 4's
 "where an SDK offers both, the two MUST return equivalent handles" holds structurally
@@ -1492,7 +1523,7 @@ rather than by two code paths agreeing, and the suite asserts it by comparing th
 path and query each actually puts on the wire.
 
 ```php
-// §27.2 — namespace handles, not 147 flat methods.
+// §27.2 — namespace handles, not 190 flat methods.
 $page = $client->users()->listItems(new PageRequest(0, 50));
 
 // Or reach the same handles behind one accessor.
@@ -1893,6 +1924,164 @@ for AXIAM's own gRPC services (`checkAccess`, `getUserInfo`) — the opposite di
 gRPC (or AMQP) resource-server guard here to wire the challenge into. §10's guard, and
 therefore all of §28, is a REST-only surface on this SDK today.
 
+## RFC 7592 client configuration (CONTRACT.md §28.12)
+
+A client that registered itself through `POST /oauth2/register` received a
+`registration_client_uri` and a `registration_access_token`, once. With them it manages its
+own registration — and only at this client's configured AXIAM: a URI at any other origin (or
+`http` unless the base URL is itself `http` on a loopback host) is refused with a
+`ValidationError` before a request is sent.
+
+```php
+use Axiam\Sdk\Core\Sensitive;
+
+$token = new Sensitive($storedRegistrationAccessToken);
+$registration = $client->readClientRegistration($registrationClientUri, $token);
+
+// A FULL replacement: a member you leave out is deleted. Start from the read, which
+// carries every member — including ones this SDK does not model, kept in ->extra.
+$registration->clientName = 'Agent v2';
+$updated = $client->updateClientRegistration($registrationClientUri, $token, $registration);
+
+// The token ROTATES: the one you presented is dead. Persist the new one first.
+store($updated->registrationAccessToken?->reveal());
+```
+
+The token travels only as `Authorization: Bearer`, on a transport that carries nothing of
+this client's session (no cookie, no access token, no CSRF token) and follows no redirect.
+Neither write is retried — an update whose answer was lost has already rotated the token —
+and a `401` from these calls (an `OAuthProtocolError` with `error === 'invalid_token'`)
+never triggers the §9 refresh. The read is retried per §16 on transport failures and
+`5xx`/`408`/`429` only.
+
+## Directory, SAML, SSF and SCIM targets (CONTRACT.md §29 – §32)
+
+Four management namespaces, generated like the rest of §27, with the contract's call-site
+rules in each method's docblock.
+
+```php
+use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Management\JsonNull;
+use Axiam\Sdk\Management\Models;
+use Axiam\Sdk\Management\ReadModifyWrite;
+
+// §30 — moving the connection (url, start_tls, bind_dn, trust_anchors_pem) needs the
+// secret again; the SDK keeps no copy. JsonNull::Null sends an explicit `null` (clears);
+// a plain PHP null is "absent" (keeps).
+$client->directory()->update(new Models\UpdateDirectoryConfig(
+    bindSecret: new Sensitive($secretFromVault),
+    groupFilter: JsonNull::Null,
+    url: 'ldaps://dc2.corp.example',
+));
+
+// §29 — a metadata import is a draft; nothing is stored until you create it. Exactly one
+// of the URL and the document: the two named constructors make that the only shape.
+$draft = $client->saml()->parseSpMetadata(Models\ParseSamlSpMetadata::fromUrl('https://sp.example/metadata'));
+$sp = $client->saml()->createServiceProvider($draft->serviceProvider);
+
+// §29 / §31 / §32 — `update` is a REPLACEMENT: an omitted member takes its default.
+// Read, convert, change, write. The write-only secret comes back absent, which keeps the
+// stored one (unless the write moves its URL, which then needs it again).
+$target = $client->scimTargets()->get($targetId);
+$client->scimTargets()->update($targetId, ReadModifyWrite::scimTarget($target, ['enabled' => false]));
+
+$stream = $client->ssf()->getStream($streamId);
+$client->ssf()->updateStream($streamId, ReadModifyWrite::ssfStream($stream, ['description' => 'EU RP']));
+```
+
+`SamlIdpCredential` has no key member and never will; a decoder meeting `bind_secret`,
+`credential`, `authorization_header` or `private_key_pem` in a response drops it. `delete` on a
+SCIM target deprovisions nothing downstream; retiring the active SAML credential with no
+successor stops SAML sign-on for the whole tenant. Every write in these namespaces is issued
+exactly once. A `400` is a `ValidationError` whose `serverMessage` carries the server's
+`message` (it names the rule — for a person; never parse it).
+
+## SSF receiver (CONTRACT.md §32.7)
+
+For the relying party that *receives* AXIAM's CAEP and RISC events:
+
+```php
+use Axiam\Sdk\Ssf\SetErr;
+use Axiam\Sdk\Ssf\SetVerificationError;
+use Axiam\Sdk\Ssf\SsfPollOptions;
+
+$receiver = $client->ssfReceiver(
+    issuer: 'https://iam.example.com/t/<tenant-id>',          // compared with `iss` exactly
+    audience: 'https://rp.example.com',                        // your stream's audience
+    jwksUri: 'https://iam.example.com/t/<tenant-id>/oauth2/jwks',
+    accessTokenProvider: fn () => $client->loginClientCredentials('ssf.manage')->accessToken,
+);
+
+// Push (RFC 8935): verify, then answer 202 — or 400 {"err": …}.
+try {
+    $event = $receiver->verifySet($requestBody);
+    handle($event->eventType, $event->event, $event->subId);
+} catch (SetVerificationError $e) {
+    respond(400, ['err' => $e->failureReason->pushErrorCode()]);
+}
+
+// Poll (RFC 8936): acknowledge what you PROCESSED on the next call; refuse the rest.
+$result = $receiver->poll($streamId, new SsfPollOptions(returnImmediately: true));
+$ack = array_map(static fn ($e) => $e->jti, $result->events);   // after processing them
+$setErrs = [];
+foreach ($result->refused as $refused) {
+    $setErrs[$refused->jti] = SetErr::fromReason($refused->reason);
+}
+$receiver->poll($streamId, new SsfPollOptions(ack: $ack, setErrs: $setErrs));
+```
+
+The verification order and the reason codes (`SetFailureReason`) are the contract's; `alg`
+is pinned to `EdDSA` before any key is looked up, and keys come only from the configured JWKS
+(never a `jwk`/`x5c` header). An unknown `kid` costs **one** forced JWKS refetch, at most once
+a minute. A JWKS fetch failure is a `NetworkError`, not a verdict on the SET. A verified SET
+is **recorded**: re-offered unacknowledged, it reads as `replayed` — so acknowledge what you
+processed. The replay window defaults to, and may not be set below, seven days; the default
+store is in-memory and per-process — behind PHP-FPM, pass a shared `ReplayStore` (an atomic
+`SET NX EX` in Redis, say). `malformed`, `invalid_type` and `replayed` are answered as
+`invalid_request`, since only RFC 8935's codes go on the wire.
+
+## CIBA (CONTRACT.md §33)
+
+Ask AXIAM to authenticate a user **on another device**, then collect the tokens. The client
+authenticates as it does at `/oauth2/token` — its `oidcClientSecret`, or, for a
+`tls_client_auth` client, its §6.1 certificate alone; a client with neither is refused locally.
+
+```php
+use Axiam\Sdk\Core\OAuthProtocolError;
+use Axiam\Sdk\Oidc\CibaInitiateRequest;
+
+$initiated = $client->cibaInitiate(new CibaInitiateRequest(
+    scope: 'openid',
+    loginHint: 'ada@example.com',
+    bindingMessage: 'W4SCT',            // shown to the user, so they can tell it is yours
+));                                     // never retried
+try {
+    $tokens = $client->cibaAwait($initiated);   // honours interval and slow_down
+} catch (OAuthProtocolError $e) {
+    if ($e->isAccessDenied()) { /* the user refused */ }
+    elseif ($e->isExpiredToken()) { /* nobody answered in time */ }
+    else { throw $e; }
+}
+```
+
+**Ping mode**: initiate with `delivery: CibaDeliveryMode::Ping, clientNotificationToken: new
+Sensitive($random)`. In the handler of your notification endpoint, call
+`$client->cibaHandlePing($request->getHeaders(), (string) $request->getBody(), $token)` — no
+I/O; it checks the bearer in constant time and returns the `auth_req_id` — answer `204`, and
+only then `$client->cibaPoll($authReqId)` once. Fall back to `cibaAwait()` once half of
+`expires_in` has passed without a ping.
+
+**Signed requests (§33.2)**: a client registered with a request-signing algorithm passes
+`signer: CibaRequestSigner::fromPem(CibaSigningAlg::EdDSA, new Sensitive($pem), 'kid-1')`; the
+form then carries only client authentication and one `request` JWT. `EdDSA` (a PKCS#8
+Ed25519 key) and `ES256` (a P-256 key) are supported; **`PS256` is refused locally** —
+`firebase/php-jwt` signs it only through phpseclib 3, which this SDK does not depend on.
+
+A successful `cibaInitiate` **proves nothing about the user**: AXIAM answers an unknown or
+locked user exactly like a real one, and only `expired_token` says nobody answered.
+`auth_req_id`, the notification token and the signing key are `Sensitive`. A request is
+redeemed once — store the tokens `cibaPoll`/`cibaAwait` return before anything else.
+
 ## TLS policy
 
 Guzzle's `verify` option is **always `true`** (strict TLS, system trust roots) unless a
@@ -1959,7 +2148,8 @@ Three things this deliberately does **not** do:
   and correctly publishes nothing. The same holds one level in: every property of
   `MtlsEndpointAliases` is nullable, and an endpoint the object does not name falls back
   rather than failing the document.
-- **No alias is ever synthesised.** Only the six endpoints RFC 8705 §5 lists can be aliased —
+- **No alias is ever synthesised.** Only the seven endpoints the contract lists can be aliased
+  (RFC 8705 §5's six, and since contract 1.58 CIBA's `backchannel_authentication_endpoint`) —
   never `authorization_endpoint`, `end_session_endpoint` or `jwks_uri`. The first two are
   front-channel and the third is public key material; sending a browser to an mTLS host
   raises a native certificate-chooser dialog most users cannot answer.

@@ -52,6 +52,10 @@ final class OidcConfiguration
      * @param bool $backchannel_logout_session_supported Whether those logout tokens carry `sid`. AXIAM always sends it.
      * @param MtlsEndpointAliases|null $mtls_endpoint_aliases RFC 8705 §5 endpoint aliases for a deployment that terminates mutual TLS on a host other than the issuer's own (contract 1.40, §21.3 rule 2). `null` means "no separate host", **not** "mTLS unsupported": a deployment running `client_auth = optional` on one listener serves both populations at the conventional endpoints and correctly publishes nothing here, so a client treating absence as an error would refuse the most common mTLS topology AXIAM ships.
      * @param list<string>|null $code_challenge_methods_supported PKCE code-challenge methods the server supports (RFC 8414 §2 / RFC 7636 §4.3; AXIAM advertises `["S256"]` as of contract 1.42). Modelled optional even though the AXIAM schema marks it required: RFC 8414 defines no default for this member, so its **absence does not mean `S256`** (CONTRACT.md §21.5) — it means a conforming client cannot establish that PKCE is available at all, and a discovery document from a non-AXIAM OP that omits it must still parse rather than be rejected.
+     * @param string|null $backchannel_authentication_endpoint CIBA Core §4 / CONTRACT.md §33.1 (contract 1.58): the endpoint `cibaInitiate` posts to. `null` when the server does not offer CIBA — an error at call time, never a cue to build the URL.
+     * @param list<string>|null $backchannel_token_delivery_modes_supported The CIBA delivery modes the SERVER offers (AXIAM: `["poll", "ping"]`). A statement about the server, not about any client's registration.
+     * @param bool|null $backchannel_user_code_parameter_supported Whether the server accepts a CIBA `user_code` (AXIAM: `false`; this SDK never sends one).
+     * @param list<string>|null $backchannel_authentication_request_signing_alg_values_supported The algorithms a signed CIBA request may use (AXIAM: `["PS256", "ES256", "EdDSA"]`).
      * @param list<string>|null $token_endpoint_auth_signing_alg_values_supported JWS algorithms the token endpoint accepts on a `private_key_jwt` client assertion (RFC 8414 §2; AXIAM advertises `["PS256", "ES256", "EdDSA"]` as of contract 1.42). Optional for the same reason as the member above, and informational either way: §12.1 note 3 pins this SDK to `client_secret_post`, so it never signs a client assertion.
      */
     public function __construct(
@@ -77,6 +81,10 @@ final class OidcConfiguration
         public readonly ?MtlsEndpointAliases $mtls_endpoint_aliases = null,
         public readonly ?array $code_challenge_methods_supported = null,
         public readonly ?array $token_endpoint_auth_signing_alg_values_supported = null,
+        public readonly ?string $backchannel_authentication_endpoint = null,
+        public readonly ?array $backchannel_token_delivery_modes_supported = null,
+        public readonly ?bool $backchannel_user_code_parameter_supported = null,
+        public readonly ?array $backchannel_authentication_request_signing_alg_values_supported = null,
     ) {
     }
 
@@ -155,6 +163,14 @@ final class OidcConfiguration
             // optional.
             code_challenge_methods_supported: $optionalStringList($wire['code_challenge_methods_supported'] ?? null),
             token_endpoint_auth_signing_alg_values_supported: $optionalStringList($wire['token_endpoint_auth_signing_alg_values_supported'] ?? null),
+            // Contract 1.58 (§21.5, §33): the four CIBA members, optional like every
+            // conditionally-advertised member above — a non-AXIAM OP need not offer CIBA.
+            backchannel_authentication_endpoint: $optionalString($wire['backchannel_authentication_endpoint'] ?? null),
+            backchannel_token_delivery_modes_supported: $optionalStringList($wire['backchannel_token_delivery_modes_supported'] ?? null),
+            backchannel_user_code_parameter_supported: is_bool($wire['backchannel_user_code_parameter_supported'] ?? null)
+                ? $wire['backchannel_user_code_parameter_supported']
+                : null,
+            backchannel_authentication_request_signing_alg_values_supported: $optionalStringList($wire['backchannel_authentication_request_signing_alg_values_supported'] ?? null),
         );
     }
 }
