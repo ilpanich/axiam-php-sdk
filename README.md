@@ -197,7 +197,7 @@ messages after the first connection loss and never recover on its own.
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.58**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.59**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
 **`PS256` is not shipped**, see [CIBA](#ciba-contractmd-33) below for why — including
@@ -238,7 +238,24 @@ they landed after this SDK already stated its earlier sections: widening a range
 turn a statement that was true when written into a different claim without anyone editing it.
 The §21.3.1 amendment of contract 1.58 — the seventh `mtls_endpoint_aliases` member,
 `backchannel_authentication_endpoint` — is decoded and honoured on an mTLS CIBA call; it is
-part of the §21 claim, not of §33's.
+part of the §21 claim, not of §33's. Vector A is pinned as the vendored `CONTRACT.md` carries
+it, `tenant_id` queries included.
+
+Contract 1.59 (§34) adds no section and changes no wire shape; its clarifications P1 – P12 bind
+the sections above, and this SDK follows them — the table below says how, where the contract
+left a choice.
+
+### Contract 1.59 — the Phase 23 review follow-up (F-59-06)
+
+| Clarification | Here |
+|---|---|
+| P1 `poll` never keeps a `jti` it does not return | The second form: what was judged is returned, and a SET a key-fetch or store failure left unjudged is unrecorded and listed in `SsfPollResult::$unjudged` (with `$unjudgedCause`); the failure is raised instead only when no SET of the batch had been accepted |
+| P4 the replay store | `ReplayStore::checkAndRecord()` reports a failure by throwing, which accepts nothing (fail closed); the default `InMemoryReplayStore` is unbounded in count, its entries expiring after the window |
+| P8 a `5xx` on `ciba_poll` | A `NetworkError` whatever its body (`500 {"error":"server_error"}` included), retried under §16 and outlived by `cibaAwait` |
+| P10 `cibaAwait`'s anchor | The instant the initiate response was received, read from the injected `CibaClock`, which also supplies the waits |
+| P12.1 / P12.2 unknown SCIM arms | `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` keep the `type` and nothing else; they render for a log line and are refused locally on the request path |
+| P12.4 the RFC 7592 replacement | Built from what the read carried: a list the read lacked is not sent, a member of an unexpected shape goes back as read |
+| P12.7 the signed form | Claimed as "§33.2 signed (ES256, EdDSA)" |
 
 ### Contract 1.53 – 1.58 — what this SDK ships
 
@@ -2047,8 +2064,9 @@ and that SET and the rest are left **unjudged** — unrecorded, listed in `$resu
 with the failure in `$result->unjudgedCause`, and neither acknowledged nor reported in
 `setErrs`, so the transmitter offers them again. If nothing had been accepted yet, the failure
 is raised instead. The replay window defaults to, and may not be set below, seven days; the default
-store is in-memory and per-process — behind PHP-FPM, pass a shared `ReplayStore` (an atomic
-`SET NX EX` in Redis, say). `malformed`, `invalid_type` and `replayed` are answered as
+store is in-memory and per-process, and unbounded in count (entries expire after the window)
+— behind PHP-FPM, pass a shared `ReplayStore` (an atomic `SET NX EX` in Redis, say). A store
+that cannot answer throws; it never answers "not seen" (§34.2 P4). `malformed`, `invalid_type` and `replayed` are answered as
 `invalid_request`, since only RFC 8935's codes go on the wire.
 
 ## CIBA (CONTRACT.md §33)
