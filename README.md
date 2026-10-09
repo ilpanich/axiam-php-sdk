@@ -155,8 +155,8 @@ works on any PHP runtime, including standard PHP-FPM.** This is the default and 
 no special deployment.
 
 **`ext-sodium` is required** (`composer.json` declares it). AXIAM signs with Ed25519, so local
-token verification (§10.1) and the SSF receiver (§32.7) verify through it, and the §33.2 signed
-CIBA request signs `EdDSA` with it. It is compiled into PHP by default; on a build made without
+token verification (§10.1) and the SSF receiver (§32.7) verify through it, and the signed
+§33.2 CIBA request signs `EdDSA` with it. It is compiled into PHP by default; on a build made without
 it, token verification and the SSF receiver fail with a typed `AxiamException` naming
 `ext-sodium` rather than a fatal error.
 
@@ -199,8 +199,8 @@ messages after the first connection loss and never recover on its own.
 
 This SDK conforms to **contract 1.58**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33,
-with §32.7 and §33.2 signed (the signed form for `EdDSA` and `ES256`; **`PS256` is not
-shipped**, see [CIBA](#ciba-contractmd-33) below for why), including
+with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
+**`PS256` is not shipped**, see [CIBA](#ciba-contractmd-33) below for why — including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
 verification; the §17 decision memo and §19 telemetry hooks, contract 1.8; §28 MCP
 resource-server helpers, contract 1.48, see below — the binding,
@@ -251,10 +251,10 @@ part of the §21 claim, not of §33's.
 | §32 SSF streams | `$client->ssf()` — five generated operations; `authorizationHeader` `Sensitive` |
 | §32.7 SSF receiver helper | `$client->ssfReceiver(...)` → `Axiam\Sdk\Ssf\SsfReceiver::verifySet()` / `poll()` |
 | §33 CIBA | `cibaInitiate`, `cibaPoll`, `cibaAwait`, `cibaHandlePing` on `AxiamClient` |
-| §33.2 signed request | `CibaRequestSigner::fromPem()` — `EdDSA` and `ES256`; `PS256` refused locally |
+| §33.2 signed (ES256, EdDSA) | `CibaRequestSigner::fromPem()` — `ES256` and `EdDSA`; `PS256` refused locally |
 | §21.3.1 (amended) | `MtlsEndpointAliases::$backchannel_authentication_endpoint`, the seventh alias |
 
-**Carve-out — `PS256` for the §33.2 signed request.** This SDK's JOSE library,
+**Carve-out — `PS256` for the signed §33.2 request.** This SDK's JOSE library,
 `firebase/php-jwt`, signs `PS256` only through phpseclib **3**, which is not a dependency of
 this package (the phpseclib a Composer install may pull in transitively for `php-amqplib`
 is version 4, whose namespace php-jwt does not load). Rather than depend on a transitive
