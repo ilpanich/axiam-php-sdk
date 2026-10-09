@@ -25,8 +25,6 @@ final class NotificationRulesApi extends ManagementSupport
     /**
      * `GET /api/v1/notification-rules`
      *
-     * `GET /api/v1/notification-rules`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -47,8 +45,6 @@ final class NotificationRulesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/notification-rules`
-     *
-     * `POST /api/v1/notification-rules`.
      * @param CreateNotificationRuleRequest $body the request body
      * @return NotificationRuleResponse
      */
@@ -69,8 +65,6 @@ final class NotificationRulesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/notification-rules/{id}`
-     *
-     * `GET /api/v1/notification-rules/{id}`.
      * @param string $id the `{id}` path parameter
      * @return NotificationRuleResponse
      */
@@ -91,8 +85,6 @@ final class NotificationRulesApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/notification-rules/{id}`
-     *
-     * `PUT /api/v1/notification-rules/{id}`.
      * @param string $id the `{id}` path parameter
      * @param UpdateNotificationRuleRequest $body the request body
      * @return NotificationRuleResponse
@@ -115,8 +107,6 @@ final class NotificationRulesApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/notification-rules/{id}`
-     *
-     * `DELETE /api/v1/notification-rules/{id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

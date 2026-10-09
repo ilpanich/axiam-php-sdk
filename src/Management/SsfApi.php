@@ -27,8 +27,6 @@ final class SsfApi extends ManagementSupport
     /**
      * `GET /api/v1/tenants/{tenant_id}/ssf/streams`
      *
-     * `GET /api/v1/tenants/{tenant_id}/ssf/streams`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -49,8 +47,6 @@ final class SsfApi extends ManagementSupport
 
     /**
      * `POST /api/v1/tenants/{tenant_id}/ssf/streams`
-     *
-     * `POST /api/v1/tenants/{tenant_id}/ssf/streams`.
      * @param SsfStreamInput $body the request body
      * @return SsfStream
      */
@@ -71,8 +67,6 @@ final class SsfApi extends ManagementSupport
 
     /**
      * `GET /api/v1/tenants/{tenant_id}/ssf/streams/{stream_id}`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/ssf/streams/{stream_id}`.
      * @param string $streamId the `{stream_id}` path parameter
      * @return SsfStream
      */

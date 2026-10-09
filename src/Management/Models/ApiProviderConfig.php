@@ -12,9 +12,8 @@ namespace Axiam\Sdk\Management\Models;
  * API-based provider configuration (SendGrid, Postmark, Resend, Brevo). `api_key` follows the
  * same write-only + omit-preserving contract as [`SmtpConfig::password`] (D-01/D-02).
  *
- * Every property is optional, so this is a SPARSE body: what you leave unset is left
- * unchanged, and is omitted from the wire request entirely rather than sent as null (§27.4
- * rule 5).
+ * Every property is optional: one you leave unset is omitted from the wire request entirely
+ * rather than sent as null (§27.4 rule 5).
  */
 final class ApiProviderConfig implements \JsonSerializable
 {

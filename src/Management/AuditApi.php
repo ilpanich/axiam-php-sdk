@@ -23,8 +23,6 @@ final class AuditApi extends ManagementSupport
     /**
      * `GET /api/v1/audit-logs`
      *
-     * `GET /api/v1/audit-logs`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -57,8 +55,6 @@ final class AuditApi extends ManagementSupport
 
     /**
      * `GET /api/v1/audit-logs/system`
-     *
-     * `GET /api/v1/audit-logs/system`.
      *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.

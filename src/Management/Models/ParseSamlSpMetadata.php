@@ -11,9 +11,8 @@ namespace Axiam\Sdk\Management\Models;
 /**
  * `POST …/saml/parse-sp-metadata` body: **exactly one** of the two members.
  *
- * Every property is optional, so this is a SPARSE body: what you leave unset is left
- * unchanged, and is omitted from the wire request entirely rather than sent as null (§27.4
- * rule 5).
+ * Every property is optional: one you leave unset is omitted from the wire request entirely
+ * rather than sent as null (§27.4 rule 5).
  */
 final class ParseSamlSpMetadata implements \JsonSerializable
 {

@@ -28,9 +28,8 @@ namespace Axiam\Sdk\Management\Models;
  * be trusted. Each is clamped again in code against the three constants above, so a settings
  * row written by hand cannot lift them.
  *
- * Every property is optional, so this is a SPARSE body: what you leave unset is left
- * unchanged, and is omitted from the wire request entirely rather than sent as null (§27.4
- * rule 5).
+ * Every property is optional: one you leave unset is omitted from the wire request entirely
+ * rather than sent as null (§27.4 rule 5).
  */
 final class CimdPolicy implements \JsonSerializable
 {

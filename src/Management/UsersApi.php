@@ -29,8 +29,6 @@ final class UsersApi extends ManagementSupport
     /**
      * `GET /api/v1/users`
      *
-     * `GET /api/v1/users`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -51,8 +49,6 @@ final class UsersApi extends ManagementSupport
 
     /**
      * `POST /api/v1/users`
-     *
-     * `POST /api/v1/users`.
      * @param CreateUserRequest $body the request body
      * @return UserResponse
      */
@@ -73,8 +69,6 @@ final class UsersApi extends ManagementSupport
 
     /**
      * `GET /api/v1/users/{user_id}`
-     *
-     * `GET /api/v1/users/{user_id}`.
      * @param string $userId the `{user_id}` path parameter
      * @return UserResponse
      */
@@ -95,8 +89,6 @@ final class UsersApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/users/{user_id}`
-     *
-     * `PUT /api/v1/users/{user_id}`.
      * @param string $userId the `{user_id}` path parameter
      * @param UpdateUserRequest $body the request body
      * @return UserResponse
@@ -120,8 +112,6 @@ final class UsersApi extends ManagementSupport
     /**
      * `DELETE /api/v1/users/{user_id}`
      *
-     * `DELETE /api/v1/users/{user_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -143,8 +133,6 @@ final class UsersApi extends ManagementSupport
 
     /**
      * `GET /api/v1/users/{user_id}/mfa-methods`
-     *
-     * `GET /api/v1/users/{user_id}/mfa-methods`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -176,8 +164,6 @@ final class UsersApi extends ManagementSupport
     /**
      * `DELETE /api/v1/users/{user_id}/mfa-methods/{method_id}`
      *
-     * `DELETE /api/v1/users/{user_id}/mfa-methods/{method_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -202,8 +188,6 @@ final class UsersApi extends ManagementSupport
     /**
      * `POST /api/v1/users/{user_id}/reset-mfa`
      *
-     * `POST /api/v1/users/{user_id}/reset-mfa`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $userId the `{user_id}` path parameter
      */
@@ -222,8 +206,6 @@ final class UsersApi extends ManagementSupport
 
     /**
      * `POST /api/v1/users/{user_id}/unlock`
-     *
-     * `POST /api/v1/users/{user_id}/unlock`.
      * @param string $userId the `{user_id}` path parameter
      * @return UserResponse
      */
@@ -244,8 +226,6 @@ final class UsersApi extends ManagementSupport
 
     /**
      * `GET /api/v1/users/{user_id}/roles`
-     *
-     * `GET /api/v1/users/{user_id}/roles`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -276,8 +256,6 @@ final class UsersApi extends ManagementSupport
 
     /**
      * `GET /api/v1/users/{user_id}/sessions`
-     *
-     * `GET /api/v1/users/{user_id}/sessions`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).

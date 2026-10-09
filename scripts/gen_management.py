@@ -689,6 +689,21 @@ def header(namespace: str, uses: list[str] | None = None) -> str:
     return out
 
 
+def sparse_update_schemas() -> set[str]:
+    """Request schemas the registry marks as sparse updates (``update_style: sparse``).
+
+    Only these say "what you leave unset is left unchanged": an all-optional body that is
+    not an update -- ``parse_sp_metadata``'s, or a nested member object -- has no stored
+    record for an unset member to be left unchanged in (R-28, contract 1.59 §34.3).
+    """
+    out: set[str] = set()
+    for ns in REGISTRY["namespaces"].values():
+        for op in ns["operations"].values():
+            if op["request_schema"] and op.get("update_style") == "sparse":
+                out.add(op["request_schema"].lstrip("[]"))
+    return out
+
+
 def replacement_schemas() -> set[str]:
     """Request schemas the registry marks as full replacements, not sparse updates.
 
@@ -737,6 +752,8 @@ PROJECTION_DOC = (
 )
 
 PROJECTED: dict[str, list[dict[str, Any]]] = projection_map()
+
+SPARSE_UPDATES: set[str] = sparse_update_schemas()
 
 
 def field_list(schema_name: str, secrets: set[str]) -> tuple[list[dict[str, Any]], str | None]:
@@ -934,17 +951,36 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
 
     summary = escape(description) if description else \
         f"The `{name}` schema from the server's OpenAPI document."
-    if sparse:
+    if sparse and name in SPARSE_UPDATES:
         summary += (
             "\n\nEvery property is optional, so this is a SPARSE body: what you leave unset "
             "is left unchanged, and is omitted from the wire request entirely rather than "
             "sent as null (§27.4 rule 5)."
         )
-    elif replacement:
+    elif sparse:
+        summary += (
+            "\n\nEvery property is optional: one you leave unset is omitted from the wire "
+            "request entirely rather than sent as null (§27.4 rule 5)."
+        )
+    elif replacement and all(f["required"] for f in fields):
         summary += (
             "\n\nThis is a REPLACEMENT body (§27.4 rule 5): every field is required, so "
             "omitting one is a constructor error rather than a silent erasure server-side."
         )
+    elif replacement:
+        summary += (
+            "\n\nThis is a REPLACEMENT body (§27.4 rule 5): what it omits is not preserved. "
+            "The required members are constructor parameters, so omitting one is a "
+            "constructor error; an optional member left unset is omitted from the wire and "
+            "takes its default server-side."
+        )
+        written_only = [f for f in fields if f["secret"]]
+        if written_only:
+            names = ", ".join(f"`{f['wire']}`" for f in written_only)
+            summary += (
+                f" Left unset, the write-only secret ({names}) is not reset but kept -- see the "
+                "operation's documentation for when a write must carry it."
+            )
 
     uses = []
     out = [header(MODELS_NS, uses)]
@@ -1603,9 +1639,11 @@ def spec_description(op: dict[str, Any]) -> str | None:
 def operation_doc(op: dict[str, Any], name: str, canonical: str = "") -> str:
     """The docblock summary for one generated operation."""
     described = spec_description(op)
-    lead = described or f"`{op['method']} {op['path']}`."
-    if described:
-        lead = f"{described}\n\n`{op['method']} {op['path']}`."
+    request_line = f"`{op['method']} {op['path']}`"
+    lead = described or f"{request_line}."
+    # A spec summary that IS the request line is not repeated under itself (R-28).
+    if described and described.rstrip(".") != request_line:
+        lead = f"{described}\n\n{request_line}."
 
     kind = op["response"]["kind"]
     if kind == "page":

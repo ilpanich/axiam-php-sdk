@@ -30,8 +30,6 @@ final class GroupsApi extends ManagementSupport
     /**
      * `GET /api/v1/groups`
      *
-     * `GET /api/v1/groups`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -52,8 +50,6 @@ final class GroupsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/groups`
-     *
-     * `POST /api/v1/groups`.
      * @param CreateGroupRequest $body the request body
      * @return Group
      */
@@ -74,8 +70,6 @@ final class GroupsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/groups/{group_id}`
-     *
-     * `GET /api/v1/groups/{group_id}`.
      * @param string $groupId the `{group_id}` path parameter
      * @return Group
      */
@@ -96,8 +90,6 @@ final class GroupsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/groups/{group_id}`
-     *
-     * `PUT /api/v1/groups/{group_id}`.
      * @param string $groupId the `{group_id}` path parameter
      * @param UpdateGroup $body the request body
      * @return Group
@@ -121,8 +113,6 @@ final class GroupsApi extends ManagementSupport
     /**
      * `DELETE /api/v1/groups/{group_id}`
      *
-     * `DELETE /api/v1/groups/{group_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -144,8 +134,6 @@ final class GroupsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/groups/{group_id}/members`
-     *
-     * `GET /api/v1/groups/{group_id}/members`.
      *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
@@ -170,8 +158,6 @@ final class GroupsApi extends ManagementSupport
     /**
      * `POST /api/v1/groups/{group_id}/members`
      *
-     * `POST /api/v1/groups/{group_id}/members`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $groupId the `{group_id}` path parameter
      * @param AddMemberRequest $body the request body
@@ -192,8 +178,6 @@ final class GroupsApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/groups/{group_id}/members/{user_id}`
-     *
-     * `DELETE /api/v1/groups/{group_id}/members/{user_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *
@@ -218,8 +202,6 @@ final class GroupsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/groups/{group_id}/roles`
-     *
-     * `GET /api/v1/groups/{group_id}/roles`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -251,8 +233,6 @@ final class GroupsApi extends ManagementSupport
     /**
      * `GET /api/v1/groups/{group_id}/service-accounts`
      *
-     * `GET /api/v1/groups/{group_id}/service-accounts`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param string $groupId the `{group_id}` path parameter
@@ -276,8 +256,6 @@ final class GroupsApi extends ManagementSupport
     /**
      * `POST /api/v1/groups/{group_id}/service-accounts`
      *
-     * `POST /api/v1/groups/{group_id}/service-accounts`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $groupId the `{group_id}` path parameter
      * @param AddServiceAccountMemberRequest $body the request body
@@ -298,8 +276,6 @@ final class GroupsApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}`
-     *
-     * `DELETE /api/v1/groups/{group_id}/service-accounts/{service_account_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

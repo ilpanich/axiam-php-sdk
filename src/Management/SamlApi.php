@@ -33,8 +33,6 @@ final class SamlApi extends ManagementSupport
 {
     /**
      * `GET /api/v1/tenants/{tenant_id}/saml/idp`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/saml/idp`.
      * @return SamlIdpInfo
      */
     public function getIdp(): SamlIdpInfo
@@ -53,8 +51,6 @@ final class SamlApi extends ManagementSupport
 
     /**
      * `GET /api/v1/tenants/{tenant_id}/saml/service-providers`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/saml/service-providers`.
      *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
@@ -76,8 +72,6 @@ final class SamlApi extends ManagementSupport
 
     /**
      * `POST /api/v1/tenants/{tenant_id}/saml/service-providers`
-     *
-     * `POST /api/v1/tenants/{tenant_id}/saml/service-providers`.
      *
      * `sp_signing_cert_pem` must be RSA (2048 bits or more) or ECDSA on P-256, P-384 or P-521;
      * an **ECDSA certificate verifies HTTP-POST requests only** -- the HTTP-Redirect binding
@@ -103,8 +97,6 @@ final class SamlApi extends ManagementSupport
 
     /**
      * `GET /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}`.
      * @param string $spId the `{sp_id}` path parameter
      * @return SamlServiceProvider
      */
@@ -159,8 +151,6 @@ final class SamlApi extends ManagementSupport
     /**
      * `DELETE /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}`
      *
-     * `DELETE /api/v1/tenants/{tenant_id}/saml/service-providers/{sp_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -185,8 +175,6 @@ final class SamlApi extends ManagementSupport
 
     /**
      * `POST /api/v1/tenants/{tenant_id}/saml/parse-sp-metadata`
-     *
-     * `POST /api/v1/tenants/{tenant_id}/saml/parse-sp-metadata`.
      *
      * **Parses and stores nothing** (§29.3 rule 6): the result is a draft to review and pass
      * to `createServiceProvider()`. Exactly one of `metadata_xml` and `metadata_url` must be
@@ -216,8 +204,6 @@ final class SamlApi extends ManagementSupport
     /**
      * `GET /api/v1/tenants/{tenant_id}/saml/idp-credentials`
      *
-     * `GET /api/v1/tenants/{tenant_id}/saml/idp-credentials`.
-     *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
      * @return list<SamlIdpCredential>
@@ -246,8 +232,6 @@ final class SamlApi extends ManagementSupport
     /**
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials`
      *
-     * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials`.
-     *
      * Generates an RSA-4096 key on the server, which takes seconds; the key is never returned.
      * An occupied slot is `409` (§29.3 rule 7).
      * @param IssueSamlIdpCredential $body the request body
@@ -270,8 +254,6 @@ final class SamlApi extends ManagementSupport
 
     /**
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/promote`
-     *
-     * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/promote`.
      *
      * `credential_id` must be the tenant's current `next` credential; in one transaction the
      * old `active` is retired -- its key destroyed -- and `next` becomes `active` (§29.3 rule
@@ -296,8 +278,6 @@ final class SamlApi extends ManagementSupport
 
     /**
      * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/retire`
-     *
-     * `POST /api/v1/tenants/{tenant_id}/saml/idp-credentials/{credential_id}/retire`.
      *
      * **Retiring the `active` credential with no successor stops SAML sign-on for the whole
      * tenant at once** (§29.3 rule 7) -- it is the incident response to a leaked key. The key

@@ -26,8 +26,6 @@ final class WebhooksApi extends ManagementSupport
     /**
      * `GET /api/v1/webhooks`
      *
-     * `GET /api/v1/webhooks`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -48,8 +46,6 @@ final class WebhooksApi extends ManagementSupport
 
     /**
      * `POST /api/v1/webhooks`
-     *
-     * `POST /api/v1/webhooks`.
      * @param CreateWebhookRequest $body the request body
      * @return WebhookResponse
      */
@@ -70,8 +66,6 @@ final class WebhooksApi extends ManagementSupport
 
     /**
      * `GET /api/v1/webhooks/{id}`
-     *
-     * `GET /api/v1/webhooks/{id}`.
      * @param string $id the `{id}` path parameter
      * @return WebhookResponse
      */
@@ -92,8 +86,6 @@ final class WebhooksApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/webhooks/{id}`
-     *
-     * `PUT /api/v1/webhooks/{id}`.
      * @param string $id the `{id}` path parameter
      * @param UpdateWebhookRequest $body the request body
      * @return WebhookResponse
@@ -116,8 +108,6 @@ final class WebhooksApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/webhooks/{id}`
-     *
-     * `DELETE /api/v1/webhooks/{id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

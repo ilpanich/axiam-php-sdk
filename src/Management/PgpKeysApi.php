@@ -29,8 +29,6 @@ final class PgpKeysApi extends ManagementSupport
     /**
      * `GET /api/v1/pgp-keys`
      *
-     * `GET /api/v1/pgp-keys`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -51,8 +49,6 @@ final class PgpKeysApi extends ManagementSupport
 
     /**
      * `POST /api/v1/pgp-keys`
-     *
-     * `POST /api/v1/pgp-keys`.
      *
      * The response carries a ONE-TIME secret (`private_key_armored`): the server will not
      * return it again, so a caller that does not persist it here cannot recover it (§27.5).
@@ -76,8 +72,6 @@ final class PgpKeysApi extends ManagementSupport
 
     /**
      * `GET /api/v1/pgp-keys/{id}`
-     *
-     * `GET /api/v1/pgp-keys/{id}`.
      * @param string $id the `{id}` path parameter
      * @return PgpKey
      */
@@ -99,8 +93,6 @@ final class PgpKeysApi extends ManagementSupport
     /**
      * `POST /api/v1/pgp-keys/{id}/revoke`
      *
-     * `POST /api/v1/pgp-keys/{id}/revoke`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $id the `{id}` path parameter
      */
@@ -119,8 +111,6 @@ final class PgpKeysApi extends ManagementSupport
 
     /**
      * `POST /api/v1/pgp-keys/{id}/encrypt`
-     *
-     * `POST /api/v1/pgp-keys/{id}/encrypt`.
      * @param string $id the `{id}` path parameter
      * @param EncryptRequest $body the request body
      * @return EncryptedExport
@@ -143,8 +133,6 @@ final class PgpKeysApi extends ManagementSupport
 
     /**
      * `POST /api/v1/pgp-keys/sign-audit-batch`
-     *
-     * `POST /api/v1/pgp-keys/sign-audit-batch`.
      * @param SignAuditBatchRequest $body the request body
      * @return SignedAuditBatch
      */

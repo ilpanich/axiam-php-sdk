@@ -24,8 +24,6 @@ final class SettingsApi extends ManagementSupport
 {
     /**
      * `GET /api/v1/organizations/{org_id}/settings`
-     *
-     * `GET /api/v1/organizations/{org_id}/settings`.
      * @return SecuritySettings
      */
     public function getOrg(): SecuritySettings
@@ -44,8 +42,6 @@ final class SettingsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/organizations/{org_id}/settings`
-     *
-     * `PUT /api/v1/organizations/{org_id}/settings`.
      * @param SetOrgSettings $body the request body
      * @return SecuritySettings
      */
@@ -66,8 +62,6 @@ final class SettingsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/settings`
-     *
-     * `GET /api/v1/settings`.
      * @return SecuritySettings
      */
     public function getEffective(): SecuritySettings
@@ -86,8 +80,6 @@ final class SettingsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/settings`
-     *
-     * `PUT /api/v1/settings`.
      * @param TenantSettingsOverride $body the request body
      * @return SecuritySettings
      */
@@ -108,8 +100,6 @@ final class SettingsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/tenants/{tenant_id}/settings`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/settings`.
      * @return TenantSettingsOverride
      */
     public function getTenantOverride(): TenantSettingsOverride
@@ -128,8 +118,6 @@ final class SettingsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/tenants/{tenant_id}/settings`
-     *
-     * `PUT /api/v1/tenants/{tenant_id}/settings`.
      * @param TenantSettingsOverride $body the request body
      * @return TenantSettingsOverride
      */
@@ -150,8 +138,6 @@ final class SettingsApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/tenants/{tenant_id}/settings`
-     *
-     * `DELETE /api/v1/tenants/{tenant_id}/settings`.
      *
      * Returns nothing; the server answers with an empty body.
      *

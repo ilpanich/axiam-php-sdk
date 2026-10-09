@@ -13,8 +13,11 @@ namespace Axiam\Sdk\Management\Models;
  * member except `id`, `tenant_id` and the two timestamps, plus the write-only `bind_secret`.
  * An omitted optional member is **reset to its default**, not kept.
  *
- * This is a REPLACEMENT body (§27.4 rule 5): every field is required, so omitting one is a
- * constructor error rather than a silent erasure server-side.
+ * This is a REPLACEMENT body (§27.4 rule 5): what it omits is not preserved. The required
+ * members are constructor parameters, so omitting one is a constructor error; an optional
+ * member left unset is omitted from the wire and takes its default server-side. Left unset,
+ * the write-only secret (`bind_secret`) is not reset but kept -- see the operation's
+ * documentation for when a write must carry it.
  */
 final class SetDirectoryConfig implements \JsonSerializable
 {

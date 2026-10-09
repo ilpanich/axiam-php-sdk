@@ -25,8 +25,6 @@ final class PermissionsApi extends ManagementSupport
     /**
      * `GET /api/v1/permissions`
      *
-     * `GET /api/v1/permissions`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -47,8 +45,6 @@ final class PermissionsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/permissions`
-     *
-     * `POST /api/v1/permissions`.
      * @param CreatePermissionRequest $body the request body
      * @return Permission
      */
@@ -69,8 +65,6 @@ final class PermissionsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/permissions/{permission_id}`
-     *
-     * `GET /api/v1/permissions/{permission_id}`.
      * @param string $permissionId the `{permission_id}` path parameter
      * @return Permission
      */
@@ -91,8 +85,6 @@ final class PermissionsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/permissions/{permission_id}`
-     *
-     * `PUT /api/v1/permissions/{permission_id}`.
      * @param string $permissionId the `{permission_id}` path parameter
      * @param UpdatePermissionRequest $body the request body
      * @return Permission
@@ -115,8 +107,6 @@ final class PermissionsApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/permissions/{permission_id}`
-     *
-     * `DELETE /api/v1/permissions/{permission_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

@@ -30,8 +30,6 @@ final class Oauth2ClientsApi extends ManagementSupport
     /**
      * `GET /api/v1/oauth2-clients`
      *
-     * `GET /api/v1/oauth2-clients`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -52,8 +50,6 @@ final class Oauth2ClientsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/oauth2-clients`
-     *
-     * `POST /api/v1/oauth2-clients`.
      *
      * The response carries a ONE-TIME secret (`client_secret`): the server will not return it
      * again, so a caller that does not persist it here cannot recover it (§27.5).
@@ -77,8 +73,6 @@ final class Oauth2ClientsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/oauth2-clients/{id}`
-     *
-     * `GET /api/v1/oauth2-clients/{id}`.
      * @param string $id the `{id}` path parameter
      * @return OAuth2ClientResponse
      */
@@ -99,8 +93,6 @@ final class Oauth2ClientsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/oauth2-clients/{id}`
-     *
-     * `PUT /api/v1/oauth2-clients/{id}`.
      * @param string $id the `{id}` path parameter
      * @param UpdateOAuth2ClientRequest $body the request body
      * @return OAuth2ClientResponse
@@ -124,8 +116,6 @@ final class Oauth2ClientsApi extends ManagementSupport
     /**
      * `DELETE /api/v1/oauth2-clients/{id}`
      *
-     * `DELETE /api/v1/oauth2-clients/{id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -147,8 +137,6 @@ final class Oauth2ClientsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/oauth2-clients/registration-tokens`
-     *
-     * `POST /api/v1/oauth2-clients/registration-tokens`.
      *
      * The response carries a ONE-TIME secret (`initial_access_token`): the server will not
      * return it again, so a caller that does not persist it here cannot recover it (§27.5).
@@ -172,8 +160,6 @@ final class Oauth2ClientsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/oauth2-clients/registration-tokens`
-     *
-     * `GET /api/v1/oauth2-clients/registration-tokens`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
