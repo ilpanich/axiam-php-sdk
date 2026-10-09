@@ -204,10 +204,19 @@ final class SsfReceiver
      * on a transport failure, a `5xx`, `408` or `429` — never on another `4xx`, which maps like
      * a management answer (`400` {@see ValidationError}, `404` NotFoundError, `401` AuthError).
      * A SET that is not a string is refused `malformed`, one whose verified `jti` differs from
-     * its map key `invalid_request`; a JWKS fetch failure aborts the poll with that error rather
-     * than refusing SETs it could not judge.
+     * its map key `invalid_request`.
+     *
+     * **`poll` never keeps a `jti` it does not return** (§34.2 P1). A failure that is not a
+     * verdict on a SET — a JWKS or configuration fetch that fails, a replay store that cannot
+     * answer — refuses nothing: that SET and every later one in the batch are left
+     * **unjudged**, unrecorded, and listed in {@see SsfPollResult::$unjudged} with the failure in
+     * {@see SsfPollResult::$unjudgedCause}. Neither acknowledge them nor report them in
+     * `setErrs`: the transmitter offers them again. When no SET of the batch had been accepted
+     * yet, nothing was recorded and the failure is raised instead.
      *
      * @throws AuthError locally, when no access-token provider was configured.
+     * @throws NetworkError a key fetch failed before any SET of the batch was accepted (or the
+     *         poll itself failed); the replay store's own exception likewise.
      */
     public function poll(string $streamId, ?SsfPollOptions $options = null): SsfPollResult
     {
@@ -262,10 +271,16 @@ final class SsfReceiver
         }
         $events = [];
         $refused = [];
+        $unjudged = [];
+        $cause = null;
         $sets = $reply->sets ?? null;
         if ($sets instanceof \stdClass) {
             foreach (get_object_vars($sets) as $jti => $candidate) {
                 $jti = (string) $jti;
+                if ($cause !== null) {
+                    $unjudged[] = $jti;
+                    continue;
+                }
                 if (!is_string($candidate)) {
                     $refused[] = new RefusedSet($jti, SetFailureReason::Malformed);
                     continue;
@@ -274,11 +289,21 @@ final class SsfReceiver
                     $events[] = $this->verify($candidate, $jti);
                 } catch (SetVerificationError $e) {
                     $refused[] = new RefusedSet($jti, $e->failureReason);
+                } catch (\Throwable $e) {
+                    // Not a verdict on this SET (§34.2 P1, P3): a key fetch that failed or a
+                    // store that could not answer. Its jti is not recorded, and neither is any
+                    // later SET's: they are left for the transmitter to offer again.
+                    if ($events === []) {
+                        // Nothing was recorded, so raising loses nothing.
+                        throw $e;
+                    }
+                    $cause = $e;
+                    $unjudged[] = $jti;
                 }
             }
         }
 
-        return new SsfPollResult($events, ($reply->moreAvailable ?? false) === true, $refused);
+        return new SsfPollResult($events, ($reply->moreAvailable ?? false) === true, $refused, $unjudged, $cause);
     }
 
     /** The §32.7 order; `$expectedJti` is the poll map key the SET was returned under. */

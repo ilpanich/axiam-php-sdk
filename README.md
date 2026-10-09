@@ -2035,7 +2035,12 @@ is pinned to `EdDSA` before any key is looked up, and keys come only from the co
 (never a `jwk`/`x5c` header). An unknown `kid` costs **one** forced JWKS refetch, at most once
 a minute. A JWKS fetch failure is a `NetworkError`, not a verdict on the SET. A verified SET
 is **recorded**: re-offered unacknowledged, it reads as `replayed` — so acknowledge what you
-processed. The replay window defaults to, and may not be set below, seven days; the default
+processed. `poll` never keeps a `jti` it does not return (§34.2 P1): when a key fetch fails or
+the replay store cannot answer partway through a batch, the SETs already accepted are returned,
+and that SET and the rest are left **unjudged** — unrecorded, listed in `$result->unjudged`
+with the failure in `$result->unjudgedCause`, and neither acknowledged nor reported in
+`setErrs`, so the transmitter offers them again. If nothing had been accepted yet, the failure
+is raised instead. The replay window defaults to, and may not be set below, seven days; the default
 store is in-memory and per-process — behind PHP-FPM, pass a shared `ReplayStore` (an atomic
 `SET NX EX` in Redis, say). `malformed`, `invalid_type` and `replayed` are answered as
 `invalid_request`, since only RFC 8935's codes go on the wire.

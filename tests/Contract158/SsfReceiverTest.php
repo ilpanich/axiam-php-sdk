@@ -462,6 +462,110 @@ final class SsfReceiverTest extends TestCase
         $this->receiver()->poll('s');
     }
 
+    /**
+     * §32.8 helper test 8's two-SET batch (contract 1.59, §34.2 P1): the second SET names an
+     * unknown `kid` while the refetch fails. Afterwards the first SET's `jti` is not in the
+     * store, or the first SET is returned — `poll` never keeps a `jti` it does not return.
+     */
+    public function testATwoSetBatchWhoseSecondKeyFetchFailsKeepsNoJtiItDoesNotReturn(): void
+    {
+        $key = self::key();
+        $rotated = self::key();
+        // The fetch that fills the cache answers; the one refetch the unknown kid triggers fails.
+        $this->routes->on('GET', self::JWKS, RoutedHandler::json(200, ['keys' => [self::jwk($key)]]), new Response(500));
+        $first = self::claims();
+        $second = self::claims();
+        $this->routes->on('POST', '/ssf/v1/poll/s', RoutedHandler::json(200, ['sets' => [
+            $first['jti'] => self::signSet($key, $first),
+            $second['jti'] => self::signSet($rotated, $second),
+        ]]));
+        $store = new InMemoryReplayStore(fn (): int => $this->now);
+        $r = $this->receiverWithStore($store);
+
+        $result = null;
+        try {
+            $result = $r->poll('s');
+        } catch (NetworkError) {
+            // Raising is conformant only if nothing was kept.
+        }
+        $returned = $result !== null && in_array($first['jti'], array_map(static fn ($e) => $e->jti, $result->events), true);
+        $recorded = !$store->checkAndRecord($first['jti'], SsfReceiver::MIN_REPLAY_WINDOW_SECONDS);
+        self::assertTrue(
+            $returned || !$recorded,
+            'the first SET\'s jti is recorded but the first SET was not returned: a re-offer would read replayed and the event is lost',
+        );
+
+        // This SDK takes P1's second form: what was judged is returned, the unjudged SET is
+        // listed and left unrecorded, so the transmitter offers it again.
+        self::assertNotNull($result);
+        self::assertSame([$first['jti']], array_map(static fn ($e) => $e->jti, $result->events));
+        self::assertSame([], $result->refused, 'an unjudged SET is not refused');
+        self::assertSame([$second['jti']], $result->unjudged);
+        self::assertInstanceOf(NetworkError::class, $result->unjudgedCause);
+        self::assertTrue($store->checkAndRecord($second['jti'], SsfReceiver::MIN_REPLAY_WINDOW_SECONDS), 'the unjudged jti was not recorded');
+    }
+
+    /** A replay store that cannot answer is no verdict either (§34.2 P1, P3, P4). */
+    public function testAStoreThatCannotAnswerMidBatchLeavesTheRestUnjudged(): void
+    {
+        $key = self::key();
+        $this->serveJwks([self::jwk($key)]);
+        $first = self::claims();
+        $second = self::claims();
+        $third = self::claims();
+        $this->routes->on('POST', '/ssf/v1/poll/s', RoutedHandler::json(200, ['sets' => [
+            $first['jti'] => self::signSet($key, $first),
+            $second['jti'] => self::signSet($key, $second),
+            $third['jti'] => self::signSet($key, $third),
+        ]]));
+        $store = new class () implements \Axiam\Sdk\Ssf\ReplayStore {
+            /** @var list<string> */
+            public array $recorded = [];
+
+            public function checkAndRecord(string $jti, int $windowSeconds): bool
+            {
+                if ($this->recorded !== []) {
+                    throw new \RuntimeException('store unavailable');
+                }
+                $this->recorded[] = $jti;
+
+                return true;
+            }
+        };
+        $result = $this->receiverWithStore($store)->poll('s');
+        self::assertSame([$first['jti']], array_map(static fn ($e) => $e->jti, $result->events));
+        self::assertSame([$first['jti']], $store->recorded, 'every recorded jti is returned');
+        self::assertSame([$second['jti'], $third['jti']], $result->unjudged);
+        self::assertInstanceOf(\RuntimeException::class, $result->unjudgedCause);
+        self::assertSame([], $result->refused);
+
+        // A store that fails on the very first SET: nothing was kept, so the failure is raised.
+        $failing = new class () implements \Axiam\Sdk\Ssf\ReplayStore {
+            public function checkAndRecord(string $jti, int $windowSeconds): bool
+            {
+                throw new \RuntimeException('store unavailable');
+            }
+        };
+        $this->expectException(\RuntimeException::class);
+        $this->receiverWithStore($failing)->poll('s');
+    }
+
+    private function receiverWithStore(\Axiam\Sdk\Ssf\ReplayStore $store): SsfReceiver
+    {
+        $bearer = 'cc-' . bin2hex(random_bytes(16));
+
+        return new SsfReceiver(
+            http: new \GuzzleHttp\Client(['handler' => \GuzzleHttp\HandlerStack::create($this->routes)]),
+            baseUrl: self::BASE_URL,
+            issuer: self::ISSUER,
+            audience: self::AUDIENCE,
+            jwksUri: self::BASE_URL . self::JWKS,
+            accessTokenProvider: static fn (): Sensitive => new Sensitive($bearer),
+            replayStore: $store,
+            clock: fn (): int => $this->now,
+        );
+    }
+
     public function testDiscoverySuppliesTheJwksUriAndMustNameTheIssuer(): void
     {
         $key = self::key();
