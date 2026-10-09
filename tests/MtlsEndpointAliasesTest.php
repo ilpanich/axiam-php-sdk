@@ -48,7 +48,13 @@ final class MtlsEndpointAliasesTest extends TestCase
         $this->requested = [];
     }
 
-    /** All seven aliases on the mTLS origin (CONTRACT.md §21.3.1 vector A). @return array<string,string> */
+    /**
+     * All seven aliases on the mTLS origin — shaped like CONTRACT.md §21.3.1 vector A but
+     * without its queries; the vector itself is read from the vendored text by
+     * {@see self::testVectorAReadFromTheVendoredContractRoutesEveryAliasedCallWithItsQueryIntact()}.
+     *
+     * @return array<string,string>
+     */
     private function allAliases(): array
     {
         return [
@@ -509,5 +515,115 @@ final class MtlsEndpointAliasesTest extends TestCase
         $client->loginClientCredentials();
 
         $this->assertOnly('/oauth2/token', self::MTLS_BASE_URL);
+    }
+
+    // --- Vector A, read from the vendored contract (R-31, contract 1.59) --------------
+
+    /**
+     * CONTRACT.md §21.3.1 vector A exactly as the vendored text carries it — the first JSON
+     * block after its heading — so the pin moves with the contract instead of with a fixture
+     * someone retyped (and which lost the vector's `tenant_id` queries).
+     *
+     * @return array<string,mixed>
+     */
+    private static function vectorA(): array
+    {
+        $contract = file_get_contents(\dirname(__DIR__) . '/CONTRACT.md');
+        self::assertIsString($contract);
+        $start = strpos($contract, '**Vector A — a two-listener deployment.**');
+        self::assertIsInt($start, 'CONTRACT.md carries §21.3.1 vector A');
+        self::assertSame(1, preg_match('/```json\n(.*?)\n```/s', $contract, $m, 0, $start));
+        $vector = json_decode($m[1], true, 512, JSON_THROW_ON_ERROR);
+        self::assertIsArray($vector);
+
+        /** @var array<string,mixed> $vector */
+        return $vector;
+    }
+
+    public function testVectorAReadFromTheVendoredContractRoutesEveryAliasedCallWithItsQueryIntact(): void
+    {
+        $vector = self::vectorA();
+        $aliases = $vector['mtls_endpoint_aliases'];
+        self::assertIsArray($aliases);
+        self::assertCount(7, $aliases, 'the seven-key pin, from the vendored text');
+        $issuer = $vector['issuer'];
+        self::assertIsString($issuer);
+        parse_str((string) parse_url((string) $vector['token_endpoint'], PHP_URL_QUERY), $topQuery);
+        $tenantId = $topQuery['tenant_id'] ?? null;
+        self::assertIsString($tenantId, 'vector A carries a tenant_id query');
+
+        $requested = [];
+        // The vector is abridged to the members that matter; the rest of a document this
+        // SDK's discovery decoder requires is added beside it, never over it.
+        $wire = $vector + [
+            'response_types_supported' => ['code'],
+            'subject_types_supported' => ['public'],
+            'id_token_signing_alg_values_supported' => ['EdDSA'],
+            'scopes_supported' => ['openid'],
+            'token_endpoint_auth_methods_supported' => ['client_secret_post', 'tls_client_auth'],
+            'claims_supported' => ['sub', 'iss'],
+            'grant_types_supported' => ['authorization_code', 'client_credentials'],
+        ];
+        $handler = function (RequestInterface $request) use ($wire, &$requested): \GuzzleHttp\Promise\PromiseInterface {
+            $requested[] = (string) $request->getUri();
+            $path = $request->getUri()->getPath();
+
+            return \GuzzleHttp\Promise\Create::promiseFor($path === '/.well-known/openid-configuration'
+                ? new Response(200, [], (string) json_encode($wire))
+                : $this->responseFor($path));
+        };
+        $identity = $this->generateTestIdentity();
+        $client = new AxiamClient(
+            $issuer,
+            self::TENANT,
+            oidcClientId: 'my-app',
+            oidcClientSecret: 'my-secret',
+            oidcTenantId: $tenantId,
+            clientCert: $identity[0],
+            clientKey: $identity[1],
+            transportHandler: $handler,
+        );
+
+        $client->loginClientCredentials();
+        $client->introspect(new Sensitive('t'));
+        $client->revoke(new Sensitive('t'));
+        $client->deviceAuthorize();
+        $configuration = $client->oidcDiscover();
+        $request = $client->oidcBegin($configuration, 'https://app.example.com/cb');
+        $client->oidcPar($request, 'https://app.example.com/cb');
+        $client->cibaInitiate(new \Axiam\Sdk\Oidc\CibaInitiateRequest('openid', loginHint: 'ada'));
+
+        // The aliased calls: the alias host, the alias path, and its query intact — one
+        // tenant_id, the vector's, neither duplicated nor dropped.
+        $calls = [
+            'token_endpoint' => '/oauth2/token',
+            'introspection_endpoint' => '/oauth2/introspect',
+            'revocation_endpoint' => '/oauth2/revoke',
+            'device_authorization_endpoint' => '/oauth2/device_authorization',
+            'pushed_authorization_request_endpoint' => '/oauth2/par',
+            'backchannel_authentication_endpoint' => '/oauth2/bc-authorize',
+        ];
+        foreach ($calls as $member => $path) {
+            $alias = $aliases[$member];
+            self::assertIsString($alias);
+            $hits = array_values(array_filter($requested, static fn (string $u): bool => parse_url($u, PHP_URL_PATH) === $path));
+            self::assertNotSame([], $hits, $path . ' was called');
+            foreach ($hits as $hit) {
+                self::assertSame(parse_url($alias, PHP_URL_HOST), parse_url($hit, PHP_URL_HOST), $path . ' went to the alias host');
+                $query = (string) parse_url($hit, PHP_URL_QUERY);
+                self::assertSame(1, substr_count($query, 'tenant_id='), $path . ': one tenant_id, not duplicated or dropped (' . $query . ')');
+                parse_str($query, $q);
+                self::assertSame($tenantId, $q['tenant_id'] ?? null, $path . ' keeps the vector\'s tenant_id');
+            }
+        }
+        // UserInfo is aliased but never called by this SDK (§12.3 rule 5): the alias decodes verbatim.
+        self::assertNotNull($configuration->mtls_endpoint_aliases);
+        self::assertSame($aliases['userinfo_endpoint'], $configuration->mtls_endpoint_aliases->userinfo_endpoint);
+
+        // Never aliased: authorization, end session, JWKS; and iss is the issuer, unchanged.
+        self::assertStringStartsWith((string) $vector['authorization_endpoint'], $request->url);
+        self::assertSame($vector['end_session_endpoint'], $configuration->end_session_endpoint);
+        self::assertSame($vector['jwks_uri'], $configuration->jwks_uri);
+        self::assertSame($issuer, $configuration->issuer);
     }
 }

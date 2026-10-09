@@ -31,8 +31,6 @@ final class ServiceAccountsApi extends ManagementSupport
     /**
      * `GET /api/v1/service-accounts`
      *
-     * `GET /api/v1/service-accounts`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -53,8 +51,6 @@ final class ServiceAccountsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/service-accounts`
-     *
-     * `POST /api/v1/service-accounts`.
      *
      * The response carries a ONE-TIME secret (`client_secret`): the server will not return it
      * again, so a caller that does not persist it here cannot recover it (§27.5).
@@ -78,8 +74,6 @@ final class ServiceAccountsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/service-accounts/{sa_id}`
-     *
-     * `GET /api/v1/service-accounts/{sa_id}`.
      * @param string $saId the `{sa_id}` path parameter
      * @return ServiceAccountResponse
      */
@@ -100,8 +94,6 @@ final class ServiceAccountsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/service-accounts/{sa_id}`
-     *
-     * `PUT /api/v1/service-accounts/{sa_id}`.
      * @param string $saId the `{sa_id}` path parameter
      * @param UpdateServiceAccount $body the request body
      * @return ServiceAccountResponse
@@ -125,8 +117,6 @@ final class ServiceAccountsApi extends ManagementSupport
     /**
      * `DELETE /api/v1/service-accounts/{sa_id}`
      *
-     * `DELETE /api/v1/service-accounts/{sa_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -148,8 +138,6 @@ final class ServiceAccountsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/service-accounts/{sa_id}/rotate-secret`
-     *
-     * `POST /api/v1/service-accounts/{sa_id}/rotate-secret`.
      *
      * The response carries a ONE-TIME secret (`client_secret`): the server will not return it
      * again, so a caller that does not persist it here cannot recover it (§27.5).
@@ -174,8 +162,6 @@ final class ServiceAccountsApi extends ManagementSupport
     /**
      * `POST /api/v1/service-accounts/{sa_id}/bind-certificate`
      *
-     * `POST /api/v1/service-accounts/{sa_id}/bind-certificate`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $saId the `{sa_id}` path parameter
      * @param BindCertificate $body the request body
@@ -196,8 +182,6 @@ final class ServiceAccountsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/service-accounts/{service_account_id}/roles`
-     *
-     * `GET /api/v1/service-accounts/{service_account_id}/roles`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -228,8 +212,6 @@ final class ServiceAccountsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/service-accounts/{service_account_id}/groups`
-     *
-     * `GET /api/v1/service-accounts/{service_account_id}/groups`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).

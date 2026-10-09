@@ -25,8 +25,6 @@ final class ResourcesApi extends ManagementSupport
     /**
      * `GET /api/v1/resources`
      *
-     * `GET /api/v1/resources`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -47,8 +45,6 @@ final class ResourcesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/resources`
-     *
-     * `POST /api/v1/resources`.
      * @param CreateResourceRequest $body the request body
      * @return Resource
      */
@@ -69,8 +65,6 @@ final class ResourcesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/resources/{resource_id}`
-     *
-     * `GET /api/v1/resources/{resource_id}`.
      * @param string $resourceId the `{resource_id}` path parameter
      * @return Resource
      */
@@ -91,8 +85,6 @@ final class ResourcesApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/resources/{resource_id}`
-     *
-     * `PUT /api/v1/resources/{resource_id}`.
      * @param string $resourceId the `{resource_id}` path parameter
      * @param UpdateResourceRequest $body the request body
      * @return Resource
@@ -116,8 +108,6 @@ final class ResourcesApi extends ManagementSupport
     /**
      * `DELETE /api/v1/resources/{resource_id}`
      *
-     * `DELETE /api/v1/resources/{resource_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -139,8 +129,6 @@ final class ResourcesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/resources/{resource_id}/children`
-     *
-     * `GET /api/v1/resources/{resource_id}/children`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -171,8 +159,6 @@ final class ResourcesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/resources/{resource_id}/ancestors`
-     *
-     * `GET /api/v1/resources/{resource_id}/ancestors`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).

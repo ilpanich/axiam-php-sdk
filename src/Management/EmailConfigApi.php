@@ -25,8 +25,6 @@ final class EmailConfigApi extends ManagementSupport
 {
     /**
      * `GET /api/v1/organizations/{org_id}/email-config`
-     *
-     * `GET /api/v1/organizations/{org_id}/email-config`.
      * @return EmailConfig
      */
     public function getOrg(): EmailConfig
@@ -45,8 +43,6 @@ final class EmailConfigApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/organizations/{org_id}/email-config`
-     *
-     * `PUT /api/v1/organizations/{org_id}/email-config`.
      * @param SetOrgEmailConfig $body the request body
      * @return EmailConfig
      */
@@ -68,8 +64,6 @@ final class EmailConfigApi extends ManagementSupport
     /**
      * `DELETE /api/v1/organizations/{org_id}/email-config`
      *
-     * `DELETE /api/v1/organizations/{org_id}/email-config`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -89,8 +83,6 @@ final class EmailConfigApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/email-config/test`
-     *
-     * `POST /api/v1/organizations/{org_id}/email-config/test`.
      * @return EmailTestResult
      */
     public function testOrg(): EmailTestResult
@@ -109,8 +101,6 @@ final class EmailConfigApi extends ManagementSupport
 
     /**
      * `GET /api/v1/tenants/{tenant_id}/email-config`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/email-config`.
      * @return EmailConfigOverride
      */
     public function getTenant(): EmailConfigOverride
@@ -129,8 +119,6 @@ final class EmailConfigApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/tenants/{tenant_id}/email-config`
-     *
-     * `PUT /api/v1/tenants/{tenant_id}/email-config`.
      * @param EmailConfigOverride $body the request body
      * @return EmailConfigOverride
      */
@@ -152,8 +140,6 @@ final class EmailConfigApi extends ManagementSupport
     /**
      * `DELETE /api/v1/tenants/{tenant_id}/email-config`
      *
-     * `DELETE /api/v1/tenants/{tenant_id}/email-config`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -173,8 +159,6 @@ final class EmailConfigApi extends ManagementSupport
 
     /**
      * `POST /api/v1/tenants/{tenant_id}/email-config/test`
-     *
-     * `POST /api/v1/tenants/{tenant_id}/email-config/test`.
      * @return EmailTestResult
      */
     public function testTenant(): EmailTestResult

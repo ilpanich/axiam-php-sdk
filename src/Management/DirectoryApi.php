@@ -30,8 +30,6 @@ final class DirectoryApi extends ManagementSupport
 {
     /**
      * `GET /api/v1/tenants/{tenant_id}/directory`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/directory`.
      * @return DirectoryConfig
      */
     public function get(): DirectoryConfig
@@ -111,8 +109,6 @@ final class DirectoryApi extends ManagementSupport
     /**
      * `DELETE /api/v1/tenants/{tenant_id}/directory`
      *
-     * `DELETE /api/v1/tenants/{tenant_id}/directory`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -167,8 +163,6 @@ final class DirectoryApi extends ManagementSupport
 
     /**
      * `GET /api/v1/tenants/{tenant_id}/directory/sync-status`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/directory/sync-status`.
      * @return DirectorySyncStatus
      */
     public function getSyncStatus(): DirectorySyncStatus

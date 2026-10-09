@@ -25,8 +25,6 @@ final class ScimTokensApi extends ManagementSupport
     /**
      * `GET /api/v1/scim-tokens`
      *
-     * `GET /api/v1/scim-tokens`.
-     *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
      * @return list<ScimTokenResponse>
@@ -55,8 +53,6 @@ final class ScimTokensApi extends ManagementSupport
     /**
      * `POST /api/v1/scim-tokens`
      *
-     * `POST /api/v1/scim-tokens`.
-     *
      * The response carries a ONE-TIME secret (`provisioning_token`): the server will not
      * return it again, so a caller that does not persist it here cannot recover it (§27.5).
      * @param CreateScimTokenRequest $body the request body
@@ -79,8 +75,6 @@ final class ScimTokensApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/scim-tokens/{id}`
-     *
-     * `DELETE /api/v1/scim-tokens/{id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

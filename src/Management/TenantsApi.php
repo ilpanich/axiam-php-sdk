@@ -25,8 +25,6 @@ final class TenantsApi extends ManagementSupport
     /**
      * `GET /api/v1/organizations/{org_id}/tenants`
      *
-     * `GET /api/v1/organizations/{org_id}/tenants`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -47,8 +45,6 @@ final class TenantsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/tenants`
-     *
-     * `POST /api/v1/organizations/{org_id}/tenants`.
      * @param CreateTenantRequest $body the request body
      * @return Tenant
      */
@@ -69,8 +65,6 @@ final class TenantsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/organizations/{org_id}/tenants/{tenant_id}`
-     *
-     * `GET /api/v1/organizations/{org_id}/tenants/{tenant_id}`.
      * @param string $tenantId the `{tenant_id}` path parameter
      * @return Tenant
      */
@@ -91,8 +85,6 @@ final class TenantsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/organizations/{org_id}/tenants/{tenant_id}`
-     *
-     * `PUT /api/v1/organizations/{org_id}/tenants/{tenant_id}`.
      * @param string $tenantId the `{tenant_id}` path parameter
      * @param UpdateTenant $body the request body
      * @return Tenant
@@ -116,8 +108,6 @@ final class TenantsApi extends ManagementSupport
     /**
      * `DELETE /api/v1/organizations/{org_id}/tenants/{tenant_id}`
      *
-     * `DELETE /api/v1/organizations/{org_id}/tenants/{tenant_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -139,8 +129,6 @@ final class TenantsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export`
-     *
-     * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/audit-export`.
      *
      * Returns nothing; the server answers with an empty body.
      * @param string $tenantId the `{tenant_id}` path parameter

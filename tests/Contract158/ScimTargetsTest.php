@@ -95,11 +95,68 @@ final class ScimTargetsTest extends ManagementRouteTestCase
         self::assertFalse(property_exists($target, 'credential'), 'no accessor for a credential');
         self::assertSame('Downstream', $target->name);
 
-        // ... nor through an unknown auth variant's raw object.
+        // ... nor through an unknown auth variant, which keeps its discriminator alone.
         $odd = Models\ScimTargetAuth::fromArray(['type' => 'mtls', 'credential' => $leaked]);
         self::assertInstanceOf(Models\ScimTargetAuthUnknown::class, $odd);
-        self::assertArrayNotHasKey('credential', $odd->raw);
-        self::assertNoFragment(print_r($odd, true), $leaked);
+        self::assertSame(['tag' => 'mtls'], get_object_vars($odd));
+        self::assertNoFragment(self::renderings($odd), $leaked);
+    }
+
+    /**
+     * R-20 (§34.2 P12.1, §31.2): an unknown `auth` or `scope` arm keeps its discriminator and
+     * nothing else — not the server's object minus a list of names — so a secret under a name
+     * nobody listed is not surfaced either.
+     */
+    public function testAnUnknownArmKeepsItsDiscriminatorAndNothingElse(): void
+    {
+        $client = $this->client();
+        $cert = self::runtimeSecret('cert-');
+        $selector = self::runtimeSecret('sel-');
+        $id = self::uuid();
+        $this->routes->on('GET', self::TARGETS . '/' . $id, RoutedHandler::json(200, self::target([
+            'auth' => ['type' => 'mtls', 'cert' => $cert, 'credential' => $cert],
+            'scope' => ['type' => 'by_filter', 'filter' => $selector],
+        ])));
+
+        $target = $client->scimTargets()->get($id);
+        self::assertInstanceOf(Models\ScimTargetAuthUnknown::class, $target->auth);
+        self::assertInstanceOf(Models\ScimTargetScopeUnknown::class, $target->scope);
+        self::assertSame(['tag' => 'mtls'], get_object_vars($target->auth), 'the discriminator and nothing else');
+        self::assertSame(['tag' => 'by_filter'], get_object_vars($target->scope), 'the discriminator and nothing else');
+        self::assertNoFragment(self::renderings($target->auth) . self::renderings($target->scope), $cert);
+        self::assertNoFragment(self::renderings($target->scope), $selector);
+        self::assertNoFragment(self::renderings($target), $cert);
+    }
+
+    /**
+     * R-21 (§34.2 P12.2, §7 rule 1): rendering a response that carries an unknown arm for a
+     * log line never fails; the refusal to send that value is the request path's, local, and
+     * before anything is sent.
+     */
+    public function testAnUnknownArmRendersForALogLineAndIsRefusedOnlyOnTheWayOut(): void
+    {
+        $client = $this->client();
+        $id = self::uuid();
+        $this->routes->on('GET', self::TARGETS . '/' . $id, RoutedHandler::json(200, self::target([
+            'auth' => ['type' => 'mtls', 'certificate_id' => self::uuid()],
+            'scope' => ['type' => 'by_filter'],
+        ])));
+        $target = $client->scimTargets()->get($id);
+
+        $logged = json_encode($target, JSON_THROW_ON_ERROR);
+        self::assertStringContainsString('"auth":{"type":"mtls"}', $logged);
+        self::assertStringContainsString('"scope":{"type":"by_filter"}', $logged);
+        $body = ReadModifyWrite::scimTarget($target);
+        self::assertStringContainsString('"type":"mtls"', json_encode($body, JSON_THROW_ON_ERROR), 'the input renders for a log line too');
+
+        $this->routes->on('PUT', self::TARGETS . '/' . $id, RoutedHandler::json(200, self::target()));
+        try {
+            $client->scimTargets()->update($id, $body);
+            self::fail('an unknown auth type must not be sent');
+        } catch (AxiamException $e) {
+            self::assertStringContainsString('mtls', $e->getMessage());
+        }
+        self::assertSame([], $this->bodies('PUT', self::TARGETS . '/' . $id), 'refused locally: nothing was sent');
     }
 
     // -- 3. Replacement and the omitted credential ----------------------------------------

@@ -47,8 +47,6 @@ final class CertificatesApi extends ManagementSupport
     /**
      * `POST /api/v1/certificates`
      *
-     * `POST /api/v1/certificates`.
-     *
      * The response carries a ONE-TIME secret (`private_key_pem`): the server will not return
      * it again, so a caller that does not persist it here cannot recover it (§27.5).
      * @param CreateCertificateRequest $body the request body
@@ -71,8 +69,6 @@ final class CertificatesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/certificates/sign-csr`
-     *
-     * `POST /api/v1/certificates/sign-csr`.
      * @param SignCertificateCsrRequest $body the request body
      * @return Certificate
      */
@@ -93,8 +89,6 @@ final class CertificatesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/certificates/{id}`
-     *
-     * `GET /api/v1/certificates/{id}`.
      * @param string $id the `{id}` path parameter
      * @return Certificate
      */
@@ -115,8 +109,6 @@ final class CertificatesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/certificates/{id}/revoke`
-     *
-     * `POST /api/v1/certificates/{id}/revoke`.
      *
      * Returns nothing; the server answers with an empty body.
      * @param string $id the `{id}` path parameter

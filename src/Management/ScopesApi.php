@@ -25,8 +25,6 @@ final class ScopesApi extends ManagementSupport
     /**
      * `GET /api/v1/resources/{resource_id}/scopes`
      *
-     * `GET /api/v1/resources/{resource_id}/scopes`.
-     *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
      * @param string $resourceId the `{resource_id}` path parameter
@@ -56,8 +54,6 @@ final class ScopesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/resources/{resource_id}/scopes`
-     *
-     * `POST /api/v1/resources/{resource_id}/scopes`.
      * @param string $resourceId the `{resource_id}` path parameter
      * @param CreateScopeRequest $body the request body
      * @return Scope
@@ -80,8 +76,6 @@ final class ScopesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/resources/{resource_id}/scopes/{scope_id}`
-     *
-     * `GET /api/v1/resources/{resource_id}/scopes/{scope_id}`.
      * @param string $resourceId the `{resource_id}` path parameter
      * @param string $scopeId the `{scope_id}` path parameter
      * @return Scope
@@ -104,8 +98,6 @@ final class ScopesApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/resources/{resource_id}/scopes/{scope_id}`
-     *
-     * `PUT /api/v1/resources/{resource_id}/scopes/{scope_id}`.
      * @param string $resourceId the `{resource_id}` path parameter
      * @param string $scopeId the `{scope_id}` path parameter
      * @param UpdateScopeRequest $body the request body
@@ -130,8 +122,6 @@ final class ScopesApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/resources/{resource_id}/scopes/{scope_id}`
-     *
-     * `DELETE /api/v1/resources/{resource_id}/scopes/{scope_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

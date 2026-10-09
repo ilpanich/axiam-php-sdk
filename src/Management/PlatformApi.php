@@ -67,8 +67,6 @@ final class PlatformApi extends ManagementSupport
 
     /**
      * `GET /api/v1/mds/status`
-     *
-     * `GET /api/v1/mds/status`.
      * @return MdsStatusResponse
      */
     public function mdsStatus(): MdsStatusResponse
@@ -87,8 +85,6 @@ final class PlatformApi extends ManagementSupport
 
     /**
      * `POST /api/v1/mds/refresh`
-     *
-     * `POST /api/v1/mds/refresh`.
      * @return MdsRefreshOutcomeVariant
      */
     public function mdsRefresh(): MdsRefreshOutcomeVariant

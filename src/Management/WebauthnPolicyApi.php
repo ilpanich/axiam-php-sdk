@@ -25,8 +25,6 @@ final class WebauthnPolicyApi extends ManagementSupport
 {
     /**
      * `GET /api/v1/tenants/{tenant_id}/webauthn/attestation-policy`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/webauthn/attestation-policy`.
      * @return PolicyResponse
      */
     public function get(): PolicyResponse
@@ -45,8 +43,6 @@ final class WebauthnPolicyApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/tenants/{tenant_id}/webauthn/attestation-policy`
-     *
-     * `PUT /api/v1/tenants/{tenant_id}/webauthn/attestation-policy`.
      * @param WebauthnAttestationPolicy $body the request body
      * @return WebauthnAttestationPolicy
      */
@@ -67,8 +63,6 @@ final class WebauthnPolicyApi extends ManagementSupport
 
     /**
      * `GET /api/v1/tenants/{tenant_id}/webauthn/compliance-report`
-     *
-     * `GET /api/v1/tenants/{tenant_id}/webauthn/compliance-report`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).

@@ -33,8 +33,6 @@ final class RolesApi extends ManagementSupport
     /**
      * `GET /api/v1/roles`
      *
-     * `GET /api/v1/roles`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -55,8 +53,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/roles`
-     *
-     * `POST /api/v1/roles`.
      * @param CreateRoleRequest $body the request body
      * @return Role
      */
@@ -77,8 +73,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/roles/{role_id}`
-     *
-     * `GET /api/v1/roles/{role_id}`.
      * @param string $roleId the `{role_id}` path parameter
      * @return Role
      */
@@ -99,8 +93,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/roles/{role_id}`
-     *
-     * `PUT /api/v1/roles/{role_id}`.
      * @param string $roleId the `{role_id}` path parameter
      * @param UpdateRole $body the request body
      * @return Role
@@ -124,8 +116,6 @@ final class RolesApi extends ManagementSupport
     /**
      * `DELETE /api/v1/roles/{role_id}`
      *
-     * `DELETE /api/v1/roles/{role_id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -147,8 +137,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/roles/{role_id}/users`
-     *
-     * `GET /api/v1/roles/{role_id}/users`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -180,8 +168,6 @@ final class RolesApi extends ManagementSupport
     /**
      * `POST /api/v1/roles/{role_id}/users`
      *
-     * `POST /api/v1/roles/{role_id}/users`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $roleId the `{role_id}` path parameter
      * @param AssignRoleToUserRequest $body the request body
@@ -202,8 +188,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/roles/{role_id}/users/{user_id}`
-     *
-     * `DELETE /api/v1/roles/{role_id}/users/{user_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *
@@ -230,8 +214,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/roles/{role_id}/groups`
-     *
-     * `GET /api/v1/roles/{role_id}/groups`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -263,8 +245,6 @@ final class RolesApi extends ManagementSupport
     /**
      * `POST /api/v1/roles/{role_id}/groups`
      *
-     * `POST /api/v1/roles/{role_id}/groups`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $roleId the `{role_id}` path parameter
      * @param AssignRoleToGroupRequest $body the request body
@@ -285,8 +265,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/roles/{role_id}/groups/{group_id}`
-     *
-     * `DELETE /api/v1/roles/{role_id}/groups/{group_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *
@@ -313,8 +291,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/roles/{role_id}/permissions`
-     *
-     * `GET /api/v1/roles/{role_id}/permissions`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -346,8 +322,6 @@ final class RolesApi extends ManagementSupport
     /**
      * `POST /api/v1/roles/{role_id}/permissions`
      *
-     * `POST /api/v1/roles/{role_id}/permissions`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $roleId the `{role_id}` path parameter
      * @param GrantPermissionRequest $body the request body
@@ -368,8 +342,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/roles/{role_id}/permissions/{permission_id}`
-     *
-     * `DELETE /api/v1/roles/{role_id}/permissions/{permission_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *
@@ -394,8 +366,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/roles/{role_id}/service-accounts`
-     *
-     * `GET /api/v1/roles/{role_id}/service-accounts`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -427,8 +397,6 @@ final class RolesApi extends ManagementSupport
     /**
      * `POST /api/v1/roles/{role_id}/service-accounts`
      *
-     * `POST /api/v1/roles/{role_id}/service-accounts`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $roleId the `{role_id}` path parameter
      * @param AssignRoleToServiceAccountRequest $body the request body
@@ -449,8 +417,6 @@ final class RolesApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}`
-     *
-     * `DELETE /api/v1/roles/{role_id}/service-accounts/{service_account_id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

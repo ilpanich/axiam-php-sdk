@@ -12,8 +12,9 @@ namespace Axiam\Sdk\Management\Models;
  * Per-tenant WebAuthn attestation policy (D5). One row per tenant; an absent row means
  * [`WebauthnAttestationPolicy::default`], which is today's behavior unchanged.
  *
- * This is a REPLACEMENT body (§27.4 rule 5): every field is required, so omitting one is a
- * constructor error rather than a silent erasure server-side.
+ * This is a REPLACEMENT body (§27.4 rule 5): what it omits is not preserved. The required
+ * members are constructor parameters, so omitting one is a constructor error; an optional
+ * member left unset is omitted from the wire and takes its default server-side.
  */
 final class WebauthnAttestationPolicy implements \JsonSerializable
 {

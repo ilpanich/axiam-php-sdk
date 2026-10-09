@@ -689,6 +689,21 @@ def header(namespace: str, uses: list[str] | None = None) -> str:
     return out
 
 
+def sparse_update_schemas() -> set[str]:
+    """Request schemas the registry marks as sparse updates (``update_style: sparse``).
+
+    Only these say "what you leave unset is left unchanged": an all-optional body that is
+    not an update -- ``parse_sp_metadata``'s, or a nested member object -- has no stored
+    record for an unset member to be left unchanged in (R-28, contract 1.59 §34.3).
+    """
+    out: set[str] = set()
+    for ns in REGISTRY["namespaces"].values():
+        for op in ns["operations"].values():
+            if op["request_schema"] and op.get("update_style") == "sparse":
+                out.add(op["request_schema"].lstrip("[]"))
+    return out
+
+
 def replacement_schemas() -> set[str]:
     """Request schemas the registry marks as full replacements, not sparse updates.
 
@@ -737,6 +752,8 @@ PROJECTION_DOC = (
 )
 
 PROJECTED: dict[str, list[dict[str, Any]]] = projection_map()
+
+SPARSE_UPDATES: set[str] = sparse_update_schemas()
 
 
 def field_list(schema_name: str, secrets: set[str]) -> tuple[list[dict[str, Any]], str | None]:
@@ -816,22 +833,34 @@ def decode_expr(field: dict[str, Any], source: str) -> str:
     return decode_one(decl, source)
 
 
-def encode_one(type_decl: str, ref: str) -> str:
+def is_open_variant(type_decl: str) -> bool:
+    """Whether ``type_decl`` is the interface of an OPEN union (see ``OPEN_UNIONS``)."""
+    return type_decl.endswith("Variant") and type_decl[:-len("Variant")] in OPEN_UNIONS
+
+
+def encode_one(type_decl: str, ref: str, log: bool = False) -> str:
     """PHP that turns one value of declared type ``type_decl`` back into its wire form.
 
     Always ``->``, never ``?->``: an optional field is only ever encoded INSIDE its own
     ``!== null`` guard, so the nullsafe operator would be dead syntax -- and PHPStan says
     so at level 6 rather than letting it sit there implying a null that cannot occur.
+
+    ``log`` renders for ``json_encode()`` instead of for the wire: an open union's arm is
+    rendered with ``jsonSerialize()``, which never throws, where ``toArray()`` -- the wire
+    form -- refuses an unknown arm (CONTRACT.md §31.2, §34.2 P12.2).
     """
     if type_decl in {"int", "float", "string", "bool", "mixed"}:
         return ref
     if type_decl in ENUMS:
         return f"{ref}->value"
+    if log and is_open_variant(type_decl):
+        return f"{ref}->jsonSerialize()"
     return f"{ref}->toArray()"
 
 
-def encode_expr(field: dict[str, Any]) -> str:
-    """PHP source that turns one field back into its wire value."""
+def encode_expr(field: dict[str, Any], log: bool = False) -> str:
+    """PHP source that turns one field back into its wire value (or, with ``log``, its
+    ``json_encode()`` rendering -- see :func:`encode_one`)."""
     decl = field["decl"].lstrip("?")
     doc = field["doc"]
     ref = f"$this->{field['name']}"
@@ -844,12 +873,12 @@ def encode_expr(field: dict[str, Any]) -> str:
         item = doc[5:-1]
         if item in {"int", "float", "string", "bool", "mixed"} or item.startswith("array<"):
             return ref
-        inner = encode_one(item, "$v")
+        inner = encode_one(item, "$v", log)
         cast = "string" if item in ENUMS else "array"
         return f"array_map(static fn ({item} $v): {cast} => {inner}, {ref})"
     if decl == "array":
         return ref
-    return encode_one(decl, ref)
+    return encode_one(decl, ref, log)
 
 
 
@@ -922,17 +951,36 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
 
     summary = escape(description) if description else \
         f"The `{name}` schema from the server's OpenAPI document."
-    if sparse:
+    if sparse and name in SPARSE_UPDATES:
         summary += (
             "\n\nEvery property is optional, so this is a SPARSE body: what you leave unset "
             "is left unchanged, and is omitted from the wire request entirely rather than "
             "sent as null (§27.4 rule 5)."
         )
-    elif replacement:
+    elif sparse:
+        summary += (
+            "\n\nEvery property is optional: one you leave unset is omitted from the wire "
+            "request entirely rather than sent as null (§27.4 rule 5)."
+        )
+    elif replacement and all(f["required"] for f in fields):
         summary += (
             "\n\nThis is a REPLACEMENT body (§27.4 rule 5): every field is required, so "
             "omitting one is a constructor error rather than a silent erasure server-side."
         )
+    elif replacement:
+        summary += (
+            "\n\nThis is a REPLACEMENT body (§27.4 rule 5): what it omits is not preserved. "
+            "The required members are constructor parameters, so omitting one is a "
+            "constructor error; an optional member left unset is omitted from the wire and "
+            "takes its default server-side."
+        )
+        written_only = [f for f in fields if f["secret"]]
+        if written_only:
+            names = ", ".join(f"`{f['wire']}`" for f in written_only)
+            summary += (
+                f" Left unset, the write-only secret ({names}) is not reset but kept -- see the "
+                "operation's documentation for when a write must carry it."
+            )
 
     uses = []
     out = [header(MODELS_NS, uses)]
@@ -1019,14 +1067,13 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         "    ",
         ["@return array<string,mixed>"],
     ))
-    out.append("    public function toArray(): array")
-    out.append("    {")
-    if not fields:
-        out.append("        return [];")
-    else:
+    def render_body(log: bool) -> None:
+        if not fields:
+            out.append("        return [];")
+            return
         out.append("        $out = [];")
         for f in fields:
-            expr = encode_expr(f)
+            expr = encode_expr(f, log)
             if f["required"]:
                 out.append(f"        $out['{f['wire']}'] = {expr};")
             elif f["explicit_null"]:
@@ -1040,22 +1087,35 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
                 out.append("        }")
         out.append("")
         out.append("        return $out;")
+
+    out.append("    public function toArray(): array")
+    out.append("    {")
+    render_body(False)
     out.append("    }")
     out.append("")
 
     # --- jsonSerialize ---
-    out.extend(docblock(
+    holds_open_union = any(is_open_variant(f["decl"].lstrip("?")) for f in fields)
+    summary = (
         "Renders this object for `json_encode()`.\n\n"
         "Any {@see " + SENSITIVE + "} it carries stays WRAPPED here, so a log line or a "
         "`json_encode($model)` in application code prints `[SENSITIVE]`. The one place a "
         "secret is revealed is {@see \\Axiam\\Sdk\\Management\\ManagementTransport}, on the "
-        "way to the wire and nowhere else (§27.5).",
-        "    ",
-        ["@return array<string,mixed>"],
-    ))
+        "way to the wire and nowhere else (§27.5)."
+    )
+    if holds_open_union:
+        summary += (
+            "\n\nRendering for a log line never fails: an unknown union arm renders its "
+            "discriminator here, and only {@see self::toArray()} -- the request path -- "
+            "refuses to send it (CONTRACT.md §31.2, §34.2 P12.2)."
+        )
+    out.extend(docblock(summary, "    ", ["@return array<string,mixed>"]))
     out.append("    public function jsonSerialize(): array")
     out.append("    {")
-    out.append("        return $this->toArray();")
+    if holds_open_union:
+        render_body(True)
+    else:
+        out.append("        return $this->toArray();")
     out.append("    }")
     out.append("}")
     return "\n".join(out) + "\n"
@@ -1232,8 +1292,10 @@ def emit_union(name: str, schema: Any, tag: str, arms: list[tuple[str, Any]]) ->
 def emit_unknown_arm(name: str, tag: str) -> str:
     """The `<Name>Unknown` arm of an open union (see ``OPEN_UNIONS``).
 
-    It keeps the tag and the raw object so a caller can inspect what the server sent,
-    and both render paths throw: a body carrying it cannot be sent (CONTRACT.md §31.2).
+    It keeps the discriminator and nothing else (CONTRACT.md §29.5, §31.2, §34.2 P12.1). Its
+    wire form, ``toArray()``, throws -- the request path refuses to send a value this SDK does
+    not know (§34.2 P12.2) -- while ``jsonSerialize()`` renders the discriminator, so a log
+    line never fails.
     """
     arm = f"{name}Unknown"
     exc = "\\Axiam\\Sdk\\Core\\AxiamException"
@@ -1241,8 +1303,11 @@ def emit_unknown_arm(name: str, tag: str) -> str:
     body.extend(docblock(
         f"A {{@see {name}}} whose `{tag}` this SDK's copy of the spec does not list.\n\n"
         "Decoding one never fails, so a record using a newer variant still lists and reads. "
-        "It can never be sent: {@see self::toArray()} and {@see self::jsonSerialize()} throw, "
-        "because re-sending a body this SDK cannot represent would silently rewrite it.",
+        f"It keeps the `{tag}` and nothing else of what the server sent (CONTRACT.md §31.2, "
+        "§34.2 P12.1). It can never be sent: {@see self::toArray()}, the wire form, throws, "
+        "because re-sending a body this SDK cannot represent would silently rewrite it; "
+        "{@see self::jsonSerialize()} renders the discriminator, so a log line never fails "
+        "(§34.2 P12.2).",
     ))
     body.append(f"final class {arm} implements {name}Variant")
     body.append("{")
@@ -1251,35 +1316,30 @@ def emit_unknown_arm(name: str, tag: str) -> str:
         "    ",
         [
             f"@param string|null $tag The unrecognised `{tag}` value, or null when absent or not a string.",
-            "@param array<string,mixed> $raw The raw wire object, minus any member named like a "
-            "secret (see {@see self::fromArray()}).",
         ],
     ))
     body.append("    public function __construct(")
     body.append("        public readonly ?string $tag,")
-    body.append("        public readonly array $raw,")
     body.append("    ) {")
     body.append("    }")
     body.append("")
     body.extend(docblock(
-        "Keeps one decoded JSON object, never throwing -- but drops any member named like a "
-        "secret (`credential`, `client_secret`, `authorization_header`, `bind_secret`, "
-        "`private_key_pem`): no response may carry one (CONTRACT.md §31.2, §32.5), and a "
-        "decoder that meets one MUST drop it rather than surface it.",
+        f"Keeps the `{tag}` of one decoded JSON object, never throwing, and drops every other "
+        "member: only declared members are kept, and an unknown arm declares none (CONTRACT.md "
+        "§29.5, §31.2, §34.2 P12.1).",
         "    ",
         ["@param array<string,mixed> $data The raw wire object."],
     ))
     body.append("    public static function fromArray(array $data): self")
     body.append("    {")
     body.append(f"        $tag = $data['{tag}'] ?? null;")
-    body.append("        unset($data['credential'], $data['client_secret'], $data['authorization_header'], "
-                "$data['bind_secret'], $data['private_key_pem']);")
     body.append("")
-    body.append("        return new self(\\is_string($tag) ? $tag : null, $data);")
+    body.append("        return new self(\\is_string($tag) ? $tag : null);")
     body.append("    }")
     body.append("")
     body.extend(docblock(
-        "Refuses to render: an unknown variant MUST NOT be sent (CONTRACT.md §31.2).",
+        "Refuses to render the wire form: an unknown variant MUST NOT be sent, and the refusal "
+        "is local, before anything is sent (CONTRACT.md §31.2, §34.2 P12.2).",
         "    ",
         ["@return array<string,mixed>", f"@throws {exc} always."],
     ))
@@ -1291,13 +1351,14 @@ def emit_unknown_arm(name: str, tag: str) -> str:
     body.append("    }")
     body.append("")
     body.extend(docblock(
-        "Refuses to render for `json_encode()`, for the same reason as {@see self::toArray()}.",
+        f"Renders for `json_encode()` -- a log line -- as the `{tag}` alone; never throws "
+        "(CONTRACT.md §7 rule 1, §34.2 P12.2).",
         "    ",
-        ["@return array<string,mixed>", f"@throws {exc} always."],
+        ["@return array<string,mixed>"],
     ))
     body.append("    public function jsonSerialize(): array")
     body.append("    {")
-    body.append("        return $this->toArray();")
+    body.append(f"        return ['{tag}' => $this->tag];")
     body.append("    }")
     body.append("}")
     return "\n".join(body) + "\n"
@@ -1578,9 +1639,11 @@ def spec_description(op: dict[str, Any]) -> str | None:
 def operation_doc(op: dict[str, Any], name: str, canonical: str = "") -> str:
     """The docblock summary for one generated operation."""
     described = spec_description(op)
-    lead = described or f"`{op['method']} {op['path']}`."
-    if described:
-        lead = f"{described}\n\n`{op['method']} {op['path']}`."
+    request_line = f"`{op['method']} {op['path']}`"
+    lead = described or f"{request_line}."
+    # A spec summary that IS the request line is not repeated under itself (R-28).
+    if described and described.rstrip(".") != request_line:
+        lead = f"{described}\n\n{request_line}."
 
     kind = op["response"]["kind"]
     if kind == "page":
@@ -2286,7 +2349,8 @@ def emit_roundtrip_test() -> str:
                 arm = f"{name}Unknown"
                 count += 1
                 block = inline_doc(
-                    f"`{arm}`: an unrecognised `{tag}` decodes, and refuses to render.", "    ")
+                    f"`{arm}`: an unrecognised `{tag}` decodes to its discriminator alone, "
+                    "renders for a log line, and refuses the wire form.", "    ")
                 block.append(f"    public function test{arm}RoundTrips(): void")
                 block.append("    {")
                 block.append(f"        $wire = ['{tag}' => 'from_a_newer_server', 'extra' => 1];")
@@ -2295,9 +2359,11 @@ def emit_roundtrip_test() -> str:
                 block.append("")
                 block.append(f"        self::assertInstanceOf(Models\\{arm}::class, $model);")
                 block.append("        self::assertSame('from_a_newer_server', $model->tag);")
-                block.append("        self::assertSame($wire, $model->raw);")
+                block.append("        self::assertSame(['tag' => 'from_a_newer_server'], get_object_vars($model));")
+                block.append(f"        self::assertSame('{{\"{tag}\":\"from_a_newer_server\"}}', "
+                             "json_encode($model, JSON_THROW_ON_ERROR));")
                 block.append("        $this->expectException(\\Axiam\\Sdk\\Core\\AxiamException::class);")
-                block.append("        json_encode($model, JSON_THROW_ON_ERROR);")
+                block.append("        $model->toArray();")
                 block.append("    }")
                 cases.append("\n".join(block))
             continue

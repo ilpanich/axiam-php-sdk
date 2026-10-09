@@ -25,8 +25,6 @@ final class PrivacyApi extends ManagementSupport
     /**
      * `POST /api/v1/account/export`
      *
-     * `POST /api/v1/account/export`.
-     *
      * Returns nothing; the server answers with an empty body.
      */
     public function requestExport(): void
@@ -43,8 +41,6 @@ final class PrivacyApi extends ManagementSupport
 
     /**
      * `GET /api/v1/account/export/{token}`
-     *
-     * `GET /api/v1/account/export/{token}`.
      *
      * Returns nothing; the server answers with an empty body.
      * @param string $token the `{token}` path parameter
@@ -64,8 +60,6 @@ final class PrivacyApi extends ManagementSupport
 
     /**
      * `POST /api/v1/account/delete`
-     *
-     * `POST /api/v1/account/delete`.
      *
      * Returns nothing; the server answers with an empty body.
      */

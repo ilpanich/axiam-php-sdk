@@ -14,8 +14,9 @@ namespace Axiam\Sdk\Management\Models;
  * `entity_id`, `display_name` and `acs_urls` has a default, so a client written against a
  * later revision of this struct keeps working.
  *
- * This is a REPLACEMENT body (§27.4 rule 5): every field is required, so omitting one is a
- * constructor error rather than a silent erasure server-side.
+ * This is a REPLACEMENT body (§27.4 rule 5): what it omits is not preserved. The required
+ * members are constructor parameters, so omitting one is a constructor error; an optional
+ * member left unset is omitted from the wire and takes its default server-side.
  */
 final class SamlServiceProviderInput implements \JsonSerializable
 {

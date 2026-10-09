@@ -27,8 +27,6 @@ final class ScimTargetsApi extends ManagementSupport
     /**
      * `GET /api/v1/scim-targets`
      *
-     * `GET /api/v1/scim-targets`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -49,8 +47,6 @@ final class ScimTargetsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/scim-targets`
-     *
-     * `POST /api/v1/scim-targets`.
      *
      * `credential` is required here (§31.3 rule 2). It is write-only: no response ever carries
      * it, and the SDK keeps no copy.
@@ -74,8 +70,6 @@ final class ScimTargetsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/scim-targets/{id}`
-     *
-     * `GET /api/v1/scim-targets/{id}`.
      * @param string $id the `{id}` path parameter
      * @return ScimTargetResponse
      */
@@ -96,8 +90,6 @@ final class ScimTargetsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/scim-targets/{id}`
-     *
-     * `PUT /api/v1/scim-targets/{id}`.
      *
      * **The credential is bound to its URL** (§31.3 rule 2): absent `credential` keeps the
      * stored one -- except that changing `base_url` of a bearer target, `auth.token_url` or
@@ -129,8 +121,6 @@ final class ScimTargetsApi extends ManagementSupport
     /**
      * `DELETE /api/v1/scim-targets/{id}`
      *
-     * `DELETE /api/v1/scim-targets/{id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -156,8 +146,6 @@ final class ScimTargetsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/scim-targets/{id}/reconcile`
-     *
-     * `POST /api/v1/scim-targets/{id}/reconcile`.
      *
      * Starts a reconciliation in the background and answers `202`; its outcome is on the
      * target's `state` (§31.3 rule 7). `409` while a run holds the claim, within five minutes

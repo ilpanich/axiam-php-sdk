@@ -30,8 +30,6 @@ final class FederationApi extends ManagementSupport
     /**
      * `GET /api/v1/federation-configs`
      *
-     * `GET /api/v1/federation-configs`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -52,8 +50,6 @@ final class FederationApi extends ManagementSupport
 
     /**
      * `POST /api/v1/federation-configs`
-     *
-     * `POST /api/v1/federation-configs`.
      * @param CreateFederationConfigRequest $body the request body
      * @return FederationConfigResponse
      */
@@ -74,8 +70,6 @@ final class FederationApi extends ManagementSupport
 
     /**
      * `GET /api/v1/federation-configs/{id}`
-     *
-     * `GET /api/v1/federation-configs/{id}`.
      * @param string $id the `{id}` path parameter
      * @return FederationConfigResponse
      */
@@ -96,8 +90,6 @@ final class FederationApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/federation-configs/{id}`
-     *
-     * `PUT /api/v1/federation-configs/{id}`.
      * @param string $id the `{id}` path parameter
      * @param UpdateFederationConfigRequest $body the request body
      * @return FederationConfigResponse
@@ -121,8 +113,6 @@ final class FederationApi extends ManagementSupport
     /**
      * `DELETE /api/v1/federation-configs/{id}`
      *
-     * `DELETE /api/v1/federation-configs/{id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -144,8 +134,6 @@ final class FederationApi extends ManagementSupport
 
     /**
      * `GET /api/v1/federation-links/user/{user_id}`
-     *
-     * `GET /api/v1/federation-links/user/{user_id}`.
      *
      * Returns the server's complete list. This endpoint is NOT paginated, so the result is a
      * plain list and never a `Page` (§27.4 rule 4).
@@ -177,8 +165,6 @@ final class FederationApi extends ManagementSupport
     /**
      * `DELETE /api/v1/federation-links/{id}`
      *
-     * `DELETE /api/v1/federation-links/{id}`.
-     *
      * Returns nothing; the server answers with an empty body.
      *
      * NOT idempotent (§27.4 rule 6): deleting something already deleted raises {@see
@@ -200,8 +186,6 @@ final class FederationApi extends ManagementSupport
 
     /**
      * `POST /api/v1/federation/oidc/authorize`
-     *
-     * `POST /api/v1/federation/oidc/authorize`.
      * @param OidcAuthorizeRequest $body the request body
      * @return OidcAuthorizeResponse
      */
@@ -222,8 +206,6 @@ final class FederationApi extends ManagementSupport
 
     /**
      * `POST /api/v1/federation/oidc/callback`
-     *
-     * `POST /api/v1/federation/oidc/callback`.
      * @param OidcCallbackRequest $body the request body
      * @return OidcCallbackResponse
      */

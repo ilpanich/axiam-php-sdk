@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Ssf;
 
 use Axiam\Sdk\Core\AuthError;
+use Axiam\Sdk\Core\AxiamException;
 use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\RetryPolicy;
@@ -184,6 +185,8 @@ final class SsfReceiver
      * @throws SetVerificationError the SET is refused.
      * @throws NetworkError the JWKS (or the configuration document) could not be fetched —
      *         which is not a verdict on the SET.
+     * @throws AxiamException ext-sodium is not loaded (composer.json requires it) — no
+     *         verdict on the SET either.
      */
     public function verifySet(string $set): SecurityEvent
     {
@@ -204,10 +207,19 @@ final class SsfReceiver
      * on a transport failure, a `5xx`, `408` or `429` — never on another `4xx`, which maps like
      * a management answer (`400` {@see ValidationError}, `404` NotFoundError, `401` AuthError).
      * A SET that is not a string is refused `malformed`, one whose verified `jti` differs from
-     * its map key `invalid_request`; a JWKS fetch failure aborts the poll with that error rather
-     * than refusing SETs it could not judge.
+     * its map key `invalid_request`.
+     *
+     * **`poll` never keeps a `jti` it does not return** (§34.2 P1). A failure that is not a
+     * verdict on a SET — a JWKS or configuration fetch that fails, a replay store that cannot
+     * answer — refuses nothing: that SET and every later one in the batch are left
+     * **unjudged**, unrecorded, and listed in {@see SsfPollResult::$unjudged} with the failure in
+     * {@see SsfPollResult::$unjudgedCause}. Neither acknowledge them nor report them in
+     * `setErrs`: the transmitter offers them again. When no SET of the batch had been accepted
+     * yet, nothing was recorded and the failure is raised instead.
      *
      * @throws AuthError locally, when no access-token provider was configured.
+     * @throws NetworkError a key fetch failed before any SET of the batch was accepted (or the
+     *         poll itself failed); the replay store's own exception likewise.
      */
     public function poll(string $streamId, ?SsfPollOptions $options = null): SsfPollResult
     {
@@ -262,10 +274,16 @@ final class SsfReceiver
         }
         $events = [];
         $refused = [];
+        $unjudged = [];
+        $cause = null;
         $sets = $reply->sets ?? null;
         if ($sets instanceof \stdClass) {
             foreach (get_object_vars($sets) as $jti => $candidate) {
                 $jti = (string) $jti;
+                if ($cause !== null) {
+                    $unjudged[] = $jti;
+                    continue;
+                }
                 if (!is_string($candidate)) {
                     $refused[] = new RefusedSet($jti, SetFailureReason::Malformed);
                     continue;
@@ -274,16 +292,35 @@ final class SsfReceiver
                     $events[] = $this->verify($candidate, $jti);
                 } catch (SetVerificationError $e) {
                     $refused[] = new RefusedSet($jti, $e->failureReason);
+                } catch (\Throwable $e) {
+                    // Not a verdict on this SET (§34.2 P1, P3): a key fetch that failed or a
+                    // store that could not answer. Its jti is not recorded, and neither is any
+                    // later SET's: they are left for the transmitter to offer again.
+                    if ($events === []) {
+                        // Nothing was recorded, so raising loses nothing.
+                        throw $e;
+                    }
+                    $cause = $e;
+                    $unjudged[] = $jti;
                 }
             }
         }
 
-        return new SsfPollResult($events, ($reply->moreAvailable ?? false) === true, $refused);
+        return new SsfPollResult($events, ($reply->moreAvailable ?? false) === true, $refused, $unjudged, $cause);
     }
 
     /** The §32.7 order; `$expectedJti` is the poll map key the SET was returned under. */
     private function verify(string $set, ?string $expectedJti): SecurityEvent
     {
+        // Ed25519 is ext-sodium's (composer.json requires it). A build compiled without it
+        // fails here with a typed error — no verdict on the SET — rather than with PHP's
+        // "Call to undefined function" at step 4 or 5.
+        if (!function_exists('sodium_crypto_sign_verify_detached')) {
+            throw new AxiamException(
+                'ext-sodium is required to verify a SET (Ed25519) but is not loaded (CONTRACT.md §32.7)',
+            );
+        }
+
         // 1.
         $parts = explode('.', $set);
         if (count($parts) !== 3) {

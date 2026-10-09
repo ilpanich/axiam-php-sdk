@@ -11,9 +11,11 @@ namespace Axiam\Sdk\Management\Models;
 /**
  * A {@see ScimTargetScope} whose `type` this SDK's copy of the spec does not list.
  *
- * Decoding one never fails, so a record using a newer variant still lists and reads. It can
- * never be sent: {@see self::toArray()} and {@see self::jsonSerialize()} throw, because
- * re-sending a body this SDK cannot represent would silently rewrite it.
+ * Decoding one never fails, so a record using a newer variant still lists and reads. It keeps
+ * the `type` and nothing else of what the server sent (CONTRACT.md §31.2, §34.2 P12.1). It can
+ * never be sent: {@see self::toArray()}, the wire form, throws, because re-sending a body this
+ * SDK cannot represent would silently rewrite it; {@see self::jsonSerialize()} renders the
+ * discriminator, so a log line never fails (§34.2 P12.2).
  */
 final class ScimTargetScopeUnknown implements ScimTargetScopeVariant
 {
@@ -21,32 +23,28 @@ final class ScimTargetScopeUnknown implements ScimTargetScopeVariant
      * Constructs the unknown arm from what the server sent.
      * @param string|null $tag The unrecognised `type` value, or null when absent or not a
      *     string.
-     * @param array<string,mixed> $raw The raw wire object, minus any member named like a
-     *     secret (see {@see self::fromArray()}).
      */
     public function __construct(
         public readonly ?string $tag,
-        public readonly array $raw,
     ) {
     }
 
     /**
-     * Keeps one decoded JSON object, never throwing -- but drops any member named like a
-     * secret (`credential`, `client_secret`, `authorization_header`, `bind_secret`,
-     * `private_key_pem`): no response may carry one (CONTRACT.md §31.2, §32.5), and a decoder
-     * that meets one MUST drop it rather than surface it.
+     * Keeps the `type` of one decoded JSON object, never throwing, and drops every other
+     * member: only declared members are kept, and an unknown arm declares none (CONTRACT.md
+     * §29.5, §31.2, §34.2 P12.1).
      * @param array<string,mixed> $data The raw wire object.
      */
     public static function fromArray(array $data): self
     {
         $tag = $data['type'] ?? null;
-        unset($data['credential'], $data['client_secret'], $data['authorization_header'], $data['bind_secret'], $data['private_key_pem']);
 
-        return new self(\is_string($tag) ? $tag : null, $data);
+        return new self(\is_string($tag) ? $tag : null);
     }
 
     /**
-     * Refuses to render: an unknown variant MUST NOT be sent (CONTRACT.md §31.2).
+     * Refuses to render the wire form: an unknown variant MUST NOT be sent, and the refusal is
+     * local, before anything is sent (CONTRACT.md §31.2, §34.2 P12.2).
      * @return array<string,mixed>
      * @throws \Axiam\Sdk\Core\AxiamException always.
      */
@@ -58,12 +56,12 @@ final class ScimTargetScopeUnknown implements ScimTargetScopeVariant
     }
 
     /**
-     * Refuses to render for `json_encode()`, for the same reason as {@see self::toArray()}.
+     * Renders for `json_encode()` -- a log line -- as the `type` alone; never throws
+     * (CONTRACT.md §7 rule 1, §34.2 P12.2).
      * @return array<string,mixed>
-     * @throws \Axiam\Sdk\Core\AxiamException always.
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        return ['type' => $this->tag];
     }
 }

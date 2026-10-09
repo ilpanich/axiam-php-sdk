@@ -31,8 +31,6 @@ final class CaCertificatesApi extends ManagementSupport
     /**
      * `GET /api/v1/organizations/{org_id}/ca-certificates`
      *
-     * `GET /api/v1/organizations/{org_id}/ca-certificates`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -53,8 +51,6 @@ final class CaCertificatesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/ca-certificates`
-     *
-     * `POST /api/v1/organizations/{org_id}/ca-certificates`.
      *
      * The response carries a ONE-TIME secret (`private_key_pem`): the server will not return
      * it again, so a caller that does not persist it here cannot recover it (§27.5).
@@ -78,8 +74,6 @@ final class CaCertificatesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/ca-certificates/import`
-     *
-     * `POST /api/v1/organizations/{org_id}/ca-certificates/import`.
      * @param ImportCaCertificateRequest $body the request body
      * @return CaCertificate
      */
@@ -100,8 +94,6 @@ final class CaCertificatesApi extends ManagementSupport
 
     /**
      * `GET /api/v1/organizations/{org_id}/ca-certificates/{id}`
-     *
-     * `GET /api/v1/organizations/{org_id}/ca-certificates/{id}`.
      * @param string $id the `{id}` path parameter
      * @return CaCertificate
      */
@@ -123,8 +115,6 @@ final class CaCertificatesApi extends ManagementSupport
     /**
      * `POST /api/v1/organizations/{org_id}/ca-certificates/{id}/revoke`
      *
-     * `POST /api/v1/organizations/{org_id}/ca-certificates/{id}/revoke`.
-     *
      * Returns nothing; the server answers with an empty body.
      * @param string $id the `{id}` path parameter
      */
@@ -143,8 +133,6 @@ final class CaCertificatesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/ca-certificates/{id}/migrate-custody`
-     *
-     * `POST /api/v1/organizations/{org_id}/ca-certificates/{id}/migrate-custody`.
      * @param string $id the `{id}` path parameter
      * @return MigrateCustodyResponse
      */
@@ -165,8 +153,6 @@ final class CaCertificatesApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/organizations/{org_id}/ca-certificates/{id}/mtls-trust-anchor`
-     *
-     * `PUT /api/v1/organizations/{org_id}/ca-certificates/{id}/mtls-trust-anchor`.
      * @param string $id the `{id}` path parameter
      * @param SetMtlsTrustAnchor $body the request body
      * @return MtlsTrustAnchorResponse
@@ -190,8 +176,6 @@ final class CaCertificatesApi extends ManagementSupport
     /**
      * `GET /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas`
      *
-     * `GET /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param string $tenantId the `{tenant_id}` path parameter
@@ -214,8 +198,6 @@ final class CaCertificatesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas`
-     *
-     * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas`.
      *
      * The response carries a ONE-TIME secret (`private_key_pem`): the server will not return
      * it again, so a caller that does not persist it here cannot recover it (§27.5).
@@ -241,8 +223,6 @@ final class CaCertificatesApi extends ManagementSupport
 
     /**
      * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas/sign-csr`
-     *
-     * `POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas/sign-csr`.
      * @param string $tenantId the `{tenant_id}` path parameter
      * @param SignIntermediateCsrRequest $body the request body
      * @return CaCertificate

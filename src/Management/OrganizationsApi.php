@@ -25,8 +25,6 @@ final class OrganizationsApi extends ManagementSupport
     /**
      * `GET /api/v1/organizations`
      *
-     * `GET /api/v1/organizations`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -47,8 +45,6 @@ final class OrganizationsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/organizations/{org_id}`
-     *
-     * `GET /api/v1/organizations/{org_id}`.
      * @return Organization
      */
     public function get(): Organization
@@ -67,8 +63,6 @@ final class OrganizationsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/organizations/{org_id}`
-     *
-     * `PUT /api/v1/organizations/{org_id}`.
      * @param UpdateOrganizationRequest $body the request body
      * @return Organization
      */

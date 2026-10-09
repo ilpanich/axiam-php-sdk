@@ -27,8 +27,6 @@ final class ReactorsApi extends ManagementSupport
     /**
      * `GET /api/v1/reactors`
      *
-     * `GET /api/v1/reactors`.
-     *
      * Returns ONE page. `Page::$total` is the server's count across all pages and is not
      * `count($page)` — see §27.4 rule 4.
      * @param PageRequest|null $page which page to fetch; defaults to the first
@@ -49,8 +47,6 @@ final class ReactorsApi extends ManagementSupport
 
     /**
      * `POST /api/v1/reactors`
-     *
-     * `POST /api/v1/reactors`.
      * @param CreateReactorRequest $body the request body
      * @return ReactorResponse
      */
@@ -71,8 +67,6 @@ final class ReactorsApi extends ManagementSupport
 
     /**
      * `GET /api/v1/reactors/{id}`
-     *
-     * `GET /api/v1/reactors/{id}`.
      * @param string $id the `{id}` path parameter
      * @return ReactorResponse
      */
@@ -93,8 +87,6 @@ final class ReactorsApi extends ManagementSupport
 
     /**
      * `PUT /api/v1/reactors/{id}`
-     *
-     * `PUT /api/v1/reactors/{id}`.
      * @param string $id the `{id}` path parameter
      * @param UpdateReactorRequest $body the request body
      * @return ReactorResponse
@@ -117,8 +109,6 @@ final class ReactorsApi extends ManagementSupport
 
     /**
      * `DELETE /api/v1/reactors/{id}`
-     *
-     * `DELETE /api/v1/reactors/{id}`.
      *
      * Returns nothing; the server answers with an empty body.
      *

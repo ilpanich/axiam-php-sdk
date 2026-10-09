@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Contract 1.59 — follow-up F-59-06 (ilpanich/axiam#581)
+
+`CONTRACT.md` re-vendored from `ilpanich/axiam` `fe369eb` (contract 1.59, §34: the cross-SDK
+review of the 1.53 – 1.58 ports); `openapi.json`, `management-registry.json` and `proto/` were
+already identical. The README's conformance statement now names **contract 1.59**: §1–§13 and
+§12.7, §14, §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31,
+§32 and §33, with §32.7 and **§33.2 signed (ES256, EdDSA)** (§34.2 P12.7).
+
+#### Fixed
+
+- **R-1 (§32.7 step 9, P1) — `poll` no longer loses a batch's events.** A JWKS fetch failure or
+  a replay store that cannot answer on a later SET aborted `poll()` after the earlier SETs had
+  been recorded, so they were never returned and read `replayed` when re-offered.
+- **R-20 (§29.5, §31.2, P12.1) — an unknown SCIM `auth`/`scope` arm keeps its `type` and
+  nothing else**, instead of the server's whole object minus a list of secret-looking names.
+- **R-21 (§31.2, §7 rule 1, P12.2) — `json_encode()` of a `ScimTargetResponse` (or a
+  `ScimTargetInput`) carrying an unknown arm no longer throws**: the arm renders its `type`
+  for a log line, and only `toArray()` — the request path — refuses it, locally, before
+  anything is sent.
+- **R-23 (§28.12.2 rule 4, P12.4) — `updateClientRegistration()` sends only the lists the read
+  carried.** `redirect_uris`, `grant_types` and `response_types` were sent as `[]` when the
+  read lacked them, and a non-string list item was dropped on decode; a list of an
+  unexpected shape is now kept as read and sent back unchanged.
+- **R-28 (§27.4 rule 5, §29.2) — the generated documentation no longer contradicts the types**:
+  "left unchanged" is said only of the registry's sparse update bodies (not of
+  `ParseSamlSpMetadata` or a nested member object), a replacement with optional members is
+  no longer said to require every field, and no operation repeats its request line. Fixed in
+  `scripts/gen_management.py`.
+- **R-31 (§21.3.1) — vector A is pinned as the vendored `CONTRACT.md` carries it**, its
+  `tenant_id` queries included, instead of by a hand fixture without them.
+- **R-32 (§33.2, Conformance Statement, P12.7) — the claim reads "§33.2 signed (ES256,
+  EdDSA)"**: `PS256` is refused locally, so a bare "§33.2 signed" overclaimed.
+- **R-33 (§32.7) — `ext-sodium` is declared and the receiver guards it.** `composer.json`
+  requires `ext-sodium`; on a build without it `SsfReceiver::verifySet()` raises a typed
+  `AxiamException` (no verdict on the SET) instead of PHP's "Call to undefined function".
+- **§33.8 test 8 as amended (P8) — a `5xx` on `ciba_poll` is transient whatever its body.**
+  The server's own `500 {"error":"server_error"}` was an `OAuthProtocolError`, not retried and
+  terminal for `cibaAwait`; it is now a `NetworkError`, retried under §16 and outlived by the
+  loop.
+
+#### Choices the contract leaves open
+
+- **P1:** the second form — what was judged is returned; the SET a non-verdict failure hit and
+  every later one in the batch are left unjudged, unrecorded and listed in the new
+  `SsfPollResult::$unjudged` (with the failure in `$unjudgedCause`). When no SET of the batch
+  had been accepted, nothing was recorded and the failure is raised instead.
+- **P4:** the store reports a failure by throwing — the documentation route is not needed, and
+  `ReplayStore`'s docblock now says a store that cannot answer MUST throw, never answer "not
+  seen". The default in-memory store is unbounded in count, and the README says so.
+- **P10:** `cibaAwait`'s deadline is anchored at the instant the initiate response was received,
+  read from the injected `CibaClock`, which also supplies the waits (unchanged).
+
+#### Changed (compatibility)
+
+- `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` no longer have `$raw`; their
+  `jsonSerialize()` returns `{"type": <tag>}` rather than throwing.
+- `ClientRegistration::$redirectUris`, `$grantTypes` and `$responseTypes` are `?array`:
+  `null` when the response did not carry the member.
+- `composer.json` requires `ext-sodium` (compiled into PHP by default).
+- `cibaPoll()` raises `NetworkError` for a `5xx`, with or without an `error` member.
+
 ### Added
 
 - **Contract 1.58.** `CONTRACT.md`, `openapi.json` and `management-registry.json` re-vendored
@@ -43,7 +104,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SamlIdpInfo::$activeCredentialId` / `$nextCredentialId` and
   `UpdateDirectoryConfig::$groupBaseDn` / `$groupFilter` are typed `string|JsonNull|null`.
 - The open-union `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` arms drop any member named
-  like a secret from `$raw`.
+  like a secret from `$raw` (superseded by contract 1.59: the arms keep the `type` alone, see
+  above).
 
 ### Not shipped
 

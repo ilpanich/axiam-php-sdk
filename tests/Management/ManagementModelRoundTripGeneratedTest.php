@@ -3085,7 +3085,10 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
-    /** `ScimTargetAuthUnknown`: an unrecognised `type` decodes, and refuses to render. */
+    /**
+     * `ScimTargetAuthUnknown`: an unrecognised `type` decodes to its discriminator alone,
+     * renders for a log line, and refuses the wire form.
+     */
     public function testScimTargetAuthUnknownRoundTrips(): void
     {
         $wire = ['type' => 'from_a_newer_server', 'extra' => 1];
@@ -3094,9 +3097,10 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
 
         self::assertInstanceOf(Models\ScimTargetAuthUnknown::class, $model);
         self::assertSame('from_a_newer_server', $model->tag);
-        self::assertSame($wire, $model->raw);
+        self::assertSame(['tag' => 'from_a_newer_server'], get_object_vars($model));
+        self::assertSame('{"type":"from_a_newer_server"}', json_encode($model, JSON_THROW_ON_ERROR));
         $this->expectException(\Axiam\Sdk\Core\AxiamException::class);
-        json_encode($model, JSON_THROW_ON_ERROR);
+        $model->toArray();
     }
 
     /** `ScimTargetDeliveryState`: a full wire object survives decode and re-render. */
@@ -3227,7 +3231,10 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
-    /** `ScimTargetScopeUnknown`: an unrecognised `type` decodes, and refuses to render. */
+    /**
+     * `ScimTargetScopeUnknown`: an unrecognised `type` decodes to its discriminator alone,
+     * renders for a log line, and refuses the wire form.
+     */
     public function testScimTargetScopeUnknownRoundTrips(): void
     {
         $wire = ['type' => 'from_a_newer_server', 'extra' => 1];
@@ -3236,9 +3243,10 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
 
         self::assertInstanceOf(Models\ScimTargetScopeUnknown::class, $model);
         self::assertSame('from_a_newer_server', $model->tag);
-        self::assertSame($wire, $model->raw);
+        self::assertSame(['tag' => 'from_a_newer_server'], get_object_vars($model));
+        self::assertSame('{"type":"from_a_newer_server"}', json_encode($model, JSON_THROW_ON_ERROR));
         $this->expectException(\Axiam\Sdk\Core\AxiamException::class);
-        json_encode($model, JSON_THROW_ON_ERROR);
+        $model->toArray();
     }
 
     /** `ScimTokenResponse`: a full wire object survives decode and re-render. */
