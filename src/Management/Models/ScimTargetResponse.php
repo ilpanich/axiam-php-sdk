@@ -109,10 +109,31 @@ final class ScimTargetResponse implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator
+     * here, and only {@see self::toArray()} -- the request path -- refuses to send it
+     * (CONTRACT.md §31.2, §34.2 P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['auth'] = $this->auth->jsonSerialize();
+        $out['base_url'] = $this->baseUrl;
+        $out['created_at'] = $this->createdAt;
+        $out['deprovision'] = $this->deprovision->value;
+        $out['enabled'] = $this->enabled;
+        $out['id'] = $this->id;
+        $out['name'] = $this->name;
+        $out['push_groups'] = $this->pushGroups;
+        $out['scope'] = $this->scope->jsonSerialize();
+        $out['tenant_id'] = $this->tenantId;
+        $out['updated_at'] = $this->updatedAt;
+        $out['user_name_from'] = $this->userNameFrom->value;
+        if ($this->state !== null) {
+            $out['state'] = $this->state->toArray();
+        }
+
+        return $out;
     }
 }
