@@ -1866,7 +1866,9 @@ final class OidcClient
      * apart by {@see OAuthProtocolError::isAccessDenied()} /
      * {@see OAuthProtocolError::isExpiredToken()}), `invalid_grant`. A protocol answer is never
      * retried; a transport failure, a `5xx`, `408` or a bodiless `429` is retried per §16 within
-     * this call; any other `4xx` is not.
+     * this call; any other `4xx` is not. A `5xx` is transient **whatever its body** — AXIAM's
+     * token endpoint answers `500 {"error":"server_error"}` — so it surfaces as a
+     * {@see NetworkError}, never an `OAuthProtocolError` (§33.4, §34.2 P8).
      *
      * **Store the returned tokens before anything else**: a request is redeemed once, and a
      * second `cibaPoll` for it is `invalid_grant` (§33.7 rule 7). The ID token is validated as
@@ -2072,6 +2074,12 @@ final class OidcClient
                     throw NetworkError::fromException($e, 'ciba_poll request failed');
                 }
                 $status = $response->getStatusCode();
+                if ($status >= 500) {
+                    // §33.4, §33.7 rule 5, §34.2 P8: on ciba_poll a 5xx is transient whatever
+                    // its body — AXIAM's own token endpoint answers 500 {"error":"server_error"}
+                    // — so it is a NetworkError, which §16 retries and cibaAwait outlives.
+                    throw NetworkError::fromResponse($response, 'ciba_poll request failed');
+                }
                 if ($status < 200 || $status >= 300) {
                     // A body carrying `error` is an OAuthProtocolError — an AuthError, which
                     // §16 never retries; a bodiless status maps per §2.

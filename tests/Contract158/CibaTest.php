@@ -392,14 +392,25 @@ final class CibaTest extends TestCase
     {
         $clock = new CibaTestClock();
         $tokens = $this->tokensWithIdToken();
-        $this->tokenScript($clock, self::oauthError(400, 'authorization_pending'), new Response(500), self::oauthError(429, 'rate_limit_exceeded'), new Response(429), $tokens);
+        // Contract 1.59 (§34.2 P8): the 500 carries the body AXIAM's token endpoint sends,
+        // {"error":"server_error"}, and a 503 temporarily_unavailable is the same kind of
+        // answer — a 5xx on ciba_poll is transient whatever its body.
+        $this->tokenScript(
+            $clock,
+            self::oauthError(400, 'authorization_pending'),
+            self::oauthError(500, 'server_error'),
+            self::oauthError(429, 'rate_limit_exceeded'),
+            new Response(429),
+            self::oauthError(503, 'temporarily_unavailable'),
+            $tokens,
+        );
 
         $set = $this->client()->cibaAwait(self::initiated(600, 5, $clock->now), configuration: self::configuration(), clock: $clock);
         self::assertNotSame('', $set->accessToken->reveal());
         self::assertNotNull($set->idToken);
         self::assertNotNull($set->idClaims);
         self::assertSame('urn:axiam:acr:mfa', $set->idClaims['acr'] ?? null);
-        self::assertCount(5, $this->routes->sent('POST', self::TOKEN));
+        self::assertCount(6, $this->routes->sent('POST', self::TOKEN));
     }
 
     public function testT08ABodiless4xxIsTerminalAndAPollRetriesTransientFailures(): void
