@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Ssf;
 
 use Axiam\Sdk\Core\AuthError;
+use Axiam\Sdk\Core\AxiamException;
 use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\RetryPolicy;
@@ -184,6 +185,8 @@ final class SsfReceiver
      * @throws SetVerificationError the SET is refused.
      * @throws NetworkError the JWKS (or the configuration document) could not be fetched —
      *         which is not a verdict on the SET.
+     * @throws AxiamException ext-sodium is not loaded (composer.json requires it) — no
+     *         verdict on the SET either.
      */
     public function verifySet(string $set): SecurityEvent
     {
@@ -309,6 +312,15 @@ final class SsfReceiver
     /** The §32.7 order; `$expectedJti` is the poll map key the SET was returned under. */
     private function verify(string $set, ?string $expectedJti): SecurityEvent
     {
+        // Ed25519 is ext-sodium's (composer.json requires it). A build compiled without it
+        // fails here with a typed error — no verdict on the SET — rather than with PHP's
+        // "Call to undefined function" at step 4 or 5.
+        if (!function_exists('sodium_crypto_sign_verify_detached')) {
+            throw new AxiamException(
+                'ext-sodium is required to verify a SET (Ed25519) but is not loaded (CONTRACT.md §32.7)',
+            );
+        }
+
         // 1.
         $parts = explode('.', $set);
         if (count($parts) !== 3) {

@@ -550,6 +550,53 @@ final class SsfReceiverTest extends TestCase
         $this->receiverWithStore($failing)->poll('s');
     }
 
+    /**
+     * R-33: the receiver verifies Ed25519 through ext-sodium, so `composer.json` declares it
+     * and, where it is absent anyway, `verifySet` fails with a typed SDK error — never PHP's
+     * "Call to undefined function", and never a SET refusal (it is no verdict on the SET).
+     */
+    public function testTheReceiverDeclaresExtSodiumAndFailsTypedWithoutIt(): void
+    {
+        $raw = file_get_contents(\dirname(__DIR__, 2) . '/composer.json');
+        self::assertIsString($raw);
+        /** @var array{require?: array<string,string>} $manifest */
+        $manifest = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        self::assertArrayHasKey('ext-sodium', $manifest['require'] ?? [], 'composer.json require declares ext-sodium');
+
+        // A child PHP with the verification primitive disabled stands in for a build without
+        // ext-sodium; the key, the JWKS and the SET are made at run time inside it.
+        $autoload = \dirname(__DIR__, 2) . '/vendor/autoload.php';
+        $script = tempnam(sys_get_temp_dir(), 'ssf-sodium-');
+        self::assertIsString($script);
+        file_put_contents($script, '<?php
+require ' . var_export($autoload, true) . ';
+$b64 = static fn (string $r): string => rtrim(strtr(base64_encode($r), "+/", "-_"), "=");
+$pair = sodium_crypto_sign_keypair();
+$kid = "k-" . bin2hex(random_bytes(4));
+$jwks = ["keys" => [["kty" => "OKP", "crv" => "Ed25519", "kid" => $kid, "x" => $b64(sodium_crypto_sign_publickey($pair))]]];
+$http = new GuzzleHttp\Client(["handler" => GuzzleHttp\HandlerStack::create(new GuzzleHttp\Handler\MockHandler([
+    new GuzzleHttp\Psr7\Response(200, [], (string) json_encode($jwks)),
+]))]);
+$claims = ["iss" => "https://iam.example.test", "aud" => "https://rp.example.test", "iat" => 1, "jti" => bin2hex(random_bytes(8)),
+    "sub_id" => ["format" => "opaque", "id" => "x"], "events" => ["urn:example" => new stdClass()]];
+$input = $b64((string) json_encode(["alg" => "EdDSA", "typ" => "secevent+jwt", "kid" => $kid])) . "." . $b64((string) json_encode($claims));
+$set = $input . "." . $b64(sodium_crypto_sign_detached($input, sodium_crypto_sign_secretkey($pair)));
+$r = new Axiam\Sdk\Ssf\SsfReceiver($http, "https://iam.example.test", "https://iam.example.test", "https://rp.example.test", jwksUri: "https://iam.example.test/jwks");
+try {
+    $r->verifySet($set);
+    echo "verified";
+} catch (Throwable $e) {
+    echo get_class($e), "|", $e->getMessage();
+}
+');
+        $output = [];
+        exec(escapeshellarg(PHP_BINARY) . ' -d disable_functions=sodium_crypto_sign_verify_detached ' . escapeshellarg($script) . ' 2>&1', $output);
+        unlink($script);
+        $line = implode("\n", $output);
+        self::assertStringStartsWith(\Axiam\Sdk\Core\AxiamException::class . '|', $line, 'a typed SDK error, not a PHP Error: ' . $line);
+        self::assertStringContainsString('ext-sodium', $line);
+    }
+
     private function receiverWithStore(\Axiam\Sdk\Ssf\ReplayStore $store): SsfReceiver
     {
         $bearer = 'cc-' . bin2hex(random_bytes(16));

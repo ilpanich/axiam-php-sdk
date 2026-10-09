@@ -154,6 +154,12 @@ organization identifier being optional rather than blank.
 works on any PHP runtime, including standard PHP-FPM.** This is the default and requires
 no special deployment.
 
+**`ext-sodium` is required** (`composer.json` declares it). AXIAM signs with Ed25519, so local
+token verification (§10.1) and the SSF receiver (§32.7) verify through it, and the §33.2 signed
+CIBA request signs `EdDSA` with it. It is compiled into PHP by default; on a build made without
+it, token verification and the SSF receiver fail with a typed `AxiamException` naming
+`ext-sodium` rather than a fatal error.
+
 **gRPC and the AMQP consumer are different — they require a long-running PHP runtime**
 (Swoole, RoadRunner, or a plain long-lived CLI process), **not standard PHP-FPM**:
 

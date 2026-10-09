@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "require": {
     "php": ">=8.2",
+    "ext-sodium": "*",
     "guzzlehttp/guzzle": "^7.13 || ^8.0",
     "php-amqplib/php-amqplib": "^3.7",
     "firebase/php-jwt": "^7.0",
