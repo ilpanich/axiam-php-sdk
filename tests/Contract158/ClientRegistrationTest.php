@@ -216,6 +216,37 @@ final class ClientRegistrationTest extends TestCase
         self::assertSame('poll', $body['backchannel_token_delivery_mode'], 'unknown members round-trip');
     }
 
+    /**
+     * R-23 (§28.12.2 rule 4, §34.2 P12.4): the replacement is built from what the read
+     * carried. A list the read lacked is not sent — never as `[]`, which RFC 7591 does not
+     * read as "the default" — and a member of an unexpected shape goes back as read.
+     */
+    public function testAnUpdateSendsOnlyWhatTheReadCarriedAndKeepsAnUnexpectedShapeAsRead(): void
+    {
+        $this->routes->on('PUT', self::PATH, RoutedHandler::json(200, self::body(['registration_access_token' => self::token()])));
+        $read = self::body();
+        unset($read['redirect_uris'], $read['grant_types'], $read['response_types']);
+        $metadata = ClientRegistration::fromArray($read);
+        $this->client()->updateClientRegistration(self::uri(), new Sensitive(self::token()), $metadata);
+
+        $sent = json_decode((string) $this->routes->sent('PUT', self::PATH)[0]->getBody(), true);
+        self::assertIsArray($sent);
+        foreach (['redirect_uris', 'grant_types', 'response_types'] as $absent) {
+            self::assertArrayNotHasKey($absent, $sent, $absent . ' was not in the read, so it is not sent');
+        }
+
+        // An unexpected shape is kept as read: a list with a non-string item, and a string.
+        $odd = ClientRegistration::fromArray(self::body([
+            'grant_types' => ['authorization_code', 7],
+            'response_types' => 'code',
+            'redirect_uris' => [],
+        ]));
+        $body = $odd->updateBody();
+        self::assertSame(['authorization_code', 7], $body['grant_types']);
+        self::assertSame('code', $body['response_types']);
+        self::assertSame([], $body['redirect_uris'], 'an empty list the read carried goes back empty');
+    }
+
     public function testAnUpdateAnswered503IsNotRetried(): void
     {
         $this->routes->on('PUT', self::PATH, new Response(503));
@@ -356,7 +387,8 @@ final class ClientRegistrationTest extends TestCase
         self::assertSame('not-a-number', $registration->extra['client_id_issued_at']);
         self::assertSame(7, $registration->extra['client_name']);
         self::assertSame('not-an-object', $registration->extra['jwks']);
-        self::assertSame(['https://a'], $registration->redirectUris);
+        self::assertNull($registration->redirectUris, 'a list with a non-string item is not a list of strings');
+        self::assertSame(['https://a', 3], $registration->extra['redirect_uris'], '... and is kept as read (§34.2 P12.4)');
         self::assertInstanceOf(Sensitive::class, $registration->clientSecret);
         self::assertInstanceOf(Sensitive::class, $registration->registrationAccessToken);
 
@@ -364,6 +396,7 @@ final class ClientRegistrationTest extends TestCase
         self::assertArrayNotHasKey('client_id_issued_at', $body, 'a mistyped server-stated member is dropped too');
         self::assertSame('poll', $body['backchannel_token_delivery_mode']);
         self::assertSame(7, $body['client_name'], 'a mistyped modelled member still round-trips');
+        self::assertSame(['https://a', 3], $body['redirect_uris'], 'a mistyped list goes back as read');
 
         $jwks = ClientRegistration::fromArray(['client_id' => 'c', 'jwks' => ['keys' => []]]);
         self::assertSame(['keys' => []], $jwks->jwks);

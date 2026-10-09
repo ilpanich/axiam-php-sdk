@@ -52,9 +52,9 @@ final class ClientRegistration implements \JsonSerializable
      * @param string $clientId The client's `client_id`.
      * @param int|null $clientIdIssuedAt When the id was issued (seconds since the epoch). Never sent on an update.
      * @param string|null $clientName The registered display name.
-     * @param list<string> $redirectUris The registered redirect URIs.
-     * @param list<string> $grantTypes The registered grant types.
-     * @param list<string> $responseTypes The registered response types.
+     * @param list<string>|null $redirectUris The registered redirect URIs; `null` when the response did not carry them.
+     * @param list<string>|null $grantTypes The registered grant types; `null` when the response did not carry them.
+     * @param list<string>|null $responseTypes The registered response types; `null` when the response did not carry them.
      * @param string|null $tokenEndpointAuthMethod How the client authenticates at the token endpoint. The server refuses an update that changes it.
      * @param string|null $scope The registered scope, space-separated.
      * @param string|null $registrationClientUri Where this registration is read, replaced and deleted. Never sent on an update.
@@ -69,9 +69,9 @@ final class ClientRegistration implements \JsonSerializable
         public string $clientId,
         public ?int $clientIdIssuedAt = null,
         public ?string $clientName = null,
-        public array $redirectUris = [],
-        public array $grantTypes = [],
-        public array $responseTypes = [],
+        public ?array $redirectUris = null,
+        public ?array $grantTypes = null,
+        public ?array $responseTypes = null,
         public ?string $tokenEndpointAuthMethod = null,
         public ?string $scope = null,
         public ?string $registrationClientUri = null,
@@ -130,11 +130,23 @@ final class ClientRegistration implements \JsonSerializable
 
             return $value;
         };
-        /** @return list<string> */
-        $list = static function (string $key) use ($wire): array {
+        // A list of strings, or `null` when absent. Anything else — a non-list, or a list with a
+        // non-string item — is an unexpected shape and is kept as read, in `$extra`, so the
+        // replacement sends it back unchanged (§28.12.2 rule 4, §34.2 P12.4).
+        /** @return list<string>|null */
+        $list = static function (string $key) use ($wire, &$extra): ?array {
             $value = $wire[$key] ?? null;
+            if ($value === null) {
+                return null;
+            }
+            if (!is_array($value) || !array_is_list($value) || count(array_filter($value, 'is_string')) !== count($value)) {
+                $extra[$key] = $value;
 
-            return is_array($value) ? array_values(array_filter($value, 'is_string')) : [];
+                return null;
+            }
+
+            /** @var list<string> $value */
+            return $value;
         };
 
         $jwks = null;
@@ -172,6 +184,10 @@ final class ClientRegistration implements \JsonSerializable
      * rule 4): every member — the unknown ones in `$extra` included — except the five
      * {@see self::SERVER_STATED_MEMBERS}, with `client_id` set to this registration's own.
      *
+     * It is built from what the read carried (§34.2 P12.4): a member that is `null` — one the
+     * read did not carry — is not sent, so no list becomes `[]` because the read lacked it,
+     * and a member of an unexpected shape goes back exactly as read.
+     *
      * Holds no secret: the token and the client secret are exactly what it leaves out.
      *
      * @return array<string,mixed>
@@ -186,9 +202,15 @@ final class ClientRegistration implements \JsonSerializable
         if ($this->clientName !== null) {
             $body['client_name'] = $this->clientName;
         }
-        $body['redirect_uris'] = array_values($this->redirectUris);
-        $body['grant_types'] = array_values($this->grantTypes);
-        $body['response_types'] = array_values($this->responseTypes);
+        if ($this->redirectUris !== null) {
+            $body['redirect_uris'] = array_values($this->redirectUris);
+        }
+        if ($this->grantTypes !== null) {
+            $body['grant_types'] = array_values($this->grantTypes);
+        }
+        if ($this->responseTypes !== null) {
+            $body['response_types'] = array_values($this->responseTypes);
+        }
         if ($this->tokenEndpointAuthMethod !== null) {
             $body['token_endpoint_auth_method'] = $this->tokenEndpointAuthMethod;
         }
