@@ -38,6 +38,12 @@ final class ScimTargetInput implements \JsonSerializable
      *     or `delete`. (optional)
      * @param bool|null $enabled `true` by default. A disabled target receives nothing.
      *     (optional)
+     * @param string|null $expectedUpdatedAt The `updated_at` of the target as the client read
+     *     it (P23W5-09, T-416). **Update only; create ignores it.** When present, the replacement
+     *     lands only if the target still has that version, else `409` (reload and retry): two
+     *     administrators who opened the form at the same version cannot silently overwrite each
+     *     other. When absent the replacement is conditional on the version the server reads during
+     *     the request — last-writer-wins between administrators, as before. (optional)
      * @param bool|null $pushGroups Push groups too (every group for `all_users`, the listed
      *     ones for `groups`). `false` by default. (optional)
      * @param UserNameSource|null $userNameFrom `username` (default) or `email`. (optional)
@@ -50,6 +56,7 @@ final class ScimTargetInput implements \JsonSerializable
         public readonly ?\Axiam\Sdk\Core\Sensitive $credential = null,
         public readonly ?DeprovisionPolicy $deprovision = null,
         public readonly ?bool $enabled = null,
+        public readonly ?string $expectedUpdatedAt = null,
         public readonly ?bool $pushGroups = null,
         public readonly ?UserNameSource $userNameFrom = null,
     ) {
@@ -69,6 +76,7 @@ final class ScimTargetInput implements \JsonSerializable
             isset($data['credential']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['credential']) : null,
             isset($data['deprovision']) ? DeprovisionPolicy::fromWire((string) $data['deprovision']) : null,
             isset($data['enabled']) ? (bool) $data['enabled'] : null,
+            isset($data['expected_updated_at']) ? (string) $data['expected_updated_at'] : null,
             isset($data['push_groups']) ? (bool) $data['push_groups'] : null,
             isset($data['user_name_from']) ? UserNameSource::fromWire((string) $data['user_name_from']) : null,
         );
@@ -97,6 +105,9 @@ final class ScimTargetInput implements \JsonSerializable
         }
         if ($this->enabled !== null) {
             $out['enabled'] = $this->enabled;
+        }
+        if ($this->expectedUpdatedAt !== null) {
+            $out['expected_updated_at'] = $this->expectedUpdatedAt;
         }
         if ($this->pushGroups !== null) {
             $out['push_groups'] = $this->pushGroups;
@@ -136,6 +147,9 @@ final class ScimTargetInput implements \JsonSerializable
         }
         if ($this->enabled !== null) {
             $out['enabled'] = $this->enabled;
+        }
+        if ($this->expectedUpdatedAt !== null) {
+            $out['expected_updated_at'] = $this->expectedUpdatedAt;
         }
         if ($this->pushGroups !== null) {
             $out['push_groups'] = $this->pushGroups;

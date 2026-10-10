@@ -919,6 +919,13 @@ final class OidcClient
      * - **No default `$actorToken`** (§15.2 rule 1). Passing `null` asks for
      *   *impersonation*; the SDK will not quietly reuse the client's own session token as
      *   the actor and turn that into a delegation.
+     * - **An `$actorToken` is the exchanging client's own** (rule 9, contract 1.60): obtain it
+     *   with the same client's `client_credentials` grant
+     *   ({@see \Axiam\Sdk\AxiamClient::loginClientCredentials()}) and pass it here; the
+     *   SDK supplies none. A token issued to another client, a console sign-in or a service
+     *   account is answered `400 invalid_request` (`actor_token was not issued to the
+     *   exchanging client`), which surfaces unchanged — not retried, not rewritten into an
+     *   impersonation, not repaired with a token of the SDK's own.
      * - **No retry or downgrade on `unauthorized_client`** (rule 2) — a registration fact
      *   an operator must fix.
      * - **No auto-narrowing on `invalid_scope`** (rule 3). The server refuses instead of

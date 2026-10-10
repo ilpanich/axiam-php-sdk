@@ -26,7 +26,9 @@ final class SsfPollResult
      *                                           empty when every SET was.
      * @param \Throwable|null     $unjudgedCause The failure that left them unjudged — a
      *                                           {@see \Axiam\Sdk\Core\NetworkError} for a key
-     *                                           fetch, or the replay store's own exception —
+     *                                           fetch or a replay store that could not answer
+     *                                           (the store's exception chained as its cause; an
+     *                                           SDK error the store raised, unchanged) —
      *                                           `null` when `$unjudged` is empty.
      */
     public function __construct(

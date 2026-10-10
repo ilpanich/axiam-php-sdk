@@ -1714,6 +1714,13 @@ final class AxiamClient
      * Requires confidential-client credentials. Never defaults `$actorToken`, never
      * auto-narrows after `invalid_scope`, never adopts the result.
      *
+     * An `$actorToken` (delegation) must have been issued to this same client (§15.2 rule 9,
+     * contract 1.60): obtain it from the client's own `client_credentials` grant, for example
+     * `$client->loginClientCredentials()->accessToken` kept apart from the client's session
+     * (`adoptAsCredential` left `false`), and pass it. Any other actor token is answered
+     * `400 invalid_request` (`actor_token was not issued to the exchanging client`), which
+     * surfaces unchanged: no retry, no rewrite into an impersonation.
+     *
      * @param list<string>|null $scopes
      * @param string $subjectTokenType What kind of token `$subjectToken` is. Required (§15.1):
      *        {@see OidcClient::ACCESS_TOKEN_TYPE} for an AXIAM access token, or

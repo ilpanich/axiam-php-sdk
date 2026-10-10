@@ -15,6 +15,8 @@ final class FederationConfigResponse implements \JsonSerializable
 {
     /**
      * Constructs a FederationConfigResponse.
+     * @param bool $allowSha1Signatures SAML only: whether IdP responses signed with SHA-1 are
+     *     accepted (default `false`; #531).
      * @param bool $allowTenantInheritance Whether tenants of this organization may inherit
      *     this provider.
      * @param list<string> $allowedAlgorithms Accepted signing algorithms. Returned for OIDC
@@ -52,6 +54,9 @@ final class FederationConfigResponse implements \JsonSerializable
      * @param string|null $authorizationEndpoint OAuth2-variant authorization endpoint.
      *     (optional)
      * @param string|null $buttonIcon Custom sign-in-button icon, when one is set. (optional)
+     * @param string|null $idpMetadataSigningCertPem SAML only: the certificate the IdP's
+     *     metadata must be signed with (#530); `null` when the metadata is not signature-checked.
+     *     (optional)
      * @param string|null $metadataUrl the server's `metadata_url` field (optional)
      * @param string|null $providerSlug Operator-chosen identifier for a `generic_*` kind.
      *     (optional)
@@ -59,6 +64,7 @@ final class FederationConfigResponse implements \JsonSerializable
      * @param string|null $userinfoEndpoint OAuth2-variant userinfo endpoint. (optional)
      */
     public function __construct(
+        public readonly bool $allowSha1Signatures,
         public readonly bool $allowTenantInheritance,
         public readonly array $allowedAlgorithms,
         public readonly array $allowedIssuerTenants,
@@ -82,6 +88,7 @@ final class FederationConfigResponse implements \JsonSerializable
         public readonly ?string $appleTeamId = null,
         public readonly ?string $authorizationEndpoint = null,
         public readonly ?string $buttonIcon = null,
+        public readonly ?string $idpMetadataSigningCertPem = null,
         public readonly ?string $metadataUrl = null,
         public readonly ?string $providerSlug = null,
         public readonly ?string $tokenEndpoint = null,
@@ -96,6 +103,7 @@ final class FederationConfigResponse implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            isset($data['allow_sha1_signatures']) ? (bool) $data['allow_sha1_signatures'] : false,
             (bool) ModelDecode::need($data, 'allow_tenant_inheritance', self::class),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'allowed_algorithms', self::class))),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'allowed_issuer_tenants', self::class))),
@@ -119,6 +127,7 @@ final class FederationConfigResponse implements \JsonSerializable
             isset($data['apple_team_id']) ? (string) $data['apple_team_id'] : null,
             isset($data['authorization_endpoint']) ? (string) $data['authorization_endpoint'] : null,
             isset($data['button_icon']) ? (string) $data['button_icon'] : null,
+            isset($data['idp_metadata_signing_cert_pem']) ? (string) $data['idp_metadata_signing_cert_pem'] : null,
             isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
             isset($data['provider_slug']) ? (string) $data['provider_slug'] : null,
             isset($data['token_endpoint']) ? (string) $data['token_endpoint'] : null,
@@ -137,6 +146,7 @@ final class FederationConfigResponse implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
         $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
         $out['allowed_algorithms'] = $this->allowedAlgorithms;
         $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
@@ -167,6 +177,9 @@ final class FederationConfigResponse implements \JsonSerializable
         }
         if ($this->buttonIcon !== null) {
             $out['button_icon'] = $this->buttonIcon;
+        }
+        if ($this->idpMetadataSigningCertPem !== null) {
+            $out['idp_metadata_signing_cert_pem'] = $this->idpMetadataSigningCertPem;
         }
         if ($this->metadataUrl !== null) {
             $out['metadata_url'] = $this->metadataUrl;

@@ -10,6 +10,7 @@ use Axiam\Sdk\Core\ErrorMapper;
 use Axiam\Sdk\Core\NetworkError;
 use Axiam\Sdk\Core\RetryPolicy;
 use Axiam\Sdk\Core\Sensitive;
+use Axiam\Sdk\Core\SsfUnjudgedEvent;
 use Axiam\Sdk\Core\TelemetryDispatcher;
 use Axiam\Sdk\Management\FieldError;
 use Axiam\Sdk\Management\ManagementErrorMapper;
@@ -58,10 +59,17 @@ final class SsfReceiver
      */
     public const MIN_REPLAY_WINDOW_SECONDS = 7 * 24 * 60 * 60;
 
-    /** A forced JWKS refetch (an unknown `kid`) happens at most once per this many seconds. */
+    /**
+     * A forced JWKS refetch (an unknown `kid`) happens at most once per this many seconds, and
+     * after a fetch that failed — a fill and an expiry refresh included — no fetch is made for
+     * this long (CONTRACT.md §34.2 P6).
+     */
     public const FORCED_REFETCH_INTERVAL_SECONDS = 60;
 
-    /** An un-forced refetch happens once the cached JWKS is this old. */
+    /**
+     * The cached JWKS expires this long after the successful fetch that filled it, and the next
+     * SET fetches again (§34.2 P6: no later than ten minutes).
+     */
     public const JWKS_TTL_SECONDS = 300;
 
     /** The two `typ` spellings §32.7 step 2 accepts, compared case-insensitively. */
@@ -72,7 +80,14 @@ final class SsfReceiver
 
     private int $fetchedAt = 0;
 
-    private ?int $lastForcedRefetch = null;
+    /** The latest fetch the once-a-minute limit counts: a forced refetch, or a failed fetch. */
+    private ?int $lastCountedFetch = null;
+
+    /** When the latest fetch failed, if it did; `null` after a successful one. */
+    private ?int $lastFailedFetch = null;
+
+    /** Set when the replay store, not a key fetch, failed — the §19 `ssf_unjudged` category. */
+    private bool $storeFailed = false;
 
     private ?string $resolvedJwksUri = null;
 
@@ -107,7 +122,8 @@ final class SsfReceiver
      * @param ReplayStore|null $replayStore Where accepted `jti`s are kept; an
      *        {@see InMemoryReplayStore} when omitted.
      * @param bool $retryEnabled §16.1's switch, for `poll()`.
-     * @param TelemetryDispatcher|null $telemetry §19, notified before a retry wait.
+     * @param TelemetryDispatcher|null $telemetry §19, notified before a retry wait and when a
+     *        `poll()` returns leaving SETs unjudged ({@see SsfUnjudgedEvent}).
      * @param (callable(): int)|null $clock The current time in seconds (for the refetch limit);
      *        `time()` when omitted.
      *
@@ -183,8 +199,11 @@ final class SsfReceiver
      * a polled SET once you have processed it, or a re-offer reads as a replay.
      *
      * @throws SetVerificationError the SET is refused.
-     * @throws NetworkError the JWKS (or the configuration document) could not be fetched —
-     *         which is not a verdict on the SET.
+     * @throws NetworkError the JWKS (or the configuration document) could not be fetched, a
+     *         fetch failed less than a minute ago so none is made (§34.2 P6), or the replay
+     *         store could not answer — none of which is a verdict on the SET. A store's own
+     *         exception is chained as the cause; an SDK error it raised passes through unchanged
+     *         (CONTRACT.md §2, §34.2 P3).
      * @throws AxiamException ext-sodium is not loaded (composer.json requires it) — no
      *         verdict on the SET either.
      */
@@ -200,8 +219,13 @@ final class SsfReceiver
      * The body carries exactly the options set — `{}` when none is — so `ack` and `setErrs` go
      * out exactly as given. **Nothing is acknowledged on your behalf**: on the next call,
      * acknowledge the `jti`s you processed and pass each refused one in `setErrs`
-     * ({@see SetErr::fromReason()}). A SET you neither acknowledge nor refuse is re-offered,
-     * and — having been recorded when it verified — then reads as `replayed`.
+     * ({@see SetErr::fromReason()}) — **except a `replayed` one, which you acknowledge in
+     * `ack`** and never report in `setErrs` (CONTRACT.md §34.2 P2): this receiver accepted
+     * that SET earlier, so an error report would tell the transmitter that an event you took
+     * had failed, when it removes the event from its queue either way. A SET you neither
+     * acknowledge nor refuse is re-offered, and — having been recorded when it verified —
+     * then reads as `replayed`; the receiver records a `jti` when it accepts the SET, so
+     * processing before the next `poll` (or a persistent {@see ReplayStore}) is yours.
      *
      * The request carries nothing of the SDK's session and follows no redirect. Retried per §16
      * on a transport failure, a `5xx`, `408` or `429` — never on another `4xx`, which maps like
@@ -211,11 +235,15 @@ final class SsfReceiver
      *
      * **`poll` never keeps a `jti` it does not return** (§34.2 P1). A failure that is not a
      * verdict on a SET — a JWKS or configuration fetch that fails, a replay store that cannot
-     * answer — refuses nothing: that SET and every later one in the batch are left
-     * **unjudged**, unrecorded, and listed in {@see SsfPollResult::$unjudged} with the failure in
-     * {@see SsfPollResult::$unjudgedCause}. Neither acknowledge them nor report them in
-     * `setErrs`: the transmitter offers them again. When no SET of the batch had been accepted
-     * yet, nothing was recorded and the failure is raised instead.
+     * answer — refuses nothing: that SET is left **unjudged**, unrecorded, and listed in
+     * {@see SsfPollResult::$unjudged} with the failure in {@see SsfPollResult::$unjudgedCause}.
+     * The replay store is asked nothing more for the batch: every later SET is still checked
+     * (steps 1 – 8) and refused if it fails, and is otherwise unjudged too. Neither acknowledge
+     * the unjudged SETs nor report them in `setErrs`: the transmitter offers them again. When no
+     * SET of the batch had been accepted yet, nothing was recorded and the failure is raised
+     * instead. A `poll` that returns leaving SETs unjudged emits §19's `ssf_unjudged`
+     * ({@see SsfUnjudgedEvent}) with their number and the category, `key_fetch` or
+     * `replay_store`.
      *
      * @throws AuthError locally, when no access-token provider was configured.
      * @throws NetworkError a key fetch failed before any SET of the batch was accepted (or the
@@ -276,42 +304,60 @@ final class SsfReceiver
         $refused = [];
         $unjudged = [];
         $cause = null;
+        $category = null;
         $sets = $reply->sets ?? null;
         if ($sets instanceof \stdClass) {
             foreach (get_object_vars($sets) as $jti => $candidate) {
                 $jti = (string) $jti;
-                if ($cause !== null) {
-                    $unjudged[] = $jti;
-                    continue;
-                }
                 if (!is_string($candidate)) {
                     $refused[] = new RefusedSet($jti, SetFailureReason::Malformed);
                     continue;
                 }
                 try {
-                    $events[] = $this->verify($candidate, $jti);
+                    // After the first non-verdict failure the store is asked nothing more
+                    // (§34.2 P1): a later SET is checked against steps 1 – 8 only.
+                    $event = $this->verify($candidate, $jti, record: $cause === null);
+                    if ($cause === null) {
+                        $events[] = $event;
+                    } else {
+                        $unjudged[] = $jti;
+                    }
                 } catch (SetVerificationError $e) {
                     $refused[] = new RefusedSet($jti, $e->failureReason);
                 } catch (\Throwable $e) {
                     // Not a verdict on this SET (§34.2 P1, P3): a key fetch that failed or a
                     // store that could not answer. Its jti is not recorded, and neither is any
                     // later SET's: they are left for the transmitter to offer again.
-                    if ($events === []) {
+                    if ($cause === null && $events === []) {
                         // Nothing was recorded, so raising loses nothing.
                         throw $e;
                     }
-                    $cause = $e;
+                    if ($cause === null) {
+                        $cause = $e;
+                        $category = $this->storeFailed
+                            ? SsfUnjudgedEvent::CATEGORY_REPLAY_STORE
+                            : SsfUnjudgedEvent::CATEGORY_KEY_FETCH;
+                    }
                     $unjudged[] = $jti;
                 }
             }
         }
 
+        if ($unjudged !== [] && $category !== null) {
+            // §19.1 (contract 1.60, SHOULD): an outage the caller sees in no error is visible.
+            $this->telemetry?->emit(new SsfUnjudgedEvent('ssf.poll', count($unjudged), $category));
+        }
+
         return new SsfPollResult($events, ($reply->moreAvailable ?? false) === true, $refused, $unjudged, $cause);
     }
 
-    /** The §32.7 order; `$expectedJti` is the poll map key the SET was returned under. */
-    private function verify(string $set, ?string $expectedJti): SecurityEvent
+    /**
+     * The §32.7 order; `$expectedJti` is the poll map key the SET was returned under. With
+     * `$record` false, step 9 is skipped: the store is not asked and nothing is recorded.
+     */
+    private function verify(string $set, ?string $expectedJti, bool $record = true): SecurityEvent
     {
+        $this->storeFailed = false;
         // Ed25519 is ext-sodium's (composer.json requires it). A build compiled without it
         // fails here with a typed error — no verdict on the SET — rather than with PHP's
         // "Call to undefined function" at step 4 or 5.
@@ -407,9 +453,21 @@ final class SsfReceiver
         $eventType = (string) array_key_first($members);
         $event = $members[$eventType];
 
-        // 9. Only now, once 1–8 passed.
-        if (!$this->replayStore->checkAndRecord($jti, $this->replayWindowSeconds)) {
-            throw new SetVerificationError(SetFailureReason::Replayed, 'the jti was already accepted');
+        // 9. Only now, once 1–8 passed. A store that cannot answer gives no verdict: its
+        // failure is a NetworkError (§2, §34.2 P3), never `replayed`.
+        if ($record) {
+            try {
+                $seen = !$this->replayStore->checkAndRecord($jti, $this->replayWindowSeconds);
+            } catch (AxiamException $e) {
+                $this->storeFailed = true;
+                throw $e;
+            } catch (\Throwable $e) {
+                $this->storeFailed = true;
+                throw NetworkError::fromException($e, 'the SSF replay store could not answer');
+            }
+            if ($seen) {
+                throw new SetVerificationError(SetFailureReason::Replayed, 'the jti was already accepted');
+            }
         }
 
         $txn = $claims->txn ?? null;
@@ -431,24 +489,51 @@ final class SsfReceiver
      * happens at most once per {@see self::FORCED_REFETCH_INTERVAL_SECONDS}, so a stream of
      * SETs with made-up `kid`s cannot turn this receiver into a JWKS load generator (§32.7
      * step 4).
+     *
+     * §34.2 P6: the limit counts every forced refetch and every **failed** fetch — a failed
+     * fill of the empty cache and a failed refresh of an expired one included — so a JWKS
+     * outage is not one fetch per SET. A successful fill or refresh is not counted. Within the
+     * minute after a failed fetch, a SET that needs the key set fetched makes no fetch and gets
+     * a {@see NetworkError}: no verdict.
      */
     private function keyFor(string $kid): ?string
     {
         $now = ($this->clock)();
         if ($this->keys === null || $now - $this->fetchedAt >= self::JWKS_TTL_SECONDS) {
+            if ($this->lastFailedFetch !== null && $now - $this->lastFailedFetch < self::FORCED_REFETCH_INTERVAL_SECONDS) {
+                throw NetworkError::fromMessage(
+                    'SSF JWKS fetch: the last fetch failed less than a minute ago, so none is made (CONTRACT.md §34.2 P6)',
+                );
+            }
             $this->fetchKeys($now);
         }
         if (!isset($this->keys[$kid])
-            && ($this->lastForcedRefetch === null || $now - $this->lastForcedRefetch >= self::FORCED_REFETCH_INTERVAL_SECONDS)) {
-            $this->lastForcedRefetch = $now;
+            && ($this->lastCountedFetch === null || $now - $this->lastCountedFetch >= self::FORCED_REFETCH_INTERVAL_SECONDS)) {
+            $this->lastCountedFetch = $now;
             $this->fetchKeys($now);
         }
 
         return $this->keys[$kid] ?? null;
     }
 
-    /** Fetch the JWKS; a failure is a {@see NetworkError}, never a SET refusal. */
+    /**
+     * Fetch the JWKS; a failure is a {@see NetworkError}, never a SET refusal, and counts toward
+     * the once-a-minute limit (§34.2 P6).
+     */
     private function fetchKeys(int $now): void
+    {
+        try {
+            $this->doFetchKeys($now);
+        } catch (\Throwable $e) {
+            $this->lastFailedFetch = $now;
+            $this->lastCountedFetch = $now;
+            throw $e;
+        }
+        $this->lastFailedFetch = null;
+    }
+
+    /** One JWKS fetch, through the configuration document when no `jwks_uri` was given. */
+    private function doFetchKeys(int $now): void
     {
         $response = $this->get($this->jwksUri(), 'SSF JWKS fetch');
         $document = json_decode((string) $response->getBody(), true);

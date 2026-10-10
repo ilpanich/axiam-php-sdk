@@ -534,6 +534,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testCreateFederationConfigRequestRoundTrips(): void
     {
         $wire = [
+            'allow_sha1_signatures' => true,
             'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
@@ -548,6 +549,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'button_icon' => 'example',
             'client_id' => 'example',
             'client_secret' => 'example',
+            'idp_metadata_signing_cert_pem' => 'example',
             'idp_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'protocol' => 'example',
@@ -633,6 +635,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'recipient_emails' => [
                 'example',
             ],
+            'window_minutes' => 1,
         ];
 
         $model = Models\CreateNotificationRuleRequest::fromArray($wire);
@@ -1243,6 +1246,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testFederationConfigResponseRoundTrips(): void
     {
         $wire = [
+            'allow_sha1_signatures' => true,
             'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
@@ -1263,6 +1267,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'enabled' => true,
             'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
+            'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
             'pkce_required' => true,
@@ -1872,6 +1877,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
             'updated_at' => '2026-08-26T00:00:00Z',
+            'window_minutes' => 1,
         ];
 
         $model = Models\NotificationRuleResponse::fromArray($wire);
@@ -3136,6 +3142,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'credential' => 'example',
             'deprovision' => 'deactivate',
             'enabled' => true,
+            'expected_updated_at' => '2026-08-26T00:00:00Z',
             'name' => 'example',
             'push_groups' => true,
             'scope' => [
@@ -4116,6 +4123,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
     public function testUpdateFederationConfigRequestRoundTrips(): void
     {
         $wire = [
+            'allow_sha1_signatures' => true,
             'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
@@ -4131,6 +4139,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'client_id' => 'example',
             'client_secret' => 'example',
             'enabled' => true,
+            'idp_metadata_signing_cert_pem' => 'example',
             'idp_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'provider' => 'example',
@@ -4195,6 +4204,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'recipient_emails' => [
                 'example',
             ],
+            'window_minutes' => 1,
         ];
 
         $model = Models\UpdateNotificationRuleRequest::fromArray($wire);

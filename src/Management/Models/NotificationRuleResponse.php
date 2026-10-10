@@ -24,6 +24,8 @@ final class NotificationRuleResponse implements \JsonSerializable
      * @param list<string> $recipientEmails the server's `recipient_emails` field
      * @param string $tenantId the server's `tenant_id` field
      * @param string $updatedAt the server's `updated_at` field
+     * @param int $windowMinutes Minutes in which one event type mails each recipient at most
+     *     once; further events are counted and reported by the next mail (#551).
      */
     public function __construct(
         public readonly string $createdAt,
@@ -35,6 +37,7 @@ final class NotificationRuleResponse implements \JsonSerializable
         public readonly array $recipientEmails,
         public readonly string $tenantId,
         public readonly string $updatedAt,
+        public readonly int $windowMinutes,
     ) {
     }
 
@@ -54,6 +57,7 @@ final class NotificationRuleResponse implements \JsonSerializable
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'recipient_emails', self::class))),
             (string) ModelDecode::need($data, 'tenant_id', self::class),
             (string) ModelDecode::need($data, 'updated_at', self::class),
+            (int) ModelDecode::need($data, 'window_minutes', self::class),
         );
     }
 
@@ -77,6 +81,7 @@ final class NotificationRuleResponse implements \JsonSerializable
         $out['recipient_emails'] = $this->recipientEmails;
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
+        $out['window_minutes'] = $this->windowMinutes;
 
         return $out;
     }

@@ -20,6 +20,11 @@ final class CreateFederationConfigRequest implements \JsonSerializable
      *     external IdP.
      * @param string $protocol Federation protocol: "OidcConnect" or "Saml".
      * @param string $provider Display name for the identity provider (e.g., "Google", "Okta").
+     * @param bool|null $allowSha1Signatures SAML only: accept IdP responses signed with SHA-1
+     *     (`rsa-sha1`). Default `false` — since 1.0.0 the SP verifier accepts only SHA-2
+     *     signatures. The escape hatch for an IdP that cannot sign with SHA-2 yet; refused on a
+     *     non-SAML config, and audited (`federation.sha1_signatures_allowed`) when set to `true`.
+     *     (optional)
      * @param bool|null $allowTenantInheritance Whether tenants of this organization may
      *     inherit this provider. Only meaningful on a config in the organization-scope tenant.
      *     (optional)
@@ -41,6 +46,10 @@ final class CreateFederationConfigRequest implements \JsonSerializable
      *     Apple and Microsoft all publish sign-in-button rules that require their own mark, so
      *     substituting a picture would produce a button that breaks the guidelines it exists to
      *     follow. (optional)
+     * @param string|null $idpMetadataSigningCertPem SAML only: the PEM certificate the IdP
+     *     signs its metadata document with (#530). When set, the metadata must carry one SHA-2
+     *     signature on its `EntityDescriptor` root that verifies against it, or no sign-in starts.
+     *     Omitted: the metadata is not signature-checked. (optional)
      * @param string|null $idpSigningCertPem PEM-encoded X.509 certificate for verifying SAML
      *     assertions or OIDC signatures (CQ-B40/REQ-14 AC-5). Required for SAML configs.
      *     (optional)
@@ -68,6 +77,7 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         public readonly \Axiam\Sdk\Core\Sensitive $clientSecret,
         public readonly string $protocol,
         public readonly string $provider,
+        public readonly ?bool $allowSha1Signatures = null,
         public readonly ?bool $allowTenantInheritance = null,
         public readonly ?array $allowedAlgorithms = null,
         public readonly ?array $allowedIssuerTenants = null,
@@ -76,6 +86,7 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         public readonly mixed $attributeMap = null,
         public readonly ?string $authorizationEndpoint = null,
         public readonly ?string $buttonIcon = null,
+        public readonly ?string $idpMetadataSigningCertPem = null,
         public readonly ?string $idpSigningCertPem = null,
         public readonly ?string $metadataUrl = null,
         public readonly ?string $providerKind = null,
@@ -99,6 +110,7 @@ final class CreateFederationConfigRequest implements \JsonSerializable
             new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'client_secret', self::class)),
             (string) ModelDecode::need($data, 'protocol', self::class),
             (string) ModelDecode::need($data, 'provider', self::class),
+            isset($data['allow_sha1_signatures']) ? (bool) $data['allow_sha1_signatures'] : null,
             isset($data['allow_tenant_inheritance']) ? (bool) $data['allow_tenant_inheritance'] : null,
             isset($data['allowed_algorithms']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_algorithms'])) : null,
             isset($data['allowed_issuer_tenants']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_issuer_tenants'])) : null,
@@ -107,6 +119,7 @@ final class CreateFederationConfigRequest implements \JsonSerializable
             isset($data['attribute_map']) ? $data['attribute_map'] : null,
             isset($data['authorization_endpoint']) ? (string) $data['authorization_endpoint'] : null,
             isset($data['button_icon']) ? (string) $data['button_icon'] : null,
+            isset($data['idp_metadata_signing_cert_pem']) ? (string) $data['idp_metadata_signing_cert_pem'] : null,
             isset($data['idp_signing_cert_pem']) ? (string) $data['idp_signing_cert_pem'] : null,
             isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
             isset($data['provider_kind']) ? (string) $data['provider_kind'] : null,
@@ -134,6 +147,9 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         $out['client_secret'] = $this->clientSecret;
         $out['protocol'] = $this->protocol;
         $out['provider'] = $this->provider;
+        if ($this->allowSha1Signatures !== null) {
+            $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
+        }
         if ($this->allowTenantInheritance !== null) {
             $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
         }
@@ -157,6 +173,9 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         }
         if ($this->buttonIcon !== null) {
             $out['button_icon'] = $this->buttonIcon;
+        }
+        if ($this->idpMetadataSigningCertPem !== null) {
+            $out['idp_metadata_signing_cert_pem'] = $this->idpMetadataSigningCertPem;
         }
         if ($this->idpSigningCertPem !== null) {
             $out['idp_signing_cert_pem'] = $this->idpSigningCertPem;

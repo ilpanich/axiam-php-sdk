@@ -101,7 +101,12 @@ OMIT_WHEN_EMPTY = {"tenantScope"}
 # both sides of the wire is the rule applied, not a relaxation of it: a server that DOES
 # send the field is decoded exactly as before. A name list, like OMIT_WHEN_EMPTY,
 # because "absent means true" is a fact about this one field, not about every bool.
-DEFAULT_TRUE_WHEN_ABSENT = {"inherit"}
+#
+# CONTRACT.md §27.15 note 6 (contract 1.60) adds the mirror case: `FederationConfigResponse`
+# always carries `allow_sha1_signatures`, and "a response that lacks it, from an older server,
+# decodes as `false`" -- the SHA-1 escape hatch a server before 1.0.0 had no switch for.
+# Hence a map from wire name to the PHP literal its absence decodes to.
+DEFAULT_WHEN_ABSENT: dict[str, str] = {"inherit": "true", "allow_sha1_signatures": "false"}
 
 # `type`-tagged unions that are OPEN: an unrecognised tag decodes to a `<Name>Unknown`
 # arm instead of throwing, and that arm refuses to serialize. CONTRACT.md §31.2: an
@@ -122,14 +127,25 @@ OPEN_UNIONS = {"ScimTargetAuth", "ScimTargetScope"}
 # - §29.8 test 8: `SamlIdpInfo`'s two credential ids are null when the slot is empty, and
 #   a decoder MUST keep that null apart from a member a server did not send.
 #
-# A name list, because the distinction is a fact about these four fields and changing the
+# - §27.15 note 8 (contract 1.60): on `federation.update_config` each of the ten nullable
+#   members of `UpdateFederationConfigRequest` is CLEARED by an explicit `null` and left
+#   unchanged when omitted; the model must be able to say both. Its other members cannot be
+#   cleared (the server reads their `null` as absent) and stay two-state.
+#
+# A name list, because the distinction is a fact about these fields and changing the
 # meaning of `null` on every other optional field would break every caller of them.
 JSON_NULL = "\\Axiam\\Sdk\\Management\\JsonNull"
+FEDERATION_CLEARABLE = (
+    "metadata_url", "idp_signing_cert_pem", "idp_metadata_signing_cert_pem", "provider_slug",
+    "authorization_endpoint", "token_endpoint", "userinfo_endpoint", "apple_team_id",
+    "apple_key_id", "button_icon",
+)
 EXPLICIT_NULL_FIELDS = {
     ("UpdateDirectoryConfig", "group_base_dn"),
     ("UpdateDirectoryConfig", "group_filter"),
     ("SamlIdpInfo", "active_credential_id"),
     ("SamlIdpInfo", "next_credential_id"),
+    *(("UpdateFederationConfigRequest", wire) for wire in FEDERATION_CLEARABLE),
 }
 
 # Operations whose body has a constraint the server would otherwise be left to refuse, and
@@ -1042,8 +1058,9 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         out.append("        return new self(")
         for f in fields:
             src = f"$data['{f['wire']}']"
-            if f["required"] and f["wire"] in DEFAULT_TRUE_WHEN_ABSENT:
-                out.append(f"            isset({src}) ? {decode_expr(f, src)} : true,")
+            if f["required"] and f["wire"] in DEFAULT_WHEN_ABSENT:
+                out.append(f"            isset({src}) ? {decode_expr(f, src)} : "
+                           f"{DEFAULT_WHEN_ABSENT[f['wire']]},")
             elif f["required"]:
                 need = f"ModelDecode::need($data, '{f['wire']}', self::class)"
                 out.append(f"            {decode_expr(f, need)},")

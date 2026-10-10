@@ -19,12 +19,16 @@ final class CreateNotificationRuleRequest implements \JsonSerializable
      * @param list<NotificationEventType> $events Event types that trigger this rule.
      * @param string $name Human-readable name for the rule.
      * @param list<string> $recipientEmails Email addresses to notify.
+     * @param int|null $windowMinutes Minutes in which one event type mails each recipient at
+     *     most once: the first event of a window is mailed, the rest are counted and the next mail
+     *     says how many were not sent (#551). 1 … 1440; 15 when omitted. (optional)
      */
     public function __construct(
         public readonly string $description,
         public readonly array $events,
         public readonly string $name,
         public readonly array $recipientEmails,
+        public readonly ?int $windowMinutes = null,
     ) {
     }
 
@@ -39,6 +43,7 @@ final class CreateNotificationRuleRequest implements \JsonSerializable
             array_values(array_map(static fn (mixed $v): NotificationEventType => NotificationEventType::fromWire((string) $v), (array) ModelDecode::need($data, 'events', self::class))),
             (string) ModelDecode::need($data, 'name', self::class),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'recipient_emails', self::class))),
+            isset($data['window_minutes']) ? (int) $data['window_minutes'] : null,
         );
     }
 
@@ -57,6 +62,9 @@ final class CreateNotificationRuleRequest implements \JsonSerializable
         $out['events'] = array_map(static fn (NotificationEventType $v): string => $v->value, $this->events);
         $out['name'] = $this->name;
         $out['recipient_emails'] = $this->recipientEmails;
+        if ($this->windowMinutes !== null) {
+            $out['window_minutes'] = $this->windowMinutes;
+        }
 
         return $out;
     }

@@ -15,7 +15,7 @@ Identity and Authorization Management.
 ## Package identity
 
 - **Packagist package:** `axiam/axiam-sdk`
-- **Registry:** [packagist.org/packages/axiam/axiam-sdk](https://packagist.org/packages/axiam/axiam-sdk) _(reserved, not yet published)_
+- **Registry:** [packagist.org/packages/axiam/axiam-sdk](https://packagist.org/packages/axiam/axiam-sdk)
 - **Source:** [github.com/ilpanich/axiam-php-sdk](https://github.com/ilpanich/axiam-php-sdk)
 - **API reference:** [ilpanich.github.io/axiam-php-sdk](https://ilpanich.github.io/axiam-php-sdk/)
 - **License:** Apache-2.0
@@ -24,8 +24,11 @@ Identity and Authorization Management.
 ## Install
 
 ```bash
-composer require axiam/axiam-sdk
+composer require "axiam/axiam-sdk:^1.0.0"
 ```
+
+From 1.0.0 the SDK is stable and follows [semantic versioning](https://semver.org/): a breaking
+change to its public API comes only with a new major version.
 
 ## Supported PHP versions
 
@@ -195,9 +198,18 @@ failure: systemd (`Restart=on-failure`), a RoadRunner worker-pool respawn, or a 
 `restart: unless-stopped` policy. A worker with no supervision will simply stop consuming
 messages after the first connection loss and never recover on its own.
 
+**A broker confirm is not evidence that AXIAM saw a message (CONTRACT.md §8, contract 1.60).**
+A publisher confirm, or the broker's `basic.ack` of a publish, means only that the broker
+accepted the message; this SDK never treats it as proof that AXIAM decided a request or
+recorded an event. A server running in the **minimal profile** (`AXIAM__AMQP__ENABLED=false`)
+reads no AMQP queue at all — it consumes neither `axiam.authz.request` nor
+`axiam.audit.events`, whatever a broker holds — so against one use REST or gRPC. `GET /health`
+reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` under
+`unavailable`.
+
 ## Contract conformance
 
-This SDK conforms to **contract 1.59**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.60**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
 **`PS256` is not shipped**, see [CIBA](#ciba-contractmd-33) below for why — including
@@ -243,19 +255,35 @@ it, `tenant_id` queries included.
 
 Contract 1.59 (§34) adds no section and changes no wire shape; its clarifications P1 – P12 bind
 the sections above, and this SDK follows them — the table below says how, where the contract
-left a choice.
+left a choice. Contract 1.60 answers the questions the 1.59 ports raised (§34.4), adds three
+optional members to the §27 models and the `federation.update_config` null rule (§27.15), and
+`expected_updated_at` on §31's `ScimTargetInput`; its §35 (certificate revocation lists) is
+informative and has no SDK surface. The second table says what 1.60 changed here.
 
 ### Contract 1.59 — the Phase 23 review follow-up (F-59-06)
 
 | Clarification | Here |
 |---|---|
-| P1 `poll` never keeps a `jti` it does not return | The second form: what was judged is returned, and a SET a key-fetch or store failure left unjudged is unrecorded and listed in `SsfPollResult::$unjudged` (with `$unjudgedCause`); the failure is raised instead only when no SET of the batch had been accepted |
-| P4 the replay store | `ReplayStore::checkAndRecord()` reports a failure by throwing, which accepts nothing (fail closed); the default `InMemoryReplayStore` is unbounded in count, its entries expiring after the window |
+| P1 `poll` never keeps a `jti` it does not return | The second form: what was judged is returned, and a SET a key-fetch or store failure left unjudged is unrecorded and listed in `SsfPollResult::$unjudged` (with `$unjudgedCause`); after a store failure the store is asked nothing more for the batch, a later SET that fails verification is still refused and one that verifies is unjudged; the failure is raised instead only when no SET of the batch had been accepted |
+| P4 the replay store | `ReplayStore::checkAndRecord()` reports a failure by throwing, which accepts nothing (fail closed) and surfaces as a `NetworkError` with the store's exception chained; the default `InMemoryReplayStore` is unbounded in count, its entries expiring after the window |
+| P6 key fetches | A failed fetch — a fill and an expiry refresh included — and every unknown-`kid` refetch count toward the once-a-minute limit; a successful fill does not. The key cache expires 300 s after the fetch that filled it |
 | P8 a `5xx` on `ciba_poll` | A `NetworkError` whatever its body (`500 {"error":"server_error"}` included), retried under §16 and outlived by `cibaAwait` |
 | P10 `cibaAwait`'s anchor | The instant the initiate response was received, read from the injected `CibaClock`, which also supplies the waits |
 | P12.1 / P12.2 unknown SCIM arms | `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` keep the `type` and nothing else; they render for a log line and are refused locally on the request path |
 | P12.4 the RFC 7592 replacement | Built from what the read carried: a list the read lacked is not sent, a member of an unexpected shape goes back as read |
 | P12.7 the signed form | Claimed as "§33.2 signed (ES256, EdDSA)" |
+
+### Contract 1.60 — what changed here
+
+| Row | Here |
+|---|---|
+| §31 `expected_updated_at` | `ScimTargetInput::$expectedUpdatedAt`, sent on `update` exactly as given and absent when unset; `ReadModifyWrite::scimTarget()` fills it with the `updated_at` it read, so an edit made since answers `409` (`ConflictError`) |
+| §27.15 `window_minutes` | On `CreateNotificationRuleRequest`, `UpdateNotificationRuleRequest` and `NotificationRuleResponse`; passed through, never clamped |
+| §27.15 `allow_sha1_signatures`, `idp_metadata_signing_cert_pem` | On the three federation configuration models, sent only when set; a response without `allow_sha1_signatures` decodes as `false` |
+| §27.15 note 8 | The ten clearable members of `UpdateFederationConfigRequest` are `string\|JsonNull\|null`: `null` leaves the member out (unchanged), `JsonNull::Null` sends `null` (cleared) |
+| §12.1 refresh `scope` | `OidcTokenSet::$scope` is the refresh response's, never the original grant's |
+| §21.5 discovery | `OidcConfiguration` decodes the four revocation and introspection authentication members, each optional |
+| §19.1 `ssf_unjudged` | `SsfUnjudgedEvent`: a `poll` that returns with SETs unjudged reports their number and `key_fetch` or `replay_store` |
 
 ### Contract 1.53 – 1.58 — what this SDK ships
 
@@ -355,7 +383,7 @@ is refused locally with a `ValidationError`. A client that must sign CIBA reques
 ### Laravel — auto-discovered, zero-config
 
 ```bash
-composer require axiam/axiam-sdk
+composer require "axiam/axiam-sdk:^1.0.0"
 ```
 
 That's it. Laravel's own [package auto-discovery](https://laravel.com/docs/packages#package-discovery)
@@ -703,10 +731,30 @@ $exchanged = $client->tokenExchange(
 );
 ```
 
+To **delegate** rather than impersonate, pass an actor token, and make it the exchanging
+client's own `client_credentials` token (§15.2 rule 9, contract 1.60) — the server answers
+any actor token not issued to that client `400 invalid_request` (`actor_token was not issued
+to the exchanging client`):
+
+```php
+// The same client's own client_credentials grant. Do not adopt it as the session, and do not
+// use a console sign-in, another client's token or a service account's: those are refused.
+$actor = $client->loginClientCredentials('orders:read')->accessToken;
+
+$delegated = $client->tokenExchange(
+    subjectToken: $userToken,
+    subjectTokenType: OidcClient::ACCESS_TOKEN_TYPE,
+    actorToken: $actor,
+    scopes: ['orders:read'],
+);
+```
+
 Most of what this method does is refuse to be helpful:
 
 - **No default `$actorToken`.** Passing `null` asks for *impersonation*; the SDK will not
   quietly substitute the client's own session token and turn that into a delegation.
+  You obtain the actor token and pass it; a `invalid_request` for one issued to another client
+  surfaces unchanged — not retried, not rewritten into an impersonation.
 - **No auto-narrowing after `invalid_scope`.** The server refuses rather than silently
   narrowing precisely so the caller finds out here.
 - **No refresh token, ever** — `ExchangedToken` has no such property. Re-run the exchange.
@@ -2025,6 +2073,7 @@ For the relying party that *receives* AXIAM's CAEP and RISC events:
 
 ```php
 use Axiam\Sdk\Ssf\SetErr;
+use Axiam\Sdk\Ssf\SetFailureReason;
 use Axiam\Sdk\Ssf\SetVerificationError;
 use Axiam\Sdk\Ssf\SsfPollOptions;
 
@@ -2048,6 +2097,12 @@ $result = $receiver->poll($streamId, new SsfPollOptions(returnImmediately: true)
 $ack = array_map(static fn ($e) => $e->jti, $result->events);   // after processing them
 $setErrs = [];
 foreach ($result->refused as $refused) {
+    if ($refused->reason === SetFailureReason::Replayed) {
+        // Accepted by this receiver on an earlier poll: acknowledge it, never report it
+        // (§34.2 P2) — an error for an event you took would misinform the transmitter.
+        $ack[] = $refused->jti;
+        continue;
+    }
     $setErrs[$refused->jti] = SetErr::fromReason($refused->reason);
 }
 $receiver->poll($streamId, new SsfPollOptions(ack: $ack, setErrs: $setErrs));
@@ -2056,17 +2111,27 @@ $receiver->poll($streamId, new SsfPollOptions(ack: $ack, setErrs: $setErrs));
 The verification order and the reason codes (`SetFailureReason`) are the contract's; `alg`
 is pinned to `EdDSA` before any key is looked up, and keys come only from the configured JWKS
 (never a `jwk`/`x5c` header). An unknown `kid` costs **one** forced JWKS refetch, at most once
-a minute. A JWKS fetch failure is a `NetworkError`, not a verdict on the SET. A verified SET
+a minute. A JWKS fetch failure is a `NetworkError`, not a verdict on the SET, and it counts toward
+the same once-a-minute limit: for a minute after a failed fetch no SET triggers another, each
+getting a `NetworkError` instead (§34.2 P6). The key cache expires five minutes after the fetch
+that filled it, and the next SET fetches again. A verified SET
 is **recorded**: re-offered unacknowledged, it reads as `replayed` — so acknowledge what you
-processed. `poll` never keeps a `jti` it does not return (§34.2 P1): when a key fetch fails or
+processed. A `replayed` SET was accepted by this receiver earlier: `poll` returns it in
+`$result->refused`, and you acknowledge it in `ack`, **not** in `setErrs` (§34.2 P2) — the
+transmitter drops the event either way, and an error report would misinform it about an event
+you took. `poll` never keeps a `jti` it does not return (§34.2 P1): when a key fetch fails or
 the replay store cannot answer partway through a batch, the SETs already accepted are returned,
-and that SET and the rest are left **unjudged** — unrecorded, listed in `$result->unjudged`
-with the failure in `$result->unjudgedCause`, and neither acknowledged nor reported in
-`setErrs`, so the transmitter offers them again. If nothing had been accepted yet, the failure
-is raised instead. The replay window defaults to, and may not be set below, seven days; the default
+and that SET is left **unjudged** — unrecorded, listed in `$result->unjudged` with the failure in
+`$result->unjudgedCause`, and neither acknowledged nor reported in `setErrs`, so the transmitter
+offers it again. The store is asked nothing more for that batch: a later SET that fails
+verification is still refused, and one that verifies is unjudged too. If nothing had been
+accepted yet, the failure is raised instead. A `poll` that returns with SETs unjudged emits the
+§19 event `SsfUnjudgedEvent` (`ssf.poll`, how many, and `key_fetch` or `replay_store` — no
+`jti`) to the client's telemetry hook, so an outage that raises nothing is still visible. The replay window defaults to, and may not be set below, seven days; the default
 store is in-memory and per-process, and unbounded in count (entries expire after the window)
 — behind PHP-FPM, pass a shared `ReplayStore` (an atomic `SET NX EX` in Redis, say). A store
-that cannot answer throws; it never answers "not seen" (§34.2 P4). `malformed`, `invalid_type` and `replayed` are answered as
+that cannot answer throws; it never answers "not seen" (§34.2 P4), and `verifySet()` raises
+the failure as a `NetworkError` with the store's exception chained as its cause (§2). `malformed`, `invalid_type` and `replayed` are answered as
 `invalid_request`, since only RFC 8935's codes go on the wire.
 
 ## CIBA (CONTRACT.md §33)

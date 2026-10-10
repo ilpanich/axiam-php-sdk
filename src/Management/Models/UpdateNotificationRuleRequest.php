@@ -25,6 +25,8 @@ final class UpdateNotificationRuleRequest implements \JsonSerializable
      * @param string|null $name the server's `name` field (optional)
      * @param list<string>|null $recipientEmails the server's `recipient_emails` field
      *     (optional)
+     * @param int|null $windowMinutes The rule's notification window in minutes, 1 … 1440
+     *     (#551). (optional)
      */
     public function __construct(
         public readonly ?string $description = null,
@@ -32,6 +34,7 @@ final class UpdateNotificationRuleRequest implements \JsonSerializable
         public readonly ?array $events = null,
         public readonly ?string $name = null,
         public readonly ?array $recipientEmails = null,
+        public readonly ?int $windowMinutes = null,
     ) {
     }
 
@@ -47,6 +50,7 @@ final class UpdateNotificationRuleRequest implements \JsonSerializable
             isset($data['events']) ? array_values(array_map(static fn (mixed $v): NotificationEventType => NotificationEventType::fromWire((string) $v), (array) $data['events'])) : null,
             isset($data['name']) ? (string) $data['name'] : null,
             isset($data['recipient_emails']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['recipient_emails'])) : null,
+            isset($data['window_minutes']) ? (int) $data['window_minutes'] : null,
         );
     }
 
@@ -75,6 +79,9 @@ final class UpdateNotificationRuleRequest implements \JsonSerializable
         }
         if ($this->recipientEmails !== null) {
             $out['recipient_emails'] = $this->recipientEmails;
+        }
+        if ($this->windowMinutes !== null) {
+            $out['window_minutes'] = $this->windowMinutes;
         }
 
         return $out;

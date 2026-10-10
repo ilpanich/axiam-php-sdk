@@ -257,6 +257,33 @@ final class OidcDiscoveryTest extends TestCase
         self::assertNull($configuration->token_endpoint_auth_signing_alg_values_supported);
     }
 
+    /**
+     * Contract 1.60 (§21.5, §12.1): the revocation and introspection endpoints' four
+     * authentication members decode when advertised and are optional — a document without
+     * them (a server before 1.0.0, or vector A, which {@see MtlsEndpointAliasesTest} decodes)
+     * still parses, each member `null`.
+     */
+    public function testTheRevocationAndIntrospectionAuthMembersAreOptional(): void
+    {
+        $wire = $this->discoveryWire();
+        $wire['revocation_endpoint_auth_methods_supported'] = ['client_secret_post', 'none'];
+        $wire['introspection_endpoint_auth_methods_supported'] = ['client_secret_post'];
+        $wire['revocation_endpoint_auth_signing_alg_values_supported'] = ['PS256', 'EdDSA'];
+        $wire['introspection_endpoint_auth_signing_alg_values_supported'] = ['ES256'];
+        $advertised = $this->client([new Response(200, [], (string) json_encode($wire))])->oidcDiscover();
+
+        self::assertSame(['client_secret_post', 'none'], $advertised->revocation_endpoint_auth_methods_supported);
+        self::assertSame(['client_secret_post'], $advertised->introspection_endpoint_auth_methods_supported);
+        self::assertSame(['PS256', 'EdDSA'], $advertised->revocation_endpoint_auth_signing_alg_values_supported);
+        self::assertSame(['ES256'], $advertised->introspection_endpoint_auth_signing_alg_values_supported);
+
+        $older = $this->client([$this->discoveryResponse()])->oidcDiscover();
+        self::assertNull($older->revocation_endpoint_auth_methods_supported);
+        self::assertNull($older->introspection_endpoint_auth_methods_supported);
+        self::assertNull($older->revocation_endpoint_auth_signing_alg_values_supported);
+        self::assertNull($older->introspection_endpoint_auth_signing_alg_values_supported);
+    }
+
     /** An advertised empty list is a real answer and survives as `[]`, never collapsing to null. */
     public function testAdvertisedEmptyCapabilityListIsNotCollapsedToNull(): void
     {

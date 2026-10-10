@@ -2660,6 +2660,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $mounted = [
             'items' => [
                 [
+                    'allow_sha1_signatures' => true,
                     'allow_tenant_inheritance' => true,
                     'allowed_algorithms' => [
                         'example',
@@ -2680,6 +2681,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'enabled' => true,
                     'has_bundled_mark' => true,
                     'id' => '11111111-1111-4111-8111-111111111111',
+                    'idp_metadata_signing_cert_pem' => 'example',
                     'metadata_url' => 'example',
                     'mints_client_secret' => true,
                     'pkce_required' => true,
@@ -2726,6 +2728,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testFederationCreateConfigReachesItsRoute(): void
     {
         $mounted = [
+            'allow_sha1_signatures' => true,
             'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
@@ -2746,6 +2749,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'enabled' => true,
             'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
+            'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
             'pkce_required' => true,
@@ -2784,6 +2788,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testFederationGetConfigReachesItsRoute(): void
     {
         $mounted = [
+            'allow_sha1_signatures' => true,
             'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
@@ -2804,6 +2809,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'enabled' => true,
             'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
+            'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
             'pkce_required' => true,
@@ -2842,6 +2848,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     public function testFederationUpdateConfigReachesItsRoute(): void
     {
         $mounted = [
+            'allow_sha1_signatures' => true,
             'allow_tenant_inheritance' => true,
             'allowed_algorithms' => [
                 'example',
@@ -2862,6 +2869,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'enabled' => true,
             'has_bundled_mark' => true,
             'id' => '11111111-1111-4111-8111-111111111111',
+            'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
             'pkce_required' => true,
@@ -2998,6 +3006,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     ],
                     'tenant_id' => '11111111-1111-4111-8111-111111111111',
                     'updated_at' => '2026-08-26T00:00:00Z',
+                    'window_minutes' => 1,
                 ],
             ],
             'total' => 1,
@@ -3033,6 +3042,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
             'updated_at' => '2026-08-26T00:00:00Z',
+            'window_minutes' => 1,
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->notificationRules()->create(new Models\CreateNotificationRuleRequest('example', [Models\NotificationEventType::LoginFailure], 'example', ['example']));
@@ -3060,6 +3070,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
             'updated_at' => '2026-08-26T00:00:00Z',
+            'window_minutes' => 1,
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->notificationRules()->get('11111111-1111-4111-8111-111111111111');
@@ -3087,6 +3098,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             ],
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
             'updated_at' => '2026-08-26T00:00:00Z',
+            'window_minutes' => 1,
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->notificationRules()->update('11111111-1111-4111-8111-111111111111', new Models\UpdateNotificationRuleRequest());

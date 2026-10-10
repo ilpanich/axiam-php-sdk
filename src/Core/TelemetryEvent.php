@@ -20,6 +20,7 @@ namespace Axiam\Sdk\Core;
  * @see RequestEndEvent
  * @see RetryEvent
  * @see RefreshEvent
+ * @see SsfUnjudgedEvent
  */
 abstract class TelemetryEvent
 {
