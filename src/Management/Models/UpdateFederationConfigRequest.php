@@ -19,60 +19,93 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
 {
     /**
      * Constructs a UpdateFederationConfigRequest.
+     * @param bool|null $allowSha1Signatures SAML only: accept IdP responses signed with SHA-1.
+     *     Refused on a non-SAML config; turning it on is audited
+     *     (`federation.sha1_signatures_allowed`). (optional)
      * @param bool|null $allowTenantInheritance Whether tenants may inherit this
      *     organization-level provider. (optional)
      * @param list<string>|null $allowedAlgorithms Accepted signature algorithms (CQ-B40/REQ-14
      *     AC-5). (optional)
      * @param list<string>|null $allowedIssuerTenants Accepted external IdP tenants for a
      *     templated issuer. Replaced wholesale. (optional)
-     * @param string|null $appleKeyId Apple Key ID. `Some(None)` clears it. (optional)
-     * @param string|null $appleTeamId Apple Team ID. `Some(None)` clears it. (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $appleKeyId Apple Key ID. Explicit
+     *     `null` clears it. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $appleTeamId Apple Team ID. Explicit
+     *     `null` clears it. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
      * @param mixed $attributeMap the server's `attribute_map` field (optional)
-     * @param string|null $authorizationEndpoint OAuth2-variant authorization endpoint.
-     *     `Some(None)` clears it. (optional)
-     * @param string|null $buttonIcon Sign-in-button icon for a generic provider. `Some(None)`
-     *     clears it. (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $authorizationEndpoint OAuth2-variant
+     *     authorization endpoint. Explicit `null` clears it. `null` leaves the member ABSENT;
+     *     {@see \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the
+     *     same thing (§27.4 rule 5). (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $buttonIcon Sign-in-button icon for a
+     *     generic provider. Explicit `null` clears it. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
      * @param string|null $clientId the server's `client_id` field (optional)
      * @param \Axiam\Sdk\Core\Sensitive|null $clientSecret the server's `client_secret` field —
      *     a one-time secret (§27.5) (optional)
      * @param bool|null $enabled the server's `enabled` field (optional)
-     * @param string|null $idpSigningCertPem PEM-encoded X.509 certificate for verifying SAML
-     *     assertions (CQ-B40/REQ-14 AC-5). `Some(None)` clears the stored cert. (optional)
-     * @param string|null $metadataUrl the server's `metadata_url` field (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $idpMetadataSigningCertPem SAML only:
+     *     the IdP metadata signing certificate (#530). Explicit `null` clears it; omitted leaves
+     *     it. Clearing it is audited (`federation.metadata_signing_cert_cleared`), and so is
+     *     replacing it with a different certificate (`federation.metadata_signing_cert_changed`).
+     *     `null` leaves the member ABSENT; {@see \Axiam\Sdk\Management\JsonNull::Null} is an
+     *     explicit JSON `null`, which is not the same thing (§27.4 rule 5). (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $idpSigningCertPem PEM-encoded X.509
+     *     certificate for verifying SAML assertions (CQ-B40/REQ-14 AC-5). Explicit `null` clears
+     *     the stored cert; omitted leaves it. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $metadataUrl OIDC discovery or SAML
+     *     metadata URL. Explicit `null` clears it; omitted leaves it. `null` leaves the member
+     *     ABSENT; {@see \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is
+     *     not the same thing (§27.4 rule 5). (optional)
      * @param string|null $provider the server's `provider` field (optional)
-     * @param string|null $providerSlug Operator-chosen identifier for a `generic_*` kind.
-     *     `Some(None)` clears it. (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $providerSlug Operator-chosen
+     *     identifier for a `generic_*` kind. Explicit `null` clears it. `null` leaves the member
+     *     ABSENT; {@see \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is
+     *     not the same thing (§27.4 rule 5). (optional)
      * @param bool|null $requirePkce Send PKCE on the authorization request. (optional)
      * @param list<string>|null $scopes Scopes to request. Replaced wholesale; empty restores
      *     the per-kind default. (optional)
-     * @param string|null $tokenEndpoint OAuth2-variant token endpoint. `Some(None)` clears it.
-     *     (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $tokenEndpoint OAuth2-variant token
+     *     endpoint. Explicit `null` clears it. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
      * @param TokenExchangeTrustRequest|null $tokenExchange the server's `token_exchange` field
      *     (optional)
-     * @param string|null $userinfoEndpoint OAuth2-variant userinfo endpoint. `Some(None)`
-     *     clears it. (optional)
+     * @param string|\Axiam\Sdk\Management\JsonNull|null $userinfoEndpoint OAuth2-variant
+     *     userinfo endpoint. Explicit `null` clears it. `null` leaves the member ABSENT; {@see
+     *     \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is not the same
+     *     thing (§27.4 rule 5). (optional)
      */
     public function __construct(
+        public readonly ?bool $allowSha1Signatures = null,
         public readonly ?bool $allowTenantInheritance = null,
         public readonly ?array $allowedAlgorithms = null,
         public readonly ?array $allowedIssuerTenants = null,
-        public readonly ?string $appleKeyId = null,
-        public readonly ?string $appleTeamId = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $appleKeyId = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $appleTeamId = null,
         public readonly mixed $attributeMap = null,
-        public readonly ?string $authorizationEndpoint = null,
-        public readonly ?string $buttonIcon = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $authorizationEndpoint = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $buttonIcon = null,
         public readonly ?string $clientId = null,
         public readonly ?\Axiam\Sdk\Core\Sensitive $clientSecret = null,
         public readonly ?bool $enabled = null,
-        public readonly ?string $idpSigningCertPem = null,
-        public readonly ?string $metadataUrl = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $idpMetadataSigningCertPem = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $idpSigningCertPem = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $metadataUrl = null,
         public readonly ?string $provider = null,
-        public readonly ?string $providerSlug = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $providerSlug = null,
         public readonly ?bool $requirePkce = null,
         public readonly ?array $scopes = null,
-        public readonly ?string $tokenEndpoint = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $tokenEndpoint = null,
         public readonly ?TokenExchangeTrustRequest $tokenExchange = null,
-        public readonly ?string $userinfoEndpoint = null,
+        public readonly string|\Axiam\Sdk\Management\JsonNull|null $userinfoEndpoint = null,
     ) {
     }
 
@@ -83,26 +116,28 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
+            isset($data['allow_sha1_signatures']) ? (bool) $data['allow_sha1_signatures'] : null,
             isset($data['allow_tenant_inheritance']) ? (bool) $data['allow_tenant_inheritance'] : null,
             isset($data['allowed_algorithms']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_algorithms'])) : null,
             isset($data['allowed_issuer_tenants']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['allowed_issuer_tenants'])) : null,
-            isset($data['apple_key_id']) ? (string) $data['apple_key_id'] : null,
-            isset($data['apple_team_id']) ? (string) $data['apple_team_id'] : null,
+            array_key_exists('apple_key_id', $data) ? ($data['apple_key_id'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['apple_key_id']) : null,
+            array_key_exists('apple_team_id', $data) ? ($data['apple_team_id'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['apple_team_id']) : null,
             isset($data['attribute_map']) ? $data['attribute_map'] : null,
-            isset($data['authorization_endpoint']) ? (string) $data['authorization_endpoint'] : null,
-            isset($data['button_icon']) ? (string) $data['button_icon'] : null,
+            array_key_exists('authorization_endpoint', $data) ? ($data['authorization_endpoint'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['authorization_endpoint']) : null,
+            array_key_exists('button_icon', $data) ? ($data['button_icon'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['button_icon']) : null,
             isset($data['client_id']) ? (string) $data['client_id'] : null,
             isset($data['client_secret']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['client_secret']) : null,
             isset($data['enabled']) ? (bool) $data['enabled'] : null,
-            isset($data['idp_signing_cert_pem']) ? (string) $data['idp_signing_cert_pem'] : null,
-            isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
+            array_key_exists('idp_metadata_signing_cert_pem', $data) ? ($data['idp_metadata_signing_cert_pem'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['idp_metadata_signing_cert_pem']) : null,
+            array_key_exists('idp_signing_cert_pem', $data) ? ($data['idp_signing_cert_pem'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['idp_signing_cert_pem']) : null,
+            array_key_exists('metadata_url', $data) ? ($data['metadata_url'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['metadata_url']) : null,
             isset($data['provider']) ? (string) $data['provider'] : null,
-            isset($data['provider_slug']) ? (string) $data['provider_slug'] : null,
+            array_key_exists('provider_slug', $data) ? ($data['provider_slug'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['provider_slug']) : null,
             isset($data['require_pkce']) ? (bool) $data['require_pkce'] : null,
             isset($data['scopes']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scopes'])) : null,
-            isset($data['token_endpoint']) ? (string) $data['token_endpoint'] : null,
+            array_key_exists('token_endpoint', $data) ? ($data['token_endpoint'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['token_endpoint']) : null,
             isset($data['token_exchange']) ? TokenExchangeTrustRequest::fromArray((array) $data['token_exchange']) : null,
-            isset($data['userinfo_endpoint']) ? (string) $data['userinfo_endpoint'] : null,
+            array_key_exists('userinfo_endpoint', $data) ? ($data['userinfo_endpoint'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['userinfo_endpoint']) : null,
         );
     }
 
@@ -117,6 +152,9 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
+        if ($this->allowSha1Signatures !== null) {
+            $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
+        }
         if ($this->allowTenantInheritance !== null) {
             $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
         }
@@ -127,19 +165,19 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
             $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
         }
         if ($this->appleKeyId !== null) {
-            $out['apple_key_id'] = $this->appleKeyId;
+            $out['apple_key_id'] = $this->appleKeyId instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->appleKeyId;
         }
         if ($this->appleTeamId !== null) {
-            $out['apple_team_id'] = $this->appleTeamId;
+            $out['apple_team_id'] = $this->appleTeamId instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->appleTeamId;
         }
         if ($this->attributeMap !== null) {
             $out['attribute_map'] = $this->attributeMap;
         }
         if ($this->authorizationEndpoint !== null) {
-            $out['authorization_endpoint'] = $this->authorizationEndpoint;
+            $out['authorization_endpoint'] = $this->authorizationEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->authorizationEndpoint;
         }
         if ($this->buttonIcon !== null) {
-            $out['button_icon'] = $this->buttonIcon;
+            $out['button_icon'] = $this->buttonIcon instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->buttonIcon;
         }
         if ($this->clientId !== null) {
             $out['client_id'] = $this->clientId;
@@ -150,17 +188,20 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
         if ($this->enabled !== null) {
             $out['enabled'] = $this->enabled;
         }
+        if ($this->idpMetadataSigningCertPem !== null) {
+            $out['idp_metadata_signing_cert_pem'] = $this->idpMetadataSigningCertPem instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->idpMetadataSigningCertPem;
+        }
         if ($this->idpSigningCertPem !== null) {
-            $out['idp_signing_cert_pem'] = $this->idpSigningCertPem;
+            $out['idp_signing_cert_pem'] = $this->idpSigningCertPem instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->idpSigningCertPem;
         }
         if ($this->metadataUrl !== null) {
-            $out['metadata_url'] = $this->metadataUrl;
+            $out['metadata_url'] = $this->metadataUrl instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->metadataUrl;
         }
         if ($this->provider !== null) {
             $out['provider'] = $this->provider;
         }
         if ($this->providerSlug !== null) {
-            $out['provider_slug'] = $this->providerSlug;
+            $out['provider_slug'] = $this->providerSlug instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->providerSlug;
         }
         if ($this->requirePkce !== null) {
             $out['require_pkce'] = $this->requirePkce;
@@ -169,13 +210,13 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
             $out['scopes'] = $this->scopes;
         }
         if ($this->tokenEndpoint !== null) {
-            $out['token_endpoint'] = $this->tokenEndpoint;
+            $out['token_endpoint'] = $this->tokenEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->tokenEndpoint;
         }
         if ($this->tokenExchange !== null) {
             $out['token_exchange'] = $this->tokenExchange->toArray();
         }
         if ($this->userinfoEndpoint !== null) {
-            $out['userinfo_endpoint'] = $this->userinfoEndpoint;
+            $out['userinfo_endpoint'] = $this->userinfoEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->userinfoEndpoint;
         }
 
         return $out;

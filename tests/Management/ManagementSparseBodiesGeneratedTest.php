@@ -137,16 +137,16 @@ final class ManagementSparseBodiesGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * `UpdateFederationConfigRequest`: naming only `allow_tenant_inheritance` sends only
-     * `allow_tenant_inheritance`.
+     * `UpdateFederationConfigRequest`: naming only `allow_sha1_signatures` sends only
+     * `allow_sha1_signatures`.
      */
     public function testUpdateFederationConfigRequestOmitsWhatYouDidNotName(): void
     {
-        $body = new Models\UpdateFederationConfigRequest(allowTenantInheritance: true);
+        $body = new Models\UpdateFederationConfigRequest(allowSha1Signatures: true);
 
         $rendered = $body->toArray();
 
-        self::assertSame(['allow_tenant_inheritance'], array_keys($rendered));
+        self::assertSame(['allow_sha1_signatures'], array_keys($rendered));
     }
 
     /** `UpdateNotificationRuleRequest`: naming only `description` sends only `description`. */
