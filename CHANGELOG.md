@@ -7,139 +7,157 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Contract 1.60 — phase 1 (W3)
+`axiam/axiam-sdk` 1.0.0 is the first stable release of the PHP SDK: from here it follows
+semantic versioning, and a breaking change to its public API comes only with a new major
+version. It talks to AXIAM over REST (Guzzle, the always-available transport), over gRPC for
+low-latency authorization and token checks when `ext-grpc` is loaded, and over AMQP
+(`php-amqplib`) for HMAC-verified messages and the §22 reactor runtime. It conforms to
+**contract 1.60** — `CONTRACT.md` §1 – §13 and §12.7, §14, §15, §17, §19, §20, §21, §22, §23,
+§24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33, with §32.7 and **§33.2 signed
+(ES256, EdDSA)**, and the §34 clarifications — with `CONTRACT.md`, `openapi.json`,
+`management-registry.json` and `proto/` vendored byte for byte from `ilpanich/axiam` `3ed6547`
+(190 management operations across 28 namespaces). The README states the claim, and a test now
+ties it to the vendored contract's version.
 
-`CONTRACT.md` re-vendored byte-for-byte from `ilpanich/axiam` (contract 1.60). `openapi.json`,
-`management-registry.json` and `proto/` are re-vendored, and the README's conformance statement
-moved to 1.60, in the phase-2 change.
+### Breaking changes
 
-#### Fixed
+Since `v1.0.0-beta17`:
 
-- **A7 (R-2, §32.7, §34.2 P2) — a `replayed` SET is acknowledged, not reported.**
-  `SsfReceiver::poll()`'s docblock, `RefusedSet`, `SetFailureReason::Replayed` and the README's
-  poll example put a `replayed` refusal in the next call's `ack`, never in `setErrs`: this
-  receiver accepted that SET earlier, and an error report for an event the caller took
-  misinforms the transmitter. Behaviour is unchanged; only the advice was wrong.
-
-#### Verified (no code change)
-
-- **B1 (§32.7 step 9, §34.2 P4) — a replay store that cannot answer gives no verdict.**
-  `ReplayStore::checkAndRecord()` is already fallible (it throws) and the default
-  `InMemoryReplayStore` cannot fail, so no interface changes and nothing here is breaking.
-  New tests (§32.8 test 6, the store-failure case): `verifySet()` raises the store's own failure
-  — never a `SetVerificationError`, never `replayed` — and `poll()` returns that SET in neither
-  `events` nor `refused`, does not record its `jti` and acknowledges nothing.
-
-#### Documentation
-
-- **§15.2 rule 9 — the actor token is the exchanging client's own.** `tokenExchange()`'s
-  docblocks and the README show `$actorToken` obtained from the same client's
-  `client_credentials` grant, and say that any other actor token is answered `400
-  invalid_request` and surfaces unchanged. New §15.6 test: such an answer surfaces with exactly
-  one request and no rewriting.
-- **§8 — a broker confirm is not evidence that AXIAM saw a message.** README sentence added to
-  the AMQP runtime section: a minimal-profile server (`AXIAM__AMQP__ENABLED=false`) reads no
-  AMQP queue; use REST or gRPC against it.
-
-### Contract 1.59 — follow-up F-59-06 (ilpanich/axiam#581)
-
-`CONTRACT.md` re-vendored from `ilpanich/axiam` `fe369eb` (contract 1.59, §34: the cross-SDK
-review of the 1.53 – 1.58 ports); `openapi.json`, `management-registry.json` and `proto/` were
-already identical. The README's conformance statement now names **contract 1.59**: §1–§13 and
-§12.7, §14, §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31,
-§32 and §33, with §32.7 and **§33.2 signed (ES256, EdDSA)** (§34.2 P12.7).
-
-#### Fixed
-
-- **R-1 (§32.7 step 9, P1) — `poll` no longer loses a batch's events.** A JWKS fetch failure or
-  a replay store that cannot answer on a later SET aborted `poll()` after the earlier SETs had
-  been recorded, so they were never returned and read `replayed` when re-offered.
-- **R-20 (§29.5, §31.2, P12.1) — an unknown SCIM `auth`/`scope` arm keeps its `type` and
-  nothing else**, instead of the server's whole object minus a list of secret-looking names.
-- **R-21 (§31.2, §7 rule 1, P12.2) — `json_encode()` of a `ScimTargetResponse` (or a
-  `ScimTargetInput`) carrying an unknown arm no longer throws**: the arm renders its `type`
-  for a log line, and only `toArray()` — the request path — refuses it, locally, before
-  anything is sent.
-- **R-23 (§28.12.2 rule 4, P12.4) — `updateClientRegistration()` sends only the lists the read
-  carried.** `redirect_uris`, `grant_types` and `response_types` were sent as `[]` when the
-  read lacked them, and a non-string list item was dropped on decode; a list of an
-  unexpected shape is now kept as read and sent back unchanged.
-- **R-28 (§27.4 rule 5, §29.2) — the generated documentation no longer contradicts the types**:
-  "left unchanged" is said only of the registry's sparse update bodies (not of
-  `ParseSamlSpMetadata` or a nested member object), a replacement with optional members is
-  no longer said to require every field, and no operation repeats its request line. Fixed in
-  `scripts/gen_management.py`.
-- **R-31 (§21.3.1) — vector A is pinned as the vendored `CONTRACT.md` carries it**, its
-  `tenant_id` queries included, instead of by a hand fixture without them.
-- **R-32 (§33.2, Conformance Statement, P12.7) — the claim reads "§33.2 signed (ES256,
-  EdDSA)"**: `PS256` is refused locally, so a bare "§33.2 signed" overclaimed.
-- **R-33 (§32.7) — `ext-sodium` is declared and the receiver guards it.** `composer.json`
-  requires `ext-sodium`; on a build without it `SsfReceiver::verifySet()` raises a typed
-  `AxiamException` (no verdict on the SET) instead of PHP's "Call to undefined function".
-- **§33.8 test 8 as amended (P8) — a `5xx` on `ciba_poll` is transient whatever its body.**
-  The server's own `500 {"error":"server_error"}` was an `OAuthProtocolError`, not retried and
-  terminal for `cibaAwait`; it is now a `NetworkError`, retried under §16 and outlived by the
-  loop.
-
-#### Choices the contract leaves open
-
-- **P1:** the second form — what was judged is returned; the SET a non-verdict failure hit and
-  every later one in the batch are left unjudged, unrecorded and listed in the new
-  `SsfPollResult::$unjudged` (with the failure in `$unjudgedCause`). When no SET of the batch
-  had been accepted, nothing was recorded and the failure is raised instead.
-- **P4:** the store reports a failure by throwing — the documentation route is not needed, and
-  `ReplayStore`'s docblock now says a store that cannot answer MUST throw, never answer "not
-  seen". The default in-memory store is unbounded in count, and the README says so.
-- **P10:** `cibaAwait`'s deadline is anchored at the instant the initiate response was received,
-  read from the injected `CibaClock`, which also supplies the waits (unchanged).
-
-#### Changed (compatibility)
-
-- `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` no longer have `$raw`; their
-  `jsonSerialize()` returns `{"type": <tag>}` rather than throwing.
-- `ClientRegistration::$redirectUris`, `$grantTypes` and `$responseTypes` are `?array`:
-  `null` when the response did not carry the member.
-- `composer.json` requires `ext-sodium` (compiled into PHP by default).
-- `cibaPoll()` raises `NetworkError` for a `5xx`, with or without an `error` member.
+- **`ext-sodium` is required.** `composer.json` declares it, because the §32.7 SSF receiver
+  verifies Ed25519 signatures with it. It is compiled into PHP by default; a build without it
+  must enable it before `composer install`.
+- **`UpdateFederationConfigRequest`'s ten clearable members are `string|JsonNull|null`**
+  (§27.15 note 8): `metadataUrl`, `idpSigningCertPem`, `idpMetadataSigningCertPem`,
+  `providerSlug`, `authorizationEndpoint`, `tokenEndpoint`, `userinfoEndpoint`, `appleTeamId`,
+  `appleKeyId` and `buttonIcon`. `null` still leaves the member out — the stored value is kept
+  — and `JsonNull::Null` now sends an explicit `null`, which clears it; `fromArray()` decodes a
+  JSON `null` there to `JsonNull::Null`. *Migration:* code that reads these properties handles
+  the `JsonNull` case; to clear one, pass `JsonNull::Null` (there was no way to before).
+- **Federation and notification-rule models gained members, and positional arguments moved.**
+  `FederationConfigResponse` has a new required `allowSha1Signatures` (its first parameter),
+  `CreateFederationConfigRequest` and `UpdateFederationConfigRequest` a new optional
+  `allowSha1Signatures` and `idpMetadataSigningCertPem`, and `NotificationRuleResponse` a new
+  required `windowMinutes`. *Migration:* construct generated models with named arguments —
+  their parameters follow the schema's member order and move whenever the server adds one.
+- **`NotificationRuleResponse` requires `window_minutes`**, which every AXIAM 1.0.0 response
+  carries; decoding a notification rule from a server before 1.0.0 raises. *Migration:* run
+  the 1.0.0 server with the 1.0.0 SDK.
 
 ### Added
 
-- **Contract 1.58.** `CONTRACT.md`, `openapi.json` and `management-registry.json` re-vendored
-  (190 operations across 28 namespaces); the §27 surface regenerated. The README's
-  conformance statement now names contract 1.58: §28.12, §29, §30, §31, §32 and §33, with
-  §32.7 and §33.2 signed (`EdDSA`, `ES256`).
+- **Contract 1.60 (§27.15, §31).** `ScimTargetInput::$expectedUpdatedAt` — the `updated_at`
+  of the target as read, sent on `update` exactly as given (never re-formatted) and absent when
+  unset; the server answers `409` (`ConflictError`) once another write has landed.
+  `windowMinutes` on `CreateNotificationRuleRequest`, `UpdateNotificationRuleRequest` and
+  `NotificationRuleResponse` (1 – 1440, the server's 15 when omitted), passed through and never
+  clamped. `allowSha1Signatures` and `idpMetadataSigningCertPem` on the three federation
+  configuration models, sent only when set; a response without `allow_sha1_signatures` decodes
+  as `false`.
+- **§19.1 `ssf_unjudged` — `Core\SsfUnjudgedEvent`.** A `poll()` that returns leaving SETs
+  unjudged reports `ssf.poll`, how many, and the category (`key_fetch` or `replay_store`) to
+  the telemetry hook — never a `jti` or a SET — so an outage that raises nothing is visible.
+- **§21.5 discovery.** `OidcConfiguration` decodes `revocation_endpoint_auth_methods_supported`,
+  `introspection_endpoint_auth_methods_supported` and the two `*_auth_signing_alg_values_supported`
+  members of those endpoints; each is optional, so an older document and vector A still decode.
 - **§28.12 — RFC 7592 client configuration.** `readClientRegistration`,
-  `updateClientRegistration`, `deleteClientRegistration` on `AxiamClient` and
-  `Oidc\ClientRegistration` (unknown members kept in `$extra`; the token and the client
-  secret `Sensitive`). The URI must be at the configured AXIAM origin (local
-  `ValidationError` otherwise); the requests carry only the registration bearer, on a new
-  session-free transport (no cookies, no session token, no redirects); update and delete are
-  never retried; a `401` never enters §9.
-- **§29 / §30 / §31 / §32 — the `saml`, `directory`, `scim_targets` and `ssf` namespaces**,
-  with the contract's call-site rules in their docblocks (generator `CALL_SITE_NOTES`), the
-  explicit-null marker `Management\JsonNull` (`UpdateDirectoryConfig::$groupBaseDn` /
-  `$groupFilter`, `SamlIdpInfo`'s credential ids), `ParseSamlSpMetadata::fromUrl()` /
-  `::fromXml()` with both-or-neither refused locally (`Management\ManagementChecks`), and
-  `Management\ReadModifyWrite` for the four replacement updates. `ValidationError` gained
-  `serverMessage`, the server's `message` member.
+  `updateClientRegistration` and `deleteClientRegistration` on `AxiamClient`, and
+  `Oidc\ClientRegistration` (unknown members kept in `$extra`; the registration token and the
+  client secret `Sensitive`). The URI must be at the configured AXIAM origin (a local
+  `ValidationError` otherwise); the requests carry only the registration bearer, on a
+  session-free transport with no cookies and no redirects; update and delete are never
+  retried, and a `401` never enters the §9 refresh. The replacement sends only the lists the
+  read carried — `redirectUris`, `grantTypes` and `responseTypes` are `null` when the response
+  lacked them — and a list of an unexpected shape goes back as read.
+- **§29 – §32 — the `saml`, `directory`, `scim_targets` and `ssf` management namespaces**, with
+  the contract's call-site rules in their docblocks; `Management\JsonNull`, the explicit-null
+  marker (`UpdateDirectoryConfig::$groupBaseDn` / `$groupFilter`, `SamlIdpInfo`'s credential
+  ids); `ParseSamlSpMetadata::fromUrl()` / `::fromXml()`, both-or-neither refused locally; and
+  `Management\ReadModifyWrite` for the four replacement updates. An unknown SCIM `auth` or
+  `scope` arm (`ScimTargetAuthUnknown`, `ScimTargetScopeUnknown`) decodes, keeps its `type`
+  and nothing else, renders `{"type": …}` for a log line, and is refused locally on the request
+  path. `ValidationError` gained `serverMessage`, the server's `message`.
 - **§32.7 — the SSF receiver helper**, `$client->ssfReceiver(...)` → `Ssf\SsfReceiver`
-  (`verifySet`, `poll`), with `SetVerificationError` / `SetFailureReason`, `SetErr`,
-  `SsfPollOptions`, a pluggable `ReplayStore` (in-memory default, seven-day window floor) and
-  `SsfEventTypes`. A forced JWKS refetch on an unknown `kid` happens at most once per 60 s.
-- **§33 — CIBA.** `cibaInitiate`, `cibaPoll`, `cibaAwait` (injectable `CibaClock`) and
-  `cibaHandlePing` on `AxiamClient`; `CibaInitiateRequest`, `CibaInitiateResponse`,
-  `CibaDeliveryMode`; `OAuthProtocolError::isAccessDenied()` / `isExpiredToken()`. The §33.2
-  signed form via `CibaRequestSigner::fromPem()` for `EdDSA` and `ES256`.
+  (`verifySet()`, `poll()`), with `SetVerificationError` / `SetFailureReason`, `SetErr`,
+  `SsfPollOptions`, `SsfPollResult` (`events`, `refused`, and the `unjudged` `jti`s with their
+  `unjudgedCause`), a pluggable `ReplayStore` (in-memory by default, seven-day window floor)
+  and `SsfEventTypes`. `poll()` never keeps a `jti` it does not return (§34.2 P1): what was
+  judged is returned, a SET a key fetch or a store failure left unjudged is unrecorded and
+  listed, and the failure is raised instead only when no SET of the batch had been accepted.
+- **§33 — CIBA.** `cibaInitiate`, `cibaPoll`, `cibaAwait` (an injectable `CibaClock`, the
+  deadline anchored at the instant the initiate response arrived) and `cibaHandlePing` on
+  `AxiamClient`; `CibaInitiateRequest`, `CibaInitiateResponse`, `CibaDeliveryMode`;
+  `OAuthProtocolError::isAccessDenied()` / `isExpiredToken()`; the §33.2 signed form through
+  `CibaRequestSigner::fromPem()` for `EdDSA` and `ES256`. A `5xx` on `cibaPoll()` is a
+  `NetworkError` whatever its body (`500 {"error":"server_error"}` included), retried under §16
+  and outlived by `cibaAwait`.
 - **§21.3.1 (amended in 1.58)** — `MtlsEndpointAliases::$backchannel_authentication_endpoint`,
   the seventh alias, and the four CIBA members on `OidcConfiguration`.
 
 ### Changed
 
-- `SamlIdpInfo::$activeCredentialId` / `$nextCredentialId` and
-  `UpdateDirectoryConfig::$groupBaseDn` / `$groupFilter` are typed `string|JsonNull|null`.
-- The open-union `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` arms drop any member named
-  like a secret from `$raw` (superseded by contract 1.59: the arms keep the `type` alone, see
-  above).
+- **`ReadModifyWrite::scimTarget()` sends the version it read.** Its body carries the read's
+  `updated_at` as `expected_updated_at` (§31.3 rule 4), so an edit another administrator made
+  since answers `409` instead of being overwritten; reload and retry. Pass
+  `expected_updated_at` in `$changes` to send another value.
+- **A replay store that cannot answer surfaces as `NetworkError`** (§2, §34.2 P3, C-1), with
+  the store's exception chained as its cause and no reason code — never `replayed`, never a
+  verdict; an SDK error the store raises passes through unchanged. `ReplayStore`'s interface is
+  unchanged (it already reports a failure by throwing).
+- **After a store failure in a `poll()` batch, the store is asked nothing more** (§34.2 P1): a
+  later SET is still verified and refused if it fails, and is otherwise left unjudged.
+
+### Fixed
+
+- **An empty sparse update is sent as `{}`.** A management update that names no member (for
+  example `new UpdateNotificationRuleRequest()`) went out as the JSON array `[]`.
+- **§34.2 P6 — a failed JWKS fetch counts toward the once-a-minute limit.** A failed fill of
+  the empty key cache, or a failed refresh of an expired one, was retried on every SET; for a
+  minute after a failed fetch no SET now triggers another, each getting a `NetworkError` (no
+  verdict). A successful fill is not counted, so an unknown `kid` right after it is refetched
+  once. The cache expires 300 s after the fetch that filled it, within the contract's ten
+  minutes.
+- **R-1 (§32.7 step 9, P1)** — a JWKS failure or an unanswering store on a later SET no longer
+  makes `poll()` lose the events it had already recorded.
+- **R-28 (§27.4 rule 5, §29.2)** — the generated documentation no longer contradicts the types:
+  "left unchanged" is said only of the sparse update bodies, a replacement with optional
+  members is not said to require every field, and no operation repeats its request line.
+- **R-31 (§21.3.1)** — vector A is pinned as the vendored `CONTRACT.md` carries it, its
+  `tenant_id` queries included.
+- **R-32 (§33.2, P12.7)** — the conformance claim reads "§33.2 signed (ES256, EdDSA)": `PS256`
+  is refused locally, so a bare "§33.2 signed" overclaimed.
+- **R-33 (§32.7)** — on a PHP build without `ext-sodium`, `SsfReceiver::verifySet()` raises a
+  typed `AxiamException` (no verdict on the SET) instead of "Call to undefined function".
+
+### Security
+
+- **The SSF receiver pins `alg` to `EdDSA` before any key is looked up** and takes keys only
+  from the configured JWKS, never a `jwk` or `x5c` header; an unknown `kid` costs one forced
+  refetch at most once a minute, and a JWKS outage no longer turns every SET into a fetch
+  (P6 above).
+- **The replay store fails closed** (§32.7 step 9, §34.2 P4): a store that cannot answer
+  accepts nothing and never reads as "not seen"; the default in-memory store is unbounded in
+  count, its entries expiring after the window — behind PHP-FPM, use a shared store.
+- **An unknown SCIM union arm keeps nothing but its `type`** (R-20, §31.2, P12.1), instead of
+  the server's whole object minus a list of secret-looking names; `jsonSerialize()` of a
+  response carrying one no longer throws (R-21).
+- **The RFC 7592 operations carry only the registration bearer** — no session cookie, no
+  session token — and follow no redirect.
+
+### Documentation
+
+- **A7 (R-2, §32.7, §34.2 P2) — a `replayed` SET is acknowledged, not reported.** The
+  `SsfReceiver::poll()` docblock, `RefusedSet`, `SetFailureReason::Replayed` and the README's
+  poll example put a `replayed` refusal in the next call's `ack`, never in `setErrs`.
+- **§15.2 rule 9 — the actor token is the exchanging client's own.** `tokenExchange()` and the
+  README obtain `$actorToken` from the same client's `client_credentials` grant; any other is
+  answered `400 invalid_request`, surfaced unchanged after exactly one request.
+- **§8 — a broker confirm is not evidence that AXIAM saw a message.** A minimal-profile server
+  (`AXIAM__AMQP__ENABLED=false`) reads no AMQP queue; use REST or gRPC against it.
+- **§12.1 — a refresh's `scope` is authoritative.** `OidcTokenSet::$scope` is the refresh
+  response's; it may be narrower than the grant's (and carry no ID token once `openid` is
+  gone). Verified by a new test; no code change.
+- The README states conformance at contract 1.60 with a table of what 1.60 changed, and drops
+  the "not yet published" note on the Packagist package; the install snippets name `^1.0.0`.
 
 ### Not shipped
 

@@ -54,6 +54,18 @@ final class ConformanceStatementTest extends TestCase
         self::assertStringContainsString('AXIAM__AMQP__ENABLED=false', $flat);
     }
 
+    /**
+     * The README claims the contract version the vendored `CONTRACT.md` states (§34.4 C-14: the
+     * claim moves with the re-vendored text, never ahead of it or behind it).
+     */
+    public function testTheClaimNamesTheVendoredContractVersion(): void
+    {
+        $contract = file_get_contents(\dirname(__DIR__) . '/CONTRACT.md');
+        self::assertIsString($contract);
+        self::assertSame(1, preg_match('/^\*Contract version: (\d+\.\d+)\b/m', $contract, $m), 'CONTRACT.md states its version');
+        self::assertStringContainsString('This SDK conforms to **contract ' . $m[1] . '**', self::statement());
+    }
+
     public function testTheSignedFormClaimNamesTheAlgorithmSubset(): void
     {
         $statement = self::statement();
