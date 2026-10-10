@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-10
+
 `axiam/axiam-sdk` 1.0.0 is the first stable release of the PHP SDK: from here it follows
 semantic versioning, and a breaking change to its public API comes only with a new major
 version. It talks to AXIAM over REST (Guzzle, the always-available transport), over gRPC for
@@ -93,6 +95,20 @@ Since `v1.0.0-beta17`:
 - **§21.3.1 (amended in 1.58)** — `MtlsEndpointAliases::$backchannel_authentication_endpoint`,
   the seventh alias, and the four CIBA members on `OidcConfiguration`.
 
+- The four revocation/introspection discovery members, optional; refresh scope pinned
+
+- expected_updated_at, window_minutes and the federation null rule tested; empty bodies sent as {}
+
+- Contract 1.60 phase 1 - replayed SETs are acknowledged, store failure proven, actor token and AMQP docs
+
+- CIBA initiation, polling and ping helpers, signed form (CONTRACT §33, §21.3.1)
+
+- SSF stream management tests and the receiver helper (CONTRACT §32, §32.7)
+
+- Directory namespace semantics and generator infra (CONTRACT §30)
+
+- RFC 7592 client configuration operations (CONTRACT §28.12)
+
 ### Changed
 
 - **`ReadModifyWrite::scimTarget()` sends the version it read.** Its body carries the read's
@@ -105,6 +121,36 @@ Since `v1.0.0-beta17`:
   unchanged (it already reports a failure by throwing).
 - **After a store failure in a `poll()` batch, the store is asked nothing more** (§34.2 P1): a
   later SET is still verified and refused if it fails, and is otherwise left unjudged.
+
+- Main is the 1.x line
+
+- re-vendor at axiam 8df0e11 (the R1W1 tls_client_auth note, the spec digest)
+
+- README at contract 1.60; the 1.0.0 changelog
+
+- re-vendor contract 1.60, the spec and the registry (axiam 3ed6547)
+
+- re-vendor CONTRACT.md at contract 1.60
+
+- Contract 1.59 conformance statement and changelog (F-59-06)
+
+- Claim '§33.2 signed (ES256, EdDSA)', the subset this SDK signs (R-32, PHP-02)
+
+- Pin §21.3.1 vector A as the vendored contract carries it, tenant_id queries included (R-31, PHP-08)
+
+- The generated docs stop contradicting the types (R-28, PHP-06)
+
+- re-vendor CONTRACT.md at contract 1.59 (axiam fe369eb)
+
+- Contract 1.58 conformance statement, usage, changelog
+
+- scim_targets namespace required tests (CONTRACT §31)
+
+- Saml namespace required tests (CONTRACT §29)
+
+- re-vendor contract 1.58 artifacts and regenerate §27 surface
+
+- re-vendor openapi.json + management-registry.json after utoipa 6
 
 ### Fixed
 
@@ -127,6 +173,20 @@ Since `v1.0.0-beta17`:
   is refused locally, so a bare "§33.2 signed" overclaimed.
 - **R-33 (§32.7)** — on a PHP build without `ext-sodium`, `SsfReceiver::verifySet()` raises a
   typed `AxiamException` (no verdict on the SET) instead of "Call to undefined function".
+
+- Failed key fetches count toward the minute, store failures are NetworkError, ssf_unjudged
+
+- A 5xx on ciba_poll is transient whatever its body (§33.8 t8 amended, §34.2 P8)
+
+- The RFC 7592 update sends only the lists the read carried, mistyped ones as read (R-23, PHP-07)
+
+- An unknown auth/scope arm keeps its discriminator alone and renders for a log line (R-20, R-21, PHP-03)
+
+- Guard the receiver's sodium use and declare ext-sodium (R-33, PHP-04)
+
+- Poll returns or leaves unrecorded every SET of a batch a non-verdict failure interrupts (R-1, PHP-01)
+
+- Keep the §16 status predicates PHPStan-clean (CONTRACT §28.12, §32.7)
 
 ### Security
 
