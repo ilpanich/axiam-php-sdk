@@ -19,8 +19,10 @@ interface ReplayStore
      *
      * **Fail closed** (CONTRACT.md §32.7 step 9, §34.2 P4): a store that cannot answer — its
      * backend unreachable, a timeout — MUST throw, and never return `true`. The exception is
-     * no verdict on the SET: `verifySet()` raises it, and `poll()` leaves that SET and the rest
-     * of its batch unjudged and unrecorded (§34.2 P1, P3).
+     * no verdict on the SET: `verifySet()` raises it as a {@see \Axiam\Sdk\Core\NetworkError}
+     * with the exception chained as its cause (an SDK error thrown here passes through
+     * unchanged; CONTRACT.md §2), and `poll()` asks the store nothing more for that batch and
+     * leaves that SET unjudged and unrecorded (§34.2 P1, P3).
      *
      * @throws \Throwable when the store cannot answer.
      */
