@@ -310,11 +310,17 @@ final class ManagementTransport
      * a serializer default to start shipping the literal `[SENSITIVE]` to the server as a
      * password, and the one place secrets are revealed is a named method you can grep for.
      *
+     * Every §27 request body is a JSON object, and PHP's empty array is ambiguous: a sparse
+     * update that names nothing (`new UpdateNotificationRuleRequest()`) would otherwise go out
+     * as `[]`, which is not an object and is not "change nothing". It is sent as `{}`.
+     *
      * @param array<string,mixed> $body
      */
     private static function encodeBody(string $operation, array $body): string
     {
-        $json = json_encode(self::reveal($body), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $json = $body === []
+            ? '{}'
+            : json_encode(self::reveal($body), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if ($json === false) {
             throw NetworkError::fromMessage(sprintf(
                 '%s: request body could not be encoded as JSON (%s)',

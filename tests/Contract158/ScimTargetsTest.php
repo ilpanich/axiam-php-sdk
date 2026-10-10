@@ -185,6 +185,21 @@ final class ScimTargetsTest extends ManagementRouteTestCase
         $group = self::uuid();
         self::assertEquals(['type' => 'groups', 'group_ids' => [$group]], (new Models\ScimTargetScopeGroups([$group]))->toArray());
 
+        // Contract 1.60: `expected_updated_at` is sent exactly as given — the string, not
+        // re-formatted (fractional seconds and an offset survive) — and is absent when unset.
+        self::assertArrayNotHasKey('expected_updated_at', $sent[0], 'unset: no key');
+        $read = '2026-10-05T08:30:00.123456+02:00';
+        $client->scimTargets()->update($id, new Models\ScimTargetInput(
+            auth: new Models\ScimTargetAuthBearer(),
+            baseUrl: 'https://idp.example/scim/v2',
+            name: 'Downstream',
+            scope: new Models\ScimTargetScopeAllUsers(),
+            expectedUpdatedAt: $read,
+        ));
+        $sent = $this->bodies('PUT', self::TARGETS . '/' . $id);
+        self::assertIsArray($sent[2]);
+        self::assertSame($read, $sent[2]['expected_updated_at'] ?? null, 'passed through unchanged');
+
         $this->expectException(\ArgumentCountError::class);
         /** @phpstan-ignore-next-line deliberately missing arguments */
         new Models\ScimTargetInput(auth: new Models\ScimTargetAuthBearer(), baseUrl: 'https://x');
@@ -312,11 +327,37 @@ final class ScimTargetsTest extends ManagementRouteTestCase
         self::assertSame('', (string) $sent[0]->getBody(), 'reconcile sends no body');
     }
 
+    /**
+     * §31.3 rule 4 (contract 1.60): a replacement carrying the version the caller read is
+     * refused `409` once another write has landed; the SDK surfaces it as `ConflictError`
+     * after exactly one request and never retries it on its own (§31.7).
+     */
+    public function testAnOvertakenExpectedUpdatedAtSurfacesAsConflict(): void
+    {
+        $client = $this->client(retry: true);
+        $id = self::uuid();
+        $this->routes->on('PUT', self::TARGETS . '/' . $id, RoutedHandler::json(409, ['error' => 'conflict', 'message' => 'the SCIM target changed since it was read']));
+        $read = Models\ScimTargetResponse::fromArray(self::target(['id' => $id, 'updated_at' => '2026-10-05T00:00:00.5Z']));
+
+        try {
+            $client->scimTargets()->update($id, ReadModifyWrite::scimTarget($read, ['name' => 'Renamed']));
+            self::fail('a 409 must surface');
+        } catch (ConflictError $e) {
+            self::assertStringContainsString('409', $e->getMessage());
+        }
+        $sent = $this->bodies('PUT', self::TARGETS . '/' . $id);
+        self::assertCount(1, $sent, 'one request, no retry');
+        self::assertIsArray($sent[0]);
+        self::assertSame('2026-10-05T00:00:00.5Z', $sent[0]['expected_updated_at'] ?? null, 'the read version, as read');
+        self::assertSame('Renamed', $sent[0]['name']);
+    }
+
     public function testAReadConvertsIntoTheReplacementBodyWithoutACredential(): void
     {
         $target = Models\ScimTargetResponse::fromArray(self::target());
         $body = ReadModifyWrite::scimTarget($target);
         self::assertNull($body->credential, 'absent keeps the stored credential');
+        self::assertSame($target->updatedAt, $body->expectedUpdatedAt, 'the read version (§31.3 rule 4)');
         self::assertSame($target->baseUrl, $body->baseUrl);
         self::assertTrue($body->enabled);
 

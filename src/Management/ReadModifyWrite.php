@@ -94,6 +94,10 @@ final class ReadModifyWrite
     /**
      * `scim_targets.update`'s body from a `get()` result. `credential` is left absent:
      * absent keeps the stored one, unless the write moves its URL (§31.3 rule 2).
+     * `expected_updated_at` is the read's `updated_at`, so the replacement lands only on the
+     * version that was read and an edit made since answers `409` instead of being overwritten
+     * (§31.3 rule 4, contract 1.60); reload and retry. Pass `expected_updated_at` in `$changes`
+     * to send another value.
      *
      * @param array<string,mixed> $changes Wire members to change, applied over the read.
      */
@@ -106,6 +110,7 @@ final class ReadModifyWrite
             scope: $target->scope,
             deprovision: $target->deprovision,
             enabled: $target->enabled,
+            expectedUpdatedAt: $target->updatedAt,
             pushGroups: $target->pushGroups,
             userNameFrom: $target->userNameFrom,
         );
