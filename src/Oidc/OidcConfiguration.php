@@ -56,6 +56,10 @@ final class OidcConfiguration
      * @param list<string>|null $backchannel_token_delivery_modes_supported The CIBA delivery modes the SERVER offers (AXIAM: `["poll", "ping"]`). A statement about the server, not about any client's registration.
      * @param bool|null $backchannel_user_code_parameter_supported Whether the server accepts a CIBA `user_code` (AXIAM: `false`; this SDK never sends one).
      * @param list<string>|null $backchannel_authentication_request_signing_alg_values_supported The algorithms a signed CIBA request may use (AXIAM: `["PS256", "ES256", "EdDSA"]`).
+     * @param list<string>|null $revocation_endpoint_auth_methods_supported Client-authentication methods the revocation endpoint accepts (RFC 8414 §2; contract 1.60, §21.5). Optional: a server before 1.0.0 omits it. Informational — `revoke` keeps authenticating with the method this client was configured with either way.
+     * @param list<string>|null $introspection_endpoint_auth_methods_supported Client-authentication methods the introspection endpoint accepts (contract 1.60, §21.5): the token endpoint's list without `none`, since introspection refuses a public client. Optional, informational.
+     * @param list<string>|null $revocation_endpoint_auth_signing_alg_values_supported JWS algorithms the revocation endpoint accepts on a client assertion (contract 1.60, §21.5). Optional, informational.
+     * @param list<string>|null $introspection_endpoint_auth_signing_alg_values_supported JWS algorithms the introspection endpoint accepts on a client assertion (contract 1.60, §21.5). Optional, informational.
      * @param list<string>|null $token_endpoint_auth_signing_alg_values_supported JWS algorithms the token endpoint accepts on a `private_key_jwt` client assertion (RFC 8414 §2; AXIAM advertises `["PS256", "ES256", "EdDSA"]` as of contract 1.42). Optional for the same reason as the member above, and informational either way: §12.1 note 3 pins this SDK to `client_secret_post`, so it never signs a client assertion.
      */
     public function __construct(
@@ -85,6 +89,10 @@ final class OidcConfiguration
         public readonly ?array $backchannel_token_delivery_modes_supported = null,
         public readonly ?bool $backchannel_user_code_parameter_supported = null,
         public readonly ?array $backchannel_authentication_request_signing_alg_values_supported = null,
+        public readonly ?array $revocation_endpoint_auth_methods_supported = null,
+        public readonly ?array $introspection_endpoint_auth_methods_supported = null,
+        public readonly ?array $revocation_endpoint_auth_signing_alg_values_supported = null,
+        public readonly ?array $introspection_endpoint_auth_signing_alg_values_supported = null,
     ) {
     }
 
@@ -171,6 +179,13 @@ final class OidcConfiguration
                 ? $wire['backchannel_user_code_parameter_supported']
                 : null,
             backchannel_authentication_request_signing_alg_values_supported: $optionalStringList($wire['backchannel_authentication_request_signing_alg_values_supported'] ?? null),
+            // Contract 1.60 (§21.5, §12.1): the revocation and introspection endpoints'
+            // authentication members. Optional — a server before 1.0.0 omits all four, and a
+            // model that required them would fail against it.
+            revocation_endpoint_auth_methods_supported: $optionalStringList($wire['revocation_endpoint_auth_methods_supported'] ?? null),
+            introspection_endpoint_auth_methods_supported: $optionalStringList($wire['introspection_endpoint_auth_methods_supported'] ?? null),
+            revocation_endpoint_auth_signing_alg_values_supported: $optionalStringList($wire['revocation_endpoint_auth_signing_alg_values_supported'] ?? null),
+            introspection_endpoint_auth_signing_alg_values_supported: $optionalStringList($wire['introspection_endpoint_auth_signing_alg_values_supported'] ?? null),
         );
     }
 }

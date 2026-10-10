@@ -168,6 +168,28 @@ final class OidcTokenOpsTest extends TestCase
     }
 
     /**
+     * §12.1 (contract 1.60): the server intersects a grant's scopes with the client's
+     * registration at every refresh, so a refresh may come back narrower than the grant —
+     * without `openid`, and so without an ID token. The response's `scope` is the token
+     * set's scope; nothing of the original grant's is carried over.
+     */
+    public function testARefreshResponseScopeReplacesTheGrantScope(): void
+    {
+        $client = $this->client([
+            new Response(200, [], (string) json_encode([
+                'access_token' => 'new-access', 'token_type' => 'Bearer', 'expires_in' => 900,
+                'refresh_token' => 'rotated', 'scope' => 'profile',
+            ])),
+        ]);
+
+        // Granted `openid profile email`; the registration has since lost two of them.
+        $tokens = $client->oidcRefresh('the-refresh-token', configuration: $this->configuration());
+
+        self::assertSame('profile', $tokens->scope, 'the response scope, not the grant');
+        self::assertNull($tokens->idToken, 'no openid, no ID token');
+    }
+
+    /**
      * §9/§12.1: `oidcRefresh` shares Session's single guard slot with the cookie-session
      * refresh path. If that slot is already occupied by a DIFFERENT refresh when
      * `oidcRefresh` is called, it must wait for it to settle and retry — never return a
