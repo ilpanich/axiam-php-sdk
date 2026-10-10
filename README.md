@@ -195,6 +195,15 @@ failure: systemd (`Restart=on-failure`), a RoadRunner worker-pool respawn, or a 
 `restart: unless-stopped` policy. A worker with no supervision will simply stop consuming
 messages after the first connection loss and never recover on its own.
 
+**A broker confirm is not evidence that AXIAM saw a message (CONTRACT.md §8, contract 1.60).**
+A publisher confirm, or the broker's `basic.ack` of a publish, means only that the broker
+accepted the message; this SDK never treats it as proof that AXIAM decided a request or
+recorded an event. A server running in the **minimal profile** (`AXIAM__AMQP__ENABLED=false`)
+reads no AMQP queue at all — it consumes neither `axiam.authz.request` nor
+`axiam.audit.events`, whatever a broker holds — so against one use REST or gRPC. `GET /health`
+reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` under
+`unavailable`.
+
 ## Contract conformance
 
 This SDK conforms to **contract 1.59**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
@@ -703,10 +712,30 @@ $exchanged = $client->tokenExchange(
 );
 ```
 
+To **delegate** rather than impersonate, pass an actor token, and make it the exchanging
+client's own `client_credentials` token (§15.2 rule 9, contract 1.60) — the server answers
+any actor token not issued to that client `400 invalid_request` (`actor_token was not issued
+to the exchanging client`):
+
+```php
+// The same client's own client_credentials grant. Do not adopt it as the session, and do not
+// use a console sign-in, another client's token or a service account's: those are refused.
+$actor = $client->loginClientCredentials('orders:read')->accessToken;
+
+$delegated = $client->tokenExchange(
+    subjectToken: $userToken,
+    subjectTokenType: OidcClient::ACCESS_TOKEN_TYPE,
+    actorToken: $actor,
+    scopes: ['orders:read'],
+);
+```
+
 Most of what this method does is refuse to be helpful:
 
 - **No default `$actorToken`.** Passing `null` asks for *impersonation*; the SDK will not
   quietly substitute the client's own session token and turn that into a delegation.
+  You obtain the actor token and pass it; a `invalid_request` for one issued to another client
+  surfaces unchanged — not retried, not rewritten into an impersonation.
 - **No auto-narrowing after `invalid_scope`.** The server refuses rather than silently
   narrowing precisely so the caller finds out here.
 - **No refresh token, ever** — `ExchangedToken` has no such property. Re-run the exchange.
@@ -2025,6 +2054,7 @@ For the relying party that *receives* AXIAM's CAEP and RISC events:
 
 ```php
 use Axiam\Sdk\Ssf\SetErr;
+use Axiam\Sdk\Ssf\SetFailureReason;
 use Axiam\Sdk\Ssf\SetVerificationError;
 use Axiam\Sdk\Ssf\SsfPollOptions;
 
@@ -2048,6 +2078,12 @@ $result = $receiver->poll($streamId, new SsfPollOptions(returnImmediately: true)
 $ack = array_map(static fn ($e) => $e->jti, $result->events);   // after processing them
 $setErrs = [];
 foreach ($result->refused as $refused) {
+    if ($refused->reason === SetFailureReason::Replayed) {
+        // Accepted by this receiver on an earlier poll: acknowledge it, never report it
+        // (§34.2 P2) — an error for an event you took would misinform the transmitter.
+        $ack[] = $refused->jti;
+        continue;
+    }
     $setErrs[$refused->jti] = SetErr::fromReason($refused->reason);
 }
 $receiver->poll($streamId, new SsfPollOptions(ack: $ack, setErrs: $setErrs));
@@ -2058,7 +2094,10 @@ is pinned to `EdDSA` before any key is looked up, and keys come only from the co
 (never a `jwk`/`x5c` header). An unknown `kid` costs **one** forced JWKS refetch, at most once
 a minute. A JWKS fetch failure is a `NetworkError`, not a verdict on the SET. A verified SET
 is **recorded**: re-offered unacknowledged, it reads as `replayed` — so acknowledge what you
-processed. `poll` never keeps a `jti` it does not return (§34.2 P1): when a key fetch fails or
+processed. A `replayed` SET was accepted by this receiver earlier: `poll` returns it in
+`$result->refused`, and you acknowledge it in `ack`, **not** in `setErrs` (§34.2 P2) — the
+transmitter drops the event either way, and an error report would misinform it about an event
+you took. `poll` never keeps a `jti` it does not return (§34.2 P1): when a key fetch fails or
 the replay store cannot answer partway through a batch, the SETs already accepted are returned,
 and that SET and the rest are left **unjudged** — unrecorded, listed in `$result->unjudged`
 with the failure in `$result->unjudgedCause`, and neither acknowledged nor reported in

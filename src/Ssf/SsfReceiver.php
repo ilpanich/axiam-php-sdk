@@ -200,8 +200,13 @@ final class SsfReceiver
      * The body carries exactly the options set — `{}` when none is — so `ack` and `setErrs` go
      * out exactly as given. **Nothing is acknowledged on your behalf**: on the next call,
      * acknowledge the `jti`s you processed and pass each refused one in `setErrs`
-     * ({@see SetErr::fromReason()}). A SET you neither acknowledge nor refuse is re-offered,
-     * and — having been recorded when it verified — then reads as `replayed`.
+     * ({@see SetErr::fromReason()}) — **except a `replayed` one, which you acknowledge in
+     * `ack`** and never report in `setErrs` (CONTRACT.md §34.2 P2): this receiver accepted
+     * that SET earlier, so an error report would tell the transmitter that an event you took
+     * had failed, when it removes the event from its queue either way. A SET you neither
+     * acknowledge nor refuse is re-offered, and — having been recorded when it verified —
+     * then reads as `replayed`; the receiver records a `jti` when it accepts the SET, so
+     * processing before the next `poll` (or a persistent {@see ReplayStore}) is yours.
      *
      * The request carries nothing of the SDK's session and follows no redirect. Retried per §16
      * on a transport failure, a `5xx`, `408` or `429` — never on another `4xx`, which maps like

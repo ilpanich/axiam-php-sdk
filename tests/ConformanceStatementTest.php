@@ -39,6 +39,21 @@ final class ConformanceStatementTest extends TestCase
         return substr($body, 0, $end === false ? null : $end);
     }
 
+    /**
+     * §8 minimal-profile note (contract 1.60, MUST): the README of an AMQP SDK says that a broker
+     * confirm is not evidence AXIAM saw a message, and that a minimal-profile server reads no
+     * AMQP queue.
+     */
+    public function testTheReadmeSaysABrokerConfirmIsNotEvidenceAxiamSawAMessage(): void
+    {
+        $readme = self::readme();
+        $flat = (string) preg_replace('/\s+/', ' ', $readme);
+        self::assertStringContainsString('A broker confirm is not evidence that AXIAM saw a message', $flat);
+        self::assertStringContainsString('minimal profile', $flat);
+        self::assertStringContainsString('reads no AMQP queue', $flat);
+        self::assertStringContainsString('AXIAM__AMQP__ENABLED=false', $flat);
+    }
+
     public function testTheSignedFormClaimNamesTheAlgorithmSubset(): void
     {
         $statement = self::statement();

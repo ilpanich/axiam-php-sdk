@@ -385,7 +385,7 @@ final class SsfReceiverTest extends TestCase
             maxEvents: 10,
             returnImmediately: true,
             ack: ['done-1', 'done-2'],
-            setErrs: ['old-1' => SetErr::fromReason(SetFailureReason::Replayed), 'old-2' => new SetErr('invalid_key', 'rotated')],
+            setErrs: ['old-1' => SetErr::fromReason(SetFailureReason::InvalidRequest), 'old-2' => new SetErr('invalid_key', 'rotated')],
         ));
 
         self::assertTrue($result->moreAvailable);
@@ -548,6 +548,188 @@ final class SsfReceiverTest extends TestCase
         };
         $this->expectException(\RuntimeException::class);
         $this->receiverWithStore($failing)->poll('s');
+    }
+
+    /**
+     * §32.8 test 6, the store-failure case (contract 1.60, §34.2 P4 / B1 *verify*): a store that
+     * cannot answer gives NO verdict. `verifySet()` raises the store's own failure — never a
+     * {@see SetVerificationError}, so never `replayed` and never carrying a reason code — and the
+     * SET is not recorded. The PHP interface answers `bool` but is fallible through an exception,
+     * so B1's "bare bool" defect does not apply; this pins that an exception is never read as
+     * "already seen", whatever it is (a `\Exception`, an SDK error, or a PHP `\Error`).
+     *
+     * @dataProvider unanswerableStoreFailures
+     */
+    public function testAStoreThatCannotAnswerGivesNoVerdictOnVerifySet(\Throwable $failure): void
+    {
+        $key = self::key();
+        $this->serveJwks([self::jwk($key)]);
+        $store = new class ($failure) implements \Axiam\Sdk\Ssf\ReplayStore {
+            public int $asked = 0;
+
+            public function __construct(private readonly \Throwable $failure)
+            {
+            }
+
+            public function checkAndRecord(string $jti, int $windowSeconds): bool
+            {
+                ++$this->asked;
+                throw $this->failure;
+            }
+        };
+        $set = self::signSet($key, self::claims());
+        $receiver = $this->receiverWithStore($store);
+        try {
+            $receiver->verifySet($set);
+            self::fail('a store that cannot answer must raise, not accept the SET');
+        } catch (SetVerificationError $e) {
+            self::fail('a store that cannot answer is never read as ' . $e->failureReason->value);
+        } catch (\Throwable $e) {
+            self::assertSame($failure, $e, 'the store\'s own failure, with no reason code');
+        }
+        self::assertSame(1, $store->asked);
+
+        // Still no verdict when the very same SET is offered again: nothing was recorded.
+        try {
+            $receiver->verifySet($set);
+            self::fail('expected the store failure again');
+        } catch (SetVerificationError $e) {
+            self::fail('the failed SET read as ' . $e->failureReason->value . ' on a second look');
+        } catch (\Throwable) {
+        }
+        self::assertSame(2, $store->asked, 'asked again, not remembered as replayed');
+    }
+
+    /** @return iterable<string,array{\Throwable}> */
+    public static function unanswerableStoreFailures(): iterable
+    {
+        yield 'a runtime failure' => [new \RuntimeException('redis: connection refused')];
+        yield 'an SDK network error' => [NetworkError::fromMessage('store timed out')];
+        yield 'a PHP error' => [new \TypeError('store returned garbage')];
+    }
+
+    /**
+     * §32.8 test 6's `poll` half (§34.2 P4): the SET whose store cannot answer is in neither
+     * `events` nor `refused`, its `jti` is not recorded, and no `ack` leaves the receiver on its
+     * own. Mid-batch it is listed `unjudged`; as the first SET it is raised, having kept nothing.
+     */
+    public function testAStoreThatCannotAnswerLeavesThePolledSetInNeitherEventsNorRefused(): void
+    {
+        $key = self::key();
+        $this->serveJwks([self::jwk($key)]);
+        $ok = self::claims();
+        $unanswerable = self::claims();
+        $this->routes->on('POST', '/ssf/v1/poll/s', RoutedHandler::json(200, ['sets' => [
+            $ok['jti'] => self::signSet($key, $ok),
+            $unanswerable['jti'] => self::signSet($key, $unanswerable),
+        ]]));
+        $store = new class ($unanswerable['jti']) implements \Axiam\Sdk\Ssf\ReplayStore {
+            /** @var list<string> */
+            public array $recorded = [];
+
+            public function __construct(private readonly string $failsFor)
+            {
+            }
+
+            public function checkAndRecord(string $jti, int $windowSeconds): bool
+            {
+                if ($jti === $this->failsFor) {
+                    throw new \RuntimeException('store unavailable');
+                }
+                $this->recorded[] = $jti;
+
+                return true;
+            }
+        };
+        $result = $this->receiverWithStore($store)->poll('s');
+        self::assertSame([$ok['jti']], array_map(static fn ($e) => $e->jti, $result->events));
+        self::assertSame([], $result->refused, 'not refused, and in particular not replayed');
+        self::assertSame([$unanswerable['jti']], $result->unjudged);
+        self::assertSame([$ok['jti']], $store->recorded, 'the unanswerable jti was not recorded');
+        $sent = $this->routes->sent('POST', '/ssf/v1/poll/s');
+        self::assertCount(1, $sent);
+        self::assertSame('{}', (string) $sent[0]->getBody(), 'nothing acknowledged on the caller\'s behalf');
+
+        // The first SET of a batch: nothing had been kept, so the failure is raised and the
+        // SET is in neither list.
+        $only = self::claims();
+        $this->routes->on('POST', '/ssf/v1/poll/only', RoutedHandler::json(200, ['sets' => [
+            $only['jti'] => self::signSet($key, $only),
+        ]]));
+        $failing = new class () implements \Axiam\Sdk\Ssf\ReplayStore {
+            public function checkAndRecord(string $jti, int $windowSeconds): bool
+            {
+                throw new \RuntimeException('store unavailable');
+            }
+        };
+        try {
+            $this->receiverWithStore($failing)->poll('only');
+            self::fail('expected the store failure to be raised');
+        } catch (SetVerificationError $e) {
+            self::fail('read as ' . $e->failureReason->value);
+        } catch (\RuntimeException $e) {
+            self::assertSame('store unavailable', $e->getMessage());
+        }
+    }
+
+    /**
+     * A7 (R-2, §34.2 P2): a `replayed` SET on a later poll is acknowledged in `ack`, not
+     * reported in `setErrs`. Drives the README's poll loop verbatim: the re-offered SET comes
+     * back refused `replayed`, the loop puts it in `ack`, and the next request carries no
+     * `setErrs` entry for it. The docblock and the README example say so too.
+     */
+    public function testAReplayedSetIsAcknowledgedAndNeverReportedInSetErrs(): void
+    {
+        $key = self::key();
+        $this->serveJwks([self::jwk($key)]);
+        $claims = self::claims();
+        $other = array_merge(self::claims(), ['iss' => 'https://impostor.test']);
+        $set = self::signSet($key, $claims);
+        $this->routes->on(
+            'POST',
+            '/ssf/v1/poll/s',
+            RoutedHandler::json(200, ['sets' => [$claims['jti'] => $set]]),
+            // Re-offered because the caller never acknowledged it, plus one genuinely bad SET.
+            RoutedHandler::json(200, ['sets' => [$claims['jti'] => $set, $other['jti'] => self::signSet($key, $other)]]),
+            RoutedHandler::json(200, ['sets' => new \stdClass()]),
+        );
+        $receiver = $this->receiverWithStore(new InMemoryReplayStore(fn (): int => $this->now));
+
+        $first = $receiver->poll('s');
+        self::assertSame([$claims['jti']], array_map(static fn ($e) => $e->jti, $first->events));
+
+        $result = $receiver->poll('s');
+        self::assertSame([], $result->events);
+
+        // The README's loop.
+        $ack = array_map(static fn ($e) => $e->jti, $result->events);
+        $setErrs = [];
+        foreach ($result->refused as $refused) {
+            if ($refused->reason === SetFailureReason::Replayed) {
+                $ack[] = $refused->jti;
+                continue;
+            }
+            $setErrs[$refused->jti] = SetErr::fromReason($refused->reason);
+        }
+        self::assertSame([$claims['jti']], $ack, 'the replayed SET is acknowledged');
+        self::assertSame([$other['jti']], array_keys($setErrs), 'only the genuinely bad SET is reported');
+        self::assertSame('invalid_issuer', $setErrs[$other['jti']]->err);
+
+        $receiver->poll('s', new SsfPollOptions(ack: $ack, setErrs: $setErrs));
+        $sent = $this->routes->sent('POST', '/ssf/v1/poll/s');
+        self::assertCount(3, $sent);
+        $body = json_decode((string) $sent[2]->getBody(), true);
+        self::assertSame([$claims['jti']], $body['ack']);
+        self::assertArrayNotHasKey($claims['jti'], $body['setErrs']);
+        self::assertSame(['err' => 'invalid_issuer'], $body['setErrs'][$other['jti']]);
+
+        // Documentation: the poll() docblock and the README example say the same.
+        $doc = (string) (new \ReflectionMethod(SsfReceiver::class, 'poll'))->getDocComment();
+        self::assertMatchesRegularExpression('/`replayed`[^`]*one, which you acknowledge in\s+\*\s+`ack`/', $doc);
+        $readme = (string) file_get_contents(\dirname(__DIR__, 2) . '/README.md');
+        self::assertStringContainsString('if ($refused->reason === SetFailureReason::Replayed) {', $readme);
+        self::assertStringContainsString('$ack[] = $refused->jti;', $readme);
+        self::assertStringContainsString('**not** in `setErrs`', $readme);
     }
 
     /**

@@ -28,7 +28,11 @@ enum SetFailureReason: string
     /** Step 8: `exp` or `sub` present; `jti`, `iat` or `sub_id` missing; not exactly one event. */
     case InvalidRequest = 'invalid_request';
 
-    /** Step 9: the `jti` was already accepted within the replay window. */
+    /**
+     * Step 9: the `jti` was already accepted within the replay window. Returned by `poll()`, it
+     * is **acknowledged** in the next call's `ack`, never reported in `setErrs`
+     * (CONTRACT.md §34.2 P2).
+     */
     case Replayed = 'replayed';
 
     /**

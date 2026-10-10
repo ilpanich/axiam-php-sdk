@@ -229,6 +229,43 @@ final class OidcTokenExchangeTest extends TestCase
         self::assertCount(1, $history);
     }
 
+    /**
+     * §15.6 as amended by contract 1.60 (§15.2 rule 9): an `actor_token` the server did not
+     * issue to the exchanging client is answered `400 invalid_request`
+     * (`actor_token was not issued to the exchanging client`). The SDK surfaces that error
+     * unchanged, with exactly ONE request and no rewriting — no retry, no re-send without the
+     * actor (an impersonation the caller did not ask for), no substitute token of its own.
+     */
+    public function testAnActorTokenNotIssuedToTheClientSurfacesUnchangedWithOneRequest(): void
+    {
+        $history = [];
+        $description = 'actor_token was not issued to the exchanging client';
+        $client = $this->client([
+            new Response(400, [], (string) json_encode(['error' => 'invalid_request', 'error_description' => $description])),
+            // Queued so that a (forbidden) retry or rewrite would succeed and be noticed.
+            self::exchangeResponse(),
+            self::exchangeResponse(),
+        ], history: $history);
+
+        try {
+            $client->tokenExchange(
+                self::SUBJECT_TOKEN,
+                OidcClient::ACCESS_TOKEN_TYPE,
+                actorToken: self::ACTOR_TOKEN,
+                scopes: ['orders:read'],
+                configuration: $this->configuration(),
+            );
+            self::fail('expected the refusal to surface');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('invalid_request', $e->error);
+            self::assertSame($description, $e->errorDescription);
+        }
+
+        self::assertCount(1, $history, 'exactly one request: no retry, no rewrite into an impersonation');
+        $body = urldecode((string) $history[0]['request']->getBody());
+        self::assertStringContainsString('actor_token=' . self::ACTOR_TOKEN, $body, 'the request is the one the caller wrote');
+    }
+
     // ===================================================================================
     // §15.2 rules 4-7 — what the result is, and is not
     // ===================================================================================

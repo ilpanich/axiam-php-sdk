@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Contract 1.60 — phase 1 (W3)
+
+`CONTRACT.md` re-vendored byte-for-byte from `ilpanich/axiam` (contract 1.60). `openapi.json`,
+`management-registry.json` and `proto/` are re-vendored, and the README's conformance statement
+moved to 1.60, in the phase-2 change.
+
+#### Fixed
+
+- **A7 (R-2, §32.7, §34.2 P2) — a `replayed` SET is acknowledged, not reported.**
+  `SsfReceiver::poll()`'s docblock, `RefusedSet`, `SetFailureReason::Replayed` and the README's
+  poll example put a `replayed` refusal in the next call's `ack`, never in `setErrs`: this
+  receiver accepted that SET earlier, and an error report for an event the caller took
+  misinforms the transmitter. Behaviour is unchanged; only the advice was wrong.
+
+#### Verified (no code change)
+
+- **B1 (§32.7 step 9, §34.2 P4) — a replay store that cannot answer gives no verdict.**
+  `ReplayStore::checkAndRecord()` is already fallible (it throws) and the default
+  `InMemoryReplayStore` cannot fail, so no interface changes and nothing here is breaking.
+  New tests (§32.8 test 6, the store-failure case): `verifySet()` raises the store's own failure
+  — never a `SetVerificationError`, never `replayed` — and `poll()` returns that SET in neither
+  `events` nor `refused`, does not record its `jti` and acknowledges nothing.
+
+#### Documentation
+
+- **§15.2 rule 9 — the actor token is the exchanging client's own.** `tokenExchange()`'s
+  docblocks and the README show `$actorToken` obtained from the same client's
+  `client_credentials` grant, and say that any other actor token is answered `400
+  invalid_request` and surfaces unchanged. New §15.6 test: such an answer surfaces with exactly
+  one request and no rewriting.
+- **§8 — a broker confirm is not evidence that AXIAM saw a message.** README sentence added to
+  the AMQP runtime section: a minimal-profile server (`AXIAM__AMQP__ENABLED=false`) reads no
+  AMQP queue; use REST or gRPC against it.
+
 ### Contract 1.59 — follow-up F-59-06 (ilpanich/axiam#581)
 
 `CONTRACT.md` re-vendored from `ilpanich/axiam` `fe369eb` (contract 1.59, §34: the cross-SDK

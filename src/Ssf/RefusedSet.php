@@ -12,7 +12,10 @@ final class RefusedSet
     /**
      * @param string           $jti    The key the transmitter returned the SET under.
      * @param SetFailureReason $reason Why it was refused — pass {@see SetErr::fromReason()} of it
-     *                                 in the next poll's `setErrs`.
+     *                                 in the next poll's `setErrs`, except
+     *                                 {@see SetFailureReason::Replayed}: this receiver accepted
+     *                                 that SET earlier, so acknowledge its `jti` in `ack`
+     *                                 instead (CONTRACT.md §34.2 P2).
      */
     public function __construct(
         public readonly string $jti,
