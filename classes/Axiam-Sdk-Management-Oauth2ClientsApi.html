@@ -337,7 +337,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">63</span>
+    <span class="phpdocumentor-element-found-in__line">59</span>
 
     </aside>
 
@@ -350,8 +350,7 @@ for why it copies.</dd>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/oauth2-clients</code>.</p>
-<p>The response carries a ONE-TIME secret (<code class="prettyprint">client_secret</code>): the server will not return it
+        <section class="phpdocumentor-description"><p>The response carries a ONE-TIME secret (<code class="prettyprint">client_secret</code>): the server will not return it
 again, so a caller that does not persist it here cannot recover it (§27.5).</p>
 </section>
 
@@ -392,7 +391,7 @@ again, so a caller that does not persist it here cannot recover it (§27.5).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">158</span>
+    <span class="phpdocumentor-element-found-in__line">146</span>
 
     </aside>
 
@@ -405,8 +404,7 @@ again, so a caller that does not persist it here cannot recover it (§27.5).</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/oauth2-clients/registration-tokens</code>.</p>
-<p>The response carries a ONE-TIME secret (<code class="prettyprint">initial_access_token</code>): the server will not
+        <section class="phpdocumentor-description"><p>The response carries a ONE-TIME secret (<code class="prettyprint">initial_access_token</code>): the server will not
 return it again, so a caller that does not persist it here cannot recover it (§27.5).</p>
 </section>
 
@@ -447,7 +445,7 @@ return it again, so a caller that does not persist it here cannot recover it (§
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">135</span>
+    <span class="phpdocumentor-element-found-in__line">125</span>
 
     </aside>
 
@@ -460,8 +458,7 @@ return it again, so a caller that does not persist it here cannot recover it (§
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/oauth2-clients/{id}</code>.</p>
-<p>Returns nothing; the server answers with an empty body.</p>
+        <section class="phpdocumentor-description"><p>Returns nothing; the server answers with an empty body.</p>
 <p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
 </section>
 
@@ -548,7 +545,7 @@ for why it copies.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">85</span>
+    <span class="phpdocumentor-element-found-in__line">79</span>
 
     </aside>
 
@@ -561,9 +558,7 @@ for why it copies.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/oauth2-clients/{id}</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -656,7 +651,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">40</span>
+    <span class="phpdocumentor-element-found-in__line">38</span>
 
     </aside>
 
@@ -669,8 +664,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/oauth2-clients</code>.</p>
-<p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
+        <section class="phpdocumentor-description"><p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
 <code class="prettyprint">count($page)</code> — see §27.4 rule 4.</p>
 </section>
 
@@ -711,7 +705,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">182</span>
+    <span class="phpdocumentor-element-found-in__line">168</span>
 
     </aside>
 
@@ -724,8 +718,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/oauth2-clients/registration-tokens</code>.</p>
-<p>Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+        <section class="phpdocumentor-description"><p>Returns the server's complete list. This endpoint is NOT paginated, so the result is a
 plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p>
 </section>
 
@@ -754,7 +747,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Oauth2ClientsApi.php"><a href="files/src-management-oauth2clientsapi.html"><abbr title="src/Management/Oauth2ClientsApi.php">Oauth2ClientsApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">108</span>
+    <span class="phpdocumentor-element-found-in__line">100</span>
 
     </aside>
 
@@ -767,9 +760,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">PUT /api/v1/oauth2-clients/{id}</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">

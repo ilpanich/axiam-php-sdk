@@ -407,7 +407,7 @@ for why it copies.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">64</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
@@ -420,8 +420,7 @@ for why it copies.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/organizations/{org_id}/ca-certificates</code>.</p>
-<p>The response carries a ONE-TIME secret (<code class="prettyprint">private_key_pem</code>): the server will not return
+        <section class="phpdocumentor-description"><p>The response carries a ONE-TIME secret (<code class="prettyprint">private_key_pem</code>): the server will not return
 it again, so a caller that does not persist it here cannot recover it (§27.5).</p>
 </section>
 
@@ -462,7 +461,7 @@ it again, so a caller that does not persist it here cannot recover it (§27.5).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">226</span>
+    <span class="phpdocumentor-element-found-in__line">208</span>
 
     </aside>
 
@@ -475,8 +474,7 @@ it again, so a caller that does not persist it here cannot recover it (§27.5).<
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas</code>.</p>
-<p>The response carries a ONE-TIME secret (<code class="prettyprint">private_key_pem</code>): the server will not return
+        <section class="phpdocumentor-description"><p>The response carries a ONE-TIME secret (<code class="prettyprint">private_key_pem</code>): the server will not return
 it again, so a caller that does not persist it here cannot recover it (§27.5).</p>
 </section>
 
@@ -526,7 +524,7 @@ it again, so a caller that does not persist it here cannot recover it (§27.5).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">108</span>
+    <span class="phpdocumentor-element-found-in__line">100</span>
 
     </aside>
 
@@ -539,9 +537,7 @@ it again, so a caller that does not persist it here cannot recover it (§27.5).<
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/organizations/{org_id}/ca-certificates/{id}</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -579,7 +575,7 @@ it again, so a caller that does not persist it here cannot recover it (§27.5).<
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">86</span>
+    <span class="phpdocumentor-element-found-in__line">80</span>
 
     </aside>
 
@@ -592,9 +588,7 @@ it again, so a caller that does not persist it here cannot recover it (§27.5).<
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/organizations/{org_id}/ca-certificates/import</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -687,7 +681,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">39</span>
 
     </aside>
 
@@ -700,8 +694,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/organizations/{org_id}/ca-certificates</code>.</p>
-<p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
+        <section class="phpdocumentor-description"><p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
 <code class="prettyprint">count($page)</code> — see §27.4 rule 4.</p>
 </section>
 
@@ -742,7 +735,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">201</span>
+    <span class="phpdocumentor-element-found-in__line">185</span>
 
     </aside>
 
@@ -755,8 +748,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas</code>.</p>
-<p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
+        <section class="phpdocumentor-description"><p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
 <code class="prettyprint">count($page)</code> — see §27.4 rule 4.</p>
 </section>
 
@@ -806,7 +798,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">151</span>
+    <span class="phpdocumentor-element-found-in__line">139</span>
 
     </aside>
 
@@ -819,9 +811,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/organizations/{org_id}/ca-certificates/{id}/migrate-custody</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -859,7 +849,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">131</span>
+    <span class="phpdocumentor-element-found-in__line">121</span>
 
     </aside>
 
@@ -872,8 +862,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/organizations/{org_id}/ca-certificates/{id}/revoke</code>.</p>
-<p>Returns nothing; the server answers with an empty body.</p>
+        <section class="phpdocumentor-description"><p>Returns nothing; the server answers with an empty body.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -909,7 +898,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">174</span>
+    <span class="phpdocumentor-element-found-in__line">160</span>
 
     </aside>
 
@@ -922,9 +911,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">PUT /api/v1/organizations/{org_id}/ca-certificates/{id}/mtls-trust-anchor</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -971,7 +958,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/CaCertificatesApi.php"><a href="files/src-management-cacertificatesapi.html"><abbr title="src/Management/CaCertificatesApi.php">CaCertificatesApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">250</span>
+    <span class="phpdocumentor-element-found-in__line">230</span>
 
     </aside>
 
@@ -984,9 +971,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/organizations/{org_id}/tenants/{tenant_id}/signing-cas/sign-csr</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">

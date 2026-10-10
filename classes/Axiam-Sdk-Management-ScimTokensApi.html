@@ -307,7 +307,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ScimTokensApi.php"><a href="files/src-management-scimtokensapi.html"><abbr title="src/Management/ScimTokensApi.php">ScimTokensApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">65</span>
+    <span class="phpdocumentor-element-found-in__line">61</span>
 
     </aside>
 
@@ -320,8 +320,7 @@ for why it copies.</dd>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/scim-tokens</code>.</p>
-<p>The response carries a ONE-TIME secret (<code class="prettyprint">provisioning_token</code>): the server will not
+        <section class="phpdocumentor-description"><p>The response carries a ONE-TIME secret (<code class="prettyprint">provisioning_token</code>): the server will not
 return it again, so a caller that does not persist it here cannot recover it (§27.5).</p>
 </section>
 
@@ -467,7 +466,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ScimTokensApi.php"><a href="files/src-management-scimtokensapi.html"><abbr title="src/Management/ScimTokensApi.php">ScimTokensApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">32</span>
 
     </aside>
 
@@ -480,8 +479,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/scim-tokens</code>.</p>
-<p>Returns the server's complete list. This endpoint is NOT paginated, so the result is a
+        <section class="phpdocumentor-description"><p>Returns the server's complete list. This endpoint is NOT paginated, so the result is a
 plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p>
 </section>
 
@@ -510,7 +508,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ScimTokensApi.php"><a href="files/src-management-scimtokensapi.html"><abbr title="src/Management/ScimTokensApi.php">ScimTokensApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">91</span>
+    <span class="phpdocumentor-element-found-in__line">85</span>
 
     </aside>
 
@@ -523,8 +521,7 @@ plain list and never a <code class="prettyprint">Page</code> (§27.4 rule 4).</p
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/scim-tokens/{id}</code>.</p>
-<p>Returns nothing; the server answers with an empty body.</p>
+        <section class="phpdocumentor-description"><p>Returns nothing; the server answers with an empty body.</p>
 <p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
 </section>
 

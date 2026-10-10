@@ -1048,7 +1048,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Amanagement\u0028\u0029",
             "name": "management",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020147\u0020operations\u0020across\u002024\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020190\u0020operations\u0020across\u002028\u0020namespaces.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_management"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Aorganizations\u0028\u0029",
@@ -1135,6 +1135,26 @@ Search.appendIndex(
             "name": "emailConfig",
             "summary": "Transactional\u002Dmail\u0020transport,\u0020configurable\u0020at\u0020organization\u0020level\u0020and\u0020overridable\u0020per\ntenant.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_emailConfig"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Adirectory\u0028\u0029",
+            "name": "directory",
+            "summary": "A\u0020tenant\u0027s\u0020LDAP\u0020\/\u0020Active\u0020Directory\u0020identity\u0020source\u0020\u0028CONTRACT\u0020\u00A730\u0029\u003A\u0020its\u0020configuration,\naccount\u0020linking,\u0020and\u0020the\u0020sync\u0020job\u0027s\u0020status.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_directory"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Asaml\u0028\u0029",
+            "name": "saml",
+            "summary": "A\u0020tenant\u0027s\u0020SAML\u00202.0\u0020identity\u0020provider\u0020\u0028CONTRACT\u0020\u00A729\u0029\u003A\u0020service\u0020providers,\u0020SP\u002Dmetadata\nimport,\u0020and\u0020the\u0020IdP\u0020signing\u002Dcredential\u0020lifecycle.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_saml"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Assf\u0028\u0029",
+            "name": "ssf",
+            "summary": "A\u0020tenant\u0027s\u0020Shared\u0020Signals\u0020Framework\u0020streams\u0020\u0028CONTRACT\u0020\u00A732\u0029\u003A\u0020which\u0020receiver\u0020gets\u0020which\nCAEP\u0020and\u0020RISC\u0020security\u0020events.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssf"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AscimTargets\u0028\u0029",
+            "name": "scimTargets",
+            "summary": "A\u0020tenant\u0027s\u0020outbound\u0020SCIM\u0020targets\u0020\u0028CONTRACT\u0020\u00A731\u0029\u003A\u0020the\u0020downstream\u0020SCIM\u00202.0\u0020service\nproviders\u0020AXIAM\u0020pushes\u0020users\u0020and\u0020groups\u0020to.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_scimTargets"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Asettings\u0028\u0029",
             "name": "settings",
@@ -1310,6 +1330,46 @@ Search.appendIndex(
             "name": "tokenExchange",
             "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020the\u0020RFC\u00208693\u0020grant\u0020\u0028CONTRACT.md\u0020\u00A715.1\u0029\u0020\u2014\u0020exchange\u0020a\u0020token\nfor\u0020a\u0020\u002A\u002Anarrower\u002A\u002A\u0020one.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_tokenExchange"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AreadClientRegistration\u0028\u0029",
+            "name": "readClientRegistration",
+            "summary": "\u0060GET\u0020registration_client_uri\u0060\u0020\u0028RFC\u00207592\u0020\u00A72.1,\u0020CONTRACT.md\u0020\u00A728.12\u0029\u0020\u2014\u0020read\u0020this\nclient\u0027s\u0020own\u0020registration,\u0020as\u0020a\u0020client\u0020that\u0020registered\u0020itself\u0020through\n\u0060POST\u0020\/oauth2\/register\u0060\u0020\u0028RFC\u00207591\u0029.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_readClientRegistration"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AupdateClientRegistration\u0028\u0029",
+            "name": "updateClientRegistration",
+            "summary": "\u0060PUT\u0020registration_client_uri\u0060\u0020\u0028RFC\u00207592\u0020\u00A72.2,\u0020CONTRACT.md\u0020\u00A728.12\u0029\u0020\u2014\u0020\u002A\u002Areplace\u002A\u002A\u0020this\nclient\u0027s\u0020registration,\u0020and\u0020receive\u0020a\u0020\u002A\u002Arotated\u002A\u002A\u0020registration\u0020access\u0020token.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_updateClientRegistration"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AdeleteClientRegistration\u0028\u0029",
+            "name": "deleteClientRegistration",
+            "summary": "\u0060DELETE\u0020registration_client_uri\u0060\u0020\u0028RFC\u00207592\u0020\u00A72.3,\u0020CONTRACT.md\u0020\u00A728.12\u0029\u0020\u2014\u0020delete\u0020this\nclient\u0027s\u0020registration.\u0020A\u0020\u0060204\u0060\u0020returns\u0020normally.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_deleteClientRegistration"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AcibaInitiate\u0028\u0029",
+            "name": "cibaInitiate",
+            "summary": "\u0060POST\u0020\/oauth2\/bc\u002Dauthorize\u0060\u0020\u0028CONTRACT.md\u0020\u00A733.1\u0029\u0020\u2014\u0020ask\u0020AXIAM\u0020to\u0020authenticate\u0020a\u0020user\u0020on\nanother\u0020device.\u0020\u002A\u002ANever\u0020retried\u002A\u002A,\u0020and\u0020a\u0020success\u0020proves\u0020nothing\u0020about\u0020the\u0020user\u003B\u0020see\n\u007B\u0040see\u0020OidcEngine\u003A\u003AcibaInitiate\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_cibaInitiate"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AcibaPoll\u0028\u0029",
+            "name": "cibaPoll",
+            "summary": "One\u0020CIBA\u0020token\u0020request\u0020\u0028CONTRACT.md\u0020\u00A733.1\u0029.\u0020\u0060access_denied\u0060\u0020and\u0020\u0060expired_token\u0060\u0020are\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Core\\OAuthProtocolError\u007Ds\u0020told\u0020apart\u0020by\u0020\u0060isAccessDenied\u0028\u0029\u0060\u0020\/\n\u0060isExpiredToken\u0028\u0029\u0060.\u0020\u002A\u002AStore\u0020the\u0020tokens\u0020first\u002A\u002A\u003A\u0020a\u0020request\u0020is\u0020redeemed\u0020once.\u0020See\n\u007B\u0040see\u0020OidcEngine\u003A\u003AcibaPoll\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_cibaPoll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AcibaAwait\u0028\u0029",
+            "name": "cibaAwait",
+            "summary": "Poll\u0020for\u0020a\u0020CIBA\u0020request\u0027s\u0020outcome\u0020until\u0020it\u0020is\u0020decided\u0020or\u0020expires,\u0020honouring\u0020\u0060interval\u0060\nand\u0020\u0060slow_down\u0060\u0020\u0028CONTRACT.md\u0020\u00A733.7\u0029.\u0020Returns\u0020the\u0020token\u0020set\u0020without\u0020adopting\u0020it.\u0020See\n\u007B\u0040see\u0020OidcEngine\u003A\u003AcibaAwait\u0028\u0029\u007D,\u0020including\u0020the\u0020ping\u002Dmode\u0020fallback.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_cibaAwait"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AcibaHandlePing\u0028\u0029",
+            "name": "cibaHandlePing",
+            "summary": "Verify\u0020a\u0020CIBA\u0020ping\u0027s\u0020bearer\u0020and\u0020return\u0020the\u0020\u0060auth_req_id\u0060\u0020it\u0020names\u0020\u0028CONTRACT.md\u0020\u00A733.1\u0029\u0020\u2014\npure,\u0020no\u0020I\/O.\u0020Answer\u0020the\u0020ping,\u0020then\u0020\u007B\u0040see\u0020self\u003A\u003AcibaPoll\u0028\u0029\u007D.\u0020See\n\u007B\u0040see\u0020OidcEngine\u003A\u003AcibaHandlePing\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_cibaHandlePing"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AssfReceiver\u0028\u0029",
+            "name": "ssfReceiver",
+            "summary": "An\u0020SSF\u0020receiver\u0020\u2014\u0020the\u0020helper\u0020a\u0020relying\u0020party\u0020uses\u0020to\u0020verify\u0020the\u0020Security\u0020Event\u0020Tokens\nAXIAM\u0020pushes\u0020to\u0020it\u0020and\u0020to\u0020poll\u0020a\u0020poll\u0020stream\u0020\u0028CONTRACT.md\u0020\u00A732.7\u0029.\u0020See\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003AverifySet\u0028\u0029\u007D\u0020and\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003Apoll\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_ssfReceiver"
         },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AumaRegisterResource\u0028\u0029",
             "name": "umaRegisterResource",
@@ -1716,6 +1776,16 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Core-OAuthProtocolError.html#method___construct"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\OAuthProtocolError\u003A\u003AisAccessDenied\u0028\u0029",
+            "name": "isAccessDenied",
+            "summary": "Whether\u0020this\u0020is\u0020\u0060access_denied\u0060\u0020\u2014\u0020at\u0020a\u0020CIBA\u0020or\u0020device\u0020poll,\u0020the\u0020user\u0020refused\n\u0028CONTRACT.md\u0020\u00A733.4,\u0020\u00A714.2\u0020rule\u00203\u0029.\u0020Distinct\u0020from\u0020\u007B\u0040see\u0020self\u003A\u003AisExpiredToken\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isAccessDenied"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\OAuthProtocolError\u003A\u003AisExpiredToken\u0028\u0029",
+            "name": "isExpiredToken",
+            "summary": "Whether\u0020this\u0020is\u0020\u0060expired_token\u0060\u0020\u2014\u0020at\u0020a\u0020CIBA\u0020or\u0020device\u0020poll,\u0020nobody\u0020decided\u0020in\u0020time\u003B\u0020also\nwhat\u0020\u0060cibaAwait\u0060\u0020raises\u0020locally\u0020at\u0020its\u0020deadline\u0020\u0028CONTRACT.md\u0020\u00A733.4,\u0020\u00A733.7\u0020rule\u00204\u0029.",
+            "url": "classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isExpiredToken"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Core\\OAuthProtocolError\u003A\u003A\u0024error",
             "name": "error",
             "summary": "",
@@ -1910,6 +1980,41 @@ Search.appendIndex(
             "name": "reveal",
             "summary": "The\u0020ONLY\u0020way\u0020to\u0020obtain\u0020the\u0020real\u0020value\u0020\u2014\u0020call\u0020explicitly\u0020at\u0020the\u0020point\u0020of\u0020use.",
             "url": "classes/Axiam-Sdk-Core-Sensitive.html#method_reveal"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\SsfUnjudgedEvent",
+            "name": "SsfUnjudgedEvent",
+            "summary": "Emitted\u0020when\u0020\u0060ssf.poll\u0060\u0020returns\u0020normally\u0020leaving\u0020at\u0020least\u0020one\u0020SET\u0020unjudged\u0020\u0028CONTRACT.md\n\u00A719.1,\u0020contract\u00201.60\u003B\u0020\u00A734.2\u0020P1\u0029.",
+            "url": "classes/Axiam-Sdk-Core-SsfUnjudgedEvent.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\SsfUnjudgedEvent\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Core-SsfUnjudgedEvent.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\SsfUnjudgedEvent\u003A\u003ACATEGORY_KEY_FETCH",
+            "name": "CATEGORY_KEY_FETCH",
+            "summary": "A\u0020JWKS\u0020or\u0020SSF\u0020configuration\u0020fetch\u0020failed\u0020\u0028or\u0020failed\u0020less\u0020than\u0020a\u0020minute\u0020ago\u0029.",
+            "url": "classes/Axiam-Sdk-Core-SsfUnjudgedEvent.html#constant_CATEGORY_KEY_FETCH"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\SsfUnjudgedEvent\u003A\u003ACATEGORY_REPLAY_STORE",
+            "name": "CATEGORY_REPLAY_STORE",
+            "summary": "The\u0020replay\u0020store\u0020could\u0020not\u0020answer.",
+            "url": "classes/Axiam-Sdk-Core-SsfUnjudgedEvent.html#constant_CATEGORY_REPLAY_STORE"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\SsfUnjudgedEvent\u003A\u003A\u0024operation",
+            "name": "operation",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Core-SsfUnjudgedEvent.html#property_operation"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\SsfUnjudgedEvent\u003A\u003A\u0024unjudged",
+            "name": "unjudged",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Core-SsfUnjudgedEvent.html#property_unjudged"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\SsfUnjudgedEvent\u003A\u003A\u0024category",
+            "name": "category",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Core-SsfUnjudgedEvent.html#property_category"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Core\\TelemetryDispatcher",
             "name": "TelemetryDispatcher",
@@ -2236,6 +2341,41 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-ConflictError.html#method___construct"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi",
+            "name": "DirectoryApi",
+            "summary": "A\u0020tenant\u0027s\u0020LDAP\u0020\/\u0020Active\u0020Directory\u0020identity\u0020source\u0020\u0028CONTRACT\u0020\u00A730\u0029\u003A\u0020the\u0020one\u0020configuration,\nthe\u0020explicit\u0020act\u0020that\u0020links\u0020an\u0020existing\u0020local\u0020account\u0020to\u0020its\u0020directory\u0020entry,\u0020and\u0020a\nread\u002Donly\u0020view\u0020of\u0020the\u0020sync\u0020job.\u0020Signing\u0020in\u0020needs\u0020nothing\u0020new\u0020\u002D\u002D\u0020a\u0020directory\u0020account\u0020calls\nthe\u0020same\u0020\u00A71\u0020\u0060login\u0060.",
+            "url": "classes/Axiam-Sdk-Management-DirectoryApi.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi\u003A\u003Aget\u0028\u0029",
+            "name": "get",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\u0060",
+            "url": "classes/Axiam-Sdk-Management-DirectoryApi.html#method_get"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi\u003A\u003Aset\u0028\u0029",
+            "name": "set",
+            "summary": "\u0060PUT\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\u0060\u0020\u2014\u0020create\u0020or\u0020\u002A\u002Areplace\u002A\u002A.",
+            "url": "classes/Axiam-Sdk-Management-DirectoryApi.html#method_set"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi\u003A\u003Aupdate\u0028\u0029",
+            "name": "update",
+            "summary": "\u0060PATCH\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\u0060\u0020\u2014\u0020a\u0020\u002A\u002Asparse\u002A\u002A\u0020update.",
+            "url": "classes/Axiam-Sdk-Management-DirectoryApi.html#method_update"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi\u003A\u003Adelete\u0028\u0029",
+            "name": "delete",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\u0060",
+            "url": "classes/Axiam-Sdk-Management-DirectoryApi.html#method_delete"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi\u003A\u003AlinkAccount\u0028\u0029",
+            "name": "linkAccount",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\/links\u0060\u0020\u2014\u0020link\u0020a\u0020local\u0020account\u0020to\u0020its\ndirectory\u0020entry\u0020\u0028D\u002D28\u0029.",
+            "url": "classes/Axiam-Sdk-Management-DirectoryApi.html#method_linkAccount"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi\u003A\u003AgetSyncStatus\u0028\u0029",
+            "name": "getSyncStatus",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\/sync\u002Dstatus\u0060",
+            "url": "classes/Axiam-Sdk-Management-DirectoryApi.html#method_getSyncStatus"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\EmailConfigApi",
             "name": "EmailConfigApi",
             "summary": "Transactional\u002Dmail\u0020transport,\u0020configurable\u0020at\u0020organization\u0020level\u0020and\u0020overridable\u0020per\u0020tenant.",
@@ -2416,9 +2556,19 @@ Search.appendIndex(
             "summary": "\u0060DELETE\u0020\/api\/v1\/groups\/\u007Bgroup_id\u007D\/service\u002Daccounts\/\u007Bservice_account_id\u007D\u0060",
             "url": "classes/Axiam-Sdk-Management-GroupsApi.html#method_removeServiceAccount"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\JsonNull",
+            "name": "JsonNull",
+            "summary": "An\u0020explicit\u0020JSON\u0020\u0060null\u0060,\u0020as\u0020distinct\u0020from\u0020an\u0020ABSENT\u0020member\u0020\u0028CONTRACT.md\u0020\u00A727.4\u0020rule\u00205,\n\u0022null\u0020is\u0020not\u0020absent\u0022\u0029.",
+            "url": "classes/Axiam-Sdk-Management-JsonNull.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\JsonNull\u003A\u003ANull",
+            "name": "Null",
+            "summary": "The\u0020JSON\u0020literal\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-JsonNull.html#enumcase_Null"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi",
             "name": "ManagementApi",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020162\u0020operations\u0020across\u002024\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020190\u0020operations\u0020across\u002028\u0020namespaces.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003A__construct\u0028\u0029",
@@ -2516,6 +2666,26 @@ Search.appendIndex(
             "summary": "Transactional\u002Dmail\u0020transport,\u0020configurable\u0020at\u0020organization\u0020level\u0020and\u0020overridable\u0020per\ntenant.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_emailConfig"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Adirectory\u0028\u0029",
+            "name": "directory",
+            "summary": "A\u0020tenant\u0027s\u0020LDAP\u0020\/\u0020Active\u0020Directory\u0020identity\u0020source\u0020\u0028CONTRACT\u0020\u00A730\u0029\u003A\u0020the\u0020one\nconfiguration,\u0020the\u0020explicit\u0020act\u0020that\u0020links\u0020an\u0020existing\u0020local\u0020account\u0020to\u0020its\u0020directory\nentry,\u0020and\u0020a\u0020read\u002Donly\u0020view\u0020of\u0020the\u0020sync\u0020job.\u0020Signing\u0020in\u0020needs\u0020nothing\u0020new\u0020\u002D\u002D\u0020a\u0020directory\naccount\u0020calls\u0020the\u0020same\u0020\u00A71\u0020\u0060login\u0060.",
+            "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_directory"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Asaml\u0028\u0029",
+            "name": "saml",
+            "summary": "A\u0020tenant\u0027s\u0020SAML\u00202.0\u0020identity\u0020provider\u0020\u0028CONTRACT\u0020\u00A729\u0029\u003A\u0020the\u0020registry\u0020of\u0020service\u0020providers,\nthe\u0020import\u0020of\u0020an\u0020SP\u0027s\u0020metadata\u0020into\u0020a\u0020\u002Adraft\u002A\u0020registration\u0020\u0028never\u0020a\u0020write\u0029,\u0020and\u0020the\nlifecycle\u0020of\u0020the\u0020IdP\u0020signing\u0020credential.\u0020The\u0020protocol\u0020itself\u0020\u002D\u002D\u0020single\u0020sign\u002Don,\u0020single\nlogout,\u0020the\u0020IdP\u0020metadata\u0020document\u0020\u002D\u002D\u0020is\u0020browser\u0020and\u0020SP\u002Dto\u002DIdP\u0020surface\u0020under\n\/saml\/v2\/\u007Btenant_id\u007D,\u0020an\u0020SP\u0027s\u0020own\u0020SAML\u0020library\u0020speaks\u0020to\u0020it,\u0020and\u0020it\u0020is\u0020not\u0020in\u0020this\nregistry.",
+            "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_saml"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Assf\u0028\u0029",
+            "name": "ssf",
+            "summary": "A\u0020tenant\u0027s\u0020Shared\u0020Signals\u0020Framework\u0020streams\u0020\u0028CONTRACT\u0020\u00A732\u0029\u003A\u0020which\u0020receiver\u0020\u002D\u002D\u0020an\u0020OAuth2\nclient\u0020of\u0020the\u0020tenant\u0020\u002D\u002D\u0020receives\u0020which\u0020CAEP\u0020and\u0020RISC\u0020security\u0020events,\u0020as\u0020SETs\u0020pushed\u0020to\nits\u0020endpoint\u0020or\u0020polled.\u0020The\u0020receiver\u0027s\u0020own\u0020protocol\u0020\u0028transmitter\u0020metadata,\u0020the\u0020SSF\nstream\u0020management\u0020API,\u0020polling\u0029\u0020is\u0020not\u0020in\u0020this\u0020registry.",
+            "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_ssf"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003AscimTargets\u0028\u0029",
+            "name": "scimTargets",
+            "summary": "A\u0020tenant\u0027s\u0020outbound\u0020SCIM\u0020targets\u0020\u0028CONTRACT\u0020\u00A731\u0029\u003A\u0020the\u0020downstream\u0020SCIM\u00202.0\u0020service\nproviders\u0020AXIAM\u0020pushes\u0020the\u0020tenant\u0027s\u0020users\u0020and\u0020groups\u0020to,\u0020each\u0020with\u0020its\u0020delivery\u0020state.",
+            "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTargets"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Asettings\u0028\u0029",
             "name": "settings",
             "summary": "Effective\u0020settings,\u0020and\u0020the\u0020organization\/tenant\u0020layers\u0020they\u0020resolve\u0020from.",
@@ -2551,6 +2721,16 @@ Search.appendIndex(
             "summary": "Deployment\u002Dlevel\u0020probes\u0020and\u0020FIDO\u0020metadata\u0020state.\u0020Unauthenticated\u0020where\u0020the\u0020server\u0020leaves\nthem\u0020so.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_platform"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ManagementChecks",
+            "name": "ManagementChecks",
+            "summary": "Local\u0020checks\u0020the\u0020generated\u0020\u00A727\u0020surface\u0020runs\u0020before\u0020any\u0020I\/O\u0020\u0028generator\u0020table\u0020\u0060PRECHECKS\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Management-ManagementChecks.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ManagementChecks\u003A\u003AparseSpMetadataExactlyOne\u0028\u0029",
+            "name": "parseSpMetadataExactlyOne",
+            "summary": "CONTRACT.md\u0020\u00A729.2\u003A\u0020\u0060ParseSamlSpMetadata\u0060\u0020is\u0020\u002A\u002Aexactly\u0020one\u002A\u002A\u0020of\u0020\u0060metadata_xml\u0060\u0020and\n\u0060metadata_url\u0060.\u0020Both\u0020or\u0020neither\u0020is\u0020a\u0020local\u0020\u007B\u0040see\u0020ValidationError\u007D,\u0020raised\u0020before\u0020any\nrequest\u0020\u2014\u0020never\u0020a\u0020request\u0020the\u0020server\u0020refuses.",
+            "url": "classes/Axiam-Sdk-Management-ManagementChecks.html#method_parseSpMetadataExactlyOne"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementErrorMapper",
             "name": "ManagementErrorMapper",
             "summary": "The\u0020\u00A727\u0020status\u2192error\u0020mapper\u0020\u0028CONTRACT.md\u0020\u00A727.4\u0020rule\u00207\u0029.",
@@ -2563,7 +2743,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementSupport",
             "name": "ManagementSupport",
-            "summary": "Base\u0020class\u0020for\u0020the\u002024\u0020generated\u0020namespace\u0020handles\u0020\u0028CONTRACT.md\u0020\u00A727.2\u0029.",
+            "summary": "Base\u0020class\u0020for\u0020the\u002028\u0020generated\u0020namespace\u0020handles\u0020\u0028CONTRACT.md\u0020\u00A727.2\u0029.",
             "url": "classes/Axiam-Sdk-Management-ManagementSupport.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementSupport\u003A\u003A__construct\u0028\u0029",
@@ -2583,7 +2763,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementTransport",
             "name": "ManagementTransport",
-            "summary": "The\u0020single\u0020wire\u0020path\u0020every\u0020one\u0020of\u0020the\u0020147\u0020\u00A727\u0020management\u0020operations\u0020goes\u0020through\n\u0028CONTRACT.md\u0020\u00A727.8\u0029.",
+            "summary": "The\u0020single\u0020wire\u0020path\u0020every\u0020one\u0020of\u0020the\u0020190\u0020\u00A727\u0020management\u0020operations\u0020goes\u0020through\n\u0028CONTRACT.md\u0020\u00A727.8\u0029.",
             "url": "classes/Axiam-Sdk-Management-ManagementTransport.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementTransport\u003A\u003A__construct\u0028\u0029",
@@ -2971,6 +3151,51 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Manifest-RoleBinding.html#property_inherit"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint",
+            "name": "AcsEndpoint",
+            "summary": "One\u0020\u0060AssertionConsumerService\u0060\u0020endpoint\u0020of\u0020a\u0020service\u0020provider.\u0020The\u0020list\u0020of\u0020these\u0020is\u0020an\n\u002A\u002Aallow\u002Dlist\u002A\u002A,\u0020checked\u0020the\u0020way\u0020OAuth2\u0020redirect\u0020URIs\u0020are\u003A\u0020an\u0020\u0060AuthnRequest\u0060\u0020naming\u0020an\u0020ACS\nURL\u0020is\u0020honoured\u0020only\u0020when\u0020the\u0020URL\u0020equals\u0020one\u0020registered\u0020here,\u0020byte\u0020for\u0020byte.\u0020No\u0020globs,\u0020no\nprefix\u0020match.",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020AcsEndpoint.",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020AcsEndpoint\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003A\u0024binding",
+            "name": "binding",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#property_binding"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003A\u0024index",
+            "name": "index",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#property_index"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003A\u0024url",
+            "name": "url",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#property_url"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003A\u0024isDefault",
+            "name": "isDefault",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#property_isDefault"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ActorType",
             "name": "ActorType",
             "summary": "The\u0020\u0060ActorType\u0060\u0020enumeration\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
@@ -3255,6 +3480,96 @@ Search.appendIndex(
             "name": "Unknown",
             "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
             "url": "classes/Axiam-Sdk-Management-Models-AttestationMode.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping",
+            "name": "AttributeMapping",
+            "summary": "One\u0020entry\u0020of\u0020an\u0020SP\u0027s\u0020attribute\u0020mapping\u0020table.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020AttributeMapping.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020AttributeMapping\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003A\u0024samlName",
+            "name": "samlName",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#property_samlName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003A\u0024source",
+            "name": "source",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#property_source"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003A\u0024nameFormat",
+            "name": "nameFormat",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#property_nameFormat"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource",
+            "name": "AttributeSource",
+            "summary": "Where\u0020an\u0020attribute\u0027s\u0020value\u0020comes\u0020from.\u0020Every\u0020variant\u0020has\u0020a\u0020real\u0020source\u0020today\u003B\u0020a\u0020variant\u0020with\nnone\u0020\u0028a\u0020telephone\u0020number\u0020the\u0020OIDC\u0020\u0060phone\u0060\u0020scope\u0020gates\u0020behind\u0020its\u0020own\u0020consent,\u0020say\u0029\u0020is\ndeliberately\u0020absent\u0020rather\u0020than\u0020mapped\u0020to\u0020an\u0020empty\u0020value.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020AttributeSource,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AUsername",
+            "name": "Username",
+            "summary": "The\u0020wire\u0020value\u0020\u0060username\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_Username"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AEmail",
+            "name": "Email",
+            "summary": "The\u0020wire\u0020value\u0020\u0060email\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_Email"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003ADisplayName",
+            "name": "DisplayName",
+            "summary": "The\u0020wire\u0020value\u0020\u0060display_name\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_DisplayName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AGivenName",
+            "name": "GivenName",
+            "summary": "The\u0020wire\u0020value\u0020\u0060given_name\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_GivenName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AFamilyName",
+            "name": "FamilyName",
+            "summary": "The\u0020wire\u0020value\u0020\u0060family_name\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_FamilyName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AGroups",
+            "name": "Groups",
+            "summary": "The\u0020wire\u0020value\u0020\u0060groups\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_Groups"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003ARoles",
+            "name": "Roles",
+            "summary": "The\u0020wire\u0020value\u0020\u0060roles\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_Roles"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#enumcase_Unknown"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuditLogEntry",
             "name": "AuditLogEntry",
@@ -3766,6 +4081,61 @@ Search.appendIndex(
             "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
             "url": "classes/Axiam-Sdk-Management-Models-CertificationLevel.html#enumcase_Unknown"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaDeliveryMode",
+            "name": "CibaDeliveryMode",
+            "summary": "How\u0020a\u0020CIBA\u0020client\u0020learns\u0020that\u0020a\u0020request\u0020has\u0020been\u0020decided\u0020\u0028CIBA\u0020Core\u0020\u00A75\u0029.\u0020\u0060push\u0060\u0020is\ndeliberately\u0020absent\u003A\u0020AXIAM\u0020does\u0020not\u0020offer\u0020it,\u0020and\u0020the\u0020FAPI\u002DCIBA\u0020profile\u0020forbids\u0020it\u0020\u2014\u0020push\ndelivers\u0020the\u0020tokens\u0020themselves\u0020to\u0020a\u0020client\u0020endpoint,\u0020which\u0020makes\u0020the\u0020notification\u0020endpoint\u0020a\ntoken\u0020sink.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaDeliveryMode.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaDeliveryMode\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020CibaDeliveryMode,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaDeliveryMode.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaDeliveryMode\u003A\u003APoll",
+            "name": "Poll",
+            "summary": "The\u0020wire\u0020value\u0020\u0060poll\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaDeliveryMode.html#enumcase_Poll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaDeliveryMode\u003A\u003APing",
+            "name": "Ping",
+            "summary": "The\u0020wire\u0020value\u0020\u0060ping\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaDeliveryMode.html#enumcase_Ping"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaDeliveryMode\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaDeliveryMode.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg",
+            "name": "CibaRequestSigningAlg",
+            "summary": "The\u0020JWS\u0020algorithm\u0020a\u0020CIBA\u0020client\u0020signs\u0020its\u0020authentication\u0020requests\u0020with\u0020\u0028CIBA\u0020Core\u0020\u00A74\n\u0060backchannel_authentication_request_signing_alg\u0060,\u0020\u00A77.1.1\u0029.\u0020Exactly\u0020the\u0020three\u0020algorithms\nAXIAM\u0020verifies\u0020on\u0020any\u0020client\u002Dsigned\u0020JWT\u0020\u0028\u0060axiam_oauth2\u003A\u003Ajose\u003A\u003APERMITTED_ALGORITHMS\u0060\u0029\u003A\u0020FAPI\n2.0\u0020\u00A75.3.1.1\u0027s\u0020list.\u0020A\u0020registration\u0020naming\u0020anything\u0020else\u0020\u2014\u0020\u0060RS256\u0060,\u0020\u0060HS256\u0060,\u0020\u0060none\u0060\u0020\u2014\u0020is\nrefused\u0020rather\u0020than\u0020stored,\u0020so\u0020no\u0020row\u0020can\u0020hold\u0020an\u0020algorithm\u0020the\u0020verifier\u0020would\u0020not\u0020honour\n\u0028D\u002D61\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020CibaRequestSigningAlg,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg\u003A\u003APS256",
+            "name": "PS256",
+            "summary": "The\u0020wire\u0020value\u0020\u0060PS256\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html#enumcase_PS256"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg\u003A\u003AES256",
+            "name": "ES256",
+            "summary": "The\u0020wire\u0020value\u0020\u0060ES256\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html#enumcase_ES256"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg\u003A\u003AEdDSA",
+            "name": "EdDSA",
+            "summary": "The\u0020wire\u0020value\u0020\u0060EdDSA\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html#enumcase_EdDSA"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html#enumcase_Unknown"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CimdPolicy",
             "name": "CimdPolicy",
             "summary": "Whether,\u0020and\u0020on\u0020what\u0020terms,\u0020a\u0020\u0060client_id\u0060\u0020that\u0020is\u0020a\u0020URL\u0020is\u0020resolved\u0020by\u0020fetching\u0020the\u0020document\nit\u0020names\u0020\u0028T21.5,\u0020\u0060draft\u002Dietf\u002Doauth\u002Dclient\u002Did\u002Dmetadata\u002Ddocument\u0060\u0029.\u0020\u0023\u0020Why\u0020this\u0020is\u0020one\u0020nested\npolicy\u0020rather\u0020than\u0020nine\u0020fields\u0020Every\u0020field\u0020here\u0020is\u0020a\u0020term\u0020of\u0020a\u0020single\u0020decision\u0020\u2014\u0020\u002Ado\u0020we\nfetch\u0020a\u0020stranger\u0027s\u0020URL\u0020and\u0020make\u0020a\u0020client\u0020out\u0020of\u0020what\u0020comes\u0020back\u002A\u0020\u2014\u0020and\u0020none\u0020of\u0020them\u0020means\nanything\u0020without\u0020\u005B\u0060Self\u003A\u003Aenabled\u0060\u005D.\u0020A\u0020tenant\u0020that\u0020states\u0020a\u0020CIMD\u0020posture\u0020states\u0020all\u0020of\u0020it\u003B\u0020a\ntenant\u0020that\u0020states\u0020none\u0020inherits\u0020its\u0020organization\u0027s\u0020whole\u0020posture\u0020rather\u0020than\u0020half\u0020of\u0020one,\nwhich\u0020is\u0020the\u0020only\u0020merge\u0020that\u0020cannot\u0020produce\u0020a\u0020combination\u0020neither\u0020party\u0020wrote.\u0020\u0023\u0020The\u0020two\nfields\u0020that\u0020can\u0020widen,\u0020and\u0020the\u0020seven\u0020that\u0020cannot\u0020\u005B\u0060Self\u003A\u003Aenabled\u0060\u005D\u0020and\u0020\u005B\u0060Self\u003A\u003Aallow_http\u0060\u005D\nare\u0020\u002A\u002Aordered\u002A\u002A\u003A\u0020a\u0020tenant\u0020may\u0020turn\u0020either\u0020off\u0020but\u0020never\u0020on,\u0020exactly\u0020as\n\u0060dynamic_registration\u0060\u0020may\u0020only\u0020move\u0020down\u0020its\u0020ladder.\u0020Everything\u0020else\u0020names\u0020\u002Athis\u0020tenant\u0027s\u002A\ndomains\u0020or\u0020\u002Athis\u0020tenant\u0027s\u002A\u0020bounds,\u0020and\u0020there\u0020is\u0020no\u0020sense\u0020in\u0020which\u0020one\u0020tenant\u0027s\u0020list\u0020of\ntrusted\u0020publishers\u0020is\u0020stricter\u0020than\u0020another\u0027s\u0020\u2014\u0020the\u0020same\u0020argument\u0020\u005B\u0060OidcPolicy\u0060\u005D\u0020already\nmakes\u0020for\u0020\u0060dcr_allowed_redirect_hosts\u0060.\u0020\u0023\u0020Every\u0020bound\u0020here\u0020is\u0020a\u0020security\u0020control\n\u005B\u0060Self\u003A\u003Amax_metadata_bytes\u0060\u005D,\u0020\u005B\u0060Self\u003A\u003Amin_cache_secs\u0060\u005D\u0020and\u0020\u005B\u0060Self\u003A\u003Amax_cache_secs\u0060\u005D\u0020are\u0020not\ntuning\u0020knobs.\u0020They\u0020are,\u0020respectively,\u0020the\u0020ceiling\u0020on\u0020a\u0020read\u0020from\u0020an\u0020attacker\u002Dchosen\u0020URL,\u0020the\nfloor\u0020under\u0020how\u0020often\u0020that\u0020read\u0020may\u0020be\u0020repeated,\u0020and\u0020the\u0020ceiling\u0020on\u0020how\u0020long\u0020its\u0020result\u0020may\nbe\u0020trusted.\u0020Each\u0020is\u0020clamped\u0020again\u0020in\u0020code\u0020against\u0020the\u0020three\u0020constants\u0020above,\u0020so\u0020a\u0020settings\nrow\u0020written\u0020by\u0020hand\u0020cannot\u0020lift\u0020them.",
@@ -4171,6 +4541,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_provider"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024allowSha1Signatures",
+            "name": "allowSha1Signatures",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_allowSha1Signatures"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024allowTenantInheritance",
             "name": "allowTenantInheritance",
             "summary": "",
@@ -4210,6 +4585,11 @@ Search.appendIndex(
             "name": "buttonIcon",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_buttonIcon"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024idpMetadataSigningCertPem",
+            "name": "idpMetadataSigningCertPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_idpMetadataSigningCertPem"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024idpSigningCertPem",
             "name": "idpSigningCertPem",
@@ -4386,6 +4766,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateNotificationRuleRequest.html#property_recipientEmails"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNotificationRuleRequest\u003A\u003A\u0024windowMinutes",
+            "name": "windowMinutes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNotificationRuleRequest.html#property_windowMinutes"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest",
             "name": "CreateOAuth2ClientRequest",
             "summary": "The\u0020\u0060CreateOAuth2ClientRequest\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
@@ -4441,10 +4826,30 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_authnRequestParams"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024backchannelAuthenticationRequestSigningAlg",
+            "name": "backchannelAuthenticationRequestSigningAlg",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_backchannelAuthenticationRequestSigningAlg"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024backchannelClientNotificationEndpoint",
+            "name": "backchannelClientNotificationEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_backchannelClientNotificationEndpoint"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024backchannelLogoutUri",
             "name": "backchannelLogoutUri",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_backchannelLogoutUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024backchannelTokenDeliveryMode",
+            "name": "backchannelTokenDeliveryMode",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_backchannelTokenDeliveryMode"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024backchannelUserCodeParameter",
+            "name": "backchannelUserCodeParameter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_backchannelUserCodeParameter"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024browserSso",
             "name": "browserSso",
@@ -5141,6 +5546,281 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateWebhookRequest.html#property_retryPolicy"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DeprovisionPolicy",
+            "name": "DeprovisionPolicy",
+            "summary": "What\u0020happens\u0020downstream\u0020to\u0020a\u0020user\u0020who\u0020falls\u0020out\u0020of\u0020scope\u0020or\u0020is\u0020no\u0020longer\u0020active.\u0020Erasure\nalways\u0020deletes,\u0020whatever\u0020this\u0020says.",
+            "url": "classes/Axiam-Sdk-Management-Models-DeprovisionPolicy.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DeprovisionPolicy\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020DeprovisionPolicy,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-DeprovisionPolicy.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DeprovisionPolicy\u003A\u003ADeactivate",
+            "name": "Deactivate",
+            "summary": "The\u0020wire\u0020value\u0020\u0060deactivate\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DeprovisionPolicy.html#enumcase_Deactivate"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DeprovisionPolicy\u003A\u003ADelete",
+            "name": "Delete",
+            "summary": "The\u0020wire\u0020value\u0020\u0060delete\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DeprovisionPolicy.html#enumcase_Delete"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DeprovisionPolicy\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-DeprovisionPolicy.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig",
+            "name": "DirectoryConfig",
+            "summary": "A\u0020tenant\u0027s\u0020directory\u0020configuration,\u0020as\u0020stored\u0020and\u0020as\u0020read\u0020back.\u0020Carries\u0020no\u0020secret\u003A\u0020see\u0020the\nmodule\u0020documentation.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020DirectoryConfig.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020DirectoryConfig\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024baseDn",
+            "name": "baseDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_baseDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024bindDn",
+            "name": "bindDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_bindDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024groupMappings",
+            "name": "groupMappings",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_groupMappings"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024groupMemberAttribute",
+            "name": "groupMemberAttribute",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_groupMemberAttribute"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024groupNestingDepth",
+            "name": "groupNestingDepth",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_groupNestingDepth"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024jitProvisioning",
+            "name": "jitProvisioning",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_jitProvisioning"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024kind",
+            "name": "kind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_kind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024startTls",
+            "name": "startTls",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_startTls"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024syncIntervalSecs",
+            "name": "syncIntervalSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_syncIntervalSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024trustAnchorsPem",
+            "name": "trustAnchorsPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_trustAnchorsPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024updatedAt",
+            "name": "updatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024url",
+            "name": "url",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_url"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024userAttributeMap",
+            "name": "userAttributeMap",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_userAttributeMap"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024userFilter",
+            "name": "userFilter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_userFilter"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024groupBaseDn",
+            "name": "groupBaseDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_groupBaseDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003A\u0024groupFilter",
+            "name": "groupFilter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#property_groupFilter"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryKind",
+            "name": "DirectoryKind",
+            "summary": "Which\u0020kind\u0020of\u0020directory\u0020server\u0020a\u0020configuration\u0020points\u0020at.\u0020It\u0020drives\u0020\u002A\u002Adefaults\u0020only\u002A\u002A\u003A\u0020the\nexternal\u002Did\u0020attribute,\u0020the\u0020group\u002Dmembership\u0020strategy\u0020and\u0020the\u0020change\u0020attribute\u0020the\u0020sync\u0020job\nreads.\u0020Every\u0020one\u0020of\u0020them\u0020is\u0020still\u0020an\u0020explicit,\u0020editable\u0020field\u0020of\u0020the\u0020configuration\u0020\u0028or,\u0020for\nthe\u0020strategy\u0020and\u0020change\u0020attribute,\u0020derived\u0020from\u0020this\u0020value\u0020at\u0020the\u0020point\u0020of\u0020use\u0029\u003B\u0020nothing\nabout\u0020the\u0020kind\u0020changes\u0020what\u0020is\u0020\u002Aallowed\u002A.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryKind.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryKind\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020DirectoryKind,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryKind.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryKind\u003A\u003AOpenLdap",
+            "name": "OpenLdap",
+            "summary": "The\u0020wire\u0020value\u0020\u0060open_ldap\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryKind.html#enumcase_OpenLdap"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryKind\u003A\u003AActiveDirectory",
+            "name": "ActiveDirectory",
+            "summary": "The\u0020wire\u0020value\u0020\u0060active_directory\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryKind.html#enumcase_ActiveDirectory"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryKind\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryKind.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult",
+            "name": "DirectoryLinkResult",
+            "summary": "What\u0020linking\u0020did.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020DirectoryLinkResult.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020DirectoryLinkResult\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003A\u0024certificatesRevoked",
+            "name": "certificatesRevoked",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#property_certificatesRevoked"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003A\u0024directoryExternalId",
+            "name": "directoryExternalId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#property_directoryExternalId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003A\u0024userId",
+            "name": "userId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#property_userId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003A\u0024wasAlreadyLinked",
+            "name": "wasAlreadyLinked",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#property_wasAlreadyLinked"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryLinkResult\u003A\u003A\u0024webauthnCredentialsDeleted",
+            "name": "webauthnCredentialsDeleted",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryLinkResult.html#property_webauthnCredentialsDeleted"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus",
+            "name": "DirectorySyncStatus",
+            "summary": "A\u0020read\u002Donly\u0020view\u0020of\u0020the\u0020sync\u0020job\u0027s\u0020state\u0020for\u0020one\u0020tenant.\u0020Counts\u0020of\u0020what\u0020a\u0020run\u0020did\u0020are\u0020in\u0020its\naudit\u0020rows,\u0020and\u0020no\u0020account\u0020id\u0020is\u0020here.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020DirectorySyncStatus.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020DirectorySyncStatus\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003A\u0024fullRequired",
+            "name": "fullRequired",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#property_fullRequired"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003A\u0024hasWatermark",
+            "name": "hasWatermark",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#property_hasWatermark"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003A\u0024lastAttemptAt",
+            "name": "lastAttemptAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#property_lastAttemptAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003A\u0024lastFullRunAt",
+            "name": "lastFullRunAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#property_lastFullRunAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectorySyncStatus\u003A\u003A\u0024lastResult",
+            "name": "lastResult",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectorySyncStatus.html#property_lastResult"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\EmailConfig",
             "name": "EmailConfig",
             "summary": "Fully\u0020resolved\u0020email\u0020configuration\u0020\u0028all\u0020fields\u0020present\u0029.",
@@ -5456,6 +6136,11 @@ Search.appendIndex(
             "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#method_jsonSerialize"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024allowSha1Signatures",
+            "name": "allowSha1Signatures",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_allowSha1Signatures"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024allowTenantInheritance",
             "name": "allowTenantInheritance",
             "summary": "",
@@ -5570,6 +6255,11 @@ Search.appendIndex(
             "name": "buttonIcon",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_buttonIcon"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024idpMetadataSigningCertPem",
+            "name": "idpMetadataSigningCertPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_idpMetadataSigningCertPem"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024metadataUrl",
             "name": "metadataUrl",
@@ -6116,9 +6806,44 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-Group.html#property_updatedAt"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GroupMapping",
+            "name": "GroupMapping",
+            "summary": "One\u0020row\u0020of\u0020the\u0020group\u002Dmapping\u0020table\u0020\u0028G\u002D3,\u0020T23.3.4,\u0020D\u002D30\u0029\u003A\u0020a\u0020directory\u0020group,\u0020named\u0020by\u0020its\ndistinguished\u0020name,\u0020and\u0020the\u0020AXIAM\u0020group\u0020a\u0020member\u0020of\u0020it\u0020is\u0020put\u0020into.\u0020\u002A\u002AThe\u0020table\u0020is\u0020the\u0020only\nway\u0020a\u0020directory\u0020group\u0020reaches\u0020an\u0020AXIAM\u0020group.\u002A\u002A\u0020There\u0020is\u0020no\u0020match\u0020by\u0020name,\u0020no\u0020prefix\u0020or\nwildcard,\u0020and\u0020no\u0020AXIAM\u0020group\u0020is\u0020ever\u0020created\u0020from\u0020a\u0020directory\u0020one\u003A\u0020a\u0020directory\u0020administrator\nwho\u0020names\u0020a\u0020group\u0020\u0060admins\u0060\u0020gains\u0020nothing\u0020unless\u0020a\u0020tenant\u0020administrator\u0020mapped\u0020it\u0020here.\u0020The\nDN\u0020is\u0020stored\u0020as\u0020the\u0020administrator\u0020typed\u0020it\u0020and\u0020compared\u0020after\u0020RFC\u00204514\u0020normalisation\n\u0028\u0060axiam_directory\u003A\u003Adn\u0060\u0029,\u0020so\u0020\u0060CN\u003DStaff,\u0020OU\u003DGroups\u0060\u0020and\u0020\u0060cn\u003Dstaff,ou\u003Dgroups\u0060\u0020are\u0020the\u0020same\u0020row.",
+            "url": "classes/Axiam-Sdk-Management-Models-GroupMapping.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GroupMapping\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020GroupMapping.",
+            "url": "classes/Axiam-Sdk-Management-Models-GroupMapping.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GroupMapping\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020GroupMapping\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-GroupMapping.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GroupMapping\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-GroupMapping.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GroupMapping\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-GroupMapping.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GroupMapping\u003A\u003A\u0024directoryGroupDn",
+            "name": "directoryGroupDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-GroupMapping.html#property_directoryGroupDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GroupMapping\u003A\u003A\u0024groupId",
+            "name": "groupId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-GroupMapping.html#property_groupId"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\HealthResponse",
             "name": "HealthResponse",
-            "summary": "The\u0020\u0060HealthResponse\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
+            "summary": "Response\u0020body\u0020for\u0020\u0060GET\u0020\/health\u0060.\u0020\u0060profile\u0060\u0020and\u0020\u0060unavailable\u0060\u0020are\u0020additive\u0020\u0028G\u002D8,\u0020D\u002D59\u0029\u003A\u0020a\nclient\u0020that\u0020reads\u0020only\u0020\u0060status\u0060\u0020is\u0020unaffected.",
             "url": "classes/Axiam-Sdk-Management-Models-HealthResponse.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\HealthResponse\u003A\u003A__construct\u0028\u0029",
@@ -6141,10 +6866,20 @@ Search.appendIndex(
             "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-HealthResponse.html#method_jsonSerialize"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\HealthResponse\u003A\u003A\u0024profile",
+            "name": "profile",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-HealthResponse.html#property_profile"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\HealthResponse\u003A\u003A\u0024status",
             "name": "status",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-HealthResponse.html#property_status"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\HealthResponse\u003A\u003A\u0024unavailable",
+            "name": "unavailable",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-HealthResponse.html#property_unavailable"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ImportCaCertificateRequest",
             "name": "ImportCaCertificateRequest",
@@ -6181,6 +6916,46 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-ImportCaCertificateRequest.html#property_privateKeyPem"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential",
+            "name": "IssueSamlIdpCredential",
+            "summary": "\u0060POST\u0020\u2026\/saml\/idp\u002Dcredentials\u0060\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020IssueSamlIdpCredential.",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020IssueSamlIdpCredential\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003A\u0024issuerCaId",
+            "name": "issuerCaId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#property_issuerCaId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003A\u0024slot",
+            "name": "slot",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#property_slot"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003A\u0024validityDays",
+            "name": "validityDays",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#property_validityDays"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\KeyAlgorithm",
             "name": "KeyAlgorithm",
             "summary": "The\u0020type\u0020of\u0020key\u0020algorithm\u0020used\u0020for\u0020a\u0020certificate.",
@@ -6205,6 +6980,36 @@ Search.appendIndex(
             "name": "Unknown",
             "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
             "url": "classes/Axiam-Sdk-Management-Models-KeyAlgorithm.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\LinkDirectoryAccount",
+            "name": "LinkDirectoryAccount",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\/links\u0060\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-LinkDirectoryAccount.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\LinkDirectoryAccount\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020LinkDirectoryAccount.",
+            "url": "classes/Axiam-Sdk-Management-Models-LinkDirectoryAccount.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\LinkDirectoryAccount\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020LinkDirectoryAccount\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-LinkDirectoryAccount.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\LinkDirectoryAccount\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-LinkDirectoryAccount.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\LinkDirectoryAccount\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-LinkDirectoryAccount.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\LinkDirectoryAccount\u003A\u003A\u0024userId",
+            "name": "userId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-LinkDirectoryAccount.html#property_userId"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\LockoutPolicy",
             "name": "LockoutPolicy",
@@ -6706,6 +7511,31 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-MtlsTrustAnchorResponse.html#property_trustedAnchors"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NameIdFormat",
+            "name": "NameIdFormat",
+            "summary": "How\u0020the\u0020assertion\u0027s\u0020\u0060NameID\u0060\u0020is\u0020formed\u0020\u0028per\u0020service\u0020provider\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NameIdFormat\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020NameIdFormat,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NameIdFormat\u003A\u003APersistent",
+            "name": "Persistent",
+            "summary": "The\u0020wire\u0020value\u0020\u0060persistent\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#enumcase_Persistent"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NameIdFormat\u003A\u003AEmailAddress",
+            "name": "EmailAddress",
+            "summary": "The\u0020wire\u0020value\u0020\u0060email_address\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#enumcase_EmailAddress"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NameIdFormat\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#enumcase_Unknown"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NotificationEventType",
             "name": "NotificationEventType",
             "summary": "Events\u0020that\u0020can\u0020trigger\u0020an\u0020admin\u0020notification.",
@@ -6800,6 +7630,11 @@ Search.appendIndex(
             "name": "ServiceAccountDeleted",
             "summary": "The\u0020wire\u0020value\u0020\u0060service_account_deleted\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-NotificationEventType.html#enumcase_ServiceAccountDeleted"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NotificationEventType\u003A\u003AScimDeliveryFailed",
+            "name": "ScimDeliveryFailed",
+            "summary": "The\u0020wire\u0020value\u0020\u0060scim_delivery_failed\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NotificationEventType.html#enumcase_ScimDeliveryFailed"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NotificationEventType\u003A\u003AUnknown",
             "name": "Unknown",
@@ -6905,6 +7740,11 @@ Search.appendIndex(
             "name": "updatedAt",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-NotificationRuleResponse.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NotificationRuleResponse\u003A\u003A\u0024windowMinutes",
+            "name": "windowMinutes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NotificationRuleResponse.html#property_windowMinutes"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientCreatedResponse",
             "name": "OAuth2ClientCreatedResponse",
@@ -7106,6 +7946,21 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_updatedAt"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024backchannelAuthenticationRequestSigningAlg",
+            "name": "backchannelAuthenticationRequestSigningAlg",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_backchannelAuthenticationRequestSigningAlg"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024backchannelClientNotificationEndpoint",
+            "name": "backchannelClientNotificationEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_backchannelClientNotificationEndpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024backchannelTokenDeliveryMode",
+            "name": "backchannelTokenDeliveryMode",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_backchannelTokenDeliveryMode"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024jwks",
             "name": "jwks",
             "summary": "",
@@ -7303,7 +8158,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy",
             "name": "OidcPolicy",
-            "summary": "OpenID\u0020Connect\u0020surface\u0020controls\u0020\u0028X7\u0020G8,\u0020plan\u0020\u00A74.6\/\u00A74.8\u003B\u0020T21.4\u0029.\u0020Settings\u0020that\u0020are\u0020not\npassword\u0020rules,\u0020here\u0020because\u0020this\u0020is\u0020the\u0020org\u002Dbaseline\u002Dplus\u002Dtenant\u002Doverride\u0020surface\u0020every\nother\u0020per\u002Dtenant\u0020control\u0020lives\u0020on.\u0020They\u0020are\u0020not\u0020all\u0020of\u0020the\u0020same\u0020kind\u0020as\u0020each\u0020other,\u0020and\nwhich\u0020is\u0020which\u0020is\u0020the\u0020whole\u0020of\u0020what\u0020\u005B\u0060validate_tenant_override\u0060\u005D\u0020and\n\u005B\u0060clamp_overrides_to_org\u0060\u005D\u0020read,\u0020so\u0020it\u0020is\u0020set\u0020out\u0020rather\u0020than\u0020inferred.\u0020\u002A\u002AOrdered\u002A\u002A\u0020\u2014\u0020a\ntenant\u0020may\u0020be\u0020stricter\u0020than\u0020its\u0020organization\u0020and\u0020never\u0020more\u0020permissive\u003A\u0020\u002A\n\u005B\u0060Self\u003A\u003Asensitive_scopes_enabled\u0060\u005D,\u0020validated\u0020\u002A\u002Adisable\u002Donly\u002A\u002A\u0020\u2014\u0020the\u0020mirror\u0020image\u0020of\n\u0060mfa_enforced\u0060,\u0020because\u0020releasing\u0020personal\u0020data\u0020is\u0020the\u0020less\u002Drestrictive\u0020direction,\u0020so\u0020a\ntenant\u0020can\u0020turn\u0020its\u0020organization\u0027s\u0020decision\u0020off\u0020but\u0020never\u0020on.\u0020\u002A\n\u005B\u0060Self\u003A\u003Adynamic_registration\u0060\u005D,\u0020on\u0020the\u0020ladder\u0020\u0060disabled\u0060\u0020\u2192\u0020\u0060initial_access_token\u0060\u0020\u2192\n\u0060anonymous\u0060\u003A\u0020a\u0020tenant\u0020may\u0020move\u0020down\u0020it\u0020and\u0020never\u0020up.\u0020\u002A\u0020\u005B\u0060Self\u003A\u003Adcr_max_clients\u0060\u005D\u0020and\n\u005B\u0060Self\u003A\u003Adcr_unused_client_ttl_days\u0060\u005D,\u0020on\u0020the\u0020ordinary\u0020\u0060tenant\u0020\u003C\u003D\u0020org\u0060\u0020rule\u0020\u2014\u0020with\u0020the\nwrinkle\u0020that\u0020\u00600\u0060\u0020on\u0020the\u0020second\u0020means\u0020\u002Anever\u0020sweep\u002A,\u0020which\u0020is\u0020the\u0020longest\u0020window\u0020of\u0020all\u0020and\nis\u0020handled\u0020by\u0020\u005B\u0060dcr_ttl_strictness\u0060\u005D.\u0020\u002A\u002ANot\u0020ordered\u002A\u002A,\u0020therefore\u0020never\u0020validated\u0020against\u0020the\nbaseline\u0020and\u0020never\u0020clamped\u003A\u0020\u002A\u0020\u005B\u0060Self\u003A\u003Adefault_locale\u0060\u005D.\u0020A\u0020language\u0020is\u0020a\u0020presentation\npreference\u003B\u0020there\u0020is\u0020no\u0020sense\u0020in\u0020which\u0020Italian\u0020is\u0020stricter\u0020than\u0020French.\u0020\u002A\n\u005B\u0060Self\u003A\u003Adcr_allowed_scopes\u0060\u005D,\u0020\u005B\u0060Self\u003A\u003Adcr_allowed_redirect_hosts\u0060\u005D\u0020and\n\u005B\u0060Self\u003A\u003Aexternal_client_allowed_resources\u0060\u005D.\u0020Each\u0020names\u0020per\u002Dtenant\u0020resources\u0020\u2014\u0020\u002Athis\u002A\ntenant\u0027s\u0020MCP\u0020servers,\u0020\u002Athis\u002A\u0020tenant\u0027s\u0020callback\u0020hosts\u0020\u2014\u0020and\u0020there\u0020is\u0020no\u0020sense\u0020in\u0020which\u0020one\nsuch\u0020list\u0020is\u0020stricter\u0020than\u0020another.\u0020A\u0020subset\u0020rule\u0020would\u0020force\u0020an\u0020organization\u0020to\u0020enumerate\nevery\u0020tenant\u0027s\u0020resource\u0020servers\u0020in\u0020its\u0020own\u0020baseline\u0020before\u0020any\u0020tenant\u0020could\u0020name\u0020one.\u0020The\nmodel\u0027s\u0020rule\u0020is\u0020\u0022a\u0020tenant\u0020may\u0020only\u0020be\u0020more\u0020restrictive\u0022,\u0020which\u0020binds\u0020every\u0020field\u0020that\u0020\u002Ahas\u002A\na\u0020restrictiveness\u003B\u0020a\u0020field\u0020that\u0020has\u0020none\u0020cannot\u0020violate\u0020it.\u0020One\u0020cross\u002Dfield\u0020interlock\u0020spans\nboth\u0020groups\u0020and\u0020is\u0020checked\u0020on\u0020the\u0020resolved\u0020policy\u0020rather\u0020than\u0020on\u0020either\u0020input\u003A\u0020see\n\u005B\u0060validate_dcr_policy\u0060\u005D.",
+            "summary": "OpenID\u0020Connect\u0020surface\u0020controls\u0020\u0028X7\u0020G8,\u0020plan\u0020\u00A74.6\/\u00A74.8\u003B\u0020T21.4\u0029.\u0020Settings\u0020that\u0020are\u0020not\npassword\u0020rules,\u0020here\u0020because\u0020this\u0020is\u0020the\u0020org\u002Dbaseline\u002Dplus\u002Dtenant\u002Doverride\u0020surface\u0020every\nother\u0020per\u002Dtenant\u0020control\u0020lives\u0020on.\u0020They\u0020are\u0020not\u0020all\u0020of\u0020the\u0020same\u0020kind\u0020as\u0020each\u0020other,\u0020and\nwhich\u0020is\u0020which\u0020is\u0020the\u0020whole\u0020of\u0020what\u0020\u005B\u0060validate_tenant_override\u0060\u005D\u0020and\n\u005B\u0060clamp_overrides_to_org\u0060\u005D\u0020read,\u0020so\u0020it\u0020is\u0020set\u0020out\u0020rather\u0020than\u0020inferred.\u0020\u002A\u002AOrdered\u002A\u002A\u0020\u2014\u0020a\ntenant\u0020may\u0020be\u0020stricter\u0020than\u0020its\u0020organization\u0020and\u0020never\u0020more\u0020permissive\u003A\u0020\u002A\n\u005B\u0060Self\u003A\u003Asensitive_scopes_enabled\u0060\u005D,\u0020validated\u0020\u002A\u002Adisable\u002Donly\u002A\u002A\u0020\u2014\u0020the\u0020mirror\u0020image\u0020of\n\u0060mfa_enforced\u0060,\u0020because\u0020releasing\u0020personal\u0020data\u0020is\u0020the\u0020less\u002Drestrictive\u0020direction,\u0020so\u0020a\ntenant\u0020can\u0020turn\u0020its\u0020organization\u0027s\u0020decision\u0020off\u0020but\u0020never\u0020on.\u0020\u002A\u0020\u005B\u0060Self\u003A\u003Asaml_idp_enabled\u0060\u005D,\nvalidated\u0020\u002A\u002Adisable\u002Donly\u002A\u002A\u0020exactly\u0020like\u0020\u005B\u0060Self\u003A\u003Asensitive_scopes_enabled\u0060\u005D\u0020\u0028D\u002D20\u0029\u003A\u0020a\u0020tenant\nmay\u0020turn\u0020its\u0020organization\u0027s\u0020\u0060true\u0060\u0020off\u0020and\u0020never\u0020its\u0020\u0060false\u0060\u0020on.\u0020\u002A\u0020\u005B\u0060Self\u003A\u003Assf_enabled\u0060\u005D,\nvalidated\u0020\u002A\u002Adisable\u002Donly\u002A\u002A\u0020the\u0020same\u0020way\u0020\u0028D\u002D45\u0029.\u0020\u002A\u0020\u005B\u0060Self\u003A\u003Adynamic_registration\u0060\u005D,\u0020on\u0020the\nladder\u0020\u0060disabled\u0060\u0020\u2192\u0020\u0060initial_access_token\u0060\u0020\u2192\u0020\u0060anonymous\u0060\u003A\u0020a\u0020tenant\u0020may\u0020move\u0020down\u0020it\u0020and\nnever\u0020up.\u0020\u002A\u0020\u005B\u0060Self\u003A\u003Adcr_max_clients\u0060\u005D\u0020and\u0020\u005B\u0060Self\u003A\u003Adcr_unused_client_ttl_days\u0060\u005D,\u0020on\u0020the\nordinary\u0020\u0060tenant\u0020\u003C\u003D\u0020org\u0060\u0020rule\u0020\u2014\u0020with\u0020the\u0020wrinkle\u0020that\u0020\u00600\u0060\u0020on\u0020the\u0020second\u0020means\u0020\u002Anever\u0020sweep\u002A,\nwhich\u0020is\u0020the\u0020longest\u0020window\u0020of\u0020all\u0020and\u0020is\u0020handled\u0020by\u0020\u005B\u0060dcr_ttl_strictness\u0060\u005D.\u0020\u002A\u002ANot\nordered\u002A\u002A,\u0020therefore\u0020never\u0020validated\u0020against\u0020the\u0020baseline\u0020and\u0020never\u0020clamped\u003A\u0020\u002A\n\u005B\u0060Self\u003A\u003Adefault_locale\u0060\u005D.\u0020A\u0020language\u0020is\u0020a\u0020presentation\u0020preference\u003B\u0020there\u0020is\u0020no\u0020sense\u0020in\nwhich\u0020Italian\u0020is\u0020stricter\u0020than\u0020French.\u0020\u002A\u0020\u005B\u0060Self\u003A\u003Adcr_allowed_scopes\u0060\u005D,\n\u005B\u0060Self\u003A\u003Adcr_allowed_redirect_hosts\u0060\u005D\u0020and\u0020\u005B\u0060Self\u003A\u003Aexternal_client_allowed_resources\u0060\u005D.\u0020Each\nnames\u0020per\u002Dtenant\u0020resources\u0020\u2014\u0020\u002Athis\u002A\u0020tenant\u0027s\u0020MCP\u0020servers,\u0020\u002Athis\u002A\u0020tenant\u0027s\u0020callback\u0020hosts\u0020\u2014\nand\u0020there\u0020is\u0020no\u0020sense\u0020in\u0020which\u0020one\u0020such\u0020list\u0020is\u0020stricter\u0020than\u0020another.\u0020A\u0020subset\u0020rule\u0020would\nforce\u0020an\u0020organization\u0020to\u0020enumerate\u0020every\u0020tenant\u0027s\u0020resource\u0020servers\u0020in\u0020its\u0020own\u0020baseline\nbefore\u0020any\u0020tenant\u0020could\u0020name\u0020one.\u0020The\u0020model\u0027s\u0020rule\u0020is\u0020\u0022a\u0020tenant\u0020may\u0020only\u0020be\u0020more\nrestrictive\u0022,\u0020which\u0020binds\u0020every\u0020field\u0020that\u0020\u002Ahas\u002A\u0020a\u0020restrictiveness\u003B\u0020a\u0020field\u0020that\u0020has\u0020none\ncannot\u0020violate\u0020it.\u0020One\u0020cross\u002Dfield\u0020interlock\u0020spans\u0020both\u0020groups\u0020and\u0020is\u0020checked\u0020on\u0020the\nresolved\u0020policy\u0020rather\u0020than\u0020on\u0020either\u0020input\u003A\u0020see\u0020\u005B\u0060validate_dcr_policy\u0060\u005D.",
             "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003A__construct\u0028\u0029",
@@ -7370,6 +8225,21 @@ Search.appendIndex(
             "name": "externalClientAllowedResources",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_externalClientAllowedResources"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003A\u0024samlIdpEnabled",
+            "name": "samlIdpEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_samlIdpEnabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003A\u0024ssfEnabled",
+            "name": "ssfEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfEnabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcPolicy\u003A\u003A\u0024ssfInactiveReason",
+            "name": "ssfInactiveReason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfInactiveReason"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OpaqueEnrollment",
             "name": "OpaqueEnrollment",
@@ -7500,6 +8370,51 @@ Search.appendIndex(
             "name": "updatedAt",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-Organization.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata",
+            "name": "ParseSamlSpMetadata",
+            "summary": "\u0060POST\u0020\u2026\/saml\/parse\u002Dsp\u002Dmetadata\u0060\u0020body\u003A\u0020\u002A\u002Aexactly\u0020one\u002A\u002A\u0020of\u0020the\u0020two\u0020members.",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ParseSamlSpMetadata.",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003AfromUrl\u0028\u0029",
+            "name": "fromUrl",
+            "summary": "A\u0020request\u0020for\u0020the\u0020server\u0020to\u0020fetch\u0020the\u0020SP\u0027s\u0020metadata\u0020from\u0020\u0060\u0024value\u0060\u0020\u0028\u0060https\u0060\u0020only,\u0020through\nits\u0020SSRF\u0020guard\u0029.\u0020Leaves\u0020\u0060metadata_xml\u0060\u0020absent.",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#method_fromUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003AfromXml\u0028\u0029",
+            "name": "fromXml",
+            "summary": "A\u0020request\u0020carrying\u0020the\u0020SP\u0027s\u0020metadata\u0020document\u0020itself\u0020\u0028at\u0020most\u0020512\u0020KiB\u0029.\u0020Leaves\n\u0060metadata_url\u0060\u0020absent.",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#method_fromXml"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ParseSamlSpMetadata\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003A\u0024metadataUrl",
+            "name": "metadataUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#property_metadataUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ParseSamlSpMetadata\u003A\u003A\u0024metadataXml",
+            "name": "metadataXml",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ParseSamlSpMetadata.html#property_metadataXml"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PasswordPolicy",
             "name": "PasswordPolicy",
@@ -8771,6 +9686,1016 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-RotateSecretResponse.html#property_clientSecret"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlBinding",
+            "name": "SamlBinding",
+            "summary": "A\u0020SAML\u00202.0\u0020protocol\u0020binding\u0020\u0028SAML\u0020Bindings\u0020\u00A73\u0029.\u0020The\u0020response\u0020binding\u0020for\u0020Web\u0020Browser\u0020SSO\u0020is\nalways\u0020\u005B\u0060Self\u003A\u003AHttpPost\u0060\u005D,\u0020but\u0020the\u0020enum\u0020keeps\u0020both\u0020because\u0020SP\u0020metadata\u0020carries\u0020both,\u0020and\u0020an\n\u0060slo_url\u0060\u0020may\u0020use\u0020either.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlBinding.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlBinding\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SamlBinding,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlBinding.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlBinding\u003A\u003AHttpPost",
+            "name": "HttpPost",
+            "summary": "The\u0020wire\u0020value\u0020\u0060http_post\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlBinding.html#enumcase_HttpPost"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlBinding\u003A\u003AHttpRedirect",
+            "name": "HttpRedirect",
+            "summary": "The\u0020wire\u0020value\u0020\u0060http_redirect\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlBinding.html#enumcase_HttpRedirect"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlBinding\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlBinding.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential",
+            "name": "SamlIdpCredential",
+            "summary": "The\u0020tenant\u0027s\u0020IdP\u0020signing\u0020credential,\u0020\u002A\u002Apublic\u0020facts\u0020only\u002A\u002A.\u0020There\u0020is\u0020no\u0020key\u0020on\u0020it\u0020and\u0020no\nfield\u0020a\u0020key\u0020could\u0020be\u0020put\u0020in\u003A\u0020the\u0020private\u0020key\u0020is\u0020generated\u0020by\u0020the\u0020server,\u0020sealed\u0020at\u0020rest,\nnever\u0020returned\u0020by\u0020any\u0020route\u0020and\u0020destroyed\u0020on\u0020retirement\u0020\u0028D\u002D21\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SamlIdpCredential.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SamlIdpCredential\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024certificatePem",
+            "name": "certificatePem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_certificatePem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024fingerprint",
+            "name": "fingerprint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_fingerprint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024issuerCaId",
+            "name": "issuerCaId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_issuerCaId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024notAfter",
+            "name": "notAfter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_notAfter"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024notBefore",
+            "name": "notBefore",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_notBefore"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024serial",
+            "name": "serial",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_serial"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024status",
+            "name": "status",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_status"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003A\u0024retiredAt",
+            "name": "retiredAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#property_retiredAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialPromotion",
+            "name": "SamlIdpCredentialPromotion",
+            "summary": "What\u0020promoting\u0020the\u0020\u0060next\u0060\u0020credential\u0020did.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialPromotion.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialPromotion\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SamlIdpCredentialPromotion.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialPromotion.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialPromotion\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SamlIdpCredentialPromotion\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialPromotion.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialPromotion\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialPromotion.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialPromotion\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialPromotion.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialPromotion\u003A\u003A\u0024active",
+            "name": "active",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialPromotion.html#property_active"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialPromotion\u003A\u003A\u0024retired",
+            "name": "retired",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialPromotion.html#property_retired"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus",
+            "name": "SamlIdpCredentialStatus",
+            "summary": "Where\u0020a\u0020signing\u0020credential\u0020is\u0020in\u0020its\u0020life.\u0020An\u0020open\u0020set\u003A\u0020an\u0020SDK\u0020decodes\u0020a\u0020value\u0020it\u0020does\u0020not\nknow\u0020without\u0020failing.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SamlIdpCredentialStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus\u003A\u003AActive",
+            "name": "Active",
+            "summary": "The\u0020wire\u0020value\u0020\u0060active\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html#enumcase_Active"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus\u003A\u003ANext",
+            "name": "Next",
+            "summary": "The\u0020wire\u0020value\u0020\u0060next\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html#enumcase_Next"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus\u003A\u003ARetired",
+            "name": "Retired",
+            "summary": "The\u0020wire\u0020value\u0020\u0060retired\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html#enumcase_Retired"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo",
+            "name": "SamlIdpInfo",
+            "summary": "The\u0020tenant\u0027s\u0020SAML\u0020IdP,\u0020as\u0020the\u0020administrator\u0020needs\u0020to\u0020see\u0020it\u0020before\u0020and\u0020while\u0020switching\u0020it\non\u003A\u0020what\u0020an\u0020SP\u0020will\u0020be\u0020given,\u0020and\u0020whether\u0020it\u0020answers\u0020yet.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SamlIdpInfo.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SamlIdpInfo\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024entityId",
+            "name": "entityId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_entityId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024metadataServed",
+            "name": "metadataServed",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_metadataServed"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024metadataUrl",
+            "name": "metadataUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_metadataUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024samlAvailable",
+            "name": "samlAvailable",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_samlAvailable"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024samlIdpEnabled",
+            "name": "samlIdpEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_samlIdpEnabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024sloUrl",
+            "name": "sloUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_sloUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024ssoUrl",
+            "name": "ssoUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_ssoUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024activeCredentialId",
+            "name": "activeCredentialId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_activeCredentialId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpInfo\u003A\u003A\u0024nextCredentialId",
+            "name": "nextCredentialId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpInfo.html#property_nextCredentialId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpSlot",
+            "name": "SamlIdpSlot",
+            "summary": "Which\u0020slot\u0020a\u0020credential\u0020is\u0020issued\u0020into.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpSlot.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpSlot\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SamlIdpSlot,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpSlot.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpSlot\u003A\u003AActive",
+            "name": "Active",
+            "summary": "The\u0020wire\u0020value\u0020\u0060active\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpSlot.html#enumcase_Active"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpSlot\u003A\u003ANext",
+            "name": "Next",
+            "summary": "The\u0020wire\u0020value\u0020\u0060next\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpSlot.html#enumcase_Next"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpSlot\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpSlot.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider",
+            "name": "SamlServiceProvider",
+            "summary": "A\u0020registered\u0020service\u0020provider,\u0020as\u0020stored.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SamlServiceProvider.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SamlServiceProvider\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024acsUrls",
+            "name": "acsUrls",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_acsUrls"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024allowIdpInitiated",
+            "name": "allowIdpInitiated",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_allowIdpInitiated"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024allowedGroups",
+            "name": "allowedGroups",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_allowedGroups"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024attributeMappings",
+            "name": "attributeMappings",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_attributeMappings"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024displayName",
+            "name": "displayName",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_displayName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024encryptAssertions",
+            "name": "encryptAssertions",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_encryptAssertions"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024entityId",
+            "name": "entityId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_entityId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024nameIdFormat",
+            "name": "nameIdFormat",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_nameIdFormat"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024signResponses",
+            "name": "signResponses",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_signResponses"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024updatedAt",
+            "name": "updatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024wantAuthnRequestsSigned",
+            "name": "wantAuthnRequestsSigned",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_wantAuthnRequestsSigned"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024sloBinding",
+            "name": "sloBinding",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_sloBinding"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024sloUrl",
+            "name": "sloUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_sloUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024spEncryptionCertPem",
+            "name": "spEncryptionCertPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_spEncryptionCertPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003A\u0024spSigningCertPem",
+            "name": "spSigningCertPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#property_spSigningCertPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput",
+            "name": "SamlServiceProviderInput",
+            "summary": "Everything\u0020an\u0020administrator\u0020supplies\u0020when\u0020registering\u0020or\u0020replacing\u0020a\u0020service\u0020provider\n\u0028\u0060create\u0060\u0020and\u0020\u0060update\u0060\u0020both\u0020take\u0020it\u003B\u0020\u0060update\u0060\u0020is\u0020a\u0020full\u0020replacement\u0029.\u0020Every\u0020field\u0020but\n\u0060entity_id\u0060,\u0020\u0060display_name\u0060\u0020and\u0020\u0060acs_urls\u0060\u0020has\u0020a\u0020default,\u0020so\u0020a\u0020client\u0020written\u0020against\u0020a\nlater\u0020revision\u0020of\u0020this\u0020struct\u0020keeps\u0020working.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SamlServiceProviderInput.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SamlServiceProviderInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024acsUrls",
+            "name": "acsUrls",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_acsUrls"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024displayName",
+            "name": "displayName",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_displayName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024entityId",
+            "name": "entityId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_entityId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024allowIdpInitiated",
+            "name": "allowIdpInitiated",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_allowIdpInitiated"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024allowedGroups",
+            "name": "allowedGroups",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_allowedGroups"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024attributeMappings",
+            "name": "attributeMappings",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_attributeMappings"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024encryptAssertions",
+            "name": "encryptAssertions",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_encryptAssertions"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024nameIdFormat",
+            "name": "nameIdFormat",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_nameIdFormat"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024signResponses",
+            "name": "signResponses",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_signResponses"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024sloBinding",
+            "name": "sloBinding",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_sloBinding"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024sloUrl",
+            "name": "sloUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_sloUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024spEncryptionCertPem",
+            "name": "spEncryptionCertPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_spEncryptionCertPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024spSigningCertPem",
+            "name": "spSigningCertPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_spSigningCertPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003A\u0024wantAuthnRequestsSigned",
+            "name": "wantAuthnRequestsSigned",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#property_wantAuthnRequestsSigned"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft",
+            "name": "SamlSpMetadataDraft",
+            "summary": "A\u0020parse\u0020of\u0020SP\u0020metadata\u003A\u0020\u002A\u002Aa\u0020draft,\u0020not\u0020a\u0020registration\u002A\u002A.\u0020Nothing\u0020is\u0020stored\u0020until\u0020the\u0020caller\nsubmits\u0020\u0060service_provider\u0060\u0020to\u0020\u0060create_service_provider\u0060\u0020or\u0020\u0060update_service_provider\u0060,\u0020and\nnothing\u0020in\u0020it\u0020is\u0020trusted\u0020because\u0020it\u0020came\u0020from\u0020a\u0020document\u0020\u0028D\u002D41\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SamlSpMetadataDraft.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SamlSpMetadataDraft\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003A\u0024serviceProvider",
+            "name": "serviceProvider",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#property_serviceProvider"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003A\u0024warnings",
+            "name": "warnings",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#property_warnings"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003A\u0024encryptionCertificateFingerprint",
+            "name": "encryptionCertificateFingerprint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#property_encryptionCertificateFingerprint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlSpMetadataDraft\u003A\u003A\u0024signingCertificateFingerprint",
+            "name": "signingCertificateFingerprint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlSpMetadataDraft.html#property_signingCertificateFingerprint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimReconcileAccepted",
+            "name": "ScimReconcileAccepted",
+            "summary": "The\u0020body\u0020of\u0020a\u0020started\u0020reconciliation\u0027s\u0020\u0060202\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimReconcileAccepted.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimReconcileAccepted\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ScimReconcileAccepted.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimReconcileAccepted.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimReconcileAccepted\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ScimReconcileAccepted\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimReconcileAccepted.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimReconcileAccepted\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimReconcileAccepted.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimReconcileAccepted\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimReconcileAccepted.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimReconcileAccepted\u003A\u003A\u0024status",
+            "name": "status",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimReconcileAccepted.html#property_status"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimReconcileAccepted\u003A\u003A\u0024targetId",
+            "name": "targetId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimReconcileAccepted.html#property_targetId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuth",
+            "name": "ScimTargetAuth",
+            "summary": "How\u0020AXIAM\u0020authenticates\u0020to\u0020the\u0020downstream\u0020service\u0020provider,\u0020without\u0020the\u0020credential\u0020itself.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuth.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuth\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Decodes\u0020one\u0020\u0060type\u0060\u002Dtagged\u0020ScimTargetAuth\u0020object\u0020into\u0020its\u0020variant.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuth.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthBearer",
+            "name": "ScimTargetAuthBearer",
+            "summary": "The\u0020\u0060bearer\u0060\u0020arm\u0020of\u0020\u007B\u0040see\u0020ScimTargetAuth\u007D\u0020\u0028\u0060type\u003A\u0020\u0022bearer\u0022\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthBearer.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthBearer\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020the\u0020\u0060bearer\u0060\u0020arm,\u0020which\u0020carries\u0020no\u0020fields.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthBearer.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthBearer\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020the\u0020\u0060bearer\u0060\u0020arm\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthBearer.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthBearer\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020arm\u0020to\u0020its\u0020wire\u0020form,\u0020re\u002Dattaching\u0020\u0060type\u003A\u0020\u0022bearer\u0022\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthBearer.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthBearer\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020arm\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthBearer.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials",
+            "name": "ScimTargetAuthOauth2ClientCredentials",
+            "summary": "The\u0020\u0060oauth2_client_credentials\u0060\u0020arm\u0020of\u0020\u007B\u0040see\u0020ScimTargetAuth\u007D\u0020\u0028\u0060type\u003A\n\u0022oauth2_client_credentials\u0022\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020the\u0020\u0060oauth2_client_credentials\u0060\u0020arm.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020the\u0020\u0060oauth2_client_credentials\u0060\u0020arm\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020arm\u0020to\u0020its\u0020wire\u0020form,\u0020re\u002Dattaching\u0020\u0060type\u003A\u0020\u0022oauth2_client_credentials\u0022\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020arm\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials\u003A\u003A\u0024clientId",
+            "name": "clientId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html#property_clientId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials\u003A\u003A\u0024tokenUrl",
+            "name": "tokenUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html#property_tokenUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthOauth2ClientCredentials\u003A\u003A\u0024scope",
+            "name": "scope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthOauth2ClientCredentials.html#property_scope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthUnknown",
+            "name": "ScimTargetAuthUnknown",
+            "summary": "A\u0020\u007B\u0040see\u0020ScimTargetAuth\u007D\u0020whose\u0020\u0060type\u0060\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthUnknown.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthUnknown\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020the\u0020unknown\u0020arm\u0020from\u0020what\u0020the\u0020server\u0020sent.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthUnknown.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthUnknown\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Keeps\u0020the\u0020\u0060type\u0060\u0020of\u0020one\u0020decoded\u0020JSON\u0020object,\u0020never\u0020throwing,\u0020and\u0020drops\u0020every\u0020other\nmember\u003A\u0020only\u0020declared\u0020members\u0020are\u0020kept,\u0020and\u0020an\u0020unknown\u0020arm\u0020declares\u0020none\u0020\u0028CONTRACT.md\n\u00A729.5,\u0020\u00A731.2,\u0020\u00A734.2\u0020P12.1\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthUnknown.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthUnknown\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Refuses\u0020to\u0020render\u0020the\u0020wire\u0020form\u003A\u0020an\u0020unknown\u0020variant\u0020MUST\u0020NOT\u0020be\u0020sent,\u0020and\u0020the\u0020refusal\u0020is\nlocal,\u0020before\u0020anything\u0020is\u0020sent\u0020\u0028CONTRACT.md\u0020\u00A731.2,\u0020\u00A734.2\u0020P12.2\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthUnknown.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthUnknown\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020for\u0020\u0060json_encode\u0028\u0029\u0060\u0020\u002D\u002D\u0020a\u0020log\u0020line\u0020\u002D\u002D\u0020as\u0020the\u0020\u0060type\u0060\u0020alone\u003B\u0020never\u0020throws\n\u0028CONTRACT.md\u0020\u00A77\u0020rule\u00201,\u0020\u00A734.2\u0020P12.2\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthUnknown.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthUnknown\u003A\u003A\u0024tag",
+            "name": "tag",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthUnknown.html#property_tag"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthVariant",
+            "name": "ScimTargetAuthVariant",
+            "summary": "How\u0020AXIAM\u0020authenticates\u0020to\u0020the\u0020downstream\u0020service\u0020provider,\u0020without\u0020the\u0020credential\u0020itself.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthVariant.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetAuthVariant\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020variant\u0020to\u0020its\u0020wire\u0020form,\u0020including\u0020its\u0020discriminator.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetAuthVariant.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState",
+            "name": "ScimTargetDeliveryState",
+            "summary": "A\u0020target\u0027s\u0020delivery\u0020state,\u0020as\u0020\u0060GET\u0060\u0020projects\u0020it.\u0020Fixed\u0020vocabulary\u0020only\u003A\u0020the\u0020failure\u0020reason\nis\u0020one\u0020of\u0020the\u0020deliverer\u0027s\u0020phrases,\u0020never\u0020a\u0020URL,\u0020a\u0020response\u0020body\u0020or\u0020a\u0020value.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ScimTargetDeliveryState.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ScimTargetDeliveryState\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003A\u0024consecutiveFailures",
+            "name": "consecutiveFailures",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#property_consecutiveFailures"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003A\u0024deadLetteredTotal",
+            "name": "deadLetteredTotal",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#property_deadLetteredTotal"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003A\u0024lastFailureAt",
+            "name": "lastFailureAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#property_lastFailureAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003A\u0024lastFailureReason",
+            "name": "lastFailureReason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#property_lastFailureReason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003A\u0024lastReconciledAt",
+            "name": "lastReconciledAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#property_lastReconciledAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetDeliveryState\u003A\u003A\u0024lastSuccessAt",
+            "name": "lastSuccessAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetDeliveryState.html#property_lastSuccessAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput",
+            "name": "ScimTargetInput",
+            "summary": "\u0060create\u0060\u0020and\u0020\u0060update\u0060\u0020\u0028a\u0020\u002A\u002Areplacement\u002A\u002A\u0029\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ScimTargetInput.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ScimTargetInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024auth",
+            "name": "auth",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_auth"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024baseUrl",
+            "name": "baseUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_baseUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024name",
+            "name": "name",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_name"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024scope",
+            "name": "scope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_scope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024credential",
+            "name": "credential",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_credential"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024deprovision",
+            "name": "deprovision",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_deprovision"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024expectedUpdatedAt",
+            "name": "expectedUpdatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_expectedUpdatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024pushGroups",
+            "name": "pushGroups",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_pushGroups"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003A\u0024userNameFrom",
+            "name": "userNameFrom",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#property_userNameFrom"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse",
+            "name": "ScimTargetResponse",
+            "summary": "A\u0020registered\u0020SCIM\u0020target,\u0020as\u0020the\u0020management\u0020API\u0020returns\u0020it.\u0020\u002A\u002AThe\u0020credential\u0020is\u0020never\nreturned\u002A\u002A,\u0020and\u0020there\u0020is\u0020no\u0020member\u0020that\u0020says\u0020anything\u0020about\u0020it.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ScimTargetResponse.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ScimTargetResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024auth",
+            "name": "auth",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_auth"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024baseUrl",
+            "name": "baseUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_baseUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024deprovision",
+            "name": "deprovision",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_deprovision"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024name",
+            "name": "name",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_name"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024pushGroups",
+            "name": "pushGroups",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_pushGroups"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024scope",
+            "name": "scope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_scope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024updatedAt",
+            "name": "updatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024userNameFrom",
+            "name": "userNameFrom",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_userNameFrom"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003A\u0024state",
+            "name": "state",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#property_state"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScope",
+            "name": "ScimTargetScope",
+            "summary": "Which\u0020users\u0020a\u0020target\u0020provisions.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScope.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScope\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Decodes\u0020one\u0020\u0060type\u0060\u002Dtagged\u0020ScimTargetScope\u0020object\u0020into\u0020its\u0020variant.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScope.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeAllUsers",
+            "name": "ScimTargetScopeAllUsers",
+            "summary": "The\u0020\u0060all_users\u0060\u0020arm\u0020of\u0020\u007B\u0040see\u0020ScimTargetScope\u007D\u0020\u0028\u0060type\u003A\u0020\u0022all_users\u0022\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeAllUsers.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeAllUsers\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020the\u0020\u0060all_users\u0060\u0020arm,\u0020which\u0020carries\u0020no\u0020fields.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeAllUsers.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeAllUsers\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020the\u0020\u0060all_users\u0060\u0020arm\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeAllUsers.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeAllUsers\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020arm\u0020to\u0020its\u0020wire\u0020form,\u0020re\u002Dattaching\u0020\u0060type\u003A\u0020\u0022all_users\u0022\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeAllUsers.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeAllUsers\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020arm\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeAllUsers.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeGroups",
+            "name": "ScimTargetScopeGroups",
+            "summary": "The\u0020\u0060groups\u0060\u0020arm\u0020of\u0020\u007B\u0040see\u0020ScimTargetScope\u007D\u0020\u0028\u0060type\u003A\u0020\u0022groups\u0022\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeGroups.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeGroups\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020the\u0020\u0060groups\u0060\u0020arm.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeGroups.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeGroups\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020the\u0020\u0060groups\u0060\u0020arm\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeGroups.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeGroups\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020arm\u0020to\u0020its\u0020wire\u0020form,\u0020re\u002Dattaching\u0020\u0060type\u003A\u0020\u0022groups\u0022\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeGroups.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeGroups\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020arm\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeGroups.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeGroups\u003A\u003A\u0024groupIds",
+            "name": "groupIds",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeGroups.html#property_groupIds"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeUnknown",
+            "name": "ScimTargetScopeUnknown",
+            "summary": "A\u0020\u007B\u0040see\u0020ScimTargetScope\u007D\u0020whose\u0020\u0060type\u0060\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeUnknown.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeUnknown\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020the\u0020unknown\u0020arm\u0020from\u0020what\u0020the\u0020server\u0020sent.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeUnknown.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeUnknown\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Keeps\u0020the\u0020\u0060type\u0060\u0020of\u0020one\u0020decoded\u0020JSON\u0020object,\u0020never\u0020throwing,\u0020and\u0020drops\u0020every\u0020other\nmember\u003A\u0020only\u0020declared\u0020members\u0020are\u0020kept,\u0020and\u0020an\u0020unknown\u0020arm\u0020declares\u0020none\u0020\u0028CONTRACT.md\n\u00A729.5,\u0020\u00A731.2,\u0020\u00A734.2\u0020P12.1\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeUnknown.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeUnknown\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Refuses\u0020to\u0020render\u0020the\u0020wire\u0020form\u003A\u0020an\u0020unknown\u0020variant\u0020MUST\u0020NOT\u0020be\u0020sent,\u0020and\u0020the\u0020refusal\u0020is\nlocal,\u0020before\u0020anything\u0020is\u0020sent\u0020\u0028CONTRACT.md\u0020\u00A731.2,\u0020\u00A734.2\u0020P12.2\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeUnknown.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeUnknown\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020for\u0020\u0060json_encode\u0028\u0029\u0060\u0020\u002D\u002D\u0020a\u0020log\u0020line\u0020\u002D\u002D\u0020as\u0020the\u0020\u0060type\u0060\u0020alone\u003B\u0020never\u0020throws\n\u0028CONTRACT.md\u0020\u00A77\u0020rule\u00201,\u0020\u00A734.2\u0020P12.2\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeUnknown.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeUnknown\u003A\u003A\u0024tag",
+            "name": "tag",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeUnknown.html#property_tag"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeVariant",
+            "name": "ScimTargetScopeVariant",
+            "summary": "Which\u0020users\u0020a\u0020target\u0020provisions.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeVariant.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetScopeVariant\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020variant\u0020to\u0020its\u0020wire\u0020form,\u0020including\u0020its\u0020discriminator.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetScopeVariant.html#method_toArray"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTokenResponse",
             "name": "ScimTokenResponse",
             "summary": "Metadata\u0020only.\u0020The\u0020handle\u0020is\u0020never\u0020in\u0020a\u0020list\u0020response\u0020\u2014\u0020it\u0020exists\u0020in\u0020plaintext\u0020exactly\u0020once,\nin\u0020\u005B\u0060CreateScimTokenResponse\u0060\u005D.",
@@ -9256,6 +11181,116 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SessionResponse.html#property_userAgent"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig",
+            "name": "SetDirectoryConfig",
+            "summary": "\u0060PUT\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\u0060\u0020\u2014\u0020a\u0020\u002A\u002Areplacement\u002A\u002A.\u0020Every\u0020\u0060DirectoryConfig\u0060\nmember\u0020except\u0020\u0060id\u0060,\u0020\u0060tenant_id\u0060\u0020and\u0020the\u0020two\u0020timestamps,\u0020plus\u0020the\u0020write\u002Donly\u0020\u0060bind_secret\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SetDirectoryConfig.",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SetDirectoryConfig\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024baseDn",
+            "name": "baseDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_baseDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024bindDn",
+            "name": "bindDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_bindDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024kind",
+            "name": "kind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_kind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024startTls",
+            "name": "startTls",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_startTls"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024url",
+            "name": "url",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_url"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024userFilter",
+            "name": "userFilter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_userFilter"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024bindSecret",
+            "name": "bindSecret",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_bindSecret"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024groupBaseDn",
+            "name": "groupBaseDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_groupBaseDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024groupFilter",
+            "name": "groupFilter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_groupFilter"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024groupMappings",
+            "name": "groupMappings",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_groupMappings"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024groupMemberAttribute",
+            "name": "groupMemberAttribute",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_groupMemberAttribute"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024groupNestingDepth",
+            "name": "groupNestingDepth",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_groupNestingDepth"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024jitProvisioning",
+            "name": "jitProvisioning",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_jitProvisioning"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024syncIntervalSecs",
+            "name": "syncIntervalSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_syncIntervalSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024trustAnchorsPem",
+            "name": "trustAnchorsPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_trustAnchorsPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003A\u0024userAttributeMap",
+            "name": "userAttributeMap",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#property_userAttributeMap"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetMtlsTrustAnchor",
             "name": "SetMtlsTrustAnchor",
             "summary": "Body\u0020for\u0020\u0060PUT\u0020...\/ca\u002Dcertificates\/\u007Bid\u007D\/mtls\u002Dtrust\u002Danchor\u0060.",
@@ -9521,6 +11556,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_opaqueSuite"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024samlIdpEnabled",
+            "name": "samlIdpEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_samlIdpEnabled"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024sensitiveScopesEnabled",
             "name": "sensitiveScopesEnabled",
             "summary": "",
@@ -9530,6 +11570,11 @@ Search.appendIndex(
             "name": "serverCertAllowedNames",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_serverCertAllowedNames"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024ssfEnabled",
+            "name": "ssfEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_ssfEnabled"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024webauthnUserVerification",
             "name": "webauthnUserVerification",
@@ -9785,6 +11830,366 @@ Search.appendIndex(
             "name": "username",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SmtpConfig.html#property_username"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfDeliveryMethod",
+            "name": "SsfDeliveryMethod",
+            "summary": "How\u0020SETs\u0020reach\u0020the\u0020receiver.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfDeliveryMethod.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfDeliveryMethod\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfDeliveryMethod,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfDeliveryMethod.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfDeliveryMethod\u003A\u003APush",
+            "name": "Push",
+            "summary": "The\u0020wire\u0020value\u0020\u0060push\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfDeliveryMethod.html#enumcase_Push"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfDeliveryMethod\u003A\u003APoll",
+            "name": "Poll",
+            "summary": "The\u0020wire\u0020value\u0020\u0060poll\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfDeliveryMethod.html#enumcase_Poll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfDeliveryMethod\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfDeliveryMethod.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType",
+            "name": "SsfEventType",
+            "summary": "The\u0020six\u0020event\u0020types\u0020AXIAM\u0020transmits\u0020\u0028G\u002D5\u0029.\u0020Stored\u0020and\u0020sent\u0020as\u0020their\u0020event\u002Dtype\u0020URIs\u003B\n\u005B\u0060Self\u003A\u003AALL\u0060\u005D\u0020is\u0020the\u0020canonical\u0020order\u0020every\u0020list\u0020AXIAM\u0020returns\u0020is\u0020sorted\u0020in.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfEventType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003ASessionRevoked",
+            "name": "SessionRevoked",
+            "summary": "The\u0020wire\u0020value\u0020\u0060https\u003A\/\/schemas.openid.net\/secevent\/caep\/event\u002Dtype\/session\u002Drevoked\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#enumcase_SessionRevoked"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003ACredentialChange",
+            "name": "CredentialChange",
+            "summary": "The\u0020wire\u0020value\u0020\u0060https\u003A\/\/schemas.openid.net\/secevent\/caep\/event\u002Dtype\/credential\u002Dchange\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#enumcase_CredentialChange"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003AAssuranceLevelChange",
+            "name": "AssuranceLevelChange",
+            "summary": "The\u0020wire\u0020value\n\u0060https\u003A\/\/schemas.openid.net\/secevent\/caep\/event\u002Dtype\/assurance\u002Dlevel\u002Dchange\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#enumcase_AssuranceLevelChange"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003AAccountDisabled",
+            "name": "AccountDisabled",
+            "summary": "The\u0020wire\u0020value\u0020\u0060https\u003A\/\/schemas.openid.net\/secevent\/risc\/event\u002Dtype\/account\u002Ddisabled\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#enumcase_AccountDisabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003AAccountEnabled",
+            "name": "AccountEnabled",
+            "summary": "The\u0020wire\u0020value\u0020\u0060https\u003A\/\/schemas.openid.net\/secevent\/risc\/event\u002Dtype\/account\u002Denabled\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#enumcase_AccountEnabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003AAccountPurged",
+            "name": "AccountPurged",
+            "summary": "The\u0020wire\u0020value\u0020\u0060https\u003A\/\/schemas.openid.net\/secevent\/risc\/event\u002Dtype\/account\u002Dpurged\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#enumcase_AccountPurged"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStatusActor",
+            "name": "SsfStatusActor",
+            "summary": "Who\u0020set\u0020a\u0020stream\u0027s\u0020current\u0020status.\u0020A\u0020status\u0020an\u0020administrator\u0020set\u0020to\u0020anything\u0020but\u0020\u0060enabled\u0060\ncannot\u0020be\u0020changed\u0020by\u0020the\u0020receiver\u0020\u0028D\u002D51\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStatusActor.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStatusActor\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfStatusActor,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStatusActor.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStatusActor\u003A\u003AAdmin",
+            "name": "Admin",
+            "summary": "The\u0020wire\u0020value\u0020\u0060admin\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStatusActor.html#enumcase_Admin"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStatusActor\u003A\u003AReceiver",
+            "name": "Receiver",
+            "summary": "The\u0020wire\u0020value\u0020\u0060receiver\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStatusActor.html#enumcase_Receiver"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStatusActor\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStatusActor.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream",
+            "name": "SsfStream",
+            "summary": "A\u0020registered\u0020SSF\u0020stream,\u0020as\u0020the\u0020management\u0020API\u0020returns\u0020it.\u0020\u002A\u002AThe\u0020push\u0020\u0060Authorization\u0060\u0020header\nis\u0020never\u0020returned\u002A\u002A\u003B\u0020\u0060authorization_header_set\u0060\u0020says\u0020whether\u0020one\u0020is\u0020stored.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SsfStream.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SsfStream\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024audience",
+            "name": "audience",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_audience"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024authorizationHeaderSet",
+            "name": "authorizationHeaderSet",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_authorizationHeaderSet"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024deliveryMethod",
+            "name": "deliveryMethod",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_deliveryMethod"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024eventsAllowed",
+            "name": "eventsAllowed",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_eventsAllowed"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024eventsDelivered",
+            "name": "eventsDelivered",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_eventsDelivered"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024eventsRequested",
+            "name": "eventsRequested",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_eventsRequested"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024receiverClientId",
+            "name": "receiverClientId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_receiverClientId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024status",
+            "name": "status",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_status"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024statusActor",
+            "name": "statusActor",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_statusActor"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024subjectFormat",
+            "name": "subjectFormat",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_subjectFormat"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024transmitterActive",
+            "name": "transmitterActive",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_transmitterActive"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024updatedAt",
+            "name": "updatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024description",
+            "name": "description",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_description"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024endpointUrl",
+            "name": "endpointUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_endpointUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024lastVerificationAt",
+            "name": "lastVerificationAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_lastVerificationAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024statusReason",
+            "name": "statusReason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_statusReason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003A\u0024transmitterInactiveReason",
+            "name": "transmitterInactiveReason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#property_transmitterInactiveReason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput",
+            "name": "SsfStreamInput",
+            "summary": "\u0060create_stream\u0060\u0020and\u0020\u0060update_stream\u0060\u0020\u0028a\u0020\u002A\u002Areplacement\u002A\u002A\u0029\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020SsfStreamInput.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020SsfStreamInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024audience",
+            "name": "audience",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_audience"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024deliveryMethod",
+            "name": "deliveryMethod",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_deliveryMethod"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024eventsAllowed",
+            "name": "eventsAllowed",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_eventsAllowed"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024receiverClientId",
+            "name": "receiverClientId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_receiverClientId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024authorizationHeader",
+            "name": "authorizationHeader",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_authorizationHeader"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024clearAuthorizationHeader",
+            "name": "clearAuthorizationHeader",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_clearAuthorizationHeader"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024description",
+            "name": "description",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_description"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024endpointUrl",
+            "name": "endpointUrl",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_endpointUrl"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024eventsRequested",
+            "name": "eventsRequested",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_eventsRequested"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024status",
+            "name": "status",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_status"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024statusReason",
+            "name": "statusReason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_statusReason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024subjectFormat",
+            "name": "subjectFormat",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_subjectFormat"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus",
+            "name": "SsfStreamStatus",
+            "summary": "A\u0020stream\u0027s\u0020SSF\u0020status\u0020\u0028SSF\u00201.0\u0020\u00A78.1.2\u0029,\u0020with\u0020AXIAM\u0027s\u0020meaning\u0020pinned\u0020by\u0020D\u002D51.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfStreamStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus\u003A\u003AEnabled",
+            "name": "Enabled",
+            "summary": "The\u0020wire\u0020value\u0020\u0060enabled\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html#enumcase_Enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus\u003A\u003APaused",
+            "name": "Paused",
+            "summary": "The\u0020wire\u0020value\u0020\u0060paused\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html#enumcase_Paused"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus\u003A\u003ADisabled",
+            "name": "Disabled",
+            "summary": "The\u0020wire\u0020value\u0020\u0060disabled\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html#enumcase_Disabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfSubjectFormat",
+            "name": "SsfSubjectFormat",
+            "summary": "Which\u0020RFC\u00209493\u0020subject\u0020identifier\u0020names\u0020the\u0020user\u0020in\u0020the\u0020SETs\u0020of\u0020a\u0020stream\u0020\u0028D\u002D46\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfSubjectFormat.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfSubjectFormat\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfSubjectFormat,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfSubjectFormat.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfSubjectFormat\u003A\u003AIssSub",
+            "name": "IssSub",
+            "summary": "The\u0020wire\u0020value\u0020\u0060iss_sub\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfSubjectFormat.html#enumcase_IssSub"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfSubjectFormat\u003A\u003AEmail",
+            "name": "Email",
+            "summary": "The\u0020wire\u0020value\u0020\u0060email\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfSubjectFormat.html#enumcase_Email"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfSubjectFormat\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfSubjectFormat.html#enumcase_Unknown"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SubjectAltName",
             "name": "SubjectAltName",
@@ -10146,6 +12551,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_requireUppercase"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024samlIdpEnabled",
+            "name": "samlIdpEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_samlIdpEnabled"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024sensitiveScopesEnabled",
             "name": "sensitiveScopesEnabled",
             "summary": "",
@@ -10155,6 +12565,11 @@ Search.appendIndex(
             "name": "serverCertAllowedNames",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_serverCertAllowedNames"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024ssfEnabled",
+            "name": "ssfEnabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_ssfEnabled"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024webauthnUserVerification",
             "name": "webauthnUserVerification",
@@ -10356,6 +12771,116 @@ Search.appendIndex(
             "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
             "url": "classes/Axiam-Sdk-Management-Models-UnknownAaguidAction.html#enumcase_Unknown"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig",
+            "name": "UpdateDirectoryConfig",
+            "summary": "\u0060PATCH\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/directory\u0060\u0020\u2014\u0020a\u0020\u002A\u002Asparse\u002A\u002A\u0020update.\u0020Every\u0020member\u0020optional\u003A\nabsent\u0020leaves\u0020the\u0020stored\u0020value,\u0020and\u0020for\u0020the\u0020two\u0020nullable\u0020members\u0020an\u0020explicit\u0020\u0060null\u0060\u0020clears\nit.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020UpdateDirectoryConfig.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020UpdateDirectoryConfig\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024baseDn",
+            "name": "baseDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_baseDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024bindDn",
+            "name": "bindDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_bindDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024bindSecret",
+            "name": "bindSecret",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_bindSecret"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024groupBaseDn",
+            "name": "groupBaseDn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_groupBaseDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024groupFilter",
+            "name": "groupFilter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_groupFilter"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024groupMappings",
+            "name": "groupMappings",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_groupMappings"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024groupMemberAttribute",
+            "name": "groupMemberAttribute",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_groupMemberAttribute"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024groupNestingDepth",
+            "name": "groupNestingDepth",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_groupNestingDepth"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024jitProvisioning",
+            "name": "jitProvisioning",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_jitProvisioning"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024kind",
+            "name": "kind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_kind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024startTls",
+            "name": "startTls",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_startTls"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024syncIntervalSecs",
+            "name": "syncIntervalSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_syncIntervalSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024trustAnchorsPem",
+            "name": "trustAnchorsPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_trustAnchorsPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024url",
+            "name": "url",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_url"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024userAttributeMap",
+            "name": "userAttributeMap",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_userAttributeMap"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003A\u0024userFilter",
+            "name": "userFilter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#property_userFilter"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest",
             "name": "UpdateFederationConfigRequest",
             "summary": "The\u0020\u0060UpdateFederationConfigRequest\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
@@ -10380,6 +12905,11 @@ Search.appendIndex(
             "name": "jsonSerialize",
             "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024allowSha1Signatures",
+            "name": "allowSha1Signatures",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_allowSha1Signatures"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024allowTenantInheritance",
             "name": "allowTenantInheritance",
@@ -10435,6 +12965,11 @@ Search.appendIndex(
             "name": "enabled",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024idpMetadataSigningCertPem",
+            "name": "idpMetadataSigningCertPem",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_idpMetadataSigningCertPem"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024idpSigningCertPem",
             "name": "idpSigningCertPem",
@@ -10571,6 +13106,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateNotificationRuleRequest.html#property_recipientEmails"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateNotificationRuleRequest\u003A\u003A\u0024windowMinutes",
+            "name": "windowMinutes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateNotificationRuleRequest.html#property_windowMinutes"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest",
             "name": "UpdateOAuth2ClientRequest",
             "summary": "The\u0020\u0060UpdateOAuth2ClientRequest\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
@@ -10606,10 +13146,30 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_authnRequestParams"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024backchannelAuthenticationRequestSigningAlg",
+            "name": "backchannelAuthenticationRequestSigningAlg",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_backchannelAuthenticationRequestSigningAlg"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024backchannelClientNotificationEndpoint",
+            "name": "backchannelClientNotificationEndpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_backchannelClientNotificationEndpoint"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024backchannelLogoutUri",
             "name": "backchannelLogoutUri",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_backchannelLogoutUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024backchannelTokenDeliveryMode",
+            "name": "backchannelTokenDeliveryMode",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_backchannelTokenDeliveryMode"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024backchannelUserCodeParameter",
+            "name": "backchannelUserCodeParameter",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_backchannelUserCodeParameter"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024browserSso",
             "name": "browserSso",
@@ -11140,6 +13700,76 @@ Search.appendIndex(
             "name": "url",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateWebhookRequest.html#property_url"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap",
+            "name": "UserAttributeMap",
+            "summary": "Which\u0020directory\u0020attribute\u0020feeds\u0020each\u0020AXIAM\u0020user\u0020field.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020UserAttributeMap.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020UserAttributeMap\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003A\u0024displayName",
+            "name": "displayName",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#property_displayName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003A\u0024email",
+            "name": "email",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#property_email"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003A\u0024externalId",
+            "name": "externalId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#property_externalId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserAttributeMap\u003A\u003A\u0024username",
+            "name": "username",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UserAttributeMap.html#property_username"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserNameSource",
+            "name": "UserNameSource",
+            "summary": "Which\u0020AXIAM\u0020attribute\u0020becomes\u0020the\u0020downstream\u0020\u0060userName\u0060.\u0020The\u0020mapping\u0020is\u0020a\u0020fixed\u0020attribute\nset,\u0020not\u0020a\u0020mapping\u0020language\u0020\u0028D\u002D57\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserNameSource.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserNameSource\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020UserNameSource,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserNameSource.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserNameSource\u003A\u003AUsername",
+            "name": "Username",
+            "summary": "The\u0020wire\u0020value\u0020\u0060username\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserNameSource.html#enumcase_Username"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserNameSource\u003A\u003AEmail",
+            "name": "Email",
+            "summary": "The\u0020wire\u0020value\u0020\u0060email\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserNameSource.html#enumcase_Email"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserNameSource\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserNameSource.html#enumcase_Unknown"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserResponse",
             "name": "UserResponse",
@@ -11821,6 +14451,31 @@ Search.appendIndex(
             "summary": "\u0060GET\u0020\/api\/v1\/reactors\/events\u0060\u0020\u2014\u0020the\u0020registry,\u0020verbatim.",
             "url": "classes/Axiam-Sdk-Management-ReactorsApi.html#method_listEvents"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ReadModifyWrite",
+            "name": "ReadModifyWrite",
+            "summary": "The\u0020read\u002Dmodify\u002Dwrite\u0020form\u0020CONTRACT.md\u0020\u00A727.4\u0020rule\u00205\u0020recommends\u0020for\u0020\u0060replace\u0060\u0020updates\u003A\u0020a\nread\u0020result\u0020turned\u0020back\u0020into\u0020the\u0020replacement\u0020body,\u0020every\u0020member\u0020carried\u0020over,\u0020so\u0020that\nchanging\u0020one\u0020field\u0020and\u0020sending\u0020the\u0020body\u0020back\u0020preserves\u0020the\u0020rest\u0020instead\u0020of\u0020resetting\nevery\u0020omitted\u0020member\u0020to\u0020its\u0020default.",
+            "url": "classes/Axiam-Sdk-Management-ReadModifyWrite.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ReadModifyWrite\u003A\u003AsamlServiceProvider\u0028\u0029",
+            "name": "samlServiceProvider",
+            "summary": "\u0060saml.update_service_provider\u0060\u0027s\u0020body\u0020from\u0020a\u0020\u0060getServiceProvider\u0028\u0029\u0060\u0020result.",
+            "url": "classes/Axiam-Sdk-Management-ReadModifyWrite.html#method_samlServiceProvider"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ReadModifyWrite\u003A\u003AssfStream\u0028\u0029",
+            "name": "ssfStream",
+            "summary": "\u0060ssf.update_stream\u0060\u0027s\u0020body\u0020from\u0020a\u0020\u0060getStream\u0028\u0029\u0060\u0020result.\u0020\u0060authorizationHeader\u0060\u0020and\n\u0060clearAuthorizationHeader\u0060\u0020are\u0020left\u0020absent\u003A\u0020absent\u0020keeps\u0020the\u0020stored\u0020header\u0020\u0028\u00A732.2\u0029.",
+            "url": "classes/Axiam-Sdk-Management-ReadModifyWrite.html#method_ssfStream"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ReadModifyWrite\u003A\u003AscimTarget\u0028\u0029",
+            "name": "scimTarget",
+            "summary": "\u0060scim_targets.update\u0060\u0027s\u0020body\u0020from\u0020a\u0020\u0060get\u0028\u0029\u0060\u0020result.\u0020\u0060credential\u0060\u0020is\u0020left\u0020absent\u003A\nabsent\u0020keeps\u0020the\u0020stored\u0020one,\u0020unless\u0020the\u0020write\u0020moves\u0020its\u0020URL\u0020\u0028\u00A731.3\u0020rule\u00202\u0029.",
+            "url": "classes/Axiam-Sdk-Management-ReadModifyWrite.html#method_scimTarget"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ReadModifyWrite\u003A\u003AdirectoryConfig\u0028\u0029",
+            "name": "directoryConfig",
+            "summary": "\u0060directory.set\u0060\u0027s\u0020body\u0020from\u0020a\u0020\u0060get\u0028\u0029\u0060\u0020result.\u0020\u0060bindSecret\u0060\u0020is\u0020left\u0020absent\u003A\u0020absent\u0020keeps\nthe\u0020stored\u0020secret,\u0020unless\u0020the\u0020write\u0020moves\u0020the\u0020connection\u0020\u0028\u00A730.3\u0020rule\u00202\u0029.",
+            "url": "classes/Axiam-Sdk-Management-ReadModifyWrite.html#method_directoryConfig"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ResourcesApi",
             "name": "ResourcesApi",
             "summary": "The\u0020resource\u0020hierarchy\u0020role\u0020assignments\u0020cascade\u0020down.",
@@ -11950,6 +14605,101 @@ Search.appendIndex(
             "name": "unassignFromServiceAccount",
             "summary": "\u0060DELETE\u0020\/api\/v1\/roles\/\u007Brole_id\u007D\/service\u002Daccounts\/\u007Bservice_account_id\u007D\u0060",
             "url": "classes/Axiam-Sdk-Management-RolesApi.html#method_unassignFromServiceAccount"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi",
+            "name": "SamlApi",
+            "summary": "A\u0020tenant\u0027s\u0020SAML\u00202.0\u0020identity\u0020provider\u0020\u0028CONTRACT\u0020\u00A729\u0029\u003A\u0020the\u0020registry\u0020of\u0020service\u0020providers,\u0020the\nimport\u0020of\u0020an\u0020SP\u0027s\u0020metadata\u0020into\u0020a\u0020\u002Adraft\u002A\u0020registration\u0020\u0028never\u0020a\u0020write\u0029,\u0020and\u0020the\u0020lifecycle\u0020of\nthe\u0020IdP\u0020signing\u0020credential.\u0020The\u0020protocol\u0020itself\u0020\u002D\u002D\u0020single\u0020sign\u002Don,\u0020single\u0020logout,\u0020the\u0020IdP\nmetadata\u0020document\u0020\u002D\u002D\u0020is\u0020browser\u0020and\u0020SP\u002Dto\u002DIdP\u0020surface\u0020under\u0020\/saml\/v2\/\u007Btenant_id\u007D,\u0020an\u0020SP\u0027s\nown\u0020SAML\u0020library\u0020speaks\u0020to\u0020it,\u0020and\u0020it\u0020is\u0020not\u0020in\u0020this\u0020registry.",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AgetIdp\u0028\u0029",
+            "name": "getIdp",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/idp\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_getIdp"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AlistServiceProviders\u0028\u0029",
+            "name": "listServiceProviders",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/service\u002Dproviders\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_listServiceProviders"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AcreateServiceProvider\u0028\u0029",
+            "name": "createServiceProvider",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/service\u002Dproviders\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_createServiceProvider"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AgetServiceProvider\u0028\u0029",
+            "name": "getServiceProvider",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/service\u002Dproviders\/\u007Bsp_id\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_getServiceProvider"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AupdateServiceProvider\u0028\u0029",
+            "name": "updateServiceProvider",
+            "summary": "\u0060PUT\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/service\u002Dproviders\/\u007Bsp_id\u007D\u0060\u0020\u2014\u0020a\u0020\u002A\u002Areplacement\u002A\u002A\u003A\nevery\u0020member\u0020the\u0020body\u0020omits\u0020takes\u0020its\u0020default,\u0020it\u0020is\u0020not\u0020kept.\u0020\u0060entity_id\u0060\u0020is\u0020immutable.",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_updateServiceProvider"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AdeleteServiceProvider\u0028\u0029",
+            "name": "deleteServiceProvider",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/service\u002Dproviders\/\u007Bsp_id\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_deleteServiceProvider"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AparseSpMetadata\u0028\u0029",
+            "name": "parseSpMetadata",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/parse\u002Dsp\u002Dmetadata\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_parseSpMetadata"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AlistIdpCredentials\u0028\u0029",
+            "name": "listIdpCredentials",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/idp\u002Dcredentials\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_listIdpCredentials"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AissueIdpCredential\u0028\u0029",
+            "name": "issueIdpCredential",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/idp\u002Dcredentials\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_issueIdpCredential"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003ApromoteIdpCredential\u0028\u0029",
+            "name": "promoteIdpCredential",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/idp\u002Dcredentials\/\u007Bcredential_id\u007D\/promote\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_promoteIdpCredential"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SamlApi\u003A\u003AretireIdpCredential\u0028\u0029",
+            "name": "retireIdpCredential",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/saml\/idp\u002Dcredentials\/\u007Bcredential_id\u007D\/retire\u0060",
+            "url": "classes/Axiam-Sdk-Management-SamlApi.html#method_retireIdpCredential"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ScimTargetsApi",
+            "name": "ScimTargetsApi",
+            "summary": "A\u0020tenant\u0027s\u0020outbound\u0020SCIM\u0020targets\u0020\u0028CONTRACT\u0020\u00A731\u0029\u003A\u0020the\u0020downstream\u0020SCIM\u00202.0\u0020service\u0020providers\nAXIAM\u0020pushes\u0020the\u0020tenant\u0027s\u0020users\u0020and\u0020groups\u0020to,\u0020each\u0020with\u0020its\u0020delivery\u0020state.\u0020The\u0020credential\nAXIAM\u0020pushes\u0020with\u0020is\u0020write\u002Donly.\u0020Deleting\u0020a\u0020target\u0020does\u0020not\u0020deprovision\u0020anything\u0020downstream.",
+            "url": "classes/Axiam-Sdk-Management-ScimTargetsApi.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ScimTargetsApi\u003A\u003AlistItems\u0028\u0029",
+            "name": "listItems",
+            "summary": "\u0060GET\u0020\/api\/v1\/scim\u002Dtargets\u0060",
+            "url": "classes/Axiam-Sdk-Management-ScimTargetsApi.html#method_listItems"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ScimTargetsApi\u003A\u003Acreate\u0028\u0029",
+            "name": "create",
+            "summary": "\u0060POST\u0020\/api\/v1\/scim\u002Dtargets\u0060",
+            "url": "classes/Axiam-Sdk-Management-ScimTargetsApi.html#method_create"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ScimTargetsApi\u003A\u003Aget\u0028\u0029",
+            "name": "get",
+            "summary": "\u0060GET\u0020\/api\/v1\/scim\u002Dtargets\/\u007Bid\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-ScimTargetsApi.html#method_get"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ScimTargetsApi\u003A\u003Aupdate\u0028\u0029",
+            "name": "update",
+            "summary": "\u0060PUT\u0020\/api\/v1\/scim\u002Dtargets\/\u007Bid\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-ScimTargetsApi.html#method_update"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ScimTargetsApi\u003A\u003Adelete\u0028\u0029",
+            "name": "delete",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/scim\u002Dtargets\/\u007Bid\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-ScimTargetsApi.html#method_delete"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ScimTargetsApi\u003A\u003Areconcile\u0028\u0029",
+            "name": "reconcile",
+            "summary": "\u0060POST\u0020\/api\/v1\/scim\u002Dtargets\/\u007Bid\u007D\/reconcile\u0060",
+            "url": "classes/Axiam-Sdk-Management-ScimTargetsApi.html#method_reconcile"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ScimTokensApi",
             "name": "ScimTokensApi",
@@ -12091,6 +14841,36 @@ Search.appendIndex(
             "summary": "\u0060DELETE\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/settings\u0060",
             "url": "classes/Axiam-Sdk-Management-SettingsApi.html#method_deleteTenantOverride"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SsfApi",
+            "name": "SsfApi",
+            "summary": "A\u0020tenant\u0027s\u0020Shared\u0020Signals\u0020Framework\u0020streams\u0020\u0028CONTRACT\u0020\u00A732\u0029\u003A\u0020which\u0020receiver\u0020\u002D\u002D\u0020an\u0020OAuth2\nclient\u0020of\u0020the\u0020tenant\u0020\u002D\u002D\u0020receives\u0020which\u0020CAEP\u0020and\u0020RISC\u0020security\u0020events,\u0020as\u0020SETs\u0020pushed\u0020to\u0020its\nendpoint\u0020or\u0020polled.\u0020The\u0020receiver\u0027s\u0020own\u0020protocol\u0020\u0028transmitter\u0020metadata,\u0020the\u0020SSF\u0020stream\nmanagement\u0020API,\u0020polling\u0029\u0020is\u0020not\u0020in\u0020this\u0020registry.",
+            "url": "classes/Axiam-Sdk-Management-SsfApi.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SsfApi\u003A\u003AlistStreams\u0028\u0029",
+            "name": "listStreams",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/ssf\/streams\u0060",
+            "url": "classes/Axiam-Sdk-Management-SsfApi.html#method_listStreams"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SsfApi\u003A\u003AcreateStream\u0028\u0029",
+            "name": "createStream",
+            "summary": "\u0060POST\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/ssf\/streams\u0060",
+            "url": "classes/Axiam-Sdk-Management-SsfApi.html#method_createStream"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SsfApi\u003A\u003AgetStream\u0028\u0029",
+            "name": "getStream",
+            "summary": "\u0060GET\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/ssf\/streams\/\u007Bstream_id\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-SsfApi.html#method_getStream"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SsfApi\u003A\u003AupdateStream\u0028\u0029",
+            "name": "updateStream",
+            "summary": "\u0060PUT\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/ssf\/streams\/\u007Bstream_id\u007D\u0060\u0020\u2014\u0020a\u0020\u002A\u002Areplacement\u002A\u002A\u003A\u0020an\nomitted\u0020optional\u0020member\u0020takes\u0020its\u0020default,\u0020except\u0020the\u0020header,\u0020which\u0020absent\u0020keeps.",
+            "url": "classes/Axiam-Sdk-Management-SsfApi.html#method_updateStream"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\SsfApi\u003A\u003AdeleteStream\u0028\u0029",
+            "name": "deleteStream",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/tenants\/\u007Btenant_id\u007D\/ssf\/streams\/\u007Bstream_id\u007D\u0060\u0020\u2014\u0020the\u0020stream\u0020and\u0020its\nbuffered\u0020events.",
+            "url": "classes/Axiam-Sdk-Management-SsfApi.html#method_deleteStream"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\TenantsApi",
             "name": "TenantsApi",
             "summary": "Tenants\u0020within\u0020an\u0020organization\u0020\u002D\u002D\u0020the\u0020isolation\u0020boundary\u0020every\u0020other\u0020namespace\u0020is\u0020scoped\u0020to.",
@@ -12200,6 +14980,11 @@ Search.appendIndex(
             "name": "fields",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-ValidationError.html#property_fields"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ValidationError\u003A\u003A\u0024serverMessage",
+            "name": "serverMessage",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-ValidationError.html#property_serverMessage"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\WebauthnPolicyApi",
             "name": "WebauthnPolicyApi",
@@ -12410,6 +15195,286 @@ Search.appendIndex(
             "name": "codeVerifier",
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-AuthorizationRequest.html#property_codeVerifier"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaClock",
+            "name": "CibaClock",
+            "summary": "The\u0020clock\u0020\u007B\u0040see\u0020OidcClient\u003A\u003AcibaAwait\u0028\u0029\u007D\u0020waits\u0020on\u0020\u2014\u0020injectable\u0020so\u0020the\u0020\u00A733.7\u0020schedule\u0020is\ntestable\u0020without\u0020sleeping.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaClock.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaClock\u003A\u003Anow\u0028\u0029",
+            "name": "now",
+            "summary": "The\u0020current\u0020time,\u0020in\u0020seconds\u0020\u0028fractional\u0020allowed\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaClock.html#method_now"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaClock\u003A\u003Asleep\u0028\u0029",
+            "name": "sleep",
+            "summary": "Wait\u0020\u0060\u0024seconds\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaClock.html#method_sleep"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaDeliveryMode",
+            "name": "CibaDeliveryMode",
+            "summary": "How\u0020a\u0020CIBA\u0020client\u0020receives\u0020the\u0020outcome,\u0020as\u0020it\u0020registered\u0020\u0028CONTRACT.md\u0020\u00A733.3\u0020rule\u00201\u0029.\u0020There\nis\u0020no\u0020push\u0020mode\u003A\u0020AXIAM\u0020does\u0020not\u0020offer\u0020it.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaDeliveryMode.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaDeliveryMode\u003A\u003APoll",
+            "name": "Poll",
+            "summary": "The\u0020client\u0020polls\u0020the\u0020token\u0020endpoint\u0020\u0028\u007B\u0040see\u0020OidcClient\u003A\u003AcibaAwait\u0028\u0029\u007D\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaDeliveryMode.html#enumcase_Poll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaDeliveryMode\u003A\u003APing",
+            "name": "Ping",
+            "summary": "AXIAM\u0020pings\u0020the\u0020client\u0027s\u0020registered\u0020notification\u0020endpoint,\u0020presenting\u0020the\u0020request\u0027s\n\u0060client_notification_token\u0060\u0020as\u0020a\u0020bearer\u003B\u0020the\u0020client\u0020then\u0020polls\u0020once.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaDeliveryMode.html#enumcase_Ping"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest",
+            "name": "CibaInitiateRequest",
+            "summary": "Arguments\u0020to\u0020\u007B\u0040see\u0020OidcClient\u003A\u003AcibaInitiate\u0028\u0029\u007D\u0020\u2014\u0020\u0060CibaInitiateRequest\u0060\u0020\u0028CONTRACT.md\u0020\u00A733.2\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003Amembers\u0028\u0029",
+            "name": "members",
+            "summary": "The\u0020authentication\u002Drequest\u0020members\u0020this\u0020request\u0020sets,\u0020exactly\u0020\u2014\u0020the\u0020wire\u0020spelling,\u0020with\n\u0060requested_expiry\u0060\u0020as\u0020an\u0020integer\u0020\u0028the\u0020form\u0020sends\u0020it\u0020as\u0020a\u0020string,\u0020a\u0020signed\u0020request\u0020as\u0020a\nnumber\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#method_members"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024scope",
+            "name": "scope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_scope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024loginHint",
+            "name": "loginHint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_loginHint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024idTokenHint",
+            "name": "idTokenHint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_idTokenHint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024bindingMessage",
+            "name": "bindingMessage",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_bindingMessage"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024requestedExpiry",
+            "name": "requestedExpiry",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_requestedExpiry"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024acrValues",
+            "name": "acrValues",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_acrValues"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024resource",
+            "name": "resource",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_resource"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024delivery",
+            "name": "delivery",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_delivery"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024clientNotificationToken",
+            "name": "clientNotificationToken",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_clientNotificationToken"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateRequest\u003A\u003A\u0024signer",
+            "name": "signer",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html#property_signer"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateResponse",
+            "name": "CibaInitiateResponse",
+            "summary": "\u0060CibaInitiateResponse\u0060\u0020\u0028CONTRACT.md\u0020\u00A733.2\u0029\u0020\u2014\u0020what\u0020\u007B\u0040see\u0020OidcClient\u003A\u003AcibaInitiate\u0028\u0029\u007D\u0020returns.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateResponse\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateResponse\u003A\u003A\u0024authReqId",
+            "name": "authReqId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html#property_authReqId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateResponse\u003A\u003A\u0024expiresIn",
+            "name": "expiresIn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html#property_expiresIn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateResponse\u003A\u003A\u0024interval",
+            "name": "interval",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html#property_interval"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaInitiateResponse\u003A\u003A\u0024receivedAt",
+            "name": "receivedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html#property_receivedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaRequestSigner",
+            "name": "CibaRequestSigner",
+            "summary": "The\u0020key\u0020and\u0020algorithm\u0020for\u0020CIBA\u0027s\u0020signed\u0020authentication\u0020request\u0020\u0028CONTRACT.md\u0020\u00A733.2,\u0020CIBA\nCore\u0020\u00A77.1.1\u0029.\u0020Both\u0020are\u0020the\u0020caller\u0027s\u003A\u0020there\u0020is\u0020no\u0020default\u0020for\u0020either,\u0020and\u0020the\u0020SDK\u0020signs\u0020under\nexactly\u0020the\u0020algorithm\u0020given\u0020\u2014\u0020the\u0020one\u0020the\u0020client\u0020registered\u0020as\n\u0060backchannel_authentication_request_signing_alg\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaRequestSigner.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaRequestSigner\u003A\u003AfromPem\u0028\u0029",
+            "name": "fromPem",
+            "summary": "A\u0020signer\u0020from\u0020a\u0020PEM\u0020private\u0020key\u0020and\u0020the\u0020algorithm\u0020it\u0020signs\u0020under\u003A\u0020a\u0020PKCS\u00238\n\u0028\u0060BEGIN\u0020PRIVATE\u0020KEY\u0060\u0029\u0020Ed25519\u0020key\u0020for\u0020\u0060EdDSA\u0060,\u0020a\u0020P\u002D256\u0020EC\u0020key\u0020\u0028PKCS\u00238\u0020or\u0020SEC1\u0029\u0020for\n\u0060ES256\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaRequestSigner.html#method_fromPem"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaRequestSigner\u003A\u003Asign\u0028\u0029",
+            "name": "sign",
+            "summary": "The\u0020compact\u0020JWS\u0020of\u0020\u0060\u0024claims\u0060,\u0020signed\u0020under\u0020this\u0020signer\u0027s\u0020algorithm\u0020with\u0020its\u0020\u0060kid\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaRequestSigner.html#method_sign"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaRequestSigner\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "The\u0020signer\u0020for\u0020a\u0020log\u0020line\u003A\u0020the\u0020algorithm\u0020and\u0020\u0060kid\u0060\u0020only.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaRequestSigner.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaRequestSigner\u003A\u003A\u0024alg",
+            "name": "alg",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaRequestSigner.html#property_alg"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaRequestSigner\u003A\u003A\u0024kid",
+            "name": "kid",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-CibaRequestSigner.html#property_kid"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaSigningAlg",
+            "name": "CibaSigningAlg",
+            "summary": "The\u0020algorithms\u0020a\u0020signed\u0020CIBA\u0020authentication\u0020request\u0020may\u0020use\u0020\u0028CONTRACT.md\u0020\u00A733.2\u0029\u0020\u2014\u0020the\nclient\u0027s\u0020registered\u0020\u0060backchannel_authentication_request_signing_alg\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaSigningAlg.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaSigningAlg\u003A\u003APS256",
+            "name": "PS256",
+            "summary": "RSASSA\u002DPSS\u0020with\u0020SHA\u002D256\u0020\u2014\u0020refused\u0020by\u0020this\u0020SDK\u0020\u0028see\u0020the\u0020type\u0027s\u0020summary\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaSigningAlg.html#enumcase_PS256"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaSigningAlg\u003A\u003AES256",
+            "name": "ES256",
+            "summary": "ECDSA\u0020on\u0020P\u002D256\u0020with\u0020SHA\u002D256.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaSigningAlg.html#enumcase_ES256"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaSigningAlg\u003A\u003AEdDSA",
+            "name": "EdDSA",
+            "summary": "Ed25519.",
+            "url": "classes/Axiam-Sdk-Oidc-CibaSigningAlg.html#enumcase_EdDSA"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration",
+            "name": "ClientRegistration",
+            "summary": "An\u0020RFC\u00207591\u0020\u00A73.2.1\u0020\/\u0020RFC\u00207592\u0020\u00A73\u0020client\u0020information\u0020response\u0020\u2014\u0020what\n\u007B\u0040see\u0020\\Axiam\\Sdk\\AxiamClient\u003A\u003AreadClientRegistration\u0028\u0029\u007D\u0020and\n\u007B\u0040see\u0020\\Axiam\\Sdk\\AxiamClient\u003A\u003AupdateClientRegistration\u0028\u0029\u007D\u0020return\u0020\u0028CONTRACT.md\u0020\u00A728.12.1\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Decode\u0020a\u0020client\u0020information\u0020response,\u0020tolerating\u0020members\u0020this\u0020type\u0020does\u0020not\u0020name.",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003AupdateBody\u0028\u0029",
+            "name": "updateBody",
+            "summary": "The\u0020RFC\u00207592\u0020\u00A72.2\u0020replacement\u0020body\u0020\u0060updateClientRegistration\u0028\u0029\u0060\u0020sends\u0020\u0028\u00A728.12.2\nrule\u00204\u0029\u003A\u0020every\u0020member\u0020\u2014\u0020the\u0020unknown\u0020ones\u0020in\u0020\u0060\u0024extra\u0060\u0020included\u0020\u2014\u0020except\u0020the\u0020five\n\u007B\u0040see\u0020self\u003A\u003ASERVER_STATED_MEMBERS\u007D,\u0020with\u0020\u0060client_id\u0060\u0020set\u0020to\u0020this\u0020registration\u0027s\u0020own.",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#method_updateBody"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020registration\u0020for\u0020\u0060json_encode\u0028\u0029\u0060\u0020\u2014\u0020a\u0020log\u0020line,\u0020never\u0020the\u0020wire.\u0020The\u0020token\nand\u0020the\u0020secret\u0020stay\u0020wrapped\u0020and\u0020print\u0020\u0060\u005BSENSITIVE\u005D\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003ASERVER_STATED_MEMBERS",
+            "name": "SERVER_STATED_MEMBERS",
+            "summary": "The\u0020members\u0020\u0060updateClientRegistration\u0028\u0029\u0060\u0020never\u0020sends\u0020\u0028\u00A728.12.2\u0020rule\u00204\u0029.\u0020The\u0020first\u0020four\nthe\u0020server\u0020refuses\u0020with\u0020\u0060400\u0020invalid_request\u0060\u0020when\u0020present\u003B\u0020\u0060client_secret\u0060\u0020it\u0020never\naccepts\u0020back.",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#constant_SERVER_STATED_MEMBERS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024clientId",
+            "name": "clientId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_clientId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024clientIdIssuedAt",
+            "name": "clientIdIssuedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_clientIdIssuedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024clientName",
+            "name": "clientName",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_clientName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024redirectUris",
+            "name": "redirectUris",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_redirectUris"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024grantTypes",
+            "name": "grantTypes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_grantTypes"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024responseTypes",
+            "name": "responseTypes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_responseTypes"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024tokenEndpointAuthMethod",
+            "name": "tokenEndpointAuthMethod",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_tokenEndpointAuthMethod"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024scope",
+            "name": "scope",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_scope"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024registrationClientUri",
+            "name": "registrationClientUri",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_registrationClientUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024clientSecretExpiresAt",
+            "name": "clientSecretExpiresAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_clientSecretExpiresAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024jwks",
+            "name": "jwks",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_jwks"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024jwksUri",
+            "name": "jwksUri",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_jwksUri"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024clientSecret",
+            "name": "clientSecret",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_clientSecret"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024registrationAccessToken",
+            "name": "registrationAccessToken",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_registrationAccessToken"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ClientRegistration\u003A\u003A\u0024extra",
+            "name": "extra",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ClientRegistration.html#property_extra"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\DeviceAuthorization",
             "name": "DeviceAuthorization",
@@ -12718,7 +15783,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases",
             "name": "MtlsEndpointAliases",
-            "summary": "RFC\u00208705\u0020\u00A75\u0020\u0060mtls_endpoint_aliases\u0060\u0020\u2014\u0020the\u0020six\u0020endpoints\u0020re\u002Dbased\u0020on\u0020the\u0020host\u0020that\nperforms\u0020the\u0020mutual\u002DTLS\u0020handshake\u0020\u0028wire\u0020schema\u0020\u0060MtlsEndpointAliases\u0060,\u0020contract\u00201.40\u0029.",
+            "summary": "RFC\u00208705\u0020\u00A75\u0020\u0060mtls_endpoint_aliases\u0060\u0020\u2014\u0020the\u0020seven\u0020endpoints\u0020re\u002Dbased\u0020on\u0020the\u0020host\u0020that\nperforms\u0020the\u0020mutual\u002DTLS\u0020handshake\u0020\u0028wire\u0020schema\u0020\u0060MtlsEndpointAliases\u0060,\u0020contract\u00201.40\u003B\nthe\u0020seventh,\u0020CIBA\u0027s\u0020\u0060backchannel_authentication_endpoint\u0060,\u0020contract\u00201.58\u0020\u2014\u0020CONTRACT.md\u0020\u00A721.3.1\nas\u0020amended\u0020by\u0020\u00A733\u0029.",
             "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A__construct\u0028\u0029",
@@ -12760,6 +15825,11 @@ Search.appendIndex(
             "name": "pushed_authorization_request_endpoint",
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_pushed_authorization_request_endpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases\u003A\u003A\u0024backchannel_authentication_endpoint",
+            "name": "backchannel_authentication_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_backchannel_authentication_endpoint"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient",
             "name": "OidcClient",
@@ -12906,6 +15976,26 @@ Search.appendIndex(
             "summary": "Format\u0020a\u0020\u0060WWW\u002DAuthenticate\u003A\u0020UMA\u0060\u0020header\u0020\u0028\u00A720.3,\u0020emit\u0020half\u0029\u0020\u2014\u0020pure\u0020local\ncomputation,\u0020for\u0020a\u0020resource\u0020server\u0020that\u0020has\u0020just\u0020minted\u0020a\u0020ticket.",
             "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_umaChallengeHeader"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AcibaInitiate\u0028\u0029",
+            "name": "cibaInitiate",
+            "summary": "\u0060POST\u0020\/oauth2\/bc\u002Dauthorize\u0060\u0020\u0028CIBA\u0020Core\u0020\u00A77,\u0020CONTRACT.md\u0020\u00A733.1\u0029\u0020\u2014\u0020ask\u0020AXIAM\u0020to\u0020authenticate\na\u0020user\u0020\u002A\u002Aon\u0020another\u0020device\u002A\u002A.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaInitiate"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AcibaPoll\u0028\u0029",
+            "name": "cibaPoll",
+            "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020\u0060grant_type\u003Durn\u003Aopenid\u003Aparams\u003Agrant\u002Dtype\u003Aciba\u0060\u0020\u0028CIBA\u0020Core\u0020\u00A710.1,\nCONTRACT.md\u0020\u00A733.1\u0029\u0020\u2014\u0020\u002A\u002Aone\u002A\u002A\u0020token\u0020request,\u0020with\u0020the\u0020same\u0020client\u0020authentication\u0020as\n\u007B\u0040see\u0020self\u003A\u003AcibaInitiate\u0028\u0029\u007D\u0020and\u0020the\u0020mTLS\u0020alias\u0020rule\u0020of\u0020every\u0020token\u0020call.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaPoll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AcibaAwait\u0028\u0029",
+            "name": "cibaAwait",
+            "summary": "Poll\u0020for\u0020\u0060\u0024initiated\u0060\u0027s\u0020outcome\u0020until\u0020it\u0020is\u0020decided\u0020or\u0020expires\u0020\u0028CONTRACT.md\u0020\u00A733.1,\n\u00A733.7\u0029.\u0020Surfaces\u0020nothing\u0020to\u0020the\u0020user\u0020\u2014\u0020AXIAM\u0020notified\u0020them.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaAwait"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AcibaHandlePing\u0028\u0029",
+            "name": "cibaHandlePing",
+            "summary": "Check\u0020a\u0020ping\u0020AXIAM\u0020delivered\u0020to\u0020your\u0020notification\u0020endpoint,\u0020and\u0020return\u0020the\u0020\u0060auth_req_id\u0060\nit\u0020names\u0020\u0028CIBA\u0020Core\u0020\u00A710.2,\u0020CONTRACT.md\u0020\u00A733.1\u0029.\u0020\u002A\u002ANo\u0020I\/O.\u002A\u002A",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaHandlePing"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AssoProviders\u0028\u0029",
             "name": "ssoProviders",
             "summary": "\u0060GET\u0020\/api\/v1\/auth\/federation\/providers\u0060\u0020\u0028\u00A712.1\u0029\u0020\u2014\u0020which\u0020\u0022Sign\u0020in\u0020with\u0020X\u0022\nbuttons\u0020to\u0020render\u0020for\u0020a\u0020workspace.",
@@ -13025,6 +16115,26 @@ Search.appendIndex(
             "name": "MAX_LOGOUT_TOKEN_AGE_SECONDS",
             "summary": "Maximum\u0020accepted\u0020age\u0020for\u0020a\u0020logout\u0020token\u0027s\u0020\u0060iat\u0060,\u0020in\u0020seconds.\u0020AXIAM\u0020issues\u0020them\nwith\u0020a\u0020120\u0020s\u0020lifetime\u003B\u0020this\u0020bound\u0020is\u0020the\u0020same\u0020order\u0020and\u0020stops\u0020a\u0020token\u0020captured\nfrom\u0020a\u0020mis\u002Dconfigured\u0020RP\u0020being\u0020replayed\u0020days\u0020later.",
             "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_MAX_LOGOUT_TOKEN_AGE_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ACIBA_GRANT_TYPE",
+            "name": "CIBA_GRANT_TYPE",
+            "summary": "\u0060grant_type\u0060\u0020of\u0020the\u0020CIBA\u0020token\u0020request\u0020\u0028CIBA\u0020Core\u0020\u00A710.1\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_GRANT_TYPE"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ADEFAULT_CIBA_INTERVAL_SECONDS",
+            "name": "DEFAULT_CIBA_INTERVAL_SECONDS",
+            "summary": "The\u0020interval\u0020used\u0020when\u0020the\u0020initiate\u0020response\u0020carries\u0020none\u0020\u0028\u00A733.7\u0020rule\u00202\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEFAULT_CIBA_INTERVAL_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ACIBA_SLOW_DOWN_INCREMENT_SECONDS",
+            "name": "CIBA_SLOW_DOWN_INCREMENT_SECONDS",
+            "summary": "Seconds\u0020added\u0020to\u0020the\u0020CIBA\u0020interval\u0020per\u0020\u0060slow_down\u0060,\u0020permanently\u0020\u0028\u00A733.7\u0020rule\u00203\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SLOW_DOWN_INCREMENT_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ACIBA_SIGNED_REQUEST_LIFETIME_SECONDS",
+            "name": "CIBA_SIGNED_REQUEST_LIFETIME_SECONDS",
+            "summary": "The\u0020lifetime\u0020of\u0020a\u0020signed\u0020request\u0020this\u0020SDK\u0020mints\u003A\u0020inside\u0020the\u0020server\u0027s\u002060\u002Dminute\u0020bound.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SIGNED_REQUEST_LIFETIME_SECONDS"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration",
             "name": "OidcConfiguration",
@@ -13150,6 +16260,46 @@ Search.appendIndex(
             "name": "token_endpoint_auth_signing_alg_values_supported",
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_token_endpoint_auth_signing_alg_values_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024backchannel_authentication_endpoint",
+            "name": "backchannel_authentication_endpoint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_backchannel_authentication_endpoint"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024backchannel_token_delivery_modes_supported",
+            "name": "backchannel_token_delivery_modes_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_backchannel_token_delivery_modes_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024backchannel_user_code_parameter_supported",
+            "name": "backchannel_user_code_parameter_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_backchannel_user_code_parameter_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024backchannel_authentication_request_signing_alg_values_supported",
+            "name": "backchannel_authentication_request_signing_alg_values_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_backchannel_authentication_request_signing_alg_values_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024revocation_endpoint_auth_methods_supported",
+            "name": "revocation_endpoint_auth_methods_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_revocation_endpoint_auth_methods_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024introspection_endpoint_auth_methods_supported",
+            "name": "introspection_endpoint_auth_methods_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_introspection_endpoint_auth_methods_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024revocation_endpoint_auth_signing_alg_values_supported",
+            "name": "revocation_endpoint_auth_signing_alg_values_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_revocation_endpoint_auth_signing_alg_values_supported"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcConfiguration\u003A\u003A\u0024introspection_endpoint_auth_signing_alg_values_supported",
+            "name": "introspection_endpoint_auth_signing_alg_values_supported",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcConfiguration.html#property_introspection_endpoint_auth_signing_alg_values_supported"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow",
             "name": "OidcLoginFlow",
@@ -13575,6 +16725,21 @@ Search.appendIndex(
             "name": "expiresInSecs",
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-SsoStartResult.html#property_expiresInSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\SystemCibaClock",
+            "name": "SystemCibaClock",
+            "summary": "The\u0020real\u0020\u007B\u0040see\u0020CibaClock\u007D\u003A\u0020\u0060microtime\u0028true\u0029\u0060\u0020and\u0020\u0060sleep\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-SystemCibaClock.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\SystemCibaClock\u003A\u003Anow\u0028\u0029",
+            "name": "now",
+            "summary": "The\u0020current\u0020time,\u0020in\u0020seconds\u0020\u0028fractional\u0020allowed\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-SystemCibaClock.html#method_now"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\SystemCibaClock\u003A\u003Asleep\u0028\u0029",
+            "name": "sleep",
+            "summary": "Wait\u0020\u0060\u0024seconds\u0060.",
+            "url": "classes/Axiam-Sdk-Oidc-SystemCibaClock.html#method_sleep"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\UmaChallenge",
             "name": "UmaChallenge",
@@ -14921,6 +18086,346 @@ Search.appendIndex(
             "summary": "Guard\u002Dslot\u0020kind\u0020for\u0020the\u0020\u00A712\u0020\u0060oidc_refresh\u0060\u0020OAuth2\u0020token\u002Dendpoint\u0020path\n\u0028CONTRACT.md\u0020\u00A79\u0020rule\u00205\u0020\/\u0020F\u002D06\u0029.\u0020Used\u0020by\u0020\u007B\u0040see\u0020\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AoidcRefresh\u0028\u0029\u007D\nso\u0020a\u0020second\u0020concurrent\u0020\u0060oidcRefresh\u0060\u0020caller\u0020can\u0020recognise\u0020the\u0020guard\u0020is\u0020busy\u0020with\nANOTHER\u0020\u0060oidcRefresh\u0060\u0020\u0028same\u0020kind\u0029\u0020and\u0020share\u0020its\u0020single\u0020outcome,\u0020instead\u0020of\nre\u002Dacquiring\u0020the\u0020guard\u0020and\u0020issuing\u0020its\u0020own\u0020wire\u0020call\u0020that\u0020would\u0020replay\u0020an\nalready\u002Dconsumed\u0020\u0028single\u002Duse,\u0020rotating\u0029\u0020refresh\u0020token.",
             "url": "classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_OIDC"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\InMemoryReplayStore",
+            "name": "InMemoryReplayStore",
+            "summary": "The\u0020default\u0020\u007B\u0040see\u0020ReplayStore\u007D\u003A\u0020one\u0020process\u0027s\u0020memory,\u0020entries\u0020expiring\u0020after\u0020the\u0020window.",
+            "url": "classes/Axiam-Sdk-Ssf-InMemoryReplayStore.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\InMemoryReplayStore\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-InMemoryReplayStore.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\InMemoryReplayStore\u003A\u003AcheckAndRecord\u0028\u0029",
+            "name": "checkAndRecord",
+            "summary": "Record\u0020\u0060\u0024jti\u0060\u0020for\u0020\u0060\u0024windowSeconds\u0060\u0020and\u0020return\u0020\u0060true\u0060,\u0020or\u0020return\u0020\u0060false\u0060\u0020without\u0020recording\nwhen\u0020it\u0020is\u0020already\u0020held.\u0020MUST\u0020be\u0020atomic\u003A\u0020two\u0020concurrent\u0020calls\u0020with\u0020one\u0020\u0060jti\u0060\u0020must\u0020not\u0020both\nsee\u0020\u0060true\u0060\u0020\u0028a\u0020shared\u0020store\u0020implements\u0020this\u0020with\u0020an\u0020atomic\u0020add,\u0020e.g.\u0020Redis\u0020\u0060SET\u0020NX\u0020EX\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-InMemoryReplayStore.html#method_checkAndRecord"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\RefusedSet",
+            "name": "RefusedSet",
+            "summary": "One\u0020SET\u0020a\u0020poll\u0020returned\u0020that\u0020\u007B\u0040see\u0020SsfReceiver\u003A\u003AverifySet\u0028\u0029\u007D\u0020refused.",
+            "url": "classes/Axiam-Sdk-Ssf-RefusedSet.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\RefusedSet\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-RefusedSet.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\RefusedSet\u003A\u003A\u0024jti",
+            "name": "jti",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-RefusedSet.html#property_jti"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\RefusedSet\u003A\u003A\u0024reason",
+            "name": "reason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-RefusedSet.html#property_reason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\ReplayStore",
+            "name": "ReplayStore",
+            "summary": "Remembers\u0020the\u0020\u0060jti\u0060s\u0020an\u0020\u007B\u0040see\u0020SsfReceiver\u007D\u0020already\u0020accepted\u0020\u0028CONTRACT.md\u0020\u00A732.7\u0020step\u00209\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-ReplayStore.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\ReplayStore\u003A\u003AcheckAndRecord\u0028\u0029",
+            "name": "checkAndRecord",
+            "summary": "Record\u0020\u0060\u0024jti\u0060\u0020for\u0020\u0060\u0024windowSeconds\u0060\u0020and\u0020return\u0020\u0060true\u0060,\u0020or\u0020return\u0020\u0060false\u0060\u0020without\u0020recording\nwhen\u0020it\u0020is\u0020already\u0020held.\u0020MUST\u0020be\u0020atomic\u003A\u0020two\u0020concurrent\u0020calls\u0020with\u0020one\u0020\u0060jti\u0060\u0020must\u0020not\u0020both\nsee\u0020\u0060true\u0060\u0020\u0028a\u0020shared\u0020store\u0020implements\u0020this\u0020with\u0020an\u0020atomic\u0020add,\u0020e.g.\u0020Redis\u0020\u0060SET\u0020NX\u0020EX\u0060\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-ReplayStore.html#method_checkAndRecord"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent",
+            "name": "SecurityEvent",
+            "summary": "A\u0020verified\u0020Security\u0020Event\u0020Token\u0020\u2014\u0020\u007B\u0040see\u0020SsfReceiver\u003A\u003AverifySet\u0028\u0029\u007D\u0027s\u0020result\u0020\u0028CONTRACT.md\n\u00A732.7\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024jti",
+            "name": "jti",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_jti"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024iat",
+            "name": "iat",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_iat"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024iss",
+            "name": "iss",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_iss"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024aud",
+            "name": "aud",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_aud"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024txn",
+            "name": "txn",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_txn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024eventType",
+            "name": "eventType",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_eventType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024event",
+            "name": "event",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_event"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SecurityEvent\u003A\u003A\u0024subId",
+            "name": "subId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SecurityEvent.html#property_subId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetErr",
+            "name": "SetErr",
+            "summary": "One\u0020RFC\u00208936\u0020\u0060setErrs\u0060\u0020entry\u003A\u0020the\u0020RFC\u00208935\u0020\u00A72.4\u0020\u0060err\u0060\u0020code\u0020and\u0020an\u0020optional\u0020description.",
+            "url": "classes/Axiam-Sdk-Ssf-SetErr.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetErr\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SetErr.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetErr\u003A\u003AfromReason\u0028\u0029",
+            "name": "fromReason",
+            "summary": "The\u0020entry\u0020for\u0020a\u0020refusal\u003A\u0020its\u0020\u007B\u0040see\u0020SetFailureReason\u003A\u003ApushErrorCode\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-Ssf-SetErr.html#method_fromReason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetErr\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "The\u0020wire\u0020form,\u0020\u0060\u007B\u0022err\u0022\u003A\u0020\u2026\u007D\u0060\u0020plus\u0020\u0060description\u0060\u0020when\u0020set.",
+            "url": "classes/Axiam-Sdk-Ssf-SetErr.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetErr\u003A\u003A\u0024err",
+            "name": "err",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SetErr.html#property_err"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetErr\u003A\u003A\u0024description",
+            "name": "description",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SetErr.html#property_description"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason",
+            "name": "SetFailureReason",
+            "summary": "Why\u0020\u007B\u0040see\u0020SsfReceiver\u003A\u003AverifySet\u0028\u0029\u007D\u0020refused\u0020a\u0020Security\u0020Event\u0020Token\u0020\u2014\u0020the\u0020bracketed\u0020reason\ncodes\u0020of\u0020CONTRACT.md\u0020\u00A732.7,\u0020one\u0020per\u0020verification\u0020step\u0020that\u0020can\u0020fail.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003ApushErrorCode\u0028\u0029",
+            "name": "pushErrorCode",
+            "summary": "The\u0020RFC\u00208935\u0020\u00A72.4\u0020\u0060err\u0060\u0020to\u0020answer\u0020a\u0020push\u0020with\u0020\u0028\u0060400\u0020\u007B\u0022err\u0022\u003A\u0020\u2026\u007D\u0060\u0029,\u0020and\u0020to\u0020pass\u0020in\u0020a\npoll\u0027s\u0020\u0060setErrs\u0060.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#method_pushErrorCode"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003AMalformed",
+            "name": "Malformed",
+            "summary": "Step\u00201\u003A\u0020not\u0020three\u0020base64url\u0020parts,\u0020or\u0020a\u0020header\u0020\/\u0020payload\u0020that\u0020is\u0020not\u0020a\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#enumcase_Malformed"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003AInvalidType",
+            "name": "InvalidType",
+            "summary": "Step\u00202\u003A\u0020\u0060typ\u0060\u0020is\u0020neither\u0020\u0060secevent\u002Bjwt\u0060\u0020nor\u0020\u0060application\/secevent\u002Bjwt\u0060.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#enumcase_InvalidType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003AInvalidKey",
+            "name": "InvalidKey",
+            "summary": "Steps\u00203\u20135\u003A\u0020\u0060alg\u0060\u0020is\u0020not\u0020\u0060EdDSA\u0060,\u0020the\u0020\u0060kid\u0060\u0020is\u0020not\u0020in\u0020the\u0020JWKS,\u0020or\u0020the\u0020signature\u0020fails.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#enumcase_InvalidKey"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003AInvalidIssuer",
+            "name": "InvalidIssuer",
+            "summary": "Step\u00206\u003A\u0020\u0060iss\u0060\u0020is\u0020not\u0020the\u0020configured\u0020issuer.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#enumcase_InvalidIssuer"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003AInvalidAudience",
+            "name": "InvalidAudience",
+            "summary": "Step\u00207\u003A\u0020\u0060aud\u0060\u0020does\u0020not\u0020name\u0020this\u0020receiver.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#enumcase_InvalidAudience"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003AInvalidRequest",
+            "name": "InvalidRequest",
+            "summary": "Step\u00208\u003A\u0020\u0060exp\u0060\u0020or\u0020\u0060sub\u0060\u0020present\u003B\u0020\u0060jti\u0060,\u0020\u0060iat\u0060\u0020or\u0020\u0060sub_id\u0060\u0020missing\u003B\u0020not\u0020exactly\u0020one\u0020event.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#enumcase_InvalidRequest"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetFailureReason\u003A\u003AReplayed",
+            "name": "Replayed",
+            "summary": "Step\u00209\u003A\u0020the\u0020\u0060jti\u0060\u0020was\u0020already\u0020accepted\u0020within\u0020the\u0020replay\u0020window.\u0020Returned\u0020by\u0020\u0060poll\u0028\u0029\u0060,\u0020it\nis\u0020\u002A\u002Aacknowledged\u002A\u002A\u0020in\u0020the\u0020next\u0020call\u0027s\u0020\u0060ack\u0060,\u0020never\u0020reported\u0020in\u0020\u0060setErrs\u0060\n\u0028CONTRACT.md\u0020\u00A734.2\u0020P2\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-SetFailureReason.html#enumcase_Replayed"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetVerificationError",
+            "name": "SetVerificationError",
+            "summary": "A\u0020Security\u0020Event\u0020Token\u0020refused\u0020by\u0020\u007B\u0040see\u0020SsfReceiver\u003A\u003AverifySet\u0028\u0029\u007D\u0020\u0028CONTRACT.md\u0020\u00A732.7\u0029\u0020\u2014\u0020an\n\u007B\u0040see\u0020AuthError\u007D,\u0020as\u0020\u00A732.7\u0020requires,\u0020carrying\u0020the\u0020step\u0020that\u0020failed\u0020as\u0020a\u0020typed\n\u007B\u0040see\u0020SetFailureReason\u007D.\u0020\u007B\u0040see\u0020AuthError\u003A\u003AgetReason\u0028\u0029\u007D\u0020returns\u0020the\u0020same\u0020code\u0020as\u0020a\u0020string.",
+            "url": "classes/Axiam-Sdk-Ssf-SetVerificationError.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetVerificationError\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SetVerificationError.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SetVerificationError\u003A\u003A\u0024failureReason",
+            "name": "failureReason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SetVerificationError.html#property_failureReason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes",
+            "name": "SsfEventTypes",
+            "summary": "The\u0020six\u0020event\u0020types\u0020AXIAM\u0020transmits\u0020and\u0020the\u0020two\u0020SSF\u0020stream\u0020events\u0020\u0028CONTRACT.md\u0020\u00A732.6\u0029,\u0020as\nnamed\u0020constants.\u0020Event\u0020types\u0020are\u0020open\u003A\u0020a\u0020SET\u0020of\u0020another\u0020type\u0020still\u0020verifies,\u0020and\n\u007B\u0040see\u0020SecurityEvent\u003A\u003A\u0024eventType\u007D\u0020carries\u0020it\u0020verbatim.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003ASESSION_REVOKED",
+            "name": "SESSION_REVOKED",
+            "summary": "CAEP\u0020session\u0020revoked.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_SESSION_REVOKED"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003ACREDENTIAL_CHANGE",
+            "name": "CREDENTIAL_CHANGE",
+            "summary": "CAEP\u0020credential\u0020change.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_CREDENTIAL_CHANGE"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003AASSURANCE_LEVEL_CHANGE",
+            "name": "ASSURANCE_LEVEL_CHANGE",
+            "summary": "CAEP\u0020assurance\u0020level\u0020change.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_ASSURANCE_LEVEL_CHANGE"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003AACCOUNT_DISABLED",
+            "name": "ACCOUNT_DISABLED",
+            "summary": "RISC\u0020account\u0020disabled.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_ACCOUNT_DISABLED"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003AACCOUNT_ENABLED",
+            "name": "ACCOUNT_ENABLED",
+            "summary": "RISC\u0020account\u0020enabled.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_ACCOUNT_ENABLED"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003AACCOUNT_PURGED",
+            "name": "ACCOUNT_PURGED",
+            "summary": "RISC\u0020account\u0020purged.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_ACCOUNT_PURGED"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003AVERIFICATION",
+            "name": "VERIFICATION",
+            "summary": "SSF\u0020verification.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_VERIFICATION"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfEventTypes\u003A\u003ASTREAM_UPDATED",
+            "name": "STREAM_UPDATED",
+            "summary": "SSF\u0020stream\u0020updated.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfEventTypes.html#constant_STREAM_UPDATED"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollOptions",
+            "name": "SsfPollOptions",
+            "summary": "Arguments\u0020to\u0020\u007B\u0040see\u0020SsfReceiver\u003A\u003Apoll\u0028\u0029\u007D\u0020\u0028RFC\u00208936\u0029.\u0020Every\u0020member\u0020is\u0020passed\u0020through\u0020exactly\nas\u0020given\u003B\u0020an\u0020unset\u0020\u0028\u0060null\u0060\u0029\u0020one\u0020is\u0020not\u0020sent,\u0020so\u0020a\u0020poll\u0020with\u0020no\u0020options\u0020sends\u0020\u0060\u007B\u007D\u0060.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollOptions.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollOptions\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollOptions.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollOptions\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "The\u0020JSON\u0020object\u0020\u0060poll\u0028\u0029\u0060\u0020sends\u003A\u0020only\u0020the\u0020members\u0020set.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollOptions.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollOptions\u003A\u003A\u0024maxEvents",
+            "name": "maxEvents",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollOptions.html#property_maxEvents"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollOptions\u003A\u003A\u0024returnImmediately",
+            "name": "returnImmediately",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollOptions.html#property_returnImmediately"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollOptions\u003A\u003A\u0024ack",
+            "name": "ack",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollOptions.html#property_ack"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollOptions\u003A\u003A\u0024setErrs",
+            "name": "setErrs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollOptions.html#property_setErrs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollResult",
+            "name": "SsfPollResult",
+            "summary": "What\u0020\u007B\u0040see\u0020SsfReceiver\u003A\u003Apoll\u0028\u0029\u007D\u0020returns\u003A\u0020the\u0020verified\u0020SETs\u0020and\u0020the\u0020refused\u0020ones,\u0020apart\u0020\u2014\u0020and\nthe\u0020ones\u0020it\u0020could\u0020not\u0020judge.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollResult.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollResult\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollResult.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollResult\u003A\u003A\u0024events",
+            "name": "events",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollResult.html#property_events"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollResult\u003A\u003A\u0024moreAvailable",
+            "name": "moreAvailable",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollResult.html#property_moreAvailable"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollResult\u003A\u003A\u0024refused",
+            "name": "refused",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollResult.html#property_refused"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollResult\u003A\u003A\u0024unjudged",
+            "name": "unjudged",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollResult.html#property_unjudged"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfPollResult\u003A\u003A\u0024unjudgedCause",
+            "name": "unjudgedCause",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfPollResult.html#property_unjudgedCause"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver",
+            "name": "SsfReceiver",
+            "summary": "The\u0020SSF\u0020receiver\u0020helper\u0020\u2014\u0020CONTRACT.md\u0020\u00A732.7\u0020\u0028contract\u00201.56\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003A__debugInfo\u0028\u0029",
+            "name": "__debugInfo",
+            "summary": "What\u0020\u0060print_r\u0028\u0029\u0060\u0020\/\u0020\u0060var_dump\u0028\u0029\u0060\u0020show\u003A\u0020the\u0020configuration,\u0020never\u0020the\u0020access\u002Dtoken\nprovider\u0020\u0028a\u0020closure\u0020that\u0020typically\u0020captures\u0020a\u0020bearer\u0029\u0020nor\u0020the\u0020replay\u0020store.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html#method___debugInfo"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003AverifySet\u0028\u0029",
+            "name": "verifySet",
+            "summary": "Verify\u0020one\u0020compact\u0020SET\u0020\u0028CONTRACT.md\u0020\u00A732.7\u0029,\u0020in\u0020this\u0020order,\u0020refusing\u0020at\u0020the\u0020first\u0020failure\nwith\u0020a\u0020\u007B\u0040see\u0020SetVerificationError\u007D\u0020whose\u0020\u007B\u0040see\u0020SetFailureReason\u007D\u0020is\u0020in\u0020brackets\u003A",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html#method_verifySet"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003Apoll\u0028\u0029",
+            "name": "poll",
+            "summary": "Poll\u0020the\u0020stream\u0027s\u0020RFC\u00208936\u0020endpoint,\u0020\u0060\u007Broot\u007D\/ssf\/v1\/poll\/\u007Bstream_id\u007D\u0060,\u0020with\u0020a\u0020bearer\u0020from\nthe\u0020configured\u0020access\u002Dtoken\u0020provider,\u0020and\u0020verify\u0020every\u0020SET\u0020it\u0020returns.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html#method_poll"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003AMIN_REPLAY_WINDOW_SECONDS",
+            "name": "MIN_REPLAY_WINDOW_SECONDS",
+            "summary": "The\u0020replay\u0020window\u0027s\u0020floor\u0020and\u0020default\u003A\u0020seven\u0020days,\u0020the\u0020transmitter\u0027s\u0020buffer\u0020retention\n\u0028\u00A732.6\u0029.\u0020A\u0020shorter\u0020window\u0020would\u0020forget\u0020a\u0020\u0060jti\u0060\u0020the\u0020transmitter\u0020can\u0020still\u0020re\u002Dsend.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html#constant_MIN_REPLAY_WINDOW_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003AFORCED_REFETCH_INTERVAL_SECONDS",
+            "name": "FORCED_REFETCH_INTERVAL_SECONDS",
+            "summary": "A\u0020forced\u0020JWKS\u0020refetch\u0020\u0028an\u0020unknown\u0020\u0060kid\u0060\u0029\u0020happens\u0020at\u0020most\u0020once\u0020per\u0020this\u0020many\u0020seconds,\u0020and\nafter\u0020a\u0020fetch\u0020that\u0020failed\u0020\u2014\u0020a\u0020fill\u0020and\u0020an\u0020expiry\u0020refresh\u0020included\u0020\u2014\u0020no\u0020fetch\u0020is\u0020made\u0020for\nthis\u0020long\u0020\u0028CONTRACT.md\u0020\u00A734.2\u0020P6\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html#constant_FORCED_REFETCH_INTERVAL_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf\\SsfReceiver\u003A\u003AJWKS_TTL_SECONDS",
+            "name": "JWKS_TTL_SECONDS",
+            "summary": "The\u0020cached\u0020JWKS\u0020expires\u0020this\u0020long\u0020after\u0020the\u0020successful\u0020fetch\u0020that\u0020filled\u0020it,\u0020and\u0020the\u0020next\nSET\u0020fetches\u0020again\u0020\u0028\u00A734.2\u0020P6\u003A\u0020no\u0020later\u0020than\u0020ten\u0020minutes\u0029.",
+            "url": "classes/Axiam-Sdk-Ssf-SsfReceiver.html#constant_JWKS_TTL_SECONDS"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\SupportedVersions",
             "name": "SupportedVersions",
             "summary": "The\u0020range\u0020of\u0020PHP\u0020versions\u0020this\u0020SDK\u0020is\u0020built\u0020and\u0020tested\u0020against.",
@@ -15390,6 +18895,11 @@ Search.appendIndex(
             "name": "Rest",
             "summary": "",
             "url": "namespaces/axiam-sdk-rest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Ssf",
+            "name": "Ssf",
+            "summary": "",
+            "url": "namespaces/axiam-sdk-ssf.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony",
             "name": "Symfony",

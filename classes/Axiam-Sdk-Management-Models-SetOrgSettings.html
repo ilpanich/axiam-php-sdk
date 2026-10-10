@@ -128,15 +128,16 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">17</span>
+    <span class="phpdocumentor-element-found-in__line">18</span>
 
     </aside>
 
             <p class="phpdocumentor-summary">Input for setting organization-level security settings.</p>
 
 
-    <section class="phpdocumentor-description"><p>This is a REPLACEMENT body (§27.4 rule 5): every field is required, so omitting one is a
-constructor error rather than a silent erasure server-side.</p>
+    <section class="phpdocumentor-description"><p>This is a REPLACEMENT body (§27.4 rule 5): what it omits is not preserved. The required
+members are constructor parameters, so omitting one is a constructor error; an optional
+member left unset is omitted from the wire and takes its default server-side.</p>
 </section>
 
 
@@ -363,6 +364,12 @@ constructor error rather than a silent erasure server-side.</p>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_samlIdpEnabled">$samlIdpEnabled</a>
+    <span>
+                        &nbsp;: bool|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_sensitiveScopesEnabled">$sensitiveScopesEnabled</a>
     <span>
                         &nbsp;: bool|null            </span>
@@ -372,6 +379,12 @@ constructor error rather than a silent erasure server-side.</p>
     <a class="" href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_serverCertAllowedNames">$serverCertAllowedNames</a>
     <span>
                         &nbsp;: array&lt;string|int, mixed&gt;|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_ssfEnabled">$ssfEnabled</a>
+    <span>
+                        &nbsp;: bool|null            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
@@ -446,7 +459,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">71</span>
+    <span class="phpdocumentor-element-found-in__line">78</span>
 
     </aside>
 
@@ -483,7 +496,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">72</span>
+    <span class="phpdocumentor-element-found-in__line">79</span>
 
     </aside>
 
@@ -520,7 +533,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">91</span>
+    <span class="phpdocumentor-element-found-in__line">98</span>
 
     </aside>
 
@@ -557,7 +570,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">92</span>
+    <span class="phpdocumentor-element-found-in__line">99</span>
 
     </aside>
 
@@ -594,7 +607,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">93</span>
+    <span class="phpdocumentor-element-found-in__line">100</span>
 
     </aside>
 
@@ -631,7 +644,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">94</span>
+    <span class="phpdocumentor-element-found-in__line">101</span>
 
     </aside>
 
@@ -668,7 +681,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">95</span>
+    <span class="phpdocumentor-element-found-in__line">102</span>
 
     </aside>
 
@@ -705,7 +718,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">73</span>
+    <span class="phpdocumentor-element-found-in__line">80</span>
 
     </aside>
 
@@ -742,7 +755,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">96</span>
+    <span class="phpdocumentor-element-found-in__line">103</span>
 
     </aside>
 
@@ -779,7 +792,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">97</span>
+    <span class="phpdocumentor-element-found-in__line">104</span>
 
     </aside>
 
@@ -816,7 +829,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">98</span>
+    <span class="phpdocumentor-element-found-in__line">105</span>
 
     </aside>
 
@@ -853,7 +866,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">74</span>
+    <span class="phpdocumentor-element-found-in__line">81</span>
 
     </aside>
 
@@ -890,7 +903,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">82</span>
 
     </aside>
 
@@ -927,7 +940,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">99</span>
+    <span class="phpdocumentor-element-found-in__line">106</span>
 
     </aside>
 
@@ -964,7 +977,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">76</span>
+    <span class="phpdocumentor-element-found-in__line">83</span>
 
     </aside>
 
@@ -1001,7 +1014,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">77</span>
+    <span class="phpdocumentor-element-found-in__line">84</span>
 
     </aside>
 
@@ -1038,7 +1051,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">78</span>
+    <span class="phpdocumentor-element-found-in__line">85</span>
 
     </aside>
 
@@ -1075,7 +1088,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">79</span>
+    <span class="phpdocumentor-element-found-in__line">86</span>
 
     </aside>
 
@@ -1112,7 +1125,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">80</span>
+    <span class="phpdocumentor-element-found-in__line">87</span>
 
     </aside>
 
@@ -1149,7 +1162,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">81</span>
+    <span class="phpdocumentor-element-found-in__line">88</span>
 
     </aside>
 
@@ -1186,7 +1199,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">82</span>
+    <span class="phpdocumentor-element-found-in__line">89</span>
 
     </aside>
 
@@ -1223,7 +1236,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">83</span>
+    <span class="phpdocumentor-element-found-in__line">90</span>
 
     </aside>
 
@@ -1260,7 +1273,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">84</span>
+    <span class="phpdocumentor-element-found-in__line">91</span>
 
     </aside>
 
@@ -1297,7 +1310,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">100</span>
+    <span class="phpdocumentor-element-found-in__line">107</span>
 
     </aside>
 
@@ -1334,7 +1347,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">101</span>
+    <span class="phpdocumentor-element-found-in__line">108</span>
 
     </aside>
 
@@ -1371,7 +1384,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">102</span>
+    <span class="phpdocumentor-element-found-in__line">109</span>
 
     </aside>
 
@@ -1408,7 +1421,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">85</span>
+    <span class="phpdocumentor-element-found-in__line">92</span>
 
     </aside>
 
@@ -1445,7 +1458,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">86</span>
+    <span class="phpdocumentor-element-found-in__line">93</span>
 
     </aside>
 
@@ -1482,7 +1495,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">87</span>
+    <span class="phpdocumentor-element-found-in__line">94</span>
 
     </aside>
 
@@ -1519,7 +1532,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">88</span>
+    <span class="phpdocumentor-element-found-in__line">95</span>
 
     </aside>
 
@@ -1556,7 +1569,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">89</span>
+    <span class="phpdocumentor-element-found-in__line">96</span>
 
     </aside>
 
@@ -1593,7 +1606,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">90</span>
+    <span class="phpdocumentor-element-found-in__line">97</span>
 
     </aside>
 
@@ -1620,6 +1633,43 @@ constructor error rather than a silent erasure server-side.</p>
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_samlIdpEnabled">
+        $samlIdpEnabled
+        <a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_samlIdpEnabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">110</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">bool|null</span>
+    <span class="phpdocumentor-signature__name">$samlIdpEnabled</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_sensitiveScopesEnabled">
         $sensitiveScopesEnabled
         <a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_sensitiveScopesEnabled" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1630,7 +1680,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">103</span>
+    <span class="phpdocumentor-element-found-in__line">111</span>
 
     </aside>
 
@@ -1667,7 +1717,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">104</span>
+    <span class="phpdocumentor-element-found-in__line">112</span>
 
     </aside>
 
@@ -1677,6 +1727,43 @@ constructor error rather than a silent erasure server-side.</p>
         <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;|null</span>
     <span class="phpdocumentor-signature__name">$serverCertAllowedNames</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_ssfEnabled">
+        $ssfEnabled
+        <a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_ssfEnabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">113</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">bool|null</span>
+    <span class="phpdocumentor-signature__name">$ssfEnabled</span>
      = <span class="phpdocumentor-signature__default-value">null</span></code>
 
     
@@ -1704,7 +1791,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">105</span>
+    <span class="phpdocumentor-element-found-in__line">114</span>
 
     </aside>
 
@@ -1746,7 +1833,7 @@ constructor error rather than a silent erasure server-side.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">70</span>
+    <span class="phpdocumentor-element-found-in__line">77</span>
 
     </aside>
 
@@ -1754,7 +1841,7 @@ constructor error rather than a silent erasure server-side.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$accessTokenLifetimeSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$adminNotificationsEnabled</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultCertValidityDays</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$emailVerificationGracePeriodHours</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$emailVerificationRequired</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$hibpCheckEnabled</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">float&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lockoutBackoffMultiplier</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lockoutDurationSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$maxCertValidityDays</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$maxFailedLoginAttempts</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$maxLockoutDurationSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaChallengeLifetimeSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaEnforced</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$minLength</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordHistoryCount</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$refreshTokenLifetimeSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireDigits</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireLowercase</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireSymbols</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireUppercase</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cimd</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedRedirectHosts</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedScopes</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrMaxClients</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrUnusedClientTtlDays</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultLocale</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$deletionGracePeriodDays</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dynamicRegistration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$externalClientAllowedResources</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$opaqueKsf</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$opaqueMode</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$opaqueSuite</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sensitiveScopesEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$serverCertAllowedNames</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$webauthnUserVerification</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$accessTokenLifetimeSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$adminNotificationsEnabled</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultCertValidityDays</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$emailVerificationGracePeriodHours</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$emailVerificationRequired</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$hibpCheckEnabled</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">float&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lockoutBackoffMultiplier</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$lockoutDurationSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$maxCertValidityDays</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$maxFailedLoginAttempts</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$maxLockoutDurationSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaChallengeLifetimeSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$mfaEnforced</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$minLength</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$passwordHistoryCount</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$refreshTokenLifetimeSecs</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireDigits</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireLowercase</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireSymbols</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$requireUppercase</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cimd</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedRedirectHosts</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedScopes</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrMaxClients</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrUnusedClientTtlDays</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultLocale</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$deletionGracePeriodDays</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dynamicRegistration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$externalClientAllowedResources</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$opaqueKsf</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$opaqueMode</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$opaqueSuite</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$samlIdpEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sensitiveScopesEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$serverCertAllowedNames</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$ssfEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$webauthnUserVerification</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -2060,6 +2147,17 @@ metadata documents existed (I1). (optional)</p>
 
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$samlIdpEnabled</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>G-2 / D-20 — defaulted, so an API client written before
+the SAML identity provider existed lands on <code class="prettyprint">false</code>, which is what every deployment did
+before (I1). (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$sensitiveScopesEnabled</span>
                 : <span class="phpdocumentor-argument-list__argument__type">bool|null</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
@@ -2077,6 +2175,17 @@ metadata documents existed (I1). (optional)</p>
                     <section class="phpdocumentor-description"><p>S-7 — defaulted to empty, so an API
 client written before the field lands on &quot;no <code class="prettyprint">Server</code> certificate is issued&quot; (I1).
 (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$ssfEnabled</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>G-5 / D-45 — defaulted, so an API client written before the
+SSF transmitter existed lands on <code class="prettyprint">false</code>, which is what every deployment did before
+(I1). (optional)</p>
 </section>
 
             </dd>
@@ -2112,7 +2221,7 @@ field (optional)</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">113</span>
+    <span class="phpdocumentor-element-found-in__line">122</span>
 
     </aside>
 
@@ -2163,7 +2272,7 @@ field (optional)</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">243</span>
+    <span class="phpdocumentor-element-found-in__line">260</span>
 
     </aside>
 
@@ -2207,7 +2316,7 @@ and nowhere else (§27.5).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SetOrgSettings.php"><a href="files/src-management-models-setorgsettings.html"><abbr title="src/Management/Models/SetOrgSettings.php">SetOrgSettings.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">162</span>
+    <span class="phpdocumentor-element-found-in__line">173</span>
 
     </aside>
 
@@ -2290,8 +2399,10 @@ omission means the first.</p>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_requireLowercase">$requireLowercase</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_requireSymbols">$requireSymbols</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_requireUppercase">$requireUppercase</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_samlIdpEnabled">$samlIdpEnabled</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_sensitiveScopesEnabled">$sensitiveScopesEnabled</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_serverCertAllowedNames">$serverCertAllowedNames</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_ssfEnabled">$ssfEnabled</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_webauthnUserVerification">$webauthnUserVerification</a></li>
                                             </ul>
                 </li>

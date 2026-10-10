@@ -124,24 +124,26 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">RFC 8705 §5 `mtls_endpoint_aliases` — the six endpoints re-based on the host that
-performs the mutual-TLS handshake (wire schema `MtlsEndpointAliases`, contract 1.40).</p>
+            <p class="phpdocumentor-summary">RFC 8705 §5 `mtls_endpoint_aliases` — the seven endpoints re-based on the host that
+performs the mutual-TLS handshake (wire schema `MtlsEndpointAliases`, contract 1.40;
+the seventh, CIBA&#039;s `backchannel_authentication_endpoint`, contract 1.58 — CONTRACT.md §21.3.1
+as amended by §33).</p>
 
 
     <section class="phpdocumentor-description"><p>A TLS listener decides whether to request a client certificate during the handshake,
 before it has seen any HTTP, so &quot;ask for a certificate on <code class="prettyprint">/oauth2/token</code> but not on
 <code class="prettyprint">/oauth2/authorize</code>&quot; is not something one listener can do. A deployment wanting both
 runs two, and this object names the second.</p>
-<p>Only these six are ever aliased. <code class="prettyprint">authorization_endpoint</code> and <code class="prettyprint">end_session_endpoint</code> are
+<p>Only these seven are ever aliased. <code class="prettyprint">authorization_endpoint</code> and <code class="prettyprint">end_session_endpoint</code> are
 front-channel and <code class="prettyprint">jwks_uri</code> is public key material, so CONTRACT.md §21.3 rule 2 forbids
 synthesising an alias for any of them — sending a browser to an mTLS host raises a native
 certificate-chooser dialog most users cannot answer. <code class="prettyprint">issuer</code> is not an endpoint and does
 not move either: §12.4 rule 3 still compares <code class="prettyprint">iss</code> against it by exact string.</p>
-<p><strong>Every property is nullable</strong>, though the server's schema marks all six required. AXIAM
+<p><strong>Every property is nullable</strong>, though the server's schema marks them required. AXIAM
 builds them from one path through a shared macro and so always publishes the complete
 set, but RFC 8705 §5 permits an OP to alias fewer, and the shape of this member must
 never be why a client stops working — the same principle rule 2 point 1 states for the
@@ -173,6 +175,12 @@ the same name, exactly as an absent object does.</p>
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_backchannel_authentication_endpoint">$backchannel_authentication_endpoint</a>
+    <span>
+                        &nbsp;: string|null            </span>
+</dt>
+
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_device_authorization_endpoint">$device_authorization_endpoint</a>
     <span>
@@ -251,6 +259,43 @@ or `null` when the document carries none.</dd>
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_backchannel_authentication_endpoint">
+        $backchannel_authentication_endpoint
+        <a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_backchannel_authentication_endpoint" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">49</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$backchannel_authentication_endpoint</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_device_authorization_endpoint">
         $device_authorization_endpoint
         <a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_device_authorization_endpoint" class="headerlink"><i class="fas fa-link"></i></a>
@@ -261,7 +306,7 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">44</span>
+    <span class="phpdocumentor-element-found-in__line">47</span>
 
     </aside>
 
@@ -298,7 +343,7 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">43</span>
+    <span class="phpdocumentor-element-found-in__line">46</span>
 
     </aside>
 
@@ -335,7 +380,7 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">45</span>
+    <span class="phpdocumentor-element-found-in__line">48</span>
 
     </aside>
 
@@ -372,7 +417,7 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">42</span>
+    <span class="phpdocumentor-element-found-in__line">45</span>
 
     </aside>
 
@@ -409,7 +454,7 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">40</span>
+    <span class="phpdocumentor-element-found-in__line">43</span>
 
     </aside>
 
@@ -446,7 +491,7 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">44</span>
 
     </aside>
 
@@ -488,14 +533,14 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">42</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userinfo_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$revocation_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$introspection_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$device_authorization_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$pushed_authorization_request_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$token_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$userinfo_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$revocation_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$introspection_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$device_authorization_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$pushed_authorization_request_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$backchannel_authentication_endpoint</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -557,6 +602,15 @@ or `null` when the document carries none.</dd>
 </section>
 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$backchannel_authentication_endpoint</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>CIBA Core §7 — authenticates the client (contract 1.58): a <code class="prettyprint">tls_client_auth</code> CIBA client presents its certificate here as at the token endpoint.</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -579,7 +633,7 @@ or `null` when the document carries none.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MtlsEndpointAliases.php"><a href="files/src-oidc-mtlsendpointaliases.html"><abbr title="src/Oidc/MtlsEndpointAliases.php">MtlsEndpointAliases.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">58</span>
+    <span class="phpdocumentor-element-found-in__line">62</span>
 
     </aside>
 
@@ -642,6 +696,7 @@ rather than failing the whole document.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_backchannel_authentication_endpoint">$backchannel_authentication_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_device_authorization_endpoint">$device_authorization_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_introspection_endpoint">$introspection_endpoint</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-MtlsEndpointAliases.html#property_pushed_authorization_request_endpoint">$pushed_authorization_request_endpoint</a></li>

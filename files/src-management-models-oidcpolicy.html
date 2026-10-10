@@ -129,23 +129,25 @@ which is which is the whole of what [`validate_tenant_override`] and
 tenant may be stricter than its organization and never more permissive: *
 [`Self::sensitive_scopes_enabled`], validated **disable-only** — the mirror image of
 `mfa_enforced`, because releasing personal data is the less-restrictive direction, so a
-tenant can turn its organization&#039;s decision off but never on. *
-[`Self::dynamic_registration`], on the ladder `disabled` → `initial_access_token` →
-`anonymous`: a tenant may move down it and never up. * [`Self::dcr_max_clients`] and
-[`Self::dcr_unused_client_ttl_days`], on the ordinary `tenant &lt;= org` rule — with the
-wrinkle that `0` on the second means *never sweep*, which is the longest window of all and
-is handled by [`dcr_ttl_strictness`]. **Not ordered**, therefore never validated against the
-baseline and never clamped: * [`Self::default_locale`]. A language is a presentation
-preference; there is no sense in which Italian is stricter than French. *
-[`Self::dcr_allowed_scopes`], [`Self::dcr_allowed_redirect_hosts`] and
-[`Self::external_client_allowed_resources`]. Each names per-tenant resources — *this*
-tenant&#039;s MCP servers, *this* tenant&#039;s callback hosts — and there is no sense in which one
-such list is stricter than another. A subset rule would force an organization to enumerate
-every tenant&#039;s resource servers in its own baseline before any tenant could name one. The
-model&#039;s rule is &quot;a tenant may only be more restrictive&quot;, which binds every field that *has*
-a restrictiveness; a field that has none cannot violate it. One cross-field interlock spans
-both groups and is checked on the resolved policy rather than on either input: see
-[`validate_dcr_policy`].</dd>    </dl>
+tenant can turn its organization&#039;s decision off but never on. * [`Self::saml_idp_enabled`],
+validated **disable-only** exactly like [`Self::sensitive_scopes_enabled`] (D-20): a tenant
+may turn its organization&#039;s `true` off and never its `false` on. * [`Self::ssf_enabled`],
+validated **disable-only** the same way (D-45). * [`Self::dynamic_registration`], on the
+ladder `disabled` → `initial_access_token` → `anonymous`: a tenant may move down it and
+never up. * [`Self::dcr_max_clients`] and [`Self::dcr_unused_client_ttl_days`], on the
+ordinary `tenant &lt;= org` rule — with the wrinkle that `0` on the second means *never sweep*,
+which is the longest window of all and is handled by [`dcr_ttl_strictness`]. **Not
+ordered**, therefore never validated against the baseline and never clamped: *
+[`Self::default_locale`]. A language is a presentation preference; there is no sense in
+which Italian is stricter than French. * [`Self::dcr_allowed_scopes`],
+[`Self::dcr_allowed_redirect_hosts`] and [`Self::external_client_allowed_resources`]. Each
+names per-tenant resources — *this* tenant&#039;s MCP servers, *this* tenant&#039;s callback hosts —
+and there is no sense in which one such list is stricter than another. A subset rule would
+force an organization to enumerate every tenant&#039;s resource servers in its own baseline
+before any tenant could name one. The model&#039;s rule is &quot;a tenant may only be more
+restrictive&quot;, which binds every field that *has* a restrictiveness; a field that has none
+cannot violate it. One cross-field interlock spans both groups and is checked on the
+resolved policy rather than on either input: see [`validate_dcr_policy`].</dd>    </dl>
 
 
 

@@ -328,7 +328,7 @@ for why it copies.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PgpKeysApi.php"><a href="files/src-management-pgpkeysapi.html"><abbr title="src/Management/PgpKeysApi.php">PgpKeysApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">128</span>
+    <span class="phpdocumentor-element-found-in__line">118</span>
 
     </aside>
 
@@ -341,9 +341,7 @@ for why it copies.</dd>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/pgp-keys/{id}/encrypt</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -440,7 +438,7 @@ for why it copies.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PgpKeysApi.php"><a href="files/src-management-pgpkeysapi.html"><abbr title="src/Management/PgpKeysApi.php">PgpKeysApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -453,8 +451,7 @@ for why it copies.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/pgp-keys</code>.</p>
-<p>The response carries a ONE-TIME secret (<code class="prettyprint">private_key_armored</code>): the server will not
+        <section class="phpdocumentor-description"><p>The response carries a ONE-TIME secret (<code class="prettyprint">private_key_armored</code>): the server will not
 return it again, so a caller that does not persist it here cannot recover it (§27.5).</p>
 </section>
 
@@ -495,7 +492,7 @@ return it again, so a caller that does not persist it here cannot recover it (§
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PgpKeysApi.php"><a href="files/src-management-pgpkeysapi.html"><abbr title="src/Management/PgpKeysApi.php">PgpKeysApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">84</span>
+    <span class="phpdocumentor-element-found-in__line">78</span>
 
     </aside>
 
@@ -508,9 +505,7 @@ return it again, so a caller that does not persist it here cannot recover it (§
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/pgp-keys/{id}</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -603,7 +598,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PgpKeysApi.php"><a href="files/src-management-pgpkeysapi.html"><abbr title="src/Management/PgpKeysApi.php">PgpKeysApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -616,8 +611,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">GET /api/v1/pgp-keys</code>.</p>
-<p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
+        <section class="phpdocumentor-description"><p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
 <code class="prettyprint">count($page)</code> — see §27.4 rule 4.</p>
 </section>
 
@@ -658,7 +652,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PgpKeysApi.php"><a href="files/src-management-pgpkeysapi.html"><abbr title="src/Management/PgpKeysApi.php">PgpKeysApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">107</span>
+    <span class="phpdocumentor-element-found-in__line">99</span>
 
     </aside>
 
@@ -671,8 +665,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/pgp-keys/{id}/revoke</code>.</p>
-<p>Returns nothing; the server answers with an empty body.</p>
+        <section class="phpdocumentor-description"><p>Returns nothing; the server answers with an empty body.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -708,7 +701,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/PgpKeysApi.php"><a href="files/src-management-pgpkeysapi.html"><abbr title="src/Management/PgpKeysApi.php">PgpKeysApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">151</span>
+    <span class="phpdocumentor-element-found-in__line">139</span>
 
     </aside>
 
@@ -721,9 +714,7 @@ from it.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><code class="prettyprint">POST /api/v1/pgp-keys/sign-audit-batch</code>.</p>
-</section>
-
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">

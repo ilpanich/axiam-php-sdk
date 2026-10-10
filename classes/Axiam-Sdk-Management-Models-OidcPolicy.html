@@ -128,7 +128,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">38</span>
+    <span class="phpdocumentor-element-found-in__line">40</span>
 
     </aside>
 
@@ -140,23 +140,25 @@ which is which is the whole of what [`validate_tenant_override`] and
 tenant may be stricter than its organization and never more permissive: *
 [`Self::sensitive_scopes_enabled`], validated **disable-only** — the mirror image of
 `mfa_enforced`, because releasing personal data is the less-restrictive direction, so a
-tenant can turn its organization&#039;s decision off but never on. *
-[`Self::dynamic_registration`], on the ladder `disabled` → `initial_access_token` →
-`anonymous`: a tenant may move down it and never up. * [`Self::dcr_max_clients`] and
-[`Self::dcr_unused_client_ttl_days`], on the ordinary `tenant &lt;= org` rule — with the
-wrinkle that `0` on the second means *never sweep*, which is the longest window of all and
-is handled by [`dcr_ttl_strictness`]. **Not ordered**, therefore never validated against the
-baseline and never clamped: * [`Self::default_locale`]. A language is a presentation
-preference; there is no sense in which Italian is stricter than French. *
-[`Self::dcr_allowed_scopes`], [`Self::dcr_allowed_redirect_hosts`] and
-[`Self::external_client_allowed_resources`]. Each names per-tenant resources — *this*
-tenant&#039;s MCP servers, *this* tenant&#039;s callback hosts — and there is no sense in which one
-such list is stricter than another. A subset rule would force an organization to enumerate
-every tenant&#039;s resource servers in its own baseline before any tenant could name one. The
-model&#039;s rule is &quot;a tenant may only be more restrictive&quot;, which binds every field that *has*
-a restrictiveness; a field that has none cannot violate it. One cross-field interlock spans
-both groups and is checked on the resolved policy rather than on either input: see
-[`validate_dcr_policy`].</p>
+tenant can turn its organization&#039;s decision off but never on. * [`Self::saml_idp_enabled`],
+validated **disable-only** exactly like [`Self::sensitive_scopes_enabled`] (D-20): a tenant
+may turn its organization&#039;s `true` off and never its `false` on. * [`Self::ssf_enabled`],
+validated **disable-only** the same way (D-45). * [`Self::dynamic_registration`], on the
+ladder `disabled` → `initial_access_token` → `anonymous`: a tenant may move down it and
+never up. * [`Self::dcr_max_clients`] and [`Self::dcr_unused_client_ttl_days`], on the
+ordinary `tenant &lt;= org` rule — with the wrinkle that `0` on the second means *never sweep*,
+which is the longest window of all and is handled by [`dcr_ttl_strictness`]. **Not
+ordered**, therefore never validated against the baseline and never clamped: *
+[`Self::default_locale`]. A language is a presentation preference; there is no sense in
+which Italian is stricter than French. * [`Self::dcr_allowed_scopes`],
+[`Self::dcr_allowed_redirect_hosts`] and [`Self::external_client_allowed_resources`]. Each
+names per-tenant resources — *this* tenant&#039;s MCP servers, *this* tenant&#039;s callback hosts —
+and there is no sense in which one such list is stricter than another. A subset rule would
+force an organization to enumerate every tenant&#039;s resource servers in its own baseline
+before any tenant could name one. The model&#039;s rule is &quot;a tenant may only be more
+restrictive&quot;, which binds every field that *has* a restrictiveness; a field that has none
+cannot violate it. One cross-field interlock spans both groups and is checked on the
+resolved policy rather than on either input: see [`validate_dcr_policy`].</p>
 
 
 
@@ -240,9 +242,27 @@ both groups and is checked on the resolved policy rather than on either input: s
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_samlIdpEnabled">$samlIdpEnabled</a>
+    <span>
+                        &nbsp;: bool|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_sensitiveScopesEnabled">$sensitiveScopesEnabled</a>
     <span>
                         &nbsp;: bool            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfEnabled">$ssfEnabled</a>
+    <span>
+                        &nbsp;: bool|null            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfInactiveReason">$ssfInactiveReason</a>
+    <span>
+                        &nbsp;: string|null            </span>
 </dt>
 
     </dl>
@@ -311,7 +331,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">111</span>
+    <span class="phpdocumentor-element-found-in__line">137</span>
 
     </aside>
 
@@ -348,7 +368,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">112</span>
+    <span class="phpdocumentor-element-found-in__line">138</span>
 
     </aside>
 
@@ -385,7 +405,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">113</span>
+    <span class="phpdocumentor-element-found-in__line">139</span>
 
     </aside>
 
@@ -422,7 +442,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">114</span>
+    <span class="phpdocumentor-element-found-in__line">140</span>
 
     </aside>
 
@@ -459,7 +479,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">115</span>
+    <span class="phpdocumentor-element-found-in__line">141</span>
 
     </aside>
 
@@ -496,7 +516,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">116</span>
+    <span class="phpdocumentor-element-found-in__line">142</span>
 
     </aside>
 
@@ -533,7 +553,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">117</span>
+    <span class="phpdocumentor-element-found-in__line">143</span>
 
     </aside>
 
@@ -570,7 +590,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">118</span>
+    <span class="phpdocumentor-element-found-in__line">144</span>
 
     </aside>
 
@@ -580,6 +600,43 @@ both groups and is checked on the resolved policy rather than on either input: s
         <span class="phpdocumentor-signature__visibility">public</span>
             <span class="phpdocumentor-signature__type">array&lt;string|int, mixed&gt;|null</span>
     <span class="phpdocumentor-signature__name">$externalClientAllowedResources</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_samlIdpEnabled">
+        $samlIdpEnabled
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_samlIdpEnabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">145</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">bool|null</span>
+    <span class="phpdocumentor-signature__name">$samlIdpEnabled</span>
      = <span class="phpdocumentor-signature__default-value">null</span></code>
 
     
@@ -607,7 +664,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">110</span>
+    <span class="phpdocumentor-element-found-in__line">136</span>
 
     </aside>
 
@@ -618,6 +675,80 @@ both groups and is checked on the resolved policy rather than on either input: s
             <span class="phpdocumentor-signature__type">bool</span>
     <span class="phpdocumentor-signature__name">$sensitiveScopesEnabled</span>
     </code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_ssfEnabled">
+        $ssfEnabled
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfEnabled" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">146</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">bool|null</span>
+    <span class="phpdocumentor-signature__name">$ssfEnabled</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_ssfInactiveReason">
+        $ssfInactiveReason
+        <a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfInactiveReason" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">147</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$ssfInactiveReason</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
 
     
     
@@ -649,7 +780,7 @@ both groups and is checked on the resolved policy rather than on either input: s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">109</span>
+    <span class="phpdocumentor-element-found-in__line">135</span>
 
     </aside>
 
@@ -657,7 +788,7 @@ both groups and is checked on the resolved policy rather than on either input: s
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sensitiveScopesEnabled</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cimd</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedRedirectHosts</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedScopes</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrMaxClients</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrUnusedClientTtlDays</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultLocale</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dynamicRegistration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$externalClientAllowedResources</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sensitiveScopesEnabled</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CimdPolicy.html"><abbr title="\Axiam\Sdk\Management\Models\CimdPolicy">CimdPolicy</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$cimd</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedRedirectHosts</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrAllowedScopes</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrMaxClients</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dcrUnusedClientTtlDays</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$defaultLocale</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$dynamicRegistration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$externalClientAllowedResources</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$samlIdpEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$ssfEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$ssfInactiveReason</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -803,6 +934,54 @@ Shared with T5 (CIMD), which inherits the same list for the same reason. (option
 </section>
 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$samlIdpEnabled</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>G-2 / D-20 — whether this tenant may act as a SAML 2.0
+identity provider: publish IdP metadata and accept <code class="prettyprint">AuthnRequest</code>s on
+<code class="prettyprint">/saml/v2/{tenant}/{metadata,sso,slo}</code>. <strong>Off unless an organization turns it on.</strong> A
+SAML IdP issues assertions that other systems accept as proof of identity, so a
+deployment that has never decided to be one issues none, and the three endpoints answer
+<code class="prettyprint">404</code> as if they did not exist. The switch lives on this policy, beside the other OpenID
+Provider surface controls, because the SSO endpoint is the same browser login hop and OP
+session with a different wire format. <strong>Disable-only</strong>, with the shape of
+[<code class="prettyprint">Self::sensitive_scopes_enabled</code>]: a tenant may turn its organization's <code class="prettyprint">true</code> off but
+never its <code class="prettyprint">false</code> on, because the decision to issue identity assertions on behalf of the
+organization's tenants is the organization's. A deployment built without the <code class="prettyprint">saml</code>
+feature answers <code class="prettyprint">404</code> whatever this says; the setting is a capability, not a grant (each
+SP must still be registered, and <code class="prettyprint">allow_idp_initiated</code> is its own opt-in). (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$ssfEnabled</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>G-5 / D-45 — whether the tenant is a Shared Signals
+Framework transmitter: its <code class="prettyprint">/.well-known/ssf-configuration</code> is served, its receivers can
+use the stream management API, and events are signed and transmitted on its streams.
+Default <strong><code class="prettyprint">false</code></strong>. <strong>Disable-only</strong>, with the shape of [<code class="prettyprint">Self::saml_idp_enabled</code>]:
+sending security events about the organization's users to third parties is the
+organization's decision. Streams can be registered while it is off; they carry nothing
+until it is on. (optional)</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$ssfInactiveReason</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p><strong>Read-only</strong>, D-55: set on a settings response
+when <code class="prettyprint">ssf_enabled</code> is on but the transmitter is inactive anyway, saying why — the
+deployment holds more than one tenant and serves no per-tenant issuers. Never stored.
+(optional)</p>
+</section>
+
+            </dd>
             </dl>
 
     
@@ -825,7 +1004,7 @@ Shared with T5 (CIMD), which inherits the same list for the same reason. (option
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">126</span>
+    <span class="phpdocumentor-element-found-in__line">155</span>
 
     </aside>
 
@@ -876,7 +1055,7 @@ Shared with T5 (CIMD), which inherits the same list for the same reason. (option
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">190</span>
+    <span class="phpdocumentor-element-found-in__line">231</span>
 
     </aside>
 
@@ -920,7 +1099,7 @@ and nowhere else (§27.5).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/OidcPolicy.php"><a href="files/src-management-models-oidcpolicy.html"><abbr title="src/Management/Models/OidcPolicy.php">OidcPolicy.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">149</span>
+    <span class="phpdocumentor-element-found-in__line">181</span>
 
     </aside>
 
@@ -979,7 +1158,10 @@ omission means the first.</p>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_defaultLocale">$defaultLocale</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_dynamicRegistration">$dynamicRegistration</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_externalClientAllowedResources">$externalClientAllowedResources</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_samlIdpEnabled">$samlIdpEnabled</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_sensitiveScopesEnabled">$sensitiveScopesEnabled</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfEnabled">$ssfEnabled</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Models-OidcPolicy.html#property_ssfInactiveReason">$ssfInactiveReason</a></li>
                                             </ul>
                 </li>
             

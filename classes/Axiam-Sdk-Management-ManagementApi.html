@@ -128,7 +128,7 @@
 
     </aside>
 
-            <p class="phpdocumentor-summary">The CONTRACT.md §27 management surface: 162 operations across 24 namespaces.</p>
+            <p class="phpdocumentor-summary">The CONTRACT.md §27 management surface: 190 operations across 28 namespaces.</p>
 
 
     <section class="phpdocumentor-description"><p>Reached as <code class="prettyprint">$client-&gt;management()</code>. This class holds nothing but the shared <a href="classes/Axiam-Sdk-Management-ManagementTransport.html"><abbr title="\Axiam\Sdk\Management\ManagementTransport">ManagementTransport</abbr></a> and the client's default scope; each accessor below hands back a
@@ -191,6 +191,16 @@ call keeps <code class="prettyprint">-&gt;inOrg()</code> from having anything sh
                                 &nbsp;: <a href="classes/Axiam-Sdk-Management-CertificatesApi.html"><abbr title="\Axiam\Sdk\Management\CertificatesApi">CertificatesApi</abbr></a>    </span>
 </dt>
 <dd>End-entity X.509 certificates -- the ones issued to users, services and IoT devices.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_directory">directory()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-DirectoryApi.html"><abbr title="\Axiam\Sdk\Management\DirectoryApi">DirectoryApi</abbr></a>    </span>
+</dt>
+<dd>A tenant&#039;s LDAP / Active Directory identity source (CONTRACT §30): the one
+configuration, the explicit act that links an existing local account to its directory
+entry, and a read-only view of the sync job. Signing in needs nothing new -- a directory
+account calls the same §1 `login`.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_emailConfig">emailConfig()</a>
@@ -297,6 +307,26 @@ SDK could previously reach.</dd>
 <dd>Roles, their permission sets, and their assignment to users and groups.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_saml">saml()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-SamlApi.html"><abbr title="\Axiam\Sdk\Management\SamlApi">SamlApi</abbr></a>    </span>
+</dt>
+<dd>A tenant&#039;s SAML 2.0 identity provider (CONTRACT §29): the registry of service providers,
+the import of an SP&#039;s metadata into a *draft* registration (never a write), and the
+lifecycle of the IdP signing credential. The protocol itself -- single sign-on, single
+logout, the IdP metadata document -- is browser and SP-to-IdP surface under
+/saml/v2/{tenant_id}, an SP&#039;s own SAML library speaks to it, and it is not in this
+registry.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTargets">scimTargets()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-ScimTargetsApi.html"><abbr title="\Axiam\Sdk\Management\ScimTargetsApi">ScimTargetsApi</abbr></a>    </span>
+</dt>
+<dd>A tenant&#039;s outbound SCIM targets (CONTRACT §31): the downstream SCIM 2.0 service
+providers AXIAM pushes the tenant&#039;s users and groups to, each with its delivery state.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTokens">scimTokens()</a>
     <span>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Management-ScimTokensApi.html"><abbr title="\Axiam\Sdk\Management\ScimTokensApi">ScimTokensApi</abbr></a>    </span>
@@ -324,6 +354,16 @@ with.</dd>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Management-SettingsApi.html"><abbr title="\Axiam\Sdk\Management\SettingsApi">SettingsApi</abbr></a>    </span>
 </dt>
 <dd>Effective settings, and the organization/tenant layers they resolve from.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_ssf">ssf()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-SsfApi.html"><abbr title="\Axiam\Sdk\Management\SsfApi">SsfApi</abbr></a>    </span>
+</dt>
+<dd>A tenant&#039;s Shared Signals Framework streams (CONTRACT §32): which receiver -- an OAuth2
+client of the tenant -- receives which CAEP and RISC security events, as SETs pushed to
+its endpoint or polled. The receiver&#039;s own protocol (transmitter metadata, the SSF
+stream management API, polling) is not in this registry.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_tenants">tenants()</a>
@@ -450,7 +490,7 @@ which this namespace configures.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">335</span>
+    <span class="phpdocumentor-element-found-in__line">401</span>
 
     </aside>
 
@@ -550,6 +590,48 @@ which this namespace configures.</dd>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-CertificatesApi.html"><abbr title="\Axiam\Sdk\Management\CertificatesApi">CertificatesApi</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_directory">
+        directory()
+        <a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_directory" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">284</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A tenant&#039;s LDAP / Active Directory identity source (CONTRACT §30): the one
+configuration, the explicit act that links an existing local account to its directory
+entry, and a read-only view of the sync job. Signing in needs nothing new -- a directory
+account calls the same §1 `login`.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">directory</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-DirectoryApi.html"><abbr title="\Axiam\Sdk\Management\DirectoryApi">DirectoryApi</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-DirectoryApi.html"><abbr title="\Axiam\Sdk\Management\DirectoryApi">DirectoryApi</abbr></a></span>
             </section>
 
 </article>
@@ -925,7 +1007,7 @@ the SDK boundary (§27.0).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">363</span>
+    <span class="phpdocumentor-element-found-in__line">429</span>
 
     </aside>
 
@@ -965,7 +1047,7 @@ them so.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">349</span>
+    <span class="phpdocumentor-element-found-in__line">415</span>
 
     </aside>
 
@@ -1005,7 +1087,7 @@ caller, never to another user.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">308</span>
+    <span class="phpdocumentor-element-found-in__line">374</span>
 
     </aside>
 
@@ -1115,6 +1197,93 @@ SDK could previously reach.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_saml">
+        saml()
+        <a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_saml" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">302</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A tenant&#039;s SAML 2.0 identity provider (CONTRACT §29): the registry of service providers,
+the import of an SP&#039;s metadata into a *draft* registration (never a write), and the
+lifecycle of the IdP signing credential. The protocol itself -- single sign-on, single
+logout, the IdP metadata document -- is browser and SP-to-IdP surface under
+/saml/v2/{tenant_id}, an SP&#039;s own SAML library speaks to it, and it is not in this
+registry.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">saml</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-SamlApi.html"><abbr title="\Axiam\Sdk\Management\SamlApi">SamlApi</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-SamlApi.html"><abbr title="\Axiam\Sdk\Management\SamlApi">SamlApi</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_scimTargets">
+        scimTargets()
+        <a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTargets" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">334</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A tenant&#039;s outbound SCIM targets (CONTRACT §31): the downstream SCIM 2.0 service
+providers AXIAM pushes the tenant&#039;s users and groups to, each with its delivery state.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">scimTargets</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-ScimTargetsApi.html"><abbr title="\Axiam\Sdk\Management\ScimTargetsApi">ScimTargetsApi</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>The credential AXIAM pushes with is write-only. Deleting a target does not deprovision
+anything downstream.</p>
+</section>
+
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-ScimTargetsApi.html"><abbr title="\Axiam\Sdk\Management\ScimTargetsApi">ScimTargetsApi</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_scimTokens">
         scimTokens()
         <a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTokens" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1123,7 +1292,7 @@ SDK could previously reach.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">294</span>
+    <span class="phpdocumentor-element-found-in__line">360</span>
 
     </aside>
 
@@ -1241,7 +1410,7 @@ with.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">281</span>
+    <span class="phpdocumentor-element-found-in__line">347</span>
 
     </aside>
 
@@ -1263,6 +1432,48 @@ with.</p>
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-SettingsApi.html"><abbr title="\Axiam\Sdk\Management\SettingsApi">SettingsApi</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_ssf">
+        ssf()
+        <a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_ssf" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">318</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A tenant&#039;s Shared Signals Framework streams (CONTRACT §32): which receiver -- an OAuth2
+client of the tenant -- receives which CAEP and RISC security events, as SETs pushed to
+its endpoint or polled. The receiver&#039;s own protocol (transmitter metadata, the SSF
+stream management API, polling) is not in this registry.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">ssf</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-SsfApi.html"><abbr title="\Axiam\Sdk\Management\SsfApi">SsfApi</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-SsfApi.html"><abbr title="\Axiam\Sdk\Management\SsfApi">SsfApi</abbr></a></span>
             </section>
 
 </article>
@@ -1360,7 +1571,7 @@ lockout state.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">322</span>
+    <span class="phpdocumentor-element-found-in__line">388</span>
 
     </aside>
 
@@ -1452,6 +1663,7 @@ which this namespace configures.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_audit">audit()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_caCertificates">caCertificates()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_certificates">certificates()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_directory">directory()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_emailConfig">emailConfig()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_federation">federation()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_groups">groups()</a></li>
@@ -1466,10 +1678,13 @@ which this namespace configures.</p>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_reactors">reactors()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_resources">resources()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_roles">roles()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_saml">saml()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTargets">scimTargets()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTokens">scimTokens()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_scopes">scopes()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_serviceAccounts">serviceAccounts()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_settings">settings()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_ssf">ssf()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_tenants">tenants()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_users">users()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ManagementApi.html#method_webauthnPolicy">webauthnPolicy()</a></li>

@@ -204,6 +204,22 @@ properties (CONTRACT.md §2's error-construction rule).</p>
 of the §12.4 ID-token validation rules. `null` for every other `AuthError` in this
 SDK (wrong credentials, expired session, MFA failure, 401 on refresh, …).</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isAccessDenied">isAccessDenied()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Whether this is `access_denied` — at a CIBA or device poll, the user refused
+(CONTRACT.md §33.4, §14.2 rule 3). Distinct from {@see self::isExpiredToken()}.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isExpiredToken">isExpiredToken()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Whether this is `expired_token` — at a CIBA or device poll, nobody decided in time; also
+what `cibaAwait` raises locally at its deadline (CONTRACT.md §33.4, §33.7 rule 4).</dd>
+
     </dl>
 
 
@@ -395,6 +411,86 @@ SDK (wrong credentials, expired session, MFA failure, 401 on refresh, …).</p>
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_isAccessDenied">
+        isAccessDenied()
+        <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isAccessDenied" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/OAuthProtocolError.php"><a href="files/src-core-oauthprotocolerror.html"><abbr title="src/Core/OAuthProtocolError.php">OAuthProtocolError.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">38</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Whether this is `access_denied` — at a CIBA or device poll, the user refused
+(CONTRACT.md §33.4, §14.2 rule 3). Distinct from {@see self::isExpiredToken()}.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">isAccessDenied</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_isExpiredToken">
+        isExpiredToken()
+        <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isExpiredToken" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Core/OAuthProtocolError.php"><a href="files/src-core-oauthprotocolerror.html"><abbr title="src/Core/OAuthProtocolError.php">OAuthProtocolError.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">47</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Whether this is `expired_token` — at a CIBA or device poll, nobody decided in time; also
+what `cibaAwait` raises locally at its deadline (CONTRACT.md §33.4, §33.7 rule 4).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">isExpiredToken</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
             </section>
 
         
@@ -427,6 +523,8 @@ SDK (wrong credentials, expired session, MFA failure, 401 on refresh, …).</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Core-AuthError.html#method_getReason">getReason()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isAccessDenied">isAccessDenied()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isExpiredToken">isExpiredToken()</a></li>
                                     </ul>
             </li>
                     </ul>

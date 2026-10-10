@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">52</span>
+    <span class="phpdocumentor-element-found-in__line">54</span>
 
     </aside>
 
@@ -193,6 +193,34 @@ the caller names none — an AXIAM-issued access token (§15.1).</dd>
 </dt>
 <dd>The `events` member that distinguishes a logout token from an ID token
 (OIDC Back-Channel Logout 1.0 §2.4).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_GRANT_TYPE">CIBA_GRANT_TYPE</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;urn:openid:params:grant-type:ciba&#039;                            </span>
+</dt>
+<dd>`grant_type` of the CIBA token request (CIBA Core §10.1).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SIGNED_REQUEST_LIFETIME_SECONDS">CIBA_SIGNED_REQUEST_LIFETIME_SECONDS</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 300                            </span>
+</dt>
+<dd>The lifetime of a signed request this SDK mints: inside the server&#039;s 60-minute bound.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SLOW_DOWN_INCREMENT_SECONDS">CIBA_SLOW_DOWN_INCREMENT_SECONDS</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 5                            </span>
+</dt>
+<dd>Seconds added to the CIBA interval per `slow_down`, permanently (§33.7 rule 3).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEFAULT_CIBA_INTERVAL_SECONDS">DEFAULT_CIBA_INTERVAL_SECONDS</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 5                            </span>
+</dt>
+<dd>The interval used when the initiate response carries none (§33.7 rule 2).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEFAULT_POLL_INTERVAL_SECONDS">DEFAULT_POLL_INTERVAL_SECONDS</a>
@@ -339,6 +367,39 @@ so the SDK supplies it.</dd>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaAwait">cibaAwait()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a>    </span>
+</dt>
+<dd>Poll for `$initiated`&#039;s outcome until it is decided or expires (CONTRACT.md §33.1,
+§33.7). Surfaces nothing to the user — AXIAM notified them.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaHandlePing">cibaHandlePing()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>    </span>
+</dt>
+<dd>Check a ping AXIAM delivered to your notification endpoint, and return the `auth_req_id`
+it names (CIBA Core §10.2, CONTRACT.md §33.1). **No I/O.**</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaInitiate">cibaInitiate()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html"><abbr title="\Axiam\Sdk\Oidc\CibaInitiateResponse">CibaInitiateResponse</abbr></a>    </span>
+</dt>
+<dd>`POST /oauth2/bc-authorize` (CIBA Core §7, CONTRACT.md §33.1) — ask AXIAM to authenticate
+a user **on another device**.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaPoll">cibaPoll()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a>    </span>
+</dt>
+<dd>`POST /oauth2/token` with `grant_type=urn:openid:params:grant-type:ciba` (CIBA Core §10.1,
+CONTRACT.md §33.1) — **one** token request, with the same client authentication as
+{@see self::cibaInitiate()} and the mTLS alias rule of every token call.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_deviceAuthorize">deviceAuthorize()</a>
@@ -605,7 +666,7 @@ ticket for a Requesting Party Token.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">670</span>
+    <span class="phpdocumentor-element-found-in__line">676</span>
 
     </aside>
 
@@ -637,7 +698,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">701</span>
+    <span class="phpdocumentor-element-found-in__line">707</span>
 
     </aside>
 
@@ -660,6 +721,130 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
         
     </article>
                     <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_CIBA_GRANT_TYPE">
+        CIBA_GRANT_TYPE
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_GRANT_TYPE" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1782</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`grant_type` of the CIBA token request (CIBA Core §10.1).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">CIBA_GRANT_TYPE</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;urn:openid:params:grant-type:ciba&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_CIBA_SIGNED_REQUEST_LIFETIME_SECONDS">
+        CIBA_SIGNED_REQUEST_LIFETIME_SECONDS
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SIGNED_REQUEST_LIFETIME_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1791</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The lifetime of a signed request this SDK mints: inside the server&#039;s 60-minute bound.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">CIBA_SIGNED_REQUEST_LIFETIME_SECONDS</span>
+    = <span class="phpdocumentor-signature__default-value">300</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_CIBA_SLOW_DOWN_INCREMENT_SECONDS">
+        CIBA_SLOW_DOWN_INCREMENT_SECONDS
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SLOW_DOWN_INCREMENT_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1788</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Seconds added to the CIBA interval per `slow_down`, permanently (§33.7 rule 3).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">CIBA_SLOW_DOWN_INCREMENT_SECONDS</span>
+    = <span class="phpdocumentor-signature__default-value">5</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_DEFAULT_CIBA_INTERVAL_SECONDS">
+        DEFAULT_CIBA_INTERVAL_SECONDS
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEFAULT_CIBA_INTERVAL_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1785</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The interval used when the initiate response carries none (§33.7 rule 2).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">DEFAULT_CIBA_INTERVAL_SECONDS</span>
+    = <span class="phpdocumentor-signature__default-value">5</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
     <h4 class="phpdocumentor-element__name" id="constant_DEFAULT_POLL_INTERVAL_SECONDS">
         DEFAULT_POLL_INTERVAL_SECONDS
         <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEFAULT_POLL_INTERVAL_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
@@ -669,7 +854,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">655</span>
+    <span class="phpdocumentor-element-found-in__line">661</span>
 
     </aside>
 
@@ -701,7 +886,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">649</span>
+    <span class="phpdocumentor-element-found-in__line">655</span>
 
     </aside>
 
@@ -732,7 +917,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">54</span>
+    <span class="phpdocumentor-element-found-in__line">56</span>
 
     </aside>
 
@@ -762,7 +947,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">679</span>
+    <span class="phpdocumentor-element-found-in__line">685</span>
 
     </aside>
 
@@ -797,7 +982,7 @@ refresh and ID token types <strong>by name</strong>.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">708</span>
+    <span class="phpdocumentor-element-found-in__line">714</span>
 
     </aside>
 
@@ -830,7 +1015,7 @@ from a mis-configured RP being replayed days later.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">74</span>
+    <span class="phpdocumentor-element-found-in__line">76</span>
 
     </aside>
 
@@ -862,7 +1047,7 @@ sets a floor of 5 minutes; a smaller configured value is raised to it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">695</span>
+    <span class="phpdocumentor-element-found-in__line">701</span>
 
     </aside>
 
@@ -893,7 +1078,7 @@ sets a floor of 5 minutes; a smaller configured value is raised to it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">661</span>
+    <span class="phpdocumentor-element-found-in__line">667</span>
 
     </aside>
 
@@ -925,7 +1110,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">56</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -955,7 +1140,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">68</span>
+    <span class="phpdocumentor-element-found-in__line">70</span>
 
     </aside>
 
@@ -986,7 +1171,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">65</span>
+    <span class="phpdocumentor-element-found-in__line">67</span>
 
     </aside>
 
@@ -1017,7 +1202,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">64</span>
 
     </aside>
 
@@ -1048,7 +1233,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">59</span>
+    <span class="phpdocumentor-element-found-in__line">61</span>
 
     </aside>
 
@@ -1079,7 +1264,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">55</span>
+    <span class="phpdocumentor-element-found-in__line">57</span>
 
     </aside>
 
@@ -1109,7 +1294,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">664</span>
+    <span class="phpdocumentor-element-found-in__line">670</span>
 
     </aside>
 
@@ -1140,7 +1325,7 @@ increase is permanent and cumulative.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">689</span>
+    <span class="phpdocumentor-element-found-in__line">695</span>
 
     </aside>
 
@@ -1173,7 +1358,7 @@ so the SDK supplies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">692</span>
+    <span class="phpdocumentor-element-found-in__line">698</span>
 
     </aside>
 
@@ -1204,7 +1389,7 @@ so the SDK supplies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">682</span>
+    <span class="phpdocumentor-element-found-in__line">688</span>
 
     </aside>
 
@@ -1249,14 +1434,14 @@ so the SDK supplies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">114</span>
+    <span class="phpdocumentor-element-found-in__line">116</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\Client">Client</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$http</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Session.html"><abbr title="\Axiam\Sdk\Session">Session</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$session</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html"><abbr title="\Axiam\Sdk\Auth\JwksVerifier">JwksVerifier</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jwksVerifier</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientSecret</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgSlug</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantSlugForSso</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$discoveryTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::MIN_DISCOVERY_TTL_SECONDS">self::MIN_DISCOVERY_TTL_SECONDS</abbr></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clockSkewSec</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_MAX_CLOCK_SKEW_SEC"><abbr title="\Axiam\Sdk\Oidc\IdTokenValidator::MAX_CLOCK_SKEW_SEC">IdTokenValidator::MAX_CLOCK_SKEW_SEC</abbr></a></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$presentsClientCertificate</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><abbr title="\GuzzleHttp\Client">Client</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$http</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$baseUrl</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Session.html"><abbr title="\Axiam\Sdk\Session">Session</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$session</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Auth-JwksVerifier.html"><abbr title="\Axiam\Sdk\Auth\JwksVerifier">JwksVerifier</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$jwksVerifier</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientSecret</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgSlug</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantSlugForSso</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$discoveryTtlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::MIN_DISCOVERY_TTL_SECONDS">self::MIN_DISCOVERY_TTL_SECONDS</abbr></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clockSkewSec</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><a href="classes/Axiam-Sdk-Oidc-IdTokenValidator.html#constant_MAX_CLOCK_SKEW_SEC"><abbr title="\Axiam\Sdk\Oidc\IdTokenValidator::MAX_CLOCK_SKEW_SEC">IdTokenValidator::MAX_CLOCK_SKEW_SEC</abbr></a></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$presentsClientCertificate</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">false</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$retryEnabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">true</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-TelemetryDispatcher.html"><abbr title="\Axiam\Sdk\Core\TelemetryDispatcher">TelemetryDispatcher</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$telemetry</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -1379,6 +1564,20 @@ so the SDK supplies it.</p>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$retryEnabled</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">true</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$telemetry</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-TelemetryDispatcher.html"><abbr title="\Axiam\Sdk\Core\TelemetryDispatcher">TelemetryDispatcher</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
             </dl>
 
     
@@ -1386,6 +1585,386 @@ so the SDK supplies it.</p>
         
     
     
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_cibaAwait">
+        cibaAwait()
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaAwait" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1924</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Poll for `$initiated`&#039;s outcome until it is decided or expires (CONTRACT.md §33.1,
+§33.7). Surfaces nothing to the user — AXIAM notified them.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">cibaAwait</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html"><abbr title="\Axiam\Sdk\Oidc\CibaInitiateResponse">CibaInitiateResponse</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$initiated</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html"><abbr title="\Axiam\Sdk\Oidc\OidcConfiguration">OidcConfiguration</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$configuration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaClock.html"><abbr title="\Axiam\Sdk\Oidc\CibaClock">CibaClock</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clock</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><ul>
+<li>The first poll waits one <code class="prettyprint">interval</code> (the response's, or 5 s): polling earlier only
+earns <code class="prettyprint">slow_down</code> and a longer wait.</li>
+<li><code class="prettyprint">slow_down</code> adds 5 s to the interval, cumulatively and permanently;
+<code class="prettyprint">authorization_pending</code> never lowers it.</li>
+<li>A transport failure, <code class="prettyprint">5xx</code> or <code class="prettyprint">429</code> (<code class="prettyprint">rate_limit_exceeded</code>) that outlived §16 is not
+terminal: the loop waits the interval and polls again.</li>
+<li>Polling stops at <code class="prettyprint">receivedAt + expiresIn</code>, even if the server has not said
+<code class="prettyprint">expired_token</code>; the same <code class="prettyprint">expired_token</code> <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a> is then raised
+locally, without a request.</li>
+<li>Anything else — <code class="prettyprint">access_denied</code>, <code class="prettyprint">expired_token</code>, <code class="prettyprint">invalid_grant</code>, an unknown code, the
+call refused — is raised.</li>
+</ul>
+<p>Returns the token set without adopting it as this client's credential (the posture of
+<code class="prettyprint">deviceLogin</code> and <code class="prettyprint">loginClientCredentials</code> without their opt-in flag).</p>
+<p>In <strong>ping</strong> mode do not loop from the start: answer the ping, call
+<abbr title="\Axiam\Sdk\Oidc\self::cibaPoll()">self::cibaPoll()</abbr> once from the ping handler (again at <code class="prettyprint">interval</code> after
+<code class="prettyprint">slow_down</code> / <code class="prettyprint">authorization_pending</code>), and fall back to this loop only once half of
+<code class="prettyprint">expiresIn</code> has passed without a ping (§33.7 rule 6) — a ping is delivered at least once,
+never exactly once, and may not arrive at all.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$initiated</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html"><abbr title="\Axiam\Sdk\Oidc\CibaInitiateResponse">CibaInitiateResponse</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$configuration</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html"><abbr title="\Axiam\Sdk\Oidc\OidcConfiguration">OidcConfiguration</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clock</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaClock.html"><abbr title="\Axiam\Sdk\Oidc\CibaClock">CibaClock</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The clock to wait on; <a href="classes/Axiam-Sdk-Oidc-SystemCibaClock.html"><abbr title="\Axiam\Sdk\Oidc\SystemCibaClock">SystemCibaClock</abbr></a> when omitted.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_cibaHandlePing">
+        cibaHandlePing()
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaHandlePing" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1993</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Check a ping AXIAM delivered to your notification endpoint, and return the `auth_req_id`
+it names (CIBA Core §10.2, CONTRACT.md §33.1). **No I/O.**</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">cibaHandlePing</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array&lt;string|int, string|array&lt;int, string&gt;&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$headers</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expectedToken</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><ol>
+<li>Exactly one <code class="prettyprint">Authorization</code> header (names compared case-insensitively), whose value is
+the scheme <code class="prettyprint">Bearer</code> (any case), one space, and <code class="prettyprint">$expectedToken</code> — compared in constant
+time (<abbr title="\Axiam\Sdk\Oidc\hash_equals()">hash_equals()</abbr>). Otherwise an <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> whose message names no value.</li>
+<li>A JSON object with a non-empty string <code class="prettyprint">auth_req_id</code>; any other member is ignored.
+Otherwise a local <a href="classes/Axiam-Sdk-Management-ValidationError.html"><abbr title="\Axiam\Sdk\Management\ValidationError">ValidationError</abbr></a>.</li>
+</ol>
+<p>It neither answers the HTTP request nor calls the token endpoint: answer <code class="prettyprint">204</code> as soon
+as this returns, <strong>then</strong> call <abbr title="\Axiam\Sdk\Oidc\self::cibaPoll()">self::cibaPoll()</abbr> — AXIAM retries a ping that is not
+answered quickly, and the ping says only that the request was decided, never how. Nor
+does it check that the <code class="prettyprint">auth_req_id</code> is one you issued: the token endpoint answers
+<code class="prettyprint">invalid_grant</code> for any other.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$headers</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;string|int, string|array&lt;int, string&gt;&gt;</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The request's headers: a PSR-7
+<code class="prettyprint">getHeaders()</code> map (name =&gt; list of values), a <code class="prettyprint">getallheaders()</code> map
+(name =&gt; value), or a mix.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The raw request body.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$expectedToken</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The <code class="prettyprint">client_notification_token</code> you sent with the request.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_cibaInitiate">
+        cibaInitiate()
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaInitiate" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1816</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /oauth2/bc-authorize` (CIBA Core §7, CONTRACT.md §33.1) — ask AXIAM to authenticate
+a user **on another device**.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">cibaInitiate</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html"><abbr title="\Axiam\Sdk\Oidc\CibaInitiateRequest">CibaInitiateRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html"><abbr title="\Axiam\Sdk\Oidc\OidcConfiguration">OidcConfiguration</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$configuration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaClock.html"><abbr title="\Axiam\Sdk\Oidc\CibaClock">CibaClock</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clock</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html"><abbr title="\Axiam\Sdk\Oidc\CibaInitiateResponse">CibaInitiateResponse</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>The client authenticates with the credential this SDK uses at <code class="prettyprint">/oauth2/token</code>: its
+<code class="prettyprint">client_secret</code> (<code class="prettyprint">client_secret_post</code>), or — for a <code class="prettyprint">tls_client_auth</code> client — the §6.1
+certificate, sending <code class="prettyprint">client_id</code> only. A CIBA client is never public, so a client with
+neither is refused locally. <code class="prettyprint">tenant_id</code> travels in the query, never the body; on an mTLS
+call the discovery document's <code class="prettyprint">mtls_endpoint_aliases</code> entry is preferred.</p>
+<p><strong>Never retried</strong> — not on a transport error, a <code class="prettyprint">5xx</code> or a <code class="prettyprint">429</code> (§33.7 rule 1): every
+accepted call stores a request and may notify a person. On a lost answer, let it expire
+and ask again deliberately.</p>
+<p><strong>A success proves nothing about the user</strong> (§33.3 rule 4): AXIAM answers a hint that
+names nobody, a locked user and a real one identically.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$request</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaInitiateRequest.html"><abbr title="\Axiam\Sdk\Oidc\CibaInitiateRequest">CibaInitiateRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$configuration</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html"><abbr title="\Axiam\Sdk\Oidc\OidcConfiguration">OidcConfiguration</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clock</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-CibaClock.html"><abbr title="\Axiam\Sdk\Oidc\CibaClock">CibaClock</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_cibaInitiate_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaInitiate_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>locally, when the client has no credential, or when the discovery
+document advertises no <code class="prettyprint">backchannel_authentication_endpoint</code>.</p>
+</section>
+
+                                    </dd>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>for the server's refusals at any status — for example
+<code class="prettyprint">invalid_binding_message</code> with its <code class="prettyprint">errorDescription</code>, or a <code class="prettyprint">429</code>'s
+<code class="prettyprint">rate_limit_exceeded</code>.</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-CibaInitiateResponse.html"><abbr title="\Axiam\Sdk\Oidc\CibaInitiateResponse">CibaInitiateResponse</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_cibaPoll">
+        cibaPoll()
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaPoll" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1887</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /oauth2/token` with `grant_type=urn:openid:params:grant-type:ciba` (CIBA Core §10.1,
+CONTRACT.md §33.1) — **one** token request, with the same client authentication as
+{@see self::cibaInitiate()} and the mTLS alias rule of every token call.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">cibaPoll</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$authReqId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html"><abbr title="\Axiam\Sdk\Oidc\OidcConfiguration">OidcConfiguration</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$configuration</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>The answers of §33.3 rule 6 surface as <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a>: <code class="prettyprint">authorization_pending</code>
+and <code class="prettyprint">slow_down</code> (non-terminal), <code class="prettyprint">access_denied</code> and <code class="prettyprint">expired_token</code> (terminal, and told
+apart by <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isAccessDenied"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError::isAccessDenied()">OAuthProtocolError::isAccessDenied()</abbr></a> /
+<a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html#method_isExpiredToken"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError::isExpiredToken()">OAuthProtocolError::isExpiredToken()</abbr></a>), <code class="prettyprint">invalid_grant</code>. A protocol answer is never
+retried; a transport failure, a <code class="prettyprint">5xx</code>, <code class="prettyprint">408</code> or a bodiless <code class="prettyprint">429</code> is retried per §16 within
+this call; any other <code class="prettyprint">4xx</code> is not. A <code class="prettyprint">5xx</code> is transient <strong>whatever its body</strong> — AXIAM's
+token endpoint answers <code class="prettyprint">500 {&quot;error&quot;:&quot;server_error&quot;}</code> — so it surfaces as a
+<a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a>, never an <code class="prettyprint">OAuthProtocolError</code> (§33.4, §34.2 P8).</p>
+<p><strong>Store the returned tokens before anything else</strong>: a request is redeemed once, and a
+second <code class="prettyprint">cibaPoll</code> for it is <code class="prettyprint">invalid_grant</code> (§33.7 rule 7). The ID token is validated as
+for every other grant (no nonce). The set is returned, not adopted as this client's
+credential.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$authReqId</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Core-Sensitive.html"><abbr title="\Axiam\Sdk\Core\Sensitive">Sensitive</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$configuration</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcConfiguration.html"><abbr title="\Axiam\Sdk\Oidc\OidcConfiguration">OidcConfiguration</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_cibaPoll_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaPoll_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>locally, when the client has no credential.</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a></span>
+            </section>
+
 </article>
                     <article
         class="phpdocumentor-element
@@ -1401,7 +1980,7 @@ so the SDK supplies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">723</span>
+    <span class="phpdocumentor-element-found-in__line">729</span>
 
     </aside>
 
@@ -1488,7 +2067,7 @@ code is pointed at.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">836</span>
+    <span class="phpdocumentor-element-found-in__line">842</span>
 
     </aside>
 
@@ -1591,7 +2170,7 @@ said <code class="prettyprint">expired_token</code>. A 5xx or transport failure 
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">793</span>
+    <span class="phpdocumentor-element-found-in__line">799</span>
 
     </aside>
 
@@ -1660,7 +2239,7 @@ sees. Most callers want <code class="prettyprint">deviceLogin</code>.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1219</span>
+    <span class="phpdocumentor-element-found-in__line">1232</span>
 
     </aside>
 
@@ -1753,7 +2332,7 @@ NO <code class="prettyprint">RefreshMiddleware</code> at all, so there is struct
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">615</span>
+    <span class="phpdocumentor-element-found-in__line">621</span>
 
     </aside>
 
@@ -1845,7 +2424,7 @@ performed by a public client.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1044</span>
+    <span class="phpdocumentor-element-found-in__line">1057</span>
 
     </aside>
 
@@ -1940,7 +2519,7 @@ a client-side copy would drift and reject a URI an operator had just registered.
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">205</span>
+    <span class="phpdocumentor-element-found-in__line">211</span>
 
     </aside>
 
@@ -1992,7 +2571,7 @@ explicit (§12.3 rule 6). `https://IAM.example.com/` and
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">240</span>
+    <span class="phpdocumentor-element-found-in__line">246</span>
 
     </aside>
 
@@ -2089,7 +2668,7 @@ error, caught at call time.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">149</span>
+    <span class="phpdocumentor-element-found-in__line">155</span>
 
     </aside>
 
@@ -2130,7 +2709,7 @@ de-duplication of concurrent callers (§12.3 rule 6).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">159</span>
+    <span class="phpdocumentor-element-found-in__line">165</span>
 
     </aside>
 
@@ -2171,7 +2750,7 @@ de-duplication under Guzzle&#039;s async interface — mirrors
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">484</span>
+    <span class="phpdocumentor-element-found-in__line">490</span>
 
     </aside>
 
@@ -2263,7 +2842,7 @@ code — the access and refresh tokens from the same response are never returned
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">372</span>
+    <span class="phpdocumentor-element-found-in__line">378</span>
 
     </aside>
 
@@ -2388,7 +2967,7 @@ from the issuer.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">537</span>
+    <span class="phpdocumentor-element-found-in__line">543</span>
 
     </aside>
 
@@ -2479,7 +3058,7 @@ refresh-issued ID token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1280</span>
+    <span class="phpdocumentor-element-found-in__line">1293</span>
 
     </aside>
 
@@ -2570,7 +3149,7 @@ treats an unknown token as success.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1397</span>
+    <span class="phpdocumentor-element-found-in__line">1410</span>
 
     </aside>
 
@@ -2635,7 +3214,7 @@ path.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2303</span>
+    <span class="phpdocumentor-element-found-in__line">2698</span>
 
     </aside>
 
@@ -2698,7 +3277,7 @@ already-redeemed all answer the same <code class="prettyprint">401</code>, delib
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2276</span>
+    <span class="phpdocumentor-element-found-in__line">2671</span>
 
     </aside>
 
@@ -2763,7 +3342,7 @@ configured userinfo endpoint with the access token it had just received
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2130</span>
+    <span class="phpdocumentor-element-found-in__line">2525</span>
 
     </aside>
 
@@ -2848,7 +3427,7 @@ throw client-side when no workspace resolves.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1326</span>
+    <span class="phpdocumentor-element-found-in__line">1339</span>
 
     </aside>
 
@@ -2956,7 +3535,7 @@ cannot be resolved.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2210</span>
+    <span class="phpdocumentor-element-found-in__line">2605</span>
 
     </aside>
 
@@ -3069,7 +3648,7 @@ cannot be resolved.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">940</span>
+    <span class="phpdocumentor-element-found-in__line">953</span>
 
     </aside>
 
@@ -3091,6 +3670,12 @@ with no wire call.</p>
 <li><strong>No default <code class="prettyprint">$actorToken</code></strong> (§15.2 rule 1). Passing <code class="prettyprint">null</code> asks for
 <em>impersonation</em>; the SDK will not quietly reuse the client's own session token as
 the actor and turn that into a delegation.</li>
+<li><strong>An <code class="prettyprint">$actorToken</code> is the exchanging client's own</strong> (rule 9, contract 1.60): obtain it
+with the same client's <code class="prettyprint">client_credentials</code> grant
+(<a href="classes/Axiam-Sdk-AxiamClient.html#method_loginClientCredentials"><abbr title="\Axiam\Sdk\AxiamClient::loginClientCredentials()">AxiamClient::loginClientCredentials()</abbr></a>) and pass it here; the
+SDK supplies none. A token issued to another client, a console sign-in or a service
+account is answered <code class="prettyprint">400 invalid_request</code> (<code class="prettyprint">actor_token was not issued to the exchanging client</code>), which surfaces unchanged — not retried, not rewritten into an
+impersonation, not repaired with a token of the SDK's own.</li>
 <li><strong>No retry or downgrade on <code class="prettyprint">unauthorized_client</code></strong> (rule 2) — a registration fact
 an operator must fix.</li>
 <li><strong>No auto-narrowing on <code class="prettyprint">invalid_scope</code></strong> (rule 3). The server refuses instead of
@@ -3216,7 +3801,7 @@ the SDK will not retry a refusal as a different type.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1663</span>
+    <span class="phpdocumentor-element-found-in__line">1676</span>
 
     </aside>
 
@@ -3280,7 +3865,7 @@ computation, for a resource server that has just minted a ticket.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1502</span>
+    <span class="phpdocumentor-element-found-in__line">1515</span>
 
     </aside>
 
@@ -3332,7 +3917,7 @@ computation, for a resource server that has just minted a ticket.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1599</span>
+    <span class="phpdocumentor-element-found-in__line">1612</span>
 
     </aside>
 
@@ -3450,7 +4035,7 @@ for live ticket handles.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1520</span>
+    <span class="phpdocumentor-element-found-in__line">1533</span>
 
     </aside>
 
@@ -3502,7 +4087,7 @@ client, so a PAT is not an enumeration handle.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1654</span>
+    <span class="phpdocumentor-element-found-in__line">1667</span>
 
     </aside>
 
@@ -3554,7 +4139,7 @@ this client has not necessarily chosen to trust. See <a href="classes/Axiam-Sdk-
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1461</span>
+    <span class="phpdocumentor-element-found-in__line">1474</span>
 
     </aside>
 
@@ -3610,7 +4195,7 @@ this client has not necessarily chosen to trust. See <a href="classes/Axiam-Sdk-
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1443</span>
+    <span class="phpdocumentor-element-found-in__line">1456</span>
 
     </aside>
 
@@ -3688,7 +4273,7 @@ falls back to the session's own token when one is not passed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1540</span>
+    <span class="phpdocumentor-element-found-in__line">1553</span>
 
     </aside>
 
@@ -3748,7 +4333,7 @@ converts into an RPT, and a short lifetime is not the same as a harmless one
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1483</span>
+    <span class="phpdocumentor-element-found-in__line">1496</span>
 
     </aside>
 
@@ -3830,7 +4415,7 @@ impossible through this SDK.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1095</span>
+    <span class="phpdocumentor-element-found-in__line">1108</span>
 
     </aside>
 
@@ -3933,6 +4518,10 @@ store and would silently drop a real second logout after a restart.</p>
                     <ul class="phpdocumentor-list -clean">
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_ACCESS_TOKEN_TYPE">ACCESS_TOKEN_TYPE</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_BACKCHANNEL_LOGOUT_EVENT">BACKCHANNEL_LOGOUT_EVENT</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_GRANT_TYPE">CIBA_GRANT_TYPE</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SIGNED_REQUEST_LIFETIME_SECONDS">CIBA_SIGNED_REQUEST_LIFETIME_SECONDS</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_CIBA_SLOW_DOWN_INCREMENT_SECONDS">CIBA_SLOW_DOWN_INCREMENT_SECONDS</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEFAULT_CIBA_INTERVAL_SECONDS">DEFAULT_CIBA_INTERVAL_SECONDS</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEFAULT_POLL_INTERVAL_SECONDS">DEFAULT_POLL_INTERVAL_SECONDS</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DEVICE_CODE_GRANT_TYPE">DEVICE_CODE_GRANT_TYPE</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#constant_DISCOVERY_PATH">DISCOVERY_PATH</a></li>
@@ -3959,6 +4548,10 @@ store and would silently drop a real second logout after a restart.</p>
             <li>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaAwait">cibaAwait()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaHandlePing">cibaHandlePing()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaInitiate">cibaInitiate()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_cibaPoll">cibaPoll()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_deviceAuthorize">deviceAuthorize()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_deviceLogin">deviceLogin()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcClient.html#method_devicePoll">devicePoll()</a></li>

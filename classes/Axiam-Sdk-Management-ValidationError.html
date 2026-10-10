@@ -179,6 +179,12 @@ care a body the server has already rejected would be sent three times. §27.4 ru
 <dd>A server-supplied `Retry-After` hint in milliseconds (CONTRACT.md §16.1),
 `null` when the response carried none.</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ValidationError.html#property_serverMessage">$serverMessage</a>
+    <span>
+                        &nbsp;: string|null            </span>
+</dt>
+
     </dl>
 
 <h4 id="toc-methods">
@@ -252,7 +258,7 @@ is never stored — only the resulting sanitized string survives past this metho
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ValidationError.php"><a href="files/src-management-validationerror.html"><abbr title="src/Management/ValidationError.php">ValidationError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">24</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -317,6 +323,43 @@ not permitted.</p>
         
 
 </article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
+    <h4 class="phpdocumentor-element__name" id="property_serverMessage">
+        $serverMessage
+        <a href="classes/Axiam-Sdk-Management-ValidationError.html#property_serverMessage" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ValidationError.php"><a href="files/src-management-validationerror.html"><abbr title="src/Management/ValidationError.php">ValidationError.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">32</span>
+
+    </aside>
+
+    
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$serverMessage</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
             </section>
 
             <section class="phpdocumentor-methods">
@@ -339,14 +382,14 @@ not permitted.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ValidationError.php"><a href="files/src-management-validationerror.html"><abbr title="src/Management/ValidationError.php">ValidationError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">24</span>
+    <span class="phpdocumentor-element-found-in__line">29</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$message</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-FieldError.html"><abbr title="\Axiam\Sdk\Management\FieldError">FieldError</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$fields</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$message</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, <a href="classes/Axiam-Sdk-Management-FieldError.html"><abbr title="\Axiam\Sdk\Management\FieldError">FieldError</abbr></a>&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$fields</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$serverMessage</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -369,6 +412,19 @@ not permitted.</p>
                  = <span class="phpdocumentor-argument-list__argument__default-value">[]</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Per-field complaints; empty when the server sent none.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$serverMessage</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The server's own <code class="prettyprint">message</code> member, verbatim, when
+its body carried one — it names the field and the
+rule (§29.4, §30.4). For a person to read: its
+wording may change, so never parse it. <code class="prettyprint">null</code> for a
+local refusal and for a body without one.</p>
 </section>
 
             </dd>
@@ -576,6 +632,7 @@ is never stored — only the resulting sanitized string survives past this metho
                     <ul class="phpdocumentor-list -clean">
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-ValidationError.html#property_fields">$fields</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Core-NetworkError.html#property_retryAfterMs">$retryAfterMs</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-ValidationError.html#property_serverMessage">$serverMessage</a></li>
                                             </ul>
                 </li>
             
