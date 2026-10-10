@@ -15,7 +15,7 @@ low-latency authorization and token checks when `ext-grpc` is loaded, and over A
 **contract 1.60** — `CONTRACT.md` §1 – §13 and §12.7, §14, §15, §17, §19, §20, §21, §22, §23,
 §24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33, with §32.7 and **§33.2 signed
 (ES256, EdDSA)**, and the §34 clarifications — with `CONTRACT.md`, `openapi.json`,
-`management-registry.json` and `proto/` vendored byte for byte from `ilpanich/axiam` `3ed6547`
+`management-registry.json` and `proto/` vendored byte for byte from `ilpanich/axiam` `8df0e11`
 (190 management operations across 28 namespaces). The README states the claim, and a test now
 ties it to the vendored contract's version.
 
