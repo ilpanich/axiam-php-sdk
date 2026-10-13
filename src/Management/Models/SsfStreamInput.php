@@ -36,7 +36,16 @@ final class SsfStreamInput implements \JsonSerializable
      * @param string|null $endpointUrl Required for `push` (an `https` URL under the outbound
      *     address policy), refused for `poll`. (optional)
      * @param list<SsfEventType>|null $eventsRequested A subset of `events_allowed`; absent
-     *     means all of them. The receiver may narrow it later, never widen it. (optional)
+     *     means all of them. The receiver may narrow it later, never widen it. On update, absent
+     *     therefore *resets* a narrowing the receiver made to every allowed event, and `[]` keeps
+     *     a receiver's "none": a client that edits a stream sends the value it read (cut to the
+     *     new `events_allowed`), never an absent field. (optional)
+     * @param string|null $expectedUpdatedAt The `updated_at` of the stream as the client read
+     *     it (R1W2-03, T-406). **Update only; create ignores it.** When present, the replacement
+     *     lands only if the stream still has that version, else `409` (reload and retry): a pause
+     *     or a narrowing the receiver made after the form was read is not silently reverted. When
+     *     absent the replacement is conditional on the version the server reads during the request
+     *     — an old client keeps that behaviour, and the console always sends it. (optional)
      * @param SsfStreamStatus|null $status `enabled` by default. (optional)
      * @param string|null $statusReason At most 256 bytes. (optional)
      * @param SsfSubjectFormat|null $subjectFormat `iss_sub` by default. (optional)
@@ -51,6 +60,7 @@ final class SsfStreamInput implements \JsonSerializable
         public readonly ?string $description = null,
         public readonly ?string $endpointUrl = null,
         public readonly ?array $eventsRequested = null,
+        public readonly ?string $expectedUpdatedAt = null,
         public readonly ?SsfStreamStatus $status = null,
         public readonly ?string $statusReason = null,
         public readonly ?SsfSubjectFormat $subjectFormat = null,
@@ -73,6 +83,7 @@ final class SsfStreamInput implements \JsonSerializable
             isset($data['description']) ? (string) $data['description'] : null,
             isset($data['endpoint_url']) ? (string) $data['endpoint_url'] : null,
             isset($data['events_requested']) ? array_values(array_map(static fn (mixed $v): SsfEventType => SsfEventType::fromWire((string) $v), (array) $data['events_requested'])) : null,
+            isset($data['expected_updated_at']) ? (string) $data['expected_updated_at'] : null,
             isset($data['status']) ? SsfStreamStatus::fromWire((string) $data['status']) : null,
             isset($data['status_reason']) ? (string) $data['status_reason'] : null,
             isset($data['subject_format']) ? SsfSubjectFormat::fromWire((string) $data['subject_format']) : null,
@@ -108,6 +119,9 @@ final class SsfStreamInput implements \JsonSerializable
         }
         if ($this->eventsRequested !== null) {
             $out['events_requested'] = array_map(static fn (SsfEventType $v): string => $v->value, $this->eventsRequested);
+        }
+        if ($this->expectedUpdatedAt !== null) {
+            $out['expected_updated_at'] = $this->expectedUpdatedAt;
         }
         if ($this->status !== null) {
             $out['status'] = $this->status->value;

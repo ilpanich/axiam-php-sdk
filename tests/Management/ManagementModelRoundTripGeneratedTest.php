@@ -315,6 +315,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'status' => 'Active',
             'subject' => 'example',
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'user_id' => '11111111-1111-4111-8111-111111111111',
         ];
 
         $model = Models\Certificate::fromArray($wire);
@@ -517,6 +518,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                     'dns' => 'example',
                 ],
             ],
+            'user_id' => '11111111-1111-4111-8111-111111111111',
             'validity_days' => 1,
         ];
 
@@ -1378,6 +1380,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'status' => 'Active',
             'subject' => 'example',
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'user_id' => '11111111-1111-4111-8111-111111111111',
             'chain_pem' => 'example',
             'private_key_pem' => 'example',
         ];
@@ -3697,6 +3700,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
                     'dns' => 'example',
                 ],
             ],
+            'user_id' => '11111111-1111-4111-8111-111111111111',
             'validity_days' => 1,
         ];
 
@@ -3856,6 +3860,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'events_requested' => [
                 'https://schemas.openid.net/secevent/caep/event-type/session-revoked',
             ],
+            'expected_updated_at' => '2026-08-26T00:00:00Z',
             'receiver_client_id' => 'example',
             'status' => 'enabled',
             'status_reason' => 'example',

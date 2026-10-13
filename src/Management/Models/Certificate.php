@@ -23,8 +23,10 @@ final class Certificate implements \JsonSerializable
      * @param string $id the server's `id` field
      * @param string $issuerCaId The CA certificate that signed this certificate.
      * @param KeyAlgorithm $keyAlgorithm the server's `key_algorithm` field
-     * @param mixed $metadata Arbitrary key-value metadata (e.g., device serial, user ID
-     *     binding).
+     * @param mixed $metadata Arbitrary key-value metadata (e.g., a device serial). Free-form
+     *     and never authoritative: the account a `User` certificate was issued for is `user_id`. A
+     *     `metadata.user_id` is still read, by the revocation of a user's certificates, for a row
+     *     issued before the binding existed (schema v98, #533).
      * @param string $notAfter Validity end.
      * @param string $notBefore Validity start.
      * @param string $publicCertPem PEM-encoded public certificate.
@@ -33,6 +35,14 @@ final class Certificate implements \JsonSerializable
      *     value: a `CN=` prefix in the request is understood and stripped, so this always says
      *     what the certificate's subject DN says (DF-023).
      * @param string $tenantId The tenant this certificate belongs to.
+     * @param string|null $userId The user account a `User` certificate was issued for, in this
+     *     tenant (#533); `null` for every other type, for a `User` certificate issued without one,
+     *     and for every certificate issued before schema v98. What revoking a user's certificates
+     *     matches on — directory linking, administrator deletion and Art. 17 erasure. A row with
+     *     `None` is matched by the older convention instead (`metadata.user_id`, or a subject
+     *     common name equal to the account's username or email); a row naming another account
+     *     never is. It does not make the certificate authenticate as the user: a certificate
+     *     authenticates only as the service account it is bound to. (optional)
      * @param string|null $boundServiceAccountId Resolved by the list projection only. The
      *     server resolves this for a whole page in one query, so it is populated by `list` and is
      *     `null` on `get` (CONTRACT.md §27.11 rule 4). `null` there means "this read does not
@@ -53,6 +63,7 @@ final class Certificate implements \JsonSerializable
         public readonly CertificateStatus $status,
         public readonly string $subject,
         public readonly string $tenantId,
+        public readonly ?string $userId = null,
         public readonly ?string $boundServiceAccountId = null,
     ) {
     }
@@ -77,6 +88,7 @@ final class Certificate implements \JsonSerializable
             CertificateStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
             (string) ModelDecode::need($data, 'subject', self::class),
             (string) ModelDecode::need($data, 'tenant_id', self::class),
+            isset($data['user_id']) ? (string) $data['user_id'] : null,
             isset($data['bound_service_account_id']) ? (string) $data['bound_service_account_id'] : null,
         );
     }
@@ -105,6 +117,9 @@ final class Certificate implements \JsonSerializable
         $out['status'] = $this->status->value;
         $out['subject'] = $this->subject;
         $out['tenant_id'] = $this->tenantId;
+        if ($this->userId !== null) {
+            $out['user_id'] = $this->userId;
+        }
         if ($this->boundServiceAccountId !== null) {
             $out['bound_service_account_id'] = $this->boundServiceAccountId;
         }

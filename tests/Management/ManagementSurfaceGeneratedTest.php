@@ -1703,6 +1703,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'status' => 'Active',
                     'subject' => 'example',
                     'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'user_id' => '11111111-1111-4111-8111-111111111111',
                 ],
             ],
             'total' => 1,
@@ -1738,6 +1739,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'status' => 'Active',
             'subject' => 'example',
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'user_id' => '11111111-1111-4111-8111-111111111111',
             'chain_pem' => 'example',
             'private_key_pem' => 'example',
         ];
@@ -1767,6 +1769,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'status' => 'Active',
             'subject' => 'example',
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'user_id' => '11111111-1111-4111-8111-111111111111',
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->certificates()->signCsr(new Models\SignCertificateCsrRequest(Models\CertificateType::User, 'example', '11111111-1111-4111-8111-111111111111', 1));
@@ -1794,6 +1797,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'status' => 'Active',
             'subject' => 'example',
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'user_id' => '11111111-1111-4111-8111-111111111111',
         ];
         $client = $this->signedInClient(200, $mounted);
         $result = $client->management()->certificates()->get('11111111-1111-4111-8111-111111111111');
