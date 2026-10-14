@@ -22,8 +22,10 @@ final class GeneratedCertificate implements \JsonSerializable
      * @param string $id the server's `id` field
      * @param string $issuerCaId The CA certificate that signed this certificate.
      * @param KeyAlgorithm $keyAlgorithm the server's `key_algorithm` field
-     * @param mixed $metadata Arbitrary key-value metadata (e.g., device serial, user ID
-     *     binding).
+     * @param mixed $metadata Arbitrary key-value metadata (e.g., a device serial). Free-form
+     *     and never authoritative: the account a `User` certificate was issued for is `user_id`. A
+     *     `metadata.user_id` is still read, by the revocation of a user's certificates, for a row
+     *     issued before the binding existed (schema v98, #533).
      * @param string $notAfter Validity end.
      * @param string $notBefore Validity start.
      * @param string $publicCertPem PEM-encoded public certificate.
@@ -34,6 +36,14 @@ final class GeneratedCertificate implements \JsonSerializable
      * @param string $tenantId The tenant this certificate belongs to.
      * @param \Axiam\Sdk\Core\Sensitive $privateKeyPem PEM-encoded private key — returned only
      *     on generation.
+     * @param string|null $userId The user account a `User` certificate was issued for, in this
+     *     tenant (#533); `null` for every other type, for a `User` certificate issued without one,
+     *     and for every certificate issued before schema v98. What revoking a user's certificates
+     *     matches on — directory linking, administrator deletion and Art. 17 erasure. A row with
+     *     `None` is matched by the older convention instead (`metadata.user_id`, or a subject
+     *     common name equal to the account's username or email); a row naming another account
+     *     never is. It does not make the certificate authenticate as the user: a certificate
+     *     authenticates only as the service account it is bound to. (optional)
      * @param string|null $chainPem The issuing chain, concatenated PEM, nearest issuer first.
      *     Present only when the signer returned one — which is the `vault_pki` case, where the
      *     root's certificate exists nowhere a client could fetch it from. For a CA AXIAM signed
@@ -55,6 +65,7 @@ final class GeneratedCertificate implements \JsonSerializable
         public readonly string $subject,
         public readonly string $tenantId,
         public readonly \Axiam\Sdk\Core\Sensitive $privateKeyPem,
+        public readonly ?string $userId = null,
         public readonly ?string $chainPem = null,
     ) {
     }
@@ -80,6 +91,7 @@ final class GeneratedCertificate implements \JsonSerializable
             (string) ModelDecode::need($data, 'subject', self::class),
             (string) ModelDecode::need($data, 'tenant_id', self::class),
             new \Axiam\Sdk\Core\Sensitive((string) ModelDecode::need($data, 'private_key_pem', self::class)),
+            isset($data['user_id']) ? (string) $data['user_id'] : null,
             isset($data['chain_pem']) ? (string) $data['chain_pem'] : null,
         );
     }
@@ -109,6 +121,9 @@ final class GeneratedCertificate implements \JsonSerializable
         $out['subject'] = $this->subject;
         $out['tenant_id'] = $this->tenantId;
         $out['private_key_pem'] = $this->privateKeyPem;
+        if ($this->userId !== null) {
+            $out['user_id'] = $this->userId;
+        }
         if ($this->chainPem !== null) {
             $out['chain_pem'] = $this->chainPem;
         }

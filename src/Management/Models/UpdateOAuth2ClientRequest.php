@@ -29,7 +29,8 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
      * @param string|null $backchannelClientNotificationEndpoint G-7 — see the create DTO. `""`
      *     clears. (optional)
      * @param string|null $backchannelLogoutUri Pass an empty string to clear a previously
-     *     registered URI — the one edit an operator makes when an RP is decommissioned. (optional)
+     *     registered URI — the one edit an operator makes when an RP is decommissioned. Any other
+     *     value is held to the same rule as on create. (optional)
      * @param string|null $backchannelTokenDeliveryMode G-7 — see the create DTO. `""` clears.
      *     (optional)
      * @param bool|null $backchannelUserCodeParameter G-7 — `true` refused, as on create.

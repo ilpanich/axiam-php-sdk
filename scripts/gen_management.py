@@ -265,7 +265,13 @@ CALL_SITE_NOTES: dict[str, str] = {
         "`endpoint_url` to another scheme, host or port while a header is stored: then it must "
         "carry `authorization_header` again or `clear_authorization_header: true`, else `400` "
         "(§32.3 rule 5). Start from {@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::ssfStream()}. An "
-        "update overtaken by the receiver's own write is `409`: read the stream again."
+        "update overtaken by the receiver's own write is `409`: read the stream again (never "
+        "retried). **Contract 1.61:** `expected_updated_at` (the `updated_at` string you read, sent "
+        "as given) makes the update conditional on that version, `409` if the stream was written "
+        "since; and `events_requested` has three meanings on an update (§32.2): absent *resets* the "
+        "stream to every event of `events_allowed`, `[]` is stored as the receiver's \"none\", a "
+        "list is stored as given. An edit therefore sends back the `events_requested` and "
+        "`expected_updated_at` it read -- `ReadModifyWrite::ssfStream()` does."
     ),
     "scim_targets.create": (
         "`credential` is required here (§31.3 rule 2). It is write-only: no response ever "

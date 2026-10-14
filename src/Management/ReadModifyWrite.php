@@ -71,6 +71,17 @@ final class ReadModifyWrite
      * `ssf.update_stream`'s body from a `getStream()` result. `authorizationHeader` and
      * `clearAuthorizationHeader` are left absent: absent keeps the stored header (§32.2).
      *
+     * Contract 1.61 (§32.2): the body carries the `events_requested` **and** the
+     * `expected_updated_at` that were read. An `events_requested` of `[]` (the receiver's
+     * "none") stays `[]` — omitting it would reset the stream to every allowed event — and
+     * `expected_updated_at` is the read's `updated_at` string, untouched, so the replacement
+     * lands only on the version that was read and a write made since (the receiver's included)
+     * answers `409` instead of being overwritten; reload and retry. When `$changes` lowers
+     * `events_allowed` and does not name `events_requested`, the requested list is cut to the
+     * new ceiling (a request outside `events_allowed` is `400`); pass `events_requested` in
+     * `$changes` to send another value, and `expected_updated_at => null` to replace whatever
+     * is stored.
+     *
      * @param array<string,mixed> $changes Wire members to change, applied over the read.
      */
     public static function ssfStream(SsfStream $stream, array $changes = []): SsfStreamInput
@@ -83,12 +94,28 @@ final class ReadModifyWrite
             description: $stream->description,
             endpointUrl: $stream->endpointUrl,
             eventsRequested: $stream->eventsRequested,
+            expectedUpdatedAt: $stream->updatedAt,
             status: $stream->status,
             statusReason: $stream->statusReason,
             subjectFormat: $stream->subjectFormat,
         );
 
-        return $changes === [] ? $body : SsfStreamInput::fromArray(self::apply($body->toArray(), $changes));
+        if ($changes === []) {
+            return $body;
+        }
+        $merged = self::apply($body->toArray(), $changes);
+        if (array_key_exists('events_allowed', $changes) && !array_key_exists('events_requested', $changes)) {
+            $ceiling = array_map(
+                static fn (mixed $v): string => $v instanceof \BackedEnum ? (string) $v->value : (string) $v,
+                (array) $changes['events_allowed'],
+            );
+            $merged['events_requested'] = array_values(array_filter(
+                (array) ($merged['events_requested'] ?? []),
+                static fn (mixed $v): bool => in_array((string) $v, $ceiling, true),
+            ));
+        }
+
+        return SsfStreamInput::fromArray($merged);
     }
 
     /**

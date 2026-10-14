@@ -209,7 +209,7 @@ reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` und
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.60**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.61**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
 **`PS256` is not shipped**, see [CIBA](#ciba-contractmd-33) below for why — including
@@ -259,6 +259,11 @@ left a choice. Contract 1.60 answers the questions the 1.59 ports raised (§34.4
 optional members to the §27 models and the `federation.update_config` null rule (§27.15), and
 `expected_updated_at` on §31's `ScimTargetInput`; its §35 (certificate revocation lists) is
 informative and has no SDK surface. The second table says what 1.60 changed here.
+Contract 1.61 (additive, §34.5) adds three members: `Certificate.user_id` and its two request
+members (§27.11 rule 5), `SsfStreamInput.expected_updated_at` with the three meanings of
+`events_requested` on an update (§32.2, §32.3 rule 4), and `CibaPendingList.total_pending` and
+`truncated` (§33.3 rule 16, a console surface this SDK does not model). The third table says what
+1.61 changed here.
 
 ### Contract 1.59 — the Phase 23 review follow-up (F-59-06)
 
@@ -272,6 +277,16 @@ informative and has no SDK surface. The second table says what 1.60 changed here
 | P12.1 / P12.2 unknown SCIM arms | `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` keep the `type` and nothing else; they render for a log line and are refused locally on the request path |
 | P12.4 the RFC 7592 replacement | Built from what the read carried: a list the read lacked is not sent, a member of an unexpected shape goes back as read |
 | P12.7 the signed form | Claimed as "§33.2 signed (ES256, EdDSA)" |
+
+### Contract 1.61 — what changed here
+
+| Row | Here |
+|---|---|
+| §27.11 rule 5 `Certificate::$userId` | On `Certificate` and `GeneratedCertificate`, `?string`: `null` and an absent member (a server before 1.0.1) both decode as "no account named"; never required, never synthesised from `metadata` or the subject |
+| §27.11 rule 5 request member | `CreateCertificateRequest::$userId` and `SignCertificateCsrRequest::$userId`, sent exactly as given; the key is left out when unset, never `null`; the value is not judged locally (the server's `400` is surfaced) |
+| §32.2 `expected_updated_at` | `SsfStreamInput::$expectedUpdatedAt`, sent on `updateStream` exactly as given (the string) and absent when unset; a `409` is a `ConflictError`, one request, no retry |
+| §32.2 `events_requested` on an update | Absent resets to every allowed event, `[]` is sent as `[]`, a list as given. `ReadModifyWrite::ssfStream()` sends the `events_requested` and the `updated_at` it read (and cuts the requested list to a lowered `events_allowed`) |
+| §33.3 rule 16 `CibaPendingList` | Not modelled: no registry operation returns it and the generator emits only the models its operations carry |
 
 ### Contract 1.60 — what changed here
 

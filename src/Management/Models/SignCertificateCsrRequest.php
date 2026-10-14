@@ -29,6 +29,7 @@ final class SignCertificateCsrRequest implements \JsonSerializable
      *     is still refused if it requests a `subjectAltName`. Under a CA whose key is held by
      *     `vault_pki` a `Server` request on this path is refused; use `POST /api/v1/certificates`.
      *     (optional)
+     * @param string|null $userId See [`CreateCertificateRequest::user_id`]. (optional)
      */
     public function __construct(
         public readonly CertificateType $certType,
@@ -37,6 +38,7 @@ final class SignCertificateCsrRequest implements \JsonSerializable
         public readonly int $validityDays,
         public readonly mixed $metadata = null,
         public readonly ?array $subjectAltNames = null,
+        public readonly ?string $userId = null,
     ) {
     }
 
@@ -53,6 +55,7 @@ final class SignCertificateCsrRequest implements \JsonSerializable
             (int) ModelDecode::need($data, 'validity_days', self::class),
             isset($data['metadata']) ? $data['metadata'] : null,
             isset($data['subject_alt_names']) ? array_values(array_map(static fn (mixed $v): SubjectAltNameVariant => SubjectAltName::fromArray((array) $v), (array) $data['subject_alt_names'])) : null,
+            isset($data['user_id']) ? (string) $data['user_id'] : null,
         );
     }
 
@@ -76,6 +79,9 @@ final class SignCertificateCsrRequest implements \JsonSerializable
         }
         if ($this->subjectAltNames !== null) {
             $out['subject_alt_names'] = array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames);
+        }
+        if ($this->userId !== null) {
+            $out['user_id'] = $this->userId;
         }
 
         return $out;

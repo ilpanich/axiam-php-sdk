@@ -27,6 +27,11 @@ final class CreateCertificateRequest implements \JsonSerializable
      *     common name, must be admitted by the tenant's effective `server_cert_allowed_names`,
      *     which is empty — refusing every `Server` request — until an organization administrator
      *     lists names. (optional)
+     * @param string|null $userId The user account a `User` certificate is issued for (#533),
+     *     returned as the certificate's `user_id`. Optional; accepted only for `cert_type: User`,
+     *     and it must name a user of this tenant that has not been deleted or erased. A
+     *     `metadata.user_id` in the same request must agree with it. Revoking the account's
+     *     certificates — directory linking, deletion, erasure — matches on it. (optional)
      */
     public function __construct(
         public readonly CertificateType $certType,
@@ -36,6 +41,7 @@ final class CreateCertificateRequest implements \JsonSerializable
         public readonly int $validityDays,
         public readonly mixed $metadata = null,
         public readonly ?array $subjectAltNames = null,
+        public readonly ?string $userId = null,
     ) {
     }
 
@@ -53,6 +59,7 @@ final class CreateCertificateRequest implements \JsonSerializable
             (int) ModelDecode::need($data, 'validity_days', self::class),
             isset($data['metadata']) ? $data['metadata'] : null,
             isset($data['subject_alt_names']) ? array_values(array_map(static fn (mixed $v): SubjectAltNameVariant => SubjectAltName::fromArray((array) $v), (array) $data['subject_alt_names'])) : null,
+            isset($data['user_id']) ? (string) $data['user_id'] : null,
         );
     }
 
@@ -77,6 +84,9 @@ final class CreateCertificateRequest implements \JsonSerializable
         }
         if ($this->subjectAltNames !== null) {
             $out['subject_alt_names'] = array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames);
+        }
+        if ($this->userId !== null) {
+            $out['user_id'] = $this->userId;
         }
 
         return $out;
