@@ -936,6 +936,16 @@ final class AxiamClient
     }
 
     /**
+     * A tenant's network segments and the RADIUS reply profile each owns, and the tenant's
+     * `Session-Timeout` cap (CONTRACT §36, contract 1.62). Every write is conditional on the
+     * `version` the caller read; the decision route FreeRADIUS calls is not SDK surface.
+     */
+    public function network(): \Axiam\Sdk\Management\NetworkApi
+    {
+        return $this->management()->network();
+    }
+
+    /**
      * Effective settings, and the organization/tenant layers they resolve from.
      */
     public function settings(): \Axiam\Sdk\Management\SettingsApi
