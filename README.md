@@ -262,6 +262,8 @@ The §21.3.1 amendment of contract 1.58 — the seventh `mtls_endpoint_aliases` 
 part of the §21 claim, not of §33's. Vector A is pinned as the vendored `CONTRACT.md` carries
 it, `tenant_id` queries included.
 
+Manifest pruning: not offered in any namespace (§27.10) — nothing a manifest omits is ever deleted.
+
 Contract 1.59 (§34) adds no section and changes no wire shape; its clarifications P1 – P12 bind
 the sections above, and this SDK follows them — the table below says how, where the contract
 left a choice. Contract 1.60 answers the questions the 1.59 ports raised (§34.4), adds three

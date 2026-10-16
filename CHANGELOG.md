@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Contract 1.62 (the AXIAM 1.1.0 release) on top of contract 1.61. **Release 1.0.1 was never
 tagged**, so its changes ship in this one: the section that was `[1.0.1]` is merged below, under
 "Contract 1.61", with every entry kept. `CONTRACT.md`, `openapi.json` and `management-registry.json`
-are re-vendored byte for byte from `ilpanich/axiam` `d76c5a80b` (`proto/` is unchanged); the §27
+are re-vendored byte for byte from `ilpanich/axiam` `d25413506` (`proto/` is unchanged); the §27
 surface is regenerated (**202 operations across 29 namespaces**, from 190 across 28), and the README
 states conformance at contract 1.62.
 
@@ -26,6 +26,21 @@ models. *Migration:* construct generated models with named arguments (the genera
 contract 1.62 item (j): "wire-additive; source-breaking in Rust, Java, Kotlin and PHP, released as
 1.1.0". The request `user_id` of contract 1.62 item (i) does **not** break here: it was already a plain
 `?string`.
+
+### Fixes after the 1.62 conformance review
+
+- **Re-vendor of the 1.62 corrections, and an unseen SSF event-type URI is echoed (C162-03).**
+  `CONTRACT.md`, `openapi.json` (`info.version` 1.1.0, digest `sha256:cf0fc71c…59a7`) and
+  `management-registry.json` are re-vendored byte for byte from `ilpanich/axiam` `d25413506`
+  (`proto/` is unchanged; the generator `--check` is clean apart from the change below). The
+  event-type members of `SsfStream` (`eventsAllowed`, `eventsRequested`, `eventsDelivered`) and
+  `SsfStreamInput` (`eventsAllowed`, `eventsRequested`) are now `list<SsfEventType|string>`: a known
+  URI decodes to its `SsfEventType` case and **an unseen one to its own string**, and `toArray()`
+  writes the case's value or the string as it is, so a stream holding a URI this SDK has never seen
+  can be read, edited (`ReadModifyWrite::ssfStream()`, whose cut to a lowered ceiling keeps it while it
+  is in the ceiling) and written back without it turning into `""`. This widens a type, which the
+  README's SemVer sentence allows in a minor release; §34.2 P12.2(b) is now met.
+  `SsfEventType::Unknown` stays for compatibility and is never produced by these models.
 
 ### Contract 1.62
 

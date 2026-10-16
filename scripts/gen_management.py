@@ -148,6 +148,22 @@ EXPLICIT_NULL_FIELDS = {
     *(("UpdateFederationConfigRequest", wire) for wire in FEDERATION_CLEARABLE),
 }
 
+# The SSF event-type list members. The contract's event-type vocabulary is open (§34.2 P12.2):
+# a URI this SDK has never seen must decode WITH its value and go back UNCHANGED, never as the
+# enum's `Unknown` case, whose wire spelling is the empty string (P12.2(a) forbids sending
+# ``""``). So these members are ``list<SsfEventType|string>``: a known URI is its enum case, an
+# unseen one is its own string. ``SsfEventType::Unknown`` stays for compatibility and is never
+# produced by these models.
+OPEN_EVENT_LIST_DOC = "list<SsfEventType|string>"
+OPEN_EVENT_LIST_FIELDS = {
+    (model, wire)
+    for model, wires in (
+        ("SsfStream", ("events_allowed", "events_requested", "events_delivered")),
+        ("SsfStreamInput", ("events_allowed", "events_requested")),
+    )
+    for wire in wires
+}
+
 # Operations whose body has a constraint the server would otherwise be left to refuse, and
 # that the contract requires the SDK to refuse LOCALLY, before any I/O: the generated
 # method calls the named static check on {@see \Axiam\Sdk\Management\ManagementChecks}
@@ -838,6 +854,8 @@ def field_list(schema_name: str, secrets: set[str]) -> tuple[list[dict[str, Any]
     fields: list[dict[str, Any]] = []
     for wire, schema in props.items():
         decl, doc = php_type(schema, secret=wire in secrets)
+        if (schema_name, wire) in OPEN_EVENT_LIST_FIELDS:
+            decl, doc = "array", OPEN_EVENT_LIST_DOC
         is_required = wire in required
         fields.append({
             "wire": wire,
@@ -887,6 +905,9 @@ def decode_expr(field: dict[str, Any], source: str) -> str:
 
     if field["secret"]:
         return f"new \\Axiam\\Sdk\\Core\\Sensitive((string) {source})"
+    if decl == "array" and doc == OPEN_EVENT_LIST_DOC:
+        return (f"array_values(array_map(static fn (mixed $v): SsfEventType|string => "
+                f"SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) {source}))")
     if decl == "array" and doc.startswith("list<"):
         item = doc[5:-1]
         if item == "mixed" or item.startswith("array<"):
@@ -934,6 +955,9 @@ def encode_expr(field: dict[str, Any], log: bool = False) -> str:
         # Left wrapped on purpose: ManagementTransport::encodeBody() is the ONLY place a
         # Sensitive is revealed, so a body rendered anywhere else stays redacted.
         return ref
+    if decl == "array" and doc == OPEN_EVENT_LIST_DOC:
+        return (f"array_map(static fn (SsfEventType|string $v): string => "
+                f"$v instanceof SsfEventType ? $v->value : $v, {ref})")
     if decl == "array" and doc.startswith("list<"):
         item = doc[5:-1]
         if item in {"int", "float", "string", "bool", "mixed"} or item.startswith("array<"):
