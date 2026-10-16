@@ -68,19 +68,43 @@ final class ReadModifyWrite
     }
 
     /**
-     * `ssf.update_stream`'s body from a `getStream()` result. `authorizationHeader` and
-     * `clearAuthorizationHeader` are left absent: absent keeps the stored header (§32.2).
+     * `ssf.update_stream`'s body from a `getStream()` result and **the changes to make to it**
+     * — the change-taking form of CONTRACT.md §32.2 (contract 1.62). `authorizationHeader` and
+     * `clearAuthorizationHeader` are left absent: absent keeps the stored header.
      *
-     * Contract 1.61 (§32.2): the body carries the `events_requested` **and** the
-     * `expected_updated_at` that were read. An `events_requested` of `[]` (the receiver's
-     * "none") stays `[]` — omitting it would reset the stream to every allowed event — and
-     * `expected_updated_at` is the read's `updated_at` string, untouched, so the replacement
-     * lands only on the version that was read and a write made since (the receiver's included)
-     * answers `409` instead of being overwritten; reload and retry. When `$changes` lowers
-     * `events_allowed` and does not name `events_requested`, the requested list is cut to the
-     * new ceiling (a request outside `events_allowed` is `400`); pass `events_requested` in
-     * `$changes` to send another value, and `expected_updated_at => null` to replace whatever
-     * is stored.
+     * ```php
+     * $stream = $client->ssf()->getStream($id);
+     * $client->ssf()->updateStream($id, ReadModifyWrite::ssfStream($stream, [
+     *     'events_allowed' => [SsfEventTypes::SESSION_REVOKED],   // lower the ceiling
+     * ]));
+     * ```
+     *
+     * What the body carries, and why each point is a rule rather than a convenience:
+     *
+     * - **`events_requested`, as read.** An update that omits it **resets** the stream to every
+     *   event of `events_allowed`, widening what the receiver narrowed, and AXIAM then sends the
+     *   receiver more events about the tenant's users than it asked for. The read list goes back
+     *   as it was; an `[]` (the receiver's "none") goes back as `[]` and is never omitted.
+     * - **Cut to the new ceiling.** When `$changes` lowers `events_allowed` and does not name
+     *   `events_requested`, the requested list becomes the entries of the read list that are in
+     *   the new ceiling, in their order (a request outside the ceiling is `400`). An
+     *   `events_requested` named in `$changes` is sent as given: the server judges it.
+     * - **`expected_updated_at`, as read.** The `updated_at` string of the stream you read,
+     *   byte for byte — not parsed and rendered again, because the comparison is of the
+     *   instant and a timestamp rounded to fewer fraction digits than the server stored does
+     *   not match. The update then lands only on the version you read, and a write made since
+     *   (the receiver's own included) answers `409` (a {@see ConflictError}, never retried):
+     *   read again and decide again. `expected_updated_at => null` in `$changes` is "none": the
+     *   key is left out of the body and `null` is never sent, which replaces whatever is stored.
+     *
+     * **This is the form to use.** `ssfStream($stream)` with no changes is the plain converter,
+     * and it sends the stream back as read. It cannot know that the caller is about to lower
+     * the ceiling, so **cutting `events_requested` to the new `events_allowed` is the caller's
+     * duty wherever a body is built another way** (`SsfStreamInput::fromArray()` over a
+     * hand-edited array, a constructor call): a requested list left outside the new ceiling is
+     * `400`, and one left out altogether resets the stream (the three meanings of
+     * `events_requested`, §32.2; an update conditional on the version read is `409` once the
+     * stream changes under it).
      *
      * @param array<string,mixed> $changes Wire members to change, applied over the read.
      */
