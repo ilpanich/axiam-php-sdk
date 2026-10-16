@@ -38,6 +38,16 @@ final class ManifestApi
     }
 
     /**
+     * The `network` half of the manifest (CONTRACT.md §27.6.2): its reads and writes go
+     * through the same generated {@see \Axiam\Sdk\Management\NetworkApi} handle, so the
+     * transport's guarantees hold for it unchanged.
+     */
+    private function network(): NetworkReconciler
+    {
+        return new NetworkReconciler($this->management->network());
+    }
+
+    /**
      * Computes what an apply would do. Sends only reads.
      *
      * @throws ManifestException when the manifest is incoherent (checked before any read).
@@ -211,7 +221,7 @@ final class ManifestApi
 
         $changes = [];
         foreach ($ordered as $entity) {
-            $current = $existing[$entity->kind->value][$entity->name] ?? null;
+            $current = $this->currentRow($entity, $manifest, $existing);
 
             if ($current === null) {
                 $changes[] = new PlannedChange($entity, ChangeAction::Create);
@@ -230,6 +240,26 @@ final class ManifestApi
         }
 
         return new ManagementPlan($changes);
+    }
+
+    /**
+     * The server object `$entity` is matched to, or `null` when it has none.
+     *
+     * Everything is matched by its `name`, except a `network_profile`, whose natural key is
+     * its SEGMENT (CONTRACT.md §27.6.2 item 1): it is found under the segment's own key.
+     *
+     * @param array<string,array<string,array<string,mixed>>> $existing kind => name => object
+     * @return array<string,mixed>|null
+     */
+    private function currentRow(ManifestEntity $entity, ManagementManifest $manifest, array $existing): ?array
+    {
+        if ($entity->kind === ManifestKind::NetworkProfile) {
+            $segment = $this->findEntityByKey($manifest, ManifestKind::NetworkSegment, (string) $entity->segment);
+
+            return $existing[$entity->kind->value][$segment->name] ?? null;
+        }
+
+        return $existing[$entity->kind->value][$entity->name] ?? null;
     }
 
     /**
@@ -269,11 +299,15 @@ final class ManifestApi
         // (§27.5 rule 5).
         $createdServiceAccounts = [];
 
+        // The `network` rows `plan` read, and the segment versions this apply moves as it
+        // writes (§27.6.2 item 4) — a profile is written against the NEWEST of them.
+        $networkState = new NetworkApplyState($existing);
+
         $applied = [];
         foreach ($pending as $index => $change) {
             try {
                 $ids[$change->entity->kind->value][$change->entity->name]
-                    = $this->perform($change, $manifest, $ids, $createdServiceAccounts);
+                    = $this->perform($change, $manifest, $ids, $createdServiceAccounts, $networkState);
             } catch (\Throwable $failure) {
                 // §27.7: stop here, do not undo what landed. The report is the recovery
                 // tool; see ApplyReport's class doc for why an automatic rollback would
@@ -326,12 +360,15 @@ final class ManifestApi
      *        manifest-local parent KEY (§13 row 17 defect b).
      * @param list<Models\ServiceAccountCreatedResponse> $createdServiceAccounts Appended
      *        to when this step creates a service account — see {@see self::apply()}.
+     * @param NetworkApplyState $networkState What `plan` read of the `network` namespace, and
+     *        the segment versions this apply has written — see {@see NetworkReconciler}.
      */
     private function perform(
         PlannedChange $change,
         ManagementManifest $manifest,
         array $ids,
         array &$createdServiceAccounts,
+        NetworkApplyState $networkState,
     ): string {
         $entity = $change->entity;
         $fields = $change->action === ChangeAction::Create ? $entity->fields : $change->fields;
@@ -342,7 +379,30 @@ final class ManifestApi
             ManifestKind::Role => $this->applyRole($change, $fields),
             ManifestKind::Group => $this->applyGroup($change, $fields),
             ManifestKind::ServiceAccount => $this->applyServiceAccount($change, $fields, $createdServiceAccounts),
+            ManifestKind::NetworkPolicy => $this->network()->applyPolicy($entity->fields, $networkState),
+            ManifestKind::NetworkSegment => $this->network()->applySegment($change, $entity, $networkState),
+            ManifestKind::NetworkProfile => $this->applyNetworkProfile($change, $manifest, $ids, $networkState),
         };
+    }
+
+    /**
+     * Creates or replaces one segment's reply profile (CONTRACT.md §27.6.2), returning its id.
+     *
+     * The profile is addressed by its segment's id — read, or just returned by the write
+     * that created the segment earlier in this same apply (§27.6 rule 5 puts segments first).
+     *
+     * @param array<string,array<string,string>> $ids
+     */
+    private function applyNetworkProfile(
+        PlannedChange $change,
+        ManagementManifest $manifest,
+        array $ids,
+        NetworkApplyState $networkState,
+    ): string {
+        $segment = $this->findEntityByKey($manifest, ManifestKind::NetworkSegment, (string) $change->entity->segment);
+        $segmentId = $this->resolveId($ids, ManifestKind::NetworkSegment, $segment->name);
+
+        return $this->network()->applyProfile($change, $change->entity, $segment->name, $segmentId, $networkState);
     }
 
     /**
@@ -879,7 +939,18 @@ final class ManifestApi
                     $this->management->serviceAccounts()->listItems($page)->items,
                     $manifest,
                 ),
+                // §27.6.2 item 3: `get_policy`, `list_segments`, `list_profiles` — GETs only,
+                // each list walked to exhaustion. The profiles are matched to their segments,
+                // so they are read below, once the segments are in.
+                ManifestKind::NetworkPolicy => $this->network()->readPolicy(),
+                ManifestKind::NetworkSegment => $this->network()->readSegments(),
+                ManifestKind::NetworkProfile => [],
             };
+        }
+        if (isset($kinds[ManifestKind::NetworkProfile->value])) {
+            $state[ManifestKind::NetworkProfile->value] = $this->network()->readProfiles(
+                $state[ManifestKind::NetworkSegment->value] ?? [],
+            );
         }
 
         return $state;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Management\Manifest;
 
+use Axiam\Sdk\Management\ConflictError;
 use Axiam\Sdk\Management\Models\ServiceAccountCreatedResponse;
 
 /**
@@ -46,6 +47,23 @@ final class ApplyReport
     public function isComplete(): bool
     {
         return $this->failed === null;
+    }
+
+    /**
+     * The `reason_code` of the `409` that stopped this apply, when that is what did
+     * (CONTRACT.md §27.6.2 item 5, §36.4): `stale_version`, `strands_profile`,
+     * `duplicate_vlan`, ... as the server wrote it, an unknown value included.
+     *
+     * A `409` is that action's failure — `apply` stopped there, nothing was retried, and the
+     * recovery is to run `apply` again, which re-reads. Branch on this code, never on the
+     * message.
+     *
+     * @return string|null `null` when the apply completed, failed for another reason, or the
+     *                     `409` carried no code (a server before 1.1.0).
+     */
+    public function failureReasonCode(): ?string
+    {
+        return $this->failure instanceof ConflictError ? $this->failure->getReasonCode() : null;
     }
 
     /**
