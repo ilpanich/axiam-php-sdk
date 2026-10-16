@@ -625,6 +625,57 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `CreateNetworkReplyProfileRequest`: a full wire object survives decode and re-render. */
+    public function testCreateNetworkReplyProfileRequestRoundTrips(): void
+    {
+        $wire = [
+            'profile' => [
+                'dictionary' => 'example',
+                'filter_id' => 'example',
+                'idle_timeout_secs' => 1,
+                'service_type' => 'framed_user',
+                'session_timeout_secs' => 1,
+                'termination_action' => 'default',
+            ],
+            'segment_id' => '11111111-1111-4111-8111-111111111111',
+            'segment_version' => 1,
+        ];
+
+        $model = Models\CreateNetworkReplyProfileRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'CreateNetworkReplyProfileRequest decoded a field it cannot render again',
+        );
+    }
+
+    /** `CreateNetworkSegmentRequest`: a full wire object survives decode and re-render. */
+    public function testCreateNetworkSegmentRequestRoundTrips(): void
+    {
+        $wire = [
+            'enabled' => true,
+            'filter_ids' => [
+                'example',
+            ],
+            'kind' => 'access',
+            'name' => 'example',
+            'rank' => 1,
+            'site_key' => 'example',
+            'vlan_id' => 1,
+        ];
+
+        $model = Models\CreateNetworkSegmentRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'CreateNetworkSegmentRequest decoded a field it cannot render again',
+        );
+    }
+
     /** `CreateNotificationRuleRequest`: a full wire object survives decode and re-render. */
     public function testCreateNotificationRuleRequestRoundTrips(): void
     {
@@ -1823,6 +1874,119 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('email_address', Models\NameIdFormat::fromWire('email_address')->value);
     }
 
+    /** `NetworkPolicyResponse`: a full wire object survives decode and re-render. */
+    public function testNetworkPolicyResponseRoundTrips(): void
+    {
+        $wire = [
+            'session_timeout_max_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+        ];
+
+        $model = Models\NetworkPolicyResponse::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'NetworkPolicyResponse decoded a field it cannot render again',
+        );
+    }
+
+    /** `NetworkReplyProfile`: a full wire object survives decode and re-render. */
+    public function testNetworkReplyProfileRoundTrips(): void
+    {
+        $wire = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'dictionary' => 'example',
+            'filter_id' => 'example',
+            'idle_timeout_secs' => 1,
+            'segment_id' => '11111111-1111-4111-8111-111111111111',
+            'service_type' => 'framed_user',
+            'session_timeout_clamped' => true,
+            'session_timeout_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'termination_action' => 'default',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+        ];
+
+        $model = Models\NetworkReplyProfile::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'NetworkReplyProfile decoded a field it cannot render again',
+        );
+    }
+
+    /** `NetworkReplyProfileInput`: a full wire object survives decode and re-render. */
+    public function testNetworkReplyProfileInputRoundTrips(): void
+    {
+        $wire = [
+            'dictionary' => 'example',
+            'filter_id' => 'example',
+            'idle_timeout_secs' => 1,
+            'service_type' => 'framed_user',
+            'session_timeout_secs' => 1,
+            'termination_action' => 'default',
+        ];
+
+        $model = Models\NetworkReplyProfileInput::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'NetworkReplyProfileInput decoded a field it cannot render again',
+        );
+    }
+
+    /** `NetworkSegmentKind`: every case survives wire -> enum -> wire. */
+    public function testNetworkSegmentKindRoundTrips(): void
+    {
+        self::assertSame('access', Models\NetworkSegmentKind::fromWire('access')->value);
+        self::assertSame('quarantine', Models\NetworkSegmentKind::fromWire('quarantine')->value);
+    }
+
+    /** `NetworkSegmentResponse`: a full wire object survives decode and re-render. */
+    public function testNetworkSegmentResponseRoundTrips(): void
+    {
+        $wire = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'enabled' => true,
+            'filter_ids' => [
+                'example',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'access',
+            'name' => 'example',
+            'path' => 'example',
+            'rank' => 1,
+            'site_key' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+            'vlan_id' => 1,
+        ];
+
+        $model = Models\NetworkSegmentResponse::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'NetworkSegmentResponse decoded a field it cannot render again',
+        );
+    }
+
     /** `NotificationEventType`: every case survives wire -> enum -> wire. */
     public function testNotificationEventTypeRoundTrips(): void
     {
@@ -2418,6 +2582,19 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         );
     }
 
+    /** `RadiusServiceType`: every case survives wire -> enum -> wire. */
+    public function testRadiusServiceTypeRoundTrips(): void
+    {
+        self::assertSame('framed_user', Models\RadiusServiceType::fromWire('framed_user')->value);
+    }
+
+    /** `RadiusTerminationAction`: every case survives wire -> enum -> wire. */
+    public function testRadiusTerminationActionRoundTrips(): void
+    {
+        self::assertSame('default', Models\RadiusTerminationAction::fromWire('default')->value);
+        self::assertSame('radius_request', Models\RadiusTerminationAction::fromWire('radius_request')->value);
+    }
+
     /** `ReactorEventDescriptor`: a full wire object survives decode and re-render. */
     public function testReactorEventDescriptorRoundTrips(): void
     {
@@ -2521,6 +2698,73 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             [],
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'RegistrationTokenResponse decoded a field it cannot render again',
+        );
+    }
+
+    /** `ReplaceNetworkPolicyRequest`: a full wire object survives decode and re-render. */
+    public function testReplaceNetworkPolicyRequestRoundTrips(): void
+    {
+        $wire = [
+            'session_timeout_max_secs' => 1,
+            'version' => 1,
+        ];
+
+        $model = Models\ReplaceNetworkPolicyRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ReplaceNetworkPolicyRequest decoded a field it cannot render again',
+        );
+    }
+
+    /** `ReplaceNetworkReplyProfileRequest`: a full wire object survives decode and re-render. */
+    public function testReplaceNetworkReplyProfileRequestRoundTrips(): void
+    {
+        $wire = [
+            'profile' => [
+                'dictionary' => 'example',
+                'filter_id' => 'example',
+                'idle_timeout_secs' => 1,
+                'service_type' => 'framed_user',
+                'session_timeout_secs' => 1,
+                'termination_action' => 'default',
+            ],
+            'segment_version' => 1,
+            'version' => 1,
+        ];
+
+        $model = Models\ReplaceNetworkReplyProfileRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ReplaceNetworkReplyProfileRequest decoded a field it cannot render again',
+        );
+    }
+
+    /** `ReplaceNetworkSegmentRequest`: a full wire object survives decode and re-render. */
+    public function testReplaceNetworkSegmentRequestRoundTrips(): void
+    {
+        $wire = [
+            'enabled' => true,
+            'filter_ids' => [
+                'example',
+            ],
+            'rank' => 1,
+            'version' => 1,
+            'vlan_id' => 1,
+        ];
+
+        $model = Models\ReplaceNetworkSegmentRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'ReplaceNetworkSegmentRequest decoded a field it cannot render again',
         );
     }
 
@@ -4636,6 +4880,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(204, $cases);
+        self::assertCount(216, $cases);
     }
 }

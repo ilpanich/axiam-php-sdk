@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Management;
 
 /**
- * The CONTRACT.md §27 management surface: 190 operations across 28 namespaces.
+ * The CONTRACT.md §27 management surface: 202 operations across 29 namespaces.
  *
  * Reached as `$client->management()`. This class holds nothing but the shared {@see
  * ManagementTransport} and the client's default scope; each accessor below hands back a
@@ -334,6 +334,25 @@ final class ManagementApi
     public function scimTargets(): ScimTargetsApi
     {
         return new ScimTargetsApi(
+            $this->transport,
+            new NamespaceScope(),
+            $this->orgId,
+            $this->tenantId,
+        );
+    }
+
+    /**
+     * A tenant's network segments and the RADIUS reply profile each owns (RADIUS D4): a
+     * segment is a node of the reserved /network subtree of the resource tree (kind, VLAN,
+     * Filter-Id envelope, placement rank), and its profile is the typed `axiam-radius-reply/1`
+     * record a decision renders. Every write is conditional on the `version` the caller read
+     * and passes the server's write gate. The tenant's Session-Timeout cap is one more row of
+     * it (get_policy, replace_policy): lowering it is always allowed, raising it is allowed
+     * and audited. The decision route FreeRADIUS calls is not in this registry.
+     */
+    public function network(): NetworkApi
+    {
+        return new NetworkApi(
             $this->transport,
             new NamespaceScope(),
             $this->orgId,

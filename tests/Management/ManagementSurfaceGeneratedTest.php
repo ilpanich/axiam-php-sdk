@@ -12,7 +12,7 @@ use Axiam\Sdk\Management\Models;
 use Axiam\Sdk\Management\Page;
 
 /**
- * One case per CONTRACT.md §27 operation — all 190 of them.
+ * One case per CONTRACT.md §27 operation — all 202 of them.
  *
  * Each asserts three things about one operation: it issues the METHOD the registry names,
  * against the PATH the registry names, and — where the operation returns a body — that every
@@ -4311,6 +4311,322 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
         $this->assertDecodedEveryField($mounted, $result);
     }
 
+    /** `GET /api/v1/network/segments` — the `network.list_segments` operation. */
+    public function testNetworkListSegmentsReachesItsRoute(): void
+    {
+        $mounted = [
+            'items' => [
+                [
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'created_by' => '11111111-1111-4111-8111-111111111111',
+                    'enabled' => true,
+                    'filter_ids' => [
+                        'example',
+                    ],
+                    'id' => '11111111-1111-4111-8111-111111111111',
+                    'kind' => 'access',
+                    'name' => 'example',
+                    'path' => 'example',
+                    'rank' => 1,
+                    'site_key' => 'example',
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                    'updated_by' => '11111111-1111-4111-8111-111111111111',
+                    'version' => 1,
+                    'vlan_id' => 1,
+                ],
+            ],
+            'total' => 1,
+            'offset' => 0,
+            'limit' => 50,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->listSegments();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/network/segments', $request->getUri()->getPath());
+        self::assertInstanceOf(Page::class, $result);
+        self::assertSame(1, $result->total);
+        self::assertCount(1, $result->items);
+        $this->assertDecodedEveryField($mounted['items'][0], $result->items[0]);
+    }
+
+    /** `POST /api/v1/network/segments` — the `network.create_segment` operation. */
+    public function testNetworkCreateSegmentReachesItsRoute(): void
+    {
+        $mounted = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'enabled' => true,
+            'filter_ids' => [
+                'example',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'access',
+            'name' => 'example',
+            'path' => 'example',
+            'rank' => 1,
+            'site_key' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+            'vlan_id' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->createSegment(new Models\CreateNetworkSegmentRequest(Models\NetworkSegmentKind::Access, 'example', 'example', 1));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/network/segments', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `GET /api/v1/network/segments/{id}` — the `network.get_segment` operation. */
+    public function testNetworkGetSegmentReachesItsRoute(): void
+    {
+        $mounted = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'enabled' => true,
+            'filter_ids' => [
+                'example',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'access',
+            'name' => 'example',
+            'path' => 'example',
+            'rank' => 1,
+            'site_key' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+            'vlan_id' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->getSegment('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/network/segments/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `PUT /api/v1/network/segments/{id}` — the `network.replace_segment` operation. */
+    public function testNetworkReplaceSegmentReachesItsRoute(): void
+    {
+        $mounted = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'enabled' => true,
+            'filter_ids' => [
+                'example',
+            ],
+            'id' => '11111111-1111-4111-8111-111111111111',
+            'kind' => 'access',
+            'name' => 'example',
+            'path' => 'example',
+            'rank' => 1,
+            'site_key' => 'example',
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+            'vlan_id' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->replaceSegment('11111111-1111-4111-8111-111111111111', new Models\ReplaceNetworkSegmentRequest(true, ['example'], 1, 1));
+
+        $request = $this->lastRequest();
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('/api/v1/network/segments/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `DELETE /api/v1/network/segments/{id}` — the `network.delete_segment` operation. */
+    public function testNetworkDeleteSegmentReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->network()->deleteSegment('11111111-1111-4111-8111-111111111111', 1);
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/network/segments/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /** `GET /api/v1/network/profiles` — the `network.list_profiles` operation. */
+    public function testNetworkListProfilesReachesItsRoute(): void
+    {
+        $mounted = [
+            'items' => [
+                [
+                    'created_at' => '2026-08-26T00:00:00Z',
+                    'created_by' => '11111111-1111-4111-8111-111111111111',
+                    'dictionary' => 'example',
+                    'filter_id' => 'example',
+                    'idle_timeout_secs' => 1,
+                    'segment_id' => '11111111-1111-4111-8111-111111111111',
+                    'service_type' => 'framed_user',
+                    'session_timeout_clamped' => true,
+                    'session_timeout_secs' => 1,
+                    'tenant_id' => '11111111-1111-4111-8111-111111111111',
+                    'termination_action' => 'default',
+                    'updated_at' => '2026-08-26T00:00:00Z',
+                    'updated_by' => '11111111-1111-4111-8111-111111111111',
+                    'version' => 1,
+                ],
+            ],
+            'total' => 1,
+            'offset' => 0,
+            'limit' => 50,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->listProfiles();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/network/profiles', $request->getUri()->getPath());
+        self::assertInstanceOf(Page::class, $result);
+        self::assertSame(1, $result->total);
+        self::assertCount(1, $result->items);
+        $this->assertDecodedEveryField($mounted['items'][0], $result->items[0]);
+    }
+
+    /** `POST /api/v1/network/profiles` — the `network.create_profile` operation. */
+    public function testNetworkCreateProfileReachesItsRoute(): void
+    {
+        $mounted = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'dictionary' => 'example',
+            'filter_id' => 'example',
+            'idle_timeout_secs' => 1,
+            'segment_id' => '11111111-1111-4111-8111-111111111111',
+            'service_type' => 'framed_user',
+            'session_timeout_clamped' => true,
+            'session_timeout_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'termination_action' => 'default',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->createProfile(new Models\CreateNetworkReplyProfileRequest(new Models\NetworkReplyProfileInput(1), '11111111-1111-4111-8111-111111111111', 1));
+
+        $request = $this->lastRequest();
+        self::assertSame('POST', $request->getMethod());
+        self::assertSame('/api/v1/network/profiles', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `GET /api/v1/network/profiles/{segment_id}` — the `network.get_profile` operation. */
+    public function testNetworkGetProfileReachesItsRoute(): void
+    {
+        $mounted = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'dictionary' => 'example',
+            'filter_id' => 'example',
+            'idle_timeout_secs' => 1,
+            'segment_id' => '11111111-1111-4111-8111-111111111111',
+            'service_type' => 'framed_user',
+            'session_timeout_clamped' => true,
+            'session_timeout_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'termination_action' => 'default',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->getProfile('11111111-1111-4111-8111-111111111111');
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/network/profiles/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `PUT /api/v1/network/profiles/{segment_id}` — the `network.replace_profile` operation. */
+    public function testNetworkReplaceProfileReachesItsRoute(): void
+    {
+        $mounted = [
+            'created_at' => '2026-08-26T00:00:00Z',
+            'created_by' => '11111111-1111-4111-8111-111111111111',
+            'dictionary' => 'example',
+            'filter_id' => 'example',
+            'idle_timeout_secs' => 1,
+            'segment_id' => '11111111-1111-4111-8111-111111111111',
+            'service_type' => 'framed_user',
+            'session_timeout_clamped' => true,
+            'session_timeout_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'termination_action' => 'default',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->replaceProfile('11111111-1111-4111-8111-111111111111', new Models\ReplaceNetworkReplyProfileRequest(new Models\NetworkReplyProfileInput(1), 1, 1));
+
+        $request = $this->lastRequest();
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('/api/v1/network/profiles/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `DELETE /api/v1/network/profiles/{segment_id}` — the `network.delete_profile` operation. */
+    public function testNetworkDeleteProfileReachesItsRoute(): void
+    {
+        $client = $this->signedInClient(204, null);
+        $client->management()->network()->deleteProfile('11111111-1111-4111-8111-111111111111', 1);
+
+        $request = $this->lastRequest();
+        self::assertSame('DELETE', $request->getMethod());
+        self::assertSame('/api/v1/network/profiles/11111111-1111-4111-8111-111111111111', $request->getUri()->getPath());
+    }
+
+    /** `GET /api/v1/network/policy` — the `network.get_policy` operation. */
+    public function testNetworkGetPolicyReachesItsRoute(): void
+    {
+        $mounted = [
+            'session_timeout_max_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->getPolicy();
+
+        $request = $this->lastRequest();
+        self::assertSame('GET', $request->getMethod());
+        self::assertSame('/api/v1/network/policy', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
+    /** `PUT /api/v1/network/policy` — the `network.replace_policy` operation. */
+    public function testNetworkReplacePolicyReachesItsRoute(): void
+    {
+        $mounted = [
+            'session_timeout_max_secs' => 1,
+            'tenant_id' => '11111111-1111-4111-8111-111111111111',
+            'updated_at' => '2026-08-26T00:00:00Z',
+            'updated_by' => '11111111-1111-4111-8111-111111111111',
+            'version' => 1,
+        ];
+        $client = $this->signedInClient(200, $mounted);
+        $result = $client->management()->network()->replacePolicy(new Models\ReplaceNetworkPolicyRequest(1, 1));
+
+        $request = $this->lastRequest();
+        self::assertSame('PUT', $request->getMethod());
+        self::assertSame('/api/v1/network/policy', $request->getUri()->getPath());
+        $this->assertDecodedEveryField($mounted, $result);
+    }
+
     /** `GET /api/v1/organizations/{org_id}/settings` — the `settings.get_org` operation. */
     public function testSettingsGetOrgReachesItsRoute(): void
     {
@@ -5435,10 +5751,10 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
     }
 
     /**
-     * §27.9: all 190 registry operations are covered by a case above.
+     * §27.9: all 202 registry operations are covered by a case above.
      *
-     * Counted reflectively rather than written as a literal on both sides — `assertSame(190,
-     * 190)` is a tautology, and a case removed by a bad regeneration would still pass it.
+     * Counted reflectively rather than written as a literal on both sides — `assertSame(202,
+     * 202)` is a tautology, and a case removed by a bad regeneration would still pass it.
      */
     public function testEveryRegistryOperationHasACase(): void
     {
@@ -5448,6 +5764,6 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'ReachesItsRoute'),
         );
 
-        self::assertCount(190, $cases);
+        self::assertCount(202, $cases);
     }
 }
