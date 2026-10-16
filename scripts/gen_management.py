@@ -283,6 +283,39 @@ CALL_SITE_NOTES: dict[str, str] = {
         "takes the stream you read and the changes you want. An update overtaken by the "
         "receiver's own write is `409`: read the stream again."
     ),
+    "network.replace_segment": (
+        "A **replacement** (§27.4 rule 5), conditional on the `version` you read: a stale one is "
+        "`409` and writes nothing (§36.3 rule 2). Read the segment with `getSegment()`, change "
+        "what you mean to, and send every member back -- `enabled`, `filter_ids`, `vlan_id`, "
+        "`rank` and the `version`; what you leave out is not preserved. `kind`, `site_key` and "
+        "`name` are not in the body and never change (rule 4). A change of `vlan_id`, `rank` or "
+        "`enabled` on a segment that has a profile also needs `network:grant` (rule 1), and a "
+        "`filter_ids` that would strand the profile's `filter_id` is `409` `strands_profile`. "
+        "Never retried, and never repeated for you: a `409` means another administrator wrote, "
+        "so read again and decide (§36.9). The composed form is the manifest "
+        "({@see \\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder::networkSegment()}), which builds this "
+        "body from the read."
+    ),
+    "network.replace_profile": (
+        "A **replacement** (§27.4 rule 5), conditional on **two** versions you read: the profile's "
+        "own `version` and the owning segment's `segment_version`; a stale one is `409` and "
+        "writes nothing (§36.3 rule 2). Read both (`getProfile()`, `getSegment()`) and send "
+        "every member back. **A read is the effective profile**: a stored `session_timeout_secs` "
+        "above the tenant's lowered cap reads as the cap with `session_timeout_clamped: true`, so "
+        "a read-modify-write cannot restore the stored value -- what you send is what is stored, "
+        "the clamped value from then on, and a value above the current cap is `403` (§36.3 rule "
+        "6). Raise the cap first (`replacePolicy()`), leaving the profile alone, to restore it. "
+        "Never retried, and never repeated for you (§36.9). The composed form is the manifest "
+        "({@see \\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder::networkProfile()})."
+    ),
+    "network.replace_policy": (
+        "A **replacement** (§27.4 rule 5), conditional on the policy's `version` -- `0` for a "
+        "tenant that has never written one, which is the first write. Lowering the cap is always "
+        "allowed and raising it is allowed and audited; lowering it never rewrites a profile, it "
+        "only clamps what a profile reads as (§36.3 rules 6 and 7). It needs `network:segments_write` "
+        "**at the `/network` root**. Never retried (§36.7). The composed form is the manifest "
+        "({@see \\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder::networkPolicy()})."
+    ),
     "scim_targets.create": (
         "`credential` is required here (§31.3 rule 2). It is write-only: no response ever "
         "carries it, and the SDK keeps no copy."

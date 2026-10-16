@@ -298,7 +298,9 @@ final class ManifestBuilder
      * one: a stored `session_timeout_secs` above a lowered cap reads as the cap, so a manifest
      * stating the cap is `NoChange` and one stating a value above it is an `Update` whose write
      * the server refuses (`403`) — the action's failure; `apply` stops and nothing is lowered
-     * for you.
+     * for you. An `Update` of a clamped profile that does not state its timeout carries the read's
+     * effective value, so it stores the clamped value from then on (§36.3 rule 6); raise the cap
+     * with {@see self::networkPolicy()} first to restore the stored one.
      *
      * `null` is *unstated*: silent on a `Create` and carried from the read on an `Update`.
      * {@see JsonNull::Null} is a member stated as *none*: left out of the body, which is how a
