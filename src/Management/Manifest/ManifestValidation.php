@@ -34,6 +34,8 @@ final class ManifestValidation
      * calls, like a duplicate key or a dangling reference:
      *
      * - two segments with one **site + kind + name** cannot be reconciled with one server row;
+     * - a segment whose `kind` is not the wire spelling `access` or `quarantine` (the builder
+     *   refuses it too; this is for a manifest built by hand);
      * - a segment whose `filter_ids` repeats a name — the list is compared as a set, and a set
      *   has no repeated member;
      * - a profile whose segment the manifest does not declare — the manifest does not reach
@@ -51,6 +53,15 @@ final class ManifestValidation
                 continue;
             }
             $segments[$entity->key] = true;
+
+            $kind = $entity->fields['kind'] ?? null;
+            if ($kind !== 'access' && $kind !== 'quarantine') {
+                throw new ManifestException(sprintf(
+                    'network segment "%s": kind must be "access" or "quarantine", the wire spelling '
+                    . '(CONTRACT.md §27.6.2 item 1)',
+                    $entity->key,
+                ));
+            }
 
             if (isset($naturalKeys[$entity->name])) {
                 $parts = json_decode($entity->name, true);

@@ -438,6 +438,20 @@ final class NetworkManifestTest extends TestCase
                 self::assertStringContainsString('the wire spelling', $e->getMessage());
             }
         }
+        // A manifest built by hand, bypassing the builder, is refused before any request too.
+        $client = $this->client();
+        $before = \count($this->server->requests);
+        $manifest = new ManagementManifest([
+            new ManifestEntity(ManifestKind::NetworkSegment, 's', '["hq","zones","staff"]', ['site_key' => 'hq', 'kind' => 'zones', 'name' => 'staff', 'vlan_id' => 20]),
+        ]);
+        try {
+            $client->management()->manifest()->plan($manifest);
+            self::fail('expected a ManifestException');
+        } catch (ManifestException) {
+            $this->addToAssertionCount(1);
+        }
+        self::assertCount($before, $this->server->requests, 'zero wire calls');
+
         $unknown = Models\NetworkSegmentKind::Unknown;
         $this->expectException(ManifestException::class);
         ManagementManifest::builder()->networkSegment('s', 'hq', $unknown, 'staff', 20);
