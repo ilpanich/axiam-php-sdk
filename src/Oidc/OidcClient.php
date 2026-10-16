@@ -717,14 +717,26 @@ final class OidcClient
      * `POST /oauth2/device_authorization` (§14.1) — start the device grant and obtain
      * the code pair.
      *
-     * **Unauthenticated by design.** A device that cannot show a browser also cannot
-     * hold a client secret, so this never sends `client_secret` and never refuses a
-     * client built without one (§14.1).
+     * **The client authenticates the way it is configured to (contract 1.62, §14.1 rule 2).**
+     * A client built with an `oidcClientSecret` sends it as `client_secret` **in the form body**
+     * — whatever the client is registered for, `client_secret_basic` included: no SDK sends
+     * `Authorization: Basic` to a `/oauth2/*` route (§12.1 rule 3; maintainer, 2026-10-16) — and
+     * a client with a §6.1 certificate presents it on the connection, to the `mtls_endpoint_aliases`
+     * endpoint when the discovery document has one (§21.3). A **public** client (a device that
+     * cannot hold a secret) is built with neither, sends `client_id` and no credential, and is
+     * not refused here; the server refuses a public client that sends one. This method never
+     * borrows a secret from another configuration and never invents one. `private_key_jwt` is
+     * not implemented by this SDK for any token request (§21.8 is optional), so there is no
+     * assertion to send.
      *
      * @throws AuthError when the discovery document advertises no
      *   `device_authorization_endpoint`. The URL is never built by concatenation onto
      *   the issuer: that works against AXIAM and breaks against every other OP the same
      *   code is pointed at.
+     * @throws \Axiam\Sdk\Core\OAuthProtocolError with `error` `invalid_client` (`401`) when the
+     *   client is unknown, its credential failed or is missing, or a public client sent one — never
+     *   retried, and never an entry into the §9 refresh guard; `unauthorized_client` (`400`) when
+     *   the client does not hold the grant.
      */
     public function deviceAuthorize(
         ?string $scope = null,
@@ -748,6 +760,9 @@ final class OidcClient
         }
 
         $form = ['client_id' => $clientId];
+        // §14.1 rule 2: a client configured with a secret authenticates here as at /token — the
+        // secret in the body, never an Authorization header. A public client appends nothing.
+        $this->appendClientSecret($form);
         if ($scope !== null) {
             $form['scope'] = $scope;
         }
@@ -795,6 +810,18 @@ final class OidcClient
      * {@see \Axiam\Sdk\Core\OAuthProtocolError} — `authorization_pending` and
      * `slow_down` included — so a hand-rolled loop sees exactly what {@see deviceLogin}
      * sees. Most callers want `deviceLogin`.
+     *
+     * **Every poll names its client and authenticates it as {@see deviceAuthorize} did
+     * (contract 1.62, §14.1 rules 2 and 3):** `client_id` in the form body, plus the configured
+     * `client_secret` in the body (never `Authorization: Basic`) or the §6.1 certificate on the
+     * connection; a public client sends no credential. A failed client authentication is
+     * `401 invalid_client`, an {@see \Axiam\Sdk\Core\OAuthProtocolError} with that `error`
+     * (§14.2 rule 5): terminal, one request, never retried and never a §9 refresh. A client
+     * registered for sender-constrained tokens needs its DPoP proof (or, for mTLS, its certificate)
+     * on every poll (§14.2 rule 8); this SDK does not generate DPoP proofs (§21.7.3, §21.9), so a
+     * DPoP-bound client's poll is refused `401 invalid_client` and surfaces as that error — an
+     * mTLS-bound client presents its certificate and works. A response's `token_type` is read as
+     * the server wrote it (`DPoP` is never assumed to be `Bearer`).
      */
     public function devicePoll(
         Sensitive|string $deviceCode,
@@ -809,6 +836,8 @@ final class OidcClient
             'device_code' => self::exposeSecret($deviceCode),
             'client_id' => $clientId,
         ];
+        // §14.1 rule 2, as deviceAuthorize(): the configured secret in the body on every poll.
+        $this->appendClientSecret($form);
 
         $wire = $this->postToken($configuration, $form, $tenantId);
 

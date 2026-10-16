@@ -725,8 +725,28 @@ loop. The polling rules are where implementations go wrong:
   already approved.
 
 `deviceCode` is `Sensitive`; `userCode` deliberately is not — it exists to be read aloud,
-and wrapping it would defeat the one thing it is for. `deviceAuthorize()` sends no
-`client_secret` and does not refuse a client built without one.
+and wrapping it would defeat the one thing it is for.
+
+**The device client authenticates the way it is configured to (§14.1 rule 2, contract 1.62).**
+Since AXIAM 1.1.0 both device endpoints authenticate the client by the method it is registered
+for, as `/oauth2/token` does:
+
+- A **public** client — the usual device, which cannot hold a secret — is built without a secret
+  or a certificate. It sends `client_id` and **no credential** at `deviceAuthorize()` and at every
+  `devicePoll()`, and is not refused client-side. (The server refuses a public client that sends
+  one.)
+- A client built with `oidcClientSecret` sends it as `client_secret` **in the form body at both
+  endpoints** — whether it is registered for `client_secret_post` or `client_secret_basic`: this
+  SDK never sends `Authorization: Basic` to a `/oauth2/*` route (§12.1 rule 3).
+- A client built with a §6.1 certificate presents it on the connection, to the
+  `mtls_endpoint_aliases` endpoints when the discovery document names them.
+- Every poll sends `client_id` (§14.1 rule 3). A failed client authentication is `401
+  invalid_client`: an `OAuthProtocolError` with that `error`, one request, never retried and never a
+  §9 refresh. A client that cannot hold the grant any more is refused the same way at the poll.
+- **Not implemented here:** `private_key_jwt` client authentication (§21.8 is optional for every SDK)
+  and DPoP proof generation (§21.7.3, §21.9). A client registered for either cannot be driven by
+  this SDK; a DPoP-bound client's poll surfaces as `invalid_client`, and `token_type` is read as the
+  server writes it.
 
 `deviceLogin()` takes an injectable `$sleep`, so the §14.2 interval arithmetic is testable
 exactly rather than in wall-clock time. Per §14.3 rule 4 it **returns** the token set;
