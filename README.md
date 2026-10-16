@@ -276,7 +276,7 @@ members (§27.11 rule 5), `SsfStreamInput.expected_updated_at` with the three me
 Contract 1.62 (the 1.1.0 release, §34.6) adds the `network` management namespace (§36) and puts it in
 the manifest (§27.6.2), makes the device grant authenticate its client (§14.1), gives a stream a
 change-taking read-modify-write form (§32.2) and settles two rules about request members (§27.11
-rule 5). Release 1.0.1 was never tagged: this is the first release to carry 1.61 as well, as 1.1.0.
+rule 5). Release 1.0.1 was never tagged: this is the first release to carry 1.61 as well, as 1.1.0 (its change log is merged into 1.1.0).
 The first table below says what 1.62 changed here.
 
 ### Contract 1.62 — what changed here
@@ -311,7 +311,7 @@ The first table below says what 1.62 changed here.
 
 | Row | Here |
 |---|---|
-| §27.11 rule 5 `Certificate::$userId` | On `Certificate` and `GeneratedCertificate`, `?string`: `null` and an absent member (a server before 1.0.1) both decode as "no account named"; never required, never synthesised from `metadata` or the subject |
+| §27.11 rule 5 `Certificate::$userId` | On `Certificate` and `GeneratedCertificate`, `?string`: `null` and an absent member (a server before 1.1.0) both decode as "no account named"; never required, never synthesised from `metadata` or the subject |
 | §27.11 rule 5 request member | `CreateCertificateRequest::$userId` and `SignCertificateCsrRequest::$userId`, sent exactly as given; the key is left out when unset, never `null`; the value is not judged locally (the server's `400` is surfaced) |
 | §32.2 `expected_updated_at` | `SsfStreamInput::$expectedUpdatedAt`, sent on `updateStream` exactly as given (the string) and absent when unset; a `409` is a `ConflictError`, one request, no retry |
 | §32.2 `events_requested` on an update | Absent resets to every allowed event, `[]` is sent as `[]`, a list as given. `ReadModifyWrite::ssfStream()` sends the `events_requested` and the `updated_at` it read (and cuts the requested list to a lowered `events_allowed`) |

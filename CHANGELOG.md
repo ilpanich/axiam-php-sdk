@@ -7,17 +7,111 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.1] - 2026-10-13
+## [1.1.0] - 2026-10-16
+
+Contract 1.62 (the AXIAM 1.1.0 release) on top of contract 1.61. **Release 1.0.1 was never
+tagged**, so its changes ship in this one: the section that was `[1.0.1]` is merged below, under
+"Contract 1.61", with every entry kept. `CONTRACT.md`, `openapi.json` and `management-registry.json`
+are re-vendored byte for byte from `ilpanich/axiam` `d76c5a80b` (`proto/` is unchanged); the §27
+surface is regenerated (**202 operations across 29 namespaces**, from 190 across 28), and the README
+states conformance at contract 1.62.
+
+**Source-breaking, and why this is still a minor release.** A contract record may add a member or
+widen a type with a minor bump; a removal waits for 2.0.0 (the README says so). Every generated PHP
+model that gained a member gained a constructor parameter, placed among the optional ones in the
+generator's alphabetical order, so **positional construction of those models breaks** — contract
+1.61's `Certificate`, `GeneratedCertificate`, `CreateCertificateRequest`,
+`SignCertificateCsrRequest` and `SsfStreamInput`, and nothing new in 1.62 beyond the new `network`
+models. *Migration:* construct generated models with named arguments (the generated tests do). This is
+contract 1.62 item (j): "wire-additive; source-breaking in Rust, Java, Kotlin and PHP, released as
+1.1.0". The request `user_id` of contract 1.62 item (i) does **not** break here: it was already a plain
+`?string`.
+
+### Contract 1.62
+
+#### Added
+
+- **The `network` management namespace (§36, §34.6 (l)).** Twelve operations, 202 across 29 namespaces
+  in all, on `$client->network()` and `$client->management()->network()` (`NetworkApi`):
+  `listSegments`, `createSegment`, `getSegment`, `replaceSegment`, `deleteSegment`, `listProfiles`,
+  `createProfile`, `getProfile`, `replaceProfile`, `deleteProfile`, `getPolicy` and `replacePolicy`,
+  with their models (`NetworkSegmentResponse`, `NetworkReplyProfile`, `NetworkReplyProfileInput`,
+  `NetworkPolicyResponse`, the create and replace requests, and the open enums `NetworkSegmentKind`,
+  `RadiusTerminationAction` and `RadiusServiceType`). The three `PUT`s are `replace*` and full-body;
+  every write carries the `version` the caller read (a profile two: its own and `segment_version`)
+  and none is retried. `POST /api/v1/network/decide` is the FreeRADIUS recipe's and has no method.
+- **`ConflictError::getReasonCode()` (§36.3 rule 2, §36.4).** The `409` body's `reason_code`, verbatim
+  and open (`stale_version`, `strands_profile`, `has_children`, `site_gone`, `duplicate_name`,
+  `duplicate_vlan`, `duplicate_rank`, `profile_exists`, `other`, or a value this SDK has never seen);
+  `null` when the body has none. `ConflictError`'s constructor gained an optional second argument.
+- **`network` is a manifest namespace (§27.6.2; §34.6 (n), (u), (v), (w)).**
+  `ManifestBuilder::networkPolicy()`, `networkSegment()` and `networkProfile()`. A segment is keyed by
+  site + kind + name with `kind` in the wire spelling (`access` or `quarantine`; anything else,
+  `zones` included, is refused), a profile by its segment, the policy is a singleton; the order is
+  policy, segments, profiles. `plan` issues `GET`s only (each list walked to exhaustion) and judges
+  every stated member on the value **as read** — a clamped profile timeout included, so a stated value
+  above the cap is an `Update` whose write the server refuses with `403`, which stops `apply`;
+  `filterIds` compare as a **set** and a list that repeats a name is refused at build, plan and apply
+  with zero requests; `JsonNull::Null` states a profile member as none. `apply` sends
+  version-conditional `replace*` bodies built from the read, a profile with the segment version of the
+  newest segment write of the same apply; a `409` is the action's failure
+  (`ApplyReport::failureReasonCode()`). The manifest still never deletes anything, so the pruning
+  opt-in of §27.6.2 item 6 is not offered, for any namespace.
+- **The device grant authenticates its client (§14.1; §34.6 (m), (t)).** `deviceAuthorize()` and every
+  `devicePoll()` send a configured `oidcClientSecret` as `client_secret` in the form body (never
+  `Authorization: Basic`, whichever registration the client has) and a configured certificate on the
+  connection; a public client sends `client_id` and nothing else and is not refused. This **replaces**
+  the 1.60 rule that `deviceAuthorize()` never sends `client_secret`. A `401 invalid_client` from either
+  is an `OAuthProtocolError`, one request, no refresh. Not implemented here: `private_key_jwt` for
+  token requests and DPoP proof generation (§21.9).
+- `examples/network_manifest.php`.
+
+#### Changed
+
+- **A management `403` and `409` append the server's `message` to their text** (`...: forbidden
+  (HTTP 403): session_timeout_secs is above the tenant's cap of 3600`), as a `400` already did. The
+  types, `getAction()` and `getResourceId()` are unchanged.
+- `ReadModifyWrite::ssfStream($stream, $changes)` is documented as §32.2's **change-taking form**,
+  and the plain converter's documentation names the caller's duty (cut `events_requested` to a lowered
+  `events_allowed`; mind the three meanings of `events_requested` and the `409`). Its behaviour was
+  already the contract's (§34.6 (e)) and is unchanged.
+- `SsfApi::updateStream()`'s documentation states the three meanings of `events_requested`, the
+  defaults of the omitted members and the raw-client rule at the call (§34.6 (h)); the three network
+  `replace*` operations document their read-modify-write pattern (§27.4 rule 5).
+- README: the SemVer promise says that a contract record may add a member or widen a type in a minor
+  release and that a removal waits for 2.0.0; the install lines say `^1.1.0`.
+- The docblock of `AxiamClient::deviceAuthorize()`/`devicePoll()` and the README no longer say that a
+  device client sends no `client_secret`.
+
+#### Already held (verified, with tests)
+
+- **§34.6 (f)** an assigned `null` on `userId` (`CreateCertificateRequest`, `SignCertificateCsrRequest`)
+  or `expectedUpdatedAt` (`SsfStreamInput`, `ScimTargetInput`) is "none": the key is omitted and `null`
+  is never sent.
+- **§34.6 (g)** `expected_updated_at` is the server's own string: `SsfStream::$updatedAt` is kept as
+  received and every body built from a read sends it byte for byte.
+- **§34.6 (i)** the request `user_id` is an untyped `?string`, so a malformed value reaches the server
+  and its `400` is surfaced; the response `Certificate::$userId` is unchanged.
+- **§34.6 (d)** `CibaPendingList` is not modelled; "SDK work: no".
+
+#### Tests
+
+- `tests/Contract162/NetworkManagementTest.php` (§36.8's five tests), `NetworkManifestTest.php` with
+  `FakeNetworkServer.php` (§27.9's "Manifest, `network`" block), `RequestMembersAndSsfFormTest.php`
+  (§32.8 test 7; §27.11 rule 5) and `DeviceGrantAuthenticationTest.php` (§14.6's contract-1.62 paragraph);
+  the generated §27 tests cover the new operations and models, and the accessor test pins 29 namespaces.
+
+### Contract 1.61
 
 Contract 1.61 (accompanying the AXIAM 1.0.1 release), additive and clarifying: `CONTRACT.md`,
 `openapi.json` and `management-registry.json` re-vendored byte for byte from `ilpanich/axiam`
 `058d8e0` (branch `claude/release-1.0.1`; `proto/` is unchanged), the §27 surface regenerated
 (190 operations across 28 namespaces), and the README states conformance at contract 1.61.
 
-### Added
+#### Added
 
 - **`Certificate::$userId` (§27.11 rule 5).** On `Certificate` and `GeneratedCertificate`:
-  `null` and an absent member both decode as "no account named" (a server before 1.0.1 omits
+  `null` and an absent member both decode as "no account named" (a server before 1.1.0 omits
   it); it is never required, coalesced or synthesised from `metadata` or the subject.
   `CreateCertificateRequest::$userId` and `SignCertificateCsrRequest::$userId` are sent exactly
   as given and the key is left out, never `null`, when the caller names no account.
@@ -30,14 +124,14 @@ Contract 1.61 (accompanying the AXIAM 1.0.1 release), additive and clarifying: `
 - `CibaPendingList::total_pending` / `truncated` (§33.3 rule 16) are not modelled: no registry
   operation returns the type and the generator emits only the models its operations carry.
 
-### Changed
+#### Changed
 
 - The generated `Certificate`, `GeneratedCertificate`, `CreateCertificateRequest`,
   `SignCertificateCsrRequest` and `SsfStreamInput` gain a constructor parameter (`$userId`;
   `$expectedUpdatedAt`), placed in the generator's alphabetical order among the optional ones —
   use named arguments, as the generated tests do. Docblocks follow the 1.61 `openapi.json`.
 
-### Tests
+#### Tests
 
 - `tests/Contract161/Contract161Test.php`: §27.11 rule 5's required test; §32.8 test 1's
   additions (`expected_updated_at` as given and absent, `[]` as `[]`), the `409`, and the
