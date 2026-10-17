@@ -41,6 +41,12 @@ contract 1.62 item (j): "wire-additive; source-breaking in Rust, Java, Kotlin an
   is in the ceiling) and written back without it turning into `""`. This widens a type, which the
   README's SemVer sentence allows in a minor release; §34.2 P12.2(b) is now met.
   `SsfEventType::Unknown` stays for compatibility and is never produced by these models.
+- **Re-vendor of the atomicity-race fixes** (`ilpanich/axiam` `e8722b668`, release PR #716):
+  `openapi.json` and `management-registry.json` are re-vendored byte for byte; the spec documents the
+  `409` responses (and `403`/`404` on the account-deletion cancel) the server gained, digest
+  `sha256:7c3a5091d9d515b1aa3e157e74d342faf64a2c88e735f3c873b66951b3fac8a1`. `CONTRACT.md` and `proto/`
+  are unchanged, the generated management surface is unchanged (`scripts/gen_management.py --check` is
+  clean) and no source changed.
 
 ### Contract 1.62
 
