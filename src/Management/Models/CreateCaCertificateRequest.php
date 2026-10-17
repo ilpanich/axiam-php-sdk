@@ -18,7 +18,10 @@ final class CreateCaCertificateRequest implements \JsonSerializable
      * @param KeyAlgorithm $keyAlgorithm the server's `key_algorithm` field
      * @param string $subject The CA's common name, e.g. `ACME Corp Root CA`. A **common
      *     name**, not a distinguished name. A single `CN=` prefix is accepted and stripped;
-     *     anything else containing `=` — `O=Acme, CN=ACME Corp Root CA` — is refused with `400`.
+     *     anything else containing `=` — `O=Acme, CN=ACME Corp Root CA` — is refused with `400`,
+     *     as is a name of more than 64 characters (RFC 5280 `ub-common-name`) or one holding a
+     *     control character, a tab or line break, an invisible or bidirectional formatting
+     *     character, or two spaces in a row.
      * @param int $validityDays Validity duration in days.
      * @param string|null $intermediateSubject Common name for the signing intermediate —
      *     `vault_pki` custody only. Under that custodian Vault generates a root and an

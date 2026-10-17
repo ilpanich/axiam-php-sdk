@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Management\Manifest;
 
+use Axiam\Sdk\Management\JsonNull;
+use Axiam\Sdk\Management\Models;
+
 /**
  * Fluent construction of a {@see ManagementManifest} (CONTRACT.md §27.6).
  *
@@ -186,6 +189,158 @@ final class ManifestBuilder
             $fields,
             array_keys($expectedKinds),
             $expectedKinds,
+        );
+
+        return $this;
+    }
+
+    /**
+     * Declares the tenant's `Session-Timeout` cap (CONTRACT.md §27.6.2, contract 1.62): the
+     * `network` policy. A **singleton** — the tenant has exactly one, so it has no key, and a
+     * manifest that declares two is refused when it is built. The policy always exists on the
+     * server (the default, `version` 0, until the tenant first writes one), so it is never a
+     * `Create`: it is `NoChange` or an `Update`, sent as `replace_policy` with the version
+     * `plan` read. Planned and applied **before** the segments and profiles, because a
+     * profile's timeout is checked against the cap at the write.
+     *
+     * @param int $sessionTimeoutMaxSecs The cap, in seconds. The server judges the range
+     *        (300 to 86 400); the SDK does not.
+     */
+    public function networkPolicy(int $sessionTimeoutMaxSecs): self
+    {
+        $this->entities[] = new ManifestEntity(
+            ManifestKind::NetworkPolicy,
+            NetworkReconciler::POLICY_KEY,
+            NetworkReconciler::POLICY_KEY,
+            ['session_timeout_max_secs' => $sessionTimeoutMaxSecs],
+        );
+
+        return $this;
+    }
+
+    /**
+     * Declares a network segment (CONTRACT.md §27.6.2, contract 1.62).
+     *
+     * Reconciled by its natural key **site + kind + name**, where `kind` is the WIRE spelling,
+     * `access` or `quarantine` — the value `create_segment` writes and every read returns. The
+     * SDK keeps no other spelling and no mapping to the server's `zones` path segment. Those
+     * three never drift (a segment's kind, site and name do not change, §36.3 rule 4); every
+     * other stated member is compared with the value as the read returns it.
+     *
+     * `$filterIds` is compared as a **set**: the same names in another order are `NoChange`,
+     * and when the SDK does write the segment it sends them in the order stated here. A list
+     * that repeats a name is refused when the manifest is built — it is a set, and a set has no
+     * repeated member. `null` for an optional member is *unstated* (silent, §27.6 rule 3); on
+     * an `Update` it is carried from the read.
+     *
+     * @param string                          $key       Manifest-local identity, referred to by
+     *                                                   {@see self::networkProfile()}.
+     * @param string                          $site      The wire `site_key`.
+     * @param Models\NetworkSegmentKind|string $kind      `access` or `quarantine`; nothing else.
+     * @param string                          $name      The segment's name within its site.
+     * @param int                             $vlanId    The VLAN (the server checks 1 to 4094).
+     * @param int|null                        $rank      Placement rank, for an `access` segment.
+     * @param list<string>|null               $filterIds The segment's Filter-Id envelope.
+     * @param bool|null                       $enabled   Whether the segment is a placement candidate.
+     *
+     * @throws ManifestException when `$kind` is neither `access` nor `quarantine`.
+     */
+    public function networkSegment(
+        string $key,
+        string $site,
+        Models\NetworkSegmentKind|string $kind,
+        string $name,
+        int $vlanId,
+        ?int $rank = null,
+        ?array $filterIds = null,
+        ?bool $enabled = null,
+    ): self {
+        $wireKind = $kind instanceof Models\NetworkSegmentKind ? $kind->value : $kind;
+        if ($wireKind !== 'access' && $wireKind !== 'quarantine') {
+            throw new ManifestException(sprintf(
+                'network segment "%s": kind must be "access" or "quarantine", the wire spelling '
+                . '(CONTRACT.md §27.6.2 item 1), not "%s"',
+                $key,
+                $wireKind,
+            ));
+        }
+
+        $fields = ['site_key' => $site, 'kind' => $wireKind, 'name' => $name, 'vlan_id' => $vlanId];
+        if ($rank !== null) {
+            $fields['rank'] = $rank;
+        }
+        if ($filterIds !== null) {
+            $fields['filter_ids'] = array_values(array_map('strval', $filterIds));
+        }
+        if ($enabled !== null) {
+            $fields['enabled'] = $enabled;
+        }
+        $this->entities[] = new ManifestEntity(
+            ManifestKind::NetworkSegment,
+            $key,
+            NetworkReconciler::segmentKey($site, $wireKind, $name),
+            $fields,
+            setFields: ['filter_ids'],
+        );
+
+        return $this;
+    }
+
+    /**
+     * Declares a segment's reply profile (CONTRACT.md §27.6.2, contract 1.62).
+     *
+     * A profile has no name or id of its own: its natural key is **its segment**, named here by
+     * the manifest-local key of a {@see self::networkSegment()} of the same manifest — and a
+     * key the manifest does not declare is a dangling reference, refused when it is built. One
+     * profile per segment.
+     *
+     * Every stated member is compared with the profile as the read returns it, the **effective**
+     * one: a stored `session_timeout_secs` above a lowered cap reads as the cap, so a manifest
+     * stating the cap is `NoChange` and one stating a value above it is an `Update` whose write
+     * the server refuses (`403`) — the action's failure; `apply` stops and nothing is lowered
+     * for you. An `Update` of a clamped profile that does not state its timeout carries the read's
+     * effective value, so it stores the clamped value from then on (§36.3 rule 6); raise the cap
+     * with {@see self::networkPolicy()} first to restore the stored one.
+     *
+     * `null` is *unstated*: silent on a `Create` and carried from the read on an `Update`.
+     * {@see JsonNull::Null} is a member stated as *none*: left out of the body, which is how a
+     * replacement clears an optional member.
+     *
+     * @param string                                          $segmentKey          The segment's manifest-local key.
+     * @param int                                             $sessionTimeoutSecs  `Session-Timeout`; the server judges the range.
+     * @param Models\RadiusTerminationAction|string|null      $terminationAction   `default` or `radius_request`.
+     * @param int|JsonNull|null                               $idleTimeoutSecs     `Idle-Timeout`.
+     * @param string|JsonNull|null                            $filterId            One of the segment's `filter_ids`.
+     * @param Models\RadiusServiceType|string|JsonNull|null   $serviceType         `framed_user` (the only value there is).
+     */
+    public function networkProfile(
+        string $segmentKey,
+        int $sessionTimeoutSecs,
+        Models\RadiusTerminationAction|string|null $terminationAction = null,
+        int|JsonNull|null $idleTimeoutSecs = null,
+        string|JsonNull|null $filterId = null,
+        Models\RadiusServiceType|string|JsonNull|null $serviceType = null,
+    ): self {
+        $fields = ['session_timeout_secs' => $sessionTimeoutSecs];
+        if ($terminationAction !== null) {
+            $fields['termination_action'] = $terminationAction instanceof Models\RadiusTerminationAction
+                ? $terminationAction->value
+                : $terminationAction;
+        }
+        foreach (['idle_timeout_secs' => $idleTimeoutSecs, 'filter_id' => $filterId, 'service_type' => $serviceType] as $wire => $value) {
+            if ($value === null) {
+                continue;
+            }
+            $fields[$wire] = $value instanceof JsonNull
+                ? null
+                : ($value instanceof Models\RadiusServiceType ? $value->value : $value);
+        }
+        $this->entities[] = new ManifestEntity(
+            ManifestKind::NetworkProfile,
+            $segmentKey,
+            $segmentKey,
+            $fields,
+            segment: $segmentKey,
         );
 
         return $this;

@@ -32,6 +32,13 @@ final class ManifestEntity
      *        default, `[]`) falls back to matching any kind — the pre-N6.6 behavior,
      *        so a `ManifestEntity` built by hand (bypassing {@see ManifestBuilder}, as
      *        some tests do) keeps working exactly as before.
+     * @param list<string> $setFields CONTRACT 1.62 (§27.6.2 item 3): wire names of
+     *        list-valued fields compared as a SET — the same names in another order are no
+     *        drift (`network` segments' `filter_ids`). Every other list keeps its order.
+     * @param string|null $segment A `network_profile`'s segment: the manifest-local KEY of
+     *        the `network_segment` it belongs to. Kept apart from `$depends` on purpose — the
+     *        profile's own key IS its segment's, and a dependency edge from a key to itself
+     *        would be read as a cycle.
      */
     public function __construct(
         public readonly ManifestKind $kind,
@@ -40,6 +47,8 @@ final class ManifestEntity
         public readonly array $fields = [],
         public readonly array $depends = [],
         public readonly array $expectedKinds = [],
+        public readonly array $setFields = [],
+        public readonly ?string $segment = null,
     ) {
     }
 
@@ -57,6 +66,10 @@ final class ManifestEntity
      * comparison; a JSON ARRAY's element order still matters (order is significant for
      * a list, never for an object), only an object's key order is ignored.
      *
+     * CONTRACT 1.62 (§27.6.2): a field stated as PHP `null` is "none" — it drifts when the
+     * server holds a value and not when the server holds none or omits the member — and a
+     * field named in `$setFields` is compared as a set.
+     *
      * @param array<string,mixed> $existing The server's current object.
      * @return array<string,mixed> The drifted fields and their DESIRED values; empty when converged.
      */
@@ -64,12 +77,52 @@ final class ManifestEntity
     {
         $drifted = [];
         foreach ($this->fields as $wire => $desired) {
-            if (!array_key_exists($wire, $existing) || !self::jsonValueEquals($existing[$wire], $desired)) {
+            $present = array_key_exists($wire, $existing);
+            if ($desired === null) {
+                if ($present && $existing[$wire] !== null) {
+                    $drifted[$wire] = $desired;
+                }
+            } elseif (!$present) {
+                $drifted[$wire] = $desired;
+            } elseif (\in_array($wire, $this->setFields, true)) {
+                if (!self::setEquals($existing[$wire], $desired)) {
+                    $drifted[$wire] = $desired;
+                }
+            } elseif (!self::jsonValueEquals($existing[$wire], $desired)) {
                 $drifted[$wire] = $desired;
             }
         }
 
         return $drifted;
+    }
+
+    /**
+     * Two lists equal as SETS of exact strings: order and repetition do not count
+     * (CONTRACT 1.62, §27.6.2 item 3 — `filter_ids`). Anything that is not a list of strings
+     * on both sides falls back to strict value equality.
+     */
+    private static function setEquals(mixed $a, mixed $b): bool
+    {
+        if (!\is_array($a) || !\is_array($b)) {
+            return $a === $b;
+        }
+        $normalise = static function (array $list): ?array {
+            $out = [];
+            foreach ($list as $value) {
+                if (!\is_string($value)) {
+                    return null;
+                }
+                $out[$value] = true;
+            }
+            $names = array_map('strval', array_keys($out));
+            sort($names, SORT_STRING);
+
+            return $names;
+        };
+        $left = $normalise($a);
+        $right = $normalise($b);
+
+        return $left === null || $right === null ? $a === $b : $left === $right;
     }
 
     /**

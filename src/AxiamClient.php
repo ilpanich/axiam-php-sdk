@@ -936,6 +936,16 @@ final class AxiamClient
     }
 
     /**
+     * A tenant's network segments and the RADIUS reply profile each owns, and the tenant's
+     * `Session-Timeout` cap (CONTRACT §36, contract 1.62). Every write is conditional on the
+     * `version` the caller read; the decision route FreeRADIUS calls is not SDK surface.
+     */
+    public function network(): \Axiam\Sdk\Management\NetworkApi
+    {
+        return $this->management()->network();
+    }
+
+    /**
      * Effective settings, and the organization/tenant layers they resolve from.
      */
     public function settings(): \Axiam\Sdk\Management\SettingsApi
@@ -1658,9 +1668,13 @@ final class AxiamClient
      * `POST /oauth2/device_authorization` (CONTRACT.md §14.1) — start the device grant
      * and obtain the code pair.
      *
-     * **Unauthenticated by design**: a device that cannot show a browser also cannot hold
-     * a client secret, so this never sends `client_secret` and never refuses a client
-     * built without one.
+     * **The client authenticates the way it is configured to (contract 1.62, §14.1 rule 2).**
+     * A client built with an `oidcClientSecret` sends it as `client_secret` in the form body —
+     * never `Authorization: Basic`, whatever it is registered for (§12.1 rule 3) — and a client
+     * with a §6.1 certificate presents it on the connection. A public client (the usual
+     * device, which cannot hold a secret) is built with neither, sends `client_id` and no
+     * credential, and is never refused here; the server refuses a public client that sends one.
+     * A failed client authentication is `401 invalid_client`, an {@see \Axiam\Sdk\Core\OAuthProtocolError}.
      *
      * @throws AuthError when the discovery document advertises no
      *                   `device_authorization_endpoint`.
@@ -1677,6 +1691,12 @@ final class AxiamClient
      * `POST /oauth2/token` with the device-code grant (CONTRACT.md §14.1) — **one** poll
      * attempt, for an application driving its own loop. Most callers want
      * {@see self::deviceLogin()}.
+     *
+     * Every poll sends `client_id` and authenticates the client as {@see self::deviceAuthorize()}
+     * does (contract 1.62): the configured `client_secret` in the body, or the certificate on the
+     * connection, or nothing for a public client. A `401 invalid_client` is an {@see
+     * \Axiam\Sdk\Core\OAuthProtocolError}, terminal and never retried. This SDK does not generate DPoP proofs
+     * (§21.9), so a client registered for DPoP is refused that way.
      */
     public function devicePoll(
         Sensitive|string $deviceCode,

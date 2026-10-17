@@ -23,7 +23,7 @@ final class SsfStreamInput implements \JsonSerializable
      * Constructs a SsfStreamInput.
      * @param string $audience 1–512 bytes; unique across the deployment.
      * @param SsfDeliveryMethod $deliveryMethod `push` or `poll`.
-     * @param list<SsfEventType> $eventsAllowed 1–6 event types.
+     * @param list<SsfEventType|string> $eventsAllowed 1–6 event types.
      * @param string $receiverClientId An OAuth2 client of the tenant with the
      *     `client_credentials` grant and the `ssf.manage` scope.
      * @param \Axiam\Sdk\Core\Sensitive|null $authorizationHeader **Write-only.** The
@@ -35,11 +35,11 @@ final class SsfStreamInput implements \JsonSerializable
      * @param string|null $description At most 256 bytes. (optional)
      * @param string|null $endpointUrl Required for `push` (an `https` URL under the outbound
      *     address policy), refused for `poll`. (optional)
-     * @param list<SsfEventType>|null $eventsRequested A subset of `events_allowed`; absent
-     *     means all of them. The receiver may narrow it later, never widen it. On update, absent
-     *     therefore *resets* a narrowing the receiver made to every allowed event, and `[]` keeps
-     *     a receiver's "none": a client that edits a stream sends the value it read (cut to the
-     *     new `events_allowed`), never an absent field. (optional)
+     * @param list<SsfEventType|string>|null $eventsRequested A subset of `events_allowed`;
+     *     absent means all of them. The receiver may narrow it later, never widen it. On update,
+     *     absent therefore *resets* a narrowing the receiver made to every allowed event, and `[]`
+     *     keeps a receiver's "none": a client that edits a stream sends the value it read (cut to
+     *     the new `events_allowed`), never an absent field. (optional)
      * @param string|null $expectedUpdatedAt The `updated_at` of the stream as the client read
      *     it (R1W2-03, T-406). **Update only; create ignores it.** When present, the replacement
      *     lands only if the stream still has that version, else `409` (reload and retry): a pause
@@ -76,13 +76,13 @@ final class SsfStreamInput implements \JsonSerializable
         return new self(
             (string) ModelDecode::need($data, 'audience', self::class),
             SsfDeliveryMethod::fromWire((string) ModelDecode::need($data, 'delivery_method', self::class)),
-            array_values(array_map(static fn (mixed $v): SsfEventType => SsfEventType::fromWire((string) $v), (array) ModelDecode::need($data, 'events_allowed', self::class))),
+            array_values(array_map(static fn (mixed $v): SsfEventType|string => SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) ModelDecode::need($data, 'events_allowed', self::class))),
             (string) ModelDecode::need($data, 'receiver_client_id', self::class),
             isset($data['authorization_header']) ? new \Axiam\Sdk\Core\Sensitive((string) $data['authorization_header']) : null,
             isset($data['clear_authorization_header']) ? (bool) $data['clear_authorization_header'] : null,
             isset($data['description']) ? (string) $data['description'] : null,
             isset($data['endpoint_url']) ? (string) $data['endpoint_url'] : null,
-            isset($data['events_requested']) ? array_values(array_map(static fn (mixed $v): SsfEventType => SsfEventType::fromWire((string) $v), (array) $data['events_requested'])) : null,
+            isset($data['events_requested']) ? array_values(array_map(static fn (mixed $v): SsfEventType|string => SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) $data['events_requested'])) : null,
             isset($data['expected_updated_at']) ? (string) $data['expected_updated_at'] : null,
             isset($data['status']) ? SsfStreamStatus::fromWire((string) $data['status']) : null,
             isset($data['status_reason']) ? (string) $data['status_reason'] : null,
@@ -103,7 +103,7 @@ final class SsfStreamInput implements \JsonSerializable
         $out = [];
         $out['audience'] = $this->audience;
         $out['delivery_method'] = $this->deliveryMethod->value;
-        $out['events_allowed'] = array_map(static fn (SsfEventType $v): string => $v->value, $this->eventsAllowed);
+        $out['events_allowed'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsAllowed);
         $out['receiver_client_id'] = $this->receiverClientId;
         if ($this->authorizationHeader !== null) {
             $out['authorization_header'] = $this->authorizationHeader;
@@ -118,7 +118,7 @@ final class SsfStreamInput implements \JsonSerializable
             $out['endpoint_url'] = $this->endpointUrl;
         }
         if ($this->eventsRequested !== null) {
-            $out['events_requested'] = array_map(static fn (SsfEventType $v): string => $v->value, $this->eventsRequested);
+            $out['events_requested'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsRequested);
         }
         if ($this->expectedUpdatedAt !== null) {
             $out['expected_updated_at'] = $this->expectedUpdatedAt;

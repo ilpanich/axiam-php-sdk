@@ -70,10 +70,13 @@ final class GeneratedCaCertificate implements \JsonSerializable
      *     be revoked and replaced without touching the anchor the rest of the estate trusts.
      *     (optional)
      * @param \Axiam\Sdk\Core\Sensitive|null $privateKeyPem PEM-encoded private key — returned
-     *     only on generation, and only when there is one to return. Absent under `vault_pki`
-     *     custody, where the key was generated inside Vault and no API exports it. The field is
-     *     omitted rather than sent as `null` so a client that has always read it keeps working
-     *     unchanged for every custodian that does produce a key. (optional)
+     *     only on generation, and only when there is one to return. An unencrypted PKCS#8 `PRIVATE
+     *     KEY` block. An Ed25519 key is RFC 8410 version 1 (`version` INTEGER 0, the 32-byte seed
+     *     and no embedded public key), which OpenSSL 3.0 reads; an RSA-4096 key is the usual
+     *     PKCS#8 `RSAPrivateKey`. Absent under `vault_pki` custody, where the key was generated
+     *     inside Vault and no API exports it. The field is omitted rather than sent as `null` so a
+     *     client that has always read it keeps working unchanged for every custodian that does
+     *     produce a key. (optional)
      */
     public function __construct(
         public readonly string $createdAt,

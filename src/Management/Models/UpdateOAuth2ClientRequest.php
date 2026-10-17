@@ -50,7 +50,10 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
      * @param ClientProfile|null $profile the server's `profile` field (optional)
      * @param list<string>|null $redirectUris the server's `redirect_uris` field (optional)
      * @param bool|null $requirePar the server's `require_par` field (optional)
-     * @param list<string>|null $scopes the server's `scopes` field (optional)
+     * @param list<string>|null $scopes Replace the client's scopes. On a `managed_by: dcr |
+     *     cimd` client a scope the request adds that is outside the tenant's effective
+     *     `dcr_allowed_scopes` is refused with `422` (#636); an administrator-managed client is
+     *     not bounded. (optional)
      * @param list<string>|null $selfSignedTlsClientAuthThumbprints the server's
      *     `self_signed_tls_client_auth_thumbprints` field (optional)
      * @param string|null $tlsClientAuthSanDns the server's `tls_client_auth_san_dns` field

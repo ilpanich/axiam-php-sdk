@@ -125,7 +125,7 @@ final class SsfManagementTest extends ManagementRouteTestCase
         self::assertSame(Models\SsfDeliveryMethod::Unknown, $odd->deliveryMethod);
         self::assertSame(Models\SsfSubjectFormat::Unknown, $odd->subjectFormat);
         self::assertSame(Models\SsfStatusActor::Unknown, $odd->statusActor);
-        self::assertSame(Models\SsfEventType::Unknown, $odd->eventsAllowed[0]);
+        self::assertSame('https://example.test/event-type/new', $odd->eventsAllowed[0], 'an unseen event-type URI keeps its value (§34.2 P12.2(b))');
 
         $inactive = Models\SsfStream::fromArray(self::stream([
             'transmitter_active' => false,

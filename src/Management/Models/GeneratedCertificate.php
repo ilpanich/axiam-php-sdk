@@ -35,7 +35,10 @@ final class GeneratedCertificate implements \JsonSerializable
      *     what the certificate's subject DN says (DF-023).
      * @param string $tenantId The tenant this certificate belongs to.
      * @param \Axiam\Sdk\Core\Sensitive $privateKeyPem PEM-encoded private key — returned only
-     *     on generation.
+     *     on generation. An unencrypted PKCS#8 `PRIVATE KEY` block. An Ed25519 key AXIAM generated
+     *     is RFC 8410 version 1 (`version` INTEGER 0, the 32-byte seed and no embedded public
+     *     key), which OpenSSL 3.0 reads; the longer RFC 5958 v2 form it does not. An RSA-4096 key
+     *     is the usual PKCS#8 `RSAPrivateKey`.
      * @param string|null $userId The user account a `User` certificate was issued for, in this
      *     tenant (#533); `null` for every other type, for a `User` certificate issued without one,
      *     and for every certificate issued before schema v98. What revoking a user's certificates

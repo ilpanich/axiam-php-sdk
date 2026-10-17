@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Management;
 
+use Axiam\Sdk\Core\AuthzError;
 use Axiam\Sdk\Core\AxiamException;
 use Axiam\Sdk\Core\ErrorMapper;
 use Psr\Http\Message\ResponseInterface;
@@ -23,6 +24,14 @@ use Psr\Http\Message\ResponseInterface;
  * | `409`      | {@see ConflictError}    | `AuthzError`  |
  * | `400`,`422`| {@see ValidationError}  | `NetworkError`|
  *
+ * Two of them carry more than a status (contract 1.62, §36.3 rule 2 and §36.4). A `409` keeps
+ * the body's `reason_code` — verbatim, an unknown value included — on {@see
+ * ConflictError::getReasonCode()}; a caller branches on it, never on the message. A `403` stays
+ * the plain §2 {@see \Axiam\Sdk\Core\AuthzError} (with `action` and `resource_id` where the
+ * body has them), and both it and the `409` append the server's own `message` to their text, as
+ * a `400` does — the write gate's value refusal (`session_timeout_secs is above the tenant's
+ * cap of 3600`) names no permission, so the message is all the person has.
+ *
  * `404` under `AuthzError` is the counter-intuitive one: on a multi-tenant surface the
  * server answers `404` for another tenant's object *so that* a caller cannot enumerate
  * it, and re-drawing that line client-side would undo the protection. `409` keeps the
@@ -33,7 +42,7 @@ final class ManagementErrorMapper
     /**
      * Maps one management response to its typed exception.
      *
-     * @param ResponseInterface $response The error response; its body is read at most once.
+     * @param ResponseInterface $response The error response; its body is a rewindable PSR-7 stream and is only ever read, never consumed.
      * @param string            $context  Operation name, prefixed onto the message.
      */
     public static function fromResponse(ResponseInterface $response, string $context): AxiamException
@@ -45,7 +54,15 @@ final class ManagementErrorMapper
         }
 
         if ($status === 409) {
-            return new ConflictError(sprintf('%s: conflict (HTTP 409)', $context));
+            $decoded = json_decode((string) $response->getBody(), true);
+            $reasonCode = \is_array($decoded) && \is_string($decoded['reason_code'] ?? null) && $decoded['reason_code'] !== ''
+                ? $decoded['reason_code']
+                : null;
+
+            return new ConflictError(
+                self::withServerMessage(sprintf('%s: conflict (HTTP 409)', $context), $decoded),
+                $reasonCode,
+            );
         }
 
         if ($status === 400 || $status === 422) {
@@ -67,7 +84,29 @@ final class ManagementErrorMapper
         }
 
         // Everything else — 401, 403, 5xx, transport — is §2's to classify.
-        return ErrorMapper::fromStatus($status, $response, $context);
+        $error = ErrorMapper::fromStatus($status, $response, $context);
+
+        // A 403 keeps §2's type and its `action` / `resource_id`; only the person-readable text
+        // gains the server's own `message` (§27.6.2 item 5: "the outcome carries the server's
+        // message"). It is never parsed.
+        if ($status === 403 && $error instanceof AuthzError) {
+            $message = self::withServerMessage($error->getMessage(), json_decode((string) $response->getBody(), true));
+            if ($message !== $error->getMessage()) {
+                return new AuthzError($message, $error->getAction(), $error->getResourceId());
+            }
+        }
+
+        return $error;
+    }
+
+    /**
+     * `$base` followed by the body's non-empty string `message`, when it has one.
+     */
+    private static function withServerMessage(string $base, mixed $decoded): string
+    {
+        $message = \is_array($decoded) && \is_string($decoded['message'] ?? null) ? $decoded['message'] : '';
+
+        return $message === '' ? $base : $base . ': ' . $message;
     }
 
     /**

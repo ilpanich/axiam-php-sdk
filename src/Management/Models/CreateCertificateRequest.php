@@ -18,7 +18,12 @@ final class CreateCertificateRequest implements \JsonSerializable
      * @param CertificateType $certType the server's `cert_type` field
      * @param string $issuerCaId the server's `issuer_ca_id` field
      * @param KeyAlgorithm $keyAlgorithm the server's `key_algorithm` field
-     * @param string $subject the server's `subject` field
+     * @param string $subject The certificate's common name, e.g. `device-001`: a bare name or
+     *     one `CN=` component, at most 64 characters (RFC 5280 `ub-common-name`), printable — a
+     *     control character, tab or line break, an invisible or bidirectional formatting
+     *     character, or two spaces in a row is refused with `400`. A name that is to be written
+     *     into another system's configuration (a FreeRADIUS table, an ACL) should match
+     *     `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$`.
      * @param int $validityDays Validity duration in days.
      * @param mixed $metadata the server's `metadata` field (optional)
      * @param list<SubjectAltNameVariant>|null $subjectAltNames The names a `Server`
