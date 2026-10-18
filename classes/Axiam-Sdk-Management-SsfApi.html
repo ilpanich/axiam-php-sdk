@@ -378,7 +378,7 @@ omitted optional member takes its default, except the header, which absent keeps
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/SsfApi.php"><a href="files/src-management-ssfapi.html"><abbr title="src/Management/SsfApi.php">SsfApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">132</span>
+    <span class="phpdocumentor-element-found-in__line">147</span>
 
     </aside>
 
@@ -640,7 +640,7 @@ from it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/SsfApi.php"><a href="files/src-management-ssfapi.html"><abbr title="src/Management/SsfApi.php">SsfApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">104</span>
+    <span class="phpdocumentor-element-found-in__line">119</span>
 
     </aside>
 
@@ -658,8 +658,23 @@ omitted optional member takes its default, except the header, which absent keeps
 <p>An omitted optional member takes its default (§32.2) -- <strong>except <code class="prettyprint">authorization_header</code>,
 which absent keeps the stored one</strong> -- unless the update moves <code class="prettyprint">endpoint_url</code> to another
 scheme, host or port while a header is stored: then it must carry <code class="prettyprint">authorization_header</code>
-again or <code class="prettyprint">clear_authorization_header: true</code>, else <code class="prettyprint">400</code> (§32.3 rule 5). Start from <a href="classes/Axiam-Sdk-Management-ReadModifyWrite.html#method_ssfStream"><abbr title="\Axiam\Sdk\Management\ReadModifyWrite::ssfStream()">ReadModifyWrite::ssfStream()</abbr></a>. An update overtaken by the
-receiver's own write is <code class="prettyprint">409</code>: read the stream again.</p>
+again or <code class="prettyprint">clear_authorization_header: true</code>, else <code class="prettyprint">400</code> (§32.3 rule 5). On an update the
+omitted members take these defaults: <code class="prettyprint">description</code>, <code class="prettyprint">endpoint_url</code> and <code class="prettyprint">status_reason</code>
+null, <code class="prettyprint">events_requested</code> every event of <code class="prettyprint">events_allowed</code>, <code class="prettyprint">subject_format</code> <code class="prettyprint">iss_sub</code>,
+<code class="prettyprint">status</code> <code class="prettyprint">enabled</code>, <code class="prettyprint">clear_authorization_header</code> false. <strong><code class="prettyprint">events_requested</code> has three
+meanings</strong> (§32.2, contract 1.62), and they are not interchangeable: <em>absent</em> (the
+property left <code class="prettyprint">null</code>) <strong>resets</strong> the stream to every event of <code class="prettyprint">events_allowed</code>, widening
+a narrowing the receiver made; <code class="prettyprint">[]</code> is stored as the receiver's &quot;none&quot; -- it does not
+widen, and the stream carries nothing; a list is stored as given and refused (<code class="prettyprint">400</code>) if
+any entry is outside <code class="prettyprint">events_allowed</code>. A caller with no SDK is bound by the same
+meaning: an <code class="prettyprint">events_requested</code> left out of the <code class="prettyprint">PUT</code> resets the stream. An edit
+therefore sends back the <code class="prettyprint">events_requested</code> <strong>and</strong> the <code class="prettyprint">expected_updated_at</code> it read --
+the <code class="prettyprint">updated_at</code> string exactly as the response carried it, which makes the update
+conditional on that version (<code class="prettyprint">409</code> if the stream was written since, by the receiver as
+well as by an administrator; never retried) -- and, when it lowers <code class="prettyprint">events_allowed</code>,
+cuts <code class="prettyprint">events_requested</code> to the new ceiling. Start from <a href="classes/Axiam-Sdk-Management-ReadModifyWrite.html#method_ssfStream"><abbr title="\Axiam\Sdk\Management\ReadModifyWrite::ssfStream()">ReadModifyWrite::ssfStream()</abbr></a>, which does all of that: it takes
+the stream you read and the changes you want. An update overtaken by the receiver's own
+write is <code class="prettyprint">409</code>: read the stream again.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>

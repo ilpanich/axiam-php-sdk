@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+            <title>AXIAM PHP SDK</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="../">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png"/>
+    <link rel="icon" href="images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/base.css">
+            <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/template.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" integrity="sha256-ybRkN9dBjhcS2qrW1z+hfCxq+1aBdwyQM5wlQoQVt/0=" crossorigin="anonymous" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/themes/prism-okaidia.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.css">
+                <script src="https://cdn.jsdelivr.net/npm/fuse.js@3.4.6"></script>
+        <script src="https://cdn.jsdelivr.net/npm/css-vars-ponyfill@2"></script>
+        <script src="js/template.js"></script>
+        <script src="js/search.js"></script>
+        <script defer src="js/searchIndex.js"></script>
+    </head>
+<body id="top">
+    <header class="phpdocumentor-header phpdocumentor-section">
+    <h1 class="phpdocumentor-title"><a href="" class="phpdocumentor-title__link">AXIAM PHP SDK</a></h1>
+    <input class="phpdocumentor-header__menu-button" type="checkbox" id="menu-button" name="menu-button" />
+    <label class="phpdocumentor-header__menu-icon" for="menu-button">
+        <i class="fas fa-bars"></i>
+    </label>
+    <section data-search-form class="phpdocumentor-search">
+    <label>
+        <span class="visually-hidden">Search for</span>
+        <svg class="phpdocumentor-search__icon" width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+            <line x1="12.4892" y1="12.2727" x2="19.1559" y2="18.9393" stroke="currentColor" stroke-width="3"/>
+        </svg>
+        <input type="search" class="phpdocumentor-field phpdocumentor-search__field" placeholder="Loading .." disabled />
+    </label>
+</section>
+
+    <nav class="phpdocumentor-topnav">
+    <ul class="phpdocumentor-topnav__menu">
+        </ul>
+</nav>
+</header>
+
+    <main class="phpdocumentor">
+        <div class="phpdocumentor-section">
+            <input class="phpdocumentor-sidebar__menu-button" type="checkbox" id="sidebar-button" name="sidebar-button" />
+<label class="phpdocumentor-sidebar__menu-icon" for="sidebar-button">
+    Menu
+</label>
+<aside class="phpdocumentor-column -three phpdocumentor-sidebar">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
+            <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="namespaces/axiam.html" class="">Axiam</a>
+</h4>
+    <ul class="phpdocumentor-list">
+                    <li>
+                <a href="namespaces/axiam-sdk.html" class="">Sdk</a>
+                
+            </li>
+            </ul>
+
+                        </section>
+                <section class="phpdocumentor-sidebar__category -packages">
+            <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
+                                    <h4 class="phpdocumentor-sidebar__root-namespace">
+    <a href="packages/Application.html" class="">Application</a>
+</h4>
+
+                        </section>
+            
+    <section class="phpdocumentor-sidebar__category -reports">
+        <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
+                <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
+    </section>
+
+    <section class="phpdocumentor-sidebar__category -indices">
+        <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
+        <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
+    </section>
+</aside>
+
+            <div class="phpdocumentor-column -nine phpdocumentor-content">
+                                <section>
+                                        <ul class="phpdocumentor-breadcrumbs">
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam.html">Axiam</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk.html">Sdk</a></li>
+            <li class="phpdocumentor-breadcrumb"><a href="namespaces/axiam-sdk-management.html">Management</a></li>
+    </ul>
+
+    <article class="phpdocumentor-element -class">
+        <h2 class="phpdocumentor-content__title">
+    NetworkApi
+
+        <span class="phpdocumentor-element__extends">
+        extends <a href="classes/Axiam-Sdk-Management-ManagementSupport.html"><abbr title="\Axiam\Sdk\Management\ManagementSupport">ManagementSupport</abbr></a>
+    </span>
+    
+            <div class="phpdocumentor-element__package">
+            in package
+            <ul class="phpdocumentor-breadcrumbs">
+                                    <li class="phpdocumentor-breadcrumb"><a href="packages/Application.html">Application</a></li>
+                            </ul>
+        </div>
+    
+    
+    </h2>
+
+<div class="phpdocumentor-label-line">
+
+    <div class="phpdocumentor-label phpdocumentor-label--success"><span>Final</span><span>Yes</span></div>
+
+
+</div>
+
+        <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">34</span>
+
+    </aside>
+
+            <p class="phpdocumentor-summary">A tenant&#039;s network segments and the RADIUS reply profile each owns (RADIUS D4): a segment is
+a node of the reserved /network subtree of the resource tree (kind, VLAN, Filter-Id
+envelope, placement rank), and its profile is the typed `axiam-radius-reply/1` record a
+decision renders. Every write is conditional on the `version` the caller read and passes the
+server&#039;s write gate. The tenant&#039;s Session-Timeout cap is one more row of it (get_policy,
+replace_policy): lowering it is always allowed, raising it is allowed and audited. The
+decision route FreeRADIUS calls is not in this registry.</p>
+
+
+    <section class="phpdocumentor-description"><p>The <code class="prettyprint">network</code> namespace handle (CONTRACT.md §27.2), reached as
+<code class="prettyprint">$client-&gt;management()-&gt;network()</code>. Every method here goes through the one shared <a href="classes/Axiam-Sdk-Management-ManagementTransport.html"><abbr title="\Axiam\Sdk\Management\ManagementTransport">ManagementTransport</abbr></a>, so §3 CSRF, the §4 cookie jar, the §5 tenant header, §6 TLS, §16 retry
+and §19 telemetry apply without this class doing anything to opt in (§27.8).</p>
+</section>
+
+
+
+    
+    
+<h3 id="toc">
+    Table of Contents
+    <a href="classes/Axiam-Sdk-Management-NetworkApi.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h3>
+
+
+
+
+
+
+
+
+
+
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/Axiam-Sdk-Management-NetworkApi.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ManagementSupport.html#method___construct">__construct()</a>
+    <span>
+                                &nbsp;: mixed    </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_createProfile">createProfile()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a>    </span>
+</dt>
+<dd>`POST /api/v1/network/profiles`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_createSegment">createSegment()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a>    </span>
+</dt>
+<dd>`POST /api/v1/network/segments`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteProfile">deleteProfile()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`DELETE /api/v1/network/profiles/{segment_id}?version=`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteSegment">deleteSegment()</a>
+    <span>
+                                &nbsp;: void    </span>
+</dt>
+<dd>`DELETE /api/v1/network/segments/{id}?version=`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant">forTenant()</a>
+    <span>
+                                &nbsp;: static    </span>
+</dt>
+<dd>A COPY of this handle scoped to `$tenantId` (§27.4 rule 3). See {@see self::inOrg()}
+for why it copies.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getPolicy">getPolicy()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkPolicyResponse">NetworkPolicyResponse</abbr></a>    </span>
+</dt>
+<dd>`GET /api/v1/network/policy`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getProfile">getProfile()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a>    </span>
+</dt>
+<dd>`GET /api/v1/network/profiles/{segment_id}`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getSegment">getSegment()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a>    </span>
+</dt>
+<dd>`GET /api/v1/network/segments/{id}`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg">inOrg()</a>
+    <span>
+                                &nbsp;: static    </span>
+</dt>
+<dd>A COPY of this handle scoped to `$orgId` (§27.4 rule 3).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_listProfiles">listProfiles()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a>&gt;    </span>
+</dt>
+<dd>`GET /api/v1/network/profiles`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_listSegments">listSegments()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a>&gt;    </span>
+</dt>
+<dd>`GET /api/v1/network/segments`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replacePolicy">replacePolicy()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkPolicyResponse">NetworkPolicyResponse</abbr></a>    </span>
+</dt>
+<dd>`PUT /api/v1/network/policy`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceProfile">replaceProfile()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a>    </span>
+</dt>
+<dd>`PUT /api/v1/network/profiles/{segment_id}`</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceSegment">replaceSegment()</a>
+    <span>
+                                &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a>    </span>
+</dt>
+<dd>`PUT /api/v1/network/segments/{id}`</dd>
+
+    </dl>
+
+
+
+        
+
+        
+
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/Axiam-Sdk-Management-NetworkApi.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method___construct">
+        __construct()
+        <a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method___construct" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementSupport.php"><a href="files/src-management-managementsupport.html"><abbr title="src/Management/ManagementSupport.php">ManagementSupport.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">39</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-ManagementTransport.html"><abbr title="\Axiam\Sdk\Management\ManagementTransport">ManagementTransport</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$transport</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-NamespaceScope.html"><abbr title="\Axiam\Sdk\Management\NamespaceScope">NamespaceScope</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">new <a href="classes/Axiam-Sdk-Management-NamespaceScope.html"><abbr title="\Axiam\Sdk\Management\NamespaceScope">NamespaceScope</abbr></a>()</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientOrgId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$clientTenantId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$transport</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-ManagementTransport.html"><abbr title="\Axiam\Sdk\Management\ManagementTransport">ManagementTransport</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The one wire path (§27.8).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$scope</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-NamespaceScope.html"><abbr title="\Axiam\Sdk\Management\NamespaceScope">NamespaceScope</abbr></a></span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">new <a href="classes/Axiam-Sdk-Management-NamespaceScope.html"><abbr title="\Axiam\Sdk\Management\NamespaceScope">NamespaceScope</abbr></a>()</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Per-handle <code class="prettyprint">{org_id}</code>/<code class="prettyprint">{tenant_id}</code> overrides.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientOrgId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The client's own organization id, or <code class="prettyprint">null</code>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$clientTenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The client's own tenant id, or <code class="prettyprint">null</code>.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_createProfile">
+        createProfile()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_createProfile" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">185</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/network/profiles`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">createProfile</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html"><abbr title="\Axiam\Sdk\Management\Models\CreateNetworkReplyProfileRequest">CreateNetworkReplyProfileRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html"><abbr title="\Axiam\Sdk\Management\Models\CreateNetworkReplyProfileRequest">CreateNetworkReplyProfileRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_createSegment">
+        createSegment()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_createSegment" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">64</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`POST /api/v1/network/segments`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">createSegment</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html"><abbr title="\Axiam\Sdk\Management\Models\CreateNetworkSegmentRequest">CreateNetworkSegmentRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html"><abbr title="\Axiam\Sdk\Management\Models\CreateNetworkSegmentRequest">CreateNetworkSegmentRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_deleteProfile">
+        deleteProfile()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteProfile" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">265</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`DELETE /api/v1/network/profiles/{segment_id}?version=`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">deleteProfile</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$segmentId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$version</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/network/profiles/{segment_id}</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+<p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$segmentId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{segment_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$version</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the required <code class="prettyprint">version</code> query parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_deleteSegment">
+        deleteSegment()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteSegment" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">145</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`DELETE /api/v1/network/segments/{id}?version=`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">deleteSegment</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$version</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p><code class="prettyprint">DELETE /api/v1/network/segments/{id}</code>.</p>
+<p>Returns nothing; the server answers with an empty body.</p>
+<p>NOT idempotent (§27.4 rule 6): deleting something already deleted raises <a href="classes/Axiam-Sdk-Management-NotFoundError.html"><abbr title="\Axiam\Sdk\Management\NotFoundError">NotFoundError</abbr></a> rather than succeeding quietly.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$id</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$version</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the required <code class="prettyprint">version</code> query parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_forTenant">
+        forTenant()
+        <a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementSupport.php"><a href="files/src-management-managementsupport.html"><abbr title="src/Management/ManagementSupport.php">ManagementSupport.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">70</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A COPY of this handle scoped to `$tenantId` (§27.4 rule 3). See {@see self::inOrg()}
+for why it copies.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">forTenant</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">static</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">static</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getPolicy">
+        getPolicy()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getPolicy" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">283</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/network/policy`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getPolicy</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkPolicyResponse">NetworkPolicyResponse</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkPolicyResponse">NetworkPolicyResponse</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getProfile">
+        getProfile()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getProfile" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">205</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/network/profiles/{segment_id}`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getProfile</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$segmentId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$segmentId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{segment_id}</code> path parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getSegment">
+        getSegment()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getSegment" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">84</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/network/segments/{id}`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getSegment</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$id</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{id}</code> path parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_inOrg">
+        inOrg()
+        <a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementSupport.php"><a href="files/src-management-managementsupport.html"><abbr title="src/Management/ManagementSupport.php">ManagementSupport.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">56</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A COPY of this handle scoped to `$orgId` (§27.4 rule 3).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">inOrg</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$orgId</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">static</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Returns a new handle rather than mutating this one. An administrator holding a
+handle to their own organization should not find it repointed at someone else's
+because an unrelated code path re-scoped a shared object — and on a management
+surface that failure mode writes to the wrong tenant rather than merely reading
+from it.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$orgId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">static</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_listProfiles">
+        listProfiles()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_listProfiles" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">167</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/network/profiles`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">listProfiles</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-PageRequest.html"><abbr title="\Axiam\Sdk\Management\PageRequest">PageRequest</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$page</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
+<code class="prettyprint">count($page)</code> — see §27.4 rule 4.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$page</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-PageRequest.html"><abbr title="\Axiam\Sdk\Management\PageRequest">PageRequest</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>which page to fetch; defaults to the first</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a>&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_listSegments">
+        listSegments()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_listSegments" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">45</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`GET /api/v1/network/segments`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">listSegments</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-PageRequest.html"><abbr title="\Axiam\Sdk\Management\PageRequest">PageRequest</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$page</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$site</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a>&gt;</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Returns ONE page. <code class="prettyprint">Page::$total</code> is the server's count across all pages and is not
+<code class="prettyprint">count($page)</code> — see §27.4 rule 4.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$page</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-PageRequest.html"><abbr title="\Axiam\Sdk\Management\PageRequest">PageRequest</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>which page to fetch; defaults to the first</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$site</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the optional <code class="prettyprint">site</code> query parameter</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Page.html"><abbr title="\Axiam\Sdk\Management\Page">Page</abbr></a>&lt;string|int, <a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a>&gt;</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_replacePolicy">
+        replacePolicy()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replacePolicy" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">310</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`PUT /api/v1/network/policy`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">replacePolicy</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html"><abbr title="\Axiam\Sdk\Management\Models\ReplaceNetworkPolicyRequest">ReplaceNetworkPolicyRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkPolicyResponse">NetworkPolicyResponse</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>A <strong>replacement</strong> (§27.4 rule 5), conditional on the policy's <code class="prettyprint">version</code> -- <code class="prettyprint">0</code> for a
+tenant that has never written one, which is the first write. Lowering the cap is always
+allowed and raising it is allowed and audited; lowering it never rewrites a profile, it
+only clamps what a profile reads as (§36.3 rules 6 and 7). It needs
+<code class="prettyprint">network:segments_write</code> <strong>at the <code class="prettyprint">/network</code> root</strong>. Never retried (§36.7). The composed
+form is the manifest (<a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkPolicy"><abbr title="\Axiam\Sdk\Management\Manifest\ManifestBuilder::networkPolicy()">ManifestBuilder::networkPolicy()</abbr></a>).</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html"><abbr title="\Axiam\Sdk\Management\Models\ReplaceNetworkPolicyRequest">ReplaceNetworkPolicyRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkPolicyResponse">NetworkPolicyResponse</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_replaceProfile">
+        replaceProfile()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceProfile" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">237</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`PUT /api/v1/network/profiles/{segment_id}`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">replaceProfile</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$segmentId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html"><abbr title="\Axiam\Sdk\Management\Models\ReplaceNetworkReplyProfileRequest">ReplaceNetworkReplyProfileRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>A <strong>replacement</strong> (§27.4 rule 5), conditional on <strong>two</strong> versions you read: the
+profile's own <code class="prettyprint">version</code> and the owning segment's <code class="prettyprint">segment_version</code>; a stale one is <code class="prettyprint">409</code>
+and writes nothing (§36.3 rule 2). Read both (<code class="prettyprint">getProfile()</code>, <code class="prettyprint">getSegment()</code>) and send
+every member back. <strong>A read is the effective profile</strong>: a stored <code class="prettyprint">session_timeout_secs</code>
+above the tenant's lowered cap reads as the cap with <code class="prettyprint">session_timeout_clamped: true</code>, so
+a read-modify-write cannot restore the stored value -- what you send is what is stored,
+the clamped value from then on, and a value above the current cap is <code class="prettyprint">403</code> (§36.3 rule
+6). Raise the cap first (<code class="prettyprint">replacePolicy()</code>), leaving the profile alone, to restore it.
+Never retried, and never repeated for you (§36.9). The composed form is the manifest
+(<a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkProfile"><abbr title="\Axiam\Sdk\Management\Manifest\ManifestBuilder::networkProfile()">ManifestBuilder::networkProfile()</abbr></a>).</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$segmentId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{segment_id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html"><abbr title="\Axiam\Sdk\Management\Models\ReplaceNetworkReplyProfileRequest">ReplaceNetworkReplyProfileRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkReplyProfile">NetworkReplyProfile</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_replaceSegment">
+        replaceSegment()
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceSegment" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/NetworkApi.php"><a href="files/src-management-networkapi.html"><abbr title="src/Management/NetworkApi.php">NetworkApi.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">117</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`PUT /api/v1/network/segments/{id}`</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">replaceSegment</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$id</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html"><abbr title="\Axiam\Sdk\Management\Models\ReplaceNetworkSegmentRequest">ReplaceNetworkSegmentRequest</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>A <strong>replacement</strong> (§27.4 rule 5), conditional on the <code class="prettyprint">version</code> you read: a stale one is
+<code class="prettyprint">409</code> and writes nothing (§36.3 rule 2). Read the segment with <code class="prettyprint">getSegment()</code>, change
+what you mean to, and send every member back -- <code class="prettyprint">enabled</code>, <code class="prettyprint">filter_ids</code>, <code class="prettyprint">vlan_id</code>,
+<code class="prettyprint">rank</code> and the <code class="prettyprint">version</code>; what you leave out is not preserved. <code class="prettyprint">kind</code>, <code class="prettyprint">site_key</code> and
+<code class="prettyprint">name</code> are not in the body and never change (rule 4). A change of <code class="prettyprint">vlan_id</code>, <code class="prettyprint">rank</code> or
+<code class="prettyprint">enabled</code> on a segment that has a profile also needs <code class="prettyprint">network:grant</code> (rule 1), and a
+<code class="prettyprint">filter_ids</code> that would strand the profile's <code class="prettyprint">filter_id</code> is <code class="prettyprint">409</code> <code class="prettyprint">strands_profile</code>.
+Never retried, and never repeated for you: a <code class="prettyprint">409</code> means another administrator wrote, so
+read again and decide (§36.9). The composed form is the manifest (<a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkSegment"><abbr title="\Axiam\Sdk\Management\Manifest\ManifestBuilder::networkSegment()">ManifestBuilder::networkSegment()</abbr></a>), which builds this
+body from the read.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$id</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the <code class="prettyprint">{id}</code> path parameter</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html"><abbr title="\Axiam\Sdk\Management\Models\ReplaceNetworkSegmentRequest">ReplaceNetworkSegmentRequest</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>the request body</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentResponse">NetworkSegmentResponse</abbr></a></span>
+            </section>
+
+</article>
+            </section>
+
+        
+    </article>
+                                </section>
+                <section class="phpdocumentor-on-this-page__sidebar">
+                                
+    <section class="phpdocumentor-on-this-page__content">
+        <strong class="phpdocumentor-on-this-page__title">On this page</strong>
+
+        <ul class="phpdocumentor-list -clean">
+            <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                                                                <li><a href="classes/Axiam-Sdk-Management-NetworkApi.html#toc-methods">Methods</a></li>
+                                    </ul>
+            </li>
+            
+            
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_createProfile">createProfile()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_createSegment">createSegment()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteProfile">deleteProfile()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteSegment">deleteSegment()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_forTenant">forTenant()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getPolicy">getPolicy()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getProfile">getProfile()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_getSegment">getSegment()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ManagementSupport.html#method_inOrg">inOrg()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_listProfiles">listProfiles()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_listSegments">listSegments()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replacePolicy">replacePolicy()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceProfile">replaceProfile()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceSegment">replaceSegment()</a></li>
+                                    </ul>
+            </li>
+                    </ul>
+    </section>
+
+                </section>
+                            </div>
+            <section data-search-results class="phpdocumentor-search-results phpdocumentor-search-results--hidden">
+    <section class="phpdocumentor-search-results__dialog">
+        <header class="phpdocumentor-search-results__header">
+            <h2 class="phpdocumentor-search-results__title">Search results</h2>
+            <button class="phpdocumentor-search-results__close"><i class="fas fa-times"></i></button>
+        </header>
+        <section class="phpdocumentor-search-results__body">
+            <ul class="phpdocumentor-search-results__entries"></ul>
+        </section>
+    </section>
+</section>
+        </div>
+        <a href="classes/Axiam-Sdk-Management-NetworkApi.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+
+    </main>
+
+    <script>
+        cssVars({});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.23.0/plugins/line-highlight/prism-line-highlight.min.js"></script>
+</body>
+</html>

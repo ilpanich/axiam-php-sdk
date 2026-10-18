@@ -730,7 +730,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1782</span>
+    <span class="phpdocumentor-element-found-in__line">1811</span>
 
     </aside>
 
@@ -761,7 +761,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1791</span>
+    <span class="phpdocumentor-element-found-in__line">1820</span>
 
     </aside>
 
@@ -792,7 +792,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1788</span>
+    <span class="phpdocumentor-element-found-in__line">1817</span>
 
     </aside>
 
@@ -823,7 +823,7 @@ the caller names none — an AXIAM-issued access token (§15.1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1785</span>
+    <span class="phpdocumentor-element-found-in__line">1814</span>
 
     </aside>
 
@@ -1600,7 +1600,7 @@ so the SDK supplies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1924</span>
+    <span class="phpdocumentor-element-found-in__line">1953</span>
 
     </aside>
 
@@ -1694,7 +1694,7 @@ never exactly once, and may not arrive at all.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1993</span>
+    <span class="phpdocumentor-element-found-in__line">2022</span>
 
     </aside>
 
@@ -1779,7 +1779,7 @@ does it check that the <code class="prettyprint">auth_req_id</code> is one you i
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1816</span>
+    <span class="phpdocumentor-element-found-in__line">1845</span>
 
     </aside>
 
@@ -1886,7 +1886,7 @@ document advertises no <code class="prettyprint">backchannel_authentication_endp
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1887</span>
+    <span class="phpdocumentor-element-found-in__line">1916</span>
 
     </aside>
 
@@ -1980,7 +1980,7 @@ credential.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">729</span>
+    <span class="phpdocumentor-element-found-in__line">741</span>
 
     </aside>
 
@@ -1994,9 +1994,17 @@ the code pair.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p><strong>Unauthenticated by design.</strong> A device that cannot show a browser also cannot
-hold a client secret, so this never sends <code class="prettyprint">client_secret</code> and never refuses a
-client built without one (§14.1).</p>
+        <section class="phpdocumentor-description"><p><strong>The client authenticates the way it is configured to (contract 1.62, §14.1 rule 2).</strong>
+A client built with an <code class="prettyprint">oidcClientSecret</code> sends it as <code class="prettyprint">client_secret</code> <strong>in the form body</strong>
+— whatever the client is registered for, <code class="prettyprint">client_secret_basic</code> included: no SDK sends
+<code class="prettyprint">Authorization: Basic</code> to a <code class="prettyprint">/oauth2/*</code> route (§12.1 rule 3; maintainer, 2026-10-16) — and
+a client with a §6.1 certificate presents it on the connection, to the <code class="prettyprint">mtls_endpoint_aliases</code>
+endpoint when the discovery document has one (§21.3). A <strong>public</strong> client (a device that
+cannot hold a secret) is built with neither, sends <code class="prettyprint">client_id</code> and no credential, and is
+not refused here; the server refuses a public client that sends one. This method never
+borrows a secret from another configuration and never invents one. <code class="prettyprint">private_key_jwt</code> is
+not implemented by this SDK for any token request (§21.8 is optional), so there is no
+assertion to send.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -2043,6 +2051,15 @@ code is pointed at.</p>
 </section>
 
                                     </dd>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>with <code class="prettyprint">error</code> <code class="prettyprint">invalid_client</code> (<code class="prettyprint">401</code>) when the
+client is unknown, its credential failed or is missing, or a public client sent one — never
+retried, and never an entry into the §9 refresh guard; <code class="prettyprint">unauthorized_client</code> (<code class="prettyprint">400</code>) when
+the client does not hold the grant.</p>
+</section>
+
+                                    </dd>
                         </dl>
 
         
@@ -2067,7 +2084,7 @@ code is pointed at.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">842</span>
+    <span class="phpdocumentor-element-found-in__line">871</span>
 
     </aside>
 
@@ -2170,7 +2187,7 @@ said <code class="prettyprint">expired_token</code>. A 5xx or transport failure 
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">799</span>
+    <span class="phpdocumentor-element-found-in__line">826</span>
 
     </aside>
 
@@ -2188,6 +2205,17 @@ countdown, say) can. All five RFC 8628 §3.5 answers surface as
 <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a> — <code class="prettyprint">authorization_pending</code> and
 <code class="prettyprint">slow_down</code> included — so a hand-rolled loop sees exactly what <abbr title="\Axiam\Sdk\Oidc\deviceLogin">deviceLogin</abbr>
 sees. Most callers want <code class="prettyprint">deviceLogin</code>.</p>
+<p><strong>Every poll names its client and authenticates it as <abbr title="\Axiam\Sdk\Oidc\deviceAuthorize">deviceAuthorize</abbr> did
+(contract 1.62, §14.1 rules 2 and 3):</strong> <code class="prettyprint">client_id</code> in the form body, plus the configured
+<code class="prettyprint">client_secret</code> in the body (never <code class="prettyprint">Authorization: Basic</code>) or the §6.1 certificate on the
+connection; a public client sends no credential. A failed client authentication is
+<code class="prettyprint">401 invalid_client</code>, an <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a> with that <code class="prettyprint">error</code>
+(§14.2 rule 5): terminal, one request, never retried and never a §9 refresh. A client
+registered for sender-constrained tokens needs its DPoP proof (or, for mTLS, its certificate)
+on every poll (§14.2 rule 8); this SDK does not generate DPoP proofs (§21.7.3, §21.9), so a
+DPoP-bound client's poll is refused <code class="prettyprint">401 invalid_client</code> and surfaces as that error — an
+mTLS-bound client presents its certificate and works. A response's <code class="prettyprint">token_type</code> is read as
+the server wrote it (<code class="prettyprint">DPoP</code> is never assumed to be <code class="prettyprint">Bearer</code>).</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -2239,7 +2267,7 @@ sees. Most callers want <code class="prettyprint">deviceLogin</code>.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1232</span>
+    <span class="phpdocumentor-element-found-in__line">1261</span>
 
     </aside>
 
@@ -2424,7 +2452,7 @@ performed by a public client.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1057</span>
+    <span class="phpdocumentor-element-found-in__line">1086</span>
 
     </aside>
 
@@ -3058,7 +3086,7 @@ refresh-issued ID token.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1293</span>
+    <span class="phpdocumentor-element-found-in__line">1322</span>
 
     </aside>
 
@@ -3149,7 +3177,7 @@ treats an unknown token as success.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1410</span>
+    <span class="phpdocumentor-element-found-in__line">1439</span>
 
     </aside>
 
@@ -3214,7 +3242,7 @@ path.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2698</span>
+    <span class="phpdocumentor-element-found-in__line">2727</span>
 
     </aside>
 
@@ -3277,7 +3305,7 @@ already-redeemed all answer the same <code class="prettyprint">401</code>, delib
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2671</span>
+    <span class="phpdocumentor-element-found-in__line">2700</span>
 
     </aside>
 
@@ -3342,7 +3370,7 @@ configured userinfo endpoint with the access token it had just received
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2525</span>
+    <span class="phpdocumentor-element-found-in__line">2554</span>
 
     </aside>
 
@@ -3427,7 +3455,7 @@ throw client-side when no workspace resolves.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1339</span>
+    <span class="phpdocumentor-element-found-in__line">1368</span>
 
     </aside>
 
@@ -3535,7 +3563,7 @@ cannot be resolved.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">2605</span>
+    <span class="phpdocumentor-element-found-in__line">2634</span>
 
     </aside>
 
@@ -3648,7 +3676,7 @@ cannot be resolved.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">953</span>
+    <span class="phpdocumentor-element-found-in__line">982</span>
 
     </aside>
 
@@ -3801,7 +3829,7 @@ the SDK will not retry a refusal as a different type.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1676</span>
+    <span class="phpdocumentor-element-found-in__line">1705</span>
 
     </aside>
 
@@ -3865,7 +3893,7 @@ computation, for a resource server that has just minted a ticket.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1515</span>
+    <span class="phpdocumentor-element-found-in__line">1544</span>
 
     </aside>
 
@@ -3917,7 +3945,7 @@ computation, for a resource server that has just minted a ticket.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1612</span>
+    <span class="phpdocumentor-element-found-in__line">1641</span>
 
     </aside>
 
@@ -4035,7 +4063,7 @@ for live ticket handles.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1533</span>
+    <span class="phpdocumentor-element-found-in__line">1562</span>
 
     </aside>
 
@@ -4087,7 +4115,7 @@ client, so a PAT is not an enumeration handle.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1667</span>
+    <span class="phpdocumentor-element-found-in__line">1696</span>
 
     </aside>
 
@@ -4139,7 +4167,7 @@ this client has not necessarily chosen to trust. See <a href="classes/Axiam-Sdk-
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1474</span>
+    <span class="phpdocumentor-element-found-in__line">1503</span>
 
     </aside>
 
@@ -4195,7 +4223,7 @@ this client has not necessarily chosen to trust. See <a href="classes/Axiam-Sdk-
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1456</span>
+    <span class="phpdocumentor-element-found-in__line">1485</span>
 
     </aside>
 
@@ -4273,7 +4301,7 @@ falls back to the session's own token when one is not passed.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1553</span>
+    <span class="phpdocumentor-element-found-in__line">1582</span>
 
     </aside>
 
@@ -4333,7 +4361,7 @@ converts into an RPT, and a short lifetime is not the same as a harmless one
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1496</span>
+    <span class="phpdocumentor-element-found-in__line">1525</span>
 
     </aside>
 
@@ -4415,7 +4443,7 @@ impossible through this SDK.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcClient.php"><a href="files/src-oidc-oidcclient.html"><abbr title="src/Oidc/OidcClient.php">OidcClient.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1108</span>
+    <span class="phpdocumentor-element-found-in__line">1137</span>
 
     </aside>
 

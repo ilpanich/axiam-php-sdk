@@ -125,7 +125,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">15</span>
+    <span class="phpdocumentor-element-found-in__line">18</span>
 
     </aside>
 
@@ -176,6 +176,33 @@ act as changing one.</p>
                                 &nbsp;: self    </span>
 </dt>
 <dd>Declares a group and the roles assigned to it.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkPolicy">networkPolicy()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Declares the tenant&#039;s `Session-Timeout` cap (CONTRACT.md §27.6.2, contract 1.62): the
+`network` policy. A **singleton** — the tenant has exactly one, so it has no key, and a
+manifest that declares two is refused when it is built. The policy always exists on the
+server (the default, `version` 0, until the tenant first writes one), so it is never a
+`Create`: it is `NoChange` or an `Update`, sent as `replace_policy` with the version
+`plan` read. Planned and applied **before** the segments and profiles, because a
+profile&#039;s timeout is checked against the cap at the write.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkProfile">networkProfile()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Declares a segment&#039;s reply profile (CONTRACT.md §27.6.2, contract 1.62).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkSegment">networkSegment()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>Declares a network segment (CONTRACT.md §27.6.2, contract 1.62).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_permission">permission()</a>
@@ -234,7 +261,7 @@ addition 3, contract 1.51).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">227</span>
+    <span class="phpdocumentor-element-found-in__line">382</span>
 
     </aside>
 
@@ -292,7 +319,7 @@ was written rather than at the point somebody applies it.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">127</span>
+    <span class="phpdocumentor-element-found-in__line">130</span>
 
     </aside>
 
@@ -376,6 +403,317 @@ default) means UNSTATED; <code class="prettyprint">[]</code> is a STATED empty o
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_networkPolicy">
+        networkPolicy()
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkPolicy" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">209</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Declares the tenant&#039;s `Session-Timeout` cap (CONTRACT.md §27.6.2, contract 1.62): the
+`network` policy. A **singleton** — the tenant has exactly one, so it has no key, and a
+manifest that declares two is refused when it is built. The policy always exists on the
+server (the default, `version` 0, until the tenant first writes one), so it is never a
+`Create`: it is `NoChange` or an `Update`, sent as `replace_policy` with the version
+`plan` read. Planned and applied **before** the segments and profiles, because a
+profile&#039;s timeout is checked against the cap at the write.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">networkPolicy</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessionTimeoutMaxSecs</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$sessionTimeoutMaxSecs</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The cap, in seconds. The server judges the range
+(300 to 86 400); the SDK does not.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_networkProfile">
+        networkProfile()
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkProfile" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">316</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Declares a segment&#039;s reply profile (CONTRACT.md §27.6.2, contract 1.62).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">networkProfile</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$segmentKey</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$sessionTimeoutSecs</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html"><abbr title="\Axiam\Sdk\Management\Models\RadiusTerminationAction">RadiusTerminationAction</abbr></a>|string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$terminationAction</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|<a href="classes/Axiam-Sdk-Management-JsonNull.html"><abbr title="\Axiam\Sdk\Management\JsonNull">JsonNull</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$idleTimeoutSecs</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|<a href="classes/Axiam-Sdk-Management-JsonNull.html"><abbr title="\Axiam\Sdk\Management\JsonNull">JsonNull</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$filterId</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-RadiusServiceType.html"><abbr title="\Axiam\Sdk\Management\Models\RadiusServiceType">RadiusServiceType</abbr></a>|string|<a href="classes/Axiam-Sdk-Management-JsonNull.html"><abbr title="\Axiam\Sdk\Management\JsonNull">JsonNull</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$serviceType</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>A profile has no name or id of its own: its natural key is <strong>its segment</strong>, named here by
+the manifest-local key of a <abbr title="\Axiam\Sdk\Management\Manifest\self::networkSegment()">self::networkSegment()</abbr> of the same manifest — and a
+key the manifest does not declare is a dangling reference, refused when it is built. One
+profile per segment.</p>
+<p>Every stated member is compared with the profile as the read returns it, the <strong>effective</strong>
+one: a stored <code class="prettyprint">session_timeout_secs</code> above a lowered cap reads as the cap, so a manifest
+stating the cap is <code class="prettyprint">NoChange</code> and one stating a value above it is an <code class="prettyprint">Update</code> whose write
+the server refuses (<code class="prettyprint">403</code>) — the action's failure; <code class="prettyprint">apply</code> stops and nothing is lowered
+for you. An <code class="prettyprint">Update</code> of a clamped profile that does not state its timeout carries the read's
+effective value, so it stores the clamped value from then on (§36.3 rule 6); raise the cap
+with <abbr title="\Axiam\Sdk\Management\Manifest\self::networkPolicy()">self::networkPolicy()</abbr> first to restore the stored one.</p>
+<p><code class="prettyprint">null</code> is <em>unstated</em>: silent on a <code class="prettyprint">Create</code> and carried from the read on an <code class="prettyprint">Update</code>.
+<a href="classes/Axiam-Sdk-Management-JsonNull.html#enumcase_Null"><abbr title="\Axiam\Sdk\Management\JsonNull::Null">JsonNull::Null</abbr></a> is a member stated as <em>none</em>: left out of the body, which is how a
+replacement clears an optional member.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$segmentKey</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The segment's manifest-local key.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$sessionTimeoutSecs</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p><code class="prettyprint">Session-Timeout</code>; the server judges the range.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$terminationAction</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html"><abbr title="\Axiam\Sdk\Management\Models\RadiusTerminationAction">RadiusTerminationAction</abbr></a>|string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p><code class="prettyprint">default</code> or <code class="prettyprint">radius_request</code>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$idleTimeoutSecs</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|<a href="classes/Axiam-Sdk-Management-JsonNull.html"><abbr title="\Axiam\Sdk\Management\JsonNull">JsonNull</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p><code class="prettyprint">Idle-Timeout</code>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$filterId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|<a href="classes/Axiam-Sdk-Management-JsonNull.html"><abbr title="\Axiam\Sdk\Management\JsonNull">JsonNull</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>One of the segment's <code class="prettyprint">filter_ids</code>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$serviceType</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-RadiusServiceType.html"><abbr title="\Axiam\Sdk\Management\Models\RadiusServiceType">RadiusServiceType</abbr></a>|string|<a href="classes/Axiam-Sdk-Management-JsonNull.html"><abbr title="\Axiam\Sdk\Management\JsonNull">JsonNull</abbr></a>|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p><code class="prettyprint">framed_user</code> (the only value there is).</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_networkSegment">
+        networkSegment()
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkSegment" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">248</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Declares a network segment (CONTRACT.md §27.6.2, contract 1.62).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">networkSegment</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$key</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$site</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentKind">NetworkSegmentKind</abbr></a>|string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$kind</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$name</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$vlanId</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$rank</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$filterIds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$enabled</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Reconciled by its natural key <strong>site + kind + name</strong>, where <code class="prettyprint">kind</code> is the WIRE spelling,
+<code class="prettyprint">access</code> or <code class="prettyprint">quarantine</code> — the value <code class="prettyprint">create_segment</code> writes and every read returns. The
+SDK keeps no other spelling and no mapping to the server's <code class="prettyprint">zones</code> path segment. Those
+three never drift (a segment's kind, site and name do not change, §36.3 rule 4); every
+other stated member is compared with the value as the read returns it.</p>
+<p><code class="prettyprint">$filterIds</code> is compared as a <strong>set</strong>: the same names in another order are <code class="prettyprint">NoChange</code>,
+and when the SDK does write the segment it sends them in the order stated here. A list
+that repeats a name is refused when the manifest is built — it is a set, and a set has no
+repeated member. <code class="prettyprint">null</code> for an optional member is <em>unstated</em> (silent, §27.6 rule 3); on
+an <code class="prettyprint">Update</code> it is carried from the read.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$key</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Manifest-local identity, referred to by
+<abbr title="\Axiam\Sdk\Management\Manifest\self::networkProfile()">self::networkProfile()</abbr>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$site</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The wire <code class="prettyprint">site_key</code>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$kind</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html"><abbr title="\Axiam\Sdk\Management\Models\NetworkSegmentKind">NetworkSegmentKind</abbr></a>|string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p><code class="prettyprint">access</code> or <code class="prettyprint">quarantine</code>; nothing else.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$name</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The segment's name within its site.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$vlanId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The VLAN (the server checks 1 to 4094).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$rank</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Placement rank, for an <code class="prettyprint">access</code> segment.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$filterIds</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array&lt;int, string&gt;|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The segment's Filter-Id envelope.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$enabled</span>
+                : <span class="phpdocumentor-argument-list__argument__type">bool|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Whether the segment is a placement candidate.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+    <h5 class="phpdocumentor-tag-list__heading" id="method_networkSegment_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkSegment_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><a href="classes/Axiam-Sdk-Management-Manifest-ManifestException.html"><abbr title="\Axiam\Sdk\Management\Manifest\ManifestException">ManifestException</abbr></a></span>
+                                                                                        <section class="phpdocumentor-description"><p>when <code class="prettyprint">$kind</code> is neither <code class="prettyprint">access</code> nor <code class="prettyprint">quarantine</code>.</p>
+</section>
+
+                                    </dd>
+                        </dl>
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_permission">
         permission()
         <a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_permission" class="headerlink"><i class="fas fa-link"></i></a>
@@ -384,7 +722,7 @@ default) means UNSTATED; <code class="prettyprint">[]</code> is a STATED empty o
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">64</span>
+    <span class="phpdocumentor-element-found-in__line">67</span>
 
     </aside>
 
@@ -453,7 +791,7 @@ default) means UNSTATED; <code class="prettyprint">[]</code> is a STATED empty o
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -545,7 +883,7 @@ drift on <code class="prettyprint">Update</code> like any other stated value —
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">90</span>
+    <span class="phpdocumentor-element-found-in__line">93</span>
 
     </aside>
 
@@ -637,7 +975,7 @@ therefore a strong statement, not a default that a narrower allow can reverse.</
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestBuilder.php"><a href="files/src-management-manifest-manifestbuilder.html"><abbr title="src/Management/Manifest/ManifestBuilder.php">ManifestBuilder.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">170</span>
+    <span class="phpdocumentor-element-found-in__line">173</span>
 
     </aside>
 
@@ -735,6 +1073,9 @@ role KEY or a resource-scoped <a href="classes/Axiam-Sdk-Management-Manifest-Rol
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_build">build()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_group">group()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkPolicy">networkPolicy()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkProfile">networkProfile()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkSegment">networkSegment()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_permission">permission()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_resource">resource()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_role">role()</a></li>

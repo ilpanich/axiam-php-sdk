@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ConflictError.php"><a href="files/src-management-conflicterror.html"><abbr title="src/Management/ConflictError.php">ConflictError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">16</span>
+    <span class="phpdocumentor-element-found-in__line">24</span>
 
     </aside>
 
@@ -137,6 +137,13 @@
     <section class="phpdocumentor-description"><p>Extends <a href="classes/Axiam-Sdk-Core-AuthzError.html"><abbr title="\Axiam\Sdk\Core\AuthzError">AuthzError</abbr></a> because §2 already maps <code class="prettyprint">409</code> there as a resource-level
 refusal; rule 7 KEEPS that mapping rather than moving it. A <code class="prettyprint">catch (AuthzError $e)</code>
 written before §27 existed therefore behaves exactly as it did.</p>
+<p><strong><code class="prettyprint">reason_code</code> (contract 1.62, §36.4).</strong> A <code class="prettyprint">409</code> of the <code class="prettyprint">network</code> operations says which
+conflict it is in a <code class="prettyprint">reason_code</code> member of its body (<code class="prettyprint">stale_version</code>, <code class="prettyprint">strands_profile</code>,
+<code class="prettyprint">has_children</code>, <code class="prettyprint">site_gone</code>, <code class="prettyprint">duplicate_name</code>, <code class="prettyprint">duplicate_vlan</code>, <code class="prettyprint">duplicate_rank</code>,
+<code class="prettyprint">profile_exists</code>, <code class="prettyprint">other</code>, ...). <abbr title="\Axiam\Sdk\Management\self::getReasonCode()">self::getReasonCode()</abbr> returns it verbatim — the
+vocabulary is open, so a value this SDK has never seen comes back as the server wrote it —
+and <code class="prettyprint">null</code> when the body carries none (a server before 1.1.0, or a conflict of another
+namespace). A caller branches on that code and never on the message, which is for a person.</p>
 </section>
 
 
@@ -178,6 +185,13 @@ written before §27 existed therefore behaves exactly as it did.</p>
 <dd>Action the caller was denied (e.g. `users:delete`).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Management-ConflictError.html#method_getReasonCode">getReasonCode()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>The `reason_code` the server named for this conflict (§36.3 rule 2, §36.4).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Core-AuthzError.html#method_getResourceId">getResourceId()</a>
     <span>
                                 &nbsp;: string|null    </span>
@@ -212,14 +226,14 @@ written before §27 existed therefore behaves exactly as it did.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ConflictError.php"><a href="files/src-management-conflicterror.html"><abbr title="src/Management/ConflictError.php">ConflictError.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">21</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$message</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$message</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$reasonCode</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -233,6 +247,16 @@ written before §27 existed therefore behaves exactly as it did.</p>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Describes what already exists, or what state forbids the write.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$reasonCode</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The <code class="prettyprint">reason_code</code> member of the <code class="prettyprint">409</code> body, as written, or
+<code class="prettyprint">null</code> when the body had none.</p>
 </section>
 
             </dd>
@@ -282,6 +306,50 @@ written before §27 existed therefore behaves exactly as it did.</p>
         <span class="phpdocumentor-signature__response_type">string|null</span>
                     &mdash;
                 <section class="phpdocumentor-description"><p><code class="prettyprint">null</code> when the server did not report an action.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_getReasonCode">
+        getReasonCode()
+        <a href="classes/Axiam-Sdk-Management-ConflictError.html#method_getReasonCode" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ConflictError.php"><a href="files/src-management-conflicterror.html"><abbr title="src/Management/ConflictError.php">ConflictError.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">42</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The `reason_code` the server named for this conflict (§36.3 rule 2, §36.4).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getReasonCode</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>The code verbatim (an unknown one included), or <code class="prettyprint">null</code> when the
+response carried none. Never parsed out of the message.</p>
 </section>
 
             </section>
@@ -355,6 +423,7 @@ server did not report a resource.</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Management-ConflictError.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Core-AuthzError.html#method_getAction">getAction()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Management-ConflictError.html#method_getReasonCode">getReasonCode()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Core-AuthzError.html#method_getResourceId">getResourceId()</a></li>
                                     </ul>
             </li>

@@ -1156,6 +1156,11 @@ Search.appendIndex(
             "summary": "A\u0020tenant\u0027s\u0020outbound\u0020SCIM\u0020targets\u0020\u0028CONTRACT\u0020\u00A731\u0029\u003A\u0020the\u0020downstream\u0020SCIM\u00202.0\u0020service\nproviders\u0020AXIAM\u0020pushes\u0020users\u0020and\u0020groups\u0020to.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_scimTargets"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Anetwork\u0028\u0029",
+            "name": "network",
+            "summary": "A\u0020tenant\u0027s\u0020network\u0020segments\u0020and\u0020the\u0020RADIUS\u0020reply\u0020profile\u0020each\u0020owns,\u0020and\u0020the\u0020tenant\u0027s\n\u0060Session\u002DTimeout\u0060\u0020cap\u0020\u0028CONTRACT\u0020\u00A736,\u0020contract\u00201.62\u0029.\u0020Every\u0020write\u0020is\u0020conditional\u0020on\u0020the\n\u0060version\u0060\u0020the\u0020caller\u0020read\u003B\u0020the\u0020decision\u0020route\u0020FreeRADIUS\u0020calls\u0020is\u0020not\u0020SDK\u0020surface.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_network"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003Asettings\u0028\u0029",
             "name": "settings",
             "summary": "Effective\u0020settings,\u0020and\u0020the\u0020organization\/tenant\u0020layers\u0020they\u0020resolve\u0020from.",
@@ -2341,6 +2346,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-ConflictError.html#method___construct"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ConflictError\u003A\u003AgetReasonCode\u0028\u0029",
+            "name": "getReasonCode",
+            "summary": "The\u0020\u0060reason_code\u0060\u0020the\u0020server\u0020named\u0020for\u0020this\u0020conflict\u0020\u0028\u00A736.3\u0020rule\u00202,\u0020\u00A736.4\u0029.",
+            "url": "classes/Axiam-Sdk-Management-ConflictError.html#method_getReasonCode"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\DirectoryApi",
             "name": "DirectoryApi",
             "summary": "A\u0020tenant\u0027s\u0020LDAP\u0020\/\u0020Active\u0020Directory\u0020identity\u0020source\u0020\u0028CONTRACT\u0020\u00A730\u0029\u003A\u0020the\u0020one\u0020configuration,\nthe\u0020explicit\u0020act\u0020that\u0020links\u0020an\u0020existing\u0020local\u0020account\u0020to\u0020its\u0020directory\u0020entry,\u0020and\u0020a\nread\u002Donly\u0020view\u0020of\u0020the\u0020sync\u0020job.\u0020Signing\u0020in\u0020needs\u0020nothing\u0020new\u0020\u002D\u002D\u0020a\u0020directory\u0020account\u0020calls\nthe\u0020same\u0020\u00A71\u0020\u0060login\u0060.",
@@ -2568,7 +2578,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi",
             "name": "ManagementApi",
-            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020190\u0020operations\u0020across\u002028\u0020namespaces.",
+            "summary": "The\u0020CONTRACT.md\u0020\u00A727\u0020management\u0020surface\u003A\u0020202\u0020operations\u0020across\u002029\u0020namespaces.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003A__construct\u0028\u0029",
@@ -2686,6 +2696,11 @@ Search.appendIndex(
             "summary": "A\u0020tenant\u0027s\u0020outbound\u0020SCIM\u0020targets\u0020\u0028CONTRACT\u0020\u00A731\u0029\u003A\u0020the\u0020downstream\u0020SCIM\u00202.0\u0020service\nproviders\u0020AXIAM\u0020pushes\u0020the\u0020tenant\u0027s\u0020users\u0020and\u0020groups\u0020to,\u0020each\u0020with\u0020its\u0020delivery\u0020state.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_scimTargets"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Anetwork\u0028\u0029",
+            "name": "network",
+            "summary": "A\u0020tenant\u0027s\u0020network\u0020segments\u0020and\u0020the\u0020RADIUS\u0020reply\u0020profile\u0020each\u0020owns\u0020\u0028RADIUS\u0020D4\u0029\u003A\u0020a\nsegment\u0020is\u0020a\u0020node\u0020of\u0020the\u0020reserved\u0020\/network\u0020subtree\u0020of\u0020the\u0020resource\u0020tree\u0020\u0028kind,\u0020VLAN,\nFilter\u002DId\u0020envelope,\u0020placement\u0020rank\u0029,\u0020and\u0020its\u0020profile\u0020is\u0020the\u0020typed\u0020\u0060axiam\u002Dradius\u002Dreply\/1\u0060\nrecord\u0020a\u0020decision\u0020renders.\u0020Every\u0020write\u0020is\u0020conditional\u0020on\u0020the\u0020\u0060version\u0060\u0020the\u0020caller\u0020read\nand\u0020passes\u0020the\u0020server\u0027s\u0020write\u0020gate.\u0020The\u0020tenant\u0027s\u0020Session\u002DTimeout\u0020cap\u0020is\u0020one\u0020more\u0020row\u0020of\nit\u0020\u0028get_policy,\u0020replace_policy\u0029\u003A\u0020lowering\u0020it\u0020is\u0020always\u0020allowed,\u0020raising\u0020it\u0020is\u0020allowed\nand\u0020audited.\u0020The\u0020decision\u0020route\u0020FreeRADIUS\u0020calls\u0020is\u0020not\u0020in\u0020this\u0020registry.",
+            "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_network"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Asettings\u0028\u0029",
             "name": "settings",
             "summary": "Effective\u0020settings,\u0020and\u0020the\u0020organization\/tenant\u0020layers\u0020they\u0020resolve\u0020from.",
@@ -2800,6 +2815,11 @@ Search.appendIndex(
             "name": "isComplete",
             "summary": "True\u0020when\u0020every\u0020planned\u0020change\u0020landed.",
             "url": "classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_isComplete"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ApplyReport\u003A\u003AfailureReasonCode\u0028\u0029",
+            "name": "failureReasonCode",
+            "summary": "The\u0020\u0060reason_code\u0060\u0020of\u0020the\u0020\u0060409\u0060\u0020that\u0020stopped\u0020this\u0020apply,\u0020when\u0020that\u0020is\u0020what\u0020did\n\u0028CONTRACT.md\u0020\u00A727.6.2\u0020item\u00205,\u0020\u00A736.4\u0029\u003A\u0020\u0060stale_version\u0060,\u0020\u0060strands_profile\u0060,\n\u0060duplicate_vlan\u0060,\u0020...\u0020as\u0020the\u0020server\u0020wrote\u0020it,\u0020an\u0020unknown\u0020value\u0020included.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ApplyReport.html#method_failureReasonCode"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ApplyReport\u003A\u003A\u0024createdServiceAccounts",
             "name": "createdServiceAccounts",
@@ -2986,6 +3006,21 @@ Search.appendIndex(
             "summary": "Declares\u0020a\u0020service\u0020account\u0020and\u0020the\u0020roles\u0020bound\u0020to\u0020it\u0020\u0028CONTRACT.md\u0020\u00A727.6.1\naddition\u00203,\u0020contract\u00201.51\u0029.",
             "url": "classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_serviceAccount"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder\u003A\u003AnetworkPolicy\u0028\u0029",
+            "name": "networkPolicy",
+            "summary": "Declares\u0020the\u0020tenant\u0027s\u0020\u0060Session\u002DTimeout\u0060\u0020cap\u0020\u0028CONTRACT.md\u0020\u00A727.6.2,\u0020contract\u00201.62\u0029\u003A\u0020the\n\u0060network\u0060\u0020policy.\u0020A\u0020\u002A\u002Asingleton\u002A\u002A\u0020\u2014\u0020the\u0020tenant\u0020has\u0020exactly\u0020one,\u0020so\u0020it\u0020has\u0020no\u0020key,\u0020and\u0020a\nmanifest\u0020that\u0020declares\u0020two\u0020is\u0020refused\u0020when\u0020it\u0020is\u0020built.\u0020The\u0020policy\u0020always\u0020exists\u0020on\u0020the\nserver\u0020\u0028the\u0020default,\u0020\u0060version\u0060\u00200,\u0020until\u0020the\u0020tenant\u0020first\u0020writes\u0020one\u0029,\u0020so\u0020it\u0020is\u0020never\u0020a\n\u0060Create\u0060\u003A\u0020it\u0020is\u0020\u0060NoChange\u0060\u0020or\u0020an\u0020\u0060Update\u0060,\u0020sent\u0020as\u0020\u0060replace_policy\u0060\u0020with\u0020the\u0020version\n\u0060plan\u0060\u0020read.\u0020Planned\u0020and\u0020applied\u0020\u002A\u002Abefore\u002A\u002A\u0020the\u0020segments\u0020and\u0020profiles,\u0020because\u0020a\nprofile\u0027s\u0020timeout\u0020is\u0020checked\u0020against\u0020the\u0020cap\u0020at\u0020the\u0020write.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkPolicy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder\u003A\u003AnetworkSegment\u0028\u0029",
+            "name": "networkSegment",
+            "summary": "Declares\u0020a\u0020network\u0020segment\u0020\u0028CONTRACT.md\u0020\u00A727.6.2,\u0020contract\u00201.62\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkSegment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder\u003A\u003AnetworkProfile\u0028\u0029",
+            "name": "networkProfile",
+            "summary": "Declares\u0020a\u0020segment\u0027s\u0020reply\u0020profile\u0020\u0028CONTRACT.md\u0020\u00A727.6.2,\u0020contract\u00201.62\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestBuilder.html#method_networkProfile"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder\u003A\u003Abuild\u0028\u0029",
             "name": "build",
             "summary": "Finishes\u0020the\u0020manifest.",
@@ -3036,6 +3071,16 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Manifest-ManifestEntity.html#property_expectedKinds"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestEntity\u003A\u003A\u0024setFields",
+            "name": "setFields",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestEntity.html#property_setFields"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestEntity\u003A\u003A\u0024segment",
+            "name": "segment",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestEntity.html#property_segment"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestException",
             "name": "ManifestException",
             "summary": "A\u0020manifest\u0020was\u0020rejected\u0020before\u0020any\u0020request\u0020was\u0020sent\u0020\u0028CONTRACT.md\u0020\u00A727.6\u0029.",
@@ -3071,6 +3116,21 @@ Search.appendIndex(
             "summary": "A\u0020service\u0020account,\u0020plus\u0020the\u0020roles\u0020bound\u0020to\u0020it\u0020\u0028CONTRACT.md\u0020\u00A727.6.1\u0020addition\u00203,\ncontract\u00201.51\u0029.\u0020Depends\u0020on\u0020roles\u0020and\u0020resources.\u0020Ordered\u0020LAST\u0020\u0028\u00A727.6\u0020rule\u00205\u0029\u003A\u0020a\nservice\u0020account\u0027s\u0020own\u0020natural\u0020key\u0020\u0028its\u0020\u0060name\u0060\u0029\u0020is\u0020not\u0020enforced\u0020unique\u0020by\u0020the\nserver,\u0020so\u0020nothing\u0020else\u0020in\u0020a\u0020manifest\u0020can\u0020reasonably\u0020depend\u0020on\u0020one.",
             "url": "classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_ServiceAccount"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestKind\u003A\u003ANetworkPolicy",
+            "name": "NetworkPolicy",
+            "summary": "The\u0020tenant\u0027s\u0020\u0060Session\u002DTimeout\u0060\u0020cap\u0020\u0028CONTRACT.md\u0020\u00A727.6.2,\u0020contract\u00201.62\u0029\u003A\u0020a\u0020singleton,\u0020so\nit\u0020has\u0020no\u0020natural\u0020key\u0020and\u0020a\u0020manifest\u0020carries\u0020at\u0020most\u0020one.\u0020Ordered\u0020FIRST\u0020of\u0020the\u0020three\n\u0060network\u0060\u0020kinds,\u0020because\u0020a\u0020profile\u0027s\u0020timeout\u0020is\u0020checked\u0020against\u0020the\u0020cap\u0020at\u0020the\u0020write.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkPolicy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestKind\u003A\u003ANetworkSegment",
+            "name": "NetworkSegment",
+            "summary": "A\u0020network\u0020segment\u0020\u0028\u00A727.6.2\u0029\u003A\u0020natural\u0020key\u0020\u002A\u002Asite\u0020\u002B\u0020kind\u0020\u002B\u0020name\u002A\u002A,\u0020\u0060kind\u0060\u0020being\u0020the\u0020wire\nspelling\u0020\u0060access\u0060\u0020or\u0020\u0060quarantine\u0060.\u0020Ordered\u0020after\u0020the\u0020policy\u0020and\u0020before\u0020the\u0020profiles.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkSegment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestKind\u003A\u003ANetworkProfile",
+            "name": "NetworkProfile",
+            "summary": "A\u0020segment\u0027s\u0020reply\u0020profile\u0020\u0028\u00A727.6.2\u0029\u003A\u0020natural\u0020key\u0020\u002A\u002Aits\u0020segment\u002A\u002A.\u0020Ordered\u0020last,\u0020and\u0020in\nthe\u0020segments\u0027\u0020own\u0020order,\u0020so\u0020that\u0020a\u0020plan\u0020is\u0020stable.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkProfile"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\ManifestValidation",
             "name": "ManifestValidation",
             "summary": "Refuses\u0020an\u0020incoherent\u0020manifest\u0020BEFORE\u0020the\u0020first\u0020wire\u0020call\u0020\u0028CONTRACT.md\u0020\u00A727.6\u0029.",
@@ -3080,6 +3140,56 @@ Search.appendIndex(
             "name": "assertValid",
             "summary": "Throws\u0020unless\u0020\u0060\u0024manifest\u0060\u0020is\u0020coherent.",
             "url": "classes/Axiam-Sdk-Management-Manifest-ManifestValidation.html#method_assertValid"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler",
+            "name": "NetworkReconciler",
+            "summary": "The\u0020\u0060network\u0060\u0020namespace\u0020of\u0020a\u0020\u00A727.6\u0020manifest\u0020\u0028CONTRACT.md\u0020\u00A727.6.2,\u0020contract\u00201.62\u0029\u003A\u0020what\n\u0060plan\u0060\u0020reads,\u0020and\u0020how\u0020\u0060apply\u0060\u0020writes\u0020the\u0020three\u0020kinds\u0020\u2014\u0020the\u0020tenant\u0027s\u0020policy,\u0020its\u0020segments\u0020and\ntheir\u0020reply\u0020profiles\u0020\u2014\u0020through\u0020the\u0020generated\u0020\u007B\u0040see\u0020NetworkApi\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AsegmentKey\u0028\u0029",
+            "name": "segmentKey",
+            "summary": "The\u0020identity\u0020of\u0020a\u0020segment\u003A\u0020site\u0020\u002B\u0020kind\u0020\u002B\u0020name,\u0020\u0060kind\u0060\u0020in\u0020its\u0020WIRE\u0020spelling.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_segmentKey"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AreadPolicy\u0028\u0029",
+            "name": "readPolicy",
+            "summary": "The\u0020tenant\u0027s\u0020policy,\u0020as\u0020\u0060get_policy\u0060\u0020reads\u0020it\u0020\u0028it\u0020always\u0020exists\u003A\u0020the\u0020default\u0020until\u0020the\ntenant\u0020first\u0020writes\u0020one\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_readPolicy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AreadSegments\u0028\u0029",
+            "name": "readSegments",
+            "summary": "Every\u0020segment\u0020of\u0020the\u0020tenant,\u0020walked\u0020to\u0020exhaustion.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_readSegments"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AreadProfiles\u0028\u0029",
+            "name": "readProfiles",
+            "summary": "Every\u0020reply\u0020profile\u0020of\u0020the\u0020tenant,\u0020walked\u0020to\u0020exhaustion\u0020and\u0020matched\u0020to\u0020its\u0020segment\u0020by\n\u0060segment_id\u0060.\u0020Each\u0020row\u0020also\u0020carries\u0020\u0060id\u0060\u0020\u0028the\u0020segment\u0027s,\u0020which\u0020is\u0020the\u0020profile\u0027s\u0020address\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_readProfiles"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AapplyPolicy\u0028\u0029",
+            "name": "applyPolicy",
+            "summary": "Creates\u0020or\u0020replaces\u0020the\u0020tenant\u0027s\u0020policy,\u0020returning\u0020the\u0020tenant\u0020id\u0020\u0028a\u0020policy\u0020has\u0020no\u0020id\u0020of\nits\u0020own\u0029.\u0020\u0060replace_policy\u0060\u0020sends\u0020the\u0020version\u0020\u0060plan\u0060\u0020read\u0020\u2014\u0020\u00600\u0060\u0020for\u0020a\u0020tenant\u0020that\u0020has\nnever\u0020written\u0020one,\u0020which\u0020is\u0020the\u0020first\u0020write.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_applyPolicy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AapplySegment\u0028\u0029",
+            "name": "applySegment",
+            "summary": "Creates\u0020or\u0020replaces\u0020one\u0020segment,\u0020returning\u0020its\u0020id\u0020and\u0020recording\u0020the\u0020write\u0027s\u0020\u0060version\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_applySegment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AapplyProfile\u0028\u0029",
+            "name": "applyProfile",
+            "summary": "Creates\u0020or\u0020replaces\u0020one\u0020segment\u0027s\u0020reply\u0020profile,\u0020returning\u0020its\u0020id\u0020\u0028the\u0020segment\u0027s\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_applyProfile"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003APOLICY_KEY",
+            "name": "POLICY_KEY",
+            "summary": "The\u0020one\u0020manifest\u002Dlocal\u0020key\u0020\u0028and\u0020name\u0029\u0020of\u0020the\u0020singleton\u0020policy.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#constant_POLICY_KEY"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\PlannedChange",
             "name": "PlannedChange",
@@ -3926,6 +4036,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-Certificate.html#property_tenantId"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\Certificate\u003A\u003A\u0024userId",
+            "name": "userId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-Certificate.html#property_userId"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\Certificate\u003A\u003A\u0024boundServiceAccountId",
             "name": "boundServiceAccountId",
             "summary": "",
@@ -4496,6 +4611,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateCertificateRequest.html#property_subjectAltNames"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateCertificateRequest\u003A\u003A\u0024userId",
+            "name": "userId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateCertificateRequest.html#property_userId"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest",
             "name": "CreateFederationConfigRequest",
             "summary": "The\u0020\u0060CreateFederationConfigRequest\u0060\u0020schema\u0020from\u0020the\u0020server\u0027s\u0020OpenAPI\u0020document.",
@@ -4720,6 +4840,106 @@ Search.appendIndex(
             "name": "validityDays",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateIntermediateCaRequest.html#property_validityDays"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest",
+            "name": "CreateNetworkReplyProfileRequest",
+            "summary": "The\u0020body\u0020of\u0020\u0060POST\u0020\/api\/v1\/network\/profiles\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020CreateNetworkReplyProfileRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020CreateNetworkReplyProfileRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest\u003A\u003A\u0024profile",
+            "name": "profile",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html#property_profile"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest\u003A\u003A\u0024segmentId",
+            "name": "segmentId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html#property_segmentId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkReplyProfileRequest\u003A\u003A\u0024segmentVersion",
+            "name": "segmentVersion",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkReplyProfileRequest.html#property_segmentVersion"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest",
+            "name": "CreateNetworkSegmentRequest",
+            "summary": "The\u0020body\u0020of\u0020\u0060POST\u0020\/api\/v1\/network\/segments\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020CreateNetworkSegmentRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020CreateNetworkSegmentRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A\u0024kind",
+            "name": "kind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#property_kind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A\u0024name",
+            "name": "name",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#property_name"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A\u0024siteKey",
+            "name": "siteKey",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#property_siteKey"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A\u0024vlanId",
+            "name": "vlanId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#property_vlanId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A\u0024filterIds",
+            "name": "filterIds",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#property_filterIds"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003A\u0024rank",
+            "name": "rank",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#property_rank"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNotificationRuleRequest",
             "name": "CreateNotificationRuleRequest",
@@ -6551,6 +6771,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-GeneratedCertificate.html#property_privateKeyPem"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedCertificate\u003A\u003A\u0024userId",
+            "name": "userId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-GeneratedCertificate.html#property_userId"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedCertificate\u003A\u003A\u0024chainPem",
             "name": "chainPem",
             "summary": "",
@@ -7535,6 +7760,331 @@ Search.appendIndex(
             "name": "Unknown",
             "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
             "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse",
+            "name": "NetworkPolicyResponse",
+            "summary": "The\u0020tenant\u0027s\u0020network\u0020policy,\u0020as\u0020the\u0020management\u0020API\u0020returns\u0020it.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020NetworkPolicyResponse.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020NetworkPolicyResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003A\u0024sessionTimeoutMaxSecs",
+            "name": "sessionTimeoutMaxSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#property_sessionTimeoutMaxSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003A\u0024version",
+            "name": "version",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#property_version"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003A\u0024updatedAt",
+            "name": "updatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse\u003A\u003A\u0024updatedBy",
+            "name": "updatedBy",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkPolicyResponse.html#property_updatedBy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile",
+            "name": "NetworkReplyProfile",
+            "summary": "A\u0020segment\u0027s\u0020reply\u0020profile\u0020as\u0020read\u003A\u0020\u002A\u002Athe\u0020effective\u0020one\u002A\u002A,\u0020with\u0020the\u0020\u0060Session\u002DTimeout\u0060\u0020already\nclamped\u0020to\u0020the\u0020tenant\u0027s\u0020current\u0020cap\u0020\u0028design\u0020note\u0020\u00A73.4\u0029\u0020and\u0020\u0060Idle\u002DTimeout\u0060\u0020kept\u0020within\u0020it.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020NetworkReplyProfile.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020NetworkReplyProfile\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024createdBy",
+            "name": "createdBy",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_createdBy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024dictionary",
+            "name": "dictionary",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_dictionary"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024segmentId",
+            "name": "segmentId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_segmentId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024sessionTimeoutClamped",
+            "name": "sessionTimeoutClamped",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_sessionTimeoutClamped"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024sessionTimeoutSecs",
+            "name": "sessionTimeoutSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_sessionTimeoutSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024terminationAction",
+            "name": "terminationAction",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_terminationAction"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024updatedAt",
+            "name": "updatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024updatedBy",
+            "name": "updatedBy",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_updatedBy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024version",
+            "name": "version",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_version"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024filterId",
+            "name": "filterId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_filterId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024idleTimeoutSecs",
+            "name": "idleTimeoutSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_idleTimeoutSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003A\u0024serviceType",
+            "name": "serviceType",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#property_serviceType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput",
+            "name": "NetworkReplyProfileInput",
+            "summary": "What\u0020a\u0020writer\u0020supplies\u0020for\u0020a\u0020profile.\u0020Closed\u003A\u0020an\u0020unknown\u0020key\u0020is\u0020a\u0020refusal\u0020naming\u0020it,\u0020never\nignored\u0020\u0028design\u0020note\u0020\u00A73.4\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020NetworkReplyProfileInput.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020NetworkReplyProfileInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003A\u0024sessionTimeoutSecs",
+            "name": "sessionTimeoutSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#property_sessionTimeoutSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003A\u0024dictionary",
+            "name": "dictionary",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#property_dictionary"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003A\u0024filterId",
+            "name": "filterId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#property_filterId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003A\u0024idleTimeoutSecs",
+            "name": "idleTimeoutSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#property_idleTimeoutSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003A\u0024serviceType",
+            "name": "serviceType",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#property_serviceType"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003A\u0024terminationAction",
+            "name": "terminationAction",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#property_terminationAction"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentKind",
+            "name": "NetworkSegmentKind",
+            "summary": "What\u0020a\u0020segment\u0020is\u0020for.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentKind\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020NetworkSegmentKind,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentKind\u003A\u003AAccess",
+            "name": "Access",
+            "summary": "The\u0020wire\u0020value\u0020\u0060access\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html#enumcase_Access"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentKind\u003A\u003AQuarantine",
+            "name": "Quarantine",
+            "summary": "The\u0020wire\u0020value\u0020\u0060quarantine\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html#enumcase_Quarantine"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentKind\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse",
+            "name": "NetworkSegmentResponse",
+            "summary": "A\u0020network\u0020segment,\u0020as\u0020the\u0020management\u0020API\u0020returns\u0020it.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020NetworkSegmentResponse.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020NetworkSegmentResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024createdAt",
+            "name": "createdAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_createdAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024createdBy",
+            "name": "createdBy",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_createdBy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024filterIds",
+            "name": "filterIds",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_filterIds"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024id",
+            "name": "id",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_id"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024kind",
+            "name": "kind",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_kind"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024name",
+            "name": "name",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_name"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024path",
+            "name": "path",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_path"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024siteKey",
+            "name": "siteKey",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_siteKey"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024tenantId",
+            "name": "tenantId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_tenantId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024updatedAt",
+            "name": "updatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_updatedAt"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024updatedBy",
+            "name": "updatedBy",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_updatedBy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024version",
+            "name": "version",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_version"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024vlanId",
+            "name": "vlanId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_vlanId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003A\u0024rank",
+            "name": "rank",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#property_rank"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NotificationEventType",
             "name": "NotificationEventType",
@@ -8981,6 +9531,51 @@ Search.appendIndex(
             "summary": "Renders\u0020this\u0020variant\u0020to\u0020its\u0020wire\u0020form,\u0020including\u0020its\u0020discriminator.",
             "url": "classes/Axiam-Sdk-Management-Models-ProviderConfigVariant.html#method_toArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusServiceType",
+            "name": "RadiusServiceType",
+            "summary": "\u0060Service\u002DType\u0060\u0020\u0028RFC\u00202865\u0020\u00A75.6\u0029.\u0020Option\u0020B\u0020accepts\u0020only\u0020\u0060framed_user\u0060\u003B\u0020the\u0020administrative\nvalues\u0020are\u0020refused\u0020with\u0020a\u0020400.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusServiceType.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusServiceType\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020RadiusServiceType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusServiceType.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusServiceType\u003A\u003AFramedUser",
+            "name": "FramedUser",
+            "summary": "The\u0020wire\u0020value\u0020\u0060framed_user\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusServiceType.html#enumcase_FramedUser"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusServiceType\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusServiceType.html#enumcase_Unknown"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusTerminationAction",
+            "name": "RadiusTerminationAction",
+            "summary": "\u0060Termination\u002DAction\u0060\u0020\u0028RFC\u00202865\u0020\u00A75.29\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusTerminationAction\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020RadiusTerminationAction,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusTerminationAction\u003A\u003ADefault",
+            "name": "Default",
+            "summary": "The\u0020wire\u0020value\u0020\u0060default\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html#enumcase_Default"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusTerminationAction\u003A\u003ARadiusRequest",
+            "name": "RadiusRequest",
+            "summary": "The\u0020wire\u0020value\u0020\u0060radius_request\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html#enumcase_RadiusRequest"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusTerminationAction\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html#enumcase_Unknown"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReactorEventDescriptor",
             "name": "ReactorEventDescriptor",
             "summary": "One\u0020hookable\u0020event,\u0020as\u0020the\u0020registry\u0020describes\u0020it.",
@@ -9260,6 +9855,131 @@ Search.appendIndex(
             "name": "usedByClientId",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-RegistrationTokenResponse.html#property_usedByClientId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkPolicyRequest",
+            "name": "ReplaceNetworkPolicyRequest",
+            "summary": "The\u0020body\u0020of\u0020\u0060PUT\u0020\/api\/v1\/network\/policy\u0060\u003A\u0020a\u0020\u002A\u002Areplacement\u002A\u002A\u0020of\u0020the\u0020policy.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkPolicyRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ReplaceNetworkPolicyRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkPolicyRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ReplaceNetworkPolicyRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkPolicyRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkPolicyRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkPolicyRequest\u003A\u003A\u0024sessionTimeoutMaxSecs",
+            "name": "sessionTimeoutMaxSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html#property_sessionTimeoutMaxSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkPolicyRequest\u003A\u003A\u0024version",
+            "name": "version",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkPolicyRequest.html#property_version"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest",
+            "name": "ReplaceNetworkReplyProfileRequest",
+            "summary": "The\u0020body\u0020of\u0020\u0060PUT\u0020\/api\/v1\/network\/profiles\/\u007Bsegment_id\u007D\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ReplaceNetworkReplyProfileRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ReplaceNetworkReplyProfileRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest\u003A\u003A\u0024profile",
+            "name": "profile",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html#property_profile"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest\u003A\u003A\u0024segmentVersion",
+            "name": "segmentVersion",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html#property_segmentVersion"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkReplyProfileRequest\u003A\u003A\u0024version",
+            "name": "version",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkReplyProfileRequest.html#property_version"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest",
+            "name": "ReplaceNetworkSegmentRequest",
+            "summary": "The\u0020body\u0020of\u0020\u0060PUT\u0020\/api\/v1\/network\/segments\/\u007Bid\u007D\u0060\u003A\u0020a\u0020\u002A\u002Areplacement\u002A\u002A\u0020of\u0020the\u0020envelope.\u0020The\u0020kind\nand\u0020the\u0020place\u0020in\u0020the\u0020tree\u0020do\u0020not\u0020change.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020ReplaceNetworkSegmentRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020ReplaceNetworkSegmentRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003A\u0024filterIds",
+            "name": "filterIds",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#property_filterIds"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003A\u0024version",
+            "name": "version",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#property_version"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003A\u0024vlanId",
+            "name": "vlanId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#property_vlanId"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReplaceNetworkSegmentRequest\u003A\u003A\u0024rank",
+            "name": "rank",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-ReplaceNetworkSegmentRequest.html#property_rank"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ResolvedPermissionGrant",
             "name": "ResolvedPermissionGrant",
@@ -11638,7 +12358,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest",
             "name": "SignCertificateCsrRequest",
-            "summary": "Body\u0020of\u0020\u0060POST\u0020\/api\/v1\/certificates\/sign\u002Dcsr\u0060.\u0020No\u0020\u0060subject\u0060\u0020and\u0020no\u0020\u0060key_algorithm\u0060\u003A\u0020both\u0020are\nread\u0020out\u0020of\u0020the\u0020CSR,\u0020which\u0020is\u0020the\u0020only\u0020place\u0020they\u0020can\u0020be\u0020stated\u0020without\u0020the\u0020row\u0020and\u0020the\ncertificate\u0020being\u0020able\u0020to\u0020disagree.\u0020No\u0020key\u0020is\u0020returned,\u0020so\u0020there\u0020is\u0020no\u0020key\u0020field\u0020anywhere\u0020on\nthis\u0020exchange.",
+            "summary": "Body\u0020of\u0020\u0060POST\u0020\/api\/v1\/certificates\/sign\u002Dcsr\u0060.\u0020No\u0020\u0060subject\u0060\u0020and\u0020no\u0020\u0060key_algorithm\u0060\u003A\u0020both\u0020are\nread\u0020out\u0020of\u0020the\u0020CSR,\u0020which\u0020is\u0020the\u0020only\u0020place\u0020they\u0020can\u0020be\u0020stated\u0020without\u0020the\u0020row\u0020and\u0020the\ncertificate\u0020being\u0020able\u0020to\u0020disagree.\u0020No\u0020key\u0020is\u0020returned,\u0020so\u0020there\u0020is\u0020no\u0020key\u0020field\u0020anywhere\u0020on\nthis\u0020exchange.\u0020The\u0020CSR\u0027s\u0020common\u0020name\u0020meets\u0020the\u0020rules\u0020of\u0020\u0060subject\u0060\u0020on\u0020\u0060POST\n\/api\/v1\/certificates\u0060\u0020\u0028printable,\u0020at\u0020most\u002064\u0020characters\u0029\u0020and\u0020is\u0020refused,\u0020not\u0020rewritten,\u0020when\nit\u0020does\u0020not.\u0020So\u0020does\u0020the\u0020value\u0020of\u0020every\u0020other\u0020attribute\u0020of\u0020the\u0020CSR\u0027s\u0020subject,\u0020and\u0020a\u0020subject\nwith\u0020more\u0020than\u0020one\u0020common\u0020name\u0020is\u0020refused.",
             "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A__construct\u0028\u0029",
@@ -11690,6 +12410,11 @@ Search.appendIndex(
             "name": "subjectAltNames",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#property_subjectAltNames"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003A\u0024userId",
+            "name": "userId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#property_userId"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignedAuditBatch",
             "name": "SignedAuditBatch",
@@ -12120,6 +12845,11 @@ Search.appendIndex(
             "name": "eventsRequested",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_eventsRequested"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024expectedUpdatedAt",
+            "name": "expectedUpdatedAt",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#property_expectedUpdatedAt"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003A\u0024status",
             "name": "status",
@@ -14091,6 +14821,71 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-NamespaceScope.html#property_tenantId"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi",
+            "name": "NetworkApi",
+            "summary": "A\u0020tenant\u0027s\u0020network\u0020segments\u0020and\u0020the\u0020RADIUS\u0020reply\u0020profile\u0020each\u0020owns\u0020\u0028RADIUS\u0020D4\u0029\u003A\u0020a\u0020segment\u0020is\na\u0020node\u0020of\u0020the\u0020reserved\u0020\/network\u0020subtree\u0020of\u0020the\u0020resource\u0020tree\u0020\u0028kind,\u0020VLAN,\u0020Filter\u002DId\nenvelope,\u0020placement\u0020rank\u0029,\u0020and\u0020its\u0020profile\u0020is\u0020the\u0020typed\u0020\u0060axiam\u002Dradius\u002Dreply\/1\u0060\u0020record\u0020a\ndecision\u0020renders.\u0020Every\u0020write\u0020is\u0020conditional\u0020on\u0020the\u0020\u0060version\u0060\u0020the\u0020caller\u0020read\u0020and\u0020passes\u0020the\nserver\u0027s\u0020write\u0020gate.\u0020The\u0020tenant\u0027s\u0020Session\u002DTimeout\u0020cap\u0020is\u0020one\u0020more\u0020row\u0020of\u0020it\u0020\u0028get_policy,\nreplace_policy\u0029\u003A\u0020lowering\u0020it\u0020is\u0020always\u0020allowed,\u0020raising\u0020it\u0020is\u0020allowed\u0020and\u0020audited.\u0020The\ndecision\u0020route\u0020FreeRADIUS\u0020calls\u0020is\u0020not\u0020in\u0020this\u0020registry.",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AlistSegments\u0028\u0029",
+            "name": "listSegments",
+            "summary": "\u0060GET\u0020\/api\/v1\/network\/segments\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_listSegments"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AcreateSegment\u0028\u0029",
+            "name": "createSegment",
+            "summary": "\u0060POST\u0020\/api\/v1\/network\/segments\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_createSegment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AgetSegment\u0028\u0029",
+            "name": "getSegment",
+            "summary": "\u0060GET\u0020\/api\/v1\/network\/segments\/\u007Bid\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_getSegment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AreplaceSegment\u0028\u0029",
+            "name": "replaceSegment",
+            "summary": "\u0060PUT\u0020\/api\/v1\/network\/segments\/\u007Bid\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceSegment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AdeleteSegment\u0028\u0029",
+            "name": "deleteSegment",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/network\/segments\/\u007Bid\u007D\u003Fversion\u003D\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteSegment"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AlistProfiles\u0028\u0029",
+            "name": "listProfiles",
+            "summary": "\u0060GET\u0020\/api\/v1\/network\/profiles\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_listProfiles"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AcreateProfile\u0028\u0029",
+            "name": "createProfile",
+            "summary": "\u0060POST\u0020\/api\/v1\/network\/profiles\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_createProfile"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AgetProfile\u0028\u0029",
+            "name": "getProfile",
+            "summary": "\u0060GET\u0020\/api\/v1\/network\/profiles\/\u007Bsegment_id\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_getProfile"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AreplaceProfile\u0028\u0029",
+            "name": "replaceProfile",
+            "summary": "\u0060PUT\u0020\/api\/v1\/network\/profiles\/\u007Bsegment_id\u007D\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_replaceProfile"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AdeleteProfile\u0028\u0029",
+            "name": "deleteProfile",
+            "summary": "\u0060DELETE\u0020\/api\/v1\/network\/profiles\/\u007Bsegment_id\u007D\u003Fversion\u003D\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_deleteProfile"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AgetPolicy\u0028\u0029",
+            "name": "getPolicy",
+            "summary": "\u0060GET\u0020\/api\/v1\/network\/policy\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_getPolicy"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AreplacePolicy\u0028\u0029",
+            "name": "replacePolicy",
+            "summary": "\u0060PUT\u0020\/api\/v1\/network\/policy\u0060",
+            "url": "classes/Axiam-Sdk-Management-NetworkApi.html#method_replacePolicy"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\NotFoundError",
             "name": "NotFoundError",
             "summary": "\u0060404\u0020Not\u0020Found\u0060\u0020on\u0020the\u0020\u00A727\u0020management\u0020surface\u0020\u2014\u0020CONTRACT.md\u0020\u00A727.4\u0020rule\u00207.",
@@ -14463,7 +15258,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ReadModifyWrite\u003A\u003AssfStream\u0028\u0029",
             "name": "ssfStream",
-            "summary": "\u0060ssf.update_stream\u0060\u0027s\u0020body\u0020from\u0020a\u0020\u0060getStream\u0028\u0029\u0060\u0020result.\u0020\u0060authorizationHeader\u0060\u0020and\n\u0060clearAuthorizationHeader\u0060\u0020are\u0020left\u0020absent\u003A\u0020absent\u0020keeps\u0020the\u0020stored\u0020header\u0020\u0028\u00A732.2\u0029.",
+            "summary": "\u0060ssf.update_stream\u0060\u0027s\u0020body\u0020from\u0020a\u0020\u0060getStream\u0028\u0029\u0060\u0020result\u0020and\u0020\u002A\u002Athe\u0020changes\u0020to\u0020make\u0020to\u0020it\u002A\u002A\n\u2014\u0020the\u0020change\u002Dtaking\u0020form\u0020of\u0020CONTRACT.md\u0020\u00A732.2\u0020\u0028contract\u00201.62\u0029.\u0020\u0060authorizationHeader\u0060\u0020and\n\u0060clearAuthorizationHeader\u0060\u0020are\u0020left\u0020absent\u003A\u0020absent\u0020keeps\u0020the\u0020stored\u0020header.",
             "url": "classes/Axiam-Sdk-Management-ReadModifyWrite.html#method_ssfStream"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ReadModifyWrite\u003A\u003AscimTarget\u0028\u0029",

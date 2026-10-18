@@ -203,8 +203,9 @@ absent keeps the stored one, unless the write moves its URL (§31.3 rule 2).</dd
     <span>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Management-Models-SsfStreamInput.html"><abbr title="\Axiam\Sdk\Management\Models\SsfStreamInput">SsfStreamInput</abbr></a>    </span>
 </dt>
-<dd>`ssf.update_stream`&#039;s body from a `getStream()` result. `authorizationHeader` and
-`clearAuthorizationHeader` are left absent: absent keeps the stored header (§32.2).</dd>
+<dd>`ssf.update_stream`&#039;s body from a `getStream()` result and **the changes to make to it**
+— the change-taking form of CONTRACT.md §32.2 (contract 1.62). `authorizationHeader` and
+`clearAuthorizationHeader` are left absent: absent keeps the stored header.</dd>
 
     </dl>
 
@@ -234,7 +235,7 @@ absent keeps the stored one, unless the write moves its URL (§31.3 rule 2).</dd
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ReadModifyWrite.php"><a href="files/src-management-readmodifywrite.html"><abbr title="src/Management/ReadModifyWrite.php">ReadModifyWrite.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">127</span>
+    <span class="phpdocumentor-element-found-in__line">178</span>
 
     </aside>
 
@@ -351,7 +352,7 @@ the stored secret, unless the write moves the connection (§30.3 rule 2).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ReadModifyWrite.php"><a href="files/src-management-readmodifywrite.html"><abbr title="src/Management/ReadModifyWrite.php">ReadModifyWrite.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">104</span>
+    <span class="phpdocumentor-element-found-in__line">155</span>
 
     </aside>
 
@@ -415,12 +416,13 @@ to send another value.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ReadModifyWrite.php"><a href="files/src-management-readmodifywrite.html"><abbr title="src/Management/ReadModifyWrite.php">ReadModifyWrite.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">76</span>
+    <span class="phpdocumentor-element-found-in__line">111</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">`ssf.update_stream`&#039;s body from a `getStream()` result. `authorizationHeader` and
-`clearAuthorizationHeader` are left absent: absent keeps the stored header (§32.2).</p>
+        <p class="phpdocumentor-summary">`ssf.update_stream`&#039;s body from a `getStream()` result and **the changes to make to it**
+— the change-taking form of CONTRACT.md §32.2 (contract 1.62). `authorizationHeader` and
+`clearAuthorizationHeader` are left absent: absent keeps the stored header.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -429,7 +431,39 @@ to send another value.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-    
+        <section class="phpdocumentor-description"><pre class="prettyprint"><code class="language-php">$stream = $client-&gt;ssf()-&gt;getStream($id);
+$client-&gt;ssf()-&gt;updateStream($id, ReadModifyWrite::ssfStream($stream, [
+    'events_allowed' =&gt; [SsfEventTypes::SESSION_REVOKED],   // lower the ceiling
+]));
+</code></pre>
+<p>What the body carries, and why each point is a rule rather than a convenience:</p>
+<ul>
+<li><strong><code class="prettyprint">events_requested</code>, as read.</strong> An update that omits it <strong>resets</strong> the stream to every
+event of <code class="prettyprint">events_allowed</code>, widening what the receiver narrowed, and AXIAM then sends the
+receiver more events about the tenant's users than it asked for. The read list goes back
+as it was; an <code class="prettyprint">[]</code> (the receiver's &quot;none&quot;) goes back as <code class="prettyprint">[]</code> and is never omitted.</li>
+<li><strong>Cut to the new ceiling.</strong> When <code class="prettyprint">$changes</code> lowers <code class="prettyprint">events_allowed</code> and does not name
+<code class="prettyprint">events_requested</code>, the requested list becomes the entries of the read list that are in
+the new ceiling, in their order (a request outside the ceiling is <code class="prettyprint">400</code>). An
+<code class="prettyprint">events_requested</code> named in <code class="prettyprint">$changes</code> is sent as given: the server judges it.</li>
+<li><strong><code class="prettyprint">expected_updated_at</code>, as read.</strong> The <code class="prettyprint">updated_at</code> string of the stream you read,
+byte for byte — not parsed and rendered again, because the comparison is of the
+instant and a timestamp rounded to fewer fraction digits than the server stored does
+not match. The update then lands only on the version you read, and a write made since
+(the receiver's own included) answers <code class="prettyprint">409</code> (a <a href="classes/Axiam-Sdk-Management-ConflictError.html"><abbr title="\Axiam\Sdk\Management\ConflictError">ConflictError</abbr></a>, never retried):
+read again and decide again. <code class="prettyprint">expected_updated_at =&gt; null</code> in <code class="prettyprint">$changes</code> is &quot;none&quot;: the
+key is left out of the body and <code class="prettyprint">null</code> is never sent, which replaces whatever is stored.</li>
+</ul>
+<p><strong>This is the form to use.</strong> <code class="prettyprint">ssfStream($stream)</code> with no changes is the plain converter,
+and it sends the stream back as read. It cannot know that the caller is about to lower
+the ceiling, so <strong>cutting <code class="prettyprint">events_requested</code> to the new <code class="prettyprint">events_allowed</code> is the caller's
+duty wherever a body is built another way</strong> (<code class="prettyprint">SsfStreamInput::fromArray()</code> over a
+hand-edited array, a constructor call): a requested list left outside the new ceiling is
+<code class="prettyprint">400</code>, and one left out altogether resets the stream (the three meanings of
+<code class="prettyprint">events_requested</code>, §32.2; an update conditional on the version read is <code class="prettyprint">409</code> once the
+stream changes under it).</p>
+</section>
+
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">

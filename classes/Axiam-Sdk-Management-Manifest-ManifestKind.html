@@ -165,6 +165,31 @@ does not exist yet, and a group cannot be assigned a role that does not exist ye
 <dd>A group, plus the roles assigned to it. Depends on roles.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -case -">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkPolicy">NetworkPolicy</a>
+    <span>
+                &nbsp;= &#039;network_policy&#039;                    </span>
+</dt>
+<dd>The tenant&#039;s `Session-Timeout` cap (CONTRACT.md §27.6.2, contract 1.62): a singleton, so
+it has no natural key and a manifest carries at most one. Ordered FIRST of the three
+`network` kinds, because a profile&#039;s timeout is checked against the cap at the write.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -case -">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkProfile">NetworkProfile</a>
+    <span>
+                &nbsp;= &#039;network_profile&#039;                    </span>
+</dt>
+<dd>A segment&#039;s reply profile (§27.6.2): natural key **its segment**. Ordered last, and in
+the segments&#039; own order, so that a plan is stable.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -case -">
+    <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkSegment">NetworkSegment</a>
+    <span>
+                &nbsp;= &#039;network_segment&#039;                    </span>
+</dt>
+<dd>A network segment (§27.6.2): natural key **site + kind + name**, `kind` being the wire
+spelling `access` or `quarantine`. Ordered after the policy and before the profiles.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -case -">
     <a class="" href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_Permission">Permission</a>
     <span>
                 &nbsp;= &#039;permission&#039;                    </span>
@@ -345,6 +370,91 @@ server, so nothing else in a manifest can reasonably depend on one.</p>
 
         
     </article>
+                    <article
+        class="
+            phpdocumentor-element
+            -enum-case
+        "
+>
+    <h4 class="phpdocumentor-element__name" id="enumcase_NetworkPolicy">
+        NetworkPolicy
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkPolicy" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestKind.php"><a href="files/src-management-manifest-manifestkind.html"><abbr title="src/Management/Manifest/ManifestKind.php">ManifestKind.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">42</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The tenant&#039;s `Session-Timeout` cap (CONTRACT.md §27.6.2, contract 1.62): a singleton, so
+it has no natural key and a manifest carries at most one. Ordered FIRST of the three
+`network` kinds, because a profile&#039;s timeout is checked against the cap at the write.</p>
+
+    
+    
+    
+    
+
+        
+    </article>
+                    <article
+        class="
+            phpdocumentor-element
+            -enum-case
+        "
+>
+    <h4 class="phpdocumentor-element__name" id="enumcase_NetworkSegment">
+        NetworkSegment
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkSegment" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestKind.php"><a href="files/src-management-manifest-manifestkind.html"><abbr title="src/Management/Manifest/ManifestKind.php">ManifestKind.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">48</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A network segment (§27.6.2): natural key **site + kind + name**, `kind` being the wire
+spelling `access` or `quarantine`. Ordered after the policy and before the profiles.</p>
+
+    
+    
+    
+    
+
+        
+    </article>
+                    <article
+        class="
+            phpdocumentor-element
+            -enum-case
+        "
+>
+    <h4 class="phpdocumentor-element__name" id="enumcase_NetworkProfile">
+        NetworkProfile
+        <a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkProfile" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Manifest/ManifestKind.php"><a href="files/src-management-manifest-manifestkind.html"><abbr title="src/Management/Manifest/ManifestKind.php">ManifestKind.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">54</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A segment&#039;s reply profile (§27.6.2): natural key **its segment**. Ordered last, and in
+the segments&#039; own order, so that a plan is stable.</p>
+
+    
+    
+    
+    
+
+        
+    </article>
             </section>
 
         
@@ -371,6 +481,9 @@ server, so nothing else in a manifest can reasonably depend on one.</p>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_Role">Role</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_Group">Group</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_ServiceAccount">ServiceAccount</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkPolicy">NetworkPolicy</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkSegment">NetworkSegment</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Management-Manifest-ManifestKind.html#enumcase_NetworkProfile">NetworkProfile</a></li>
                                             </ul>
                 </li>
             

@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementErrorMapper.php"><a href="files/src-management-managementerrormapper.html"><abbr title="src/Management/ManagementErrorMapper.php">ManagementErrorMapper.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">31</span>
+    <span class="phpdocumentor-element-found-in__line">40</span>
 
     </aside>
 
@@ -161,6 +161,11 @@ the management surface cannot drift from the rest of the SDK on <code class="pre
 </tr>
 </tbody>
 </table>
+<p>Two of them carry more than a status (contract 1.62, §36.3 rule 2 and §36.4). A <code class="prettyprint">409</code> keeps
+the body's <code class="prettyprint">reason_code</code> — verbatim, an unknown value included — on <a href="classes/Axiam-Sdk-Management-ConflictError.html#method_getReasonCode"><abbr title="\Axiam\Sdk\Management\ConflictError::getReasonCode()">ConflictError::getReasonCode()</abbr></a>; a caller branches on it, never on the message. A <code class="prettyprint">403</code> stays
+the plain §2 <a href="classes/Axiam-Sdk-Core-AuthzError.html"><abbr title="\Axiam\Sdk\Core\AuthzError">AuthzError</abbr></a> (with <code class="prettyprint">action</code> and <code class="prettyprint">resource_id</code> where the
+body has them), and both it and the <code class="prettyprint">409</code> append the server's own <code class="prettyprint">message</code> to their text, as
+a <code class="prettyprint">400</code> does — the write gate's value refusal (<code class="prettyprint">session_timeout_secs is above the tenant's cap of 3600</code>) names no permission, so the message is all the person has.</p>
 <p><code class="prettyprint">404</code> under <code class="prettyprint">AuthzError</code> is the counter-intuitive one: on a multi-tenant surface the
 server answers <code class="prettyprint">404</code> for another tenant's object <em>so that</em> a caller cannot enumerate
 it, and re-drawing that line client-side would undo the protection. <code class="prettyprint">409</code> keeps the
@@ -227,7 +232,7 @@ parent §2 already gave it. <code class="prettyprint">400</code>/<code class="pr
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementErrorMapper.php"><a href="files/src-management-managementerrormapper.html"><abbr title="src/Management/ManagementErrorMapper.php">ManagementErrorMapper.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">48</span>
 
     </aside>
 
@@ -248,7 +253,7 @@ parent §2 already gave it. <code class="prettyprint">400</code>/<code class="pr
                 : <span class="phpdocumentor-argument-list__argument__type"><abbr title="\Psr\Http\Message\ResponseInterface">ResponseInterface</abbr></span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                    <section class="phpdocumentor-description"><p>The error response; its body is read at most once.</p>
+                    <section class="phpdocumentor-description"><p>The error response; its body is a rewindable PSR-7 stream and is only ever read, never consumed.</p>
 </section>
 
             </dd>
