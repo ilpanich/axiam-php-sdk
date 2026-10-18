@@ -148,6 +148,22 @@ EXPLICIT_NULL_FIELDS = {
     *(("UpdateFederationConfigRequest", wire) for wire in FEDERATION_CLEARABLE),
 }
 
+# The SSF event-type list members. The contract's event-type vocabulary is open (§34.2 P12.2):
+# a URI this SDK has never seen must decode WITH its value and go back UNCHANGED, never as the
+# enum's `Unknown` case, whose wire spelling is the empty string (P12.2(a) forbids sending
+# ``""``). So these members are ``list<SsfEventType|string>``: a known URI is its enum case, an
+# unseen one is its own string. ``SsfEventType::Unknown`` stays for compatibility and is never
+# produced by these models.
+OPEN_EVENT_LIST_DOC = "list<SsfEventType|string>"
+OPEN_EVENT_LIST_FIELDS = {
+    (model, wire)
+    for model, wires in (
+        ("SsfStream", ("events_allowed", "events_requested", "events_delivered")),
+        ("SsfStreamInput", ("events_allowed", "events_requested")),
+    )
+    for wire in wires
+}
+
 # Operations whose body has a constraint the server would otherwise be left to refuse, and
 # that the contract requires the SDK to refuse LOCALLY, before any I/O: the generated
 # method calls the named static check on {@see \Axiam\Sdk\Management\ManagementChecks}
@@ -264,14 +280,57 @@ CALL_SITE_NOTES: dict[str, str] = {
         "`authorization_header`, which absent keeps the stored one** -- unless the update moves "
         "`endpoint_url` to another scheme, host or port while a header is stored: then it must "
         "carry `authorization_header` again or `clear_authorization_header: true`, else `400` "
-        "(§32.3 rule 5). Start from {@see \\Axiam\\Sdk\\Management\\ReadModifyWrite::ssfStream()}. An "
-        "update overtaken by the receiver's own write is `409`: read the stream again (never "
-        "retried). **Contract 1.61:** `expected_updated_at` (the `updated_at` string you read, sent "
-        "as given) makes the update conditional on that version, `409` if the stream was written "
-        "since; and `events_requested` has three meanings on an update (§32.2): absent *resets* the "
-        "stream to every event of `events_allowed`, `[]` is stored as the receiver's \"none\", a "
-        "list is stored as given. An edit therefore sends back the `events_requested` and "
-        "`expected_updated_at` it read -- `ReadModifyWrite::ssfStream()` does."
+        "(§32.3 rule 5). On an update the omitted members take these defaults: `description`, "
+        "`endpoint_url` and `status_reason` null, `events_requested` every event of "
+        "`events_allowed`, `subject_format` `iss_sub`, `status` `enabled`, "
+        "`clear_authorization_header` false. **`events_requested` has three meanings** (§32.2, "
+        "contract 1.62), and they are not interchangeable: *absent* (the property left `null`) "
+        "**resets** the stream to every event of `events_allowed`, widening a narrowing the "
+        "receiver made; `[]` is stored as the receiver's \"none\" -- it does not widen, and the "
+        "stream carries nothing; a list is stored as given and refused (`400`) if any entry is "
+        "outside `events_allowed`. A caller with no SDK is bound by the same meaning: an "
+        "`events_requested` left out of the `PUT` resets the stream. An edit therefore sends back "
+        "the `events_requested` **and** the `expected_updated_at` it read -- the `updated_at` "
+        "string exactly as the response carried it, which makes the update conditional on that "
+        "version (`409` if the stream was written since, by the receiver as well as by an "
+        "administrator; never retried) -- and, when it lowers `events_allowed`, cuts "
+        "`events_requested` to the new ceiling. Start from {@see "
+        "\\Axiam\\Sdk\\Management\\ReadModifyWrite::ssfStream()}, which does all of that: it "
+        "takes the stream you read and the changes you want. An update overtaken by the "
+        "receiver's own write is `409`: read the stream again."
+    ),
+    "network.replace_segment": (
+        "A **replacement** (§27.4 rule 5), conditional on the `version` you read: a stale one is "
+        "`409` and writes nothing (§36.3 rule 2). Read the segment with `getSegment()`, change "
+        "what you mean to, and send every member back -- `enabled`, `filter_ids`, `vlan_id`, "
+        "`rank` and the `version`; what you leave out is not preserved. `kind`, `site_key` and "
+        "`name` are not in the body and never change (rule 4). A change of `vlan_id`, `rank` or "
+        "`enabled` on a segment that has a profile also needs `network:grant` (rule 1), and a "
+        "`filter_ids` that would strand the profile's `filter_id` is `409` `strands_profile`. "
+        "Never retried, and never repeated for you: a `409` means another administrator wrote, "
+        "so read again and decide (§36.9). The composed form is the manifest "
+        "({@see \\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder::networkSegment()}), which builds this "
+        "body from the read."
+    ),
+    "network.replace_profile": (
+        "A **replacement** (§27.4 rule 5), conditional on **two** versions you read: the profile's "
+        "own `version` and the owning segment's `segment_version`; a stale one is `409` and "
+        "writes nothing (§36.3 rule 2). Read both (`getProfile()`, `getSegment()`) and send "
+        "every member back. **A read is the effective profile**: a stored `session_timeout_secs` "
+        "above the tenant's lowered cap reads as the cap with `session_timeout_clamped: true`, so "
+        "a read-modify-write cannot restore the stored value -- what you send is what is stored, "
+        "the clamped value from then on, and a value above the current cap is `403` (§36.3 rule "
+        "6). Raise the cap first (`replacePolicy()`), leaving the profile alone, to restore it. "
+        "Never retried, and never repeated for you (§36.9). The composed form is the manifest "
+        "({@see \\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder::networkProfile()})."
+    ),
+    "network.replace_policy": (
+        "A **replacement** (§27.4 rule 5), conditional on the policy's `version` -- `0` for a "
+        "tenant that has never written one, which is the first write. Lowering the cap is always "
+        "allowed and raising it is allowed and audited; lowering it never rewrites a profile, it "
+        "only clamps what a profile reads as (§36.3 rules 6 and 7). It needs `network:segments_write` "
+        "**at the `/network` root**. Never retried (§36.7). The composed form is the manifest "
+        "({@see \\Axiam\\Sdk\\Management\\Manifest\\ManifestBuilder::networkPolicy()})."
     ),
     "scim_targets.create": (
         "`credential` is required here (§31.3 rule 2). It is write-only: no response ever "
@@ -795,6 +854,8 @@ def field_list(schema_name: str, secrets: set[str]) -> tuple[list[dict[str, Any]
     fields: list[dict[str, Any]] = []
     for wire, schema in props.items():
         decl, doc = php_type(schema, secret=wire in secrets)
+        if (schema_name, wire) in OPEN_EVENT_LIST_FIELDS:
+            decl, doc = "array", OPEN_EVENT_LIST_DOC
         is_required = wire in required
         fields.append({
             "wire": wire,
@@ -844,6 +905,9 @@ def decode_expr(field: dict[str, Any], source: str) -> str:
 
     if field["secret"]:
         return f"new \\Axiam\\Sdk\\Core\\Sensitive((string) {source})"
+    if decl == "array" and doc == OPEN_EVENT_LIST_DOC:
+        return (f"array_values(array_map(static fn (mixed $v): SsfEventType|string => "
+                f"SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) {source}))")
     if decl == "array" and doc.startswith("list<"):
         item = doc[5:-1]
         if item == "mixed" or item.startswith("array<"):
@@ -891,6 +955,9 @@ def encode_expr(field: dict[str, Any], log: bool = False) -> str:
         # Left wrapped on purpose: ManagementTransport::encodeBody() is the ONLY place a
         # Sensitive is revealed, so a body rendered anywhere else stays redacted.
         return ref
+    if decl == "array" and doc == OPEN_EVENT_LIST_DOC:
+        return (f"array_map(static fn (SsfEventType|string $v): string => "
+                f"$v instanceof SsfEventType ? $v->value : $v, {ref})")
     if decl == "array" and doc.startswith("list<"):
         item = doc[5:-1]
         if item in {"int", "float", "string", "bool", "mixed"} or item.startswith("array<"):

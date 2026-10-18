@@ -33,4 +33,23 @@ enum ManifestKind: string
      * server, so nothing else in a manifest can reasonably depend on one.
      */
     case ServiceAccount = 'service_account';
+
+    /**
+     * The tenant's `Session-Timeout` cap (CONTRACT.md §27.6.2, contract 1.62): a singleton, so
+     * it has no natural key and a manifest carries at most one. Ordered FIRST of the three
+     * `network` kinds, because a profile's timeout is checked against the cap at the write.
+     */
+    case NetworkPolicy = 'network_policy';
+
+    /**
+     * A network segment (§27.6.2): natural key **site + kind + name**, `kind` being the wire
+     * spelling `access` or `quarantine`. Ordered after the policy and before the profiles.
+     */
+    case NetworkSegment = 'network_segment';
+
+    /**
+     * A segment's reply profile (§27.6.2): natural key **its segment**. Ordered last, and in
+     * the segments' own order, so that a plan is stable.
+     */
+    case NetworkProfile = 'network_profile';
 }

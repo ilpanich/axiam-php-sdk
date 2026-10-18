@@ -26,6 +26,72 @@ final class ManifestValidation
         self::assertNoDanglingReferences($manifest, $keys);
         self::assertNoCycles($manifest);
         self::assertNoInvalidBindings($manifest);
+        self::assertValidNetwork($manifest);
+    }
+
+    /**
+     * The `network` rules of CONTRACT.md §27.6.2 item 1 — each one a refusal with ZERO wire
+     * calls, like a duplicate key or a dangling reference:
+     *
+     * - two segments with one **site + kind + name** cannot be reconciled with one server row;
+     * - a segment whose `kind` is not the wire spelling `access` or `quarantine` (the builder
+     *   refuses it too; this is for a manifest built by hand);
+     * - a segment whose `filter_ids` repeats a name — the list is compared as a set, and a set
+     *   has no repeated member;
+     * - a profile whose segment the manifest does not declare — the manifest does not reach
+     *   for a segment it does not state.
+     *
+     * (Two policies, and two profiles for one segment, share a key and are refused by
+     * {@see self::assertUniqueKeys()}.)
+     */
+    private static function assertValidNetwork(ManagementManifest $manifest): void
+    {
+        $segments = [];
+        $naturalKeys = [];
+        foreach ($manifest->entities as $entity) {
+            if ($entity->kind !== ManifestKind::NetworkSegment) {
+                continue;
+            }
+            $segments[$entity->key] = true;
+
+            $kind = $entity->fields['kind'] ?? null;
+            if ($kind !== 'access' && $kind !== 'quarantine') {
+                throw new ManifestException(sprintf(
+                    'network segment "%s": kind must be "access" or "quarantine", the wire spelling '
+                    . '(CONTRACT.md §27.6.2 item 1)',
+                    $entity->key,
+                ));
+            }
+
+            if (isset($naturalKeys[$entity->name])) {
+                $parts = json_decode($entity->name, true);
+                throw new ManifestException(sprintf(
+                    'manifest declares two network segments with one site, kind and name (%s); '
+                    . 'they name one row on the server and cannot both be reconciled with it',
+                    \is_array($parts) ? implode(' / ', array_map('strval', $parts)) : $entity->name,
+                ));
+            }
+            $naturalKeys[$entity->name] = true;
+
+            $filterIds = $entity->fields['filter_ids'] ?? [];
+            if (\is_array($filterIds) && \count($filterIds) !== \count(array_unique($filterIds))) {
+                throw new ManifestException(sprintf(
+                    'network segment "%s" lists the same Filter-Id more than once in filter_ids; '
+                    . 'the list is compared as a set, and a set has no repeated member',
+                    $entity->key,
+                ));
+            }
+        }
+
+        foreach ($manifest->entities as $entity) {
+            if ($entity->kind === ManifestKind::NetworkProfile && !isset($segments[(string) $entity->segment])) {
+                throw new ManifestException(sprintf(
+                    'network_profile:%s names segment "%s", which this manifest does not declare',
+                    $entity->key,
+                    (string) $entity->segment,
+                ));
+            }
+        }
     }
 
     /**

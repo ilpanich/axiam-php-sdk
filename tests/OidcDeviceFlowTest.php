@@ -69,8 +69,9 @@ final class OidcDeviceFlowTest extends TestCase
             $stack->push(Middleware::history($history));
         }
 
-        // No client secret: §14.1 says a device that cannot show a browser cannot hold
-        // one, and the SDK must not refuse such a client.
+        // No client secret: this is a PUBLIC client (§14.1 rule 1) — a device that cannot
+        // hold a secret — and the SDK must not refuse it. A client configured with a credential
+        // sends it at both device endpoints: tests/Contract162/DeviceGrantAuthenticationTest.php.
         return new AxiamClient(
             self::BASE_URL,
             self::TENANT,
@@ -121,7 +122,7 @@ final class OidcDeviceFlowTest extends TestCase
     // deviceAuthorize
     // ===================================================================================
 
-    public function testDeviceAuthorizeIsUnauthenticatedAndFormEncoded(): void
+    public function testAPublicClientsDeviceAuthorizeSendsNoCredentialAndIsFormEncoded(): void
     {
         $history = [];
         $client = $this->client([self::deviceAuthorizationResponse()], $history);
@@ -135,7 +136,7 @@ final class OidcDeviceFlowTest extends TestCase
         $body = (string) $request->getBody();
 
         self::assertStringStartsWith('application/x-www-form-urlencoded', $request->getHeaderLine('Content-Type'));
-        self::assertStringNotContainsString('client_secret', $body, '§14.1: deviceAuthorize MUST NOT send client_secret');
+        self::assertStringNotContainsString('client_secret', $body, '§14.1 rule 1: a public client sends no credential');
         self::assertStringContainsString('scope=openid+profile', $body);
         self::assertStringNotContainsString('tenant_id=', $body, '§12.1 note 2: tenant_id is a query parameter');
         self::assertStringContainsString('tenant_id=' . self::TENANT_UUID, (string) $request->getUri());

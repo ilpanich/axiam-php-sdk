@@ -24,11 +24,19 @@ Identity and Authorization Management.
 ## Install
 
 ```bash
-composer require "axiam/axiam-sdk:^1.0.0"
+composer require "axiam/axiam-sdk:^1.1.0"
 ```
 
 From 1.0.0 the SDK is stable and follows [semantic versioning](https://semver.org/): a breaking
 change to its public API comes only with a new major version.
+
+**What that promise means for a contract record.** The SDK's models mirror the contract's records
+(`CONTRACT.md`, `openapi.json`). A contract record may **add a member or widen a type with a minor
+bump** — a new optional property on a response model, a new optional constructor parameter, a new
+case on an open enum — and a **removal waits for 2.0.0**. Two consequences for your code: construct
+the generated models with **named arguments**, because their parameters follow the schema's member
+order and move whenever the server adds one (1.1.0 moves some, and its change log says which);
+and give a `match` over an open enum an `Unknown` arm.
 
 ## Supported PHP versions
 
@@ -209,8 +217,9 @@ reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` und
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.61**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
-§15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27, §28, §28.12, §29, §30, §31, §32 and §33,
+This SDK conforms to **contract 1.62**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+§15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33
+and §36,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
 **`PS256` is not shipped**, see [CIBA](#ciba-contractmd-33) below for why — including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
@@ -245,13 +254,15 @@ which has no authenticator, and §24.6b rule 2 forbids emulating one in software
 browser, and §24.6a's JSON bridge is the seam that carries the challenge out and the
 response back.
 
-§28.12, §29, §30, §31, §32, §32.7 and §33 are named rather than folded into a range because
+§28.12, §29, §30, §31, §32, §32.7, §33 and §36 are named rather than folded into a range because
 they landed after this SDK already stated its earlier sections: widening a range silently would
 turn a statement that was true when written into a different claim without anyone editing it.
 The §21.3.1 amendment of contract 1.58 — the seventh `mtls_endpoint_aliases` member,
 `backchannel_authentication_endpoint` — is decoded and honoured on an mTLS CIBA call; it is
 part of the §21 claim, not of §33's. Vector A is pinned as the vendored `CONTRACT.md` carries
 it, `tenant_id` queries included.
+
+Manifest pruning: not offered in any namespace (§27.10) — nothing a manifest omits is ever deleted.
 
 Contract 1.59 (§34) adds no section and changes no wire shape; its clarifications P1 – P12 bind
 the sections above, and this SDK follows them — the table below says how, where the contract
@@ -264,6 +275,26 @@ members (§27.11 rule 5), `SsfStreamInput.expected_updated_at` with the three me
 `events_requested` on an update (§32.2, §32.3 rule 4), and `CibaPendingList.total_pending` and
 `truncated` (§33.3 rule 16, a console surface this SDK does not model). The third table says what
 1.61 changed here.
+Contract 1.62 (the 1.1.0 release, §34.6) adds the `network` management namespace (§36) and puts it in
+the manifest (§27.6.2), makes the device grant authenticate its client (§14.1), gives a stream a
+change-taking read-modify-write form (§32.2) and settles two rules about request members (§27.11
+rule 5). Release 1.0.1 was never tagged: this is the first release to carry 1.61 as well, as 1.1.0 (its change log is merged into 1.1.0).
+The first table below says what 1.62 changed here.
+
+### Contract 1.62 — what changed here
+
+| Item (§34.6) | Here |
+|---|---|
+| (l) the `network` namespace (§36) | Twelve operations on `$client->network()` (also `$client->management()->network()`): `listSegments`, `createSegment`, `getSegment`, `replaceSegment`, `deleteSegment`, `listProfiles`, `createProfile`, `getProfile`, `replaceProfile`, `deleteProfile`, `getPolicy`, `replacePolicy`; 202 operations across 29 namespaces. The decision route `POST /api/v1/network/decide` is no SDK work and has no method |
+| §36.4 the `409` sub-code | `ConflictError::getReasonCode()` returns the body's `reason_code` verbatim (the vocabulary is open); `null` when the body has none |
+| (n), (u), (v), (w) `network` in a manifest (§27.6.2) | `ManifestBuilder::networkPolicy()`, `networkSegment()`, `networkProfile()`; see [the network section](#the-network-namespace-36-contract-162) |
+| (o) eleven `replace` operations | The three network `PUT`s are `replace*` and full-body, each carrying the `version` the caller read; their docblocks give the read-modify-write pattern |
+| (m), (t) the device grant authenticates its client (§14.1) | A configured secret is sent as `client_secret` in the form body at `deviceAuthorize()` **and** every `devicePoll()`; a certificate is presented on the connection; a public client sends none. Never `Authorization: Basic`. See [the device section](#device-authorization-grant-contractmd-14) |
+| (e), (g), (h) the stream form (§32.2) | `ReadModifyWrite::ssfStream($stream, $changes)` is the change-taking form: it sends `events_requested` and the server's own `updated_at` string as read and cuts `events_requested` to a lowered `events_allowed`. The plain call (`ssfStream($stream)`) is the converter, and its documentation names the caller's duty. `updateStream()`'s docblock states the three meanings of `events_requested` |
+| (f) an assigned `null` is "none" | Already held: a PHP `null` on `userId` (both certificate requests) or `expectedUpdatedAt` (`updateStream`, `scimTargets()->update`) is the same as never setting it — the key is omitted and `null` is never sent |
+| (i) the request `user_id` is an untyped string | Already held: `CreateCertificateRequest::$userId` and `SignCertificateCsrRequest::$userId` are `?string`; a malformed value reaches the server and its `400` is a `ValidationError`. `Certificate::$userId` is unchanged |
+| (j) change-log line | "wire-additive; source-breaking in Rust, Java, Kotlin and PHP, released as 1.1.0": a member added to a generated PHP model is a new constructor parameter, which breaks a *positional* call — see the change log |
+| (d) `CibaPendingList` | No SDK work, and not modelled |
 
 ### Contract 1.59 — the Phase 23 review follow-up (F-59-06)
 
@@ -282,7 +313,7 @@ members (§27.11 rule 5), `SsfStreamInput.expected_updated_at` with the three me
 
 | Row | Here |
 |---|---|
-| §27.11 rule 5 `Certificate::$userId` | On `Certificate` and `GeneratedCertificate`, `?string`: `null` and an absent member (a server before 1.0.1) both decode as "no account named"; never required, never synthesised from `metadata` or the subject |
+| §27.11 rule 5 `Certificate::$userId` | On `Certificate` and `GeneratedCertificate`, `?string`: `null` and an absent member (a server before 1.1.0) both decode as "no account named"; never required, never synthesised from `metadata` or the subject |
 | §27.11 rule 5 request member | `CreateCertificateRequest::$userId` and `SignCertificateCsrRequest::$userId`, sent exactly as given; the key is left out when unset, never `null`; the value is not judged locally (the server's `400` is surfaced) |
 | §32.2 `expected_updated_at` | `SsfStreamInput::$expectedUpdatedAt`, sent on `updateStream` exactly as given (the string) and absent when unset; a `409` is a `ConflictError`, one request, no retry |
 | §32.2 `events_requested` on an update | Absent resets to every allowed event, `[]` is sent as `[]`, a list as given. `ReadModifyWrite::ssfStream()` sends the `events_requested` and the `updated_at` it read (and cuts the requested list to a lowered `events_allowed`) |
@@ -398,7 +429,7 @@ is refused locally with a `ValidationError`. A client that must sign CIBA reques
 ### Laravel — auto-discovered, zero-config
 
 ```bash
-composer require "axiam/axiam-sdk:^1.0.0"
+composer require "axiam/axiam-sdk:^1.1.0"
 ```
 
 That's it. Laravel's own [package auto-discovery](https://laravel.com/docs/packages#package-discovery)
@@ -725,8 +756,28 @@ loop. The polling rules are where implementations go wrong:
   already approved.
 
 `deviceCode` is `Sensitive`; `userCode` deliberately is not — it exists to be read aloud,
-and wrapping it would defeat the one thing it is for. `deviceAuthorize()` sends no
-`client_secret` and does not refuse a client built without one.
+and wrapping it would defeat the one thing it is for.
+
+**The device client authenticates the way it is configured to (§14.1 rule 2, contract 1.62).**
+Since AXIAM 1.1.0 both device endpoints authenticate the client by the method it is registered
+for, as `/oauth2/token` does:
+
+- A **public** client — the usual device, which cannot hold a secret — is built without a secret
+  or a certificate. It sends `client_id` and **no credential** at `deviceAuthorize()` and at every
+  `devicePoll()`, and is not refused client-side. (The server refuses a public client that sends
+  one.)
+- A client built with `oidcClientSecret` sends it as `client_secret` **in the form body at both
+  endpoints** — whether it is registered for `client_secret_post` or `client_secret_basic`: this
+  SDK never sends `Authorization: Basic` to a `/oauth2/*` route (§12.1 rule 3).
+- A client built with a §6.1 certificate presents it on the connection, to the
+  `mtls_endpoint_aliases` endpoints when the discovery document names them.
+- Every poll sends `client_id` (§14.1 rule 3). A failed client authentication is `401
+  invalid_client`: an `OAuthProtocolError` with that `error`, one request, never retried and never a
+  §9 refresh. A client that cannot hold the grant any more is refused the same way at the poll.
+- **Not implemented here:** `private_key_jwt` client authentication (§21.8 is optional for every SDK)
+  and DPoP proof generation (§21.7.3, §21.9). A client registered for either cannot be driven by
+  this SDK; a DPoP-bound client's poll surfaces as `invalid_client`, and `token_type` is read as the
+  server writes it.
 
 `deviceLogin()` takes an injectable `$sleep`, so the §14.2 interval arithmetic is testable
 exactly rather than in wall-clock time. Per §14.3 rule 4 it **returns** the token set;
@@ -1593,7 +1644,7 @@ Worked end to end in [`examples/par_login.php`](examples/par_login.php).
 
 ## Management API (`Axiam\Sdk\Management`, CONTRACT.md §27)
 
-The administrative surface: **190 operations across 28 namespaces**, generated from the
+The administrative surface: **202 operations across 29 namespaces**, generated from the
 vendored `management-registry.json` and `openapi.json` by `scripts/gen_management.py` and
 committed, so building this package needs no Python. CI re-runs the generator with
 `--check` on every PR, which is what stops the committed surface from drifting away from
@@ -1601,7 +1652,7 @@ the contract it claims to implement.
 
 The namespace handles sit **directly on the client** — `$client->roles()`,
 `$client->serviceAccounts()->rotateSecret($id)`, the form §27.3's PHP row shows — and the
-same 28 handles are also reachable behind one accessor, `$client->management()` (§27.2
+same 29 handles are also reachable behind one accessor, `$client->management()` (§27.2
 rule 4), which reads better where a call site is already dense with §1 methods. The two
 forms are **equivalent**: the direct accessors forward to `management()`, so rule 4's
 "where an SDK offers both, the two MUST return equivalent handles" holds structurally
@@ -1609,7 +1660,7 @@ rather than by two code paths agreeing, and the suite asserts it by comparing th
 path and query each actually puts on the wire.
 
 ```php
-// §27.2 — namespace handles, not 190 flat methods.
+// §27.2 — namespace handles, not 202 flat methods.
 $page = $client->users()->listItems(new PageRequest(0, 50));
 
 // Or reach the same handles behind one accessor.
@@ -1635,7 +1686,7 @@ $management->users()->update($id, new Models\UpdateUserRequest(status: Models\Us
 $management->caCertificates()->inOrg($otherOrgId)->listItems();
 ```
 
-**Searching a list (§27.4 rule 4).** All twenty paginated operations take an optional
+**Searching a list (§27.4 rule 4).** All twenty-six paginated operations take an optional
 free-text term, matched case-insensitively by the **server** against the identifying
 fields of whatever is being listed — a name or username, plus the record id, so a UUID
 pasted out of a log line finds its row.
@@ -1651,7 +1702,7 @@ foreach (ManagementTransport::walk(
 ) as $match) { /* ... */ }
 ```
 
-The term lives on `PageRequest` rather than becoming a third argument on twenty generated
+The term lives on `PageRequest` rather than becoming a third argument on twenty-six generated
 methods, and that is what makes the walk above work at all: a per-method argument has
 nowhere to live between one request and the next, so a walk built on it would return the
 matches followed by the unfiltered tail.
@@ -1693,7 +1744,7 @@ forbids for slug resolution, for the same reason (§27.11 rule 4).
 | status | type | parent | why |
 |---|---|---|---|
 | `404` | `NotFoundError` | `AuthzError` | On a multi-tenant surface the server answers `404` for another tenant's object *precisely so* a probing caller cannot enumerate it. Re-drawing that line client-side would undo the protection. |
-| `409` | `ConflictError` | `AuthzError` | §2 already maps `409` there; the sub-type keeps that mapping. |
+| `409` | `ConflictError` | `AuthzError` | §2 already maps `409` there; the sub-type keeps that mapping. `getReasonCode()` is the body's `reason_code` (the `network` operations always name one) — branch on it, never on the message. |
 | `400`, `422` | `ValidationError` | `NetworkError` | Inherited from §2's `400` row. Carries the server's per-field complaints. |
 
 **Secrets (§27.5).** A one-time secret is `Sensitive`: it prints and `json_encode`s as
@@ -1704,6 +1755,64 @@ System.Text.Json's converter precedence, because `JsonSerializable` is consulted
 instance and nothing outranks it; making the unwrap explicit is better anyway, since
 there is no precedence rule to remember and exactly one greppable place where a secret
 is revealed.
+
+### The `network` namespace (§36, contract 1.62)
+
+A tenant's network is described as **segments** (a VLAN and a `Filter-Id` envelope each, nodes
+of a reserved `/network` subtree) and, per segment, at most one **reply profile** (a typed record
+of the closed `axiam-radius-reply/1` dictionary), plus the tenant's `Session-Timeout` cap. It is
+plain management CRUD — **human-only**, so a service-account token meets `401` — for an
+operator-run FreeRADIUS recipe. This SDK administers it; it **never asks for a placement
+decision** (`POST /api/v1/network/decide` is FreeRADIUS's, over mutual TLS, and has no method).
+
+```php
+use Axiam\Sdk\Management\Models;
+
+$network = $client->network();                       // or $client->management()->network()
+
+$segment = $network->createSegment(new Models\CreateNetworkSegmentRequest(
+    kind: Models\NetworkSegmentKind::Access,         // the wire spelling: access | quarantine
+    name: 'staff',
+    siteKey: 'hq',
+    vlanId: 20,
+    rank: 1,
+    filterIds: ['staff-in'],
+));
+
+// Every write is conditional on the version you READ, and a profile on two of them.
+$profile = $network->createProfile(new Models\CreateNetworkReplyProfileRequest(
+    profile: new Models\NetworkReplyProfileInput(sessionTimeoutSecs: 3600, filterId: 'staff-in'),
+    segmentId: $segment->id,
+    segmentVersion: $segment->version,
+));
+$network->replaceSegment($segment->id, new Models\ReplaceNetworkSegmentRequest(
+    enabled: true, filterIds: ['staff-in'], version: $segment->version, vlanId: 21, rank: 1,
+));
+$network->deleteProfile($segment->id, $profile->version);   // `?version=` is not optional
+
+try {
+    $network->deleteSegment($segment->id, $versionYouRead);
+} catch (\Axiam\Sdk\Management\ConflictError $e) {
+    // The 409's reason_code says which conflict, so branch on it and never on the message.
+    $e->getReasonCode();   // stale_version | strands_profile | has_children | duplicate_vlan | ...
+}
+```
+
+- **The `replace*` operations are replacements** (§27.4 rule 5): full-body and version-conditional.
+  A stale `version` is `409` and writes nothing. Nothing here retries a write or "refreshes the
+  version and sends again" — a `409` means another administrator wrote, and the decision is yours.
+- **A profile read is the effective profile.** `sessionTimeoutSecs` is the stored value lowered to the
+  tenant's current cap, and `sessionTimeoutClamped` says so. A read-modify-write of a clamped profile
+  therefore **cannot restore the stored value**: what you send is what is stored, from then on, and a
+  value above the current cap is `403`. Raise the cap first with `replacePolicy()` to restore it
+  (§36.3 rule 6).
+- **Closed records.** An unset optional member is absent from the body, never `null`; an unknown
+  member is a `400`. A `kind`, `termination_action` or `service_type` this SDK does not know decodes to
+  that enum's `Unknown` case and is not sent back.
+- **The SDK validates nothing but UUIDs** — the VLAN range, the envelope, the cap and the `Session-Timeout`
+  bounds are the server's to check, and its `400`/`403` text reaches you in the exception's message.
+- **The write gate's `403`** carries the missing permission in `getAction()` and the node it was checked on
+  in `getResourceId()` (for example `network:grant`); the exception's message ends with the server's own.
 
 ### Declarative manifests (§27.6, §27.7)
 
@@ -1768,12 +1877,40 @@ Four properties are worth knowing before you run one against production:
   `apply()`'s report carries the one-time `client_secret` a `Create` mints —
   `$report->createdServiceAccounts()` — and never rotates one to converge drift.
 
+- **`network` is a manifest section (§27.6.2, contract 1.62).** `->networkPolicy(7200)`,
+  `->networkSegment('staff', 'hq', 'access', 'staff', 20, rank: 1, filterIds: [...])` and
+  `->networkProfile('staff', 3600, idleTimeoutSecs: 600, filterId: 'staff-in')`:
+  - **Natural keys.** A segment by site + kind + name, `kind` being the wire spelling `access` or
+    `quarantine` (anything else, `zones` included, is refused when the manifest is built); a profile by
+    its **segment** (named by the segment's manifest key); the policy is a singleton. Two segments with
+    one natural key, a profile whose segment the manifest does not declare, two policies and a
+    segment whose `filterIds` repeats a name are each refused with zero requests.
+  - **Order.** Policy, then segments, then profiles (a profile in its segment's order), after everything
+    else — so a manifest that raises the cap and states a profile above the old one works.
+  - **Judged on the read.** Every stated member is compared with the value the read returns: a stored
+    timeout above a lowered cap reads as the cap, so a manifest stating the cap is `NoChange` and one
+    stating more is an `Update` whose write the server refuses with `403` — the action's failure;
+    `apply()` stops and nothing is lowered for you. `filterIds` are compared as a **set** (a reorder is
+    `NoChange`; a write sends them in the order the manifest states). `JsonNull::Null` states a profile
+    member as *none* and leaves it out of the replacement body; `null` is *unstated* and is carried from
+    the read.
+  - **Writes.** An `Update` is a full, version-conditional `replace*` built from the read, never retried; a
+    profile carries the segment version of the **newest segment write of the same apply**. A `409` is the
+    action's failure: `apply()` stops, the report names the rest, `$report->failureReasonCode()` is the
+    `reason_code`, and running `apply()` again — which re-reads — is the recovery.
+  - **No pruning** — see the next item.
+- **Nothing is ever deleted — pruning (§27.6 rule 4, §27.6.2 item 6) is not offered.** The opt-in a
+  contract-conformant SDK MAY offer is absent, for every namespace. An omitted segment or profile is
+  left alone, and the policy has no delete anyway.
+- **Kinds this manifest does not cover:** `scopes`, `users` (and user role bindings), `webhooks`, and
+  the one-time-secret kinds the contract excludes (§27.10). `network` is covered.
+
 An incoherent manifest — a dangling reference, a cycle, a duplicate key — is refused
 *before* the first request, because discovering it halfway through an un-rollback-able
 apply is strictly worse.
 
 See `examples/management_basics.php`, `examples/management_manifest.php`,
-`examples/management_manifest_attributes.php`, and
+`examples/management_manifest_attributes.php`, `examples/network_manifest.php`, and
 `examples/device_mtls_provisioning.php` — the last a full operator/device split that mints
 a `Device` certificate from the tenant's signing CA, binds it to a service account, writes
 the one-time private key at `0600`, and then authenticates as the device over §6.1 mutual
@@ -2074,6 +2211,17 @@ $client->scimTargets()->update($targetId, ReadModifyWrite::scimTarget($target, [
 $stream = $client->ssf()->getStream($streamId);
 $client->ssf()->updateStream($streamId, ReadModifyWrite::ssfStream($stream, ['description' => 'EU RP']));
 ```
+
+`ReadModifyWrite::ssfStream($stream, $changes)` is the **change-taking form** of §32.2 (contract
+1.62): it applies `$changes` to what you read and sends the `events_requested` **and** the
+`expected_updated_at` as read — the `updated_at` string byte for byte, and an `[]` as `[]` — and when
+`$changes` lowers `events_allowed` it cuts `events_requested` to the entries that are still allowed, in
+their order. An update that omits `events_requested` **resets** the stream to every allowed event,
+widening what the receiver narrowed (`[]` is the receiver's "none"; a list is stored as given and is
+`400` outside `events_allowed`) — `updateStream()`'s docblock says so beside the call, and a raw API
+client is bound by the same meaning. Called with no changes it is the plain converter, and cutting the
+requested list to a new ceiling is then the caller's duty, as is refreshing `expected_updated_at`: a
+write made since (the receiver's included) is a `409` and is never retried.
 
 `SamlIdpCredential` has no key member and never will; a decoder meeting `bind_secret`,
 `credential`, `authorization_header` or `private_key_pem` in a response drops it. `delete` on a
@@ -2377,6 +2525,7 @@ raw token can never leak through a caught exception, a log line, or a JSON error
 - [`examples/management_basics.php`](examples/management_basics.php) — CONTRACT.md §27: namespace handles, one page vs. every page, sparse updates, per-handle scoping, and the three error classifications.
 - [`examples/management_manifest.php`](examples/management_manifest.php) — CONTRACT.md §27.6/§27.7: plan (which writes nothing) then apply (which stops at the first failure and does not roll back), including a `deny` grant.
 - [`examples/management_manifest_attributes.php`](examples/management_manifest_attributes.php) — the same manifest declared with `#[Managed*]` attributes instead of the builder.
+- [`examples/network_manifest.php`](examples/network_manifest.php) — CONTRACT.md §27.6.2 (contract 1.62): the tenant's `Session-Timeout` cap, its network segments and their RADIUS reply profiles in a manifest — plan, apply, and a `409`'s `reason_code`.
 - [`examples/device_mtls_provisioning.php`](examples/device_mtls_provisioning.php) — the operator/device split: mint a `Device` certificate from the tenant's signing CA, bind it to a service account, write the one-time private key at `0600`, then authenticate as the device over §6.1 mutual TLS.
 - [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php) — standalone AMQP consumer worker (run under process supervision, see above).
 

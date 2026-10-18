@@ -121,7 +121,7 @@ jobs:
       # $tenantId)` whose second parameter is really the page, a `Page` treated as an
       # array, and a `UserStatus::Suspended` the enum does not have.
       #
-      # Scoped to these four rather than all of examples/: the Laravel and Symfony app
+      # Scoped to these five rather than all of examples/: the Laravel and Symfony app
       # scaffolds reference framework globals that are not installed here, and making
       # them analysable is a separate change from adding a management surface.
       - name: PHPStan — §27 examples
@@ -132,7 +132,8 @@ jobs:
             examples/management_basics.php \
             examples/management_manifest.php \
             examples/management_manifest_attributes.php \
-            examples/device_mtls_provisioning.php
+            examples/device_mtls_provisioning.php \
+            examples/network_manifest.php
 
       # D-12/SC#4: strict TLS is always on; the ONLY escape hatch is the
       # additive `customCa` CA-bundle-path pattern — there must be no Guzzle

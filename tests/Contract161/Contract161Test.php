@@ -86,7 +86,7 @@ final class Contract161Test extends ManagementRouteTestCase
         $user = self::uuid();
         $withUuid = self::certificate(['user_id' => $user]);
         $withNull = self::certificate(['user_id' => null]);
-        $without = self::certificate(); // a server before 1.0.1 omits the member
+        $without = self::certificate(); // a server before 1.1.0 omits the member
         $client = $this->client();
         foreach ([$withUuid, $withNull, $without] as $body) {
             $this->routes->on('GET', '/api/v1/certificates/' . $body['id'], RoutedHandler::json(200, $body));

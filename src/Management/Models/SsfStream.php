@@ -20,11 +20,11 @@ final class SsfStream implements \JsonSerializable
      * @param bool $authorizationHeaderSet Whether a push `Authorization` header is stored.
      * @param string $createdAt When the stream was registered.
      * @param SsfDeliveryMethod $deliveryMethod `push` (RFC 8935) or `poll` (RFC 8936).
-     * @param list<SsfEventType> $eventsAllowed The event types the receiver may have.
-     * @param list<SsfEventType> $eventsDelivered What the stream carries: the intersection of
-     *     the two.
-     * @param list<SsfEventType> $eventsRequested The event types the receiver asked for (a
-     *     subset of `events_allowed`).
+     * @param list<SsfEventType|string> $eventsAllowed The event types the receiver may have.
+     * @param list<SsfEventType|string> $eventsDelivered What the stream carries: the
+     *     intersection of the two.
+     * @param list<SsfEventType|string> $eventsRequested The event types the receiver asked for
+     *     (a subset of `events_allowed`).
      * @param string $id The stream id, also the SSF `stream_id`.
      * @param string $receiverClientId The OAuth2 `client_id` whose client-credentials token
      *     (scope `ssf.manage`) is this stream's receiver on the stream management API.
@@ -79,9 +79,9 @@ final class SsfStream implements \JsonSerializable
             (bool) ModelDecode::need($data, 'authorization_header_set', self::class),
             (string) ModelDecode::need($data, 'created_at', self::class),
             SsfDeliveryMethod::fromWire((string) ModelDecode::need($data, 'delivery_method', self::class)),
-            array_values(array_map(static fn (mixed $v): SsfEventType => SsfEventType::fromWire((string) $v), (array) ModelDecode::need($data, 'events_allowed', self::class))),
-            array_values(array_map(static fn (mixed $v): SsfEventType => SsfEventType::fromWire((string) $v), (array) ModelDecode::need($data, 'events_delivered', self::class))),
-            array_values(array_map(static fn (mixed $v): SsfEventType => SsfEventType::fromWire((string) $v), (array) ModelDecode::need($data, 'events_requested', self::class))),
+            array_values(array_map(static fn (mixed $v): SsfEventType|string => SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) ModelDecode::need($data, 'events_allowed', self::class))),
+            array_values(array_map(static fn (mixed $v): SsfEventType|string => SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) ModelDecode::need($data, 'events_delivered', self::class))),
+            array_values(array_map(static fn (mixed $v): SsfEventType|string => SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) ModelDecode::need($data, 'events_requested', self::class))),
             (string) ModelDecode::need($data, 'id', self::class),
             (string) ModelDecode::need($data, 'receiver_client_id', self::class),
             SsfStreamStatus::fromWire((string) ModelDecode::need($data, 'status', self::class)),
@@ -113,9 +113,9 @@ final class SsfStream implements \JsonSerializable
         $out['authorization_header_set'] = $this->authorizationHeaderSet;
         $out['created_at'] = $this->createdAt;
         $out['delivery_method'] = $this->deliveryMethod->value;
-        $out['events_allowed'] = array_map(static fn (SsfEventType $v): string => $v->value, $this->eventsAllowed);
-        $out['events_delivered'] = array_map(static fn (SsfEventType $v): string => $v->value, $this->eventsDelivered);
-        $out['events_requested'] = array_map(static fn (SsfEventType $v): string => $v->value, $this->eventsRequested);
+        $out['events_allowed'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsAllowed);
+        $out['events_delivered'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsDelivered);
+        $out['events_requested'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsRequested);
         $out['id'] = $this->id;
         $out['receiver_client_id'] = $this->receiverClientId;
         $out['status'] = $this->status->value;
