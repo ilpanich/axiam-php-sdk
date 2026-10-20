@@ -108,39 +108,7 @@ final class SsfStream implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['audience'] = $this->audience;
-        $out['authorization_header_set'] = $this->authorizationHeaderSet;
-        $out['created_at'] = $this->createdAt;
-        $out['delivery_method'] = $this->deliveryMethod->toWire();
-        $out['events_allowed'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsAllowed);
-        $out['events_delivered'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsDelivered);
-        $out['events_requested'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsRequested);
-        $out['id'] = $this->id;
-        $out['receiver_client_id'] = $this->receiverClientId;
-        $out['status'] = $this->status->toWire();
-        $out['status_actor'] = $this->statusActor->toWire();
-        $out['subject_format'] = $this->subjectFormat->toWire();
-        $out['tenant_id'] = $this->tenantId;
-        $out['transmitter_active'] = $this->transmitterActive;
-        $out['updated_at'] = $this->updatedAt;
-        if ($this->description !== null) {
-            $out['description'] = $this->description;
-        }
-        if ($this->endpointUrl !== null) {
-            $out['endpoint_url'] = $this->endpointUrl;
-        }
-        if ($this->lastVerificationAt !== null) {
-            $out['last_verification_at'] = $this->lastVerificationAt;
-        }
-        if ($this->statusReason !== null) {
-            $out['status_reason'] = $this->statusReason;
-        }
-        if ($this->transmitterInactiveReason !== null) {
-            $out['transmitter_inactive_reason'] = $this->transmitterInactiveReason;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -159,19 +127,30 @@ final class SsfStream implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['audience'] = $this->audience;
         $out['authorization_header_set'] = $this->authorizationHeaderSet;
         $out['created_at'] = $this->createdAt;
-        $out['delivery_method'] = $this->deliveryMethod->value;
+        $out['delivery_method'] = ($log ? $this->deliveryMethod->value : $this->deliveryMethod->toWire());
         $out['events_allowed'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsAllowed);
         $out['events_delivered'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsDelivered);
         $out['events_requested'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsRequested);
         $out['id'] = $this->id;
         $out['receiver_client_id'] = $this->receiverClientId;
-        $out['status'] = $this->status->value;
-        $out['status_actor'] = $this->statusActor->value;
-        $out['subject_format'] = $this->subjectFormat->value;
+        $out['status'] = ($log ? $this->status->value : $this->status->toWire());
+        $out['status_actor'] = ($log ? $this->statusActor->value : $this->statusActor->toWire());
+        $out['subject_format'] = ($log ? $this->subjectFormat->value : $this->subjectFormat->toWire());
         $out['tenant_id'] = $this->tenantId;
         $out['transmitter_active'] = $this->transmitterActive;
         $out['updated_at'] = $this->updatedAt;

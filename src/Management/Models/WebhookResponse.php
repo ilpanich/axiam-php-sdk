@@ -64,17 +64,7 @@ final class WebhookResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['enabled'] = $this->enabled;
-        $out['events'] = $this->events;
-        $out['id'] = $this->id;
-        $out['retry_policy'] = $this->retryPolicy->toArray();
-        $out['tenant_id'] = $this->tenantId;
-        $out['updated_at'] = $this->updatedAt;
-        $out['url'] = $this->url;
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -93,12 +83,23 @@ final class WebhookResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['enabled'] = $this->enabled;
         $out['events'] = $this->events;
         $out['id'] = $this->id;
-        $out['retry_policy'] = $this->retryPolicy->jsonSerialize();
+        $out['retry_policy'] = ($log ? $this->retryPolicy->jsonSerialize() : $this->retryPolicy->toArray());
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
         $out['url'] = $this->url;

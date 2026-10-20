@@ -53,12 +53,7 @@ final class ReplaceNetworkReplyProfileRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['profile'] = $this->profile->toArray();
-        $out['segment_version'] = $this->segmentVersion;
-        $out['version'] = $this->version;
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -77,8 +72,19 @@ final class ReplaceNetworkReplyProfileRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['profile'] = $this->profile->jsonSerialize();
+        $out['profile'] = ($log ? $this->profile->jsonSerialize() : $this->profile->toArray());
         $out['segment_version'] = $this->segmentVersion;
         $out['version'] = $this->version;
 

@@ -145,56 +145,7 @@ final class FederationConfigResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
-        $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
-        $out['allowed_algorithms'] = $this->allowedAlgorithms;
-        $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
-        $out['attribute_map'] = $this->attributeMap;
-        $out['client_id'] = $this->clientId;
-        $out['created_at'] = $this->createdAt;
-        $out['effective_scopes'] = $this->effectiveScopes;
-        $out['enabled'] = $this->enabled;
-        $out['has_bundled_mark'] = $this->hasBundledMark;
-        $out['id'] = $this->id;
-        $out['mints_client_secret'] = $this->mintsClientSecret;
-        $out['pkce_required'] = $this->pkceRequired;
-        $out['protocol'] = $this->protocol;
-        $out['provider'] = $this->provider;
-        $out['provider_kind'] = $this->providerKind;
-        $out['scopes'] = $this->scopes;
-        $out['tenant_id'] = $this->tenantId;
-        $out['token_exchange'] = $this->tokenExchange->toArray();
-        $out['updated_at'] = $this->updatedAt;
-        if ($this->appleKeyId !== null) {
-            $out['apple_key_id'] = $this->appleKeyId;
-        }
-        if ($this->appleTeamId !== null) {
-            $out['apple_team_id'] = $this->appleTeamId;
-        }
-        if ($this->authorizationEndpoint !== null) {
-            $out['authorization_endpoint'] = $this->authorizationEndpoint;
-        }
-        if ($this->buttonIcon !== null) {
-            $out['button_icon'] = $this->buttonIcon;
-        }
-        if ($this->idpMetadataSigningCertPem !== null) {
-            $out['idp_metadata_signing_cert_pem'] = $this->idpMetadataSigningCertPem;
-        }
-        if ($this->metadataUrl !== null) {
-            $out['metadata_url'] = $this->metadataUrl;
-        }
-        if ($this->providerSlug !== null) {
-            $out['provider_slug'] = $this->providerSlug;
-        }
-        if ($this->tokenEndpoint !== null) {
-            $out['token_endpoint'] = $this->tokenEndpoint;
-        }
-        if ($this->userinfoEndpoint !== null) {
-            $out['userinfo_endpoint'] = $this->userinfoEndpoint;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -212,6 +163,17 @@ final class FederationConfigResponse implements \JsonSerializable
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
+    {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
     {
         $out = [];
         $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
@@ -232,7 +194,7 @@ final class FederationConfigResponse implements \JsonSerializable
         $out['provider_kind'] = $this->providerKind;
         $out['scopes'] = $this->scopes;
         $out['tenant_id'] = $this->tenantId;
-        $out['token_exchange'] = $this->tokenExchange->jsonSerialize();
+        $out['token_exchange'] = ($log ? $this->tokenExchange->jsonSerialize() : $this->tokenExchange->toArray());
         $out['updated_at'] = $this->updatedAt;
         if ($this->appleKeyId !== null) {
             $out['apple_key_id'] = $this->appleKeyId;

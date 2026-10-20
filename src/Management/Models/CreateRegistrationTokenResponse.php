@@ -47,11 +47,7 @@ final class CreateRegistrationTokenResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['initial_access_token'] = $this->initialAccessToken;
-        $out['token'] = $this->token->toArray();
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -70,9 +66,20 @@ final class CreateRegistrationTokenResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['initial_access_token'] = $this->initialAccessToken;
-        $out['token'] = $this->token->jsonSerialize();
+        $out['token'] = ($log ? $this->token->jsonSerialize() : $this->token->toArray());
 
         return $out;
     }

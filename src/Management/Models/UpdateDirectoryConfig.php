@@ -110,60 +110,7 @@ final class UpdateDirectoryConfig implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        if ($this->baseDn !== null) {
-            $out['base_dn'] = $this->baseDn;
-        }
-        if ($this->bindDn !== null) {
-            $out['bind_dn'] = $this->bindDn;
-        }
-        if ($this->bindSecret !== null) {
-            $out['bind_secret'] = $this->bindSecret;
-        }
-        if ($this->enabled !== null) {
-            $out['enabled'] = $this->enabled;
-        }
-        if ($this->groupBaseDn !== null) {
-            $out['group_base_dn'] = $this->groupBaseDn instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->groupBaseDn;
-        }
-        if ($this->groupFilter !== null) {
-            $out['group_filter'] = $this->groupFilter instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->groupFilter;
-        }
-        if ($this->groupMappings !== null) {
-            $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->toArray(), $this->groupMappings);
-        }
-        if ($this->groupMemberAttribute !== null) {
-            $out['group_member_attribute'] = $this->groupMemberAttribute;
-        }
-        if ($this->groupNestingDepth !== null) {
-            $out['group_nesting_depth'] = $this->groupNestingDepth;
-        }
-        if ($this->jitProvisioning !== null) {
-            $out['jit_provisioning'] = $this->jitProvisioning;
-        }
-        if ($this->kind !== null) {
-            $out['kind'] = $this->kind->toWire();
-        }
-        if ($this->startTls !== null) {
-            $out['start_tls'] = $this->startTls;
-        }
-        if ($this->syncIntervalSecs !== null) {
-            $out['sync_interval_secs'] = $this->syncIntervalSecs;
-        }
-        if ($this->trustAnchorsPem !== null) {
-            $out['trust_anchors_pem'] = $this->trustAnchorsPem;
-        }
-        if ($this->url !== null) {
-            $out['url'] = $this->url;
-        }
-        if ($this->userAttributeMap !== null) {
-            $out['user_attribute_map'] = $this->userAttributeMap->toArray();
-        }
-        if ($this->userFilter !== null) {
-            $out['user_filter'] = $this->userFilter;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -181,6 +128,17 @@ final class UpdateDirectoryConfig implements \JsonSerializable
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
+    {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
     {
         $out = [];
         if ($this->baseDn !== null) {
@@ -202,7 +160,7 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             $out['group_filter'] = $this->groupFilter instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->groupFilter;
         }
         if ($this->groupMappings !== null) {
-            $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->jsonSerialize(), $this->groupMappings);
+            $out['group_mappings'] = ($log ? array_map(static fn (GroupMapping $v): array => $v->jsonSerialize(), $this->groupMappings) : array_map(static fn (GroupMapping $v): array => $v->toArray(), $this->groupMappings));
         }
         if ($this->groupMemberAttribute !== null) {
             $out['group_member_attribute'] = $this->groupMemberAttribute;
@@ -214,7 +172,7 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             $out['jit_provisioning'] = $this->jitProvisioning;
         }
         if ($this->kind !== null) {
-            $out['kind'] = $this->kind->value;
+            $out['kind'] = ($log ? $this->kind->value : $this->kind->toWire());
         }
         if ($this->startTls !== null) {
             $out['start_tls'] = $this->startTls;
@@ -229,7 +187,7 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             $out['url'] = $this->url;
         }
         if ($this->userAttributeMap !== null) {
-            $out['user_attribute_map'] = $this->userAttributeMap->jsonSerialize();
+            $out['user_attribute_map'] = ($log ? $this->userAttributeMap->jsonSerialize() : $this->userAttributeMap->toArray());
         }
         if ($this->userFilter !== null) {
             $out['user_filter'] = $this->userFilter;

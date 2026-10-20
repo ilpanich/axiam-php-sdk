@@ -191,76 +191,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['grant_types'] = $this->grantTypes;
-        $out['name'] = $this->name;
-        $out['redirect_uris'] = $this->redirectUris;
-        $out['scopes'] = $this->scopes;
-        if ($this->allowedResources !== null) {
-            $out['allowed_resources'] = $this->allowedResources;
-        }
-        if ($this->authnRequestParams !== null) {
-            $out['authn_request_params'] = $this->authnRequestParams->toWire();
-        }
-        if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
-            $out['backchannel_authentication_request_signing_alg'] = $this->backchannelAuthenticationRequestSigningAlg;
-        }
-        if ($this->backchannelClientNotificationEndpoint !== null) {
-            $out['backchannel_client_notification_endpoint'] = $this->backchannelClientNotificationEndpoint;
-        }
-        if ($this->backchannelLogoutUri !== null) {
-            $out['backchannel_logout_uri'] = $this->backchannelLogoutUri;
-        }
-        if ($this->backchannelTokenDeliveryMode !== null) {
-            $out['backchannel_token_delivery_mode'] = $this->backchannelTokenDeliveryMode;
-        }
-        if ($this->backchannelUserCodeParameter !== null) {
-            $out['backchannel_user_code_parameter'] = $this->backchannelUserCodeParameter;
-        }
-        if ($this->browserSso !== null) {
-            $out['browser_sso'] = $this->browserSso;
-        }
-        if ($this->dpopBoundAccessTokens !== null) {
-            $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;
-        }
-        if ($this->dpopRequireNonce !== null) {
-            $out['dpop_require_nonce'] = $this->dpopRequireNonce;
-        }
-        if ($this->jwks !== null) {
-            $out['jwks'] = $this->jwks;
-        }
-        if ($this->jwksUri !== null) {
-            $out['jwks_uri'] = $this->jwksUri;
-        }
-        if ($this->postLogoutRedirectUris !== null) {
-            $out['post_logout_redirect_uris'] = $this->postLogoutRedirectUris;
-        }
-        if ($this->profile !== null) {
-            $out['profile'] = $this->profile->toWire();
-        }
-        if ($this->requirePar !== null) {
-            $out['require_par'] = $this->requirePar;
-        }
-        if ($this->selfSignedTlsClientAuthThumbprints !== null) {
-            $out['self_signed_tls_client_auth_thumbprints'] = $this->selfSignedTlsClientAuthThumbprints;
-        }
-        if ($this->tlsClientAuthSanDns !== null) {
-            $out['tls_client_auth_san_dns'] = $this->tlsClientAuthSanDns;
-        }
-        if ($this->tlsClientAuthSanUri !== null) {
-            $out['tls_client_auth_san_uri'] = $this->tlsClientAuthSanUri;
-        }
-        if ($this->tlsClientAuthSubjectDn !== null) {
-            $out['tls_client_auth_subject_dn'] = $this->tlsClientAuthSubjectDn;
-        }
-        if ($this->tlsClientCertificateBoundAccessTokens !== null) {
-            $out['tls_client_certificate_bound_access_tokens'] = $this->tlsClientCertificateBoundAccessTokens;
-        }
-        if ($this->tokenEndpointAuthMethod !== null) {
-            $out['token_endpoint_auth_method'] = $this->tokenEndpointAuthMethod->toWire();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -279,6 +210,17 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['grant_types'] = $this->grantTypes;
         $out['name'] = $this->name;
@@ -288,7 +230,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             $out['allowed_resources'] = $this->allowedResources;
         }
         if ($this->authnRequestParams !== null) {
-            $out['authn_request_params'] = $this->authnRequestParams->value;
+            $out['authn_request_params'] = ($log ? $this->authnRequestParams->value : $this->authnRequestParams->toWire());
         }
         if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
             $out['backchannel_authentication_request_signing_alg'] = $this->backchannelAuthenticationRequestSigningAlg;
@@ -324,7 +266,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             $out['post_logout_redirect_uris'] = $this->postLogoutRedirectUris;
         }
         if ($this->profile !== null) {
-            $out['profile'] = $this->profile->value;
+            $out['profile'] = ($log ? $this->profile->value : $this->profile->toWire());
         }
         if ($this->requirePar !== null) {
             $out['require_par'] = $this->requirePar;
@@ -345,7 +287,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             $out['tls_client_certificate_bound_access_tokens'] = $this->tlsClientCertificateBoundAccessTokens;
         }
         if ($this->tokenEndpointAuthMethod !== null) {
-            $out['token_endpoint_auth_method'] = $this->tokenEndpointAuthMethod->value;
+            $out['token_endpoint_auth_method'] = ($log ? $this->tokenEndpointAuthMethod->value : $this->tokenEndpointAuthMethod->toWire());
         }
 
         return $out;

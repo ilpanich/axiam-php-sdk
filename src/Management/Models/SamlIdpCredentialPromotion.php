@@ -46,13 +46,7 @@ final class SamlIdpCredentialPromotion implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['active'] = $this->active->toArray();
-        if ($this->retired !== null) {
-            $out['retired'] = $this->retired->toArray();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -71,10 +65,21 @@ final class SamlIdpCredentialPromotion implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['active'] = $this->active->jsonSerialize();
+        $out['active'] = ($log ? $this->active->jsonSerialize() : $this->active->toArray());
         if ($this->retired !== null) {
-            $out['retired'] = $this->retired->jsonSerialize();
+            $out['retired'] = ($log ? $this->retired->jsonSerialize() : $this->retired->toArray());
         }
 
         return $out;

@@ -51,14 +51,7 @@ final class AttributeMapping implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['saml_name'] = $this->samlName;
-        $out['source'] = $this->source->toWire();
-        if ($this->nameFormat !== null) {
-            $out['name_format'] = $this->nameFormat;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -77,9 +70,20 @@ final class AttributeMapping implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['saml_name'] = $this->samlName;
-        $out['source'] = $this->source->value;
+        $out['source'] = ($log ? $this->source->value : $this->source->toWire());
         if ($this->nameFormat !== null) {
             $out['name_format'] = $this->nameFormat;
         }

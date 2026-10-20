@@ -136,40 +136,7 @@ final class GeneratedCaCertificate implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['fingerprint'] = $this->fingerprint;
-        $out['id'] = $this->id;
-        $out['key_algorithm'] = $this->keyAlgorithm->toWire();
-        $out['not_after'] = $this->notAfter;
-        $out['not_before'] = $this->notBefore;
-        $out['organization_id'] = $this->organizationId;
-        $out['public_cert_pem'] = $this->publicCertPem;
-        $out['status'] = $this->status->toWire();
-        $out['subject'] = $this->subject;
-        if ($this->chainPem !== null) {
-            $out['chain_pem'] = $this->chainPem;
-        }
-        if ($this->keyCustody !== null) {
-            $out['key_custody'] = $this->keyCustody;
-        }
-        if ($this->keyLocator !== null) {
-            $out['key_locator'] = $this->keyLocator;
-        }
-        if ($this->mtlsTrustAnchor !== null) {
-            $out['mtls_trust_anchor'] = $this->mtlsTrustAnchor;
-        }
-        if ($this->parentCaId !== null) {
-            $out['parent_ca_id'] = $this->parentCaId;
-        }
-        if ($this->tenantId !== null) {
-            $out['tenant_id'] = $this->tenantId;
-        }
-        if ($this->privateKeyPem !== null) {
-            $out['private_key_pem'] = $this->privateKeyPem;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -188,16 +155,27 @@ final class GeneratedCaCertificate implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['fingerprint'] = $this->fingerprint;
         $out['id'] = $this->id;
-        $out['key_algorithm'] = $this->keyAlgorithm->value;
+        $out['key_algorithm'] = ($log ? $this->keyAlgorithm->value : $this->keyAlgorithm->toWire());
         $out['not_after'] = $this->notAfter;
         $out['not_before'] = $this->notBefore;
         $out['organization_id'] = $this->organizationId;
         $out['public_cert_pem'] = $this->publicCertPem;
-        $out['status'] = $this->status->value;
+        $out['status'] = ($log ? $this->status->value : $this->status->toWire());
         $out['subject'] = $this->subject;
         if ($this->chainPem !== null) {
             $out['chain_pem'] = $this->chainPem;

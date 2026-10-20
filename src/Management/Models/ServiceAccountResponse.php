@@ -64,19 +64,7 @@ final class ServiceAccountResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['client_id'] = $this->clientId;
-        $out['created_at'] = $this->createdAt;
-        $out['id'] = $this->id;
-        $out['name'] = $this->name;
-        $out['status'] = $this->status->toWire();
-        $out['tenant_id'] = $this->tenantId;
-        $out['updated_at'] = $this->updatedAt;
-        if ($this->description !== null) {
-            $out['description'] = $this->description;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -95,12 +83,23 @@ final class ServiceAccountResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['client_id'] = $this->clientId;
         $out['created_at'] = $this->createdAt;
         $out['id'] = $this->id;
         $out['name'] = $this->name;
-        $out['status'] = $this->status->value;
+        $out['status'] = ($log ? $this->status->value : $this->status->toWire());
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
         if ($this->description !== null) {

@@ -66,27 +66,7 @@ final class CreateReactorRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['events'] = $this->events;
-        $out['mode'] = $this->mode->toWire();
-        $out['name'] = $this->name;
-        if ($this->description !== null) {
-            $out['description'] = $this->description;
-        }
-        if ($this->enabled !== null) {
-            $out['enabled'] = $this->enabled;
-        }
-        if ($this->failurePolicy !== null) {
-            $out['failure_policy'] = $this->failurePolicy->toWire();
-        }
-        if ($this->priority !== null) {
-            $out['priority'] = $this->priority;
-        }
-        if ($this->timeoutMs !== null) {
-            $out['timeout_ms'] = $this->timeoutMs;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -105,9 +85,20 @@ final class CreateReactorRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['events'] = $this->events;
-        $out['mode'] = $this->mode->value;
+        $out['mode'] = ($log ? $this->mode->value : $this->mode->toWire());
         $out['name'] = $this->name;
         if ($this->description !== null) {
             $out['description'] = $this->description;
@@ -116,7 +107,7 @@ final class CreateReactorRequest implements \JsonSerializable
             $out['enabled'] = $this->enabled;
         }
         if ($this->failurePolicy !== null) {
-            $out['failure_policy'] = $this->failurePolicy->value;
+            $out['failure_policy'] = ($log ? $this->failurePolicy->value : $this->failurePolicy->toWire());
         }
         if ($this->priority !== null) {
             $out['priority'] = $this->priority;

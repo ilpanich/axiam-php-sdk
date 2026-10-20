@@ -60,13 +60,7 @@ final class ResolvedPermissionGrant implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['effect'] = $this->effect->toWire();
-        $out['permission'] = $this->permission->toArray();
-        $out['scope_ids'] = $this->scopeIds;
-        $out['scopes'] = array_map(static fn (GrantedScope $v): array => $v->toArray(), $this->scopes);
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -85,11 +79,22 @@ final class ResolvedPermissionGrant implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['effect'] = $this->effect->value;
-        $out['permission'] = $this->permission->jsonSerialize();
+        $out['effect'] = ($log ? $this->effect->value : $this->effect->toWire());
+        $out['permission'] = ($log ? $this->permission->jsonSerialize() : $this->permission->toArray());
         $out['scope_ids'] = $this->scopeIds;
-        $out['scopes'] = array_map(static fn (GrantedScope $v): array => $v->jsonSerialize(), $this->scopes);
+        $out['scopes'] = ($log ? array_map(static fn (GrantedScope $v): array => $v->jsonSerialize(), $this->scopes) : array_map(static fn (GrantedScope $v): array => $v->toArray(), $this->scopes));
 
         return $out;
     }

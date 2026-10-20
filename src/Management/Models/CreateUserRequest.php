@@ -56,18 +56,7 @@ final class CreateUserRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['email'] = $this->email;
-        $out['password'] = $this->password;
-        $out['username'] = $this->username;
-        if ($this->metadata !== null) {
-            $out['metadata'] = $this->metadata;
-        }
-        if ($this->opaque !== null) {
-            $out['opaque'] = $this->opaque->toArray();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -86,6 +75,17 @@ final class CreateUserRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['email'] = $this->email;
         $out['password'] = $this->password;
@@ -94,7 +94,7 @@ final class CreateUserRequest implements \JsonSerializable
             $out['metadata'] = $this->metadata;
         }
         if ($this->opaque !== null) {
-            $out['opaque'] = $this->opaque->jsonSerialize();
+            $out['opaque'] = ($log ? $this->opaque->jsonSerialize() : $this->opaque->toArray());
         }
 
         return $out;

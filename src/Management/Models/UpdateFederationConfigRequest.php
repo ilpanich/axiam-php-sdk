@@ -151,75 +151,7 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        if ($this->allowSha1Signatures !== null) {
-            $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
-        }
-        if ($this->allowTenantInheritance !== null) {
-            $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
-        }
-        if ($this->allowedAlgorithms !== null) {
-            $out['allowed_algorithms'] = $this->allowedAlgorithms;
-        }
-        if ($this->allowedIssuerTenants !== null) {
-            $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
-        }
-        if ($this->appleKeyId !== null) {
-            $out['apple_key_id'] = $this->appleKeyId instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->appleKeyId;
-        }
-        if ($this->appleTeamId !== null) {
-            $out['apple_team_id'] = $this->appleTeamId instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->appleTeamId;
-        }
-        if ($this->attributeMap !== null) {
-            $out['attribute_map'] = $this->attributeMap;
-        }
-        if ($this->authorizationEndpoint !== null) {
-            $out['authorization_endpoint'] = $this->authorizationEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->authorizationEndpoint;
-        }
-        if ($this->buttonIcon !== null) {
-            $out['button_icon'] = $this->buttonIcon instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->buttonIcon;
-        }
-        if ($this->clientId !== null) {
-            $out['client_id'] = $this->clientId;
-        }
-        if ($this->clientSecret !== null) {
-            $out['client_secret'] = $this->clientSecret;
-        }
-        if ($this->enabled !== null) {
-            $out['enabled'] = $this->enabled;
-        }
-        if ($this->idpMetadataSigningCertPem !== null) {
-            $out['idp_metadata_signing_cert_pem'] = $this->idpMetadataSigningCertPem instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->idpMetadataSigningCertPem;
-        }
-        if ($this->idpSigningCertPem !== null) {
-            $out['idp_signing_cert_pem'] = $this->idpSigningCertPem instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->idpSigningCertPem;
-        }
-        if ($this->metadataUrl !== null) {
-            $out['metadata_url'] = $this->metadataUrl instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->metadataUrl;
-        }
-        if ($this->provider !== null) {
-            $out['provider'] = $this->provider;
-        }
-        if ($this->providerSlug !== null) {
-            $out['provider_slug'] = $this->providerSlug instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->providerSlug;
-        }
-        if ($this->requirePkce !== null) {
-            $out['require_pkce'] = $this->requirePkce;
-        }
-        if ($this->scopes !== null) {
-            $out['scopes'] = $this->scopes;
-        }
-        if ($this->tokenEndpoint !== null) {
-            $out['token_endpoint'] = $this->tokenEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->tokenEndpoint;
-        }
-        if ($this->tokenExchange !== null) {
-            $out['token_exchange'] = $this->tokenExchange->toArray();
-        }
-        if ($this->userinfoEndpoint !== null) {
-            $out['userinfo_endpoint'] = $this->userinfoEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->userinfoEndpoint;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -237,6 +169,17 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
+    {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
     {
         $out = [];
         if ($this->allowSha1Signatures !== null) {
@@ -300,7 +243,7 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
             $out['token_endpoint'] = $this->tokenEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->tokenEndpoint;
         }
         if ($this->tokenExchange !== null) {
-            $out['token_exchange'] = $this->tokenExchange->jsonSerialize();
+            $out['token_exchange'] = ($log ? $this->tokenExchange->jsonSerialize() : $this->tokenExchange->toArray());
         }
         if ($this->userinfoEndpoint !== null) {
             $out['userinfo_endpoint'] = $this->userinfoEndpoint instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->userinfoEndpoint;

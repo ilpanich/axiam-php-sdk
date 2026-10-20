@@ -75,24 +75,7 @@ final class WebauthnAttestationPolicy implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['block_revoked_status'] = $this->blockRevokedStatus;
-        $out['mode'] = $this->mode->toWire();
-        $out['require_fido_certified'] = $this->requireFidoCertified;
-        if ($this->allowedAaguids !== null) {
-            $out['allowed_aaguids'] = $this->allowedAaguids;
-        }
-        if ($this->blockedAaguids !== null) {
-            $out['blocked_aaguids'] = $this->blockedAaguids;
-        }
-        if ($this->minCertification !== null) {
-            $out['min_certification'] = $this->minCertification->toWire();
-        }
-        if ($this->unknownAaguid !== null) {
-            $out['unknown_aaguid'] = $this->unknownAaguid->toWire();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -111,9 +94,20 @@ final class WebauthnAttestationPolicy implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['block_revoked_status'] = $this->blockRevokedStatus;
-        $out['mode'] = $this->mode->value;
+        $out['mode'] = ($log ? $this->mode->value : $this->mode->toWire());
         $out['require_fido_certified'] = $this->requireFidoCertified;
         if ($this->allowedAaguids !== null) {
             $out['allowed_aaguids'] = $this->allowedAaguids;
@@ -122,10 +116,10 @@ final class WebauthnAttestationPolicy implements \JsonSerializable
             $out['blocked_aaguids'] = $this->blockedAaguids;
         }
         if ($this->minCertification !== null) {
-            $out['min_certification'] = $this->minCertification->value;
+            $out['min_certification'] = ($log ? $this->minCertification->value : $this->minCertification->toWire());
         }
         if ($this->unknownAaguid !== null) {
-            $out['unknown_aaguid'] = $this->unknownAaguid->value;
+            $out['unknown_aaguid'] = ($log ? $this->unknownAaguid->value : $this->unknownAaguid->toWire());
         }
 
         return $out;

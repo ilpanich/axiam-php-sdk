@@ -64,25 +64,7 @@ final class NetworkReplyProfileInput implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['session_timeout_secs'] = $this->sessionTimeoutSecs;
-        if ($this->dictionary !== null) {
-            $out['dictionary'] = $this->dictionary;
-        }
-        if ($this->filterId !== null) {
-            $out['filter_id'] = $this->filterId;
-        }
-        if ($this->idleTimeoutSecs !== null) {
-            $out['idle_timeout_secs'] = $this->idleTimeoutSecs;
-        }
-        if ($this->serviceType !== null) {
-            $out['service_type'] = $this->serviceType->toWire();
-        }
-        if ($this->terminationAction !== null) {
-            $out['termination_action'] = $this->terminationAction->toWire();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -101,6 +83,17 @@ final class NetworkReplyProfileInput implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['session_timeout_secs'] = $this->sessionTimeoutSecs;
         if ($this->dictionary !== null) {
@@ -113,10 +106,10 @@ final class NetworkReplyProfileInput implements \JsonSerializable
             $out['idle_timeout_secs'] = $this->idleTimeoutSecs;
         }
         if ($this->serviceType !== null) {
-            $out['service_type'] = $this->serviceType->value;
+            $out['service_type'] = ($log ? $this->serviceType->value : $this->serviceType->toWire());
         }
         if ($this->terminationAction !== null) {
-            $out['termination_action'] = $this->terminationAction->value;
+            $out['termination_action'] = ($log ? $this->terminationAction->value : $this->terminationAction->toWire());
         }
 
         return $out;

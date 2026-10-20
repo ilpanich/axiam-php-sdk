@@ -180,43 +180,7 @@ final class OidcPolicy implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
-        if ($this->cimd !== null) {
-            $out['cimd'] = $this->cimd->toArray();
-        }
-        if ($this->dcrAllowedRedirectHosts !== null) {
-            $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
-        }
-        if ($this->dcrAllowedScopes !== null) {
-            $out['dcr_allowed_scopes'] = $this->dcrAllowedScopes;
-        }
-        if ($this->dcrMaxClients !== null) {
-            $out['dcr_max_clients'] = $this->dcrMaxClients;
-        }
-        if ($this->dcrUnusedClientTtlDays !== null) {
-            $out['dcr_unused_client_ttl_days'] = $this->dcrUnusedClientTtlDays;
-        }
-        if ($this->defaultLocale !== null) {
-            $out['default_locale'] = $this->defaultLocale;
-        }
-        if ($this->dynamicRegistration !== null) {
-            $out['dynamic_registration'] = $this->dynamicRegistration;
-        }
-        if ($this->externalClientAllowedResources !== null) {
-            $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
-        }
-        if ($this->samlIdpEnabled !== null) {
-            $out['saml_idp_enabled'] = $this->samlIdpEnabled;
-        }
-        if ($this->ssfEnabled !== null) {
-            $out['ssf_enabled'] = $this->ssfEnabled;
-        }
-        if ($this->ssfInactiveReason !== null) {
-            $out['ssf_inactive_reason'] = $this->ssfInactiveReason;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -235,10 +199,21 @@ final class OidcPolicy implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
         if ($this->cimd !== null) {
-            $out['cimd'] = $this->cimd->jsonSerialize();
+            $out['cimd'] = ($log ? $this->cimd->jsonSerialize() : $this->cimd->toArray());
         }
         if ($this->dcrAllowedRedirectHosts !== null) {
             $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;

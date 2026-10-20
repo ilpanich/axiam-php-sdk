@@ -57,6 +57,11 @@ final class OpenEnumRefusalTest extends TestCase
      */
     public function testEveryOpenEnumRefusesToEncodeItsUnknownCase(string $enum): void
     {
+        foreach ($enum::cases() as $case) {
+            if ($case !== $enum::Unknown) { // @phpstan-ignore-line
+                self::assertSame($case->value, $case->toWire()); // @phpstan-ignore-line
+            }
+        }
         $unknown = $enum::fromWire('a_value_from_2027'); // @phpstan-ignore-line
         self::assertSame($enum::Unknown, $unknown); // @phpstan-ignore-line
         $this->expectException(ValidationError::class);

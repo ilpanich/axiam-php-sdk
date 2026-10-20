@@ -59,16 +59,7 @@ final class SetOrgEmailConfig implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['enabled'] = $this->enabled;
-        $out['from_email'] = $this->fromEmail;
-        $out['from_name'] = $this->fromName;
-        $out['provider'] = $this->provider->toArray();
-        if ($this->replyTo !== null) {
-            $out['reply_to'] = $this->replyTo;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -87,11 +78,22 @@ final class SetOrgEmailConfig implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['enabled'] = $this->enabled;
         $out['from_email'] = $this->fromEmail;
         $out['from_name'] = $this->fromName;
-        $out['provider'] = $this->provider->jsonSerialize();
+        $out['provider'] = ($log ? $this->provider->jsonSerialize() : $this->provider->toArray());
         if ($this->replyTo !== null) {
             $out['reply_to'] = $this->replyTo;
         }

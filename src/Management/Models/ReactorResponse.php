@@ -92,26 +92,7 @@ final class ReactorResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['description'] = $this->description;
-        $out['enabled'] = $this->enabled;
-        $out['events'] = $this->events;
-        $out['failure_policy'] = $this->failurePolicy->toWire();
-        $out['id'] = $this->id;
-        $out['mode'] = $this->mode->toWire();
-        $out['name'] = $this->name;
-        $out['priority'] = $this->priority;
-        $out['recent_timeout_count'] = $this->recentTimeoutCount;
-        $out['recent_veto_count'] = $this->recentVetoCount;
-        $out['tenant_id'] = $this->tenantId;
-        $out['timeout_ms'] = $this->timeoutMs;
-        $out['updated_at'] = $this->updatedAt;
-        if ($this->lastSeenAt !== null) {
-            $out['last_seen_at'] = $this->lastSeenAt;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -130,14 +111,25 @@ final class ReactorResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['description'] = $this->description;
         $out['enabled'] = $this->enabled;
         $out['events'] = $this->events;
-        $out['failure_policy'] = $this->failurePolicy->value;
+        $out['failure_policy'] = ($log ? $this->failurePolicy->value : $this->failurePolicy->toWire());
         $out['id'] = $this->id;
-        $out['mode'] = $this->mode->value;
+        $out['mode'] = ($log ? $this->mode->value : $this->mode->toWire());
         $out['name'] = $this->name;
         $out['priority'] = $this->priority;
         $out['recent_timeout_count'] = $this->recentTimeoutCount;

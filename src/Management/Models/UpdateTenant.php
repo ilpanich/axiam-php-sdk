@@ -56,21 +56,7 @@ final class UpdateTenant implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        if ($this->metadata !== null) {
-            $out['metadata'] = $this->metadata;
-        }
-        if ($this->name !== null) {
-            $out['name'] = $this->name;
-        }
-        if ($this->slug !== null) {
-            $out['slug'] = $this->slug;
-        }
-        if ($this->status !== null) {
-            $out['status'] = $this->status->toWire();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -89,6 +75,17 @@ final class UpdateTenant implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         if ($this->metadata !== null) {
             $out['metadata'] = $this->metadata;
@@ -100,7 +97,7 @@ final class UpdateTenant implements \JsonSerializable
             $out['slug'] = $this->slug;
         }
         if ($this->status !== null) {
-            $out['status'] = $this->status->value;
+            $out['status'] = ($log ? $this->status->value : $this->status->toWire());
         }
 
         return $out;

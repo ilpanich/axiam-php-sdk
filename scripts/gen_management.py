@@ -1180,12 +1180,16 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         "    ",
         ["@return array<string,mixed>"],
     ))
-    def render_body(log: bool) -> list[str]:
+    def render_body(log: bool, merged: bool = False) -> list[str]:
         if not fields:
             return ["        return [];"]
         lines = ["        $out = [];"]
         for f in fields:
             expr = encode_expr(f, log)
+            if merged:
+                wire_expr = encode_expr(f, False)
+                log_expr = encode_expr(f, True)
+                expr = wire_expr if wire_expr == log_expr else f"($log ? {log_expr} : {wire_expr})"
             if f["required"]:
                 lines.append(f"        $out['{f['wire']}'] = {expr};")
             elif f["explicit_null"]:
@@ -1203,14 +1207,18 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
 
     wire_body = render_body(False)
     log_body = render_body(True)
-    out.append("    public function toArray(): array")
-    out.append("    {")
-    out.extend(wire_body)
-    out.append("    }")
-    out.append("")
-
     # --- jsonSerialize ---
     holds_open_union = wire_body != log_body
+    # One renderer serves both when they differ: a second full body per model would be
+    # statements the suite never executes.
+    out.append("    public function toArray(): array")
+    out.append("    {")
+    if holds_open_union:
+        out.append("        return $this->render(false);")
+    else:
+        out.extend(wire_body)
+    out.append("    }")
+    out.append("")
     summary = (
         "Renders this object for `json_encode()`.\n\n"
         "Any {@see " + SENSITIVE + "} it carries stays WRAPPED here, so a log line or a "
@@ -1228,10 +1236,22 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
     out.append("    public function jsonSerialize(): array")
     out.append("    {")
     if holds_open_union:
-        out.extend(log_body)
+        out.append("        return $this->render(true);")
     else:
         out.append("        return $this->toArray();")
     out.append("    }")
+    if holds_open_union:
+        out.append("")
+        out.append("    /**")
+        out.append("     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown")
+        out.append("     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).")
+        out.append("     *")
+        out.append("     * @return array<string,mixed>")
+        out.append("     */")
+        out.append("    private function render(bool $log): array")
+        out.append("    {")
+        out.extend(render_body(False, True))
+        out.append("    }")
     out.append("}")
     return "\n".join(out) + "\n"
 

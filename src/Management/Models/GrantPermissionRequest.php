@@ -54,16 +54,7 @@ final class GrantPermissionRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['permission_id'] = $this->permissionId;
-        if ($this->effect !== null) {
-            $out['effect'] = $this->effect->toWire();
-        }
-        if ($this->scopeIds !== null) {
-            $out['scope_ids'] = $this->scopeIds;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -82,10 +73,21 @@ final class GrantPermissionRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['permission_id'] = $this->permissionId;
         if ($this->effect !== null) {
-            $out['effect'] = $this->effect->value;
+            $out['effect'] = ($log ? $this->effect->value : $this->effect->toWire());
         }
         if ($this->scopeIds !== null) {
             $out['scope_ids'] = $this->scopeIds;

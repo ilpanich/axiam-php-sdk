@@ -75,24 +75,7 @@ final class CreateScimTokenResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['created_by'] = $this->createdBy;
-        $out['expires_at'] = $this->expiresAt;
-        $out['id'] = $this->id;
-        $out['name'] = $this->name;
-        $out['status'] = $this->status->toWire();
-        $out['tenant_id'] = $this->tenantId;
-        $out['user_id'] = $this->userId;
-        $out['provisioning_token'] = $this->provisioningToken;
-        if ($this->lastUsedAt !== null) {
-            $out['last_used_at'] = $this->lastUsedAt;
-        }
-        if ($this->revokedAt !== null) {
-            $out['revoked_at'] = $this->revokedAt;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -111,13 +94,24 @@ final class CreateScimTokenResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['created_by'] = $this->createdBy;
         $out['expires_at'] = $this->expiresAt;
         $out['id'] = $this->id;
         $out['name'] = $this->name;
-        $out['status'] = $this->status->value;
+        $out['status'] = ($log ? $this->status->value : $this->status->toWire());
         $out['tenant_id'] = $this->tenantId;
         $out['user_id'] = $this->userId;
         $out['provisioning_token'] = $this->provisioningToken;

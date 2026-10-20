@@ -72,21 +72,7 @@ final class CreateCaCertificateRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['key_algorithm'] = $this->keyAlgorithm->toWire();
-        $out['subject'] = $this->subject;
-        $out['validity_days'] = $this->validityDays;
-        if ($this->intermediateSubject !== null) {
-            $out['intermediate_subject'] = $this->intermediateSubject;
-        }
-        if ($this->intermediateValidityDays !== null) {
-            $out['intermediate_validity_days'] = $this->intermediateValidityDays;
-        }
-        if ($this->issueFromRoot !== null) {
-            $out['issue_from_root'] = $this->issueFromRoot;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -105,8 +91,19 @@ final class CreateCaCertificateRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['key_algorithm'] = $this->keyAlgorithm->value;
+        $out['key_algorithm'] = ($log ? $this->keyAlgorithm->value : $this->keyAlgorithm->toWire());
         $out['subject'] = $this->subject;
         $out['validity_days'] = $this->validityDays;
         if ($this->intermediateSubject !== null) {

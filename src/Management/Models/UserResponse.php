@@ -82,24 +82,7 @@ final class UserResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['email'] = $this->email;
-        $out['email_verified'] = $this->emailVerified;
-        $out['failed_login_attempts'] = $this->failedLoginAttempts;
-        $out['id'] = $this->id;
-        $out['is_locked'] = $this->isLocked;
-        $out['metadata'] = $this->metadata;
-        $out['mfa_enabled'] = $this->mfaEnabled;
-        $out['status'] = $this->status->toWire();
-        $out['tenant_id'] = $this->tenantId;
-        $out['updated_at'] = $this->updatedAt;
-        $out['username'] = $this->username;
-        if ($this->lockedUntil !== null) {
-            $out['locked_until'] = $this->lockedUntil;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -118,6 +101,17 @@ final class UserResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['email'] = $this->email;
@@ -127,7 +121,7 @@ final class UserResponse implements \JsonSerializable
         $out['is_locked'] = $this->isLocked;
         $out['metadata'] = $this->metadata;
         $out['mfa_enabled'] = $this->mfaEnabled;
-        $out['status'] = $this->status->value;
+        $out['status'] = ($log ? $this->status->value : $this->status->toWire());
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
         $out['username'] = $this->username;

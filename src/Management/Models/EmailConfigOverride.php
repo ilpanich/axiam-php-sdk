@@ -60,24 +60,7 @@ final class EmailConfigOverride implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        if ($this->enabled !== null) {
-            $out['enabled'] = $this->enabled;
-        }
-        if ($this->fromEmail !== null) {
-            $out['from_email'] = $this->fromEmail;
-        }
-        if ($this->fromName !== null) {
-            $out['from_name'] = $this->fromName;
-        }
-        if ($this->provider !== null) {
-            $out['provider'] = $this->provider->toArray();
-        }
-        if ($this->replyTo !== null) {
-            $out['reply_to'] = $this->replyTo;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -96,6 +79,17 @@ final class EmailConfigOverride implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         if ($this->enabled !== null) {
             $out['enabled'] = $this->enabled;
@@ -107,7 +101,7 @@ final class EmailConfigOverride implements \JsonSerializable
             $out['from_name'] = $this->fromName;
         }
         if ($this->provider !== null) {
-            $out['provider'] = $this->provider->jsonSerialize();
+            $out['provider'] = ($log ? $this->provider->jsonSerialize() : $this->provider->toArray());
         }
         if ($this->replyTo !== null) {
             $out['reply_to'] = $this->replyTo;

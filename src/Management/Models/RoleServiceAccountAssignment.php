@@ -57,17 +57,7 @@ final class RoleServiceAccountAssignment implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['inherit'] = $this->inherit;
-        $out['service_account'] = $this->serviceAccount->toArray();
-        if ($this->resourceId !== null) {
-            $out['resource_id'] = $this->resourceId;
-        }
-        if ($this->tenantScope !== null && $this->tenantScope !== []) {
-            $out['tenant_scope'] = $this->tenantScope;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -86,9 +76,20 @@ final class RoleServiceAccountAssignment implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['inherit'] = $this->inherit;
-        $out['service_account'] = $this->serviceAccount->jsonSerialize();
+        $out['service_account'] = ($log ? $this->serviceAccount->jsonSerialize() : $this->serviceAccount->toArray());
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;
         }

@@ -52,13 +52,7 @@ final class CreatePgpKeyRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['algorithm'] = $this->algorithm->toWire();
-        $out['email'] = $this->email;
-        $out['name'] = $this->name;
-        $out['purpose'] = $this->purpose->toWire();
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -77,11 +71,22 @@ final class CreatePgpKeyRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['algorithm'] = $this->algorithm->value;
+        $out['algorithm'] = ($log ? $this->algorithm->value : $this->algorithm->toWire());
         $out['email'] = $this->email;
         $out['name'] = $this->name;
-        $out['purpose'] = $this->purpose->value;
+        $out['purpose'] = ($log ? $this->purpose->value : $this->purpose->toWire());
 
         return $out;
     }

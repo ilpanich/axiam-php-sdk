@@ -113,33 +113,7 @@ final class DirectoryConfig implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['base_dn'] = $this->baseDn;
-        $out['bind_dn'] = $this->bindDn;
-        $out['created_at'] = $this->createdAt;
-        $out['enabled'] = $this->enabled;
-        $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->toArray(), $this->groupMappings);
-        $out['group_member_attribute'] = $this->groupMemberAttribute;
-        $out['group_nesting_depth'] = $this->groupNestingDepth;
-        $out['id'] = $this->id;
-        $out['jit_provisioning'] = $this->jitProvisioning;
-        $out['kind'] = $this->kind->toWire();
-        $out['start_tls'] = $this->startTls;
-        $out['sync_interval_secs'] = $this->syncIntervalSecs;
-        $out['tenant_id'] = $this->tenantId;
-        $out['trust_anchors_pem'] = $this->trustAnchorsPem;
-        $out['updated_at'] = $this->updatedAt;
-        $out['url'] = $this->url;
-        $out['user_attribute_map'] = $this->userAttributeMap->toArray();
-        $out['user_filter'] = $this->userFilter;
-        if ($this->groupBaseDn !== null) {
-            $out['group_base_dn'] = $this->groupBaseDn;
-        }
-        if ($this->groupFilter !== null) {
-            $out['group_filter'] = $this->groupFilter;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -158,24 +132,35 @@ final class DirectoryConfig implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['base_dn'] = $this->baseDn;
         $out['bind_dn'] = $this->bindDn;
         $out['created_at'] = $this->createdAt;
         $out['enabled'] = $this->enabled;
-        $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->jsonSerialize(), $this->groupMappings);
+        $out['group_mappings'] = ($log ? array_map(static fn (GroupMapping $v): array => $v->jsonSerialize(), $this->groupMappings) : array_map(static fn (GroupMapping $v): array => $v->toArray(), $this->groupMappings));
         $out['group_member_attribute'] = $this->groupMemberAttribute;
         $out['group_nesting_depth'] = $this->groupNestingDepth;
         $out['id'] = $this->id;
         $out['jit_provisioning'] = $this->jitProvisioning;
-        $out['kind'] = $this->kind->value;
+        $out['kind'] = ($log ? $this->kind->value : $this->kind->toWire());
         $out['start_tls'] = $this->startTls;
         $out['sync_interval_secs'] = $this->syncIntervalSecs;
         $out['tenant_id'] = $this->tenantId;
         $out['trust_anchors_pem'] = $this->trustAnchorsPem;
         $out['updated_at'] = $this->updatedAt;
         $out['url'] = $this->url;
-        $out['user_attribute_map'] = $this->userAttributeMap->jsonSerialize();
+        $out['user_attribute_map'] = ($log ? $this->userAttributeMap->jsonSerialize() : $this->userAttributeMap->toArray());
         $out['user_filter'] = $this->userFilter;
         if ($this->groupBaseDn !== null) {
             $out['group_base_dn'] = $this->groupBaseDn;

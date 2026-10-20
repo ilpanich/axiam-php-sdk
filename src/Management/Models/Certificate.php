@@ -103,28 +103,7 @@ final class Certificate implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['cert_type'] = $this->certType->toWire();
-        $out['created_at'] = $this->createdAt;
-        $out['fingerprint'] = $this->fingerprint;
-        $out['id'] = $this->id;
-        $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['key_algorithm'] = $this->keyAlgorithm->toWire();
-        $out['metadata'] = $this->metadata;
-        $out['not_after'] = $this->notAfter;
-        $out['not_before'] = $this->notBefore;
-        $out['public_cert_pem'] = $this->publicCertPem;
-        $out['status'] = $this->status->toWire();
-        $out['subject'] = $this->subject;
-        $out['tenant_id'] = $this->tenantId;
-        if ($this->userId !== null) {
-            $out['user_id'] = $this->userId;
-        }
-        if ($this->boundServiceAccountId !== null) {
-            $out['bound_service_account_id'] = $this->boundServiceAccountId;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -143,18 +122,29 @@ final class Certificate implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['cert_type'] = $this->certType->value;
+        $out['cert_type'] = ($log ? $this->certType->value : $this->certType->toWire());
         $out['created_at'] = $this->createdAt;
         $out['fingerprint'] = $this->fingerprint;
         $out['id'] = $this->id;
         $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['key_algorithm'] = $this->keyAlgorithm->value;
+        $out['key_algorithm'] = ($log ? $this->keyAlgorithm->value : $this->keyAlgorithm->toWire());
         $out['metadata'] = $this->metadata;
         $out['not_after'] = $this->notAfter;
         $out['not_before'] = $this->notBefore;
         $out['public_cert_pem'] = $this->publicCertPem;
-        $out['status'] = $this->status->value;
+        $out['status'] = ($log ? $this->status->value : $this->status->toWire());
         $out['subject'] = $this->subject;
         $out['tenant_id'] = $this->tenantId;
         if ($this->userId !== null) {

@@ -59,17 +59,7 @@ final class SamlSpMetadataDraft implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['service_provider'] = $this->serviceProvider->toArray();
-        $out['warnings'] = $this->warnings;
-        if ($this->encryptionCertificateFingerprint !== null) {
-            $out['encryption_certificate_fingerprint'] = $this->encryptionCertificateFingerprint;
-        }
-        if ($this->signingCertificateFingerprint !== null) {
-            $out['signing_certificate_fingerprint'] = $this->signingCertificateFingerprint;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -88,8 +78,19 @@ final class SamlSpMetadataDraft implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['service_provider'] = $this->serviceProvider->jsonSerialize();
+        $out['service_provider'] = ($log ? $this->serviceProvider->jsonSerialize() : $this->serviceProvider->toArray());
         $out['warnings'] = $this->warnings;
         if ($this->encryptionCertificateFingerprint !== null) {
             $out['encryption_certificate_fingerprint'] = $this->encryptionCertificateFingerprint;

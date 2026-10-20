@@ -50,14 +50,7 @@ final class IssueSamlIdpCredential implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['slot'] = $this->slot->toWire();
-        if ($this->validityDays !== null) {
-            $out['validity_days'] = $this->validityDays;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -76,9 +69,20 @@ final class IssueSamlIdpCredential implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['slot'] = $this->slot->value;
+        $out['slot'] = ($log ? $this->slot->value : $this->slot->toWire());
         if ($this->validityDays !== null) {
             $out['validity_days'] = $this->validityDays;
         }

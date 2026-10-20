@@ -57,15 +57,7 @@ final class AcsEndpoint implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['binding'] = $this->binding->toWire();
-        $out['index'] = $this->index;
-        $out['url'] = $this->url;
-        if ($this->isDefault !== null) {
-            $out['is_default'] = $this->isDefault;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -84,8 +76,19 @@ final class AcsEndpoint implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['binding'] = $this->binding->value;
+        $out['binding'] = ($log ? $this->binding->value : $this->binding->toWire());
         $out['index'] = $this->index;
         $out['url'] = $this->url;
         if ($this->isDefault !== null) {

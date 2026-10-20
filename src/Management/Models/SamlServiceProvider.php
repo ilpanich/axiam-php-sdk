@@ -101,36 +101,7 @@ final class SamlServiceProvider implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['acs_urls'] = array_map(static fn (AcsEndpoint $v): array => $v->toArray(), $this->acsUrls);
-        $out['allow_idp_initiated'] = $this->allowIdpInitiated;
-        $out['allowed_groups'] = $this->allowedGroups;
-        $out['attribute_mappings'] = array_map(static fn (AttributeMapping $v): array => $v->toArray(), $this->attributeMappings);
-        $out['created_at'] = $this->createdAt;
-        $out['display_name'] = $this->displayName;
-        $out['enabled'] = $this->enabled;
-        $out['encrypt_assertions'] = $this->encryptAssertions;
-        $out['entity_id'] = $this->entityId;
-        $out['id'] = $this->id;
-        $out['name_id_format'] = $this->nameIdFormat->toWire();
-        $out['sign_responses'] = $this->signResponses;
-        $out['tenant_id'] = $this->tenantId;
-        $out['updated_at'] = $this->updatedAt;
-        $out['want_authn_requests_signed'] = $this->wantAuthnRequestsSigned;
-        if ($this->sloBinding !== null) {
-            $out['slo_binding'] = $this->sloBinding->toWire();
-        }
-        if ($this->sloUrl !== null) {
-            $out['slo_url'] = $this->sloUrl;
-        }
-        if ($this->spEncryptionCertPem !== null) {
-            $out['sp_encryption_cert_pem'] = $this->spEncryptionCertPem;
-        }
-        if ($this->spSigningCertPem !== null) {
-            $out['sp_signing_cert_pem'] = $this->spSigningCertPem;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -149,24 +120,35 @@ final class SamlServiceProvider implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['acs_urls'] = array_map(static fn (AcsEndpoint $v): array => $v->jsonSerialize(), $this->acsUrls);
+        $out['acs_urls'] = ($log ? array_map(static fn (AcsEndpoint $v): array => $v->jsonSerialize(), $this->acsUrls) : array_map(static fn (AcsEndpoint $v): array => $v->toArray(), $this->acsUrls));
         $out['allow_idp_initiated'] = $this->allowIdpInitiated;
         $out['allowed_groups'] = $this->allowedGroups;
-        $out['attribute_mappings'] = array_map(static fn (AttributeMapping $v): array => $v->jsonSerialize(), $this->attributeMappings);
+        $out['attribute_mappings'] = ($log ? array_map(static fn (AttributeMapping $v): array => $v->jsonSerialize(), $this->attributeMappings) : array_map(static fn (AttributeMapping $v): array => $v->toArray(), $this->attributeMappings));
         $out['created_at'] = $this->createdAt;
         $out['display_name'] = $this->displayName;
         $out['enabled'] = $this->enabled;
         $out['encrypt_assertions'] = $this->encryptAssertions;
         $out['entity_id'] = $this->entityId;
         $out['id'] = $this->id;
-        $out['name_id_format'] = $this->nameIdFormat->value;
+        $out['name_id_format'] = ($log ? $this->nameIdFormat->value : $this->nameIdFormat->toWire());
         $out['sign_responses'] = $this->signResponses;
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
         $out['want_authn_requests_signed'] = $this->wantAuthnRequestsSigned;
         if ($this->sloBinding !== null) {
-            $out['slo_binding'] = $this->sloBinding->value;
+            $out['slo_binding'] = ($log ? $this->sloBinding->value : $this->sloBinding->toWire());
         }
         if ($this->sloUrl !== null) {
             $out['slo_url'] = $this->sloUrl;

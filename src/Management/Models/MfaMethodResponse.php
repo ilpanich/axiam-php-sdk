@@ -55,16 +55,7 @@ final class MfaMethodResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['method_id'] = $this->methodId;
-        $out['method_type'] = $this->methodType->toWire();
-        $out['name'] = $this->name;
-        if ($this->lastUsedAt !== null) {
-            $out['last_used_at'] = $this->lastUsedAt;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -83,10 +74,21 @@ final class MfaMethodResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['method_id'] = $this->methodId;
-        $out['method_type'] = $this->methodType->value;
+        $out['method_type'] = ($log ? $this->methodType->value : $this->methodType->toWire());
         $out['name'] = $this->name;
         if ($this->lastUsedAt !== null) {
             $out['last_used_at'] = $this->lastUsedAt;

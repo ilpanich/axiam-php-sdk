@@ -88,25 +88,7 @@ final class SecuritySettings implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['certificate'] = $this->certificate->toArray();
-        $out['created_at'] = $this->createdAt;
-        $out['email'] = $this->email->toArray();
-        $out['id'] = $this->id;
-        $out['lockout'] = $this->lockout->toArray();
-        $out['mfa'] = $this->mfa->toArray();
-        $out['notification'] = $this->notification->toArray();
-        $out['oidc'] = $this->oidc->toArray();
-        $out['opaque'] = $this->opaque->toArray();
-        $out['password'] = $this->password->toArray();
-        $out['privacy'] = $this->privacy->toArray();
-        $out['scope'] = $this->scope->toWire();
-        $out['scope_id'] = $this->scopeId;
-        $out['token'] = $this->token->toArray();
-        $out['updated_at'] = $this->updatedAt;
-        $out['webauthn'] = $this->webauthn->toArray();
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -125,23 +107,34 @@ final class SecuritySettings implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['certificate'] = $this->certificate->jsonSerialize();
+        $out['certificate'] = ($log ? $this->certificate->jsonSerialize() : $this->certificate->toArray());
         $out['created_at'] = $this->createdAt;
-        $out['email'] = $this->email->jsonSerialize();
+        $out['email'] = ($log ? $this->email->jsonSerialize() : $this->email->toArray());
         $out['id'] = $this->id;
-        $out['lockout'] = $this->lockout->jsonSerialize();
-        $out['mfa'] = $this->mfa->jsonSerialize();
-        $out['notification'] = $this->notification->jsonSerialize();
-        $out['oidc'] = $this->oidc->jsonSerialize();
-        $out['opaque'] = $this->opaque->jsonSerialize();
-        $out['password'] = $this->password->jsonSerialize();
-        $out['privacy'] = $this->privacy->jsonSerialize();
-        $out['scope'] = $this->scope->value;
+        $out['lockout'] = ($log ? $this->lockout->jsonSerialize() : $this->lockout->toArray());
+        $out['mfa'] = ($log ? $this->mfa->jsonSerialize() : $this->mfa->toArray());
+        $out['notification'] = ($log ? $this->notification->jsonSerialize() : $this->notification->toArray());
+        $out['oidc'] = ($log ? $this->oidc->jsonSerialize() : $this->oidc->toArray());
+        $out['opaque'] = ($log ? $this->opaque->jsonSerialize() : $this->opaque->toArray());
+        $out['password'] = ($log ? $this->password->jsonSerialize() : $this->password->toArray());
+        $out['privacy'] = ($log ? $this->privacy->jsonSerialize() : $this->privacy->toArray());
+        $out['scope'] = ($log ? $this->scope->value : $this->scope->toWire());
         $out['scope_id'] = $this->scopeId;
-        $out['token'] = $this->token->jsonSerialize();
+        $out['token'] = ($log ? $this->token->jsonSerialize() : $this->token->toArray());
         $out['updated_at'] = $this->updatedAt;
-        $out['webauthn'] = $this->webauthn->jsonSerialize();
+        $out['webauthn'] = ($log ? $this->webauthn->jsonSerialize() : $this->webauthn->toArray());
 
         return $out;
     }

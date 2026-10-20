@@ -70,23 +70,7 @@ final class AuditLogEntry implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['action'] = $this->action;
-        $out['actor_id'] = $this->actorId;
-        $out['actor_type'] = $this->actorType->toWire();
-        $out['id'] = $this->id;
-        $out['metadata'] = $this->metadata;
-        $out['outcome'] = $this->outcome->toWire();
-        $out['tenant_id'] = $this->tenantId;
-        $out['timestamp'] = $this->timestamp;
-        if ($this->ipAddress !== null) {
-            $out['ip_address'] = $this->ipAddress;
-        }
-        if ($this->resourceId !== null) {
-            $out['resource_id'] = $this->resourceId;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -105,13 +89,24 @@ final class AuditLogEntry implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['action'] = $this->action;
         $out['actor_id'] = $this->actorId;
-        $out['actor_type'] = $this->actorType->value;
+        $out['actor_type'] = ($log ? $this->actorType->value : $this->actorType->toWire());
         $out['id'] = $this->id;
         $out['metadata'] = $this->metadata;
-        $out['outcome'] = $this->outcome->value;
+        $out['outcome'] = ($log ? $this->outcome->value : $this->outcome->toWire());
         $out['tenant_id'] = $this->tenantId;
         $out['timestamp'] = $this->timestamp;
         if ($this->ipAddress !== null) {

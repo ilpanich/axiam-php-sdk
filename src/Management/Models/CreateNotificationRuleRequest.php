@@ -57,16 +57,7 @@ final class CreateNotificationRuleRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['description'] = $this->description;
-        $out['events'] = array_map(static fn (NotificationEventType $v): string => $v->toWire(), $this->events);
-        $out['name'] = $this->name;
-        $out['recipient_emails'] = $this->recipientEmails;
-        if ($this->windowMinutes !== null) {
-            $out['window_minutes'] = $this->windowMinutes;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -85,9 +76,20 @@ final class CreateNotificationRuleRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['description'] = $this->description;
-        $out['events'] = array_map(static fn (NotificationEventType $v): string => $v->value, $this->events);
+        $out['events'] = ($log ? array_map(static fn (NotificationEventType $v): string => $v->value, $this->events) : array_map(static fn (NotificationEventType $v): string => $v->toWire(), $this->events));
         $out['name'] = $this->name;
         $out['recipient_emails'] = $this->recipientEmails;
         if ($this->windowMinutes !== null) {

@@ -90,26 +90,7 @@ final class NetworkSegmentResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['created_by'] = $this->createdBy;
-        $out['enabled'] = $this->enabled;
-        $out['filter_ids'] = $this->filterIds;
-        $out['id'] = $this->id;
-        $out['kind'] = $this->kind->toWire();
-        $out['name'] = $this->name;
-        $out['path'] = $this->path;
-        $out['site_key'] = $this->siteKey;
-        $out['tenant_id'] = $this->tenantId;
-        $out['updated_at'] = $this->updatedAt;
-        $out['updated_by'] = $this->updatedBy;
-        $out['version'] = $this->version;
-        $out['vlan_id'] = $this->vlanId;
-        if ($this->rank !== null) {
-            $out['rank'] = $this->rank;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -128,13 +109,24 @@ final class NetworkSegmentResponse implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['created_by'] = $this->createdBy;
         $out['enabled'] = $this->enabled;
         $out['filter_ids'] = $this->filterIds;
         $out['id'] = $this->id;
-        $out['kind'] = $this->kind->value;
+        $out['kind'] = ($log ? $this->kind->value : $this->kind->toWire());
         $out['name'] = $this->name;
         $out['path'] = $this->path;
         $out['site_key'] = $this->siteKey;

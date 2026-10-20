@@ -88,29 +88,7 @@ final class NetworkReplyProfile implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['created_by'] = $this->createdBy;
-        $out['dictionary'] = $this->dictionary;
-        $out['segment_id'] = $this->segmentId;
-        $out['session_timeout_clamped'] = $this->sessionTimeoutClamped;
-        $out['session_timeout_secs'] = $this->sessionTimeoutSecs;
-        $out['tenant_id'] = $this->tenantId;
-        $out['termination_action'] = $this->terminationAction->toWire();
-        $out['updated_at'] = $this->updatedAt;
-        $out['updated_by'] = $this->updatedBy;
-        $out['version'] = $this->version;
-        if ($this->filterId !== null) {
-            $out['filter_id'] = $this->filterId;
-        }
-        if ($this->idleTimeoutSecs !== null) {
-            $out['idle_timeout_secs'] = $this->idleTimeoutSecs;
-        }
-        if ($this->serviceType !== null) {
-            $out['service_type'] = $this->serviceType->toWire();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -129,6 +107,17 @@ final class NetworkReplyProfile implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['created_by'] = $this->createdBy;
@@ -137,7 +126,7 @@ final class NetworkReplyProfile implements \JsonSerializable
         $out['session_timeout_clamped'] = $this->sessionTimeoutClamped;
         $out['session_timeout_secs'] = $this->sessionTimeoutSecs;
         $out['tenant_id'] = $this->tenantId;
-        $out['termination_action'] = $this->terminationAction->value;
+        $out['termination_action'] = ($log ? $this->terminationAction->value : $this->terminationAction->toWire());
         $out['updated_at'] = $this->updatedAt;
         $out['updated_by'] = $this->updatedBy;
         $out['version'] = $this->version;
@@ -148,7 +137,7 @@ final class NetworkReplyProfile implements \JsonSerializable
             $out['idle_timeout_secs'] = $this->idleTimeoutSecs;
         }
         if ($this->serviceType !== null) {
-            $out['service_type'] = $this->serviceType->value;
+            $out['service_type'] = ($log ? $this->serviceType->value : $this->serviceType->toWire());
         }
 
         return $out;

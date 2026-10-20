@@ -78,23 +78,7 @@ final class CreateCertificateRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['cert_type'] = $this->certType->toWire();
-        $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['key_algorithm'] = $this->keyAlgorithm->toWire();
-        $out['subject'] = $this->subject;
-        $out['validity_days'] = $this->validityDays;
-        if ($this->metadata !== null) {
-            $out['metadata'] = $this->metadata;
-        }
-        if ($this->subjectAltNames !== null) {
-            $out['subject_alt_names'] = array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames);
-        }
-        if ($this->userId !== null) {
-            $out['user_id'] = $this->userId;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -113,17 +97,28 @@ final class CreateCertificateRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['cert_type'] = $this->certType->value;
+        $out['cert_type'] = ($log ? $this->certType->value : $this->certType->toWire());
         $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['key_algorithm'] = $this->keyAlgorithm->value;
+        $out['key_algorithm'] = ($log ? $this->keyAlgorithm->value : $this->keyAlgorithm->toWire());
         $out['subject'] = $this->subject;
         $out['validity_days'] = $this->validityDays;
         if ($this->metadata !== null) {
             $out['metadata'] = $this->metadata;
         }
         if ($this->subjectAltNames !== null) {
-            $out['subject_alt_names'] = array_map(static fn (SubjectAltNameVariant $v): array => $v->jsonSerialize(), $this->subjectAltNames);
+            $out['subject_alt_names'] = ($log ? array_map(static fn (SubjectAltNameVariant $v): array => $v->jsonSerialize(), $this->subjectAltNames) : array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames));
         }
         if ($this->userId !== null) {
             $out['user_id'] = $this->userId;

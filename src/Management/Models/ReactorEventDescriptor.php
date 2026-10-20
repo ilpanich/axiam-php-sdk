@@ -59,15 +59,7 @@ final class ReactorEventDescriptor implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['default_failure_policy'] = $this->defaultFailurePolicy->toWire();
-        $out['description'] = $this->description;
-        $out['interceptable'] = $this->interceptable;
-        $out['mutable'] = $this->mutable;
-        $out['mutable_fields'] = $this->mutableFields;
-        $out['name'] = $this->name;
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -86,8 +78,19 @@ final class ReactorEventDescriptor implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['default_failure_policy'] = $this->defaultFailurePolicy->value;
+        $out['default_failure_policy'] = ($log ? $this->defaultFailurePolicy->value : $this->defaultFailurePolicy->toWire());
         $out['description'] = $this->description;
         $out['interceptable'] = $this->interceptable;
         $out['mutable'] = $this->mutable;

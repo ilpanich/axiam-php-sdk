@@ -70,21 +70,7 @@ final class EmailConfig implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['created_at'] = $this->createdAt;
-        $out['enabled'] = $this->enabled;
-        $out['from_email'] = $this->fromEmail;
-        $out['from_name'] = $this->fromName;
-        $out['id'] = $this->id;
-        $out['provider'] = $this->provider->toArray();
-        $out['scope'] = $this->scope->toWire();
-        $out['scope_id'] = $this->scopeId;
-        $out['updated_at'] = $this->updatedAt;
-        if ($this->replyTo !== null) {
-            $out['reply_to'] = $this->replyTo;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -103,14 +89,25 @@ final class EmailConfig implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['enabled'] = $this->enabled;
         $out['from_email'] = $this->fromEmail;
         $out['from_name'] = $this->fromName;
         $out['id'] = $this->id;
-        $out['provider'] = $this->provider->jsonSerialize();
-        $out['scope'] = $this->scope->value;
+        $out['provider'] = ($log ? $this->provider->jsonSerialize() : $this->provider->toArray());
+        $out['scope'] = ($log ? $this->scope->value : $this->scope->toWire());
         $out['scope_id'] = $this->scopeId;
         $out['updated_at'] = $this->updatedAt;
         if ($this->replyTo !== null) {

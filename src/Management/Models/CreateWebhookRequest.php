@@ -53,15 +53,7 @@ final class CreateWebhookRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['events'] = $this->events;
-        $out['secret'] = $this->secret;
-        $out['url'] = $this->url;
-        if ($this->retryPolicy !== null) {
-            $out['retry_policy'] = $this->retryPolicy->toArray();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -80,12 +72,23 @@ final class CreateWebhookRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['events'] = $this->events;
         $out['secret'] = $this->secret;
         $out['url'] = $this->url;
         if ($this->retryPolicy !== null) {
-            $out['retry_policy'] = $this->retryPolicy->jsonSerialize();
+            $out['retry_policy'] = ($log ? $this->retryPolicy->jsonSerialize() : $this->retryPolicy->toArray());
         }
 
         return $out;

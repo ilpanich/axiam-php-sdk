@@ -66,22 +66,7 @@ final class CreateNetworkSegmentRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['kind'] = $this->kind->toWire();
-        $out['name'] = $this->name;
-        $out['site_key'] = $this->siteKey;
-        $out['vlan_id'] = $this->vlanId;
-        if ($this->enabled !== null) {
-            $out['enabled'] = $this->enabled;
-        }
-        if ($this->filterIds !== null) {
-            $out['filter_ids'] = $this->filterIds;
-        }
-        if ($this->rank !== null) {
-            $out['rank'] = $this->rank;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -100,8 +85,19 @@ final class CreateNetworkSegmentRequest implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['kind'] = $this->kind->value;
+        $out['kind'] = ($log ? $this->kind->value : $this->kind->toWire());
         $out['name'] = $this->name;
         $out['site_key'] = $this->siteKey;
         $out['vlan_id'] = $this->vlanId;
