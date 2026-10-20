@@ -76,10 +76,10 @@ final class NetworkReplyProfileInput implements \JsonSerializable
             $out['idle_timeout_secs'] = $this->idleTimeoutSecs;
         }
         if ($this->serviceType !== null) {
-            $out['service_type'] = $this->serviceType->value;
+            $out['service_type'] = $this->serviceType->toWire();
         }
         if ($this->terminationAction !== null) {
-            $out['termination_action'] = $this->terminationAction->value;
+            $out['termination_action'] = $this->terminationAction->toWire();
         }
 
         return $out;
@@ -92,10 +92,33 @@ final class NetworkReplyProfileInput implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['session_timeout_secs'] = $this->sessionTimeoutSecs;
+        if ($this->dictionary !== null) {
+            $out['dictionary'] = $this->dictionary;
+        }
+        if ($this->filterId !== null) {
+            $out['filter_id'] = $this->filterId;
+        }
+        if ($this->idleTimeoutSecs !== null) {
+            $out['idle_timeout_secs'] = $this->idleTimeoutSecs;
+        }
+        if ($this->serviceType !== null) {
+            $out['service_type'] = $this->serviceType->value;
+        }
+        if ($this->terminationAction !== null) {
+            $out['termination_action'] = $this->terminationAction->value;
+        }
+
+        return $out;
     }
 }

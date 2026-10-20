@@ -204,10 +204,64 @@ final class FederationConfigResponse implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
+        $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
+        $out['allowed_algorithms'] = $this->allowedAlgorithms;
+        $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
+        $out['attribute_map'] = $this->attributeMap;
+        $out['client_id'] = $this->clientId;
+        $out['created_at'] = $this->createdAt;
+        $out['effective_scopes'] = $this->effectiveScopes;
+        $out['enabled'] = $this->enabled;
+        $out['has_bundled_mark'] = $this->hasBundledMark;
+        $out['id'] = $this->id;
+        $out['mints_client_secret'] = $this->mintsClientSecret;
+        $out['pkce_required'] = $this->pkceRequired;
+        $out['protocol'] = $this->protocol;
+        $out['provider'] = $this->provider;
+        $out['provider_kind'] = $this->providerKind;
+        $out['scopes'] = $this->scopes;
+        $out['tenant_id'] = $this->tenantId;
+        $out['token_exchange'] = $this->tokenExchange->jsonSerialize();
+        $out['updated_at'] = $this->updatedAt;
+        if ($this->appleKeyId !== null) {
+            $out['apple_key_id'] = $this->appleKeyId;
+        }
+        if ($this->appleTeamId !== null) {
+            $out['apple_team_id'] = $this->appleTeamId;
+        }
+        if ($this->authorizationEndpoint !== null) {
+            $out['authorization_endpoint'] = $this->authorizationEndpoint;
+        }
+        if ($this->buttonIcon !== null) {
+            $out['button_icon'] = $this->buttonIcon;
+        }
+        if ($this->idpMetadataSigningCertPem !== null) {
+            $out['idp_metadata_signing_cert_pem'] = $this->idpMetadataSigningCertPem;
+        }
+        if ($this->metadataUrl !== null) {
+            $out['metadata_url'] = $this->metadataUrl;
+        }
+        if ($this->providerSlug !== null) {
+            $out['provider_slug'] = $this->providerSlug;
+        }
+        if ($this->tokenEndpoint !== null) {
+            $out['token_endpoint'] = $this->tokenEndpoint;
+        }
+        if ($this->userinfoEndpoint !== null) {
+            $out['userinfo_endpoint'] = $this->userinfoEndpoint;
+        }
+
+        return $out;
     }
 }

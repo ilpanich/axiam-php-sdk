@@ -115,7 +115,16 @@ final class AuthMiddleware
                 $request = $request->withHeader('Authorization', 'Bearer ' . $accessToken);
             }
 
-            if (!$noSessionCredentials && \in_array(strtoupper($request->getMethod()), self::STATE_CHANGING_METHODS, true)) {
+            // CONTRACT.md §6.1 rule 11 / §12.1 rule 3 (contract 1.63): no `axiam_*` session
+            // cookie and no `X-CSRF-Token` on any /oauth2/* request. Guzzle's cookie
+            // middleware sits below this one, so dropping the jar here keeps its `Cookie`
+            // header off the wire (and a stray `Set-Cookie` out of the jar).
+            if ($isOAuth2Path) {
+                $options['cookies'] = false;
+                $request = $request->withoutHeader('Cookie')->withoutHeader('X-CSRF-Token');
+            }
+
+            if (!$isOAuth2Path && !$noSessionCredentials && \in_array(strtoupper($request->getMethod()), self::STATE_CHANGING_METHODS, true)) {
                 $csrfToken = $this->session->csrfToken();
                 if ($csrfToken !== null) {
                     $request = $request->withHeader('X-CSRF-Token', $csrfToken);

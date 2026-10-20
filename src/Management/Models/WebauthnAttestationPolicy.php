@@ -77,6 +77,42 @@ final class WebauthnAttestationPolicy implements \JsonSerializable
     {
         $out = [];
         $out['block_revoked_status'] = $this->blockRevokedStatus;
+        $out['mode'] = $this->mode->toWire();
+        $out['require_fido_certified'] = $this->requireFidoCertified;
+        if ($this->allowedAaguids !== null) {
+            $out['allowed_aaguids'] = $this->allowedAaguids;
+        }
+        if ($this->blockedAaguids !== null) {
+            $out['blocked_aaguids'] = $this->blockedAaguids;
+        }
+        if ($this->minCertification !== null) {
+            $out['min_certification'] = $this->minCertification->toWire();
+        }
+        if ($this->unknownAaguid !== null) {
+            $out['unknown_aaguid'] = $this->unknownAaguid->toWire();
+        }
+
+        return $out;
+    }
+
+    /**
+     * Renders this object for `json_encode()`.
+     *
+     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
+     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
+     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
+     * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $out = [];
+        $out['block_revoked_status'] = $this->blockRevokedStatus;
         $out['mode'] = $this->mode->value;
         $out['require_fido_certified'] = $this->requireFidoCertified;
         if ($this->allowedAaguids !== null) {
@@ -93,19 +129,5 @@ final class WebauthnAttestationPolicy implements \JsonSerializable
         }
 
         return $out;
-    }
-
-    /**
-     * Renders this object for `json_encode()`.
-     *
-     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
-     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
-     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
-     * and nowhere else (§27.5).
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->toArray();
     }
 }

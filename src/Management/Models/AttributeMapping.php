@@ -53,7 +53,7 @@ final class AttributeMapping implements \JsonSerializable
     {
         $out = [];
         $out['saml_name'] = $this->samlName;
-        $out['source'] = $this->source->value;
+        $out['source'] = $this->source->toWire();
         if ($this->nameFormat !== null) {
             $out['name_format'] = $this->nameFormat;
         }
@@ -68,10 +68,22 @@ final class AttributeMapping implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['saml_name'] = $this->samlName;
+        $out['source'] = $this->source->value;
+        if ($this->nameFormat !== null) {
+            $out['name_format'] = $this->nameFormat;
+        }
+
+        return $out;
     }
 }

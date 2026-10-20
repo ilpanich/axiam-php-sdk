@@ -255,10 +255,88 @@ final class SetOrgSettings implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['access_token_lifetime_secs'] = $this->accessTokenLifetimeSecs;
+        $out['admin_notifications_enabled'] = $this->adminNotificationsEnabled;
+        $out['default_cert_validity_days'] = $this->defaultCertValidityDays;
+        $out['email_verification_grace_period_hours'] = $this->emailVerificationGracePeriodHours;
+        $out['email_verification_required'] = $this->emailVerificationRequired;
+        $out['hibp_check_enabled'] = $this->hibpCheckEnabled;
+        $out['lockout_backoff_multiplier'] = $this->lockoutBackoffMultiplier;
+        $out['lockout_duration_secs'] = $this->lockoutDurationSecs;
+        $out['max_cert_validity_days'] = $this->maxCertValidityDays;
+        $out['max_failed_login_attempts'] = $this->maxFailedLoginAttempts;
+        $out['max_lockout_duration_secs'] = $this->maxLockoutDurationSecs;
+        $out['mfa_challenge_lifetime_secs'] = $this->mfaChallengeLifetimeSecs;
+        $out['mfa_enforced'] = $this->mfaEnforced;
+        $out['min_length'] = $this->minLength;
+        $out['password_history_count'] = $this->passwordHistoryCount;
+        $out['refresh_token_lifetime_secs'] = $this->refreshTokenLifetimeSecs;
+        $out['require_digits'] = $this->requireDigits;
+        $out['require_lowercase'] = $this->requireLowercase;
+        $out['require_symbols'] = $this->requireSymbols;
+        $out['require_uppercase'] = $this->requireUppercase;
+        if ($this->cimd !== null) {
+            $out['cimd'] = $this->cimd->jsonSerialize();
+        }
+        if ($this->dcrAllowedRedirectHosts !== null) {
+            $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
+        }
+        if ($this->dcrAllowedScopes !== null) {
+            $out['dcr_allowed_scopes'] = $this->dcrAllowedScopes;
+        }
+        if ($this->dcrMaxClients !== null) {
+            $out['dcr_max_clients'] = $this->dcrMaxClients;
+        }
+        if ($this->dcrUnusedClientTtlDays !== null) {
+            $out['dcr_unused_client_ttl_days'] = $this->dcrUnusedClientTtlDays;
+        }
+        if ($this->defaultLocale !== null) {
+            $out['default_locale'] = $this->defaultLocale;
+        }
+        if ($this->deletionGracePeriodDays !== null) {
+            $out['deletion_grace_period_days'] = $this->deletionGracePeriodDays;
+        }
+        if ($this->dynamicRegistration !== null) {
+            $out['dynamic_registration'] = $this->dynamicRegistration;
+        }
+        if ($this->externalClientAllowedResources !== null) {
+            $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
+        }
+        if ($this->opaqueKsf !== null) {
+            $out['opaque_ksf'] = $this->opaqueKsf;
+        }
+        if ($this->opaqueMode !== null) {
+            $out['opaque_mode'] = $this->opaqueMode;
+        }
+        if ($this->opaqueSuite !== null) {
+            $out['opaque_suite'] = $this->opaqueSuite;
+        }
+        if ($this->samlIdpEnabled !== null) {
+            $out['saml_idp_enabled'] = $this->samlIdpEnabled;
+        }
+        if ($this->sensitiveScopesEnabled !== null) {
+            $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
+        }
+        if ($this->serverCertAllowedNames !== null) {
+            $out['server_cert_allowed_names'] = $this->serverCertAllowedNames;
+        }
+        if ($this->ssfEnabled !== null) {
+            $out['ssf_enabled'] = $this->ssfEnabled;
+        }
+        if ($this->webauthnUserVerification !== null) {
+            $out['webauthn_user_verification'] = $this->webauthnUserVerification;
+        }
+
+        return $out;
     }
 }

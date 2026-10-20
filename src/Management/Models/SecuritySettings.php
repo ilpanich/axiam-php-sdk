@@ -100,7 +100,7 @@ final class SecuritySettings implements \JsonSerializable
         $out['opaque'] = $this->opaque->toArray();
         $out['password'] = $this->password->toArray();
         $out['privacy'] = $this->privacy->toArray();
-        $out['scope'] = $this->scope->value;
+        $out['scope'] = $this->scope->toWire();
         $out['scope_id'] = $this->scopeId;
         $out['token'] = $this->token->toArray();
         $out['updated_at'] = $this->updatedAt;
@@ -116,10 +116,33 @@ final class SecuritySettings implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['certificate'] = $this->certificate->jsonSerialize();
+        $out['created_at'] = $this->createdAt;
+        $out['email'] = $this->email->jsonSerialize();
+        $out['id'] = $this->id;
+        $out['lockout'] = $this->lockout->jsonSerialize();
+        $out['mfa'] = $this->mfa->jsonSerialize();
+        $out['notification'] = $this->notification->jsonSerialize();
+        $out['oidc'] = $this->oidc->jsonSerialize();
+        $out['opaque'] = $this->opaque->jsonSerialize();
+        $out['password'] = $this->password->jsonSerialize();
+        $out['privacy'] = $this->privacy->jsonSerialize();
+        $out['scope'] = $this->scope->value;
+        $out['scope_id'] = $this->scopeId;
+        $out['token'] = $this->token->jsonSerialize();
+        $out['updated_at'] = $this->updatedAt;
+        $out['webauthn'] = $this->webauthn->jsonSerialize();
+
+        return $out;
     }
 }

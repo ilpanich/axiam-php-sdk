@@ -3758,7 +3758,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'service_provider' => [
                 'acs_urls' => [
                     [
-                        'binding' => null,
+                        'binding' => 'http_post',
                         'index' => 1,
                         'is_default' => true,
                         'url' => 'example',
@@ -3772,7 +3772,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     [
                         'name_format' => 'example',
                         'saml_name' => 'example',
-                        'source' => null,
+                        'source' => 'username',
                     ],
                 ],
                 'display_name' => 'example',

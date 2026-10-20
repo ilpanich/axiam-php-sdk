@@ -65,7 +65,7 @@ final class NetworkReconciler
      */
     public function readPolicy(): array
     {
-        return [self::POLICY_KEY => $this->network->getPolicy()->toArray()];
+        return [self::POLICY_KEY => $this->network->getPolicy()->jsonSerialize()];
     }
 
     /**
@@ -83,7 +83,7 @@ final class NetworkReconciler
         foreach ($walk as $segment) {
             if ($segment instanceof Models\NetworkSegmentResponse) {
                 $rows[self::segmentKey($segment->siteKey, $segment->kind->value, $segment->name)]
-                    = $segment->toArray();
+                    = $segment->jsonSerialize();
             }
         }
 
@@ -117,7 +117,7 @@ final class NetworkReconciler
             }
             $segmentKey = $bySegmentId[$profile->segmentId] ?? null;
             if ($segmentKey !== null) {
-                $rows[$segmentKey] = $profile->toArray() + ['id' => $profile->segmentId];
+                $rows[$segmentKey] = $profile->jsonSerialize() + ['id' => $profile->segmentId];
             }
         }
 

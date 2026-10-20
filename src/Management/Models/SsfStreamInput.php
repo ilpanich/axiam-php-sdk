@@ -102,6 +102,58 @@ final class SsfStreamInput implements \JsonSerializable
     {
         $out = [];
         $out['audience'] = $this->audience;
+        $out['delivery_method'] = $this->deliveryMethod->toWire();
+        $out['events_allowed'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsAllowed);
+        $out['receiver_client_id'] = $this->receiverClientId;
+        if ($this->authorizationHeader !== null) {
+            $out['authorization_header'] = $this->authorizationHeader;
+        }
+        if ($this->clearAuthorizationHeader !== null) {
+            $out['clear_authorization_header'] = $this->clearAuthorizationHeader;
+        }
+        if ($this->description !== null) {
+            $out['description'] = $this->description;
+        }
+        if ($this->endpointUrl !== null) {
+            $out['endpoint_url'] = $this->endpointUrl;
+        }
+        if ($this->eventsRequested !== null) {
+            $out['events_requested'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsRequested);
+        }
+        if ($this->expectedUpdatedAt !== null) {
+            $out['expected_updated_at'] = $this->expectedUpdatedAt;
+        }
+        if ($this->status !== null) {
+            $out['status'] = $this->status->toWire();
+        }
+        if ($this->statusReason !== null) {
+            $out['status_reason'] = $this->statusReason;
+        }
+        if ($this->subjectFormat !== null) {
+            $out['subject_format'] = $this->subjectFormat->toWire();
+        }
+
+        return $out;
+    }
+
+    /**
+     * Renders this object for `json_encode()`.
+     *
+     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
+     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
+     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
+     * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $out = [];
+        $out['audience'] = $this->audience;
         $out['delivery_method'] = $this->deliveryMethod->value;
         $out['events_allowed'] = array_map(static fn (SsfEventType|string $v): string => $v instanceof SsfEventType ? $v->value : $v, $this->eventsAllowed);
         $out['receiver_client_id'] = $this->receiverClientId;
@@ -134,19 +186,5 @@ final class SsfStreamInput implements \JsonSerializable
         }
 
         return $out;
-    }
-
-    /**
-     * Renders this object for `json_encode()`.
-     *
-     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
-     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
-     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
-     * and nowhere else (§27.5).
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->toArray();
     }
 }

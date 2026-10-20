@@ -73,10 +73,10 @@ final class AuditLogEntry implements \JsonSerializable
         $out = [];
         $out['action'] = $this->action;
         $out['actor_id'] = $this->actorId;
-        $out['actor_type'] = $this->actorType->value;
+        $out['actor_type'] = $this->actorType->toWire();
         $out['id'] = $this->id;
         $out['metadata'] = $this->metadata;
-        $out['outcome'] = $this->outcome->value;
+        $out['outcome'] = $this->outcome->toWire();
         $out['tenant_id'] = $this->tenantId;
         $out['timestamp'] = $this->timestamp;
         if ($this->ipAddress !== null) {
@@ -96,10 +96,31 @@ final class AuditLogEntry implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['action'] = $this->action;
+        $out['actor_id'] = $this->actorId;
+        $out['actor_type'] = $this->actorType->value;
+        $out['id'] = $this->id;
+        $out['metadata'] = $this->metadata;
+        $out['outcome'] = $this->outcome->value;
+        $out['tenant_id'] = $this->tenantId;
+        $out['timestamp'] = $this->timestamp;
+        if ($this->ipAddress !== null) {
+            $out['ip_address'] = $this->ipAddress;
+        }
+        if ($this->resourceId !== null) {
+            $out['resource_id'] = $this->resourceId;
+        }
+
+        return $out;
     }
 }

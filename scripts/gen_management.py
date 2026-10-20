@@ -938,8 +938,11 @@ def encode_one(type_decl: str, ref: str, log: bool = False) -> str:
     if type_decl in {"int", "float", "string", "bool", "mixed"}:
         return ref
     if type_decl in ENUMS:
-        return f"{ref}->value"
-    if log and is_open_variant(type_decl):
+        # ``toWire()`` raises on ``Unknown`` (P12.2(a)); a log line only needs the case's value.
+        return f"{ref}->value" if log else f"{ref}->toWire()"
+    if log:
+        # A nested model renders itself for a log line, so an Unknown further down never
+        # makes the whole line throw (CONTRACT.md §7 rule 1).
         return f"{ref}->jsonSerialize()"
     return f"{ref}->toArray()"
 
@@ -1021,6 +1024,26 @@ def emit_enum(name: str, schema: Any) -> str:
     out.append("    public static function fromWire(string $value): self")
     out.append("    {")
     out.append("        return self::tryFrom($value) ?? self::Unknown;")
+    out.append("    }")
+    out.append("")
+    out.extend(docblock(
+        f"The wire spelling of this case, for a request body.\n\n"
+        f"{{@see self::Unknown}} has none: it stands for a value this SDK never saw, and "
+        f"sending it back as the empty string would leave the refusal to the server. It "
+        f"raises a {{@see \\Axiam\\Sdk\\Management\\ValidationError}} here instead, before any "
+        f"request is made (CONTRACT.md §34.2 P12.2(a)). Use `->value` to render for a log line.",
+        "    ",
+        ["@throws \\Axiam\\Sdk\\Management\\ValidationError when this is `Unknown`."],
+    ))
+    out.append("    public function toWire(): string")
+    out.append("    {")
+    out.append("        if ($this === self::Unknown) {")
+    out.append(f"            throw new \\Axiam\\Sdk\\Management\\ValidationError(")
+    out.append(f"                'refusing to send an unrecognised {name} value; it was read from the server and cannot be written back',")
+    out.append("            );")
+    out.append("        }")
+    out.append("")
+    out.append("        return $this->value;")
     out.append("    }")
     out.append("}")
     return "\n".join(out) + "\n"
@@ -1157,35 +1180,37 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
         "    ",
         ["@return array<string,mixed>"],
     ))
-    def render_body(log: bool) -> None:
+    def render_body(log: bool) -> list[str]:
         if not fields:
-            out.append("        return [];")
-            return
-        out.append("        $out = [];")
+            return ["        return [];"]
+        lines = ["        $out = [];"]
         for f in fields:
             expr = encode_expr(f, log)
             if f["required"]:
-                out.append(f"        $out['{f['wire']}'] = {expr};")
+                lines.append(f"        $out['{f['wire']}'] = {expr};")
             elif f["explicit_null"]:
-                out.append(emit_guard(f['name']))
-                out.append(f"            $out['{f['wire']}'] = $this->{f['name']} instanceof "
-                           f"{JSON_NULL} ? null : {expr};")
-                out.append("        }")
+                lines.append(emit_guard(f['name']))
+                lines.append(f"            $out['{f['wire']}'] = $this->{f['name']} instanceof "
+                             f"{JSON_NULL} ? null : {expr};")
+                lines.append("        }")
             else:
-                out.append(emit_guard(f['name']))
-                out.append(f"            $out['{f['wire']}'] = {expr};")
-                out.append("        }")
-        out.append("")
-        out.append("        return $out;")
+                lines.append(emit_guard(f['name']))
+                lines.append(f"            $out['{f['wire']}'] = {expr};")
+                lines.append("        }")
+        lines.append("")
+        lines.append("        return $out;")
+        return lines
 
+    wire_body = render_body(False)
+    log_body = render_body(True)
     out.append("    public function toArray(): array")
     out.append("    {")
-    render_body(False)
+    out.extend(wire_body)
     out.append("    }")
     out.append("")
 
     # --- jsonSerialize ---
-    holds_open_union = any(is_open_variant(f["decl"].lstrip("?")) for f in fields)
+    holds_open_union = wire_body != log_body
     summary = (
         "Renders this object for `json_encode()`.\n\n"
         "Any {@see " + SENSITIVE + "} it carries stays WRAPPED here, so a log line or a "
@@ -1196,14 +1221,14 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
     if holds_open_union:
         summary += (
             "\n\nRendering for a log line never fails: an unknown union arm renders its "
-            "discriminator here, and only {@see self::toArray()} -- the request path -- "
+            "discriminator and an unrecognised enum value its empty `Unknown` spelling here, and only {@see self::toArray()} -- the request path -- "
             "refuses to send it (CONTRACT.md §31.2, §34.2 P12.2)."
         )
     out.extend(docblock(summary, "    ", ["@return array<string,mixed>"]))
     out.append("    public function jsonSerialize(): array")
     out.append("    {")
     if holds_open_union:
-        render_body(True)
+        out.extend(log_body)
     else:
         out.append("        return $this->toArray();")
     out.append("    }")
@@ -2004,11 +2029,13 @@ def example_json(schema: Any, depth: int = 0) -> Any:
 
 def example_for(name: str, depth: int = 0) -> Any:
     """A plausible wire object for the named schema."""
-    if depth > 6:
-        return None
     schema = SCHEMAS.get(name) or {}
     if isinstance(schema.get("enum"), list) and schema["enum"]:
+        # Before the depth cut-off: a leaf enum is a plain string, and a null in its place
+        # would decode to `Unknown`, which a request model now refuses to encode.
         return schema["enum"][0]
+    if depth > 6:
+        return None
     union = discriminated(schema)
     if union:
         tag, arms = union

@@ -177,7 +177,7 @@ final class RequestMembersAndSsfFormTest extends ManagementRouteTestCase
         $target = Models\ScimTargetResponse::fromArray([
             'id' => self::uuid(), 'tenant_id' => self::TENANT_ID, 'name' => 'Downstream',
             'base_url' => 'https://idp.example/scim/v2', 'auth' => ['type' => 'bearer'],
-            'scope' => ['type' => 'all_users'], 'enabled' => true, 'deprovision' => 'disable',
+            'scope' => ['type' => 'all_users'], 'enabled' => true, 'deprovision' => 'deactivate',
             'push_groups' => false, 'user_name_from' => 'email', 'state' => null,
             'created_at' => '2026-10-04T00:00:00Z', 'updated_at' => '2026-10-15T08:30:00.123456789+00:00',
         ]);

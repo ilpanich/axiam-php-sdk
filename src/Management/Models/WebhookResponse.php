@@ -84,10 +84,25 @@ final class WebhookResponse implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['created_at'] = $this->createdAt;
+        $out['enabled'] = $this->enabled;
+        $out['events'] = $this->events;
+        $out['id'] = $this->id;
+        $out['retry_policy'] = $this->retryPolicy->jsonSerialize();
+        $out['tenant_id'] = $this->tenantId;
+        $out['updated_at'] = $this->updatedAt;
+        $out['url'] = $this->url;
+
+        return $out;
     }
 }

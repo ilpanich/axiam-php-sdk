@@ -79,10 +79,10 @@ final class UpdateReactorRequest implements \JsonSerializable
             $out['events'] = $this->events;
         }
         if ($this->failurePolicy !== null) {
-            $out['failure_policy'] = $this->failurePolicy->value;
+            $out['failure_policy'] = $this->failurePolicy->toWire();
         }
         if ($this->mode !== null) {
-            $out['mode'] = $this->mode->value;
+            $out['mode'] = $this->mode->toWire();
         }
         if ($this->name !== null) {
             $out['name'] = $this->name;
@@ -104,10 +104,41 @@ final class UpdateReactorRequest implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        if ($this->description !== null) {
+            $out['description'] = $this->description;
+        }
+        if ($this->enabled !== null) {
+            $out['enabled'] = $this->enabled;
+        }
+        if ($this->events !== null) {
+            $out['events'] = $this->events;
+        }
+        if ($this->failurePolicy !== null) {
+            $out['failure_policy'] = $this->failurePolicy->value;
+        }
+        if ($this->mode !== null) {
+            $out['mode'] = $this->mode->value;
+        }
+        if ($this->name !== null) {
+            $out['name'] = $this->name;
+        }
+        if ($this->priority !== null) {
+            $out['priority'] = $this->priority;
+        }
+        if ($this->timeoutMs !== null) {
+            $out['timeout_ms'] = $this->timeoutMs;
+        }
+
+        return $out;
     }
 }

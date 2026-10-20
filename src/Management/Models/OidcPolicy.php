@@ -226,10 +226,51 @@ final class OidcPolicy implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
+        if ($this->cimd !== null) {
+            $out['cimd'] = $this->cimd->jsonSerialize();
+        }
+        if ($this->dcrAllowedRedirectHosts !== null) {
+            $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
+        }
+        if ($this->dcrAllowedScopes !== null) {
+            $out['dcr_allowed_scopes'] = $this->dcrAllowedScopes;
+        }
+        if ($this->dcrMaxClients !== null) {
+            $out['dcr_max_clients'] = $this->dcrMaxClients;
+        }
+        if ($this->dcrUnusedClientTtlDays !== null) {
+            $out['dcr_unused_client_ttl_days'] = $this->dcrUnusedClientTtlDays;
+        }
+        if ($this->defaultLocale !== null) {
+            $out['default_locale'] = $this->defaultLocale;
+        }
+        if ($this->dynamicRegistration !== null) {
+            $out['dynamic_registration'] = $this->dynamicRegistration;
+        }
+        if ($this->externalClientAllowedResources !== null) {
+            $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
+        }
+        if ($this->samlIdpEnabled !== null) {
+            $out['saml_idp_enabled'] = $this->samlIdpEnabled;
+        }
+        if ($this->ssfEnabled !== null) {
+            $out['ssf_enabled'] = $this->ssfEnabled;
+        }
+        if ($this->ssfInactiveReason !== null) {
+            $out['ssf_inactive_reason'] = $this->ssfInactiveReason;
+        }
+
+        return $out;
     }
 }

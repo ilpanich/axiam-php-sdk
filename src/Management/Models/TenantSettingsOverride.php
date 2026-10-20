@@ -306,10 +306,128 @@ final class TenantSettingsOverride implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        if ($this->accessTokenLifetimeSecs !== null) {
+            $out['access_token_lifetime_secs'] = $this->accessTokenLifetimeSecs;
+        }
+        if ($this->adminNotificationsEnabled !== null) {
+            $out['admin_notifications_enabled'] = $this->adminNotificationsEnabled;
+        }
+        if ($this->cimd !== null) {
+            $out['cimd'] = $this->cimd->jsonSerialize();
+        }
+        if ($this->dcrAllowedRedirectHosts !== null) {
+            $out['dcr_allowed_redirect_hosts'] = $this->dcrAllowedRedirectHosts;
+        }
+        if ($this->dcrAllowedScopes !== null) {
+            $out['dcr_allowed_scopes'] = $this->dcrAllowedScopes;
+        }
+        if ($this->dcrMaxClients !== null) {
+            $out['dcr_max_clients'] = $this->dcrMaxClients;
+        }
+        if ($this->dcrUnusedClientTtlDays !== null) {
+            $out['dcr_unused_client_ttl_days'] = $this->dcrUnusedClientTtlDays;
+        }
+        if ($this->defaultCertValidityDays !== null) {
+            $out['default_cert_validity_days'] = $this->defaultCertValidityDays;
+        }
+        if ($this->defaultLocale !== null) {
+            $out['default_locale'] = $this->defaultLocale;
+        }
+        if ($this->deletionGracePeriodDays !== null) {
+            $out['deletion_grace_period_days'] = $this->deletionGracePeriodDays;
+        }
+        if ($this->dynamicRegistration !== null) {
+            $out['dynamic_registration'] = $this->dynamicRegistration;
+        }
+        if ($this->emailVerificationGracePeriodHours !== null) {
+            $out['email_verification_grace_period_hours'] = $this->emailVerificationGracePeriodHours;
+        }
+        if ($this->emailVerificationRequired !== null) {
+            $out['email_verification_required'] = $this->emailVerificationRequired;
+        }
+        if ($this->externalClientAllowedResources !== null) {
+            $out['external_client_allowed_resources'] = $this->externalClientAllowedResources;
+        }
+        if ($this->hibpCheckEnabled !== null) {
+            $out['hibp_check_enabled'] = $this->hibpCheckEnabled;
+        }
+        if ($this->lockoutBackoffMultiplier !== null) {
+            $out['lockout_backoff_multiplier'] = $this->lockoutBackoffMultiplier;
+        }
+        if ($this->lockoutDurationSecs !== null) {
+            $out['lockout_duration_secs'] = $this->lockoutDurationSecs;
+        }
+        if ($this->maxCertValidityDays !== null) {
+            $out['max_cert_validity_days'] = $this->maxCertValidityDays;
+        }
+        if ($this->maxFailedLoginAttempts !== null) {
+            $out['max_failed_login_attempts'] = $this->maxFailedLoginAttempts;
+        }
+        if ($this->maxLockoutDurationSecs !== null) {
+            $out['max_lockout_duration_secs'] = $this->maxLockoutDurationSecs;
+        }
+        if ($this->mfaChallengeLifetimeSecs !== null) {
+            $out['mfa_challenge_lifetime_secs'] = $this->mfaChallengeLifetimeSecs;
+        }
+        if ($this->mfaEnforced !== null) {
+            $out['mfa_enforced'] = $this->mfaEnforced;
+        }
+        if ($this->minLength !== null) {
+            $out['min_length'] = $this->minLength;
+        }
+        if ($this->opaqueKsf !== null) {
+            $out['opaque_ksf'] = $this->opaqueKsf;
+        }
+        if ($this->opaqueMode !== null) {
+            $out['opaque_mode'] = $this->opaqueMode;
+        }
+        if ($this->opaqueSuite !== null) {
+            $out['opaque_suite'] = $this->opaqueSuite;
+        }
+        if ($this->passwordHistoryCount !== null) {
+            $out['password_history_count'] = $this->passwordHistoryCount;
+        }
+        if ($this->refreshTokenLifetimeSecs !== null) {
+            $out['refresh_token_lifetime_secs'] = $this->refreshTokenLifetimeSecs;
+        }
+        if ($this->requireDigits !== null) {
+            $out['require_digits'] = $this->requireDigits;
+        }
+        if ($this->requireLowercase !== null) {
+            $out['require_lowercase'] = $this->requireLowercase;
+        }
+        if ($this->requireSymbols !== null) {
+            $out['require_symbols'] = $this->requireSymbols;
+        }
+        if ($this->requireUppercase !== null) {
+            $out['require_uppercase'] = $this->requireUppercase;
+        }
+        if ($this->samlIdpEnabled !== null) {
+            $out['saml_idp_enabled'] = $this->samlIdpEnabled;
+        }
+        if ($this->sensitiveScopesEnabled !== null) {
+            $out['sensitive_scopes_enabled'] = $this->sensitiveScopesEnabled;
+        }
+        if ($this->serverCertAllowedNames !== null) {
+            $out['server_cert_allowed_names'] = $this->serverCertAllowedNames;
+        }
+        if ($this->ssfEnabled !== null) {
+            $out['ssf_enabled'] = $this->ssfEnabled;
+        }
+        if ($this->webauthnUserVerification !== null) {
+            $out['webauthn_user_verification'] = $this->webauthnUserVerification;
+        }
+
+        return $out;
     }
 }

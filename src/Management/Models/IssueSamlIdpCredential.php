@@ -52,7 +52,7 @@ final class IssueSamlIdpCredential implements \JsonSerializable
     {
         $out = [];
         $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['slot'] = $this->slot->value;
+        $out['slot'] = $this->slot->toWire();
         if ($this->validityDays !== null) {
             $out['validity_days'] = $this->validityDays;
         }
@@ -67,10 +67,22 @@ final class IssueSamlIdpCredential implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['issuer_ca_id'] = $this->issuerCaId;
+        $out['slot'] = $this->slot->value;
+        if ($this->validityDays !== null) {
+            $out['validity_days'] = $this->validityDays;
+        }
+
+        return $out;
     }
 }

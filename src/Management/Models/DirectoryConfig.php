@@ -123,7 +123,7 @@ final class DirectoryConfig implements \JsonSerializable
         $out['group_nesting_depth'] = $this->groupNestingDepth;
         $out['id'] = $this->id;
         $out['jit_provisioning'] = $this->jitProvisioning;
-        $out['kind'] = $this->kind->value;
+        $out['kind'] = $this->kind->toWire();
         $out['start_tls'] = $this->startTls;
         $out['sync_interval_secs'] = $this->syncIntervalSecs;
         $out['tenant_id'] = $this->tenantId;
@@ -149,10 +149,41 @@ final class DirectoryConfig implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['base_dn'] = $this->baseDn;
+        $out['bind_dn'] = $this->bindDn;
+        $out['created_at'] = $this->createdAt;
+        $out['enabled'] = $this->enabled;
+        $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->jsonSerialize(), $this->groupMappings);
+        $out['group_member_attribute'] = $this->groupMemberAttribute;
+        $out['group_nesting_depth'] = $this->groupNestingDepth;
+        $out['id'] = $this->id;
+        $out['jit_provisioning'] = $this->jitProvisioning;
+        $out['kind'] = $this->kind->value;
+        $out['start_tls'] = $this->startTls;
+        $out['sync_interval_secs'] = $this->syncIntervalSecs;
+        $out['tenant_id'] = $this->tenantId;
+        $out['trust_anchors_pem'] = $this->trustAnchorsPem;
+        $out['updated_at'] = $this->updatedAt;
+        $out['url'] = $this->url;
+        $out['user_attribute_map'] = $this->userAttributeMap->jsonSerialize();
+        $out['user_filter'] = $this->userFilter;
+        if ($this->groupBaseDn !== null) {
+            $out['group_base_dn'] = $this->groupBaseDn;
+        }
+        if ($this->groupFilter !== null) {
+            $out['group_filter'] = $this->groupFilter;
+        }
+
+        return $out;
     }
 }

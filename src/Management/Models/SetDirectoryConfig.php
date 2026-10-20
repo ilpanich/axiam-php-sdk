@@ -110,7 +110,7 @@ final class SetDirectoryConfig implements \JsonSerializable
         $out['base_dn'] = $this->baseDn;
         $out['bind_dn'] = $this->bindDn;
         $out['enabled'] = $this->enabled;
-        $out['kind'] = $this->kind->value;
+        $out['kind'] = $this->kind->toWire();
         $out['start_tls'] = $this->startTls;
         $out['url'] = $this->url;
         $out['user_filter'] = $this->userFilter;
@@ -155,10 +155,54 @@ final class SetDirectoryConfig implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['base_dn'] = $this->baseDn;
+        $out['bind_dn'] = $this->bindDn;
+        $out['enabled'] = $this->enabled;
+        $out['kind'] = $this->kind->value;
+        $out['start_tls'] = $this->startTls;
+        $out['url'] = $this->url;
+        $out['user_filter'] = $this->userFilter;
+        if ($this->bindSecret !== null) {
+            $out['bind_secret'] = $this->bindSecret;
+        }
+        if ($this->groupBaseDn !== null) {
+            $out['group_base_dn'] = $this->groupBaseDn;
+        }
+        if ($this->groupFilter !== null) {
+            $out['group_filter'] = $this->groupFilter;
+        }
+        if ($this->groupMappings !== null) {
+            $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->jsonSerialize(), $this->groupMappings);
+        }
+        if ($this->groupMemberAttribute !== null) {
+            $out['group_member_attribute'] = $this->groupMemberAttribute;
+        }
+        if ($this->groupNestingDepth !== null) {
+            $out['group_nesting_depth'] = $this->groupNestingDepth;
+        }
+        if ($this->jitProvisioning !== null) {
+            $out['jit_provisioning'] = $this->jitProvisioning;
+        }
+        if ($this->syncIntervalSecs !== null) {
+            $out['sync_interval_secs'] = $this->syncIntervalSecs;
+        }
+        if ($this->trustAnchorsPem !== null) {
+            $out['trust_anchors_pem'] = $this->trustAnchorsPem;
+        }
+        if ($this->userAttributeMap !== null) {
+            $out['user_attribute_map'] = $this->userAttributeMap->jsonSerialize();
+        }
+
+        return $out;
     }
 }

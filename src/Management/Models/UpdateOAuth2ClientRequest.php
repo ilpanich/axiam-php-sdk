@@ -146,6 +146,102 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
             $out['allowed_resources'] = $this->allowedResources;
         }
         if ($this->authnRequestParams !== null) {
+            $out['authn_request_params'] = $this->authnRequestParams->toWire();
+        }
+        if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
+            $out['backchannel_authentication_request_signing_alg'] = $this->backchannelAuthenticationRequestSigningAlg;
+        }
+        if ($this->backchannelClientNotificationEndpoint !== null) {
+            $out['backchannel_client_notification_endpoint'] = $this->backchannelClientNotificationEndpoint;
+        }
+        if ($this->backchannelLogoutUri !== null) {
+            $out['backchannel_logout_uri'] = $this->backchannelLogoutUri;
+        }
+        if ($this->backchannelTokenDeliveryMode !== null) {
+            $out['backchannel_token_delivery_mode'] = $this->backchannelTokenDeliveryMode;
+        }
+        if ($this->backchannelUserCodeParameter !== null) {
+            $out['backchannel_user_code_parameter'] = $this->backchannelUserCodeParameter;
+        }
+        if ($this->browserSso !== null) {
+            $out['browser_sso'] = $this->browserSso;
+        }
+        if ($this->dpopBoundAccessTokens !== null) {
+            $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;
+        }
+        if ($this->dpopRequireNonce !== null) {
+            $out['dpop_require_nonce'] = $this->dpopRequireNonce;
+        }
+        if ($this->grantTypes !== null) {
+            $out['grant_types'] = $this->grantTypes;
+        }
+        if ($this->jwks !== null) {
+            $out['jwks'] = $this->jwks;
+        }
+        if ($this->jwksUri !== null) {
+            $out['jwks_uri'] = $this->jwksUri;
+        }
+        if ($this->name !== null) {
+            $out['name'] = $this->name;
+        }
+        if ($this->postLogoutRedirectUris !== null) {
+            $out['post_logout_redirect_uris'] = $this->postLogoutRedirectUris;
+        }
+        if ($this->profile !== null) {
+            $out['profile'] = $this->profile->toWire();
+        }
+        if ($this->redirectUris !== null) {
+            $out['redirect_uris'] = $this->redirectUris;
+        }
+        if ($this->requirePar !== null) {
+            $out['require_par'] = $this->requirePar;
+        }
+        if ($this->scopes !== null) {
+            $out['scopes'] = $this->scopes;
+        }
+        if ($this->selfSignedTlsClientAuthThumbprints !== null) {
+            $out['self_signed_tls_client_auth_thumbprints'] = $this->selfSignedTlsClientAuthThumbprints;
+        }
+        if ($this->tlsClientAuthSanDns !== null) {
+            $out['tls_client_auth_san_dns'] = $this->tlsClientAuthSanDns;
+        }
+        if ($this->tlsClientAuthSanUri !== null) {
+            $out['tls_client_auth_san_uri'] = $this->tlsClientAuthSanUri;
+        }
+        if ($this->tlsClientAuthSubjectDn !== null) {
+            $out['tls_client_auth_subject_dn'] = $this->tlsClientAuthSubjectDn;
+        }
+        if ($this->tlsClientCertificateBoundAccessTokens !== null) {
+            $out['tls_client_certificate_bound_access_tokens'] = $this->tlsClientCertificateBoundAccessTokens;
+        }
+        if ($this->tokenEndpointAuthMethod !== null) {
+            $out['token_endpoint_auth_method'] = $this->tokenEndpointAuthMethod->toWire();
+        }
+
+        return $out;
+    }
+
+    /**
+     * Renders this object for `json_encode()`.
+     *
+     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
+     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
+     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
+     * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $out = [];
+        if ($this->allowedResources !== null) {
+            $out['allowed_resources'] = $this->allowedResources;
+        }
+        if ($this->authnRequestParams !== null) {
             $out['authn_request_params'] = $this->authnRequestParams->value;
         }
         if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
@@ -219,19 +315,5 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
         }
 
         return $out;
-    }
-
-    /**
-     * Renders this object for `json_encode()`.
-     *
-     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
-     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
-     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
-     * and nowhere else (§27.5).
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->toArray();
     }
 }

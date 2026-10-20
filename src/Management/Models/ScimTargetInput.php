@@ -101,7 +101,7 @@ final class ScimTargetInput implements \JsonSerializable
             $out['credential'] = $this->credential;
         }
         if ($this->deprovision !== null) {
-            $out['deprovision'] = $this->deprovision->value;
+            $out['deprovision'] = $this->deprovision->toWire();
         }
         if ($this->enabled !== null) {
             $out['enabled'] = $this->enabled;
@@ -113,7 +113,7 @@ final class ScimTargetInput implements \JsonSerializable
             $out['push_groups'] = $this->pushGroups;
         }
         if ($this->userNameFrom !== null) {
-            $out['user_name_from'] = $this->userNameFrom->value;
+            $out['user_name_from'] = $this->userNameFrom->toWire();
         }
 
         return $out;
@@ -127,9 +127,10 @@ final class ScimTargetInput implements \JsonSerializable
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
      *
-     * Rendering for a log line never fails: an unknown union arm renders its discriminator
-     * here, and only {@see self::toArray()} -- the request path -- refuses to send it
-     * (CONTRACT.md §31.2, §34.2 P12.2).
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array

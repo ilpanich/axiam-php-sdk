@@ -55,7 +55,7 @@ final class CreateIntermediateCaRequest implements \JsonSerializable
     public function toArray(): array
     {
         $out = [];
-        $out['key_algorithm'] = $this->keyAlgorithm->value;
+        $out['key_algorithm'] = $this->keyAlgorithm->toWire();
         $out['parent_ca_id'] = $this->parentCaId;
         $out['subject'] = $this->subject;
         $out['validity_days'] = $this->validityDays;
@@ -70,10 +70,21 @@ final class CreateIntermediateCaRequest implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['key_algorithm'] = $this->keyAlgorithm->value;
+        $out['parent_ca_id'] = $this->parentCaId;
+        $out['subject'] = $this->subject;
+        $out['validity_days'] = $this->validityDays;
+
+        return $out;
     }
 }

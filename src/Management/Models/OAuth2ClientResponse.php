@@ -158,6 +158,74 @@ final class OAuth2ClientResponse implements \JsonSerializable
     {
         $out = [];
         $out['allowed_resources'] = $this->allowedResources;
+        $out['authn_request_params'] = $this->authnRequestParams->toWire();
+        $out['browser_sso'] = $this->browserSso;
+        $out['client_id'] = $this->clientId;
+        $out['created_at'] = $this->createdAt;
+        $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;
+        $out['dpop_require_nonce'] = $this->dpopRequireNonce;
+        $out['grant_types'] = $this->grantTypes;
+        $out['id'] = $this->id;
+        $out['managed_by'] = $this->managedBy->toWire();
+        $out['name'] = $this->name;
+        $out['profile'] = $this->profile->toWire();
+        $out['redirect_uris'] = $this->redirectUris;
+        $out['require_par'] = $this->requirePar;
+        $out['scopes'] = $this->scopes;
+        $out['self_signed_tls_client_auth_thumbprints'] = $this->selfSignedTlsClientAuthThumbprints;
+        $out['tenant_id'] = $this->tenantId;
+        $out['tls_client_certificate_bound_access_tokens'] = $this->tlsClientCertificateBoundAccessTokens;
+        $out['token_endpoint_auth_method'] = $this->tokenEndpointAuthMethod->toWire();
+        $out['updated_at'] = $this->updatedAt;
+        if ($this->backchannelAuthenticationRequestSigningAlg !== null) {
+            $out['backchannel_authentication_request_signing_alg'] = $this->backchannelAuthenticationRequestSigningAlg->toWire();
+        }
+        if ($this->backchannelClientNotificationEndpoint !== null) {
+            $out['backchannel_client_notification_endpoint'] = $this->backchannelClientNotificationEndpoint;
+        }
+        if ($this->backchannelTokenDeliveryMode !== null) {
+            $out['backchannel_token_delivery_mode'] = $this->backchannelTokenDeliveryMode->toWire();
+        }
+        if ($this->jwks !== null) {
+            $out['jwks'] = $this->jwks;
+        }
+        if ($this->jwksUri !== null) {
+            $out['jwks_uri'] = $this->jwksUri;
+        }
+        if ($this->lastAuthorizedAt !== null) {
+            $out['last_authorized_at'] = $this->lastAuthorizedAt;
+        }
+        if ($this->tlsClientAuthSanDns !== null) {
+            $out['tls_client_auth_san_dns'] = $this->tlsClientAuthSanDns;
+        }
+        if ($this->tlsClientAuthSanUri !== null) {
+            $out['tls_client_auth_san_uri'] = $this->tlsClientAuthSanUri;
+        }
+        if ($this->tlsClientAuthSubjectDn !== null) {
+            $out['tls_client_auth_subject_dn'] = $this->tlsClientAuthSubjectDn;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Renders this object for `json_encode()`.
+     *
+     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
+     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
+     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
+     * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        $out = [];
+        $out['allowed_resources'] = $this->allowedResources;
         $out['authn_request_params'] = $this->authnRequestParams->value;
         $out['browser_sso'] = $this->browserSso;
         $out['client_id'] = $this->clientId;
@@ -206,19 +274,5 @@ final class OAuth2ClientResponse implements \JsonSerializable
         }
 
         return $out;
-    }
-
-    /**
-     * Renders this object for `json_encode()`.
-     *
-     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
-     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
-     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
-     * and nowhere else (§27.5).
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->toArray();
     }
 }

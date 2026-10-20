@@ -215,10 +215,78 @@ final class CreateFederationConfigRequest implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['client_id'] = $this->clientId;
+        $out['client_secret'] = $this->clientSecret;
+        $out['protocol'] = $this->protocol;
+        $out['provider'] = $this->provider;
+        if ($this->allowSha1Signatures !== null) {
+            $out['allow_sha1_signatures'] = $this->allowSha1Signatures;
+        }
+        if ($this->allowTenantInheritance !== null) {
+            $out['allow_tenant_inheritance'] = $this->allowTenantInheritance;
+        }
+        if ($this->allowedAlgorithms !== null) {
+            $out['allowed_algorithms'] = $this->allowedAlgorithms;
+        }
+        if ($this->allowedIssuerTenants !== null) {
+            $out['allowed_issuer_tenants'] = $this->allowedIssuerTenants;
+        }
+        if ($this->appleKeyId !== null) {
+            $out['apple_key_id'] = $this->appleKeyId;
+        }
+        if ($this->appleTeamId !== null) {
+            $out['apple_team_id'] = $this->appleTeamId;
+        }
+        if ($this->attributeMap !== null) {
+            $out['attribute_map'] = $this->attributeMap;
+        }
+        if ($this->authorizationEndpoint !== null) {
+            $out['authorization_endpoint'] = $this->authorizationEndpoint;
+        }
+        if ($this->buttonIcon !== null) {
+            $out['button_icon'] = $this->buttonIcon;
+        }
+        if ($this->idpMetadataSigningCertPem !== null) {
+            $out['idp_metadata_signing_cert_pem'] = $this->idpMetadataSigningCertPem;
+        }
+        if ($this->idpSigningCertPem !== null) {
+            $out['idp_signing_cert_pem'] = $this->idpSigningCertPem;
+        }
+        if ($this->metadataUrl !== null) {
+            $out['metadata_url'] = $this->metadataUrl;
+        }
+        if ($this->providerKind !== null) {
+            $out['provider_kind'] = $this->providerKind;
+        }
+        if ($this->providerSlug !== null) {
+            $out['provider_slug'] = $this->providerSlug;
+        }
+        if ($this->requirePkce !== null) {
+            $out['require_pkce'] = $this->requirePkce;
+        }
+        if ($this->scopes !== null) {
+            $out['scopes'] = $this->scopes;
+        }
+        if ($this->tokenEndpoint !== null) {
+            $out['token_endpoint'] = $this->tokenEndpoint;
+        }
+        if ($this->tokenExchange !== null) {
+            $out['token_exchange'] = $this->tokenExchange->jsonSerialize();
+        }
+        if ($this->userinfoEndpoint !== null) {
+            $out['userinfo_endpoint'] = $this->userinfoEndpoint;
+        }
+
+        return $out;
     }
 }

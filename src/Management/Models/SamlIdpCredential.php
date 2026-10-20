@@ -88,7 +88,7 @@ final class SamlIdpCredential implements \JsonSerializable
         $out['not_after'] = $this->notAfter;
         $out['not_before'] = $this->notBefore;
         $out['serial'] = $this->serial;
-        $out['status'] = $this->status->value;
+        $out['status'] = $this->status->toWire();
         $out['tenant_id'] = $this->tenantId;
         if ($this->retiredAt !== null) {
             $out['retired_at'] = $this->retiredAt;
@@ -104,10 +104,30 @@ final class SamlIdpCredential implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['certificate_pem'] = $this->certificatePem;
+        $out['created_at'] = $this->createdAt;
+        $out['fingerprint'] = $this->fingerprint;
+        $out['id'] = $this->id;
+        $out['issuer_ca_id'] = $this->issuerCaId;
+        $out['not_after'] = $this->notAfter;
+        $out['not_before'] = $this->notBefore;
+        $out['serial'] = $this->serial;
+        $out['status'] = $this->status->value;
+        $out['tenant_id'] = $this->tenantId;
+        if ($this->retiredAt !== null) {
+            $out['retired_at'] = $this->retiredAt;
+        }
+
+        return $out;
     }
 }

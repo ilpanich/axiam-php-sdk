@@ -96,7 +96,7 @@ final class NetworkSegmentResponse implements \JsonSerializable
         $out['enabled'] = $this->enabled;
         $out['filter_ids'] = $this->filterIds;
         $out['id'] = $this->id;
-        $out['kind'] = $this->kind->value;
+        $out['kind'] = $this->kind->toWire();
         $out['name'] = $this->name;
         $out['path'] = $this->path;
         $out['site_key'] = $this->siteKey;
@@ -119,10 +119,34 @@ final class NetworkSegmentResponse implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        $out = [];
+        $out['created_at'] = $this->createdAt;
+        $out['created_by'] = $this->createdBy;
+        $out['enabled'] = $this->enabled;
+        $out['filter_ids'] = $this->filterIds;
+        $out['id'] = $this->id;
+        $out['kind'] = $this->kind->value;
+        $out['name'] = $this->name;
+        $out['path'] = $this->path;
+        $out['site_key'] = $this->siteKey;
+        $out['tenant_id'] = $this->tenantId;
+        $out['updated_at'] = $this->updatedAt;
+        $out['updated_by'] = $this->updatedBy;
+        $out['version'] = $this->version;
+        $out['vlan_id'] = $this->vlanId;
+        if ($this->rank !== null) {
+            $out['rank'] = $this->rank;
+        }
+
+        return $out;
     }
 }
