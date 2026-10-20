@@ -286,7 +286,7 @@ The first table below says what 1.62 changed here.
 | Item | Here |
 |---|---|
 | (a) no session cookie or `X-CSRF-Token` on `/oauth2/*` (§6.1 rule 11, §12.1 rule 3) | `AuthMiddleware` drops both on every `/oauth2/` request; `tests/Contract163/OAuth2NoSessionCredentialsTest.php` |
-| (c) the AMQP audit producer refuses a reserved `tenants.`/`gdpr.` action | Not applicable: this SDK ships an audit-events consumer and the reactor's reply publisher, no audit producer |
+| (c) the AMQP audit producer refuses a reserved `tenants.`/`gdpr.` action | Not applicable: this SDK ships no helper that builds or signs an `AuditEventMessage`, only an audit-events consumer and the reactor's reply publisher |
 | C162-04 an unrecognised open-enum value is never sent | Generated open enums have `toWire()`, which raises `ValidationError` on `Unknown`; the refusal is local, before the request |
 | C162-07 `plan` refuses an unknown open-enum value on an unstated member | `ManifestApi::plan()` raises `ValidationError` for a network profile (`GET`s only) |
 

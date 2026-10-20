@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Contract 1.63 (the AXIAM 1.1.1 release) on top of contract 1.62, with the 1.62 conformance follow-ups of
 issue #84. `CONTRACT.md`, `openapi.json` and `management-registry.json` are re-vendored byte for byte from
-`ilpanich/axiam` `a6cd10eba` (`proto/` and `opaque-test-vectors.json` are unchanged); the generator `--check`
+`ilpanich/axiam` `d919ba0cc` (`proto/` and `opaque-test-vectors.json` are unchanged); the generator `--check`
 is clean. **A patch release:** no signature changes and no operation is added (the only spec change that
 reaches a model, the 1.63 comment wording of the `network` handle, is documentation). The README states
 conformance at contract 1.63.
@@ -40,8 +40,9 @@ conformance at contract 1.63.
 ### Notes
 
 - Contract 1.63 item (c) (the AMQP audit producer refuses a reserved `tenants.`/`gdpr.` action locally) is
-  not applicable: this SDK ships an `axiam.audit.events` **consumer** (`Amqp\Consumer`, `Amqp\Hmac::verify`)
-  and the reactor's reply publisher, but no audit producer, so there is nothing to refuse before.
+  not applicable: this SDK ships no helper that builds or signs an `AuditEventMessage` (§8): only an
+  `axiam.audit.events` **consumer** (`Amqp\Consumer`, `Amqp\Hmac::verify`) and the reactor's reply publisher,
+  so there is nothing to refuse before.
 - `DeviceAuthorizationRequest.client_id` (now optional in the spec) is not modelled: the device endpoints
   are the OIDC client's, not the §27 surface.
 - This SDK verifies DPoP proofs and generates none, so the §21.7.4 key-lifetime rule does not apply.
