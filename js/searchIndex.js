@@ -2698,7 +2698,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Anetwork\u0028\u0029",
             "name": "network",
-            "summary": "A\u0020tenant\u0027s\u0020network\u0020segments\u0020and\u0020the\u0020RADIUS\u0020reply\u0020profile\u0020each\u0020owns\u0020\u0028RADIUS\u0020D4\u0029\u003A\u0020a\nsegment\u0020is\u0020a\u0020node\u0020of\u0020the\u0020reserved\u0020\/network\u0020subtree\u0020of\u0020the\u0020resource\u0020tree\u0020\u0028kind,\u0020VLAN,\nFilter\u002DId\u0020envelope,\u0020placement\u0020rank\u0029,\u0020and\u0020its\u0020profile\u0020is\u0020the\u0020typed\u0020\u0060axiam\u002Dradius\u002Dreply\/1\u0060\nrecord\u0020a\u0020decision\u0020renders.\u0020Every\u0020write\u0020is\u0020conditional\u0020on\u0020the\u0020\u0060version\u0060\u0020the\u0020caller\u0020read\nand\u0020passes\u0020the\u0020server\u0027s\u0020write\u0020gate.\u0020The\u0020tenant\u0027s\u0020Session\u002DTimeout\u0020cap\u0020is\u0020one\u0020more\u0020row\u0020of\nit\u0020\u0028get_policy,\u0020replace_policy\u0029\u003A\u0020lowering\u0020it\u0020is\u0020always\u0020allowed,\u0020raising\u0020it\u0020is\u0020allowed\nand\u0020audited.\u0020The\u0020decision\u0020route\u0020FreeRADIUS\u0020calls\u0020is\u0020not\u0020in\u0020this\u0020registry.",
+            "summary": "A\u0020tenant\u0027s\u0020network\u0020segments\u0020and\u0020the\u0020RADIUS\u0020reply\u0020profile\u0020each\u0020owns\u0020\u0028RADIUS\u0020Live\nprofile\u0029\u003A\u0020a\u0020segment\u0020is\u0020a\u0020node\u0020of\u0020the\u0020reserved\u0020\/network\u0020subtree\u0020of\u0020the\u0020resource\u0020tree\n\u0028kind,\u0020VLAN,\u0020Filter\u002DId\u0020envelope,\u0020placement\u0020rank\u0029,\u0020and\u0020its\u0020profile\u0020is\u0020the\u0020typed\n\u0060axiam\u002Dradius\u002Dreply\/1\u0060\u0020record\u0020a\u0020decision\u0020renders.\u0020Every\u0020write\u0020is\u0020conditional\u0020on\u0020the\n\u0060version\u0060\u0020the\u0020caller\u0020read\u0020and\u0020passes\u0020the\u0020server\u0027s\u0020write\u0020gate.\u0020The\u0020tenant\u0027s\nSession\u002DTimeout\u0020cap\u0020is\u0020one\u0020more\u0020row\u0020of\u0020it\u0020\u0028get_policy,\u0020replace_policy\u0029\u003A\u0020lowering\u0020it\u0020is\nalways\u0020allowed,\u0020raising\u0020it\u0020is\u0020allowed\u0020and\u0020audited.\u0020The\u0020decision\u0020route\u0020FreeRADIUS\u0020calls\nis\u0020not\u0020in\u0020this\u0020registry.",
             "url": "classes/Axiam-Sdk-Management-ManagementApi.html#method_network"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\ManagementApi\u003A\u003Asettings\u0028\u0029",
@@ -3316,6 +3316,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020ActorType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-ActorType.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ActorType\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-ActorType.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ActorType\u003A\u003AUser",
             "name": "User",
             "summary": "The\u0020wire\u0020value\u0020\u0060User\u0060.",
@@ -3571,6 +3576,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020AttestationMode,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-AttestationMode.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttestationMode\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttestationMode.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttestationMode\u003A\u003ANone",
             "name": "None",
             "summary": "The\u0020wire\u0020value\u0020\u0060none\u0060.",
@@ -3640,6 +3650,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020AttributeSource,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeSource.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeSource\u003A\u003AUsername",
             "name": "Username",
@@ -3766,6 +3781,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020AuditOutcome,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-AuditOutcome.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuditOutcome\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuditOutcome.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuditOutcome\u003A\u003ASuccess",
             "name": "Success",
             "summary": "The\u0020wire\u0020value\u0020\u0060Success\u0060.",
@@ -3795,6 +3815,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020AuthnRequestParamsMode,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuthnRequestParamsMode\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuthnRequestParamsMode.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuthnRequestParamsMode\u003A\u003AIgnore",
             "name": "Ignore",
@@ -4096,6 +4121,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020CertificateStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-CertificateStatus.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CertificateStatus\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-CertificateStatus.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CertificateStatus\u003A\u003AActive",
             "name": "Active",
             "summary": "The\u0020wire\u0020value\u0020\u0060Active\u0060.",
@@ -4125,6 +4155,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020CertificateType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-CertificateType.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CertificateType\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-CertificateType.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CertificateType\u003A\u003AUser",
             "name": "User",
@@ -4160,6 +4195,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020CertificationLevel,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-CertificationLevel.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CertificationLevel\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-CertificationLevel.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CertificationLevel\u003A\u003AL1",
             "name": "L1",
@@ -4206,6 +4246,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020CibaDeliveryMode,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-CibaDeliveryMode.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaDeliveryMode\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaDeliveryMode.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaDeliveryMode\u003A\u003APoll",
             "name": "Poll",
             "summary": "The\u0020wire\u0020value\u0020\u0060poll\u0060.",
@@ -4230,6 +4275,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020CibaRequestSigningAlg,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-CibaRequestSigningAlg.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CibaRequestSigningAlg\u003A\u003APS256",
             "name": "PS256",
@@ -4331,6 +4381,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020ClientAuthMethod,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ClientAuthMethod\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-ClientAuthMethod.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ClientAuthMethod\u003A\u003AClientSecretPost",
             "name": "ClientSecretPost",
             "summary": "The\u0020wire\u0020value\u0020\u0060client_secret_post\u0060.",
@@ -4375,6 +4430,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020ClientProfile,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-ClientProfile.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ClientProfile\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-ClientProfile.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ClientProfile\u003A\u003AStandard",
             "name": "Standard",
@@ -5776,6 +5836,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020DeprovisionPolicy,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-DeprovisionPolicy.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DeprovisionPolicy\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-DeprovisionPolicy.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DeprovisionPolicy\u003A\u003ADeactivate",
             "name": "Deactivate",
             "summary": "The\u0020wire\u0020value\u0020\u0060deactivate\u0060.",
@@ -5925,6 +5990,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020DirectoryKind,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-DirectoryKind.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryKind\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryKind.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryKind\u003A\u003AOpenLdap",
             "name": "OpenLdap",
@@ -6315,6 +6385,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020FailurePolicy,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-FailurePolicy.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FailurePolicy\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-FailurePolicy.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FailurePolicy\u003A\u003AFailClosed",
             "name": "FailClosed",
@@ -7191,6 +7266,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020KeyAlgorithm,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-KeyAlgorithm.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\KeyAlgorithm\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-KeyAlgorithm.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\KeyAlgorithm\u003A\u003ARsa4096",
             "name": "Rsa4096",
             "summary": "The\u0020wire\u0020value\u0020\u0060Rsa4096\u0060.",
@@ -7290,6 +7370,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020ManagedBy,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-ManagedBy.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ManagedBy\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-ManagedBy.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ManagedBy\u003A\u003AAdmin",
             "name": "Admin",
@@ -7576,6 +7661,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020MfaMethodType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-MfaMethodType.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\MfaMethodType\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-MfaMethodType.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\MfaMethodType\u003A\u003ATotp",
             "name": "Totp",
             "summary": "The\u0020wire\u0020value\u0020\u0060Totp\u0060.",
@@ -7745,6 +7835,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020NameIdFormat,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NameIdFormat\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NameIdFormat\u003A\u003APersistent",
             "name": "Persistent",
@@ -7971,6 +8066,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020NetworkSegmentKind,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentKind\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentKind.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentKind\u003A\u003AAccess",
             "name": "Access",
             "summary": "The\u0020wire\u0020value\u0020\u0060access\u0060.",
@@ -8095,6 +8195,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020NotificationEventType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-NotificationEventType.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NotificationEventType\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-NotificationEventType.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NotificationEventType\u003A\u003ALoginFailure",
             "name": "LoginFailure",
@@ -9091,6 +9196,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020PermissionEffect,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-PermissionEffect.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PermissionEffect\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-PermissionEffect.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PermissionEffect\u003A\u003AAllow",
             "name": "Allow",
             "summary": "The\u0020wire\u0020value\u0020\u0060allow\u0060.",
@@ -9186,6 +9296,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020PgpKeyAlgorithm,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-PgpKeyAlgorithm.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKeyAlgorithm\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-PgpKeyAlgorithm.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKeyAlgorithm\u003A\u003ARsa4096",
             "name": "Rsa4096",
             "summary": "The\u0020wire\u0020value\u0020\u0060Rsa4096\u0060.",
@@ -9211,6 +9326,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020PgpKeyPurpose,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-PgpKeyPurpose.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKeyPurpose\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-PgpKeyPurpose.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKeyPurpose\u003A\u003AAuditSigning",
             "name": "AuditSigning",
             "summary": "The\u0020wire\u0020value\u0020\u0060AuditSigning\u0060.",
@@ -9235,6 +9355,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020PgpKeyStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-PgpKeyStatus.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKeyStatus\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-PgpKeyStatus.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKeyStatus\u003A\u003AActive",
             "name": "Active",
@@ -9541,6 +9666,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020RadiusServiceType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-RadiusServiceType.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusServiceType\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusServiceType.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusServiceType\u003A\u003AFramedUser",
             "name": "FramedUser",
             "summary": "The\u0020wire\u0020value\u0020\u0060framed_user\u0060.",
@@ -9560,6 +9690,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020RadiusTerminationAction,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusTerminationAction\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-RadiusTerminationAction.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RadiusTerminationAction\u003A\u003ADefault",
             "name": "Default",
@@ -9640,6 +9775,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020ReactorMode,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-ReactorMode.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReactorMode\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReactorMode.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReactorMode\u003A\u003AIntercept",
             "name": "Intercept",
@@ -10416,6 +10556,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SamlBinding,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SamlBinding.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlBinding\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlBinding.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlBinding\u003A\u003AHttpPost",
             "name": "HttpPost",
             "summary": "The\u0020wire\u0020value\u0020\u0060http_post\u0060.",
@@ -10556,6 +10701,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SamlIdpCredentialStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredentialStatus.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredentialStatus\u003A\u003AActive",
             "name": "Active",
             "summary": "The\u0020wire\u0020value\u0020\u0060active\u0060.",
@@ -10660,6 +10810,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SamlIdpSlot,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SamlIdpSlot.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpSlot\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpSlot.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpSlot\u003A\u003AActive",
             "name": "Active",
@@ -11501,6 +11656,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020ScimTokenStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-ScimTokenStatus.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTokenStatus\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTokenStatus.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTokenStatus\u003A\u003AActive",
             "name": "Active",
             "summary": "The\u0020wire\u0020value\u0020\u0060active\u0060.",
@@ -12311,6 +12471,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SettingsScope,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SettingsScope.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SettingsScope\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SettingsScope.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SettingsScope\u003A\u003AOrg",
             "name": "Org",
             "summary": "The\u0020wire\u0020value\u0020\u0060Org\u0060.",
@@ -12566,6 +12731,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfDeliveryMethod,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SsfDeliveryMethod.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfDeliveryMethod\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfDeliveryMethod.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfDeliveryMethod\u003A\u003APush",
             "name": "Push",
             "summary": "The\u0020wire\u0020value\u0020\u0060push\u0060.",
@@ -12590,6 +12760,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfEventType,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfEventType.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfEventType\u003A\u003ASessionRevoked",
             "name": "SessionRevoked",
@@ -12635,6 +12810,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfStatusActor,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SsfStatusActor.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStatusActor\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStatusActor.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStatusActor\u003A\u003AAdmin",
             "name": "Admin",
@@ -12876,6 +13056,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfStreamStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamStatus.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamStatus\u003A\u003AEnabled",
             "name": "Enabled",
             "summary": "The\u0020wire\u0020value\u0020\u0060enabled\u0060.",
@@ -12905,6 +13090,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020SsfSubjectFormat,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-SsfSubjectFormat.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfSubjectFormat\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfSubjectFormat.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfSubjectFormat\u003A\u003AIssSub",
             "name": "IssSub",
@@ -13080,6 +13270,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020TenantKind,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-TenantKind.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantKind\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantKind.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantKind\u003A\u003AStandard",
             "name": "Standard",
@@ -13316,6 +13511,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020TenantStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-TenantStatus.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantStatus\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantStatus.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantStatus\u003A\u003AActive",
             "name": "Active",
             "summary": "The\u0020wire\u0020value\u0020\u0060Active\u0060.",
@@ -13485,6 +13685,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020UnknownAaguidAction,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-UnknownAaguidAction.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UnknownAaguidAction\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-UnknownAaguidAction.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UnknownAaguidAction\u003A\u003AAllow",
             "name": "Allow",
@@ -14486,6 +14691,11 @@ Search.appendIndex(
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020UserNameSource,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-UserNameSource.html#method_fromWire"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserNameSource\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserNameSource.html#method_toWire"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserNameSource\u003A\u003AUsername",
             "name": "Username",
             "summary": "The\u0020wire\u0020value\u0020\u0060username\u0060.",
@@ -14600,6 +14810,11 @@ Search.appendIndex(
             "name": "fromWire",
             "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020UserStatus,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
             "url": "classes/Axiam-Sdk-Management-Models-UserStatus.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserStatus\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserStatus.html#method_toWire"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserStatus\u003A\u003AActive",
             "name": "Active",
@@ -14823,7 +15038,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi",
             "name": "NetworkApi",
-            "summary": "A\u0020tenant\u0027s\u0020network\u0020segments\u0020and\u0020the\u0020RADIUS\u0020reply\u0020profile\u0020each\u0020owns\u0020\u0028RADIUS\u0020D4\u0029\u003A\u0020a\u0020segment\u0020is\na\u0020node\u0020of\u0020the\u0020reserved\u0020\/network\u0020subtree\u0020of\u0020the\u0020resource\u0020tree\u0020\u0028kind,\u0020VLAN,\u0020Filter\u002DId\nenvelope,\u0020placement\u0020rank\u0029,\u0020and\u0020its\u0020profile\u0020is\u0020the\u0020typed\u0020\u0060axiam\u002Dradius\u002Dreply\/1\u0060\u0020record\u0020a\ndecision\u0020renders.\u0020Every\u0020write\u0020is\u0020conditional\u0020on\u0020the\u0020\u0060version\u0060\u0020the\u0020caller\u0020read\u0020and\u0020passes\u0020the\nserver\u0027s\u0020write\u0020gate.\u0020The\u0020tenant\u0027s\u0020Session\u002DTimeout\u0020cap\u0020is\u0020one\u0020more\u0020row\u0020of\u0020it\u0020\u0028get_policy,\nreplace_policy\u0029\u003A\u0020lowering\u0020it\u0020is\u0020always\u0020allowed,\u0020raising\u0020it\u0020is\u0020allowed\u0020and\u0020audited.\u0020The\ndecision\u0020route\u0020FreeRADIUS\u0020calls\u0020is\u0020not\u0020in\u0020this\u0020registry.",
+            "summary": "A\u0020tenant\u0027s\u0020network\u0020segments\u0020and\u0020the\u0020RADIUS\u0020reply\u0020profile\u0020each\u0020owns\u0020\u0028RADIUS\u0020Live\u0020profile\u0029\u003A\u0020a\nsegment\u0020is\u0020a\u0020node\u0020of\u0020the\u0020reserved\u0020\/network\u0020subtree\u0020of\u0020the\u0020resource\u0020tree\u0020\u0028kind,\u0020VLAN,\nFilter\u002DId\u0020envelope,\u0020placement\u0020rank\u0029,\u0020and\u0020its\u0020profile\u0020is\u0020the\u0020typed\u0020\u0060axiam\u002Dradius\u002Dreply\/1\u0060\nrecord\u0020a\u0020decision\u0020renders.\u0020Every\u0020write\u0020is\u0020conditional\u0020on\u0020the\u0020\u0060version\u0060\u0020the\u0020caller\u0020read\u0020and\npasses\u0020the\u0020server\u0027s\u0020write\u0020gate.\u0020The\u0020tenant\u0027s\u0020Session\u002DTimeout\u0020cap\u0020is\u0020one\u0020more\u0020row\u0020of\u0020it\n\u0028get_policy,\u0020replace_policy\u0029\u003A\u0020lowering\u0020it\u0020is\u0020always\u0020allowed,\u0020raising\u0020it\u0020is\u0020allowed\u0020and\naudited.\u0020The\u0020decision\u0020route\u0020FreeRADIUS\u0020calls\u0020is\u0020not\u0020in\u0020this\u0020registry.",
             "url": "classes/Axiam-Sdk-Management-NetworkApi.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\NetworkApi\u003A\u003AlistSegments\u0028\u0029",

@@ -1024,7 +1024,7 @@ absent the replacement is conditional on the version the server reads during the
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/Models/SsfStreamInput.php"><a href="files/src-management-models-ssfstreaminput.html"><abbr title="src/Management/Models/SsfStreamInput.php">SsfStreamInput.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">148</span>
+    <span class="phpdocumentor-element-found-in__line">120</span>
 
     </aside>
 
@@ -1041,6 +1041,9 @@ absent the replacement is conditional on the version the server reads during the
 <code class="prettyprint">json_encode($model)</code> in application code prints <code class="prettyprint">[SENSITIVE]</code>. The one place a secret
 is revealed is <a href="classes/Axiam-Sdk-Management-ManagementTransport.html"><abbr title="\Axiam\Sdk\Management\ManagementTransport">ManagementTransport</abbr></a>, on the way to the wire
 and nowhere else (§27.5).</p>
+<p>Rendering for a log line never fails: an unknown union arm renders its discriminator and
+an unrecognised enum value its empty <code class="prettyprint">Unknown</code> spelling here, and only <abbr title="\Axiam\Sdk\Management\Models\self::toArray()">self::toArray()</abbr> -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+P12.2).</p>
 </section>
 
     

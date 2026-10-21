@@ -236,13 +236,14 @@ tenant.</dd>
     <span>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Management-NetworkApi.html"><abbr title="\Axiam\Sdk\Management\NetworkApi">NetworkApi</abbr></a>    </span>
 </dt>
-<dd>A tenant&#039;s network segments and the RADIUS reply profile each owns (RADIUS D4): a
-segment is a node of the reserved /network subtree of the resource tree (kind, VLAN,
-Filter-Id envelope, placement rank), and its profile is the typed `axiam-radius-reply/1`
-record a decision renders. Every write is conditional on the `version` the caller read
-and passes the server&#039;s write gate. The tenant&#039;s Session-Timeout cap is one more row of
-it (get_policy, replace_policy): lowering it is always allowed, raising it is allowed
-and audited. The decision route FreeRADIUS calls is not in this registry.</dd>
+<dd>A tenant&#039;s network segments and the RADIUS reply profile each owns (RADIUS Live
+profile): a segment is a node of the reserved /network subtree of the resource tree
+(kind, VLAN, Filter-Id envelope, placement rank), and its profile is the typed
+`axiam-radius-reply/1` record a decision renders. Every write is conditional on the
+`version` the caller read and passes the server&#039;s write gate. The tenant&#039;s
+Session-Timeout cap is one more row of it (get_policy, replace_policy): lowering it is
+always allowed, raising it is allowed and audited. The decision route FreeRADIUS calls
+is not in this registry.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Management-ManagementApi.html#method_notificationRules">notificationRules()</a>
@@ -503,7 +504,7 @@ which this namespace configures.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">420</span>
+    <span class="phpdocumentor-element-found-in__line">421</span>
 
     </aside>
 
@@ -823,17 +824,18 @@ convergence loop over the operations below, not an endpoint the registry describ
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">353</span>
+    <span class="phpdocumentor-element-found-in__line">354</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">A tenant&#039;s network segments and the RADIUS reply profile each owns (RADIUS D4): a
-segment is a node of the reserved /network subtree of the resource tree (kind, VLAN,
-Filter-Id envelope, placement rank), and its profile is the typed `axiam-radius-reply/1`
-record a decision renders. Every write is conditional on the `version` the caller read
-and passes the server&#039;s write gate. The tenant&#039;s Session-Timeout cap is one more row of
-it (get_policy, replace_policy): lowering it is always allowed, raising it is allowed
-and audited. The decision route FreeRADIUS calls is not in this registry.</p>
+        <p class="phpdocumentor-summary">A tenant&#039;s network segments and the RADIUS reply profile each owns (RADIUS Live
+profile): a segment is a node of the reserved /network subtree of the resource tree
+(kind, VLAN, Filter-Id envelope, placement rank), and its profile is the typed
+`axiam-radius-reply/1` record a decision renders. Every write is conditional on the
+`version` the caller read and passes the server&#039;s write gate. The tenant&#039;s
+Session-Timeout cap is one more row of it (get_policy, replace_policy): lowering it is
+always allowed, raising it is allowed and audited. The decision route FreeRADIUS calls
+is not in this registry.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -1065,7 +1067,7 @@ the SDK boundary (§27.0).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">448</span>
+    <span class="phpdocumentor-element-found-in__line">449</span>
 
     </aside>
 
@@ -1105,7 +1107,7 @@ them so.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">434</span>
+    <span class="phpdocumentor-element-found-in__line">435</span>
 
     </aside>
 
@@ -1145,7 +1147,7 @@ caller, never to another user.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">393</span>
+    <span class="phpdocumentor-element-found-in__line">394</span>
 
     </aside>
 
@@ -1350,7 +1352,7 @@ anything downstream.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">379</span>
+    <span class="phpdocumentor-element-found-in__line">380</span>
 
     </aside>
 
@@ -1468,7 +1470,7 @@ with.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">366</span>
+    <span class="phpdocumentor-element-found-in__line">367</span>
 
     </aside>
 
@@ -1629,7 +1631,7 @@ lockout state.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Management/ManagementApi.php"><a href="files/src-management-managementapi.html"><abbr title="src/Management/ManagementApi.php">ManagementApi.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">407</span>
+    <span class="phpdocumentor-element-found-in__line">408</span>
 
     </aside>
 
