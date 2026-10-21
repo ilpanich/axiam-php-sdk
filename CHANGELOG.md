@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - Unreleased
+
+Contract 1.63 (the AXIAM 1.1.1 release) on top of contract 1.62, with the 1.62 conformance follow-ups of
+issue #84. `CONTRACT.md`, `openapi.json` and `management-registry.json` are re-vendored byte for byte from
+`ilpanich/axiam` `d919ba0cc` (`proto/` and `opaque-test-vectors.json` are unchanged); the generator `--check`
+is clean. **A patch release:** no signature changes and no operation is added (the only spec change that
+reaches a model, the 1.63 comment wording of the `network` handle, is documentation). The README states
+conformance at contract 1.63.
+
+### Fixed
+
+- **No session cookie and no `X-CSRF-Token` on any `/oauth2/*` request (§6.1 rule 11, §12.1 rule 3).**
+  `AuthMiddleware` already withheld `Authorization` there; it now also drops the shared jar's `Cookie`
+  header and the captured CSRF token, so a client holding a cookie session sends neither on a device
+  authorization, a device poll or a token request. Test: `tests/Contract163/OAuth2NoSessionCredentialsTest.php`.
+- **An unrecognised open-enum value is never sent (C162-04, §34.2 P12.2(a)).** `Unknown` has the wire
+  spelling `""`, and a model read back from the server and sent again wrote it. Every generated open enum
+  now has `toWire()`, which raises `ValidationError` for `Unknown`; the generated `toArray()` uses it, so the
+  refusal is local, before any request. `jsonSerialize()` (a log line) still renders and never throws, and
+  now renders nested models the same way. `ReadModifyWrite` builds its base from `jsonSerialize()`, so a
+  change that replaces the unknown member still works. Tests: `tests/Contract163/OpenEnumRefusalTest.php`
+  (every open enum; a request model; zero requests through `replaceProfile`).
+- **`plan` refuses an unknown open-enum value on an unstated member (C162-07, §27.6.2 item 4).** A network
+  profile read with a `termination_action` or `service_type` this SDK has no name for, and a manifest that
+  changes another member without stating it, raises `ValidationError` at `plan` (`GET`s only), so `apply`
+  never half-applies; a manifest that states the member resolves it, and an unchanged profile is `NoChange`.
+  The message names the member; it cannot name the value, which `Unknown` does not keep.
+- The generated round-trip tests no longer feed a depth-limited `null` to an enum member, and one fixture
+  used a `deprovision` value the spec never listed.
+
+### Notes
+
+- Contract 1.63 item (c) (the AMQP audit producer refuses a reserved `tenants.`/`gdpr.` action locally) is
+  not applicable: this SDK ships no helper that builds or signs an `AuditEventMessage` (§8): only an
+  `axiam.audit.events` **consumer** (`Amqp\Consumer`, `Amqp\Hmac::verify`) and the reactor's reply publisher,
+  so there is nothing to refuse before.
+- `DeviceAuthorizationRequest.client_id` (now optional in the spec) is not modelled: the device endpoints
+  are the OIDC client's, not the §27 surface.
+- This SDK verifies DPoP proofs and generates none, so the §21.7.4 key-lifetime rule does not apply.
+
 ## [1.1.0] - 2026-10-16
 
 Contract 1.62 (the AXIAM 1.1.0 release) on top of contract 1.61. **Release 1.0.1 was never

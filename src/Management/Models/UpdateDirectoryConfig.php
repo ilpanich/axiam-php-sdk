@@ -110,6 +110,36 @@ final class UpdateDirectoryConfig implements \JsonSerializable
      */
     public function toArray(): array
     {
+        return $this->render(false);
+    }
+
+    /**
+     * Renders this object for `json_encode()`.
+     *
+     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
+     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
+     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
+     * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         if ($this->baseDn !== null) {
             $out['base_dn'] = $this->baseDn;
@@ -130,7 +160,7 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             $out['group_filter'] = $this->groupFilter instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->groupFilter;
         }
         if ($this->groupMappings !== null) {
-            $out['group_mappings'] = array_map(static fn (GroupMapping $v): array => $v->toArray(), $this->groupMappings);
+            $out['group_mappings'] = ($log ? array_map(static fn (GroupMapping $v): array => $v->jsonSerialize(), $this->groupMappings) : array_map(static fn (GroupMapping $v): array => $v->toArray(), $this->groupMappings));
         }
         if ($this->groupMemberAttribute !== null) {
             $out['group_member_attribute'] = $this->groupMemberAttribute;
@@ -142,7 +172,7 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             $out['jit_provisioning'] = $this->jitProvisioning;
         }
         if ($this->kind !== null) {
-            $out['kind'] = $this->kind->value;
+            $out['kind'] = ($log ? $this->kind->value : $this->kind->toWire());
         }
         if ($this->startTls !== null) {
             $out['start_tls'] = $this->startTls;
@@ -157,26 +187,12 @@ final class UpdateDirectoryConfig implements \JsonSerializable
             $out['url'] = $this->url;
         }
         if ($this->userAttributeMap !== null) {
-            $out['user_attribute_map'] = $this->userAttributeMap->toArray();
+            $out['user_attribute_map'] = ($log ? $this->userAttributeMap->jsonSerialize() : $this->userAttributeMap->toArray());
         }
         if ($this->userFilter !== null) {
             $out['user_filter'] = $this->userFilter;
         }
 
         return $out;
-    }
-
-    /**
-     * Renders this object for `json_encode()`.
-     *
-     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
-     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
-     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
-     * and nowhere else (§27.5).
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->toArray();
     }
 }

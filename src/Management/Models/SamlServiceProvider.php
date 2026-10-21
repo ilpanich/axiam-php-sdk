@@ -101,24 +101,54 @@ final class SamlServiceProvider implements \JsonSerializable
      */
     public function toArray(): array
     {
+        return $this->render(false);
+    }
+
+    /**
+     * Renders this object for `json_encode()`.
+     *
+     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
+     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
+     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
+     * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['acs_urls'] = array_map(static fn (AcsEndpoint $v): array => $v->toArray(), $this->acsUrls);
+        $out['acs_urls'] = ($log ? array_map(static fn (AcsEndpoint $v): array => $v->jsonSerialize(), $this->acsUrls) : array_map(static fn (AcsEndpoint $v): array => $v->toArray(), $this->acsUrls));
         $out['allow_idp_initiated'] = $this->allowIdpInitiated;
         $out['allowed_groups'] = $this->allowedGroups;
-        $out['attribute_mappings'] = array_map(static fn (AttributeMapping $v): array => $v->toArray(), $this->attributeMappings);
+        $out['attribute_mappings'] = ($log ? array_map(static fn (AttributeMapping $v): array => $v->jsonSerialize(), $this->attributeMappings) : array_map(static fn (AttributeMapping $v): array => $v->toArray(), $this->attributeMappings));
         $out['created_at'] = $this->createdAt;
         $out['display_name'] = $this->displayName;
         $out['enabled'] = $this->enabled;
         $out['encrypt_assertions'] = $this->encryptAssertions;
         $out['entity_id'] = $this->entityId;
         $out['id'] = $this->id;
-        $out['name_id_format'] = $this->nameIdFormat->value;
+        $out['name_id_format'] = ($log ? $this->nameIdFormat->value : $this->nameIdFormat->toWire());
         $out['sign_responses'] = $this->signResponses;
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
         $out['want_authn_requests_signed'] = $this->wantAuthnRequestsSigned;
         if ($this->sloBinding !== null) {
-            $out['slo_binding'] = $this->sloBinding->value;
+            $out['slo_binding'] = ($log ? $this->sloBinding->value : $this->sloBinding->toWire());
         }
         if ($this->sloUrl !== null) {
             $out['slo_url'] = $this->sloUrl;
@@ -131,19 +161,5 @@ final class SamlServiceProvider implements \JsonSerializable
         }
 
         return $out;
-    }
-
-    /**
-     * Renders this object for `json_encode()`.
-     *
-     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
-     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
-     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
-     * and nowhere else (§27.5).
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->toArray();
     }
 }

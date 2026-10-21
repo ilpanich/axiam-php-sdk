@@ -82,24 +82,7 @@ final class ScimTargetResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['auth'] = $this->auth->toArray();
-        $out['base_url'] = $this->baseUrl;
-        $out['created_at'] = $this->createdAt;
-        $out['deprovision'] = $this->deprovision->value;
-        $out['enabled'] = $this->enabled;
-        $out['id'] = $this->id;
-        $out['name'] = $this->name;
-        $out['push_groups'] = $this->pushGroups;
-        $out['scope'] = $this->scope->toArray();
-        $out['tenant_id'] = $this->tenantId;
-        $out['updated_at'] = $this->updatedAt;
-        $out['user_name_from'] = $this->userNameFrom->value;
-        if ($this->state !== null) {
-            $out['state'] = $this->state->toArray();
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -110,28 +93,40 @@ final class ScimTargetResponse implements \JsonSerializable
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
      *
-     * Rendering for a log line never fails: an unknown union arm renders its discriminator
-     * here, and only {@see self::toArray()} -- the request path -- refuses to send it
-     * (CONTRACT.md §31.2, §34.2 P12.2).
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
-        $out['auth'] = $this->auth->jsonSerialize();
+        $out['auth'] = ($log ? $this->auth->jsonSerialize() : $this->auth->toArray());
         $out['base_url'] = $this->baseUrl;
         $out['created_at'] = $this->createdAt;
-        $out['deprovision'] = $this->deprovision->value;
+        $out['deprovision'] = ($log ? $this->deprovision->value : $this->deprovision->toWire());
         $out['enabled'] = $this->enabled;
         $out['id'] = $this->id;
         $out['name'] = $this->name;
         $out['push_groups'] = $this->pushGroups;
-        $out['scope'] = $this->scope->jsonSerialize();
+        $out['scope'] = ($log ? $this->scope->jsonSerialize() : $this->scope->toArray());
         $out['tenant_id'] = $this->tenantId;
         $out['updated_at'] = $this->updatedAt;
-        $out['user_name_from'] = $this->userNameFrom->value;
+        $out['user_name_from'] = ($log ? $this->userNameFrom->value : $this->userNameFrom->toWire());
         if ($this->state !== null) {
-            $out['state'] = $this->state->toArray();
+            $out['state'] = ($log ? $this->state->jsonSerialize() : $this->state->toArray());
         }
 
         return $out;

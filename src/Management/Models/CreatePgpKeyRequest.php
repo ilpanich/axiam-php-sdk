@@ -52,13 +52,7 @@ final class CreatePgpKeyRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['algorithm'] = $this->algorithm->value;
-        $out['email'] = $this->email;
-        $out['name'] = $this->name;
-        $out['purpose'] = $this->purpose->value;
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -68,10 +62,32 @@ final class CreatePgpKeyRequest implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
+        $out = [];
+        $out['algorithm'] = ($log ? $this->algorithm->value : $this->algorithm->toWire());
+        $out['email'] = $this->email;
+        $out['name'] = $this->name;
+        $out['purpose'] = ($log ? $this->purpose->value : $this->purpose->toWire());
+
+        return $out;
     }
 }

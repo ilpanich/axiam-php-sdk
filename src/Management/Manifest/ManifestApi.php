@@ -7,6 +7,7 @@ namespace Axiam\Sdk\Management\Manifest;
 use Axiam\Sdk\Management\ManagementApi;
 use Axiam\Sdk\Management\Models;
 use Axiam\Sdk\Management\PageRequest;
+use Axiam\Sdk\Management\ValidationError;
 
 /**
  * Plans and applies a §27.6 manifest (CONTRACT.md §27.6, §27.7).
@@ -207,6 +208,32 @@ final class ManifestApi
     }
 
     /**
+     * §27.6.2 item 4 (contract 1.62): an `Update` of a profile carries the read's members the
+     * manifest does not state, so an open-enum member the read holds as a value this SDK has no
+     * name for (it decodes to `Unknown`, whose spelling is empty) cannot be carried — and
+     * leaving it out would write the server's default over a value nobody stated. It is
+     * refused here, at `plan`, which has sent nothing but `GET`s, so no manifest is half-applied.
+     * A manifest that states the member resolves it.
+     *
+     * @param array<string,mixed> $current The profile as read.
+     *
+     * @throws ValidationError when an unstated member of the read is an unrecognised value.
+     */
+    private static function refuseUnknownCarriedMember(ManifestEntity $entity, array $current): void
+    {
+        foreach (['termination_action', 'service_type'] as $member) {
+            if (($current[$member] ?? null) === '' && !\array_key_exists($member, $entity->fields)) {
+                throw new ValidationError(sprintf(
+                    'network profile "%s": the server holds a %s this SDK does not recognise and the manifest does not state one; '
+                    . 'state the member, or upgrade the SDK',
+                    $entity->name,
+                    $member,
+                ));
+            }
+        }
+    }
+
+    /**
      * {@see self::plan()}'s computation against an ALREADY-READ `$existing` — the seam
      * {@see self::apply()} uses so its own single `currentState()` read serves both the
      * plan and {@see self::seedIds()}. Reading it twice per apply would not be WRONG,
@@ -232,6 +259,10 @@ final class ManifestApi
             // `grants` and `roles` are manifest-side concepts describing edges, not
             // columns on the server's object, so they never count as field drift.
             unset($drift['grants'], $drift['roles']);
+
+            if ($drift !== [] && $entity->kind === ManifestKind::NetworkProfile) {
+                self::refuseUnknownCarriedMember($entity, $current);
+            }
 
             $id = \is_string($current['id'] ?? null) ? $current['id'] : null;
             $changes[] = $drift === []
@@ -990,7 +1021,7 @@ final class ManifestApi
                 continue;
             }
             /** @var array<string,mixed> $row */
-            $row = $item->toArray();
+            $row = $item->jsonSerialize();
             $name = $row['name'] ?? null;
             if (!\is_string($name)) {
                 continue;
@@ -1027,7 +1058,7 @@ final class ManifestApi
                 continue;
             }
             /** @var array<string,mixed> $row */
-            $row = $item->toArray();
+            $row = $item->jsonSerialize();
             $name = $row['name'] ?? $row['action'] ?? null;
             if (\is_string($name)) {
                 $out[$name] = $row;

@@ -78,23 +78,7 @@ final class CreateCertificateRequest implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['cert_type'] = $this->certType->value;
-        $out['issuer_ca_id'] = $this->issuerCaId;
-        $out['key_algorithm'] = $this->keyAlgorithm->value;
-        $out['subject'] = $this->subject;
-        $out['validity_days'] = $this->validityDays;
-        if ($this->metadata !== null) {
-            $out['metadata'] = $this->metadata;
-        }
-        if ($this->subjectAltNames !== null) {
-            $out['subject_alt_names'] = array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames);
-        }
-        if ($this->userId !== null) {
-            $out['user_id'] = $this->userId;
-        }
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -104,10 +88,42 @@ final class CreateCertificateRequest implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
+        $out = [];
+        $out['cert_type'] = ($log ? $this->certType->value : $this->certType->toWire());
+        $out['issuer_ca_id'] = $this->issuerCaId;
+        $out['key_algorithm'] = ($log ? $this->keyAlgorithm->value : $this->keyAlgorithm->toWire());
+        $out['subject'] = $this->subject;
+        $out['validity_days'] = $this->validityDays;
+        if ($this->metadata !== null) {
+            $out['metadata'] = $this->metadata;
+        }
+        if ($this->subjectAltNames !== null) {
+            $out['subject_alt_names'] = ($log ? array_map(static fn (SubjectAltNameVariant $v): array => $v->jsonSerialize(), $this->subjectAltNames) : array_map(static fn (SubjectAltNameVariant $v): array => $v->toArray(), $this->subjectAltNames));
+        }
+        if ($this->userId !== null) {
+            $out['user_id'] = $this->userId;
+        }
+
+        return $out;
     }
 }

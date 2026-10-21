@@ -92,14 +92,44 @@ final class ReactorResponse implements \JsonSerializable
      */
     public function toArray(): array
     {
+        return $this->render(false);
+    }
+
+    /**
+     * Renders this object for `json_encode()`.
+     *
+     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
+     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
+     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
+     * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
+     * @return array<string,mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
         $out = [];
         $out['created_at'] = $this->createdAt;
         $out['description'] = $this->description;
         $out['enabled'] = $this->enabled;
         $out['events'] = $this->events;
-        $out['failure_policy'] = $this->failurePolicy->value;
+        $out['failure_policy'] = ($log ? $this->failurePolicy->value : $this->failurePolicy->toWire());
         $out['id'] = $this->id;
-        $out['mode'] = $this->mode->value;
+        $out['mode'] = ($log ? $this->mode->value : $this->mode->toWire());
         $out['name'] = $this->name;
         $out['priority'] = $this->priority;
         $out['recent_timeout_count'] = $this->recentTimeoutCount;
@@ -112,19 +142,5 @@ final class ReactorResponse implements \JsonSerializable
         }
 
         return $out;
-    }
-
-    /**
-     * Renders this object for `json_encode()`.
-     *
-     * Any {@see \Axiam\Sdk\Core\Sensitive} it carries stays WRAPPED here, so a log line or a
-     * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
-     * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
-     * and nowhere else (§27.5).
-     * @return array<string,mixed>
-     */
-    public function jsonSerialize(): array
-    {
-        return $this->toArray();
     }
 }

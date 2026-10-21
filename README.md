@@ -217,7 +217,7 @@ reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` und
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.62**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.63**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33
 and §36,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
@@ -280,6 +280,15 @@ the manifest (§27.6.2), makes the device grant authenticate its client (§14.1)
 change-taking read-modify-write form (§32.2) and settles two rules about request members (§27.11
 rule 5). Release 1.0.1 was never tagged: this is the first release to carry 1.61 as well, as 1.1.0 (its change log is merged into 1.1.0).
 The first table below says what 1.62 changed here.
+
+### Contract 1.63 — what changed here
+
+| Item | Here |
+|---|---|
+| (a) no session cookie or `X-CSRF-Token` on `/oauth2/*` (§6.1 rule 11, §12.1 rule 3) | `AuthMiddleware` drops both on every `/oauth2/` request; `tests/Contract163/OAuth2NoSessionCredentialsTest.php` |
+| (c) the AMQP audit producer refuses a reserved `tenants.`/`gdpr.` action | Not applicable: this SDK ships no helper that builds or signs an `AuditEventMessage`, only an audit-events consumer and the reactor's reply publisher |
+| C162-04 an unrecognised open-enum value is never sent | Generated open enums have `toWire()`, which raises `ValidationError` on `Unknown`; the refusal is local, before the request |
+| C162-07 `plan` refuses an unknown open-enum value on an unstated member | `ManifestApi::plan()` raises `ValidationError` for a network profile (`GET`s only) |
 
 ### Contract 1.62 — what changed here
 

@@ -64,7 +64,7 @@ final class ReadModifyWrite
             wantAuthnRequestsSigned: $sp->wantAuthnRequestsSigned,
         );
 
-        return $changes === [] ? $body : SamlServiceProviderInput::fromArray(self::apply($body->toArray(), $changes));
+        return $changes === [] ? $body : SamlServiceProviderInput::fromArray(self::apply($body->jsonSerialize(), $changes));
     }
 
     /**
@@ -127,7 +127,7 @@ final class ReadModifyWrite
         if ($changes === []) {
             return $body;
         }
-        $merged = self::apply($body->toArray(), $changes);
+        $merged = self::apply($body->jsonSerialize(), $changes);
         if (array_key_exists('events_allowed', $changes) && !array_key_exists('events_requested', $changes)) {
             $ceiling = array_map(
                 static fn (mixed $v): string => $v instanceof \BackedEnum ? (string) $v->value : (string) $v,
@@ -166,7 +166,7 @@ final class ReadModifyWrite
             userNameFrom: $target->userNameFrom,
         );
 
-        return $changes === [] ? $body : ScimTargetInput::fromArray(self::apply($body->toArray(), $changes));
+        return $changes === [] ? $body : ScimTargetInput::fromArray(self::apply($body->jsonSerialize(), $changes));
     }
 
     /**
@@ -196,7 +196,7 @@ final class ReadModifyWrite
             userAttributeMap: $config->userAttributeMap,
         );
 
-        return $changes === [] ? $body : SetDirectoryConfig::fromArray(self::apply($body->toArray(), $changes));
+        return $changes === [] ? $body : SetDirectoryConfig::fromArray(self::apply($body->jsonSerialize(), $changes));
     }
 
     /**

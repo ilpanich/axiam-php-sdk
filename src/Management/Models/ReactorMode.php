@@ -40,4 +40,24 @@ enum ReactorMode: string
     {
         return self::tryFrom($value) ?? self::Unknown;
     }
+
+    /**
+     * The wire spelling of this case, for a request body.
+     *
+     * {@see self::Unknown} has none: it stands for a value this SDK never saw, and sending it
+     * back as the empty string would leave the refusal to the server. It raises a {@see
+     * \Axiam\Sdk\Management\ValidationError} here instead, before any request is made
+     * (CONTRACT.md §34.2 P12.2(a)). Use `->value` to render for a log line.
+     * @throws \Axiam\Sdk\Management\ValidationError when this is `Unknown`.
+     */
+    public function toWire(): string
+    {
+        if ($this === self::Unknown) {
+            throw new \Axiam\Sdk\Management\ValidationError(
+                'refusing to send an unrecognised ReactorMode value; it was read from the server and cannot be written back',
+            );
+        }
+
+        return $this->value;
+    }
 }

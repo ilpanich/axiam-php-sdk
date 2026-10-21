@@ -88,25 +88,7 @@ final class SecuritySettings implements \JsonSerializable
      */
     public function toArray(): array
     {
-        $out = [];
-        $out['certificate'] = $this->certificate->toArray();
-        $out['created_at'] = $this->createdAt;
-        $out['email'] = $this->email->toArray();
-        $out['id'] = $this->id;
-        $out['lockout'] = $this->lockout->toArray();
-        $out['mfa'] = $this->mfa->toArray();
-        $out['notification'] = $this->notification->toArray();
-        $out['oidc'] = $this->oidc->toArray();
-        $out['opaque'] = $this->opaque->toArray();
-        $out['password'] = $this->password->toArray();
-        $out['privacy'] = $this->privacy->toArray();
-        $out['scope'] = $this->scope->value;
-        $out['scope_id'] = $this->scopeId;
-        $out['token'] = $this->token->toArray();
-        $out['updated_at'] = $this->updatedAt;
-        $out['webauthn'] = $this->webauthn->toArray();
-
-        return $out;
+        return $this->render(false);
     }
 
     /**
@@ -116,10 +98,44 @@ final class SecuritySettings implements \JsonSerializable
      * `json_encode($model)` in application code prints `[SENSITIVE]`. The one place a secret
      * is revealed is {@see \Axiam\Sdk\Management\ManagementTransport}, on the way to the wire
      * and nowhere else (§27.5).
+     *
+     * Rendering for a log line never fails: an unknown union arm renders its discriminator and
+     * an unrecognised enum value its empty `Unknown` spelling here, and only {@see
+     * self::toArray()} -- the request path -- refuses to send it (CONTRACT.md §31.2, §34.2
+     * P12.2).
      * @return array<string,mixed>
      */
     public function jsonSerialize(): array
     {
-        return $this->toArray();
+        return $this->render(true);
+    }
+
+    /**
+     * The one renderer behind {@see self::toArray()} (`$log` false: refuses an unknown
+     * enum value or union arm) and {@see self::jsonSerialize()} (`$log` true: never throws).
+     *
+     * @return array<string,mixed>
+     */
+    private function render(bool $log): array
+    {
+        $out = [];
+        $out['certificate'] = ($log ? $this->certificate->jsonSerialize() : $this->certificate->toArray());
+        $out['created_at'] = $this->createdAt;
+        $out['email'] = ($log ? $this->email->jsonSerialize() : $this->email->toArray());
+        $out['id'] = $this->id;
+        $out['lockout'] = ($log ? $this->lockout->jsonSerialize() : $this->lockout->toArray());
+        $out['mfa'] = ($log ? $this->mfa->jsonSerialize() : $this->mfa->toArray());
+        $out['notification'] = ($log ? $this->notification->jsonSerialize() : $this->notification->toArray());
+        $out['oidc'] = ($log ? $this->oidc->jsonSerialize() : $this->oidc->toArray());
+        $out['opaque'] = ($log ? $this->opaque->jsonSerialize() : $this->opaque->toArray());
+        $out['password'] = ($log ? $this->password->jsonSerialize() : $this->password->toArray());
+        $out['privacy'] = ($log ? $this->privacy->jsonSerialize() : $this->privacy->toArray());
+        $out['scope'] = ($log ? $this->scope->value : $this->scope->toWire());
+        $out['scope_id'] = $this->scopeId;
+        $out['token'] = ($log ? $this->token->jsonSerialize() : $this->token->toArray());
+        $out['updated_at'] = $this->updatedAt;
+        $out['webauthn'] = ($log ? $this->webauthn->jsonSerialize() : $this->webauthn->toArray());
+
+        return $out;
     }
 }
