@@ -832,7 +832,7 @@ final class OidcClient
         ?string $tenantId = null,
         ?OidcConfiguration $configuration = null,
     ): OidcTokenSet {
-        return $this->devicePollWithin($deviceCode, $tenantId, $configuration, null, null);
+        return $this->devicePollWithin($deviceCode, $tenantId, $configuration, null);
     }
 
     /**
@@ -843,17 +843,20 @@ final class OidcClient
      * surfaced as a {@see NetworkError}; **a `429` or any other answer is not** — rule 9 makes the
      * `429` the polling loop's wait, and an OAuth answer is decisive. The status is read before
      * the body (§34.2 P8), so AXIAM's own `500 {"error":"server_error"}` is a transport failure.
-     * With `$deadline` set (by {@see deviceLogin()}), a retry whose `Retry-After` would reach it is
-     * not taken: the poll surfaces the failure and the loop applies rule 4.
+     * With `$remaining` set (by {@see deviceLogin()}), a retry whose longest wait (the backoff
+     * ceiling, raised to `Retry-After`) would reach the deadline is not taken: the poll surfaces
+     * the failure and the loop applies rule 4 (§34.2 P10's analogue; nothing is sent after it).
      *
-     * @param (callable():float)|null $now The clock `$deadline` is read against.
+     * @param (callable():float)|null $remaining The seconds left until the grant's deadline.
+     * @param (callable(float):void)|null $retrySleep The sleeper of the in-poll §16 waits, in
+     *   milliseconds; `null` keeps {@see RetryPolicy}'s own.
      */
     private function devicePollWithin(
         Sensitive|string $deviceCode,
         ?string $tenantId,
         ?OidcConfiguration $configuration,
-        ?float $deadline,
-        ?callable $now,
+        ?callable $remaining,
+        ?callable $retrySleep = null,
     ): OidcTokenSet {
         $clientId = $this->requireClientId('devicePoll');
         $configuration ??= $this->oidcDiscover();
@@ -875,25 +878,40 @@ final class OidcClient
             $tenantId,
         );
 
-        // The status of the attempt in flight (`null`: a transport failure), shared with the retry
-        // predicate.
-        /** @var \ArrayObject<string, int|null> $attempt */
-        $attempt = new \ArrayObject(['status' => null]);
-        $retryable = static function (NetworkError $e) use ($attempt, $deadline, $now): bool {
+        // The attempt in flight, shared with the retry predicate: its 1-based number, its status
+        // (`null`: a transport failure) and the failure to rethrow if a retry is refused.
+        /** @var \ArrayObject<string, mixed> $attempt */
+        $attempt = new \ArrayObject(['n' => 0, 'status' => null, 'last' => null]);
+        $retryable = static function (NetworkError $e) use ($attempt, $remaining): bool {
             // A transport failure (no status) or a 5xx only: never the 429 or 408 that rule 9 leaves
             // to the loop.
             $status = $attempt['status'];
             if (\is_int($status) && $status < 500) {
                 return false;
             }
+            if ($remaining === null) {
+                return true;
+            }
 
-            return $deadline === null || $now === null || $now() + ($e->retryAfterMs ?? 0.0) / 1000.0 < $deadline;
+            // §14.2 rule 4: nothing is sent after the deadline. The wait the runner will take is the
+            // jittered backoff raised to `Retry-After`; the jitter is drawn later, so the longest it
+            // can be is bounded here (C164-36).
+            $n = $attempt['n'];
+            $longestWaitMs = max($e->retryAfterMs ?? 0.0, RetryPolicy::backoffMs(\is_int($n) ? $n : 1));
+
+            return $longestWaitMs / 1000.0 < $remaining();
         };
         $response = RetryPolicy::execute(
             'device_poll',
             $this->retryEnabled,
             $this->telemetry ?? new TelemetryDispatcher(null),
-            function () use ($url, $form, $attempt): ResponseInterface {
+            function (int $n) use ($url, $form, $attempt, $remaining): ResponseInterface {
+                $previous = $attempt['last'];
+                if ($n > 1 && $previous instanceof NetworkError && $remaining !== null && $remaining() <= 0.0) {
+                    // The wait ran past the deadline after all: send nothing, surface the failure.
+                    throw $previous;
+                }
+                $attempt['n'] = $n;
                 $attempt['status'] = null;
                 try {
                     $response = $this->http->post($url, [
@@ -902,12 +920,12 @@ final class OidcClient
                         'http_errors' => false,
                     ]);
                 } catch (GuzzleException $e) {
-                    throw NetworkError::fromException($e, 'token request failed');
+                    throw $attempt['last'] = NetworkError::fromException($e, 'token request failed');
                 }
                 $status = $response->getStatusCode();
                 $attempt['status'] = $status;
                 if ($status >= 500) {
-                    throw NetworkError::fromResponse($response, 'token request failed');
+                    throw $attempt['last'] = NetworkError::fromResponse($response, 'token request failed');
                 }
                 if ($status < 200 || $status >= 300) {
                     // An OAuth body is an OAuthProtocolError, which §16 never retries; a bodiless
@@ -918,7 +936,7 @@ final class OidcClient
                 return $response;
             },
             null,
-            null,
+            $retrySleep,
             $retryable,
         );
 
@@ -958,6 +976,9 @@ final class OidcClient
      *   §14.2 arithmetic without spending it in wall-clock time. Defaults to `sleep()`.
      * @param (callable():float)|null $now Injectable clock in seconds, for the `expires_in`
      *   deadline. Defaults to `microtime(true)`.
+     * @param (callable(float):void)|null $retrySleep Injectable sleeper for the §16 waits inside a
+     *   poll, in milliseconds. Without it, an injected `$sleep` also means those waits are not
+     *   spent; neither injected, they really wait. Either way they are bounded by the deadline.
      */
     public function deviceLogin(
         callable $onUserCode,
@@ -967,8 +988,10 @@ final class OidcClient
         bool $adoptAsCredential = false,
         ?callable $sleep = null,
         ?callable $now = null,
+        ?callable $retrySleep = null,
     ): OidcTokenSet {
         $configuration ??= $this->oidcDiscover();
+        $sleeperInjected = $sleep !== null;
         $sleep ??= static function (int $seconds): void {
             sleep($seconds);
         };
@@ -985,7 +1008,26 @@ final class OidcClient
         // the two is the elapsed time: with a real sleeper the clock is never behind, and with an
         // injected one that does not advance it the loop still counts what it slept.
         $startedAt = $now();
-        $sleptSeconds = 0;
+        $sleptSeconds = 0.0;
+        // The in-poll §16 waits (milliseconds). With a caller-injected `$retrySleep` they go there;
+        // with only an injected `$sleep` they are not spent (the promise of that parameter) but are
+        // counted as slept; otherwise `RetryPolicy` really waits.
+        $inPollSleep = null;
+        if ($retrySleep !== null) {
+            $inPollSleep = static function (float $ms) use ($retrySleep, &$sleptSeconds): void {
+                $retrySleep($ms);
+                $sleptSeconds += $ms / 1000.0;
+            };
+        } elseif ($sleeperInjected) {
+            $inPollSleep = static function (float $ms) use (&$sleptSeconds): void {
+                $sleptSeconds += $ms / 1000.0;
+            };
+        }
+        // The seconds left until the deadline, read live: by the loop before each sleep and by the
+        // in-poll §16 retry before each wait.
+        $remaining = static function () use (&$sleptSeconds, $startedAt, $now, $authorization): float {
+            return $authorization->expiresIn - max($sleptSeconds, $now() - $startedAt);
+        };
         // The wait of the next round when it is not the interval: a `429`'s `Retry-After`.
         $waitSeconds = null;
 
@@ -996,8 +1038,7 @@ final class OidcClient
             // the SDK from issuing a request that can only be refused, and reports it
             // under the same `expired_token` code the server would have used — so a
             // caller's branch does not care which side noticed first.
-            $elapsed = max($sleptSeconds, $now() - $startedAt);
-            if ($roundSeconds >= $authorization->expiresIn - $elapsed) {
+            if ($roundSeconds >= $remaining()) {
                 throw new OAuthProtocolError(
                     'expired_token',
                     'the device authorization expired before the user completed it '
@@ -1013,8 +1054,8 @@ final class OidcClient
                     $authorization->deviceCode,
                     $tenantId,
                     $configuration,
-                    $startedAt + $authorization->expiresIn,
-                    $now,
+                    $remaining,
+                    $inPollSleep,
                 );
                 if ($adoptAsCredential) {
                     $this->adoptCredential($tokenSet->accessToken);

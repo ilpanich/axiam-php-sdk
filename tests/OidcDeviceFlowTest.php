@@ -368,6 +368,20 @@ final class OidcDeviceFlowTest extends TestCase
         yield '503 temporarily_unavailable' => [503, 'temporarily_unavailable'];
     }
 
+    /**
+     * C164-38: the contract's in-attempt case holds "for a transport failure" as for a 5xx.
+     *
+     * @return iterable<string,array{callable():(Response|\Throwable)}>
+     */
+    public static function attemptFailures(): iterable
+    {
+        yield '500 with an OAuth body' => [static fn (): Response => self::oauthError('server_error', 500)];
+        yield 'a connection reset' => [static fn (): \Throwable => new \GuzzleHttp\Exception\ConnectException(
+            'connection reset',
+            new \GuzzleHttp\Psr7\Request('POST', self::BASE_URL . '/oauth2/token'),
+        )];
+    }
+
     /** @dataProvider serverFailureBodies */
     public function testA5xxWithAnOAuthBodyIsRetriedWithinThePollThenTheLoopContinues(int $status, string $code): void
     {
@@ -396,15 +410,16 @@ final class OidcDeviceFlowTest extends TestCase
         self::assertCount(3, $history, 'device_authorization + the 5xx + the retry');
     }
 
-    public function testTwoFailuresAndA200AreThreeRequestsInOneInterval(): void
+    /** @dataProvider attemptFailures */
+    public function testTwoFailuresAndA200AreThreeRequestsInOneInterval(callable $fail): void
     {
         // §14.6 (amended, C164-35): the attempt cap of §16.1 is 3 in total.
         $slept = [];
         $history = [];
         $client = $this->client([
             self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
-            self::oauthError('server_error', 500),
-            self::oauthError('server_error', 500),
+            $fail(),
+            $fail(),
             self::tokenSuccess(),
         ], $history);
 
@@ -421,15 +436,16 @@ final class OidcDeviceFlowTest extends TestCase
         self::assertCount(4, $history, 'device_authorization + three polls of one attempt');
     }
 
-    public function testAThirdFailureExhaustsTheCapAndTheLoopTakesItsNextInterval(): void
+    /** @dataProvider attemptFailures */
+    public function testAThirdFailureExhaustsTheCapAndTheLoopTakesItsNextInterval(callable $fail): void
     {
         $slept = [];
         $history = [];
         $client = $this->client([
             self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
-            self::oauthError('server_error', 500),
-            self::oauthError('server_error', 500),
-            self::oauthError('server_error', 500),
+            $fail(),
+            $fail(),
+            $fail(),
             self::tokenSuccess(),
         ], $history);
 
@@ -446,13 +462,14 @@ final class OidcDeviceFlowTest extends TestCase
         self::assertCount(5, $history, 'device_authorization + three failed polls + the next interval\'s poll');
     }
 
-    public function testWithRetryDisabledA5xxMakesOneRequestPerPoll(): void
+    /** @dataProvider attemptFailures */
+    public function testWithRetryDisabledA5xxMakesOneRequestPerPoll(callable $fail): void
     {
         $slept = [];
         $history = [];
         $client = $this->client([
             self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
-            self::oauthError('server_error', 500),
+            $fail(),
             self::tokenSuccess(),
         ], $history, retryEnabled: false);
 
@@ -469,13 +486,14 @@ final class OidcDeviceFlowTest extends TestCase
         self::assertCount(3, $history);
     }
 
-    public function testASingleDevicePollRetriesA5xxThenSurfacesANetworkError(): void
+    /** @dataProvider attemptFailures */
+    public function testASingleDevicePollRetriesA5xxThenSurfacesANetworkError(callable $fail): void
     {
         $history = [];
         $client = $this->client([
-            self::oauthError('server_error', 500),
-            self::oauthError('server_error', 500),
-            self::oauthError('server_error', 500),
+            $fail(),
+            $fail(),
+            $fail(),
         ], $history);
 
         try {
@@ -523,8 +541,11 @@ final class OidcDeviceFlowTest extends TestCase
     public function testARetryAfterThatReachesTheDeadlineIsNotWaitedInsideThePoll(): void
     {
         // The loop bounds the §16 retry by the grant's deadline: a 503 whose Retry-After would
-        // reach it is surfaced at once, and rule 4 ends the flow with nothing sent after it.
+        // reach it is surfaced at once, and rule 4 ends the flow with nothing sent after it. The
+        // in-poll waits are recorded (C164-41), not spent: a regression fails an assertion, it does
+        // not hang on a 3600 s sleep.
         $history = [];
+        $retryWaits = [];
         $client = $this->client([
             self::deviceAuthorizationResponse(['expires_in' => 30, 'interval' => 5]),
             new Response(503, ['Retry-After' => '3600'], (string) json_encode(['error' => 'temporarily_unavailable'])),
@@ -537,6 +558,9 @@ final class OidcDeviceFlowTest extends TestCase
                 configuration: $this->configuration(),
                 sleep: static function (int $s): void {
                 },
+                retrySleep: static function (float $ms) use (&$retryWaits): void {
+                    $retryWaits[] = $ms;
+                },
             );
             self::fail('expected the client-side deadline to fire');
         } catch (OAuthProtocolError $e) {
@@ -544,6 +568,132 @@ final class OidcDeviceFlowTest extends TestCase
         }
 
         self::assertCount(2, $history);
+        self::assertSame([], $retryWaits, 'no in-poll wait was started');
+    }
+
+    public function testARetryAfterInsideTheDeadlineIsServedAsTheInPollWait(): void
+    {
+        // expires_in 30, interval 5: a 503 with Retry-After 20 at 5 s is retried (5 + 20 < 30) after
+        // exactly that floor, and the second one (25 + 20 >= 30) is not.
+        $history = [];
+        $retryWaits = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 30, 'interval' => 5]),
+            new Response(503, ['Retry-After' => '20'], (string) json_encode(['error' => 'temporarily_unavailable'])),
+            new Response(503, ['Retry-After' => '20'], (string) json_encode(['error' => 'temporarily_unavailable'])),
+        ], $history);
+
+        try {
+            $client->deviceLogin(
+                onUserCode: static function (DeviceAuthorization $a): void {
+                },
+                configuration: $this->configuration(),
+                sleep: static function (int $s): void {
+                },
+                retrySleep: static function (float $ms) use (&$retryWaits): void {
+                    $retryWaits[] = $ms;
+                },
+            );
+            self::fail('expected the client-side deadline to fire');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('expired_token', $e->error);
+        }
+
+        self::assertSame([20000.0], $retryWaits);
+        self::assertCount(3, $history, 'device_authorization + the poll + its one retry; nothing after');
+    }
+
+    /**
+     * A fake clock for the deadline tests: the sleepers advance it, and a mock answer may spend
+     * request time on it.
+     *
+     * @param list<callable(\stdClass): Response> $answers Called with the state as the polls are sent, in order.
+     * @return array{AxiamClient, \stdClass} The client and the state (`clock`, `sent` as list of send times, `retryWaits`).
+     */
+    private function clockedClient(array $answers, int $expiresIn, int $interval): array
+    {
+        $state = new \stdClass();
+        $state->clock = 0.0;
+        $state->sent = [];
+        $state->retryWaits = [];
+        $queue = [self::deviceAuthorizationResponse(['expires_in' => $expiresIn, 'interval' => $interval])];
+        foreach ($answers as $answer) {
+            $queue[] = static function () use ($state, $answer): Response {
+                $state->sent[] = $state->clock;
+
+                return $answer($state);
+            };
+        }
+
+        return [$this->client($queue), $state];
+    }
+
+    private function runClocked(AxiamClient $client, \stdClass $state): ?OAuthProtocolError
+    {
+        try {
+            $client->deviceLogin(
+                onUserCode: static function (DeviceAuthorization $a): void {
+                },
+                configuration: $this->configuration(),
+                sleep: static function (int $s) use ($state): void {
+                    $state->clock += $s;
+                },
+                now: static fn (): float => $state->clock,
+                retrySleep: static function (float $ms) use ($state): void {
+                    $state->retryWaits[] = $ms;
+                    $state->clock += $ms / 1000.0;
+                },
+            );
+        } catch (OAuthProtocolError $e) {
+            return $e;
+        }
+
+        return null;
+    }
+
+    public function testEveryPollIsAnsweredWithARetryAfterPastTheDeadlineAndNothingIsSentAtOrAfterIt(): void
+    {
+        // C164-36 (1): expires_in 30, interval 5, every poll 503 + Retry-After 120.
+        [$client, $state] = $this->clockedClient(array_fill(
+            0,
+            4,
+            static fn (\stdClass $state): Response => new Response(503, ['Retry-After' => '120'], (string) json_encode(['error' => 'temporarily_unavailable'])),
+        ), 30, 5);
+
+        $e = $this->runClocked($client, $state);
+
+        self::assertNotNull($e);
+        self::assertSame('expired_token', $e->error);
+        self::assertSame([5.0], $state->sent);
+        self::assertSame([], $state->retryWaits);
+        self::assertLessThanOrEqual(30.0, $state->clock);
+    }
+
+    public function testAPollSentJustBeforeTheDeadlineAnsweredWith500IsNotRetried(): void
+    {
+        // C164-36 (2): the first poll (pending) eats 19.9 s of request time, the second is sent at
+        // 29.9 s and its 500 comes back at 29.999 s. The retry would wait up to 200 ms of jitter, so it
+        // would be sent after the deadline: it is not sent.
+        [$client, $state] = $this->clockedClient([
+            static function (\stdClass $state): Response {
+                $state->clock += 19.9;
+
+                return self::oauthError('authorization_pending');
+            },
+            static function (\stdClass $state): Response {
+                $state->clock += 0.099;
+
+                return self::oauthError('server_error', 500);
+            },
+            static fn (\stdClass $state): Response => self::tokenSuccess(),
+        ], 30, 5);
+
+        $e = $this->runClocked($client, $state);
+
+        self::assertNotNull($e);
+        self::assertSame('expired_token', $e->error);
+        self::assertCount(2, $state->sent, 'one poll in the first round, one in the second: no retry after the deadline');
+        self::assertSame([], $state->retryWaits);
     }
 
     public function testA429WhoseBodySaysSlowDownDoesNotRaiseTheInterval(): void
