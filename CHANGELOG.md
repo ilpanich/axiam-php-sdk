@@ -11,12 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Contract 1.64 (the AXIAM 1.1.2 release) on top of contract 1.63, with the 1.63 conformance follow-ups of
 issue #86 and the findings of the 1.64 conformance review (C164-xx). `CONTRACT.md` is re-vendored byte for
-byte from `ilpanich/axiam` `21beda0` (contract 1.64 as amended by W7.1b: §14.2 rules 6 and 9, §14.6, §34.2
-P11, §34.8 (c)); `openapi.json` and `management-registry.json` are those of `fb92ec4`, unchanged at `b3f8687`
+byte from `ilpanich/axiam` `b3f8687` (contract 1.64 as amended by W7.1b and W7.1c: §14.2 rules 6 and 9, §14.6
+including its in-attempt retry test, §34.2 P11, §34.8 (c)); `openapi.json` and `management-registry.json` are those of `fb92ec4`, unchanged at `b3f8687`
 (openapi `info.version` 1.1.2), and `proto/` is unchanged; the generator `--check` is clean and the registry
 still holds 202 operations in 29 namespaces. **A patch release:** no signature changes and no operation is
 added. The public additions are optional and backward compatible: trailing `retryAfterMs` and `httpStatus`
-on `OAuthProtocolError`'s constructor, a trailing `$now` clock on `deviceLogin()`, `unknownEnumValue()` on the
+on `OAuthProtocolError`'s constructor, trailing `$now` and `$retrySleep` (milliseconds) on `deviceLogin()`, `unknownEnumValue()` on the
 generated models that hold an open enum, and `NetworkError::parseRetryAfterMs()`, which became `public static`
 and is marked `@internal` (it is shared with `ErrorMapper` and is not supported surface). The README states
 conformance at contract 1.64.
@@ -36,6 +36,16 @@ conformance at contract 1.64.
   in one interval; a third failure is surfaced and the loop takes its next interval. A `429` makes one request
   (rule 9: the wait is the loop's), and inside `deviceLogin()` a retry whose `Retry-After` would reach the
   grant's deadline is not taken. Tests: `tests/OidcDeviceFlowTest.php`.
+- **The in-poll §16 retry never sends after the deadline (C164-36, §14.2 rule 4).** The check added only the
+  `Retry-After` to the clock, not the jittered backoff the runner then waits, so a retry requested just before the
+  deadline went out after it. It now takes the longest wait (the backoff ceiling, raised to `Retry-After`) against
+  the time left, and the attempt itself refuses to send once the deadline has passed. A bare `devicePoll()` keeps
+  the unbounded §16 behaviour. Tests (fake clock): every poll answered `503` + `Retry-After: 120` sends one request
+  and ends with `expired_token`; a `500` returning at 29.999 s of a 30 s grant is not retried.
+- **The in-poll waits obey the injected sleeper (C164-41).** They used `usleep` whatever `deviceLogin()`'s `$sleep`
+  said, so a test spent real seconds (or hung on a regression). With an injected `$sleep` they are counted but
+  not spent; `$retrySleep` records them. Tests assert `[]` and `[20000.0]` for a `Retry-After` past and inside
+  the deadline.
 - **A `5xx` on a device poll is retried whatever its body (C164-03, §14.2 rule 6).** AXIAM answers a datastore
   failure at `/oauth2/token` with `500 {"error":"server_error", …}`. The poll read the body before the status,
   raised a terminal `OAuthProtocolError` and lost a grant the user might already have approved. `devicePoll()`
@@ -92,6 +102,8 @@ conformance at contract 1.64.
 
 - The no-session-credentials test queues a fifth response and asserts that a `groups()->create` after the
   `/oauth2/` requests carries `Cookie` with `axiam_access=` and `X-CSRF-Token: csrf-from-login` (C163-08).
+- The in-attempt retry tests run for a transport failure as for a `500` (two failures and a `200`, the exhausted
+  cap, a single poll, retry off), and inside `deviceLogin()` (C164-38).
 - The cap case of the §14.6 1.64 test records its sleeps, so an uncapped hour-long sleep fails it (C164-19).
 - The open-enum `plan` tests run over both members, `termination_action` and `service_type`, for the refusal,
   `apply`, the stated member and `NoChange` (C163-09).
