@@ -52,7 +52,7 @@ final class CibaDeadlineBoundTest extends TestCase
      * which each poll was sent, the clock, and the typed outcome.
      *
      * @param list<callable(CibaTestClock): Response> $answers
-     * @return array{list<float>, CibaTestClock, ?OAuthProtocolError}
+     * @return array{list<float>, CibaTestClock, ?OAuthProtocolError, ?\Axiam\Sdk\Oidc\OidcTokenSet}
      */
     private function await(array $answers, int $expiresIn, int $interval, bool $retryEnabled = true): array
     {
@@ -77,14 +77,15 @@ final class CibaDeadlineBoundTest extends TestCase
         );
         $initiated = new CibaInitiateResponse(new Sensitive(bin2hex(random_bytes(8))), $expiresIn, $interval, $clock->now);
 
+        $set = null;
         try {
-            $client->cibaAwait($initiated, configuration: self::configuration(), clock: $clock);
+            $set = $client->cibaAwait($initiated, configuration: self::configuration(), clock: $clock);
             $error = null;
         } catch (OAuthProtocolError $e) {
             $error = $e;
         }
 
-        return [$sent, $clock, $error];
+        return [$sent, $clock, $error, $set];
     }
 
     private static function unavailable(int $retryAfter): callable
@@ -141,5 +142,92 @@ final class CibaDeadlineBoundTest extends TestCase
         self::assertNotNull($error);
         self::assertSame('expired_token', $error->error);
         self::assertCount(2, $sent, 'no retry after the deadline');
+    }
+
+    private static function tokens(): callable
+    {
+        return static fn (CibaTestClock $clock): Response => new Response(200, [], (string) json_encode([
+            'access_token' => 'ciba-access-token', 'token_type' => 'Bearer', 'expires_in' => 900,
+        ]));
+    }
+
+    private static function rateLimited(int $retryAfter): callable
+    {
+        return static fn (CibaTestClock $clock): Response => new Response(
+            429,
+            ['Retry-After' => (string) $retryAfter],
+            (string) json_encode(['error' => 'rate_limit_exceeded']),
+        );
+    }
+
+    public function testA429WithRetryAfterMakesTheNextWaitAtLeastThat(): void
+    {
+        // C164-52: AXIAM's own 429 body is an OAuthProtocolError; its Retry-After is a floor (§33.7
+        // rule 5), and the interval is neither shortened nor raised.
+        [$sent, $clock, $error, $set] = $this->await([self::rateLimited(12), self::tokens()], 600, 5);
+
+        self::assertNull($error);
+        self::assertNotNull($set);
+        self::assertSame([5, 12], $clock->sleeps);
+        self::assertSame([1005.0, 1017.0], $sent);
+    }
+
+    public function testA429WhoseRetryAfterPassesTheDeadlineEndsTheFlowWithNothingMoreSent(): void
+    {
+        [$sent, $clock, $error] = $this->await([self::rateLimited(12), self::tokens()], 15, 5);
+
+        self::assertNotNull($error);
+        self::assertSame('expired_token', $error->error);
+        self::assertSame([1005.0], $sent);
+        self::assertSame([5], $clock->sleeps);
+    }
+
+    public function testARetryAfterNeverShortensTheInterval(): void
+    {
+        // C164-54 (a): retry off, so the 503 reaches the loop; Retry-After 2 < interval 5.
+        [, $clock, $error] = $this->await([self::unavailable(2), self::tokens()], 600, 5, retryEnabled: false);
+
+        self::assertNull($error);
+        self::assertSame([5, 5], $clock->sleeps);
+    }
+
+    public function testARetryAfterAboveTheIntervalIsTheNextWait(): void
+    {
+        // C164-54 (b)
+        [, $clock, $error] = $this->await([self::unavailable(12), self::tokens()], 600, 5, retryEnabled: false);
+
+        self::assertNull($error);
+        self::assertSame([5, 12], $clock->sleeps);
+    }
+
+    public function testARetryWhoseWaitExactlyReachesTheDeadlineIsNotTaken(): void
+    {
+        // C164-54 (c): at 5 s with 25 s left, Retry-After 25 is not strictly less than the time left.
+        [$sent, $clock, $error] = $this->await([self::unavailable(25), self::tokens()], 30, 5);
+
+        self::assertNotNull($error);
+        self::assertSame('expired_token', $error->error);
+        self::assertSame([1005.0], $sent);
+        self::assertSame([5], $clock->sleeps);
+    }
+
+    public function testAWholeSecondClockCannotServeAWaitPastTheDeadline(): void
+    {
+        // C164-54: the poll at 29.5 s fails with 0.5 s left; the 0.2 s backoff ceiling would fit, but
+        // the clock serves it as a whole second, which would end at 30.5 s. Not admitted.
+        [$sent, $clock, $error] = $this->await([
+            static function (CibaTestClock $clock): Response {
+                $clock->now += 19.5;
+
+                return new Response(400, [], (string) json_encode(['error' => 'authorization_pending']));
+            },
+            static fn (CibaTestClock $clock): Response => new Response(500),
+            self::tokens(),
+        ], 30, 5);
+
+        self::assertNotNull($error);
+        self::assertSame('expired_token', $error->error);
+        self::assertCount(2, $sent);
+        self::assertLessThanOrEqual(1030.0, $clock->now);
     }
 }

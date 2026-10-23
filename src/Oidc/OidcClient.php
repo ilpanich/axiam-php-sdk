@@ -2158,13 +2158,24 @@ final class OidcClient
                     $configuration,
                     $status,
                     // §34.2 P10: the §16 retry inside the poll sees this loop's deadline and its clock.
-                    static fn (): float => $deadline - $clock->now(),
+                    // Whole seconds, the unit the clock serves a wait in: a retry is admitted only when
+                    // its rounded-up wait fits (C164-54), so the wait cannot end past the deadline.
+                    static fn (): float => floor($deadline - $clock->now()),
                     static function (float $ms) use ($clock): void {
                         $clock->sleep((int) ceil($ms / 1000.0));
                     },
                 );
             } catch (OAuthProtocolError $e) {
-                if ($e->error === 'authorization_pending' || $e->error === 'rate_limit_exceeded') {
+                if ($e->error === 'rate_limit_exceeded' || $e->httpStatus === 429) {
+                    // §33.7 rule 5: a 429 is waited out — its `Retry-After` is a minimum for the next
+                    // wait (never shortening the interval, never raising it), capped by the deadline
+                    // check above (C164-52).
+                    if ($e->retryAfterMs !== null) {
+                        $waitSeconds = self::retryAfterRound($interval, $e->retryAfterMs);
+                    }
+                    continue;
+                }
+                if ($e->error === 'authorization_pending') {
                     continue;
                 }
                 if ($e->error === 'slow_down') {
