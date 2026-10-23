@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Contract 1.64 (the AXIAM 1.1.2 release) on top of contract 1.63, with the 1.63 conformance follow-ups of
 issue #86 and the findings of the 1.64 conformance review (C164-xx). `CONTRACT.md` is re-vendored byte for
 byte from `ilpanich/axiam` `21beda0` (contract 1.64 as amended by W7.1b: §14.2 rules 6 and 9, §14.6, §34.2
-P11, §34.8 (c)); `openapi.json` and `management-registry.json` are those of `fb92ec4`, unchanged at `21beda0`
+P11, §34.8 (c)); `openapi.json` and `management-registry.json` are those of `fb92ec4`, unchanged at `b3f8687`
 (openapi `info.version` 1.1.2), and `proto/` is unchanged; the generator `--check` is clean and the registry
 still holds 202 operations in 29 namespaces. **A patch release:** no signature changes and no operation is
 added. The public additions are optional and backward compatible: trailing `retryAfterMs` and `httpStatus`
@@ -29,10 +29,18 @@ conformance at contract 1.64.
   counts that wait as the round's one interval, does **not** raise the interval for it, and polls again. A
   single `devicePoll()` still raises the `OAuthProtocolError`, which now carries the header as `retryAfterMs`.
   Tests: `tests/OidcDeviceFlowTest.php`.
+- **The device poll is §16-retried inside the attempt on a `5xx` or a transport failure, never on a `429`
+  (C164-25, §14.2 rule 6, §16.2).** It was sent once whatever `retryEnabled` said, so every `5xx` cost a whole
+  interval. `devicePoll()` now goes through the §16 runner as `cibaPoll` does: at most three attempts in total,
+  the `Retry-After` floor, `retryEnabled: false` makes one request. Two failures and a `200` are three requests
+  in one interval; a third failure is surfaced and the loop takes its next interval. A `429` makes one request
+  (rule 9: the wait is the loop's), and inside `deviceLogin()` a retry whose `Retry-After` would reach the
+  grant's deadline is not taken. Tests: `tests/OidcDeviceFlowTest.php`.
 - **A `5xx` on a device poll is retried whatever its body (C164-03, §14.2 rule 6).** AXIAM answers a datastore
   failure at `/oauth2/token` with `500 {"error":"server_error", …}`. The poll read the body before the status,
   raised a terminal `OAuthProtocolError` and lost a grant the user might already have approved. `devicePoll()`
-  now reads the status first (as `cibaPoll` does): a `5xx` is a `NetworkError`, which `deviceLogin()` retries.
+  now reads the status first (as `cibaPoll` does): a `5xx` is a `NetworkError`, which is retried (above) and
+  which `deviceLogin()` outlives.
   Tests: `500 {"error":"server_error"}` and `503 {"error":"temporarily_unavailable"}` mid-poll, then the tokens.
 - **Any `429` on a device poll is the rule 9 wait; only a `400` raises the interval (C164-04, C164-17).** The
   loop dispatched on the body's `error`, so a `429 {"error":"slow_down"}` (a server before 1.1.2, or an
@@ -62,7 +70,8 @@ conformance at contract 1.64.
   middleware: it re-sent the refused attempt's `Authorization`, `X-CSRF-Token` and `Cookie`. The order is
   swapped (refresh first, auth second) and the replay rebuilds `Cookie` from the jar, the cookie middleware
   being outside both. Tests: `tests/Contract164/RetriedRequestHeadersTest.php`, which also drives a real
-  `AxiamClient` (C164-10), so reverting the shipped order fails it. The `AuthMiddleware` and
+  `AxiamClient` on a bare mock transport (C164-10, C164-33), so reverting the shipped order or the cookie
+  rebuild fails it; a request sent with `cookies => false` is replayed without cookies (C164-23). The `AuthMiddleware` and
   `RefreshMiddleware` comments, which had the stack order backwards, now state it.
 
 ### Changed
