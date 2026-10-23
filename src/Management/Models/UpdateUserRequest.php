@@ -18,6 +18,16 @@ namespace Axiam\Sdk\Management\Models;
 final class UpdateUserRequest implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a UpdateUserRequest.
      * @param string|null $email the server's `email` field (optional)
      * @param mixed $metadata the server's `metadata` field (optional)
@@ -38,12 +48,32 @@ final class UpdateUserRequest implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             isset($data['email']) ? (string) $data['email'] : null,
             isset($data['metadata']) ? $data['metadata'] : null,
             isset($data['status']) ? UserStatus::fromWire((string) $data['status']) : null,
             isset($data['username']) ? (string) $data['username'] : null,
         );
+        if ($model->status === UserStatus::Unknown) {
+            $model->unknownEnumValues['status'] = (string) $data['status'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

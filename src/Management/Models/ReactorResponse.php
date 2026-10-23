@@ -14,6 +14,16 @@ namespace Axiam\Sdk\Management\Models;
 final class ReactorResponse implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a ReactorResponse.
      * @param string $createdAt the server's `created_at` field
      * @param string $description the server's `description` field
@@ -63,7 +73,7 @@ final class ReactorResponse implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             (string) ModelDecode::need($data, 'created_at', self::class),
             (string) ModelDecode::need($data, 'description', self::class),
             (bool) ModelDecode::need($data, 'enabled', self::class),
@@ -80,6 +90,29 @@ final class ReactorResponse implements \JsonSerializable
             (string) ModelDecode::need($data, 'updated_at', self::class),
             isset($data['last_seen_at']) ? (string) $data['last_seen_at'] : null,
         );
+        if ($model->failurePolicy === FailurePolicy::Unknown) {
+            $model->unknownEnumValues['failure_policy'] = (string) $data['failure_policy'];
+        }
+        if ($model->mode === ReactorMode::Unknown) {
+            $model->unknownEnumValues['mode'] = (string) $data['mode'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

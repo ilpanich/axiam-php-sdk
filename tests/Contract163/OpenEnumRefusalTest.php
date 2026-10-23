@@ -108,10 +108,22 @@ final class OpenEnumRefusalTest extends TestCase
 
     // -- C162-07 -------------------------------------------------------------------------
 
-    private function seedFuture(): void
+    /**
+     * C163-09: both open-enum members of a network profile, each with the wire value the SDK has
+     * no name for, a statement of it that resolves it, and the wire spelling that must be sent.
+     *
+     * @return iterable<string,array{string,string,\BackedEnum,string}>
+     */
+    public static function unknownProfileMembers(): iterable
+    {
+        yield 'termination_action' => ['termination_action', 'future', Models\RadiusTerminationAction::Default, 'default'];
+        yield 'service_type' => ['service_type', 'login', Models\RadiusServiceType::FramedUser, 'framed_user'];
+    }
+
+    private function seedUnknown(string $member, string $raw): void
     {
         $id = $this->server->seedSegment('hq', 'access', 'staff', 20, 1);
-        $this->server->seedProfile($id, 3600, ['termination_action' => 'future']);
+        $this->server->seedProfile($id, 3600, [$member => $raw]);
     }
 
     private function segmentOnly(): \Axiam\Sdk\Management\Manifest\ManifestBuilder
@@ -120,24 +132,29 @@ final class OpenEnumRefusalTest extends TestCase
             ->networkSegment('staff', 'hq', 'access', 'staff', 20, rank: 1);
     }
 
-    public function testPlanRefusesAnUnknownOnAnUnstatedMemberWithNoWrite(): void
+    /** @dataProvider unknownProfileMembers */
+    public function testPlanRefusesAnUnknownOnAnUnstatedMemberWithNoWrite(string $member, string $raw): void
     {
-        $this->seedFuture();
+        $this->seedUnknown($member, $raw);
         $manifest = $this->segmentOnly()->networkProfile('staff', 1800)->build(); // changes another member
 
         try {
             $this->client()->management()->manifest()->plan($manifest);
             self::fail('plan must refuse');
         } catch (ValidationError $e) {
-            self::assertStringContainsString('termination_action', $e->getMessage());
+            self::assertStringContainsString($member, $e->getMessage());
+            // C163-10 (contract 1.64 §34.8 (c)): the generated model keeps the raw string, so the
+            // refusal names the member and the value.
+            self::assertStringContainsString('"' . $raw . '"', $e->getMessage());
         }
 
         self::assertSame([], $this->server->writes(), 'plan sends no write, and so no PUT');
     }
 
-    public function testApplyRefusesTheSameWayBeforeAnyWrite(): void
+    /** @dataProvider unknownProfileMembers */
+    public function testApplyRefusesTheSameWayBeforeAnyWrite(string $member, string $raw): void
     {
-        $this->seedFuture();
+        $this->seedUnknown($member, $raw);
         $manifest = $this->segmentOnly()->networkProfile('staff', 1800)->build();
 
         try {
@@ -149,12 +166,18 @@ final class OpenEnumRefusalTest extends TestCase
         self::assertSame([], $this->server->writes());
     }
 
-    public function testAManifestThatStatesTheMemberResolvesItAndTheBodyNeverCarriesTheUnknown(): void
-    {
-        $this->seedFuture();
-        $manifest = $this->segmentOnly()
-            ->networkProfile('staff', 1800, Models\RadiusTerminationAction::Default)
-            ->build();
+    /** @dataProvider unknownProfileMembers */
+    public function testAManifestThatStatesTheMemberResolvesItAndTheBodyNeverCarriesTheUnknown(
+        string $member,
+        string $raw,
+        \BackedEnum $stated,
+        string $wire,
+    ): void {
+        $this->seedUnknown($member, $raw);
+        $builder = $this->segmentOnly();
+        $manifest = $stated instanceof Models\RadiusTerminationAction
+            ? $builder->networkProfile('staff', 1800, $stated)->build()
+            : $builder->networkProfile('staff', 1800, serviceType: $stated)->build();
 
         $report = $this->client()->management()->manifest()->apply($manifest);
 
@@ -163,12 +186,14 @@ final class OpenEnumRefusalTest extends TestCase
         self::assertCount(1, $put);
         $segmentId = $this->server->segmentId('hq', 'access', 'staff');
         $body = $this->server->bodies('PUT', '/api/v1/network/profiles/' . $segmentId)[0];
-        self::assertSame('default', $body['profile']['termination_action']);
+        self::assertSame($wire, $body['profile'][$member]);
+        self::assertNotSame('', $body['profile'][$member]);
     }
 
-    public function testAProfileThatDiffersInNothingIsNoChangeEvenWithAnUnknownMember(): void
+    /** @dataProvider unknownProfileMembers */
+    public function testAProfileThatDiffersInNothingIsNoChangeEvenWithAnUnknownMember(string $member, string $raw): void
     {
-        $this->seedFuture();
+        $this->seedUnknown($member, $raw);
         $plan = $this->client()->management()->manifest()->plan(
             $this->segmentOnly()->networkProfile('staff', 3600)->build(),
         );

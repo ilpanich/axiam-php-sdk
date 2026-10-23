@@ -14,6 +14,16 @@ namespace Axiam\Sdk\Management\Models;
 final class GrantPermissionRequest implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a GrantPermissionRequest.
      * @param string $permissionId the server's `permission_id` field
      * @param PermissionEffect|null $effect B1: `"allow"` (the default) or `"deny"`. A deny
@@ -37,11 +47,31 @@ final class GrantPermissionRequest implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             (string) ModelDecode::need($data, 'permission_id', self::class),
             isset($data['effect']) ? PermissionEffect::fromWire((string) $data['effect']) : null,
             isset($data['scope_ids']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['scope_ids'])) : null,
         );
+        if ($model->effect === PermissionEffect::Unknown) {
+            $model->unknownEnumValues['effect'] = (string) $data['effect'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

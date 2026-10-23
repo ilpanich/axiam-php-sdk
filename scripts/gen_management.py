@@ -1100,6 +1100,24 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
     out.append(f"final class {name} implements \\JsonSerializable")
     out.append("{")
 
+    # C163-10 (contract 1.64 §34.8 (c), §27.6.2 item 4): an open enum that decodes to the
+    # text-less ``Unknown`` loses the string the server sent. The raw value is kept on the model,
+    # filled by ``fromArray()`` alone, so a refusal can quote it where the SDK keeps it. It is
+    # private and not a constructor parameter: no signature changes, and ``toArray()`` and
+    # ``jsonSerialize()`` never read it, so it cannot be sent back (P12.2(a)).
+    enum_fields = [f for f in fields
+                   if f["decl"].lstrip("?") in ENUMS and not f["secret"] and not f["explicit_null"]]
+    if enum_fields:
+        out.extend(docblock(
+            "The raw wire string of each open-enum member that decoded to `Unknown`, by wire "
+            "name; empty for a model built any other way.\n\nSet by {@see self::fromArray()} "
+            "only, read by {@see self::unknownEnumValue()}, never rendered or sent.",
+            "    ",
+            ["@var array<string,string>"],
+        ))
+        out.append("    private array $unknownEnumValues = [];")
+        out.append("")
+
     # --- constructor ---
     tags = []
     for f in fields:
@@ -1151,7 +1169,7 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
     if not fields:
         out.append("        return new self();")
     else:
-        out.append("        return new self(")
+        out.append("        $model = new self(" if enum_fields else "        return new self(")
         for f in fields:
             src = f"$data['{f['wire']}']"
             if f["required"] and f["wire"] in DEFAULT_WHEN_ABSENT:
@@ -1168,8 +1186,31 @@ def emit_class(name: str, secrets: set[str], replacement: bool) -> str:
             else:
                 out.append(f"            isset({src}) ? {decode_expr(f, src)} : null,")
         out.append("        );")
+        if enum_fields:
+            for f in enum_fields:
+                enum = f["decl"].lstrip("?")
+                out.append(f"        if ($model->{f['name']} === {enum}::Unknown) {{")
+                out.append(f"            $model->unknownEnumValues['{f['wire']}'] = (string) $data['{f['wire']}'];")
+                out.append("        }")
+            out.append("")
+            out.append("        return $model;")
     out.append("    }")
     out.append("")
+    if enum_fields:
+        out.extend(docblock(
+            "The string the server sent for an open-enum member this SDK has no name for, "
+            "or `null`.\n\nOnly a model decoded by {@see self::fromArray()} knows it, and only "
+            "for a member that decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): "
+            "it lets a refusal name the value. It is for messages -- it is never rendered by "
+            "{@see self::toArray()} or {@see self::jsonSerialize()} and so is never sent.",
+            "    ",
+            ["@param string $wire The member's wire name.", "@return string|null"],
+        ))
+        out.append("    public function unknownEnumValue(string $wire): ?string")
+        out.append("    {")
+        out.append("        return $this->unknownEnumValues[$wire] ?? null;")
+        out.append("    }")
+        out.append("")
 
     # --- toArray ---
     out.extend(docblock(

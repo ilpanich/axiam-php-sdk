@@ -18,6 +18,16 @@ namespace Axiam\Sdk\Management\Models;
 final class UpdateReactorRequest implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a UpdateReactorRequest.
      * @param string|null $description the server's `description` field (optional)
      * @param bool|null $enabled the server's `enabled` field (optional)
@@ -46,7 +56,7 @@ final class UpdateReactorRequest implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             isset($data['description']) ? (string) $data['description'] : null,
             isset($data['enabled']) ? (bool) $data['enabled'] : null,
             isset($data['events']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['events'])) : null,
@@ -56,6 +66,29 @@ final class UpdateReactorRequest implements \JsonSerializable
             isset($data['priority']) ? (int) $data['priority'] : null,
             isset($data['timeout_ms']) ? (int) $data['timeout_ms'] : null,
         );
+        if ($model->failurePolicy === FailurePolicy::Unknown) {
+            $model->unknownEnumValues['failure_policy'] = (string) $data['failure_policy'];
+        }
+        if ($model->mode === ReactorMode::Unknown) {
+            $model->unknownEnumValues['mode'] = (string) $data['mode'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

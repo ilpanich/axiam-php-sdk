@@ -14,6 +14,16 @@ namespace Axiam\Sdk\Management\Models;
 final class CreateOAuth2ClientRequest implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a CreateOAuth2ClientRequest.
      * @param list<string> $grantTypes Grant types this client is authorized to use.
      * @param string $name Human-readable name for the client.
@@ -152,7 +162,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'grant_types', self::class))),
             (string) ModelDecode::need($data, 'name', self::class),
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'redirect_uris', self::class))),
@@ -179,6 +189,32 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             isset($data['tls_client_certificate_bound_access_tokens']) ? (bool) $data['tls_client_certificate_bound_access_tokens'] : null,
             isset($data['token_endpoint_auth_method']) ? ClientAuthMethod::fromWire((string) $data['token_endpoint_auth_method']) : null,
         );
+        if ($model->authnRequestParams === AuthnRequestParamsMode::Unknown) {
+            $model->unknownEnumValues['authn_request_params'] = (string) $data['authn_request_params'];
+        }
+        if ($model->profile === ClientProfile::Unknown) {
+            $model->unknownEnumValues['profile'] = (string) $data['profile'];
+        }
+        if ($model->tokenEndpointAuthMethod === ClientAuthMethod::Unknown) {
+            $model->unknownEnumValues['token_endpoint_auth_method'] = (string) $data['token_endpoint_auth_method'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

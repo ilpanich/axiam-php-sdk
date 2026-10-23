@@ -14,6 +14,16 @@ namespace Axiam\Sdk\Management\Models;
 final class OAuth2ClientResponse implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a OAuth2ClientResponse.
      * @param list<string> $allowedResources T21.3 — echoed in its stored, normalised form, so
      *     an operator auditing which audiences a client may mint tokens for reads the strings the
@@ -113,7 +123,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             array_values(array_map(static fn (mixed $v): string => (string) $v, (array) ModelDecode::need($data, 'allowed_resources', self::class))),
             AuthnRequestParamsMode::fromWire((string) ModelDecode::need($data, 'authn_request_params', self::class)),
             (bool) ModelDecode::need($data, 'browser_sso', self::class),
@@ -144,6 +154,41 @@ final class OAuth2ClientResponse implements \JsonSerializable
             isset($data['tls_client_auth_san_uri']) ? (string) $data['tls_client_auth_san_uri'] : null,
             isset($data['tls_client_auth_subject_dn']) ? (string) $data['tls_client_auth_subject_dn'] : null,
         );
+        if ($model->authnRequestParams === AuthnRequestParamsMode::Unknown) {
+            $model->unknownEnumValues['authn_request_params'] = (string) $data['authn_request_params'];
+        }
+        if ($model->managedBy === ManagedBy::Unknown) {
+            $model->unknownEnumValues['managed_by'] = (string) $data['managed_by'];
+        }
+        if ($model->profile === ClientProfile::Unknown) {
+            $model->unknownEnumValues['profile'] = (string) $data['profile'];
+        }
+        if ($model->tokenEndpointAuthMethod === ClientAuthMethod::Unknown) {
+            $model->unknownEnumValues['token_endpoint_auth_method'] = (string) $data['token_endpoint_auth_method'];
+        }
+        if ($model->backchannelAuthenticationRequestSigningAlg === CibaRequestSigningAlg::Unknown) {
+            $model->unknownEnumValues['backchannel_authentication_request_signing_alg'] = (string) $data['backchannel_authentication_request_signing_alg'];
+        }
+        if ($model->backchannelTokenDeliveryMode === CibaDeliveryMode::Unknown) {
+            $model->unknownEnumValues['backchannel_token_delivery_mode'] = (string) $data['backchannel_token_delivery_mode'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

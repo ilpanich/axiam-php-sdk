@@ -16,6 +16,16 @@ namespace Axiam\Sdk\Management\Models;
 final class SamlIdpCredential implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a SamlIdpCredential.
      * @param string $certificatePem The leaf certificate, PEM. Public: it is what the metadata
      *     publishes.
@@ -54,7 +64,7 @@ final class SamlIdpCredential implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             (string) ModelDecode::need($data, 'certificate_pem', self::class),
             (string) ModelDecode::need($data, 'created_at', self::class),
             (string) ModelDecode::need($data, 'fingerprint', self::class),
@@ -67,6 +77,26 @@ final class SamlIdpCredential implements \JsonSerializable
             (string) ModelDecode::need($data, 'tenant_id', self::class),
             isset($data['retired_at']) ? (string) $data['retired_at'] : null,
         );
+        if ($model->status === SamlIdpCredentialStatus::Unknown) {
+            $model->unknownEnumValues['status'] = (string) $data['status'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**
