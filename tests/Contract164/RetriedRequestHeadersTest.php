@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Tests\Contract164;
 
+use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Management\Models\CreateGroupRequest;
 use Axiam\Sdk\Rest\AuthMiddleware;
 use Axiam\Sdk\Rest\RefreshMiddleware;
 use Axiam\Sdk\Session;
@@ -98,5 +100,65 @@ final class RetriedRequestHeadersTest extends TestCase
         self::assertSame('csrf-new', $replay->getHeaderLine('X-CSRF-Token'));
         self::assertSame('axiam_access=' . self::accessToken('old'), $original->getHeaderLine('Cookie'));
         self::assertSame('axiam_access=' . self::accessToken('new'), $replay->getHeaderLine('Cookie'));
+    }
+
+    /**
+     * C164-10: the same through the SHIPPED wiring. An `AxiamClient` on a mock transport signs in,
+     * a management write is refused with `401`, the session refreshes (rotating the cookies and
+     * the CSRF token) and the write is replayed. Reverting the push order in `AxiamClient` makes the
+     * replay carry the refused attempt's headers and this test fail.
+     */
+    public function testAnAxiamClientReplaysAfterARefreshWithFreshCredentials(): void
+    {
+        /** @var list<RequestInterface> $seen */
+        $seen = [];
+        $record = static function (Response $response) use (&$seen): callable {
+            return static function (RequestInterface $request) use (&$seen, $response): Response {
+                $seen[] = $request;
+
+                return $response;
+            };
+        };
+        $group = new Response(200, ['Content-Type' => 'application/json'], (string) json_encode([
+            'id' => 'g1', 'tenant_id' => 't1', 'name' => 'staff', 'description' => '', 'metadata' => null,
+            'created_at' => '2026-10-23T00:00:00Z', 'updated_at' => '2026-10-23T00:00:00Z',
+        ]));
+        $mock = new MockHandler([
+            $record(new Response(200, [
+                'Set-Cookie' => 'axiam_access=' . self::accessToken('old') . '; Path=/',
+                'X-CSRF-Token' => 'csrf-old',
+                'Content-Type' => 'application/json',
+            ], (string) json_encode(['user' => ['id' => 'u1']]))),
+            $record(new Response(401)),
+            $record(new Response(200, [
+                'Set-Cookie' => 'axiam_access=' . self::accessToken('new') . '; Path=/',
+                'X-CSRF-Token' => 'csrf-new',
+            ], '{}')),
+            $record($group),
+        ]);
+        $client = new AxiamClient(
+            'https://api.test',
+            'acme',
+            transportHandler: HandlerStack::create($mock),
+            retryEnabled: false,
+        );
+
+        $client->login('alice@example.test', 'pw');
+        $client->management()->groups()->create(new CreateGroupRequest(description: '', name: 'staff'));
+
+        self::assertCount(4, $seen, 'login, refused write, refresh, replay');
+        [, $refused, $refresh, $replay] = $seen;
+        self::assertSame('/api/v1/groups', $refused->getUri()->getPath());
+        self::assertSame('/api/v1/auth/refresh', $refresh->getUri()->getPath());
+        self::assertSame('/api/v1/groups', $replay->getUri()->getPath());
+
+        self::assertSame('Bearer ' . self::accessToken('old'), $refused->getHeaderLine('Authorization'));
+        self::assertSame('csrf-old', $refused->getHeaderLine('X-CSRF-Token'));
+        self::assertStringContainsString('axiam_access=' . self::accessToken('old'), $refused->getHeaderLine('Cookie'));
+
+        self::assertSame('Bearer ' . self::accessToken('new'), $replay->getHeaderLine('Authorization'));
+        self::assertSame('csrf-new', $replay->getHeaderLine('X-CSRF-Token'));
+        self::assertStringContainsString('axiam_access=' . self::accessToken('new'), $replay->getHeaderLine('Cookie'));
+        self::assertStringNotContainsString(self::accessToken('old'), $replay->getHeaderLine('Cookie'));
     }
 }

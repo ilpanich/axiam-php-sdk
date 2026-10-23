@@ -28,7 +28,10 @@ final class BasePathPrefixOAuth2Test extends TestCase
         yield 'prefixed oauth2' => ['https://gw.test/axiam', '/axiam/oauth2/token', true];
         yield 'prefix with trailing slash' => ['https://gw.test/axiam/', '/axiam/oauth2/device_authorization', true];
         yield 'prefixed API request keeps its credentials' => ['https://gw.test/axiam', '/axiam/api/v1/groups', false];
-        yield 'oauth2 outside the prefix is not one' => ['https://gw.test/axiam', '/oauth2/token', false];
+        // C164-24: a root /oauth2/ URL under a prefixed base (a discovery document, a prefix-stripping
+        // proxy) is still stripped, as before the prefix was honoured.
+        yield 'a root oauth2 under a prefixed base is still stripped' => ['https://gw.test/axiam', '/oauth2/token', true];
+        yield 'a federation route under a prefixed base keeps its credentials' => ['https://gw.test/axiam', '/axiam/api/v1/auth/federation/providers', false];
     }
 
     /** @dataProvider paths */

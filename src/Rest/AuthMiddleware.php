@@ -111,7 +111,11 @@ final class AuthMiddleware
 
             // CONTRACT.md §12.1 note 3 / §12.3 rule 2: never attach a bearer credential
             // (cookie-sourced OR client-credentials-adopted) to an /oauth2/* request.
-            $isOAuth2Path = str_starts_with($request->getUri()->getPath(), $oauth2Prefix);
+            // The base prefix OR a root `/oauth2/`: a discovery document or a prefix-stripping proxy
+            // may name the endpoint at the root of a prefixed host, and that URL must not carry the
+            // session either (C164-24). Federation routes (`/api/v1/auth/federation/...`) match neither.
+            $path = $request->getUri()->getPath();
+            $isOAuth2Path = str_starts_with($path, $oauth2Prefix) || str_starts_with($path, '/oauth2/');
 
             $override = $options[self::CREDENTIAL_OVERRIDE_OPTION] ?? null;
             $accessToken = match (true) {

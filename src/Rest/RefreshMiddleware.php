@@ -22,8 +22,8 @@ use Psr\Http\Message\ResponseInterface;
  * base handler. The retry — invoked via the `$handler` captured here, which is everything
  * INSIDE this middleware, i.e. `AuthMiddleware` + the base handler — passes through
  * `AuthMiddleware` again, so it carries the refreshed bearer token and `X-CSRF-Token`; the
- * `Cookie` header was set by the cookie middleware outside this one and is rebuilt from the
- * jar here. It never re-enters this middleware's own 401 check a second time (retry-exactly-once by
+ * `Cookie` header was set by the cookie middleware outside this one and is rebuilt here from the
+ * request's own `cookies` jar. It never re-enters this middleware's own 401 check a second time (retry-exactly-once by
  * construction, not by an explicit retry counter).
  */
 final class RefreshMiddleware
@@ -73,10 +73,18 @@ final class RefreshMiddleware
                         // The jar now holds the rotated cookies; the stale `Cookie` header was
                         // set by the cookie middleware, which sits outside this one and does not
                         // run again for the replay.
-                        fn (): \GuzzleHttp\Promise\PromiseInterface => $handler(
-                            $this->session->cookieJar()->withCookieHeader($request->withoutHeader('Cookie')),
-                            $options,
-                        ),
+                        function () use ($handler, $request, $options): \GuzzleHttp\Promise\PromiseInterface {
+                            // The jar the request was sent with (the `cookies` option), not
+                            // necessarily the session's: a request that opted out (`false`) or
+                            // brought its own jar is replayed the same way (C164-23).
+                            $replay = $request->withoutHeader('Cookie');
+                            $jar = $options['cookies'] ?? null;
+                            if ($jar instanceof \GuzzleHttp\Cookie\CookieJarInterface) {
+                                $replay = $jar->withCookieHeader($replay);
+                            }
+
+                            return $handler($replay, $options);
+                        },
                     );
                 },
             );
