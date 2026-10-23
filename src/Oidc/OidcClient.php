@@ -822,11 +822,38 @@ final class OidcClient
      * DPoP-bound client's poll is refused `401 invalid_client` and surfaces as that error — an
      * mTLS-bound client presents its certificate and works. A response's `token_type` is read as
      * the server wrote it (`DPoP` is never assumed to be `Bearer`).
+     *
+     * A `5xx` or a transport failure is retried inside this call under §16 (§14.2 rule 6; at most
+     * three attempts, `retryEnabled` switches it off) and then raised as a {@see NetworkError}; a
+     * `429` is not retried here (rule 9: the loop waits it out).
      */
     public function devicePoll(
         Sensitive|string $deviceCode,
         ?string $tenantId = null,
         ?OidcConfiguration $configuration = null,
+    ): OidcTokenSet {
+        return $this->devicePollWithin($deviceCode, $tenantId, $configuration, null, null);
+    }
+
+    /**
+     * {@see devicePoll()}, with the §16 retry of the attempt bounded by a deadline.
+     *
+     * **A `5xx` or a transport failure is retried inside the poll** under §16 (CONTRACT.md §14.2
+     * rule 6, §16.2: at most three attempts in total, backoff with the `Retry-After` floor), then
+     * surfaced as a {@see NetworkError}; **a `429` or any other answer is not** — rule 9 makes the
+     * `429` the polling loop's wait, and an OAuth answer is decisive. The status is read before
+     * the body (§34.2 P8), so AXIAM's own `500 {"error":"server_error"}` is a transport failure.
+     * With `$deadline` set (by {@see deviceLogin()}), a retry whose `Retry-After` would reach it is
+     * not taken: the poll surfaces the failure and the loop applies rule 4.
+     *
+     * @param (callable():float)|null $now The clock `$deadline` is read against.
+     */
+    private function devicePollWithin(
+        Sensitive|string $deviceCode,
+        ?string $tenantId,
+        ?OidcConfiguration $configuration,
+        ?float $deadline,
+        ?callable $now,
     ): OidcTokenSet {
         $clientId = $this->requireClientId('devicePoll');
         $configuration ??= $this->oidcDiscover();
@@ -839,7 +866,63 @@ final class OidcClient
         // §14.1 rule 2, as deviceAuthorize(): the configured secret in the body on every poll.
         $this->appendClientSecret($form);
 
-        $wire = $this->postToken($configuration, $form, $tenantId, statusBeforeBody: true);
+        $url = $this->endpointUrl(
+            (string) $this->preferredEndpoint(
+                $configuration,
+                static fn (MtlsEndpointAliases $a): ?string => $a->token_endpoint,
+                $configuration->token_endpoint,
+            ),
+            $tenantId,
+        );
+
+        // The status of the attempt in flight (`null`: a transport failure), shared with the retry
+        // predicate.
+        /** @var \ArrayObject<string, int|null> $attempt */
+        $attempt = new \ArrayObject(['status' => null]);
+        $retryable = static function (NetworkError $e) use ($attempt, $deadline, $now): bool {
+            // A transport failure (no status) or a 5xx only: never the 429 or 408 that rule 9 leaves
+            // to the loop.
+            $status = $attempt['status'];
+            if (\is_int($status) && $status < 500) {
+                return false;
+            }
+
+            return $deadline === null || $now === null || $now() + ($e->retryAfterMs ?? 0.0) / 1000.0 < $deadline;
+        };
+        $response = RetryPolicy::execute(
+            'device_poll',
+            $this->retryEnabled,
+            $this->telemetry ?? new TelemetryDispatcher(null),
+            function () use ($url, $form, $attempt): ResponseInterface {
+                $attempt['status'] = null;
+                try {
+                    $response = $this->http->post($url, [
+                        'form_params' => $form,
+                        'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+                        'http_errors' => false,
+                    ]);
+                } catch (GuzzleException $e) {
+                    throw NetworkError::fromException($e, 'token request failed');
+                }
+                $status = $response->getStatusCode();
+                $attempt['status'] = $status;
+                if ($status >= 500) {
+                    throw NetworkError::fromResponse($response, 'token request failed');
+                }
+                if ($status < 200 || $status >= 300) {
+                    // An OAuth body is an OAuthProtocolError, which §16 never retries; a bodiless
+                    // status maps per §2.
+                    throw ErrorMapper::fromOAuth2Response($response, 'token request failed');
+                }
+
+                return $response;
+            },
+            null,
+            null,
+            $retryable,
+        );
+
+        $wire = self::decodeJsonObject($response, 'token request: response body is not a JSON object');
 
         // No nonce: the device grant has no authorization request to carry one.
         return $this->toTokenSet($wire, $configuration, null);
@@ -926,7 +1009,13 @@ final class OidcClient
             $sleep($roundSeconds);
 
             try {
-                $tokenSet = $this->devicePoll($authorization->deviceCode, $tenantId, $configuration);
+                $tokenSet = $this->devicePollWithin(
+                    $authorization->deviceCode,
+                    $tenantId,
+                    $configuration,
+                    $startedAt + $authorization->expiresIn,
+                    $now,
+                );
                 if ($adoptAsCredential) {
                     $this->adoptCredential($tokenSet->accessToken);
                 }
@@ -2237,7 +2326,7 @@ final class OidcClient
      *
      * @return array<string,mixed>
      */
-    private function postToken(OidcConfiguration $configuration, array $form, ?string $tenantId, bool $statusBeforeBody = false): array
+    private function postToken(OidcConfiguration $configuration, array $form, ?string $tenantId): array
     {
         $url = $this->endpointUrl(
             (string) $this->preferredEndpoint(
@@ -2247,7 +2336,7 @@ final class OidcClient
             ),
             $tenantId,
         );
-        $response = $this->postForm($url, $form, 'token request failed', $statusBeforeBody);
+        $response = $this->postForm($url, $form, 'token request failed');
 
         return self::decodeJsonObject($response, 'token request: response body is not a JSON object');
     }
@@ -2548,11 +2637,8 @@ final class OidcClient
      * POST a form-encoded body (§12.1 note 1) through the session transport, synchronously.
      *
      * @param array<string,string> $form
-     * @param bool $statusBeforeBody Read the status before the body (CONTRACT.md §14.2 rule 6,
-     *        §34.2 P8): a `5xx` is a {@see NetworkError} whatever it carries, even an OAuth
-     *        `{"error":"server_error"}` body that the `/oauth2/*` mapper would otherwise raise.
      */
-    private function postForm(string $url, array $form, string $context, bool $statusBeforeBody = false): ResponseInterface
+    private function postForm(string $url, array $form, string $context): ResponseInterface
     {
         try {
             return $this->http->post($url, [
@@ -2560,10 +2646,6 @@ final class OidcClient
                 'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
             ]);
         } catch (RequestException $e) {
-            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
-            if ($statusBeforeBody && $response !== null && $response->getStatusCode() >= 500) {
-                throw NetworkError::fromResponse($response, $context);
-            }
             throw $this->mapRequestException($e, $context, oauth2: true);
         } catch (GuzzleException $e) {
             throw NetworkError::fromException($e, $context);

@@ -58,10 +58,10 @@ final class OidcDeviceFlowTest extends TestCase
     }
 
     /**
-     * @param array<int,Response> $queue
+     * @param array<int,Response|\Throwable> $queue
      * @param array<int,mixed>|null $history
      */
-    private function client(array $queue, ?array &$history = null): AxiamClient
+    private function client(array $queue, ?array &$history = null, bool $retryEnabled = true): AxiamClient
     {
         $mock = new MockHandler($queue);
         $stack = HandlerStack::create($mock);
@@ -79,6 +79,7 @@ final class OidcDeviceFlowTest extends TestCase
             oidcClientSecret: null,
             oidcTenantId: self::TENANT_UUID,
             transportHandler: $stack,
+            retryEnabled: $retryEnabled,
         );
     }
 
@@ -368,16 +369,18 @@ final class OidcDeviceFlowTest extends TestCase
     }
 
     /** @dataProvider serverFailureBodies */
-    public function testA5xxWithAnOAuthBodyMidPollIsRetriedNotTerminal(int $status, string $code): void
+    public function testA5xxWithAnOAuthBodyIsRetriedWithinThePollThenTheLoopContinues(int $status, string $code): void
     {
         // AXIAM answers a datastore failure at /oauth2/token with 500 {"error":"server_error",…}
-        // (C164-03, §14.2 rule 6): the grant the user may already have approved is not lost.
+        // (C164-03, §14.2 rule 6): a transport failure whatever its body, §16-retried inside the
+        // poll (C164-25, §14.6): one 5xx and then the tokens cost one interval, two requests.
         $slept = [];
+        $history = [];
         $client = $this->client([
             self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
             self::oauthError($code, $status),
             self::tokenSuccess(),
-        ]);
+        ], $history);
 
         $tokens = $client->deviceLogin(
             onUserCode: static function (DeviceAuthorization $a): void {
@@ -389,15 +392,158 @@ final class OidcDeviceFlowTest extends TestCase
         );
 
         self::assertSame('device-access-token', $tokens->accessToken->reveal());
-        self::assertSame([5, 5], $slept);
+        self::assertSame([5], $slept, 'the retry is inside the attempt, not a second interval');
+        self::assertCount(3, $history, 'device_authorization + the 5xx + the retry');
     }
 
-    public function testASingleDevicePollRaisesANetworkErrorForA5xxWhateverItsBody(): void
+    public function testTwoFailuresAndA200AreThreeRequestsInOneInterval(): void
     {
-        $client = $this->client([self::oauthError('server_error', 500)]);
+        // §14.6 (amended, C164-35): the attempt cap of §16.1 is 3 in total.
+        $slept = [];
+        $history = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            self::oauthError('server_error', 500),
+            self::oauthError('server_error', 500),
+            self::tokenSuccess(),
+        ], $history);
 
-        $this->expectException(\Axiam\Sdk\Core\NetworkError::class);
-        $client->devicePoll(self::DEVICE_CODE, null, $this->configuration());
+        $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame([5], $slept);
+        self::assertCount(4, $history, 'device_authorization + three polls of one attempt');
+    }
+
+    public function testAThirdFailureExhaustsTheCapAndTheLoopTakesItsNextInterval(): void
+    {
+        $slept = [];
+        $history = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            self::oauthError('server_error', 500),
+            self::oauthError('server_error', 500),
+            self::oauthError('server_error', 500),
+            self::tokenSuccess(),
+        ], $history);
+
+        $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame([5, 5], $slept, 'rule 6: the exhausted attempt is surfaced, the grant is not lost');
+        self::assertCount(5, $history, 'device_authorization + three failed polls + the next interval\'s poll');
+    }
+
+    public function testWithRetryDisabledA5xxMakesOneRequestPerPoll(): void
+    {
+        $slept = [];
+        $history = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            self::oauthError('server_error', 500),
+            self::tokenSuccess(),
+        ], $history, retryEnabled: false);
+
+        $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame([5, 5], $slept);
+        self::assertCount(3, $history);
+    }
+
+    public function testASingleDevicePollRetriesA5xxThenSurfacesANetworkError(): void
+    {
+        $history = [];
+        $client = $this->client([
+            self::oauthError('server_error', 500),
+            self::oauthError('server_error', 500),
+            self::oauthError('server_error', 500),
+        ], $history);
+
+        try {
+            $client->devicePoll(self::DEVICE_CODE, null, $this->configuration());
+            self::fail('expected a NetworkError');
+        } catch (\Axiam\Sdk\Core\NetworkError $e) {
+            self::assertCount(3, $history, 'three attempts in total, whatever the body');
+        }
+    }
+
+    public function testASingleDevicePollRetriesATransportFailure(): void
+    {
+        $history = [];
+        $client = $this->client([
+            new \GuzzleHttp\Exception\ConnectException('connection reset', new \GuzzleHttp\Psr7\Request('POST', self::BASE_URL . '/oauth2/token')),
+            self::tokenSuccess(),
+        ], $history);
+
+        $tokens = $client->devicePoll(self::DEVICE_CODE, null, $this->configuration());
+
+        self::assertSame('device-access-token', $tokens->accessToken->reveal());
+        self::assertCount(2, $history);
+    }
+
+    public function testA429IsNeverRetriedInsideThePoll(): void
+    {
+        // §14.2 rule 9: the wait is the loop's. With retry on, the poll makes one request.
+        foreach ([
+            new Response(429, ['Retry-After' => '1'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
+            new Response(429, ['Retry-After' => '1']),
+        ] as $answer) {
+            $history = [];
+            $client = $this->client([$answer], $history);
+
+            try {
+                $client->devicePoll(self::DEVICE_CODE, null, $this->configuration());
+                self::fail('expected the 429 to surface');
+            } catch (\Axiam\Sdk\Core\AxiamException $e) {
+                self::assertSame(1000.0, $e->retryAfterMs ?? null);
+            }
+            self::assertCount(1, $history);
+        }
+    }
+
+    public function testARetryAfterThatReachesTheDeadlineIsNotWaitedInsideThePoll(): void
+    {
+        // The loop bounds the §16 retry by the grant's deadline: a 503 whose Retry-After would
+        // reach it is surfaced at once, and rule 4 ends the flow with nothing sent after it.
+        $history = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 30, 'interval' => 5]),
+            new Response(503, ['Retry-After' => '3600'], (string) json_encode(['error' => 'temporarily_unavailable'])),
+        ], $history);
+
+        try {
+            $client->deviceLogin(
+                onUserCode: static function (DeviceAuthorization $a): void {
+                },
+                configuration: $this->configuration(),
+                sleep: static function (int $s): void {
+                },
+            );
+            self::fail('expected the client-side deadline to fire');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('expired_token', $e->error);
+        }
+
+        self::assertCount(2, $history);
     }
 
     public function testA429WhoseBodySaysSlowDownDoesNotRaiseTheInterval(): void
