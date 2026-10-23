@@ -977,8 +977,9 @@ final class OidcClient
      * @param (callable():float)|null $now Injectable clock in seconds, for the `expires_in`
      *   deadline. Defaults to `microtime(true)`.
      * @param (callable(float):void)|null $retrySleep Injectable sleeper for the §16 waits inside a
-     *   poll, in milliseconds. Without it, an injected `$sleep` also means those waits are not
-     *   spent; neither injected, they really wait. Either way they are bounded by the deadline.
+     *   poll, in milliseconds. Without it they really wait (`usleep`), whatever `$sleep` is:
+     *   `Retry-After` is a floor (§16.1). Either way they are counted against, and bounded by,
+     *   the deadline.
      */
     public function deviceLogin(
         callable $onUserCode,
@@ -991,7 +992,6 @@ final class OidcClient
         ?callable $retrySleep = null,
     ): OidcTokenSet {
         $configuration ??= $this->oidcDiscover();
-        $sleeperInjected = $sleep !== null;
         $sleep ??= static function (int $seconds): void {
             sleep($seconds);
         };
@@ -1009,20 +1009,18 @@ final class OidcClient
         // injected one that does not advance it the loop still counts what it slept.
         $startedAt = $now();
         $sleptSeconds = 0.0;
-        // The in-poll §16 waits (milliseconds). With a caller-injected `$retrySleep` they go there;
-        // with only an injected `$sleep` they are not spent (the promise of that parameter) but are
-        // counted as slept; otherwise `RetryPolicy` really waits.
-        $inPollSleep = null;
-        if ($retrySleep !== null) {
-            $inPollSleep = static function (float $ms) use ($retrySleep, &$sleptSeconds): void {
+        // The in-poll §16 waits (milliseconds): through the caller's `$retrySleep` when given, else
+        // really slept — `Retry-After` is a floor (§16.1) and an injected `$sleep` is not entitled to
+        // skip it (C164-47). Either way they are counted as slept, so the deadline bound holds on a
+        // fake clock too.
+        $inPollSleep = static function (float $ms) use ($retrySleep, &$sleptSeconds): void {
+            if ($retrySleep !== null) {
                 $retrySleep($ms);
-                $sleptSeconds += $ms / 1000.0;
-            };
-        } elseif ($sleeperInjected) {
-            $inPollSleep = static function (float $ms) use (&$sleptSeconds): void {
-                $sleptSeconds += $ms / 1000.0;
-            };
-        }
+            } else {
+                usleep((int) round($ms * 1000));
+            }
+            $sleptSeconds += $ms / 1000.0;
+        };
         // The seconds left until the deadline, read live: by the loop before each sleep and by the
         // in-poll §16 retry before each wait.
         $remaining = static function () use (&$sleptSeconds, $startedAt, $now, $authorization): float {
@@ -2132,22 +2130,39 @@ final class OidcClient
         $deadline = $initiated->receivedAt + $initiated->expiresIn;
         $interval = $initiated->interval > 0 ? $initiated->interval : self::DEFAULT_CIBA_INTERVAL_SECONDS;
 
+        // The next round's wait when it is not the interval: the `Retry-After` of a failure the poll's
+        // own §16 retry did not (or could not) serve — a floor (§16.1) that, like any wait, the
+        // deadline below caps.
+        $waitSeconds = null;
+
         while (true) {
+            $roundSeconds = $waitSeconds ?? $interval;
+            $waitSeconds = null;
             // §33.7 rule 4: the deadline is authoritative. Checked before sleeping, so no
             // request is made that could only be refused, and reported under the server's
             // own code.
-            if ($clock->now() + $interval >= $deadline) {
+            if ($clock->now() + $roundSeconds >= $deadline) {
                 throw new OAuthProtocolError(
                     'expired_token',
                     'the CIBA request expired before it was decided (client-side deadline from '
                     . 'expires_in; CONTRACT.md §33.7 rule 4)',
                 );
             }
-            $clock->sleep($interval);
+            $clock->sleep($roundSeconds);
 
             $status = null;
             try {
-                return $this->cibaPollTracked($initiated->authReqId, $tenantId, $configuration, $status);
+                return $this->cibaPollTracked(
+                    $initiated->authReqId,
+                    $tenantId,
+                    $configuration,
+                    $status,
+                    // §34.2 P10: the §16 retry inside the poll sees this loop's deadline and its clock.
+                    static fn (): float => $deadline - $clock->now(),
+                    static function (float $ms) use ($clock): void {
+                        $clock->sleep((int) ceil($ms / 1000.0));
+                    },
+                );
             } catch (OAuthProtocolError $e) {
                 if ($e->error === 'authorization_pending' || $e->error === 'rate_limit_exceeded') {
                     continue;
@@ -2161,6 +2176,9 @@ final class OidcClient
                 // §33.7 rule 5: a transport failure, 5xx, 408 or 429 that survived §16 counts
                 // as one interval. A bodiless 4xx is an answer, not a fault.
                 if ($status === null || $status >= 500 || $status === 408 || $status === 429) {
+                    if ($e->retryAfterMs !== null) {
+                        $waitSeconds = self::retryAfterRound($interval, $e->retryAfterMs);
+                    }
                     continue;
                 }
                 throw $e;
@@ -2243,12 +2261,23 @@ final class OidcClient
      * One CIBA token request, reporting the HTTP status of the attempt that decided it in
      * `$status` (`null` for a transport failure) so {@see self::cibaAwait()} can tell a fault
      * from an answer.
+     *
+     * With `$remaining` (the seconds left to `cibaAwait()`'s deadline) the §16 retry inside the
+     * poll is bounded by it (CONTRACT.md §34.2 P10, §33.7 rule 5): a retry whose longest wait — the
+     * backoff ceiling, raised to `Retry-After` — would reach the deadline is not taken, and the
+     * attempt refuses to send once the time is up. `$retrySleep` (milliseconds) is the sleeper of
+     * those waits. A bare {@see self::cibaPoll()} passes neither and keeps the unbounded §16 behaviour.
+     *
+     * @param (callable():float)|null $remaining
+     * @param (callable(float):void)|null $retrySleep
      */
     private function cibaPollTracked(
         Sensitive $authReqId,
         ?string $tenantId,
         ?OidcConfiguration $configuration,
         ?int &$status,
+        ?callable $remaining = null,
+        ?callable $retrySleep = null,
     ): OidcTokenSet {
         $form = $this->cibaClientAuthentication('cibaPoll');
         $configuration ??= $this->oidcDiscover();
@@ -2262,14 +2291,31 @@ final class OidcClient
         );
         $form = ['grant_type' => self::CIBA_GRANT_TYPE, 'auth_req_id' => $authReqId->reveal()] + $form;
 
-        $retryable = static function () use (&$status): bool {
-            return $status === null || $status >= 500 || $status === 408 || $status === 429;
+        /** @var \ArrayObject<string, mixed> $attempt */
+        $attempt = new \ArrayObject(['n' => 0, 'last' => null]);
+        $retryable = static function (NetworkError $e) use (&$status, $attempt, $remaining): bool {
+            if (!($status === null || $status >= 500 || $status === 408 || $status === 429)) {
+                return false;
+            }
+            if ($remaining === null) {
+                return true;
+            }
+            $n = $attempt['n'];
+            $longestWaitMs = max($e->retryAfterMs ?? 0.0, RetryPolicy::backoffMs(\is_int($n) ? $n : 1));
+
+            return $longestWaitMs / 1000.0 < $remaining();
         };
         $response = RetryPolicy::execute(
             'ciba_poll',
             $this->retryEnabled,
             $this->telemetry ?? new TelemetryDispatcher(null),
-            function () use ($url, $form, &$status): ResponseInterface {
+            function (int $n) use ($url, $form, &$status, $attempt, $remaining): ResponseInterface {
+                $previous = $attempt['last'];
+                if ($n > 1 && $previous instanceof NetworkError && $remaining !== null && $remaining() <= 0.0) {
+                    // The wait ran past the deadline after all: send nothing, surface the failure.
+                    throw $previous;
+                }
+                $attempt['n'] = $n;
                 $status = null;
                 try {
                     $response = $this->http->post($url, [
@@ -2278,14 +2324,14 @@ final class OidcClient
                         'http_errors' => false,
                     ]);
                 } catch (GuzzleException $e) {
-                    throw NetworkError::fromException($e, 'ciba_poll request failed');
+                    throw $attempt['last'] = NetworkError::fromException($e, 'ciba_poll request failed');
                 }
                 $status = $response->getStatusCode();
                 if ($status >= 500) {
                     // §33.4, §33.7 rule 5, §34.2 P8: on ciba_poll a 5xx is transient whatever
                     // its body — AXIAM's own token endpoint answers 500 {"error":"server_error"}
                     // — so it is a NetworkError, which §16 retries and cibaAwait outlives.
-                    throw NetworkError::fromResponse($response, 'ciba_poll request failed');
+                    throw $attempt['last'] = NetworkError::fromResponse($response, 'ciba_poll request failed');
                 }
                 if ($status < 200 || $status >= 300) {
                     // A body carrying `error` is an OAuthProtocolError — an AuthError, which
@@ -2296,7 +2342,7 @@ final class OidcClient
                 return $response;
             },
             null,
-            null,
+            $retrySleep,
             $retryable,
         );
 

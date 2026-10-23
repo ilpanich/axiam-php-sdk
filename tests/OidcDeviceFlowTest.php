@@ -538,6 +538,39 @@ final class OidcDeviceFlowTest extends TestCase
         }
     }
 
+    public function testAnInjectedSleeperDoesNotSkipTheRetryAfterFloorInsideThePoll(): void
+    {
+        // C164-47: `$sleep` injected, no clock and no `$retrySleep`: the in-poll wait is really
+        // served (a caller's sleeper may be a real one), so a 503 + Retry-After 1 is retried no
+        // sooner than a second later (§16.1: a floor).
+        $sentAt = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            static function () use (&$sentAt): Response {
+                $sentAt[] = microtime(true);
+
+                return new Response(503, ['Retry-After' => '1'], (string) json_encode(['error' => 'temporarily_unavailable']));
+            },
+            static function () use (&$sentAt): Response {
+                $sentAt[] = microtime(true);
+
+                return self::tokenSuccess();
+            },
+        ]);
+
+        $tokens = $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s): void {
+            },
+        );
+
+        self::assertSame('device-access-token', $tokens->accessToken->reveal());
+        self::assertCount(2, $sentAt);
+        self::assertGreaterThanOrEqual(1.0, $sentAt[1] - $sentAt[0], 'the Retry-After floor was served');
+    }
+
     public function testARetryAfterThatReachesTheDeadlineIsNotWaitedInsideThePoll(): void
     {
         // The loop bounds the §16 retry by the grant's deadline: a 503 whose Retry-After would
