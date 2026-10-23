@@ -93,12 +93,16 @@ class NetworkError extends AxiamException
     /**
      * Reads `Retry-After` as milliseconds, `null` when absent or unusable.
      *
-     * Both RFC 7231 forms are accepted: delta-seconds and an HTTP-date. The date
-     * form is not hypothetical — CDNs and proxies commonly send it on `429`/`503`,
-     * and treating it as unparseable would silently discard the server's own
-     * statement about when it will be ready. A non-positive value collapses to
-     * `null` rather than becoming a floor, since a negative minimum wait is
+     * Only the RFC 9110 §10.2.3 forms are accepted: delta-seconds, and an HTTP-date in any of
+     * its three spellings (IMF-fixdate, obsolete RFC 850, asctime). The date form is not
+     * hypothetical — CDNs and proxies commonly send it on `429`/`503`. Anything else is
+     * `null`, never guessed at: `strtotime()` would read `17.0` as a time of day about seven
+     * hours ahead, and a polling loop that honours the value would then end its flow on a header
+     * it should have ignored (CONTRACT.md §14.2 rule 9, §33.7 rule 5). A non-positive value
+     * collapses to `null` rather than becoming a floor, since a negative minimum wait is
      * meaningless.
+     *
+     * @internal Shared with {@see ErrorMapper}; not part of the SDK's supported surface.
      */
     public static function parseRetryAfterMs(ResponseInterface $response): ?float
     {
@@ -113,14 +117,31 @@ class NetworkError extends AxiamException
             return $seconds > 0 ? $seconds * 1000.0 : null;
         }
 
-        $timestamp = strtotime($header);
-        if ($timestamp === false) {
+        $timestamp = self::parseHttpDate($header);
+        if ($timestamp === null) {
             return null;
         }
 
         $deltaMs = ($timestamp - time()) * 1000.0;
 
         return $deltaMs > 0 ? $deltaMs : null;
+    }
+
+    /**
+     * An RFC 9110 HTTP-date as a Unix timestamp, `null` when it is not one of the three forms.
+     */
+    private static function parseHttpDate(string $value): ?int
+    {
+        $utc = new \DateTimeZone('UTC');
+        foreach (['D, d M Y H:i:s \G\M\T', 'l, d-M-y H:i:s \G\M\T', 'D M j H:i:s Y'] as $format) {
+            $date = \DateTimeImmutable::createFromFormat('!' . $format, $value, $utc);
+            $errors = \DateTimeImmutable::getLastErrors();
+            if ($date !== false && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))) {
+                return $date->getTimestamp();
+            }
+        }
+
+        return null;
     }
 
     /**

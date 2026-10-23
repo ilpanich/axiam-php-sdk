@@ -95,6 +95,7 @@ final class ErrorMapper
                 $decoded['error'],
                 is_string($description) ? $description : '',
                 NetworkError::parseRetryAfterMs($response),
+                $response->getStatusCode(),
             );
         }
 

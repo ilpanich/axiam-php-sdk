@@ -839,7 +839,7 @@ final class OidcClient
         // §14.1 rule 2, as deviceAuthorize(): the configured secret in the body on every poll.
         $this->appendClientSecret($form);
 
-        $wire = $this->postToken($configuration, $form, $tenantId);
+        $wire = $this->postToken($configuration, $form, $tenantId, statusBeforeBody: true);
 
         // No nonce: the device grant has no authorization request to carry one.
         return $this->toTokenSet($wire, $configuration, null);
@@ -861,15 +861,20 @@ final class OidcClient
      * Polling follows §14.2: the interval comes from the response; `slow_down` adds 5 s
      * **permanently**; `authorization_pending` loops; `access_denied` and `expired_token`
      * raise distinct errors; polling stops at `expiresIn` even if the server has not yet
-     * said `expired_token`. A 5xx or transport failure mid-poll is **not** terminal
-     * (rule 6) — a server restart must not lose a grant the user has already approved.
-     * A `429 rate_limit_exceeded` is not terminal either (contract 1.64, rule 9): the loop
-     * waits `Retry-After` as a minimum — in place of that round's interval, capped at the
-     * `expiresIn` deadline — does **not** raise the interval for it, and polls again.
+     * said `expired_token`: the deadline runs from the moment the grant was issued, so the
+     * time a poll's request takes counts. A 5xx or transport failure mid-poll is **not**
+     * terminal (rule 6), whatever its body — AXIAM's own `500 {"error":"server_error"}`
+     * included — because a server restart must not lose a grant the user has already
+     * approved. Any `429` is not terminal either (contract 1.64, rule 9): the status decides,
+     * not the body. The loop waits `Retry-After` as a minimum — in place of that round's
+     * interval, capped at the `expiresIn` deadline — does **not** raise the interval for it
+     * (not even for a `429` whose body says `slow_down`), and polls again.
      *
      * @param callable(DeviceAuthorization):void $onUserCode Invoked before the first poll.
      * @param (callable(int):void)|null $sleep Injectable sleeper, so tests can assert the
      *   §14.2 arithmetic without spending it in wall-clock time. Defaults to `sleep()`.
+     * @param (callable():float)|null $now Injectable clock in seconds, for the `expires_in`
+     *   deadline. Defaults to `microtime(true)`.
      */
     public function deviceLogin(
         callable $onUserCode,
@@ -878,11 +883,13 @@ final class OidcClient
         ?OidcConfiguration $configuration = null,
         bool $adoptAsCredential = false,
         ?callable $sleep = null,
+        ?callable $now = null,
     ): OidcTokenSet {
         $configuration ??= $this->oidcDiscover();
         $sleep ??= static function (int $seconds): void {
             sleep($seconds);
         };
+        $now ??= static fn (): float => microtime(true);
 
         $authorization = $this->deviceAuthorize($scope, $tenantId, $configuration);
 
@@ -890,7 +897,12 @@ final class OidcClient
         $onUserCode($authorization);
 
         $intervalSeconds = $authorization->interval;
-        $remainingSeconds = $authorization->expiresIn;
+        // §14.2 rule 4 counts from the moment the server issued the grant, so the time a poll's
+        // request takes counts too. The seconds slept are kept beside the clock and the larger of
+        // the two is the elapsed time: with a real sleeper the clock is never behind, and with an
+        // injected one that does not advance it the loop still counts what it slept.
+        $startedAt = $now();
+        $sleptSeconds = 0;
         // The wait of the next round when it is not the interval: a `429`'s `Retry-After`.
         $waitSeconds = null;
 
@@ -901,14 +913,15 @@ final class OidcClient
             // the SDK from issuing a request that can only be refused, and reports it
             // under the same `expired_token` code the server would have used — so a
             // caller's branch does not care which side noticed first.
-            if ($roundSeconds >= $remainingSeconds) {
+            $elapsed = max($sleptSeconds, $now() - $startedAt);
+            if ($roundSeconds >= $authorization->expiresIn - $elapsed) {
                 throw new OAuthProtocolError(
                     'expired_token',
                     'the device authorization expired before the user completed it '
                     . '(client-side deadline from expires_in; CONTRACT.md §14.2 rule 4)'
                 );
             }
-            $remainingSeconds -= $roundSeconds;
+            $sleptSeconds += $roundSeconds;
 
             $sleep($roundSeconds);
 
@@ -920,29 +933,43 @@ final class OidcClient
 
                 return $tokenSet;
             } catch (OAuthProtocolError $e) {
+                if ($e->httpStatus === 429 || $e->error === 'rate_limit_exceeded') {
+                    // §14.2 rule 9 (contract 1.64, amended): the STATUS decides, not the body. Any
+                    // 429 is the wait — `Retry-After` is a minimum and counts as this round's
+                    // interval — and the interval is not raised for it, even when the body says
+                    // `slow_down`. The deadline check above caps the wait.
+                    $waitSeconds = self::retryAfterRound($intervalSeconds, $e->retryAfterMs);
+                    continue;
+                }
                 if ($e->error === 'authorization_pending') {
                     continue;
                 }
                 if ($e->error === 'slow_down') {
-                    // §14.2 rule 1: cumulative, never reset.
+                    // §14.2 rule 1: cumulative, never reset. Only the 400 raises it (rule 9).
                     $intervalSeconds += self::SLOW_DOWN_INCREMENT_SECONDS;
-                    continue;
-                }
-                if ($e->error === 'rate_limit_exceeded') {
-                    // §14.2 rule 9 (contract 1.64): `Retry-After` is a minimum and counts as this
-                    // round's interval; the interval itself is not raised for a 429. The deadline
-                    // check above caps the wait.
-                    $waitSeconds = max($intervalSeconds, (int) ceil(($e->retryAfterMs ?? 0.0) / 1000.0));
                     continue;
                 }
                 // expired_token / access_denied / invalid_grant — terminal.
                 throw $e;
             } catch (NetworkError $e) {
-                // §14.2 rule 6: transport and 5xx failures are not among the five protocol
-                // answers and are not terminal.
+                // §14.2 rule 6: transport and 5xx failures (whatever their body) are not among
+                // the five protocol answers and are not terminal. A `Retry-After` on one, such as
+                // a proxy's body-less 429, is still a floor for the next wait (§16.1).
+                if ($e->retryAfterMs !== null) {
+                    $waitSeconds = self::retryAfterRound($intervalSeconds, $e->retryAfterMs);
+                }
                 continue;
             }
         }
+    }
+
+    /**
+     * The next round's wait after a `Retry-After`: the larger of the interval and the header,
+     * which is rounded up to whole seconds.
+     */
+    private static function retryAfterRound(int $intervalSeconds, ?float $retryAfterMs): int
+    {
+        return max($intervalSeconds, (int) ceil(($retryAfterMs ?? 0.0) / 1000.0));
     }
 
     // -------------------------------------------------------------------------
@@ -2210,7 +2237,7 @@ final class OidcClient
      *
      * @return array<string,mixed>
      */
-    private function postToken(OidcConfiguration $configuration, array $form, ?string $tenantId): array
+    private function postToken(OidcConfiguration $configuration, array $form, ?string $tenantId, bool $statusBeforeBody = false): array
     {
         $url = $this->endpointUrl(
             (string) $this->preferredEndpoint(
@@ -2220,7 +2247,7 @@ final class OidcClient
             ),
             $tenantId,
         );
-        $response = $this->postForm($url, $form, 'token request failed');
+        $response = $this->postForm($url, $form, 'token request failed', $statusBeforeBody);
 
         return self::decodeJsonObject($response, 'token request: response body is not a JSON object');
     }
@@ -2521,8 +2548,11 @@ final class OidcClient
      * POST a form-encoded body (§12.1 note 1) through the session transport, synchronously.
      *
      * @param array<string,string> $form
+     * @param bool $statusBeforeBody Read the status before the body (CONTRACT.md §14.2 rule 6,
+     *        §34.2 P8): a `5xx` is a {@see NetworkError} whatever it carries, even an OAuth
+     *        `{"error":"server_error"}` body that the `/oauth2/*` mapper would otherwise raise.
      */
-    private function postForm(string $url, array $form, string $context): ResponseInterface
+    private function postForm(string $url, array $form, string $context, bool $statusBeforeBody = false): ResponseInterface
     {
         try {
             return $this->http->post($url, [
@@ -2530,6 +2560,10 @@ final class OidcClient
                 'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
             ]);
         } catch (RequestException $e) {
+            $response = $e instanceof BadResponseException ? $e->getResponse() : null;
+            if ($statusBeforeBody && $response !== null && $response->getStatusCode() >= 500) {
+                throw NetworkError::fromResponse($response, $context);
+            }
             throw $this->mapRequestException($e, $context, oauth2: true);
         } catch (GuzzleException $e) {
             throw NetworkError::fromException($e, $context);

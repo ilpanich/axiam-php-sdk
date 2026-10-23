@@ -26,11 +26,15 @@ final class OAuthProtocolError extends AuthError
      * @param float|null $retryAfterMs The response's `Retry-After` in milliseconds, `null` when
      *        absent or unusable. Set for a `429 rate_limit_exceeded` (CONTRACT.md §14.2 rule 9),
      *        whose wait the device polling loop honours as a minimum.
+     * @param int|null $httpStatus The HTTP status the body arrived with, `null` for an error built
+     *        locally. The device polling loop decides on it before the `error` code (§14.2 rule 9:
+     *        any `429` is the wait; only a `400` `slow_down` raises the interval).
      */
     public function __construct(
         public readonly string $error,
         public readonly string $errorDescription,
         public readonly ?float $retryAfterMs = null,
+        public readonly ?int $httpStatus = null,
     ) {
         parent::__construct(sprintf('%s: %s', $error, $errorDescription));
     }

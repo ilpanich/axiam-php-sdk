@@ -1720,6 +1720,7 @@ final class AxiamClient
      *
      * @param callable(DeviceAuthorization):void $onUserCode Invoked before the first poll.
      * @param (callable(int):void)|null $sleep Injectable sleeper, for tests.
+     * @param (callable():float)|null $now Injectable clock in seconds, for tests.
      */
     public function deviceLogin(
         callable $onUserCode,
@@ -1728,8 +1729,9 @@ final class AxiamClient
         ?OidcConfiguration $configuration = null,
         bool $adoptAsCredential = false,
         ?callable $sleep = null,
+        ?callable $now = null,
     ): OidcTokenSet {
-        return $this->oidc->deviceLogin($onUserCode, $scope, $tenantId, $configuration, $adoptAsCredential, $sleep);
+        return $this->oidc->deviceLogin($onUserCode, $scope, $tenantId, $configuration, $adoptAsCredential, $sleep, $now);
     }
 
     /**

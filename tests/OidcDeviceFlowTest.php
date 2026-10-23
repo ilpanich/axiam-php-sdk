@@ -334,6 +334,7 @@ final class OidcDeviceFlowTest extends TestCase
     public function testRetryAfterPastTheDeadlineIsCappedAndNothingIsSentAfterIt(): void
     {
         $history = [];
+        $slept = [];
         $client = $this->client([
             self::deviceAuthorizationResponse(['expires_in' => 30, 'interval' => 5]),
             new Response(429, ['Retry-After' => '3600'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
@@ -344,7 +345,8 @@ final class OidcDeviceFlowTest extends TestCase
                 onUserCode: static function (DeviceAuthorization $a): void {
                 },
                 configuration: $this->configuration(),
-                sleep: static function (int $s): void {
+                sleep: static function (int $s) use (&$slept): void {
+                    $slept[] = $s;
                 },
             );
             self::fail('expected the client-side deadline to fire');
@@ -353,6 +355,164 @@ final class OidcDeviceFlowTest extends TestCase
         }
 
         self::assertCount(2, $history, 'device_authorization + the one rate-limited poll; nothing after');
+        self::assertSame([5], $slept, 'the uncapped hour is never slept (C164-19)');
+    }
+
+    // ----- contract 1.64 (amended): the status decides, 5xx is a transport failure whatever its body -----
+
+    /** @return iterable<string,array{int,string}> */
+    public static function serverFailureBodies(): iterable
+    {
+        yield '500 server_error' => [500, 'server_error'];
+        yield '503 temporarily_unavailable' => [503, 'temporarily_unavailable'];
+    }
+
+    /** @dataProvider serverFailureBodies */
+    public function testA5xxWithAnOAuthBodyMidPollIsRetriedNotTerminal(int $status, string $code): void
+    {
+        // AXIAM answers a datastore failure at /oauth2/token with 500 {"error":"server_error",…}
+        // (C164-03, §14.2 rule 6): the grant the user may already have approved is not lost.
+        $slept = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            self::oauthError($code, $status),
+            self::tokenSuccess(),
+        ]);
+
+        $tokens = $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame('device-access-token', $tokens->accessToken->reveal());
+        self::assertSame([5, 5], $slept);
+    }
+
+    public function testASingleDevicePollRaisesANetworkErrorForA5xxWhateverItsBody(): void
+    {
+        $client = $this->client([self::oauthError('server_error', 500)]);
+
+        $this->expectException(\Axiam\Sdk\Core\NetworkError::class);
+        $client->devicePoll(self::DEVICE_CODE, null, $this->configuration());
+    }
+
+    public function testA429WhoseBodySaysSlowDownDoesNotRaiseTheInterval(): void
+    {
+        // C164-04: rule 5's dispatch on `error` applies to the 400; a 429 is the wait.
+        $slept = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            new Response(429, ['Retry-After' => '1'], (string) json_encode(['error' => 'slow_down'])),
+            self::oauthError('authorization_pending'),
+            self::tokenSuccess(),
+        ]);
+
+        $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame([5, 5, 5], $slept);
+    }
+
+    public function testABodilessOrForeignBody429StillHonoursRetryAfterAsAFloor(): void
+    {
+        // C164-17: a proxy's 429.
+        $slept = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            new Response(429, ['Retry-After' => '12']),
+            new Response(429, ['Retry-After' => '1'], '<html>slow down</html>'),
+            self::tokenSuccess(),
+        ]);
+
+        $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame([5, 12, 5], $slept);
+    }
+
+    public function testAMalformedRetryAfterIsIgnoredAndDoesNotEndTheFlow(): void
+    {
+        // C164-09: `strtotime("17.0")` is about seven hours ahead, which ended the flow.
+        $slept = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            new Response(429, ['Retry-After' => '17.0'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
+            self::tokenSuccess(),
+        ]);
+
+        $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame([5, 5], $slept);
+    }
+
+    public function testTheDeadlineCountsTheTimeARequestTakes(): void
+    {
+        // C164-05: the elapsed time is the larger of the seconds slept and the clock. Each poll
+        // here costs 40 s of clock on top of a 5 s interval, so a 100 s grant is out after three
+        // polls (clock 90 s, the next 5 s sleep would reach 100 s), where counting sleeps alone
+        // would send nineteen.
+        $clock = 1000.0;
+        $polls = 0;
+        $mock = new MockHandler([self::deviceAuthorizationResponse(['expires_in' => 100, 'interval' => 5])]);
+        for ($i = 0; $i < 20; $i++) {
+            $mock->append(static function () use (&$clock, &$polls): Response {
+                $polls++;
+                $clock += 40.0;
+
+                return self::oauthError('authorization_pending');
+            });
+        }
+        $client = new AxiamClient(
+            self::BASE_URL,
+            self::TENANT,
+            oidcClientId: self::CLIENT_ID,
+            oidcClientSecret: null,
+            oidcTenantId: self::TENANT_UUID,
+            transportHandler: HandlerStack::create($mock),
+            retryEnabled: false,
+        );
+
+        try {
+            $client->deviceLogin(
+                onUserCode: static function (DeviceAuthorization $a): void {
+                },
+                configuration: $this->configuration(),
+                sleep: static function (int $s) use (&$clock): void {
+                    $clock += $s;
+                },
+                now: static function () use (&$clock): float {
+                    return $clock;
+                },
+            );
+            self::fail('expected the client-side deadline to fire');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('expired_token', $e->error);
+        }
+
+        self::assertSame(3, $polls);
     }
 
     public function testASingleDevicePollStillRaisesTheRateLimitError(): void
