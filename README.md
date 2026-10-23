@@ -24,7 +24,7 @@ Identity and Authorization Management.
 ## Install
 
 ```bash
-composer require "axiam/axiam-sdk:^1.1.0"
+composer require "axiam/axiam-sdk:^1.1.2"
 ```
 
 From 1.0.0 the SDK is stable and follows [semantic versioning](https://semver.org/): a breaking
@@ -291,6 +291,8 @@ what 1.64 changed here.
 |---|---|
 | (b) a `429 rate_limit_exceeded` on a device-code poll is waited out (§14.2 rule 9) | `deviceLogin()` waits `Retry-After` as a minimum (in place of that round's interval, capped at the `expires_in` deadline), does not raise the interval, and polls again; `devicePoll()` still raises the `OAuthProtocolError`, which now carries `retryAfterMs`. Tests: `tests/OidcDeviceFlowTest.php` |
 | (c) the refusal at `plan` names the member, and the value where the SDK keeps it (§27.6.2 item 4) | The generated models keep the raw string of an open-enum member that decoded to `Unknown` (`unknownEnumValue()`, never rendered or sent); the refusal quotes it, and says the value is unknown when no raw string was read |
+| §14.2 rule 6 (amended): a `5xx` on the device poll is a transport failure whatever its body | `devicePoll()` reads the status first: `500 {"error":"server_error"}` is a `NetworkError`, which `deviceLogin()` retries |
+| §14.2 rule 9 (amended): the status decides, any `429` is the wait | `OAuthProtocolError::$httpStatus`; a `429` whose body says `slow_down` does not raise the interval, and a body-less `429` honours `Retry-After` as a floor |
 | (a), (d) to (j) | Informative; no SDK change. This SDK parses no recovered `gdpr.user_pseudonymized` row and builds no `AuditEventMessage` |
 | C163-18 a request retried after a refresh | Carries the refreshed `Authorization`, `X-CSRF-Token` and `Cookie`: `RefreshMiddleware` is now pushed before `AuthMiddleware`; `tests/Contract164/RetriedRequestHeadersTest.php` |
 | C163-19 `/oauth2/` under a base URL path prefix | `AuthMiddleware` anchors the `/oauth2/` match to the base URL's path |
@@ -452,7 +454,7 @@ is refused locally with a `ValidationError`. A client that must sign CIBA reques
 ### Laravel — auto-discovered, zero-config
 
 ```bash
-composer require "axiam/axiam-sdk:^1.1.0"
+composer require "axiam/axiam-sdk:^1.1.2"
 ```
 
 That's it. Laravel's own [package auto-discovery](https://laravel.com/docs/packages#package-discovery)

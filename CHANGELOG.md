@@ -10,12 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.2] - Unreleased
 
 Contract 1.64 (the AXIAM 1.1.2 release) on top of contract 1.63, with the 1.63 conformance follow-ups of
-issue #86. `CONTRACT.md`, `openapi.json` and `management-registry.json` are re-vendored byte for byte from
-`ilpanich/axiam` `fb92ec4` (openapi `info.version` 1.1.2; `proto/` is unchanged); the generator `--check` is
-clean and the registry still holds 202 operations in 29 namespaces. **A patch release:** no signature
-changes and no operation is added. Two public additions are optional and backward compatible: a trailing
-`retryAfterMs` on `OAuthProtocolError`'s constructor, and `unknownEnumValue()` on the generated models that hold
-an open enum. The README states conformance at contract 1.64.
+issue #86 and the findings of the 1.64 conformance review (C164-xx). `CONTRACT.md` is re-vendored byte for
+byte from `ilpanich/axiam` `21beda0` (contract 1.64 as amended by W7.1b: §14.2 rules 6 and 9, §14.6, §34.2
+P11, §34.8 (c)); `openapi.json` and `management-registry.json` are those of `fb92ec4`, unchanged at `21beda0`
+(openapi `info.version` 1.1.2), and `proto/` is unchanged; the generator `--check` is clean and the registry
+still holds 202 operations in 29 namespaces. **A patch release:** no signature changes and no operation is
+added. The public additions are optional and backward compatible: trailing `retryAfterMs` and `httpStatus`
+on `OAuthProtocolError`'s constructor, a trailing `$now` clock on `deviceLogin()`, `unknownEnumValue()` on the
+generated models that hold an open enum, and `NetworkError::parseRetryAfterMs()`, which became `public static`
+and is marked `@internal` (it is shared with `ErrorMapper` and is not supported surface). The README states
+conformance at contract 1.64.
 
 ### Fixed
 
@@ -25,6 +29,28 @@ an open enum. The README states conformance at contract 1.64.
   counts that wait as the round's one interval, does **not** raise the interval for it, and polls again. A
   single `devicePoll()` still raises the `OAuthProtocolError`, which now carries the header as `retryAfterMs`.
   Tests: `tests/OidcDeviceFlowTest.php`.
+- **A `5xx` on a device poll is retried whatever its body (C164-03, §14.2 rule 6).** AXIAM answers a datastore
+  failure at `/oauth2/token` with `500 {"error":"server_error", …}`. The poll read the body before the status,
+  raised a terminal `OAuthProtocolError` and lost a grant the user might already have approved. `devicePoll()`
+  now reads the status first (as `cibaPoll` does): a `5xx` is a `NetworkError`, which `deviceLogin()` retries.
+  Tests: `500 {"error":"server_error"}` and `503 {"error":"temporarily_unavailable"}` mid-poll, then the tokens.
+- **Any `429` on a device poll is the rule 9 wait; only a `400` raises the interval (C164-04, C164-17).** The
+  loop dispatched on the body's `error`, so a `429 {"error":"slow_down"}` (a server before 1.1.2, or an
+  intermediary) added five seconds for good, and a body-less or foreign-body `429` ignored its `Retry-After`.
+  `OAuthProtocolError` now carries the `httpStatus` it arrived with, the loop decides on the status first, and a
+  `NetworkError` that carries a `Retry-After` is honoured as a floor too.
+- **A malformed `Retry-After` is ignored (C164-09).** `strtotime()` read `17.0` as a time of day about seven
+  hours ahead, so the loop that now honours the header raised `expired_token` at once. Only the RFC 9110 forms
+  are read: delta-seconds and an HTTP-date as IMF-fixdate, RFC 850 or asctime.
+- **The device deadline counts the time a request takes (C164-05, §14.2 rule 4).** It was `expires_in` minus the
+  seconds slept, so slow polls could run past the grant. It now runs from the moment the authorization returned,
+  and the elapsed time is the larger of the clock and the seconds slept; `deviceLogin()` takes an optional
+  `$now` clock for tests.
+- **A root `/oauth2/` URL under a prefixed base URL is still stripped (C164-24).** Anchoring the match to the
+  base path (C163-19) must not stop stripping `/oauth2/*` at the root of the host, which a discovery document
+  or a prefix-stripping proxy may name.
+- **The replay after a refresh uses the request's own cookie jar (C164-23).** It rebuilt `Cookie` from the
+  session jar even for a request that had opted out (`cookies => false`) or brought another jar.
 - **`/oauth2/` is matched under the base URL's path prefix (C163-19).** `AuthMiddleware` compared the path with
   a bare `/oauth2/`, so a base URL such as `https://gw.example/axiam` (which `JwksVerifier` accepts) sent the
   bearer token, the session cookie and `X-CSRF-Token` on `/axiam/oauth2/*`. Test:
@@ -35,7 +61,8 @@ an open enum. The README states conformance at contract 1.64.
   replay after a `401` went through the handler inside the refresh middleware, which excludes the auth
   middleware: it re-sent the refused attempt's `Authorization`, `X-CSRF-Token` and `Cookie`. The order is
   swapped (refresh first, auth second) and the replay rebuilds `Cookie` from the jar, the cookie middleware
-  being outside both. Test: `tests/Contract164/RetriedRequestHeadersTest.php`. The `AuthMiddleware` and
+  being outside both. Tests: `tests/Contract164/RetriedRequestHeadersTest.php`, which also drives a real
+  `AxiamClient` (C164-10), so reverting the shipped order fails it. The `AuthMiddleware` and
   `RefreshMiddleware` comments, which had the stack order backwards, now state it.
 
 ### Changed
@@ -45,7 +72,8 @@ an open enum. The README states conformance at contract 1.64.
   raw string of an open-enum member that decoded to `Unknown`, read through `unknownEnumValue($wire)`; it is
   private, not a constructor parameter, and never rendered by `toArray()` or `jsonSerialize()`, so it cannot be
   sent back. The refusal for an unstated `termination_action` or `service_type` now names the member and the
-  value, and says the value is unknown for a model built any other way.
+  value (JSON-escaped and cut at 64 characters, C164-21), and says the value is unknown for a model built any
+  other way.
 - **`toArray()` on a response that holds `Unknown` throws (C163-18).** Since 1.1.1 `toArray()` is the request
   path and raises `ValidationError` for an open-enum member that decoded to `Unknown`; only `jsonSerialize()`
   renders it. That was not recorded in the 1.1.1 entry above: code that called `toArray()` on a model it had
@@ -55,6 +83,7 @@ an open enum. The README states conformance at contract 1.64.
 
 - The no-session-credentials test queues a fifth response and asserts that a `groups()->create` after the
   `/oauth2/` requests carries `Cookie` with `axiam_access=` and `X-CSRF-Token: csrf-from-login` (C163-08).
+- The cap case of the §14.6 1.64 test records its sleeps, so an uncapped hour-long sleep fails it (C164-19).
 - The open-enum `plan` tests run over both members, `termination_action` and `service_type`, for the refusal,
   `apply`, the stated member and `NoChange` (C163-09).
 
