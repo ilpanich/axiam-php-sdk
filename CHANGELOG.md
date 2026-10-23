@@ -36,6 +36,16 @@ conformance at contract 1.64.
   in one interval; a third failure is surfaced and the loop takes its next interval. A `429` makes one request
   (rule 9: the wait is the loop's), and inside `deviceLogin()` a retry whose `Retry-After` would reach the
   grant's deadline is not taken. Tests: `tests/OidcDeviceFlowTest.php`.
+- **A `429` on a CIBA poll is waited out (C164-52, §33.7 rule 5, §16.1).** AXIAM's own `429
+  {"error":"rate_limit_exceeded"}` is an `OAuthProtocolError`, and `cibaAwait()` polled again at the plain interval,
+  seven seconds before a `Retry-After: 12`. Any `429` now makes `Retry-After` the minimum of the next wait (never
+  shortening the interval, never raising it), and a wait that would reach the deadline ends the flow with
+  `expired_token`. Tests (`tests/Contract164/CibaDeadlineBoundTest.php`): `Retry-After: 12` gives waits `[5, 12]`;
+  with `expires_in` 15 one request and `expired_token`.
+- **The CIBA retry bound is counted in whole seconds (C164-54).** `CibaClock` serves a wait in whole seconds, so a
+  retry admitted on a 0.2 s backoff ceiling with 0.5 s left would end at 30.5 s of a 30 s grant. The time left is
+  now floored, and the new tests pin the interval floor of the carry, the strict `<` at the boundary and the
+  whole-second case.
 - **The CIBA poll's §16 retry never sends after the request's deadline either (C164-43, §34.2 P10, §33.7 rule
   5).** `cibaPoll()` as `cibaAwait()` calls it retried with no deadline and slept for real: with `expires_in` 30 and
   every poll answered `503` + `Retry-After: 20`, requests went out at 5, 25 and 45 s. It now takes the loop's time

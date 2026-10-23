@@ -809,8 +809,9 @@ for, as `/oauth2/token` does:
 in-poll retries are testable exactly rather than in wall-clock time. A `5xx` or transport failure
 on a poll is retried inside it (three attempts in total, never a `429`), and a retry is never sent
 after the `expires_in` deadline: a wait that would reach it is not started. Without `$retrySleep`
-those waits are really slept, whatever `$sleep` is, because `Retry-After` is a floor. Per §14.3 rule 4 it **returns** the token set;
-`$adoptAsCredential` is the same opt-in flag `loginClientCredentials()` uses.
+those waits are really slept, whatever `$sleep` is, because `Retry-After` is a floor. Per §14.3
+rule 4 it **returns** the token set; `$adoptAsCredential` is the same opt-in flag
+`loginClientCredentials()` uses.
 
 ## Token exchange (CONTRACT.md §15)
 
