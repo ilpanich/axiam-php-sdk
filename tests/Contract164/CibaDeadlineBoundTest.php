@@ -230,4 +230,50 @@ final class CibaDeadlineBoundTest extends TestCase
         self::assertCount(2, $sent);
         self::assertLessThanOrEqual(1030.0, $clock->now);
     }
+
+    public function testA429RetryAfterBelowTheIntervalStillWaitsTheInterval(): void
+    {
+        // C164-57 (a): the carry is a floor, never a shortcut.
+        [, $clock, $error] = $this->await([self::rateLimited(2), self::tokens()], 600, 5);
+
+        self::assertNull($error);
+        self::assertSame([5, 5], $clock->sleeps);
+    }
+
+    public function testTheCarryOf429IsConsumedOnceAndTheIntervalIsNotRaised(): void
+    {
+        // C164-57 (b): after the 429 the next ordinary wait is back to the interval.
+        [, $clock, $error] = $this->await([
+            self::rateLimited(12),
+            static fn (CibaTestClock $clock): Response => new Response(400, [], (string) json_encode(['error' => 'authorization_pending'])),
+            self::tokens(),
+        ], 600, 5);
+
+        self::assertNull($error);
+        self::assertSame([5, 12, 5], $clock->sleeps);
+    }
+
+    public function testTheStatusDecidesNotTheBodyOfA429(): void
+    {
+        // C164-57 (c): a 429 whose body says slow_down is the rule 5 wait and does not raise the
+        // interval; only the 400 does.
+        [, $clock, $error] = $this->await([
+            static fn (CibaTestClock $clock): Response => new Response(429, ['Retry-After' => '3'], (string) json_encode(['error' => 'slow_down'])),
+            self::tokens(),
+        ], 600, 5);
+
+        self::assertNull($error);
+        self::assertSame([5, 5], $clock->sleeps);
+    }
+
+    public function testASlowDownOn400StillRaisesTheInterval(): void
+    {
+        [, $clock, $error] = $this->await([
+            static fn (CibaTestClock $clock): Response => new Response(400, [], (string) json_encode(['error' => 'slow_down'])),
+            self::tokens(),
+        ], 600, 5);
+
+        self::assertNull($error);
+        self::assertSame([5, 10], $clock->sleeps);
+    }
 }

@@ -2100,8 +2100,10 @@ final class OidcClient
      *   earns `slow_down` and a longer wait.
      * - `slow_down` adds 5 s to the interval, cumulatively and permanently;
      *   `authorization_pending` never lowers it.
-     * - A transport failure, `5xx` or `429` (`rate_limit_exceeded`) that outlived §16 is not
-     *   terminal: the loop waits the interval and polls again.
+     * - A transport failure, `5xx` or `429` that outlived §16 is not terminal: the loop waits
+     *   the interval, or the failure's `Retry-After` if longer (once; the interval is never
+     *   raised, whatever a `429`'s body says), and polls again. A wait that would reach the
+     *   deadline ends the flow with `expired_token`.
      * - Polling stops at `receivedAt + expiresIn`, even if the server has not said
      *   `expired_token`; the same `expired_token` {@see OAuthProtocolError} is then raised
      *   locally, without a request.

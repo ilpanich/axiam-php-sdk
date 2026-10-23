@@ -126,6 +126,11 @@ conformance at contract 1.64.
   `/oauth2/` requests carries `Cookie` with `axiam_access=` and `X-CSRF-Token: csrf-from-login` (C163-08).
 - The README documents `$now`, `$retrySleep` and the deadline bound of the in-poll retry, and its CIBA row no longer
   overstates the clock (C164-48).
+- The CIBA `429` carry is pinned from three sides (C164-57): a `429` with `Retry-After` below the interval still waits
+  the interval (`[5, 5]`), the carry is consumed once and the next wait is the interval again (`[5, 12, 5]`), and
+  the status decides, not the body (`429 {"error":"slow_down"}` waits `[5, 5]`; a `400 slow_down` still gives
+  `[5, 10]`). The `cibaAwait()` docblock now says the loop waits the interval or the failure's `Retry-After` if
+  longer.
 - The in-attempt retry tests run for a transport failure as for a `500` (two failures and a `200`, the exhausted
   cap, a single poll, retry off), and inside `deviceLogin()` (C164-38).
 - The cap case of the §14.6 1.64 test records its sleeps, so an uncapped hour-long sleep fails it (C164-19).
