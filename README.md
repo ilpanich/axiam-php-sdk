@@ -329,7 +329,7 @@ what 1.64 changed here.
 | P4 the replay store | `ReplayStore::checkAndRecord()` reports a failure by throwing, which accepts nothing (fail closed) and surfaces as a `NetworkError` with the store's exception chained; the default `InMemoryReplayStore` is unbounded in count, its entries expiring after the window |
 | P6 key fetches | A failed fetch — a fill and an expiry refresh included — and every unknown-`kid` refetch count toward the once-a-minute limit; a successful fill does not. The key cache expires 300 s after the fetch that filled it |
 | P8 a `5xx` on `ciba_poll` | A `NetworkError` whatever its body (`500 {"error":"server_error"}` included), retried under §16 and outlived by `cibaAwait` |
-| P10 `cibaAwait`'s anchor | The instant the initiate response was received, read from the injected `CibaClock`, which also supplies the waits |
+| P10 `cibaAwait`'s anchor | The instant the initiate response was received, read from the injected `CibaClock`, which also supplies the waits, the §16 retry waits inside a poll included: a retry whose longest wait would reach the deadline is not sent |
 | P12.1 / P12.2 unknown SCIM arms | `ScimTargetAuthUnknown` / `ScimTargetScopeUnknown` keep the `type` and nothing else; they render for a log line and are refused locally on the request path |
 | P12.4 the RFC 7592 replacement | Built from what the read carried: a list the read lacked is not sent, a member of an unexpected shape goes back as read |
 | P12.7 the signed form | Claimed as "§33.2 signed (ES256, EdDSA)" |
@@ -804,8 +804,12 @@ for, as `/oauth2/token` does:
   this SDK; a DPoP-bound client's poll surfaces as `invalid_client`, and `token_type` is read as the
   server writes it.
 
-`deviceLogin()` takes an injectable `$sleep`, so the §14.2 interval arithmetic is testable
-exactly rather than in wall-clock time. Per §14.3 rule 4 it **returns** the token set;
+`deviceLogin()` takes an injectable `$sleep` (seconds), `$now` (a clock, in seconds) and
+`$retrySleep` (milliseconds: the §16 waits inside a poll), so the §14.2 interval arithmetic and the
+in-poll retries are testable exactly rather than in wall-clock time. A `5xx` or transport failure
+on a poll is retried inside it (three attempts in total, never a `429`), and a retry is never sent
+after the `expires_in` deadline: a wait that would reach it is not started. Without `$retrySleep`
+those waits are really slept, whatever `$sleep` is, because `Retry-After` is a floor. Per §14.3 rule 4 it **returns** the token set;
 `$adoptAsCredential` is the same opt-in flag `loginClientCredentials()` uses.
 
 ## Token exchange (CONTRACT.md §15)

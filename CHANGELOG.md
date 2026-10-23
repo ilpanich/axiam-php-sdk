@@ -36,6 +36,18 @@ conformance at contract 1.64.
   in one interval; a third failure is surfaced and the loop takes its next interval. A `429` makes one request
   (rule 9: the wait is the loop's), and inside `deviceLogin()` a retry whose `Retry-After` would reach the
   grant's deadline is not taken. Tests: `tests/OidcDeviceFlowTest.php`.
+- **The CIBA poll's §16 retry never sends after the request's deadline either (C164-43, §34.2 P10, §33.7 rule
+  5).** `cibaPoll()` as `cibaAwait()` calls it retried with no deadline and slept for real: with `expires_in` 30 and
+  every poll answered `503` + `Retry-After: 20`, requests went out at 5, 25 and 45 s. It now takes the loop's time
+  left and its `CibaClock` as the device poll does (longest wait against the time left, a guard in the attempt,
+  waits served on the clock), and a failure whose `Retry-After` was not served becomes the floor of the loop's next
+  wait. A bare `cibaPoll()` keeps the unbounded §16 behaviour. Tests: `tests/Contract164/CibaDeadlineBoundTest.php`
+  (§33.8 test 7's P10 case; `Retry-After: 20`; a `500` returning just before the deadline).
+- **An injected `$sleep` no longer skips the in-poll `Retry-After` floor (C164-47, §16.1).** Round 3 counted the
+  in-poll waits and did not serve them when only `$sleep` was injected, so a real sleeper saw a `Retry-After: 20`
+  retried at once and the grant given up early. They are now always served (through `$retrySleep` when given,
+  else `usleep`) and counted. Test: a no-op `$sleep`, no clock, `503` + `Retry-After: 1`, then `200` — the retry is
+  at least a second later.
 - **The in-poll §16 retry never sends after the deadline (C164-36, §14.2 rule 4).** The check added only the
   `Retry-After` to the clock, not the jittered backoff the runner then waits, so a retry requested just before the
   deadline went out after it. It now takes the longest wait (the backoff ceiling, raised to `Retry-After`) against
@@ -102,6 +114,8 @@ conformance at contract 1.64.
 
 - The no-session-credentials test queues a fifth response and asserts that a `groups()->create` after the
   `/oauth2/` requests carries `Cookie` with `axiam_access=` and `X-CSRF-Token: csrf-from-login` (C163-08).
+- The README documents `$now`, `$retrySleep` and the deadline bound of the in-poll retry, and its CIBA row no longer
+  overstates the clock (C164-48).
 - The in-attempt retry tests run for a transport failure as for a `500` (two failures and a `200`, the exhausted
   cap, a single poll, retry off), and inside `deviceLogin()` (C164-38).
 - The cap case of the §14.6 1.64 test records its sleeps, so an uncapped hour-long sleep fails it (C164-19).
