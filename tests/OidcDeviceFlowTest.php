@@ -279,6 +279,97 @@ final class OidcDeviceFlowTest extends TestCase
         self::assertCount(2, $history);
     }
 
+    // ----- contract 1.64 (§14.2 rule 9, last paragraph; §14.6): a 429 on a poll is waited out -----
+
+    public function testRateLimitedPollIsWaitedOutAndTheIntervalIsUnchanged(): void
+    {
+        // The mock answers one poll with 429 and Retry-After, then the tokens. The loop waits at
+        // least the Retry-After (a recorded sleep), polls again and completes, and the poll after
+        // the 429 is scheduled at the interval the loop held before it — not five seconds longer.
+        $slept = [];
+        $history = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            self::oauthError('authorization_pending'),
+            new Response(429, ['Retry-After' => '17'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
+            self::oauthError('authorization_pending'),
+            self::tokenSuccess(),
+        ], $history);
+
+        $tokens = $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame('device-access-token', $tokens->accessToken->reveal());
+        self::assertSame([5, 5, 17, 5], $slept, 'the 429 round waits Retry-After; the interval stays 5');
+        self::assertCount(5, $history, 'device_authorization + four polls');
+    }
+
+    public function testRetryAfterIsOnlyAMinimumNeverShorterThanTheInterval(): void
+    {
+        $slept = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 600, 'interval' => 5]),
+            new Response(429, ['Retry-After' => '1'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
+            self::tokenSuccess(),
+        ]);
+
+        $client->deviceLogin(
+            onUserCode: static function (DeviceAuthorization $a): void {
+            },
+            configuration: $this->configuration(),
+            sleep: static function (int $s) use (&$slept): void {
+                $slept[] = $s;
+            },
+        );
+
+        self::assertSame([5, 5], $slept);
+    }
+
+    public function testRetryAfterPastTheDeadlineIsCappedAndNothingIsSentAfterIt(): void
+    {
+        $history = [];
+        $client = $this->client([
+            self::deviceAuthorizationResponse(['expires_in' => 30, 'interval' => 5]),
+            new Response(429, ['Retry-After' => '3600'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
+        ], $history);
+
+        try {
+            $client->deviceLogin(
+                onUserCode: static function (DeviceAuthorization $a): void {
+                },
+                configuration: $this->configuration(),
+                sleep: static function (int $s): void {
+                },
+            );
+            self::fail('expected the client-side deadline to fire');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('expired_token', $e->error);
+        }
+
+        self::assertCount(2, $history, 'device_authorization + the one rate-limited poll; nothing after');
+    }
+
+    public function testASingleDevicePollStillRaisesTheRateLimitError(): void
+    {
+        $client = $this->client([
+            new Response(429, ['Retry-After' => '9'], (string) json_encode(['error' => 'rate_limit_exceeded'])),
+        ]);
+
+        try {
+            $client->devicePoll(self::DEVICE_CODE, null, $this->configuration());
+            self::fail('expected an OAuthProtocolError');
+        } catch (OAuthProtocolError $e) {
+            self::assertSame('rate_limit_exceeded', $e->error);
+            self::assertSame(9000.0, $e->retryAfterMs);
+        }
+    }
+
     /**
      * @return iterable<string,array{0:string}>
      */

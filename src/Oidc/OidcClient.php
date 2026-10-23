@@ -863,6 +863,9 @@ final class OidcClient
      * raise distinct errors; polling stops at `expiresIn` even if the server has not yet
      * said `expired_token`. A 5xx or transport failure mid-poll is **not** terminal
      * (rule 6) — a server restart must not lose a grant the user has already approved.
+     * A `429 rate_limit_exceeded` is not terminal either (contract 1.64, rule 9): the loop
+     * waits `Retry-After` as a minimum — in place of that round's interval, capped at the
+     * `expiresIn` deadline — does **not** raise the interval for it, and polls again.
      *
      * @param callable(DeviceAuthorization):void $onUserCode Invoked before the first poll.
      * @param (callable(int):void)|null $sleep Injectable sleeper, so tests can assert the
@@ -888,22 +891,26 @@ final class OidcClient
 
         $intervalSeconds = $authorization->interval;
         $remainingSeconds = $authorization->expiresIn;
+        // The wait of the next round when it is not the interval: a `429`'s `Retry-After`.
+        $waitSeconds = null;
 
         while (true) {
+            $roundSeconds = $waitSeconds ?? $intervalSeconds;
+            $waitSeconds = null;
             // §14.2 rule 4: the deadline is authoritative. Checking before sleeping keeps
             // the SDK from issuing a request that can only be refused, and reports it
             // under the same `expired_token` code the server would have used — so a
             // caller's branch does not care which side noticed first.
-            if ($intervalSeconds >= $remainingSeconds) {
+            if ($roundSeconds >= $remainingSeconds) {
                 throw new OAuthProtocolError(
                     'expired_token',
                     'the device authorization expired before the user completed it '
                     . '(client-side deadline from expires_in; CONTRACT.md §14.2 rule 4)'
                 );
             }
-            $remainingSeconds -= $intervalSeconds;
+            $remainingSeconds -= $roundSeconds;
 
-            $sleep($intervalSeconds);
+            $sleep($roundSeconds);
 
             try {
                 $tokenSet = $this->devicePoll($authorization->deviceCode, $tenantId, $configuration);
@@ -919,6 +926,13 @@ final class OidcClient
                 if ($e->error === 'slow_down') {
                     // §14.2 rule 1: cumulative, never reset.
                     $intervalSeconds += self::SLOW_DOWN_INCREMENT_SECONDS;
+                    continue;
+                }
+                if ($e->error === 'rate_limit_exceeded') {
+                    // §14.2 rule 9 (contract 1.64): `Retry-After` is a minimum and counts as this
+                    // round's interval; the interval itself is not raised for a 429. The deadline
+                    // check above caps the wait.
+                    $waitSeconds = max($intervalSeconds, (int) ceil(($e->retryAfterMs ?? 0.0) / 1000.0));
                     continue;
                 }
                 // expired_token / access_denied / invalid_grant — terminal.

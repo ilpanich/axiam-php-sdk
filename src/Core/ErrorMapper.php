@@ -91,7 +91,11 @@ final class ErrorMapper
         if (is_array($decoded) && is_string($decoded['error'] ?? null) && $decoded['error'] !== '') {
             $description = $decoded['error_description'] ?? null;
 
-            return new OAuthProtocolError($decoded['error'], is_string($description) ? $description : '');
+            return new OAuthProtocolError(
+                $decoded['error'],
+                is_string($description) ? $description : '',
+                NetworkError::parseRetryAfterMs($response),
+            );
         }
 
         return self::fromStatus($response->getStatusCode(), $response, $context);

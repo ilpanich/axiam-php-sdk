@@ -100,7 +100,7 @@ class NetworkError extends AxiamException
      * `null` rather than becoming a floor, since a negative minimum wait is
      * meaningless.
      */
-    private static function parseRetryAfterMs(ResponseInterface $response): ?float
+    public static function parseRetryAfterMs(ResponseInterface $response): ?float
     {
         $header = trim($response->getHeaderLine('Retry-After'));
         if ($header === '') {

@@ -23,10 +23,14 @@ final class OAuthProtocolError extends AuthError
     /**
      * @param string $error RFC 6749 error code (e.g. `invalid_grant`, `invalid_client`).
      * @param string $errorDescription The server's human-readable description of {@see self::$error}.
+     * @param float|null $retryAfterMs The response's `Retry-After` in milliseconds, `null` when
+     *        absent or unusable. Set for a `429 rate_limit_exceeded` (CONTRACT.md §14.2 rule 9),
+     *        whose wait the device polling loop honours as a minimum.
      */
     public function __construct(
         public readonly string $error,
         public readonly string $errorDescription,
+        public readonly ?float $retryAfterMs = null,
     ) {
         parent::__construct(sprintf('%s: %s', $error, $errorDescription));
     }
