@@ -139,7 +139,9 @@ final class RetriedRequestHeadersTest extends TestCase
         $client = new AxiamClient(
             'https://api.test',
             'acme',
-            transportHandler: HandlerStack::create($mock),
+            // The bare mock, as production has no second Guzzle stack under the SDK's own: a nested
+            // HandlerStack::create() would re-stamp Cookie itself and mask the replay's rebuild (C164-33).
+            transportHandler: $mock,
             retryEnabled: false,
         );
 
@@ -160,5 +162,47 @@ final class RetriedRequestHeadersTest extends TestCase
         self::assertSame('csrf-new', $replay->getHeaderLine('X-CSRF-Token'));
         self::assertStringContainsString('axiam_access=' . self::accessToken('new'), $replay->getHeaderLine('Cookie'));
         self::assertStringNotContainsString(self::accessToken('old'), $replay->getHeaderLine('Cookie'));
+    }
+
+    public function testAReplayOfARequestSentWithoutCookiesStaysWithoutThem(): void
+    {
+        // C164-23: the rebuild uses the request's own `cookies` option, not always the session jar.
+        /** @var list<RequestInterface> $seen */
+        $seen = [];
+        $jar = new CookieJar();
+        $jar->setCookie(new SetCookie([
+            'Name' => 'axiam_access',
+            'Value' => self::accessToken('old'),
+            'Domain' => 'api.test',
+            'Path' => '/',
+        ]));
+        $mock = new MockHandler([
+            static function (RequestInterface $r) use (&$seen): Response {
+                $seen[] = $r;
+
+                return new Response(401);
+            },
+            static function (RequestInterface $r) use (&$seen): Response {
+                $seen[] = $r;
+
+                return new Response(200, ['X-CSRF-Token' => 'csrf-new'], '{}');
+            },
+            static function (RequestInterface $r) use (&$seen): Response {
+                $seen[] = $r;
+
+                return new Response(200);
+            },
+        ]);
+        $stack = HandlerStack::create($mock);
+        $session = new Session('https://api.test', 'acme', new Client(['handler' => $stack]), $jar);
+        $stack->push(new RefreshMiddleware($session), 'axiam_refresh');
+        $stack->push(new AuthMiddleware($session), 'axiam_auth');
+
+        (new Client(['handler' => $stack, 'http_errors' => false]))
+            ->post('https://api.test/api/v1/authz/check', ['cookies' => false]);
+
+        self::assertCount(3, $seen);
+        self::assertFalse($seen[0]->hasHeader('Cookie'));
+        self::assertFalse($seen[2]->hasHeader('Cookie'), 'the replay does not pick the session jar up');
     }
 }
