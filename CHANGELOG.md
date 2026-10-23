@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - Unreleased
+
+Contract 1.64 (the AXIAM 1.1.2 release) on top of contract 1.63, with the 1.63 conformance follow-ups of
+issue #86. `CONTRACT.md`, `openapi.json` and `management-registry.json` are re-vendored byte for byte from
+`ilpanich/axiam` `fb92ec4` (openapi `info.version` 1.1.2; `proto/` is unchanged); the generator `--check` is
+clean and the registry still holds 202 operations in 29 namespaces. **A patch release:** no signature
+changes and no operation is added. Two public additions are optional and backward compatible: a trailing
+`retryAfterMs` on `OAuthProtocolError`'s constructor, and `unknownEnumValue()` on the generated models that hold
+an open enum. The README states conformance at contract 1.64.
+
+### Fixed
+
+- **A `429 rate_limit_exceeded` on a device-code poll is waited out (contract 1.64 (b), §14.2 rule 9).**
+  `deviceLogin()` used to end on it. It now waits the response's `Retry-After` as a minimum (never less than
+  the interval, capped at the `expires_in` deadline: past it, `expired_token` and nothing more is sent),
+  counts that wait as the round's one interval, does **not** raise the interval for it, and polls again. A
+  single `devicePoll()` still raises the `OAuthProtocolError`, which now carries the header as `retryAfterMs`.
+  Tests: `tests/OidcDeviceFlowTest.php`.
+- **`/oauth2/` is matched under the base URL's path prefix (C163-19).** `AuthMiddleware` compared the path with
+  a bare `/oauth2/`, so a base URL such as `https://gw.example/axiam` (which `JwksVerifier` accepts) sent the
+  bearer token, the session cookie and `X-CSRF-Token` on `/axiam/oauth2/*`. Test:
+  `tests/Contract164/BasePathPrefixOAuth2Test.php`.
+
+- **A request retried after a refresh carries the fresh credentials (C163-18).** `HandlerStack` runs the
+  *first* pushed middleware first, and `AxiamClient` pushed `AuthMiddleware` before `RefreshMiddleware`, so the
+  replay after a `401` went through the handler inside the refresh middleware, which excludes the auth
+  middleware: it re-sent the refused attempt's `Authorization`, `X-CSRF-Token` and `Cookie`. The order is
+  swapped (refresh first, auth second) and the replay rebuilds `Cookie` from the jar, the cookie middleware
+  being outside both. Test: `tests/Contract164/RetriedRequestHeadersTest.php`. The `AuthMiddleware` and
+  `RefreshMiddleware` comments, which had the stack order backwards, now state it.
+
+### Changed
+
+- **The refusal at `plan` quotes the value (C163-10, contract 1.64 (c), §27.6.2 item 4).** The generator
+  (`scripts/gen_management.py`, regenerated; the models are not edited by hand) makes `fromArray()` record the
+  raw string of an open-enum member that decoded to `Unknown`, read through `unknownEnumValue($wire)`; it is
+  private, not a constructor parameter, and never rendered by `toArray()` or `jsonSerialize()`, so it cannot be
+  sent back. The refusal for an unstated `termination_action` or `service_type` now names the member and the
+  value, and says the value is unknown for a model built any other way.
+- **`toArray()` on a response that holds `Unknown` throws (C163-18).** Since 1.1.1 `toArray()` is the request
+  path and raises `ValidationError` for an open-enum member that decoded to `Unknown`; only `jsonSerialize()`
+  renders it. That was not recorded in the 1.1.1 entry above: code that called `toArray()` on a model it had
+  read, to log or copy it, must call `jsonSerialize()`.
+
+### Tests
+
+- The no-session-credentials test queues a fifth response and asserts that a `groups()->create` after the
+  `/oauth2/` requests carries `Cookie` with `axiam_access=` and `X-CSRF-Token: csrf-from-login` (C163-08).
+- The open-enum `plan` tests run over both members, `termination_action` and `service_type`, for the refusal,
+  `apply`, the stated member and `NoChange` (C163-09).
+
+### Notes
+
+- Items (a), (d) to (j) of §34.8 are informative and need no SDK change.
+- Not changed, for the maintainer: Guzzle's cookie middleware sits outside `AuthMiddleware`, so a `Set-Cookie` on
+  an `/oauth2/*` response is still stored in the jar; §6.1 rule 11 and §12.1 rule 3 bind what is *sent*, which
+  holds.
+
 ## [1.1.1] - Unreleased
 
 Contract 1.63 (the AXIAM 1.1.1 release) on top of contract 1.62, with the 1.62 conformance follow-ups of

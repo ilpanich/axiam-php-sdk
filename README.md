@@ -217,7 +217,7 @@ reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` und
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.63**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.64**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33
 and §36,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
@@ -280,6 +280,20 @@ the manifest (§27.6.2), makes the device grant authenticate its client (§14.1)
 change-taking read-modify-write form (§32.2) and settles two rules about request members (§27.11
 rule 5). Release 1.0.1 was never tagged: this is the first release to carry 1.61 as well, as 1.1.0 (its change log is merged into 1.1.0).
 The first table below says what 1.62 changed here.
+
+Contract 1.64 (the 1.1.2 release, §34.8) adds no operation (202 operations across 29 namespaces) and records one
+rule SDKs port, one wording relaxation, and server-side changes that need no SDK work. The first table below says
+what 1.64 changed here.
+
+### Contract 1.64 — what changed here
+
+| Item (§34.8) | Here |
+|---|---|
+| (b) a `429 rate_limit_exceeded` on a device-code poll is waited out (§14.2 rule 9) | `deviceLogin()` waits `Retry-After` as a minimum (in place of that round's interval, capped at the `expires_in` deadline), does not raise the interval, and polls again; `devicePoll()` still raises the `OAuthProtocolError`, which now carries `retryAfterMs`. Tests: `tests/OidcDeviceFlowTest.php` |
+| (c) the refusal at `plan` names the member, and the value where the SDK keeps it (§27.6.2 item 4) | The generated models keep the raw string of an open-enum member that decoded to `Unknown` (`unknownEnumValue()`, never rendered or sent); the refusal quotes it, and says the value is unknown when no raw string was read |
+| (a), (d) to (j) | Informative; no SDK change. This SDK parses no recovered `gdpr.user_pseudonymized` row and builds no `AuditEventMessage` |
+| C163-18 a request retried after a refresh | Carries the refreshed `Authorization`, `X-CSRF-Token` and `Cookie`: `RefreshMiddleware` is now pushed before `AuthMiddleware`; `tests/Contract164/RetriedRequestHeadersTest.php` |
+| C163-19 `/oauth2/` under a base URL path prefix | `AuthMiddleware` anchors the `/oauth2/` match to the base URL's path |
 
 ### Contract 1.63 — what changed here
 
