@@ -464,8 +464,13 @@ final class AxiamClient
         // authz call transparently benefits from the shared single-flight refresh-on-401
         // (D-06), matching the plan's own prescribed push order.
         $authzStack = HandlerStack::create($transportHandler);
-        $authzStack->push(new AuthMiddleware($this->session), 'axiam_auth');
+        //
+        // ORDER (C163-18): `HandlerStack` runs the FIRST pushed middleware first on a request,
+        // so Refresh is pushed first and Auth second. The replay Refresh issues after a 401
+        // goes through the handler it wraps, which must include Auth, or it would re-send the
+        // stale Authorization / X-CSRF-Token of the attempt that was just refused.
         $authzStack->push(new RefreshMiddleware($this->session), 'axiam_refresh');
+        $authzStack->push(new AuthMiddleware($this->session), 'axiam_auth');
         $this->authzHttp = new Client($commonConfig + ['handler' => $authzStack]);
 
         $this->jwksVerifier = new JwksVerifier(

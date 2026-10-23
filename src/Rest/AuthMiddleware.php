@@ -14,10 +14,14 @@ use Psr\Http\Message\RequestInterface;
  * (captured from a prior response, {@see Session::csrfToken()}) on state-changing
  * requests (CONTRACT.md §3 non-browser CSRF, §5 tenant context contract).
  *
- * Registered on the `HandlerStack` closer to the base handler than
- * {@see RefreshMiddleware}, so a retried request (after a single-flight refresh) is
+ * Pushed on the `HandlerStack` AFTER {@see RefreshMiddleware} (`AxiamClient` builds
+ * `$authzStack` that way). `HandlerStack` runs the first pushed middleware first on a request,
+ * so Guzzle's own middleware (cookies included) run first, then `RefreshMiddleware`, then this
+ * one, then the base handler. The replay {@see RefreshMiddleware} issues after a single-flight
+ * refresh goes through the handler it wraps, which is this middleware, so a retried request is
  * re-decorated with the FRESH access token / CSRF value picked up from the shared
- * {@see Session} — never the stale headers from the original 401'd attempt.
+ * {@see Session} — never the stale headers from the original 401'd attempt
+ * (tests/Contract164/RetriedRequestHeadersTest.php).
  *
  * CONTRACT.md §12.1 note 3 / §12.3 rule 2: a request to `/oauth2/*` never gets the
  * `Authorization` header, regardless of whether {@see Session::accessToken()} is
@@ -76,8 +80,12 @@ final class AuthMiddleware
     public function __invoke(callable $handler): callable
     {
         $baseHost = parse_url($this->session->baseUrl(), PHP_URL_HOST);
+        // C163-19: a base URL may carry a path prefix (`https://gw.example/axiam`), under which
+        // the OAuth2 endpoints live at `<prefix>/oauth2/*`; anchor the match to that prefix.
+        $basePath = parse_url($this->session->baseUrl(), PHP_URL_PATH);
+        $oauth2Prefix = rtrim(\is_string($basePath) ? $basePath : '', '/') . '/oauth2/';
 
-        return function (RequestInterface $request, array $options) use ($handler, $baseHost) {
+        return function (RequestInterface $request, array $options) use ($handler, $baseHost, $oauth2Prefix) {
             // Host-isolation (3A, defense in depth): only same-origin requests
             // are decorated, so the tenant id, bearer token, and CSRF token
             // never leak to an absolute third-party URL or a followed cross-host
@@ -103,7 +111,7 @@ final class AuthMiddleware
 
             // CONTRACT.md §12.1 note 3 / §12.3 rule 2: never attach a bearer credential
             // (cookie-sourced OR client-credentials-adopted) to an /oauth2/* request.
-            $isOAuth2Path = str_starts_with($request->getUri()->getPath(), '/oauth2/');
+            $isOAuth2Path = str_starts_with($request->getUri()->getPath(), $oauth2Prefix);
 
             $override = $options[self::CREDENTIAL_OVERRIDE_OPTION] ?? null;
             $accessToken = match (true) {
@@ -116,9 +124,11 @@ final class AuthMiddleware
             }
 
             // CONTRACT.md §6.1 rule 11 / §12.1 rule 3 (contract 1.63): no `axiam_*` session
-            // cookie and no `X-CSRF-Token` on any /oauth2/* request. Guzzle's cookie
-            // middleware sits below this one, so dropping the jar here keeps its `Cookie`
-            // header off the wire (and a stray `Set-Cookie` out of the jar).
+            // cookie and no `X-CSRF-Token` on any /oauth2/* request. Guzzle's cookie middleware
+            // runs BEFORE this one (the first pushed runs first), so the jar's `Cookie` header is
+            // already on the request and is removed here; `cookies => false` only reaches the
+            // middleware inside this one. A `Set-Cookie` on the response is still extracted into
+            // the jar by that outer middleware: this rule is about what is SENT.
             if ($isOAuth2Path) {
                 $options['cookies'] = false;
                 $request = $request->withoutHeader('Cookie')->withoutHeader('X-CSRF-Token');

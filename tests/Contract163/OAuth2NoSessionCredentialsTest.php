@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Axiam\Sdk\Tests\Contract163;
 
 use Axiam\Sdk\AxiamClient;
+use Axiam\Sdk\Management\Models\CreateGroupRequest;
 use Axiam\Sdk\Oidc\OidcConfiguration;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -39,7 +40,12 @@ final class OAuth2NoSessionCredentialsTest extends TestCase
         $token = new Response(200, [], (string) json_encode([
             'access_token' => 'tok', 'token_type' => 'Bearer', 'expires_in' => 900,
         ]));
-        $stack = HandlerStack::create(new MockHandler([$login, $device, $token, $token]));
+        // C163-08: a non-/oauth2/ request after the four above, to show the session is still armed.
+        $group = new Response(200, ['Content-Type' => 'application/json'], (string) json_encode([
+            'id' => 'g1', 'tenant_id' => 't1', 'name' => 'staff', 'description' => '', 'metadata' => null,
+            'created_at' => '2026-10-23T00:00:00Z', 'updated_at' => '2026-10-23T00:00:00Z',
+        ]));
+        $stack = HandlerStack::create(new MockHandler([$login, $device, $token, $token, $group]));
         $stack->push(Middleware::history($this->history));
         $client = new AxiamClient(
             self::BASE_URL,
@@ -72,9 +78,10 @@ final class OAuth2NoSessionCredentialsTest extends TestCase
         $client->deviceAuthorize(configuration: $configuration);
         $client->devicePoll('dc', configuration: $configuration);
         $client->loginClientCredentials(configuration: $configuration);
+        $client->management()->groups()->create(new CreateGroupRequest(description: '', name: 'staff'));
 
         // The login did arm the session: its own follow-ups would carry both.
-        self::assertCount(4, $this->history);
+        self::assertCount(5, $this->history);
         foreach ([1, 2, 3] as $i) {
             $request = $this->history[$i]['request'];
             self::assertStringStartsWith('/oauth2/', $request->getUri()->getPath());
@@ -82,5 +89,12 @@ final class OAuth2NoSessionCredentialsTest extends TestCase
             self::assertFalse($request->hasHeader('X-CSRF-Token'), $request->getUri()->getPath() . ' carries X-CSRF-Token');
             self::assertFalse($request->hasHeader('Authorization'));
         }
+
+        // The control: the same client, the same jar, a request outside /oauth2/ — it carries the
+        // session cookie and the CSRF token the /oauth2/ requests above were stripped of.
+        $groups = $this->history[4]['request'];
+        self::assertSame('/api/v1/groups', $groups->getUri()->getPath());
+        self::assertStringContainsString('axiam_access=', $groups->getHeaderLine('Cookie'));
+        self::assertSame('csrf-from-login', $groups->getHeaderLine('X-CSRF-Token'));
     }
 }

@@ -16,10 +16,14 @@ use Psr\Http\Message\ResponseInterface;
  * ({@see Session::refreshIfNeeded()}), so N concurrent expired-token requests still
  * result in exactly one `/api/v1/auth/refresh` call.
  *
- * Registered OUTSIDE (further from the base handler than) {@see AuthMiddleware} on the
- * `HandlerStack`, so the retry — invoked via the `$handler` captured here, which is
- * everything BELOW this middleware, i.e. `AuthMiddleware` + the base handler — never
- * re-enters this middleware's own 401 check a second time (retry-exactly-once by
+ * Pushed BEFORE {@see AuthMiddleware} (`AxiamClient::$authzStack`). `HandlerStack` runs the
+ * first pushed middleware first on a request, so a request runs Guzzle's `http_errors`,
+ * redirect, cookie and body middleware, then this middleware, then `AuthMiddleware`, then the
+ * base handler. The retry — invoked via the `$handler` captured here, which is everything
+ * INSIDE this middleware, i.e. `AuthMiddleware` + the base handler — passes through
+ * `AuthMiddleware` again, so it carries the refreshed bearer token and `X-CSRF-Token`; the
+ * `Cookie` header was set by the cookie middleware outside this one and is rebuilt from the
+ * jar here. It never re-enters this middleware's own 401 check a second time (retry-exactly-once by
  * construction, not by an explicit retry counter).
  */
 final class RefreshMiddleware
@@ -66,7 +70,13 @@ final class RefreshMiddleware
                     // refreshIfNeeded() and is handed back the SAME Promise (D-06) —
                     // the retry below fires exactly once per request, no loop.
                     return $this->session->refreshIfNeeded()->then(
-                        static fn (): \GuzzleHttp\Promise\PromiseInterface => $handler($request, $options),
+                        // The jar now holds the rotated cookies; the stale `Cookie` header was
+                        // set by the cookie middleware, which sits outside this one and does not
+                        // run again for the replay.
+                        fn (): \GuzzleHttp\Promise\PromiseInterface => $handler(
+                            $this->session->cookieJar()->withCookieHeader($request->withoutHeader('Cookie')),
+                            $options,
+                        ),
                     );
                 },
             );
