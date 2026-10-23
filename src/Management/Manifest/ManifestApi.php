@@ -230,7 +230,11 @@ final class ManifestApi
                     . 'state the member, or upgrade the SDK',
                     $entity->name,
                     $member,
-                    \is_string($raw) ? sprintf('"%s"', $raw) : '(value unknown)',
+                    \is_string($raw)
+                        // Server data in a message: capped, and escaped so a quote, a newline or a
+                        // control character cannot reach a log as itself (C164-21).
+                        ? (string) json_encode(mb_substr($raw, 0, 64), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)
+                        : '(value unknown)',
                 ));
             }
         }

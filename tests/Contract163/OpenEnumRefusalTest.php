@@ -151,6 +151,25 @@ final class OpenEnumRefusalTest extends TestCase
         self::assertSame([], $this->server->writes(), 'plan sends no write, and so no PUT');
     }
 
+    public function testTheQuotedValueIsEscapedAndCapped(): void
+    {
+        // C164-21: server data in a message. A quote, a newline and a control character do not
+        // reach a log as themselves, and a long value is cut.
+        $raw = "fu\"ture\n\x07" . str_repeat('x', 200);
+        $this->seedUnknown('termination_action', $raw);
+
+        try {
+            $this->client()->management()->manifest()->plan($this->segmentOnly()->networkProfile('staff', 1800)->build());
+            self::fail('plan must refuse');
+        } catch (ValidationError $e) {
+            $message = $e->getMessage();
+            self::assertStringContainsString('"fu\\"ture\\n\\u0007', $message);
+            self::assertStringNotContainsString("\n", $message);
+            self::assertStringNotContainsString("\x07", $message);
+            self::assertLessThan(260, strlen($message));
+        }
+    }
+
     /** @dataProvider unknownProfileMembers */
     public function testApplyRefusesTheSameWayBeforeAnyWrite(string $member, string $raw): void
     {
