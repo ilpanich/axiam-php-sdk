@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Contract 1.64 (the AXIAM 1.1.2 release) on top of contract 1.63, with the 1.63 conformance follow-ups of
 issue #86 and the findings of the 1.64 conformance review (C164-xx). `CONTRACT.md` is re-vendored byte for
 byte from `ilpanich/axiam` `b3f8687` (contract 1.64 as amended by W7.1b and W7.1c: §14.2 rules 6 and 9, §14.6
-including its in-attempt retry test, §34.2 P11, §34.8 (c)); `openapi.json` and `management-registry.json` are those of `fb92ec4`, unchanged at `b3f8687`
-(openapi `info.version` 1.1.2), and `proto/` is unchanged; the generator `--check` is clean and the registry
+including its in-attempt retry test, §34.2 P11, §34.8 (c)); `openapi.json` and `management-registry.json` are re-synced from `356a6da` (the merged 1.1.2 release: the
+omitted `401`/`429` responses and the logout-URI bound on the administrator's client `PUT` are now declared; spec
+digest `sha256:f5613aea…3f0d`; openapi `info.version` 1.1.2), and `proto/` is unchanged; the generator `--check` is clean and the registry
 still holds 202 operations in 29 namespaces. **A patch release:** no signature changes and no operation is
 added. The public additions are optional and backward compatible: trailing `retryAfterMs` and `httpStatus`
 on `OAuthProtocolError`'s constructor, trailing `$now` and `$retrySleep` (milliseconds) on `deviceLogin()`, `unknownEnumValue()` on the
