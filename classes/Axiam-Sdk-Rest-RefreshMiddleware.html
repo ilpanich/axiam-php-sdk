@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/RefreshMiddleware.php"><a href="files/src-rest-refreshmiddleware.html"><abbr title="src/Rest/RefreshMiddleware.php">RefreshMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">25</span>
+    <span class="phpdocumentor-element-found-in__line">29</span>
 
     </aside>
 
@@ -136,10 +136,14 @@ one {@see Session} share the SAME refresh `PromiseInterface`
 result in exactly one `/api/v1/auth/refresh` call.</p>
 
 
-    <section class="phpdocumentor-description"><p>Registered OUTSIDE (further from the base handler than) <a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html"><abbr title="\Axiam\Sdk\Rest\AuthMiddleware">AuthMiddleware</abbr></a> on the
-<code class="prettyprint">HandlerStack</code>, so the retry — invoked via the <code class="prettyprint">$handler</code> captured here, which is
-everything BELOW this middleware, i.e. <code class="prettyprint">AuthMiddleware</code> + the base handler — never
-re-enters this middleware's own 401 check a second time (retry-exactly-once by
+    <section class="phpdocumentor-description"><p>Pushed BEFORE <a href="classes/Axiam-Sdk-Rest-AuthMiddleware.html"><abbr title="\Axiam\Sdk\Rest\AuthMiddleware">AuthMiddleware</abbr></a> (<code class="prettyprint">AxiamClient::$authzStack</code>). <code class="prettyprint">HandlerStack</code> runs the
+first pushed middleware first on a request, so a request runs Guzzle's <code class="prettyprint">http_errors</code>,
+redirect, cookie and body middleware, then this middleware, then <code class="prettyprint">AuthMiddleware</code>, then the
+base handler. The retry — invoked via the <code class="prettyprint">$handler</code> captured here, which is everything
+INSIDE this middleware, i.e. <code class="prettyprint">AuthMiddleware</code> + the base handler — passes through
+<code class="prettyprint">AuthMiddleware</code> again, so it carries the refreshed bearer token and <code class="prettyprint">X-CSRF-Token</code>; the
+<code class="prettyprint">Cookie</code> header was set by the cookie middleware outside this one and is rebuilt here from the
+request's own <code class="prettyprint">cookies</code> jar. It never re-enters this middleware's own 401 check a second time (retry-exactly-once by
 construction, not by an explicit retry counter).</p>
 </section>
 
@@ -210,7 +214,7 @@ replay of the original request.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/RefreshMiddleware.php"><a href="files/src-rest-refreshmiddleware.html"><abbr title="src/Rest/RefreshMiddleware.php">RefreshMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">32</span>
 
     </aside>
 
@@ -256,7 +260,7 @@ replay of the original request.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Rest/RefreshMiddleware.php"><a href="files/src-rest-refreshmiddleware.html"><abbr title="src/Rest/RefreshMiddleware.php">RefreshMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">44</span>
+    <span class="phpdocumentor-element-found-in__line">48</span>
 
     </aside>
 

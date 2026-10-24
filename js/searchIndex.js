@@ -1801,6 +1801,16 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Core-OAuthProtocolError.html#property_errorDescription"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\OAuthProtocolError\u003A\u003A\u0024retryAfterMs",
+            "name": "retryAfterMs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Core-OAuthProtocolError.html#property_retryAfterMs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Core\\OAuthProtocolError\u003A\u003A\u0024httpStatus",
+            "name": "httpStatus",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Core-OAuthProtocolError.html#property_httpStatus"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Core\\RefreshEvent",
             "name": "RefreshEvent",
             "summary": "Emitted\u0020around\u0020a\u0020\u00A79\u0020single\u002Dflight\u0020refresh\u0020\u0028CONTRACT.md\u0020\u00A719\u0029.",
@@ -3186,6 +3196,11 @@ Search.appendIndex(
             "summary": "Creates\u0020or\u0020replaces\u0020one\u0020segment\u0027s\u0020reply\u0020profile,\u0020returning\u0020its\u0020id\u0020\u0028the\u0020segment\u0027s\u0029.",
             "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#method_applyProfile"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003AUNRECOGNISED_KEY",
+            "name": "UNRECOGNISED_KEY",
+            "summary": "The\u0020row\u0020key\u0020holding\u0020the\u0020raw\u0020strings\u0020of\u0020open\u002Denum\u0020members\u0020the\u0020SDK\u0020has\u0020no\u0020name\u0020for\u0020\u0028C163\u002D10\u0029.",
+            "url": "classes/Axiam-Sdk-Management-Manifest-NetworkReconciler.html#constant_UNRECOGNISED_KEY"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Manifest\\NetworkReconciler\u003A\u003APOLICY_KEY",
             "name": "POLICY_KEY",
             "summary": "The\u0020one\u0020manifest\u002Dlocal\u0020key\u0020\u0028and\u0020name\u0029\u0020of\u0020the\u0020singleton\u0020policy.",
@@ -3275,6 +3290,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020AcsEndpoint\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AcsEndpoint.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AcsEndpoint\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -3616,6 +3636,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020AttributeMapping\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AttributeMapping.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AttributeMapping\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -3710,6 +3735,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020AuditLogEntry\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-AuditLogEntry.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuditLogEntry\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-AuditLogEntry.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuditLogEntry\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -3881,6 +3911,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020CaCertificate\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CaCertificate.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CaCertificate\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CaCertificate.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CaCertificate\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -3985,6 +4020,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020Certificate\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-Certificate.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\Certificate\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-Certificate.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\Certificate\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -4571,6 +4611,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020CreateCaCertificateRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreateCaCertificateRequest.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateCaCertificateRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateCaCertificateRequest.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateCaCertificateRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -4625,6 +4670,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020CreateCertificateRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreateCertificateRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateCertificateRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateCertificateRequest.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateCertificateRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -4871,6 +4921,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020CreateIntermediateCaRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreateIntermediateCaRequest.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateIntermediateCaRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateIntermediateCaRequest.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateIntermediateCaRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -4955,6 +5010,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020CreateNetworkSegmentRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateNetworkSegmentRequest.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateNetworkSegmentRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -5065,6 +5125,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020CreateOAuth2ClientRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -5251,6 +5316,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020CreatePgpKeyRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreatePgpKeyRequest.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreatePgpKeyRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreatePgpKeyRequest.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreatePgpKeyRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -5295,6 +5365,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020CreateReactorRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreateReactorRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateReactorRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateReactorRequest.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateReactorRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -5555,6 +5630,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020CreateScimTokenResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-CreateScimTokenResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateScimTokenResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateScimTokenResponse.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateScimTokenResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -5871,6 +5951,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020DirectoryConfig\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-DirectoryConfig.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\DirectoryConfig\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -6125,6 +6210,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020EmailConfig\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-EmailConfig.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\EmailConfig\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-EmailConfig.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\EmailConfig\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -6656,6 +6746,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020GeneratedCaCertificate\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-GeneratedCaCertificate.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedCaCertificate\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-GeneratedCaCertificate.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedCaCertificate\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -6766,6 +6861,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020GeneratedCertificate\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-GeneratedCertificate.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedCertificate\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-GeneratedCertificate.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedCertificate\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -6870,6 +6970,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020GeneratedPgpKey\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-GeneratedPgpKey.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedPgpKey\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-GeneratedPgpKey.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GeneratedPgpKey\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -6985,6 +7090,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020GrantPermissionRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-GrantPermissionRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantPermissionRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-GrantPermissionRequest.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\GrantPermissionRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -7230,6 +7340,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020IssueSamlIdpCredential\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-IssueSamlIdpCredential.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\IssueSamlIdpCredential\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -7616,6 +7731,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020MfaMethodResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-MfaMethodResponse.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\MfaMethodResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-MfaMethodResponse.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\MfaMethodResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -7921,6 +8041,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020NetworkReplyProfile\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfile.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfile\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -8016,6 +8141,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020NetworkReplyProfileInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkReplyProfileInput.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkReplyProfileInput\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -8100,6 +8230,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020NetworkSegmentResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NetworkSegmentResponse.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkSegmentResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -8490,6 +8625,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020OAuth2ClientResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -9231,6 +9371,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020PgpKey\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-PgpKey.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKey\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-PgpKey.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PgpKey\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -9390,6 +9535,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020PolicyResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-PolicyResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PolicyResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-PolicyResponse.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\PolicyResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -9726,6 +9876,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020ReactorEventDescriptor\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ReactorEventDescriptor.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReactorEventDescriptor\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReactorEventDescriptor.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReactorEventDescriptor\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -9810,6 +9965,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020ReactorResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ReactorResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReactorResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ReactorResponse.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ReactorResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -10135,6 +10295,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020ResolvedPermissionGrant\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ResolvedPermissionGrant.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ResolvedPermissionGrant\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ResolvedPermissionGrant.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ResolvedPermissionGrant\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -10591,6 +10756,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020SamlIdpCredential\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlIdpCredential.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlIdpCredential\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -10846,6 +11016,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020SamlServiceProvider\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProvider.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProvider\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -10965,6 +11140,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020SamlServiceProviderInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SamlServiceProviderInput.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SamlServiceProviderInput\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -11316,6 +11496,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020ScimTargetInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetInput.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetInput\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -11390,6 +11575,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020ScimTargetResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTargetResponse.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTargetResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -11586,6 +11776,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020ScimTokenResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ScimTokenResponse.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTokenResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ScimTokenResponse.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ScimTokenResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -11756,6 +11951,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020SecuritySettings\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SecuritySettings\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SecuritySettings\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -11861,6 +12061,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020ServiceAccountCreatedResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ServiceAccountCreatedResponse.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ServiceAccountCreatedResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ServiceAccountCreatedResponse.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ServiceAccountCreatedResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -11930,6 +12135,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020ServiceAccountResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-ServiceAccountResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ServiceAccountResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-ServiceAccountResponse.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ServiceAccountResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -12075,6 +12285,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020SetDirectoryConfig\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SetDirectoryConfig.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetDirectoryConfig\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -12536,6 +12751,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020SignCertificateCsrRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SignCertificateCsrRequest.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SignCertificateCsrRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -12846,6 +13066,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020SsfStream\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStream.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStream\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -12970,6 +13195,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020SsfStreamInput\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SsfStreamInput.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SsfStreamInput\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -13205,6 +13435,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020Tenant\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-Tenant.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\Tenant\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-Tenant.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\Tenant\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -13721,6 +13956,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020UpdateDirectoryConfig\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateDirectoryConfig.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateDirectoryConfig\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -14061,6 +14301,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020UpdateOAuth2ClientRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -14286,6 +14531,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020UpdateReactorRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateReactorRequest.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateReactorRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateReactorRequest.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateReactorRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -14471,6 +14721,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020UpdateServiceAccount\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateServiceAccount.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateServiceAccount\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateServiceAccount.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateServiceAccount\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -14510,6 +14765,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020UpdateTenant\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateTenant.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateTenant\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateTenant.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateTenant\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -14555,6 +14815,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020UpdateUserRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateUserRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateUserRequest\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateUserRequest.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateUserRequest\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
@@ -14726,6 +14991,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020UserResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-UserResponse.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserResponse\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-UserResponse.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UserResponse\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -14865,6 +15135,11 @@ Search.appendIndex(
             "name": "fromArray",
             "summary": "Rebuilds\u0020a\u0020WebauthnAttestationPolicy\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-WebauthnAttestationPolicy.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnAttestationPolicy\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-WebauthnAttestationPolicy.html#method_unknownEnumValue"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\WebauthnAttestationPolicy\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
