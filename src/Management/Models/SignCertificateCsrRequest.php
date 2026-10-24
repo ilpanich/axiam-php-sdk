@@ -20,6 +20,16 @@ namespace Axiam\Sdk\Management\Models;
 final class SignCertificateCsrRequest implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a SignCertificateCsrRequest.
      * @param CertificateType $certType the server's `cert_type` field
      * @param string $csrPem PEM-encoded PKCS#10 request — a `BEGIN CERTIFICATE REQUEST` block.
@@ -51,7 +61,7 @@ final class SignCertificateCsrRequest implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             CertificateType::fromWire((string) ModelDecode::need($data, 'cert_type', self::class)),
             (string) ModelDecode::need($data, 'csr_pem', self::class),
             (string) ModelDecode::need($data, 'issuer_ca_id', self::class),
@@ -60,6 +70,26 @@ final class SignCertificateCsrRequest implements \JsonSerializable
             isset($data['subject_alt_names']) ? array_values(array_map(static fn (mixed $v): SubjectAltNameVariant => SubjectAltName::fromArray((array) $v), (array) $data['subject_alt_names'])) : null,
             isset($data['user_id']) ? (string) $data['user_id'] : null,
         );
+        if ($model->certType === CertificateType::Unknown) {
+            $model->unknownEnumValues['cert_type'] = (string) $data['cert_type'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

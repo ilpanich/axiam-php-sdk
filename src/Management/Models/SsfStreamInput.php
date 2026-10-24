@@ -20,6 +20,16 @@ namespace Axiam\Sdk\Management\Models;
 final class SsfStreamInput implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a SsfStreamInput.
      * @param string $audience 1–512 bytes; unique across the deployment.
      * @param SsfDeliveryMethod $deliveryMethod `push` or `poll`.
@@ -73,7 +83,7 @@ final class SsfStreamInput implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             (string) ModelDecode::need($data, 'audience', self::class),
             SsfDeliveryMethod::fromWire((string) ModelDecode::need($data, 'delivery_method', self::class)),
             array_values(array_map(static fn (mixed $v): SsfEventType|string => SsfEventType::tryFrom((string) $v) ?? (string) $v, (array) ModelDecode::need($data, 'events_allowed', self::class))),
@@ -88,6 +98,32 @@ final class SsfStreamInput implements \JsonSerializable
             isset($data['status_reason']) ? (string) $data['status_reason'] : null,
             isset($data['subject_format']) ? SsfSubjectFormat::fromWire((string) $data['subject_format']) : null,
         );
+        if ($model->deliveryMethod === SsfDeliveryMethod::Unknown) {
+            $model->unknownEnumValues['delivery_method'] = (string) $data['delivery_method'];
+        }
+        if ($model->status === SsfStreamStatus::Unknown) {
+            $model->unknownEnumValues['status'] = (string) $data['status'];
+        }
+        if ($model->subjectFormat === SsfSubjectFormat::Unknown) {
+            $model->unknownEnumValues['subject_format'] = (string) $data['subject_format'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

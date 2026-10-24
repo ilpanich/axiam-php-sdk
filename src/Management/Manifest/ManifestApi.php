@@ -223,11 +223,18 @@ final class ManifestApi
     {
         foreach (['termination_action', 'service_type'] as $member) {
             if (($current[$member] ?? null) === '' && !\array_key_exists($member, $entity->fields)) {
+                // The SDK keeps the raw string (C163-10, contract 1.64 §34.8 (c)): quote it.
+                $raw = $current[NetworkReconciler::UNRECOGNISED_KEY][$member] ?? null;
                 throw new ValidationError(sprintf(
-                    'network profile "%s": the server holds a %s this SDK does not recognise and the manifest does not state one; '
+                    'network profile "%s": the server holds a %s %s this SDK does not recognise and the manifest does not state one; '
                     . 'state the member, or upgrade the SDK',
                     $entity->name,
                     $member,
+                    \is_string($raw)
+                        // Server data in a message: capped, and escaped so a quote, a newline or a
+                        // control character cannot reach a log as itself (C164-21).
+                        ? (string) json_encode(mb_substr($raw, 0, 64), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)
+                        : '(value unknown)',
                 ));
             }
         }

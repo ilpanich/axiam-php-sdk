@@ -19,6 +19,16 @@ namespace Axiam\Sdk\Management\Models;
 final class PolicyResponse implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a PolicyResponse.
      * @param bool $blockRevokedStatus Deny registration if the MDS entry has ever reported
      *     `REVOKED` or any `*_COMPROMISE` status (sticky — D8 step 7).
@@ -58,7 +68,7 @@ final class PolicyResponse implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             (bool) ModelDecode::need($data, 'block_revoked_status', self::class),
             AttestationMode::fromWire((string) ModelDecode::need($data, 'mode', self::class)),
             (bool) ModelDecode::need($data, 'require_fido_certified', self::class),
@@ -68,6 +78,35 @@ final class PolicyResponse implements \JsonSerializable
             isset($data['min_certification']) ? CertificationLevel::fromWire((string) $data['min_certification']) : null,
             isset($data['unknown_aaguid']) ? UnknownAaguidAction::fromWire((string) $data['unknown_aaguid']) : null,
         );
+        if ($model->mode === AttestationMode::Unknown) {
+            $model->unknownEnumValues['mode'] = (string) $data['mode'];
+        }
+        if ($model->effectiveUnknownAaguid === UnknownAaguidAction::Unknown) {
+            $model->unknownEnumValues['effective_unknown_aaguid'] = (string) $data['effective_unknown_aaguid'];
+        }
+        if ($model->minCertification === CertificationLevel::Unknown) {
+            $model->unknownEnumValues['min_certification'] = (string) $data['min_certification'];
+        }
+        if ($model->unknownAaguid === UnknownAaguidAction::Unknown) {
+            $model->unknownEnumValues['unknown_aaguid'] = (string) $data['unknown_aaguid'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**

@@ -464,8 +464,13 @@ final class AxiamClient
         // authz call transparently benefits from the shared single-flight refresh-on-401
         // (D-06), matching the plan's own prescribed push order.
         $authzStack = HandlerStack::create($transportHandler);
-        $authzStack->push(new AuthMiddleware($this->session), 'axiam_auth');
+        //
+        // ORDER (C163-18): `HandlerStack` runs the FIRST pushed middleware first on a request,
+        // so Refresh is pushed first and Auth second. The replay Refresh issues after a 401
+        // goes through the handler it wraps, which must include Auth, or it would re-send the
+        // stale Authorization / X-CSRF-Token of the attempt that was just refused.
         $authzStack->push(new RefreshMiddleware($this->session), 'axiam_refresh');
+        $authzStack->push(new AuthMiddleware($this->session), 'axiam_auth');
         $this->authzHttp = new Client($commonConfig + ['handler' => $authzStack]);
 
         $this->jwksVerifier = new JwksVerifier(
@@ -1715,6 +1720,8 @@ final class AxiamClient
      *
      * @param callable(DeviceAuthorization):void $onUserCode Invoked before the first poll.
      * @param (callable(int):void)|null $sleep Injectable sleeper, for tests.
+     * @param (callable():float)|null $now Injectable clock in seconds, for tests.
+     * @param (callable(float):void)|null $retrySleep Injectable sleeper (milliseconds) for the §16 waits inside a poll.
      */
     public function deviceLogin(
         callable $onUserCode,
@@ -1723,8 +1730,10 @@ final class AxiamClient
         ?OidcConfiguration $configuration = null,
         bool $adoptAsCredential = false,
         ?callable $sleep = null,
+        ?callable $now = null,
+        ?callable $retrySleep = null,
     ): OidcTokenSet {
-        return $this->oidc->deviceLogin($onUserCode, $scope, $tenantId, $configuration, $adoptAsCredential, $sleep);
+        return $this->oidc->deviceLogin($onUserCode, $scope, $tenantId, $configuration, $adoptAsCredential, $sleep, $now, $retrySleep);
     }
 
     /**

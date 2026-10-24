@@ -35,6 +35,9 @@ final class NetworkReconciler
     /** Page size used when reading; the walk continues until a page is empty. */
     private const SCAN_LIMIT = 200;
 
+    /** The row key holding the raw strings of open-enum members the SDK has no name for (C163-10). */
+    public const UNRECOGNISED_KEY = 'unrecognised_values';
+
     /** The one manifest-local key (and name) of the singleton policy. */
     public const POLICY_KEY = 'network';
 
@@ -117,7 +120,21 @@ final class NetworkReconciler
             }
             $segmentKey = $bySegmentId[$profile->segmentId] ?? null;
             if ($segmentKey !== null) {
-                $rows[$segmentKey] = $profile->jsonSerialize() + ['id' => $profile->segmentId];
+                $row = $profile->jsonSerialize() + ['id' => $profile->segmentId];
+                // C163-10: the string the server sent for a member this SDK has no name for, kept
+                // by the model's fromArray(), so the refusal at `plan` can quote it. A side key
+                // that is no manifest field: drift reads only the manifest's own fields.
+                $unrecognised = [];
+                foreach (['termination_action', 'service_type'] as $member) {
+                    $raw = $profile->unknownEnumValue($member);
+                    if ($raw !== null) {
+                        $unrecognised[$member] = $raw;
+                    }
+                }
+                if ($unrecognised !== []) {
+                    $row[self::UNRECOGNISED_KEY] = $unrecognised;
+                }
+                $rows[$segmentKey] = $row;
             }
         }
 

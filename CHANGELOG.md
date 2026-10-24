@@ -7,6 +7,144 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - Unreleased
+
+Contract 1.64 (the AXIAM 1.1.2 release) on top of contract 1.63, with the 1.63 conformance follow-ups of
+issue #86 and the findings of the 1.64 conformance review (C164-xx). `CONTRACT.md` is re-vendored byte for
+byte from `ilpanich/axiam` `b3f8687` (contract 1.64 as amended by W7.1b and W7.1c: §14.2 rules 6 and 9, §14.6
+including its in-attempt retry test, §34.2 P11, §34.8 (c)); `openapi.json` and `management-registry.json` are re-synced from `356a6da` (the merged 1.1.2 release: the
+omitted `401`/`429` responses and the logout-URI bound on the administrator's client `PUT` are now declared; spec
+digest `sha256:f5613aea…3f0d`; openapi `info.version` 1.1.2), and `proto/` is unchanged; the generator `--check` is clean and the registry
+still holds 202 operations in 29 namespaces. **A patch release:** no signature changes and no operation is
+added. The public additions are optional and backward compatible: trailing `retryAfterMs` and `httpStatus`
+on `OAuthProtocolError`'s constructor, trailing `$now` and `$retrySleep` (milliseconds) on `deviceLogin()`, `unknownEnumValue()` on the
+generated models that hold an open enum, and `NetworkError::parseRetryAfterMs()`, which became `public static`
+and is marked `@internal` (it is shared with `ErrorMapper` and is not supported surface). The README states
+conformance at contract 1.64.
+
+### Fixed
+
+- **A `429 rate_limit_exceeded` on a device-code poll is waited out (contract 1.64 (b), §14.2 rule 9).**
+  `deviceLogin()` used to end on it. It now waits the response's `Retry-After` as a minimum (never less than
+  the interval, capped at the `expires_in` deadline: past it, `expired_token` and nothing more is sent),
+  counts that wait as the round's one interval, does **not** raise the interval for it, and polls again. A
+  single `devicePoll()` still raises the `OAuthProtocolError`, which now carries the header as `retryAfterMs`.
+  Tests: `tests/OidcDeviceFlowTest.php`.
+- **The device poll is §16-retried inside the attempt on a `5xx` or a transport failure, never on a `429`
+  (C164-25, §14.2 rule 6, §16.2).** It was sent once whatever `retryEnabled` said, so every `5xx` cost a whole
+  interval. `devicePoll()` now goes through the §16 runner as `cibaPoll` does: at most three attempts in total,
+  the `Retry-After` floor, `retryEnabled: false` makes one request. Two failures and a `200` are three requests
+  in one interval; a third failure is surfaced and the loop takes its next interval. A `429` makes one request
+  (rule 9: the wait is the loop's), and inside `deviceLogin()` a retry whose `Retry-After` would reach the
+  grant's deadline is not taken. Tests: `tests/OidcDeviceFlowTest.php`.
+- **A `429` on a CIBA poll is waited out (C164-52, §33.7 rule 5, §16.1).** AXIAM's own `429
+  {"error":"rate_limit_exceeded"}` is an `OAuthProtocolError`, and `cibaAwait()` polled again at the plain interval,
+  seven seconds before a `Retry-After: 12`. Any `429` now makes `Retry-After` the minimum of the next wait (never
+  shortening the interval, never raising it), and a wait that would reach the deadline ends the flow with
+  `expired_token`. Tests (`tests/Contract164/CibaDeadlineBoundTest.php`): `Retry-After: 12` gives waits `[5, 12]`;
+  with `expires_in` 15 one request and `expired_token`.
+- **The CIBA retry bound is counted in whole seconds (C164-54).** `CibaClock` serves a wait in whole seconds, so a
+  retry admitted on a 0.2 s backoff ceiling with 0.5 s left would end at 30.5 s of a 30 s grant. The time left is
+  now floored, and the new tests pin the interval floor of the carry, the strict `<` at the boundary and the
+  whole-second case.
+- **The CIBA poll's §16 retry never sends after the request's deadline either (C164-43, §34.2 P10, §33.7 rule
+  5).** `cibaPoll()` as `cibaAwait()` calls it retried with no deadline and slept for real: with `expires_in` 30 and
+  every poll answered `503` + `Retry-After: 20`, requests went out at 5, 25 and 45 s. It now takes the loop's time
+  left and its `CibaClock` as the device poll does (longest wait against the time left, a guard in the attempt,
+  waits served on the clock), and a failure whose `Retry-After` was not served becomes the floor of the loop's next
+  wait. A bare `cibaPoll()` keeps the unbounded §16 behaviour. Tests: `tests/Contract164/CibaDeadlineBoundTest.php`
+  (§33.8 test 7's P10 case; `Retry-After: 20`; a `500` returning just before the deadline).
+- **An injected `$sleep` no longer skips the in-poll `Retry-After` floor (C164-47, §16.1).** Round 3 counted the
+  in-poll waits and did not serve them when only `$sleep` was injected, so a real sleeper saw a `Retry-After: 20`
+  retried at once and the grant given up early. They are now always served (through `$retrySleep` when given,
+  else `usleep`) and counted. Test: a no-op `$sleep`, no clock, `503` + `Retry-After: 1`, then `200` — the retry is
+  at least a second later.
+- **The in-poll §16 retry never sends after the deadline (C164-36, §14.2 rule 4).** The check added only the
+  `Retry-After` to the clock, not the jittered backoff the runner then waits, so a retry requested just before the
+  deadline went out after it. It now takes the longest wait (the backoff ceiling, raised to `Retry-After`) against
+  the time left, and the attempt itself refuses to send once the deadline has passed. A bare `devicePoll()` keeps
+  the unbounded §16 behaviour. Tests (fake clock): every poll answered `503` + `Retry-After: 120` sends one request
+  and ends with `expired_token`; a `500` returning at 29.999 s of a 30 s grant is not retried.
+- **The in-poll waits obey the injected sleeper (C164-41).** They used `usleep` whatever `deviceLogin()`'s `$sleep`
+  said, so a test spent real seconds (or hung on a regression). With an injected `$sleep` they are counted but
+  not spent; `$retrySleep` records them. Tests assert `[]` and `[20000.0]` for a `Retry-After` past and inside
+  the deadline.
+- **A `5xx` on a device poll is retried whatever its body (C164-03, §14.2 rule 6).** AXIAM answers a datastore
+  failure at `/oauth2/token` with `500 {"error":"server_error", …}`. The poll read the body before the status,
+  raised a terminal `OAuthProtocolError` and lost a grant the user might already have approved. `devicePoll()`
+  now reads the status first (as `cibaPoll` does): a `5xx` is a `NetworkError`, which is retried (above) and
+  which `deviceLogin()` outlives.
+  Tests: `500 {"error":"server_error"}` and `503 {"error":"temporarily_unavailable"}` mid-poll, then the tokens.
+- **Any `429` on a device poll is the rule 9 wait; only a `400` raises the interval (C164-04, C164-17).** The
+  loop dispatched on the body's `error`, so a `429 {"error":"slow_down"}` (a server before 1.1.2, or an
+  intermediary) added five seconds for good, and a body-less or foreign-body `429` ignored its `Retry-After`.
+  `OAuthProtocolError` now carries the `httpStatus` it arrived with, the loop decides on the status first, and a
+  `NetworkError` that carries a `Retry-After` is honoured as a floor too.
+- **A malformed `Retry-After` is ignored (C164-09).** `strtotime()` read `17.0` as a time of day about seven
+  hours ahead, so the loop that now honours the header raised `expired_token` at once. Only the RFC 9110 forms
+  are read: delta-seconds and an HTTP-date as IMF-fixdate, RFC 850 or asctime.
+- **The device deadline counts the time a request takes (C164-05, §14.2 rule 4).** It was `expires_in` minus the
+  seconds slept, so slow polls could run past the grant. It now runs from the moment the authorization returned,
+  and the elapsed time is the larger of the clock and the seconds slept; `deviceLogin()` takes an optional
+  `$now` clock for tests.
+- **A root `/oauth2/` URL under a prefixed base URL is still stripped (C164-24).** Anchoring the match to the
+  base path (C163-19) must not stop stripping `/oauth2/*` at the root of the host, which a discovery document
+  or a prefix-stripping proxy may name.
+- **The replay after a refresh uses the request's own cookie jar (C164-23).** It rebuilt `Cookie` from the
+  session jar even for a request that had opted out (`cookies => false`) or brought another jar.
+- **`/oauth2/` is matched under the base URL's path prefix (C163-19).** `AuthMiddleware` compared the path with
+  a bare `/oauth2/`, so a base URL such as `https://gw.example/axiam` (which `JwksVerifier` accepts) sent the
+  bearer token, the session cookie and `X-CSRF-Token` on `/axiam/oauth2/*`. Test:
+  `tests/Contract164/BasePathPrefixOAuth2Test.php`.
+
+- **A request retried after a refresh carries the fresh credentials (C163-18).** `HandlerStack` runs the
+  *first* pushed middleware first, and `AxiamClient` pushed `AuthMiddleware` before `RefreshMiddleware`, so the
+  replay after a `401` went through the handler inside the refresh middleware, which excludes the auth
+  middleware: it re-sent the refused attempt's `Authorization`, `X-CSRF-Token` and `Cookie`. The order is
+  swapped (refresh first, auth second) and the replay rebuilds `Cookie` from the jar, the cookie middleware
+  being outside both. Tests: `tests/Contract164/RetriedRequestHeadersTest.php`, which also drives a real
+  `AxiamClient` on a bare mock transport (C164-10, C164-33), so reverting the shipped order or the cookie
+  rebuild fails it; a request sent with `cookies => false` is replayed without cookies (C164-23). The `AuthMiddleware` and
+  `RefreshMiddleware` comments, which had the stack order backwards, now state it.
+
+### Changed
+
+- **The refusal at `plan` quotes the value (C163-10, contract 1.64 (c), §27.6.2 item 4).** The generator
+  (`scripts/gen_management.py`, regenerated; the models are not edited by hand) makes `fromArray()` record the
+  raw string of an open-enum member that decoded to `Unknown`, read through `unknownEnumValue($wire)`; it is
+  private, not a constructor parameter, and never rendered by `toArray()` or `jsonSerialize()`, so it cannot be
+  sent back. The refusal for an unstated `termination_action` or `service_type` now names the member and the
+  value (JSON-escaped and cut at 64 characters, C164-21), and says the value is unknown for a model built any
+  other way.
+- **`toArray()` on a response that holds `Unknown` throws (C163-18).** Since 1.1.1 `toArray()` is the request
+  path and raises `ValidationError` for an open-enum member that decoded to `Unknown`; only `jsonSerialize()`
+  renders it. That was not recorded in the 1.1.1 entry above: code that called `toArray()` on a model it had
+  read, to log or copy it, must call `jsonSerialize()`.
+
+### Tests
+
+- The no-session-credentials test queues a fifth response and asserts that a `groups()->create` after the
+  `/oauth2/` requests carries `Cookie` with `axiam_access=` and `X-CSRF-Token: csrf-from-login` (C163-08).
+- The README documents `$now`, `$retrySleep` and the deadline bound of the in-poll retry, and its CIBA row no longer
+  overstates the clock (C164-48).
+- The CIBA `429` carry is pinned from three sides (C164-57): a `429` with `Retry-After` below the interval still waits
+  the interval (`[5, 5]`), the carry is consumed once and the next wait is the interval again (`[5, 12, 5]`), and
+  the status decides, not the body (`429 {"error":"slow_down"}` waits `[5, 5]`; a `400 slow_down` still gives
+  `[5, 10]`). The `cibaAwait()` docblock now says the loop waits the interval or the failure's `Retry-After` if
+  longer.
+- The in-attempt retry tests run for a transport failure as for a `500` (two failures and a `200`, the exhausted
+  cap, a single poll, retry off), and inside `deviceLogin()` (C164-38).
+- The cap case of the §14.6 1.64 test records its sleeps, so an uncapped hour-long sleep fails it (C164-19).
+- The open-enum `plan` tests run over both members, `termination_action` and `service_type`, for the refusal,
+  `apply`, the stated member and `NoChange` (C163-09).
+
+### Notes
+
+- Items (a), (d) to (j) of §34.8 are informative and need no SDK change.
+- Not changed, for the maintainer: Guzzle's cookie middleware sits outside `AuthMiddleware`, so a `Set-Cookie` on
+  an `/oauth2/*` response is still stored in the jar; §6.1 rule 11 and §12.1 rule 3 bind what is *sent*, which
+  holds.
+
 ## [1.1.1] - Unreleased
 
 Contract 1.63 (the AXIAM 1.1.1 release) on top of contract 1.62, with the 1.62 conformance follow-ups of

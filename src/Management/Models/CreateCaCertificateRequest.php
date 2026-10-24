@@ -14,6 +14,16 @@ namespace Axiam\Sdk\Management\Models;
 final class CreateCaCertificateRequest implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a CreateCaCertificateRequest.
      * @param KeyAlgorithm $keyAlgorithm the server's `key_algorithm` field
      * @param string $subject The CA's common name, e.g. `ACME Corp Root CA`. A **common
@@ -52,7 +62,7 @@ final class CreateCaCertificateRequest implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             KeyAlgorithm::fromWire((string) ModelDecode::need($data, 'key_algorithm', self::class)),
             (string) ModelDecode::need($data, 'subject', self::class),
             (int) ModelDecode::need($data, 'validity_days', self::class),
@@ -60,6 +70,26 @@ final class CreateCaCertificateRequest implements \JsonSerializable
             isset($data['intermediate_validity_days']) ? (int) $data['intermediate_validity_days'] : null,
             isset($data['issue_from_root']) ? (bool) $data['issue_from_root'] : null,
         );
+        if ($model->keyAlgorithm === KeyAlgorithm::Unknown) {
+            $model->unknownEnumValues['key_algorithm'] = (string) $data['key_algorithm'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**
