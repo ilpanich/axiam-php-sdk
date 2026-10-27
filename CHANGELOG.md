@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Runtime dependency floors raised to the releases CI resolves (dependency refresh, 2026-10).** `composer.json`
+  now requires `guzzlehttp/guzzle` `^7.16 || ^8.3` (was `^7.13 || ^8.0`), `firebase/php-jwt` `^7.2` (was `^7.0`)
+  and `php-amqplib/php-amqplib` `^3.7.5` (was `^3.7`). CI installs the newest compatible release and never the
+  lowest, so the old floors were never executed; these are. `psr/log` stays `^3.0`. A consumer already on a
+  current release of each sees no change; one pinned below a new floor has to update it alongside this SDK.
+- **The Laravel bridge accepts Laravel 13.** `illuminate/support` and `illuminate/contracts` (require-dev, the
+  bridge's test dependencies) allow `^13.0` beside `^11.0 || ^12.0`; the 8.5 CI leg resolves 13, the 8.2 leg
+  stays on 12 because Laravel 13 needs PHP 8.3.
+- **Dev tooling.** `phpstan/phpstan` `^2.3` (was `^2.2`).
+
+### Notes
+
+- **PHP support is unchanged: floor 8.2, newest 8.5.** 8.2's security support ends 2026-12-31, two months
+  out, so the floor stays and `tests/VersionPolicyTest.php` still moves it to 8.3 on that date. PHP 8.6 is at
+  release-candidate stage (GA scheduled for 2026-11-19), so the newest CI leg stays 8.5 until 8.6 ships.
+- PHPUnit stays on `^9.6`. PHPUnit 11 is the newest that runs on the 8.2 floor, and moving to it means
+  converting the docblock annotations (`@dataProvider`, `@covers`, ...) to attributes and migrating
+  `phpunit.xml.dist`; that is a separate change.
+
 ## [1.1.2] - Unreleased
 
 Contract 1.64 (the AXIAM 1.1.2 release) on top of contract 1.63, with the 1.63 conformance follow-ups of
