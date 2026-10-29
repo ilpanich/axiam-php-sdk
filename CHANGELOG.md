@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-10-29
+
 ### Changed
 
 - **Runtime dependency floors raised to the releases CI resolves (dependency refresh, 2026-10).** `composer.json`
@@ -18,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bridge's test dependencies) allow `^13.0` beside `^11.0 || ^12.0`; the 8.5 CI leg resolves 13, the 8.2 leg
   stays on 12 because Laravel 13 needs PHP 8.3.
 - **Dev tooling.** `phpstan/phpstan` `^2.3` (was `^2.2`).
+
+- Raise dependency floors, allow Laravel 13, bump PHPStan
 
 ### Notes
 
