@@ -18,8 +18,8 @@ byte-identical at that commit. No release number is chosen here: it is the maint
   ?string $tenantId = null, ?OidcConfiguration $configuration = null, bool $adoptAsCredential = false): OidcTokenSet`
   — one `POST /oauth2/token` with `grant_type=urn:axiam:params:oauth:grant-type:provider-id-token`. The raw nonce
   and the provider (a UUID or a slug) are sent verbatim; no scope is added (so no `openid`, and no `id_token`
-  unless the caller asks for it); empty inputs and a slug-only client are refused with an `AuthError` before any
-  request; the call is never retried and `invalid_grant` is never refined; a returned `id_token` is validated
+  unless the caller asks for it); empty inputs and an over-long nonce are refused with `\InvalidArgumentException` (the type `idpHint` uses; never
+  an `AuthError`) and a slug-only client with an `AuthError`, all before any request; the call is never retried and `invalid_grant` is never refined; a returned `id_token` is validated
   under §12.4 with the raw nonce; neither the provider token nor the nonce is logged, kept or put in an error.
   Adoption is the same opt-in as `loginClientCredentials()` (`$adoptAsCredential`, default `false`).
 - **`AxiamClient::nativeNonce(): ProviderNonce`** (§37.4) — a network-free pair `{Sensitive $raw, string $hashed}`:
@@ -51,10 +51,16 @@ byte-identical at that commit. No release number is chosen here: it is the maint
   token under it, the successor included. Treat `invalid_grant` on `oidcRefresh()` as "the session is over";
   never retry it with the same token. The §9 single-flight guard keeps one burst to one rotation, but it is per
   client instance: refreshing the same token from two processes is a defect.
-- `FederationConfigResponse::$nativeLogin` is **required** by the 1.2.0 spec, so a response without `native_login` (an older
-  server) fails to decode with the usual "missing member" `NetworkError`; the one test fixture that played a server
+- **Server floor:** federation-config admin calls (`federation.create_config`, `get_config`, `list_configs`,
+  `update_config`) of this 1.2-line SDK need an AXIAM server **1.2.0 or later**: `FederationConfigResponse::$nativeLogin`
+  is required from 1.2.0, and a response from an older server fails to decode (the usual "missing member" `NetworkError`); the one test fixture that played a server
   response (`tests/Contract160/FederationAndNotificationRulesTest.php`) now carries the block.
 - `README.md` states conformance to contract 1.65 and §37.
+- **No `/oauth2/*` `POST` follows a redirect** (§12.1 rule 3, §37.2 rule 12; C165-14). Guzzle's default would have re-sent the
+  form (client credential, provider token, nonce) to a 307/308 target, cross-host included; `postForm` now sets
+  `allow_redirects => false` and surfaces any `3xx` as a `NetworkError`. AXIAM never redirects these endpoints, so only an
+  intermediary or a wrong base URL triggers it.
+- `CONTRACT.md` re-vendored at the amended 1.65 (sha256 `95ee87ba…9529`, `ilpanich/axiam` `d93976b`).
 
 ## [1.1.3] - 2026-10-29
 

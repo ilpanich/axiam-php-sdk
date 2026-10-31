@@ -1696,8 +1696,9 @@ final class AxiamClient
      * Hold the raw nonce only for the length of the attempt; after any failure start over with
      * a FRESH provider token and a FRESH nonce.
      *
-     * Raises {@see AuthError} client-side (no request) for an empty `$provider`, `$idToken`
-     * or `$nonce`, and for a client with no tenant UUID; {@see \Axiam\Sdk\Core\OAuthProtocolError}
+     * Raises `\InvalidArgumentException` client-side (no request) for an empty `$provider`,
+     * `$idToken` or `$nonce` or a `$nonce` over 512 bytes (never an {@see AuthError}), and
+     * {@see AuthError} for a client with no tenant UUID; {@see \Axiam\Sdk\Core\OAuthProtocolError}
      * for every well-formed server refusal; {@see \Axiam\Sdk\Core\NetworkError} for a transport
      * failure or a body-less `5xx`. `$adoptAsCredential` is the same opt-in as
      * {@see self::loginClientCredentials()}.

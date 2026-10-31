@@ -757,8 +757,10 @@ final class OidcClient
      * @param string|null $resource RFC 8707 `resource`; omitted when `null`.
      * @param string|null $tenantId Tenant UUID for the `?tenant_id=` query parameter (§12.3 rule 4).
      *
-     * @throws AuthError client-side, with no wire call, for an empty `$provider`, `$idToken` or
-     *   `$nonce`, a `$nonce` over 512 bytes, or a client with no tenant UUID.
+     * @throws \InvalidArgumentException client-side, with no wire call, for an empty `$provider`, `$idToken`
+     *   or `$nonce`, or a `$nonce` over 512 bytes (the same programming-error type as an invalid `$idpHint`;
+     *   never an {@see AuthError}).
+     * @throws AuthError client-side, with no wire call, for a client with no tenant UUID (§12.3 rule 4).
      * @throws OAuthProtocolError for every well-formed refusal: `invalid_grant` (the single generic
      *   answer; start over with a FRESH provider token and a FRESH nonce), `consent_required` (the
      *   token is spent), `unauthorized_client`, `invalid_client`, `invalid_scope`, `invalid_target`,
@@ -783,14 +785,14 @@ final class OidcClient
         // values themselves is ever put in the message.
         foreach (['provider' => $provider, 'idToken' => $rawIdToken, 'nonce' => $rawNonce] as $name => $value) {
             if ($value === '') {
-                throw new AuthError(sprintf(
+                throw new \InvalidArgumentException(sprintf(
                     'loginWithProviderIdToken requires a non-empty $%s (CONTRACT.md §37.2 rule 4).',
                     $name,
                 ));
             }
         }
         if (strlen($rawNonce) > self::NATIVE_NONCE_MAX_BYTES) {
-            throw new AuthError(sprintf(
+            throw new \InvalidArgumentException(sprintf(
                 'loginWithProviderIdToken: $nonce is longer than %d bytes (CONTRACT.md §37.2 rule 4).',
                 self::NATIVE_NONCE_MAX_BYTES,
             ));
@@ -2932,10 +2934,18 @@ final class OidcClient
     private function postForm(string $url, array $form, string $context): ResponseInterface
     {
         try {
-            return $this->http->post($url, [
+            // §12.1 rule 3 / §37.2 rule 12: no redirect is followed from an /oauth2/* POST — a 307/308
+            // would re-send the form (provider token, nonce, client_secret) to the redirect target.
+            $response = $this->http->post($url, [
                 'form_params' => $form,
                 'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+                'allow_redirects' => false,
             ]);
+            if ($response->getStatusCode() >= 300 && $response->getStatusCode() < 400) {
+                throw NetworkError::fromResponse($response, $context . ' (redirect refused)');
+            }
+
+            return $response;
         } catch (RequestException $e) {
             throw $this->mapRequestException($e, $context, oauth2: true);
         } catch (GuzzleException $e) {

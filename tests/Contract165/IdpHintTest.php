@@ -253,4 +253,26 @@ final class IdpHintTest extends TestCase
         }
         self::assertCount(0, $this->sent);
     }
+
+    public function testParIdpHintFromBeginUrlPushed(): void
+    {
+        $client = $this->client([self::parResponse()]);
+        $config = $this->configuration();
+        $begun = $client->oidcBegin($config, self::REDIRECT_URI, idpHint: 'Google');
+
+        $client->oidcPar($begun, self::REDIRECT_URI, $config);
+
+        self::assertSame(['Google'], self::valuesOf(self::pairs((string) $this->sent[0]->getBody()), 'axiam_idp_hint'));
+    }
+
+    public function testParIdpHintArgumentWins(): void
+    {
+        $client = $this->client([self::parResponse()]);
+        $config = $this->configuration();
+        $begun = $client->oidcBegin($config, self::REDIRECT_URI, idpHint: 'Google');
+
+        $client->oidcPar($begun, self::REDIRECT_URI, $config, idpHint: 'github');
+
+        self::assertSame(['github'], self::valuesOf(self::pairs((string) $this->sent[0]->getBody()), 'axiam_idp_hint'));
+    }
 }

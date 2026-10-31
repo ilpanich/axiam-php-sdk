@@ -320,7 +320,8 @@ final class NativeSignInTest extends TestCase
             // No configuration passed: a discovery fetch would be a request too.
             $client->loginWithProviderIdToken($provider, $idToken, $nonce);
             self::fail('expected a client-side refusal');
-        } catch (AuthError $e) {
+        } catch (\InvalidArgumentException $e) {
+            self::assertNotInstanceOf(AuthError::class, $e);
             self::assertStringContainsString('§37.2 rule 4', $e->getMessage());
         }
         self::assertCount(0, $this->sent, 'zero requests, discovery included');
@@ -334,7 +335,7 @@ final class NativeSignInTest extends TestCase
             try {
                 $client->loginWithProviderIdToken('slug', $idToken, $nonce);
                 self::fail('expected a client-side refusal');
-            } catch (AuthError) {
+            } catch (\InvalidArgumentException) {
                 // expected
             }
         }
@@ -361,7 +362,7 @@ final class NativeSignInTest extends TestCase
         try {
             $client->loginWithProviderIdToken('slug', 't', str_repeat('a', 513), configuration: $this->configuration());
             self::fail('expected a client-side refusal');
-        } catch (AuthError) {
+        } catch (\InvalidArgumentException) {
             self::assertCount(0, $this->sent);
         }
 
@@ -658,7 +659,7 @@ final class NativeSignInTest extends TestCase
         // The local refusals, too (rule 4): the message names the parameter, never the value.
         try {
             $this->client([])->loginWithProviderIdToken('', $idToken, $nonce);
-        } catch (AuthError $e) {
+        } catch (\InvalidArgumentException $e) {
             $rendered .= $e->getMessage() . "\n" . $e;
         }
 
@@ -728,5 +729,29 @@ final class NativeSignInTest extends TestCase
         self::assertNotSame($pair->hashed, $other->hashed);
 
         self::assertCount(0, $this->sent, 'pure local computation: no network I/O');
+    }
+
+    // ===================================================================================
+    // §12.1 rule 3 / §37.2 rule 12 — no redirect is followed from an /oauth2/* POST
+    // ===================================================================================
+
+    public function testARedirectFromTheTokenPostIsNotFollowed(): void
+    {
+        foreach ([307, 308] as $status) {
+            $client = $this->client([
+                new Response($status, ['Location' => 'http://other.test/steal']),
+                self::tokens(), // would be consumed only if the redirect were followed
+            ]);
+
+            try {
+                $client->loginWithProviderIdToken('slug', 'provider-token', 'raw-nonce', configuration: $this->configuration());
+                self::fail('expected a NetworkError');
+            } catch (\Axiam\Sdk\Core\NetworkError $e) {
+                self::assertStringNotContainsString('provider-token', $e->getMessage());
+                self::assertStringNotContainsString('raw-nonce', $e->getMessage());
+            }
+            self::assertCount(1, $this->sent, 'the other host sees no request (' . $status . ')');
+            self::assertSame('api.test', $this->sent[0]->getUri()->getHost());
+        }
     }
 }

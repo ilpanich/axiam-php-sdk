@@ -287,6 +287,10 @@ namespaces) and brings two things every SDK ports — **native sign-in with a pr
 (§12.1, §26.2 rule 8) — beside server-side changes that need no SDK work. The first table below says what 1.65
 changed here.
 
+**Server floor:** federation-config admin calls (`federation.create_config`, `get_config`, `list_configs`,
+`update_config`) of this 1.2-line SDK need an AXIAM server **1.2.0 or later**: `FederationConfigResponse::$nativeLogin`
+is required from 1.2.0, and a response from an older server fails to decode.
+
 Contract 1.64 (the 1.1.2 release, §34.8) adds no operation (202 operations across 29 namespaces) and records one
 rule SDKs port, one wording relaxation, and server-side changes that need no SDK work. The table headed
 "Contract 1.64" below says what 1.64 changed here.
@@ -802,8 +806,9 @@ $tokens->accessToken->reveal();                    // an OidcTokenSet, like oidc
   deployment, and every refusal of it is one generic `OAuthProtocolError`. After any failure, obtain a **fresh**
   provider token and a **fresh** nonce. A `429` spends nothing and carries `retryAfterMs`.
 - Neither the provider ID token nor the raw nonce is logged, kept, or put in an error message. Hold the raw
-  nonce only for the length of the attempt. An empty `provider`, `idToken` or `nonce`, and a client built with no
-  tenant UUID, are refused with an `AuthError` before any request.
+  nonce only for the length of the attempt. An empty `provider`, `idToken` or `nonce`, and a nonce over 512 bytes, are refused
+  with `\InvalidArgumentException` (what an invalid `idpHint` raises; never an `AuthError`), and a client built with no
+  tenant UUID with an `AuthError`, all before any request.
 - `adoptAsCredential: true` is the same opt-in as `loginClientCredentials()` and `deviceLogin()`; the default
   adopts nothing. This SDK generates no DPoP proofs (§21.9), so a client registered for DPoP is refused by the
   server as for any token request.
