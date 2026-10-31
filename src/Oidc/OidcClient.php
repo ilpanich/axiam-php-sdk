@@ -86,6 +86,12 @@ final class OidcClient
         'state', 'nonce', 'code_challenge', 'code_challenge_method',
     ];
 
+    /** The one spelling of the provider hint (contract 1.65, §12.1); there is no `kc_idp_hint`. */
+    private const IDP_HINT_PARAM = 'axiam_idp_hint';
+
+    /** §12.1 `idp_hint` rule 2: the longest hint, in bytes of UTF-8. */
+    private const IDP_HINT_MAX_BYTES = 256;
+
     /** Shape of a UUID, used to reject a slug where §12.3 rule 4 requires a UUID. */
     private const UUID_RE = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
 
@@ -238,18 +244,27 @@ final class OidcClient
      *
      * @param string|list<string> $scope
      * @param array<string,string> $extraParams
+     * @param string|null $idpHint Contract 1.65 (§12.1, "`idp_hint` — choosing the provider"):
+     *   a provider UUID, `provider_slug` or branded kind name, emitted as the ninth query
+     *   parameter `axiam_idp_hint` **exactly once**, and only when set. Validated for
+     *   emptiness and length (256 bytes) and nothing else: it is not trimmed, case-folded,
+     *   parsed as a UUID or looked up. When set, an `axiam_idp_hint` in `$extraParams` is
+     *   dropped. There is no `kc_idp_hint`.
      *
      * @throws \InvalidArgumentException when `$extraParams` tries to override one of the
-     *                                    eight SDK-owned parameters — a programming
-     *                                    error, caught at call time.
+     *                                    eight SDK-owned parameters, or `$idpHint` is empty
+     *                                    or longer than 256 bytes — programming errors,
+     *                                    caught at call time with no URL built.
      */
     public function oidcBegin(
         OidcConfiguration $configuration,
         string $redirectUri,
         string|array|null $scope = null,
         array $extraParams = [],
+        ?string $idpHint = null,
     ): AuthorizationRequest {
         $clientId = $this->requireClientId('oidcBegin');
+        self::assertIdpHint('oidcBegin', $idpHint);
         $state = Pkce::randomUrlSafeToken();
         $nonce = Pkce::randomUrlSafeToken();
         $codeVerifier = Pkce::generateCodeVerifier();
@@ -264,6 +279,11 @@ final class OidcClient
                     $key,
                 ));
             }
+            // §12.1 `idp_hint` rule 3: the option is the single source of the hint, so a
+            // caller-supplied copy of the same name is dropped rather than emitted twice.
+            if ($idpHint !== null && $key === self::IDP_HINT_PARAM) {
+                continue;
+            }
             $query[$key] = $value;
         }
 
@@ -275,10 +295,38 @@ final class OidcClient
         $query['nonce'] = $nonce;
         $query['code_challenge'] = $codeChallenge;
         $query['code_challenge_method'] = Pkce::CODE_CHALLENGE_METHOD_S256;
+        if ($idpHint !== null) {
+            $query[self::IDP_HINT_PARAM] = $idpHint;
+        }
 
         $url = self::withQuery($configuration->authorization_endpoint, $query);
 
-        return new AuthorizationRequest($url, $state, $nonce, $codeVerifier);
+        return new AuthorizationRequest($url, $state, $nonce, $codeVerifier, $idpHint);
+    }
+
+    /**
+     * §12.1 `idp_hint` rule 2: refuse an empty value and one longer than 256 bytes (UTF-8)
+     * client-side, and nothing else. The server would drop the second silently and a
+     * developer is better told.
+     */
+    private static function assertIdpHint(string $operation, ?string $idpHint): void
+    {
+        if ($idpHint === null) {
+            return;
+        }
+        if ($idpHint === '') {
+            throw new \InvalidArgumentException(sprintf(
+                '%s: idpHint must not be empty; pass null to send no hint (CONTRACT.md §12.1 idp_hint rule 2).',
+                $operation,
+            ));
+        }
+        if (strlen($idpHint) > self::IDP_HINT_MAX_BYTES) {
+            throw new \InvalidArgumentException(sprintf(
+                '%s: idpHint is longer than %d bytes (CONTRACT.md §12.1 idp_hint rule 2).',
+                $operation,
+                self::IDP_HINT_MAX_BYTES,
+            ));
+        }
     }
 
     /**
@@ -371,6 +419,12 @@ final class OidcClient
      *   thumbprint from; an application that holds one passes the base64url thumbprint it
      *   already computes for its own `DPoP` header. The value is forwarded verbatim.
      *
+     * @param string|null $idpHint Contract 1.65 (§26.2 rule 8): pushed in the **body** as
+     *   `axiam_idp_hint`, exactly once, and never added to the redirect URL (which stays
+     *   exactly `client_id` and `request_uri`). Defaults to the hint `$request` was built
+     *   with by {@see self::oidcBegin()}; validated as there (emptiness and length only).
+     *
+     * @throws \InvalidArgumentException when `$idpHint` is empty or longer than 256 bytes.
      * @throws AuthError client-side, with no wire call, when the discovery document
      *   advertises no PAR endpoint — §12.7.2 rule 1's discipline: never synthesise the URL
      *   from the issuer.
@@ -382,7 +436,10 @@ final class OidcClient
         string|array|null $scope = null,
         ?string $tenantId = null,
         ?string $dpopJkt = null,
+        ?string $idpHint = null,
     ): PushedAuthorizationRequest {
+        $idpHint ??= $request->idpHint;
+        self::assertIdpHint('oidcPar', $idpHint);
         $configuration ??= $this->oidcDiscover();
         $clientId = $this->requireClientId('oidcPar');
 
@@ -418,6 +475,11 @@ final class OidcClient
         // as a present-but-empty thumbprint would bind the code to nothing.
         if ($dpopJkt !== null && $dpopJkt !== '') {
             $form['dpop_jkt'] = $dpopJkt;
+        }
+        // §26.2 rule 8: the server reads the PUSHED hint, so it rides the body and never
+        // the redirect. Absent (not blank) when unset.
+        if ($idpHint !== null) {
+            $form[self::IDP_HINT_PARAM] = $idpHint;
         }
         $this->appendClientSecret($form);
 
@@ -645,6 +707,135 @@ final class OidcClient
         }
 
         return $tokenSet;
+    }
+
+    // -------------------------------------------------------------------------
+    // §37 Native sign-in with a provider ID token (contract 1.65)
+    // -------------------------------------------------------------------------
+
+    /** `grant_type` of the native sign-in request (CONTRACT.md §37.1). Not token exchange (§15). */
+    public const PROVIDER_ID_TOKEN_GRANT_TYPE = 'urn:axiam:params:oauth:grant-type:provider-id-token';
+
+    /** §37.2 rule 4: the longest `nonce` the server accepts, in bytes. */
+    public const NATIVE_NONCE_MAX_BYTES = 512;
+
+    /**
+     * `POST /oauth2/token` with `grant_type=urn:axiam:params:oauth:grant-type:provider-id-token`
+     * (CONTRACT.md §37) — sign a user in with the ID token a Google, Apple or Facebook native SDK
+     * produced, and get back this client's ordinary token set.
+     *
+     * Get the nonce pair from {@see self::nativeNonce()}: give the provider's SDK `->hashed`, and
+     * pass `->raw` here. **`$nonce` is the raw value** and is sent byte for byte — never hashed,
+     * never replaced by the token's own `nonce` claim, never generated here (§37.2 rule 3).
+     *
+     * `$provider` is the provider's UUID or its `provider_slug`, sent exactly as given (§37.2 rule 2).
+     * A branded kind name such as `google` is accepted only if the operator also chose it as the
+     * slug; it is not translated, and no lookup is made. This SDK never trims, folds or resolves it.
+     *
+     * **What it does not do.** It adds no scope: an omitted `$scopes` is the empty set, so the
+     * response carries no `id_token` unless the caller passes `openid` (rule 7). It never retries on
+     * any status or transport failure, because the provider's token is single-use across the whole
+     * deployment and a `5xx` or a lost answer may already have spent it (rule 10), and it does not
+     * refine `invalid_grant`, whose one generic answer covers every refusal of the token. It does
+     * not fall back to `tokenExchange` or to a browser flow, and it keeps neither the provider
+     * token nor the nonce after it returns (rule 12).
+     *
+     * A public client (`client_id` alone — the normal registration of a mobile app) is not refused
+     * for holding no secret; a client built with an `oidcClientSecret` sends it in the body. This
+     * SDK does not generate DPoP proofs (§21.9), so for a client registered for DPoP the server's
+     * `401 invalid_client` surfaces as it does for any token request.
+     *
+     * When the response carries an `id_token` it is validated under §12.4 with the **raw**
+     * `$nonce` as the expected nonce — it is AXIAM's token, which carries the request's nonce as
+     * sent, not the provider's hash. `$adoptAsCredential` is the same opt-in as
+     * {@see self::loginClientCredentials()} and {@see self::deviceLogin()}.
+     *
+     * @param string $provider The provider's UUID or `provider_slug`, verbatim.
+     * @param Sensitive|string $idToken The provider's ID token (§37.6: accepted wrapped or bare).
+     * @param Sensitive|string $nonce The RAW nonce (§37.6: accepted wrapped or bare).
+     * @param list<string>|null $scopes Space-joined into `scope`; omitted from the body when `null` or empty. `openid` is never added.
+     * @param string|null $resource RFC 8707 `resource`; omitted when `null`.
+     * @param string|null $tenantId Tenant UUID for the `?tenant_id=` query parameter (§12.3 rule 4).
+     *
+     * @throws AuthError client-side, with no wire call, for an empty `$provider`, `$idToken` or
+     *   `$nonce`, a `$nonce` over 512 bytes, or a client with no tenant UUID.
+     * @throws OAuthProtocolError for every well-formed refusal: `invalid_grant` (the single generic
+     *   answer; start over with a FRESH provider token and a FRESH nonce), `consent_required` (the
+     *   token is spent), `unauthorized_client`, `invalid_client`, `invalid_scope`, `invalid_target`,
+     *   `rate_limit_exceeded` (`retryAfterMs` set; nothing spent) and `server_error`.
+     * @throws \Axiam\Sdk\Core\NetworkError for a transport failure or a `5xx` without a body.
+     */
+    public function loginWithProviderIdToken(
+        string $provider,
+        Sensitive|string $idToken,
+        Sensitive|string $nonce,
+        ?array $scopes = null,
+        ?string $resource = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        bool $adoptAsCredential = false,
+    ): OidcTokenSet {
+        $clientId = $this->requireClientId('loginWithProviderIdToken');
+        $rawIdToken = self::exposeSecret($idToken);
+        $rawNonce = self::exposeSecret($nonce);
+
+        // §37.2 rule 4: refused before ANY request — discovery included — and nothing about the
+        // values themselves is ever put in the message.
+        foreach (['provider' => $provider, 'idToken' => $rawIdToken, 'nonce' => $rawNonce] as $name => $value) {
+            if ($value === '') {
+                throw new AuthError(sprintf(
+                    'loginWithProviderIdToken requires a non-empty $%s (CONTRACT.md §37.2 rule 4).',
+                    $name,
+                ));
+            }
+        }
+        if (strlen($rawNonce) > self::NATIVE_NONCE_MAX_BYTES) {
+            throw new AuthError(sprintf(
+                'loginWithProviderIdToken: $nonce is longer than %d bytes (CONTRACT.md §37.2 rule 4).',
+                self::NATIVE_NONCE_MAX_BYTES,
+            ));
+        }
+        // §12.3 rule 4, still before any request: a slug-only client fails here, not after a discovery fetch.
+        $resolvedTenantId = $this->resolveTenantId($tenantId);
+        $configuration ??= $this->oidcDiscover();
+
+        // §37.1: exactly this field set, in this order — plus the client's credential when it has one.
+        $form = [
+            'grant_type' => self::PROVIDER_ID_TOKEN_GRANT_TYPE,
+            'client_id' => $clientId,
+            'provider' => $provider,
+            'id_token' => $rawIdToken,
+            'nonce' => $rawNonce,
+        ];
+        if ($scopes !== null && $scopes !== []) {
+            $form['scope'] = implode(' ', $scopes);
+        }
+        if ($resource !== null) {
+            $form['resource'] = $resource;
+        }
+        $this->appendClientSecret($form);
+
+        // One attempt. postToken() is not wrapped in any retry (§37.2 rule 10, §16.2), and no
+        // error built from the response embeds the request (rule 12).
+        $wire = $this->postToken($configuration, $form, $resolvedTenantId);
+        $tokenSet = $this->toTokenSet($wire, $configuration, $rawNonce);
+
+        if ($adoptAsCredential) {
+            $this->adoptCredential($tokenSet->accessToken);
+        }
+
+        return $tokenSet;
+    }
+
+    /**
+     * Generate the nonce pair a native sign-in needs (CONTRACT.md §37.4) — **pure local
+     * computation, no network I/O**, and nothing is stored.
+     *
+     * Give `->hashed` to the provider's SDK and `->raw` to {@see self::loginWithProviderIdToken()}.
+     */
+    public function nativeNonce(): ProviderNonce
+    {
+        return ProviderNonce::generate();
     }
 
     // -------------------------------------------------------------------------

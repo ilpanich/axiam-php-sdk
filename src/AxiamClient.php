@@ -27,6 +27,7 @@ use Axiam\Sdk\Oidc\OidcClient as OidcEngine;
 use Axiam\Sdk\Oidc\VerifiedLogoutToken;
 use Axiam\Sdk\Oidc\OidcConfiguration;
 use Axiam\Sdk\Oidc\OidcTokenSet;
+use Axiam\Sdk\Oidc\ProviderNonce;
 use Axiam\Sdk\Oidc\PushedAuthorizationRequest;
 use Axiam\Sdk\Oidc\RequestedPermission;
 use Axiam\Sdk\Oidc\RequestingPartyToken;
@@ -1552,14 +1553,21 @@ final class AxiamClient
      * @param array<string,string> $extraParams Extra authorization-request parameters
      *        (e.g. `prompt`, `login_hint`). Throws {@see \InvalidArgumentException} if
      *        one tries to override an SDK-owned parameter (§12.1 rule 5).
+     * @param string|null $idpHint Contract 1.65 (§12.1 `idp_hint`): the provider to start
+     *        the sign-in with — a UUID, a `provider_slug` or a branded kind name such as
+     *        `google` — emitted once as `axiam_idp_hint`. Only emptiness and length (256
+     *        bytes) are checked, by {@see \InvalidArgumentException}; the value is never
+     *        trimmed, folded or looked up, and an unresolvable hint is ignored by the server.
+     *        An `axiam_idp_hint` in `$extraParams` is dropped when this is set.
      */
     public function oidcBegin(
         OidcConfiguration $configuration,
         string $redirectUri,
         string|array|null $scope = null,
         array $extraParams = [],
+        ?string $idpHint = null,
     ): AuthorizationRequest {
-        return $this->oidc->oidcBegin($configuration, $redirectUri, $scope, $extraParams);
+        return $this->oidc->oidcBegin($configuration, $redirectUri, $scope, $extraParams, $idpHint);
     }
 
     /**
@@ -1581,6 +1589,9 @@ final class AxiamClient
      *        to that key at issue time. Omitted from the form when null. This SDK verifies
      *        DPoP proofs but does not generate them (CONTRACT.md §21.9), so the thumbprint
      *        comes from the application, not from here.
+     * @param string|null $idpHint Contract 1.65 (§26.2 rule 8): pushed in the body as
+     *        `axiam_idp_hint`, never on the redirect URL. Defaults to the hint `$request`
+     *        was built with by {@see self::oidcBegin()}.
      */
     public function oidcPar(
         AuthorizationRequest $request,
@@ -1589,10 +1600,11 @@ final class AxiamClient
         string|array|null $scope = null,
         ?string $tenantId = null,
         ?string $dpopJkt = null,
+        ?string $idpHint = null,
     ): PushedAuthorizationRequest {
         $this->ensureOpen();
 
-        return $this->oidc->oidcPar($request, $redirectUri, $configuration, $scope, $tenantId, $dpopJkt);
+        return $this->oidc->oidcPar($request, $redirectUri, $configuration, $scope, $tenantId, $dpopJkt, $idpHint);
     }
 
     /**
@@ -1667,6 +1679,66 @@ final class AxiamClient
         bool $adoptAsCredential = false,
     ): OidcTokenSet {
         return $this->oidc->loginClientCredentials($scope, $tenantId, $configuration, $adoptAsCredential);
+    }
+
+    /**
+     * `POST /oauth2/token` with the native sign-in grant (CONTRACT.md §37, contract 1.65) —
+     * sign a user in with the ID token a Google, Apple or Facebook native SDK produced, and
+     * get this client's ordinary {@see OidcTokenSet}. **Not** token exchange: {@see self::tokenExchange()}
+     * refuses ID tokens, and neither is a fallback for the other.
+     *
+     * `$nonce` is the **raw** nonce, sent byte for byte; the provider's SDK was given its
+     * SHA-256 hex, which {@see self::nativeNonce()} produces as `->hashed`. `$provider` is
+     * the provider's UUID or `provider_slug`, verbatim — not a kind name unless the operator
+     * made it the slug. No scope is added (so no `id_token` unless `openid` is passed in
+     * `$scopes`), nothing is retried, `invalid_grant` is never refined, and neither the ID
+     * token nor the nonce is logged or kept. A public client (no secret) is the normal case.
+     * Hold the raw nonce only for the length of the attempt; after any failure start over with
+     * a FRESH provider token and a FRESH nonce.
+     *
+     * Raises {@see AuthError} client-side (no request) for an empty `$provider`, `$idToken`
+     * or `$nonce`, and for a client with no tenant UUID; {@see \Axiam\Sdk\Core\OAuthProtocolError}
+     * for every well-formed server refusal; {@see \Axiam\Sdk\Core\NetworkError} for a transport
+     * failure or a body-less `5xx`. `$adoptAsCredential` is the same opt-in as
+     * {@see self::loginClientCredentials()}.
+     *
+     * @param Sensitive|string $idToken The provider's ID token — accepts the wrapped or bare form.
+     * @param Sensitive|string $nonce The raw nonce — accepts the wrapped or bare form.
+     * @param list<string>|null $scopes Space-joined into `scope`; omitted when `null` or empty.
+     * @param string|null $resource RFC 8707 `resource`; omitted when `null`.
+     */
+    public function loginWithProviderIdToken(
+        string $provider,
+        Sensitive|string $idToken,
+        Sensitive|string $nonce,
+        ?array $scopes = null,
+        ?string $resource = null,
+        ?string $tenantId = null,
+        ?OidcConfiguration $configuration = null,
+        bool $adoptAsCredential = false,
+    ): OidcTokenSet {
+        return $this->oidc->loginWithProviderIdToken(
+            $provider,
+            $idToken,
+            $nonce,
+            $scopes,
+            $resource,
+            $tenantId,
+            $configuration,
+            $adoptAsCredential,
+        );
+    }
+
+    /**
+     * The nonce pair for {@see self::loginWithProviderIdToken()} (CONTRACT.md §37.4) —
+     * **pure local computation, no network I/O**; a fresh pair on every call, stored nowhere.
+     *
+     * Give `->hashed` (64 lower-case hex characters) to the provider's SDK as its nonce and
+     * pass `->raw` (a {@see Sensitive}, 32 CSPRNG bytes as unpadded base64url) to the sign-in.
+     */
+    public function nativeNonce(): ProviderNonce
+    {
+        return $this->oidc->nativeNonce();
     }
 
     /**
