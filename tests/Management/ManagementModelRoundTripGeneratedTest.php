@@ -554,6 +554,13 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'idp_metadata_signing_cert_pem' => 'example',
             'idp_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
+            'native_login' => [
+                'client_ids' => [
+                    'example',
+                ],
+                'enabled' => true,
+                'max_token_age_secs' => 1,
+            ],
             'protocol' => 'example',
             'provider' => 'example',
             'provider_kind' => 'example',
@@ -715,6 +722,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'backchannel_token_delivery_mode' => 'example',
             'backchannel_user_code_parameter' => true,
             'browser_sso' => true,
+            'default_idp' => '11111111-1111-4111-8111-111111111111',
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
             'grant_types' => [
@@ -1323,6 +1331,13 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
+            'native_login' => [
+                'client_ids' => [
+                    'example',
+                ],
+                'enabled' => true,
+                'max_token_age_secs' => 1,
+            ],
             'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
@@ -1874,6 +1889,48 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
         self::assertSame('email_address', Models\NameIdFormat::fromWire('email_address')->value);
     }
 
+    /** `NativeLoginTrustRequest`: a full wire object survives decode and re-render. */
+    public function testNativeLoginTrustRequestRoundTrips(): void
+    {
+        $wire = [
+            'client_ids' => [
+                'example',
+            ],
+            'enabled' => true,
+            'max_token_age_secs' => 1,
+        ];
+
+        $model = Models\NativeLoginTrustRequest::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'NativeLoginTrustRequest decoded a field it cannot render again',
+        );
+    }
+
+    /** `NativeLoginTrustResponse`: a full wire object survives decode and re-render. */
+    public function testNativeLoginTrustResponseRoundTrips(): void
+    {
+        $wire = [
+            'client_ids' => [
+                'example',
+            ],
+            'enabled' => true,
+            'max_token_age_secs' => 1,
+        ];
+
+        $model = Models\NativeLoginTrustResponse::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'NativeLoginTrustResponse decoded a field it cannot render again',
+        );
+    }
+
     /** `NetworkPolicyResponse`: a full wire object survives decode and re-render. */
     public function testNetworkPolicyResponseRoundTrips(): void
     {
@@ -2103,6 +2160,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'browser_sso' => true,
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
+            'default_idp' => '11111111-1111-4111-8111-111111111111',
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
             'grant_types' => [
@@ -2141,6 +2199,23 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             [],
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'OAuth2ClientResponse decoded a field it cannot render again',
+        );
+    }
+
+    /** `OAuth2Policy`: a full wire object survives decode and re-render. */
+    public function testOAuth2PolicyRoundTrips(): void
+    {
+        $wire = [
+            'refresh_reuse_response' => 'revoke_session',
+        ];
+
+        $model = Models\OAuth2Policy::fromArray($wire);
+        $rendered = $model->toArray();
+
+        self::assertSame(
+            [],
+            array_values(array_diff(array_keys($wire), array_keys($rendered))),
+            'OAuth2Policy decoded a field it cannot render again',
         );
     }
 
@@ -2675,6 +2750,13 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             array_values(array_diff(array_keys($wire), array_keys($rendered))),
             'ReadyResponse decoded a field it cannot render again',
         );
+    }
+
+    /** `RefreshReuseResponse`: every case survives wire -> enum -> wire. */
+    public function testRefreshReuseResponseRoundTrips(): void
+    {
+        self::assertSame('revoke_session', Models\RefreshReuseResponse::fromWire('revoke_session')->value);
+        self::assertSame('refuse', Models\RefreshReuseResponse::fromWire('refuse')->value);
     }
 
     /** `RegistrationTokenResponse`: a full wire object survives decode and re-render. */
@@ -3590,6 +3672,9 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'notification' => [
                 'admin_notifications_enabled' => true,
             ],
+            'oauth2' => [
+                'refresh_reuse_response' => 'revoke_session',
+            ],
             'oidc' => [
                 'cimd' => [
                     'allow_http' => true,
@@ -3881,6 +3966,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'opaque_mode' => 'example',
             'opaque_suite' => 'example',
             'password_history_count' => 1,
+            'refresh_reuse_response' => 'revoke_session',
             'refresh_token_lifetime_secs' => 1,
             'require_digits' => true,
             'require_lowercase' => true,
@@ -4219,6 +4305,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'opaque_mode' => 'example',
             'opaque_suite' => 'example',
             'password_history_count' => 1,
+            'refresh_reuse_response' => 'revoke_session',
             'refresh_token_lifetime_secs' => 1,
             'require_digits' => true,
             'require_lowercase' => true,
@@ -4391,6 +4478,13 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'idp_metadata_signing_cert_pem' => 'example',
             'idp_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
+            'native_login' => [
+                'client_ids' => [
+                    'example',
+                ],
+                'enabled' => true,
+                'max_token_age_secs' => 1,
+            ],
             'provider' => 'example',
             'provider_slug' => 'example',
             'require_pkce' => true,
@@ -4480,6 +4574,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'backchannel_token_delivery_mode' => 'example',
             'backchannel_user_code_parameter' => true,
             'browser_sso' => true,
+            'default_idp' => '11111111-1111-4111-8111-111111111111',
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
             'grant_types' => [
@@ -4880,6 +4975,6 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             static fn (\ReflectionMethod $m): bool => str_ends_with($m->getName(), 'RoundTrips'),
         );
 
-        self::assertCount(216, $cases);
+        self::assertCount(220, $cases);
     }
 }

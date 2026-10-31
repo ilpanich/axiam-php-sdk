@@ -54,6 +54,8 @@ final class CreateFederationConfigRequest implements \JsonSerializable
      *     assertions or OIDC signatures (CQ-B40/REQ-14 AC-5). Required for SAML configs.
      *     (optional)
      * @param string|null $metadataUrl OIDC discovery URL or SAML metadata URL. (optional)
+     * @param NativeLoginTrustRequest|null $nativeLogin the server's `native_login` field
+     *     (optional)
      * @param string|null $providerKind Which provider this is: `google`, `github`, `facebook`,
      *     `apple`, `microsoft`, `generic_oidc`, `generic_oauth2` or `generic_saml`. Selects the
      *     sign-in button's branding, the per-kind defaults, and the key on which a tenant config
@@ -89,6 +91,7 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         public readonly ?string $idpMetadataSigningCertPem = null,
         public readonly ?string $idpSigningCertPem = null,
         public readonly ?string $metadataUrl = null,
+        public readonly ?NativeLoginTrustRequest $nativeLogin = null,
         public readonly ?string $providerKind = null,
         public readonly ?string $providerSlug = null,
         public readonly ?bool $requirePkce = null,
@@ -122,6 +125,7 @@ final class CreateFederationConfigRequest implements \JsonSerializable
             isset($data['idp_metadata_signing_cert_pem']) ? (string) $data['idp_metadata_signing_cert_pem'] : null,
             isset($data['idp_signing_cert_pem']) ? (string) $data['idp_signing_cert_pem'] : null,
             isset($data['metadata_url']) ? (string) $data['metadata_url'] : null,
+            isset($data['native_login']) ? NativeLoginTrustRequest::fromArray((array) $data['native_login']) : null,
             isset($data['provider_kind']) ? (string) $data['provider_kind'] : null,
             isset($data['provider_slug']) ? (string) $data['provider_slug'] : null,
             isset($data['require_pkce']) ? (bool) $data['require_pkce'] : null,
@@ -212,6 +216,9 @@ final class CreateFederationConfigRequest implements \JsonSerializable
         }
         if ($this->metadataUrl !== null) {
             $out['metadata_url'] = $this->metadataUrl;
+        }
+        if ($this->nativeLogin !== null) {
+            $out['native_login'] = ($log ? $this->nativeLogin->jsonSerialize() : $this->nativeLogin->toArray());
         }
         if ($this->providerKind !== null) {
             $out['provider_kind'] = $this->providerKind;

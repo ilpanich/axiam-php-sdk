@@ -81,6 +81,13 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
      *     gates is a later wave. Unlike `authn_request_params` it is permitted on a `fapi2`
      *     client, because it relaxes nothing — it decides only how an anonymous browser is
      *     answered. (optional)
+     * @param string|null $defaultIdp G-B (#817) — the federation provider (a federation config
+     *     `id`) this client's sign-in page starts with when an authorization request carries no
+     *     `axiam_idp_hint`; a hint that names a provider overrides it. Must name a provider this
+     *     tenant can sign in with — its own enabled configs, or the organization's enabled ones it
+     *     inherits — or the registration is refused with `400`. If that provider is later disabled
+     *     or deleted the default is ignored at the authorization endpoint (the provider chooser is
+     *     shown), never an error. Omit for none. (optional)
      * @param bool|null $dpopBoundAccessTokens RFC 9449 §5.2 — issue DPoP-bound
      *     (sender-constrained) access tokens to this client. Independent of both the
      *     authentication method and `tls_client_certificate_bound_access_tokens`; a client may ask
@@ -140,6 +147,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         public readonly ?string $backchannelTokenDeliveryMode = null,
         public readonly ?bool $backchannelUserCodeParameter = null,
         public readonly ?bool $browserSso = null,
+        public readonly ?string $defaultIdp = null,
         public readonly ?bool $dpopBoundAccessTokens = null,
         public readonly ?bool $dpopRequireNonce = null,
         public readonly ?string $jwks = null,
@@ -175,6 +183,7 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
             isset($data['backchannel_token_delivery_mode']) ? (string) $data['backchannel_token_delivery_mode'] : null,
             isset($data['backchannel_user_code_parameter']) ? (bool) $data['backchannel_user_code_parameter'] : null,
             isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
+            isset($data['default_idp']) ? (string) $data['default_idp'] : null,
             isset($data['dpop_bound_access_tokens']) ? (bool) $data['dpop_bound_access_tokens'] : null,
             isset($data['dpop_require_nonce']) ? (bool) $data['dpop_require_nonce'] : null,
             isset($data['jwks']) ? (string) $data['jwks'] : null,
@@ -285,6 +294,9 @@ final class CreateOAuth2ClientRequest implements \JsonSerializable
         }
         if ($this->browserSso !== null) {
             $out['browser_sso'] = $this->browserSso;
+        }
+        if ($this->defaultIdp !== null) {
+            $out['default_idp'] = $this->defaultIdp;
         }
         if ($this->dpopBoundAccessTokens !== null) {
             $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;

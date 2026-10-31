@@ -37,6 +37,7 @@ final class FederationConfigResponse implements \JsonSerializable
      * @param bool $mintsClientSecret Whether AXIAM mints this provider's client secret itself,
      *     per exchange, rather than sending a stored one. True only for an Apple config with both
      *     identifiers set.
+     * @param NativeLoginTrustResponse $nativeLogin Native sign-in trust (G-A).
      * @param bool $pkceRequired Whether PKCE is sent on the authorization request. Always true
      *     for the OAuth2 variant regardless of the stored flag.
      * @param string $protocol the server's `protocol` field
@@ -76,6 +77,7 @@ final class FederationConfigResponse implements \JsonSerializable
         public readonly bool $hasBundledMark,
         public readonly string $id,
         public readonly bool $mintsClientSecret,
+        public readonly NativeLoginTrustResponse $nativeLogin,
         public readonly bool $pkceRequired,
         public readonly string $protocol,
         public readonly string $provider,
@@ -115,6 +117,7 @@ final class FederationConfigResponse implements \JsonSerializable
             (bool) ModelDecode::need($data, 'has_bundled_mark', self::class),
             (string) ModelDecode::need($data, 'id', self::class),
             (bool) ModelDecode::need($data, 'mints_client_secret', self::class),
+            NativeLoginTrustResponse::fromArray((array) ModelDecode::need($data, 'native_login', self::class)),
             (bool) ModelDecode::need($data, 'pkce_required', self::class),
             (string) ModelDecode::need($data, 'protocol', self::class),
             (string) ModelDecode::need($data, 'provider', self::class),
@@ -188,6 +191,7 @@ final class FederationConfigResponse implements \JsonSerializable
         $out['has_bundled_mark'] = $this->hasBundledMark;
         $out['id'] = $this->id;
         $out['mints_client_secret'] = $this->mintsClientSecret;
+        $out['native_login'] = ($log ? $this->nativeLogin->jsonSerialize() : $this->nativeLogin->toArray());
         $out['pkce_required'] = $this->pkceRequired;
         $out['protocol'] = $this->protocol;
         $out['provider'] = $this->provider;

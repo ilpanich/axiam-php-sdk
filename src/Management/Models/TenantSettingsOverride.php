@@ -18,6 +18,16 @@ namespace Axiam\Sdk\Management\Models;
 final class TenantSettingsOverride implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a TenantSettingsOverride.
      * @param int|null $accessTokenLifetimeSecs the server's `access_token_lifetime_secs` field
      *     (optional)
@@ -66,6 +76,8 @@ final class TenantSettingsOverride implements \JsonSerializable
      * @param string|null $opaqueSuite the server's `opaque_suite` field (optional)
      * @param int|null $passwordHistoryCount the server's `password_history_count` field
      *     (optional)
+     * @param RefreshReuseResponse|null $refreshReuseResponse the server's
+     *     `refresh_reuse_response` field (optional)
      * @param int|null $refreshTokenLifetimeSecs the server's `refresh_token_lifetime_secs`
      *     field (optional)
      * @param bool|null $requireDigits the server's `require_digits` field (optional)
@@ -113,6 +125,7 @@ final class TenantSettingsOverride implements \JsonSerializable
         public readonly ?string $opaqueMode = null,
         public readonly ?string $opaqueSuite = null,
         public readonly ?int $passwordHistoryCount = null,
+        public readonly ?RefreshReuseResponse $refreshReuseResponse = null,
         public readonly ?int $refreshTokenLifetimeSecs = null,
         public readonly ?bool $requireDigits = null,
         public readonly ?bool $requireLowercase = null,
@@ -132,7 +145,7 @@ final class TenantSettingsOverride implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             isset($data['access_token_lifetime_secs']) ? (int) $data['access_token_lifetime_secs'] : null,
             isset($data['admin_notifications_enabled']) ? (bool) $data['admin_notifications_enabled'] : null,
             isset($data['cimd']) ? CimdPolicy::fromArray((array) $data['cimd']) : null,
@@ -160,6 +173,7 @@ final class TenantSettingsOverride implements \JsonSerializable
             isset($data['opaque_mode']) ? (string) $data['opaque_mode'] : null,
             isset($data['opaque_suite']) ? (string) $data['opaque_suite'] : null,
             isset($data['password_history_count']) ? (int) $data['password_history_count'] : null,
+            isset($data['refresh_reuse_response']) ? RefreshReuseResponse::fromWire((string) $data['refresh_reuse_response']) : null,
             isset($data['refresh_token_lifetime_secs']) ? (int) $data['refresh_token_lifetime_secs'] : null,
             isset($data['require_digits']) ? (bool) $data['require_digits'] : null,
             isset($data['require_lowercase']) ? (bool) $data['require_lowercase'] : null,
@@ -171,6 +185,26 @@ final class TenantSettingsOverride implements \JsonSerializable
             isset($data['ssf_enabled']) ? (bool) $data['ssf_enabled'] : null,
             isset($data['webauthn_user_verification']) ? (string) $data['webauthn_user_verification'] : null,
         );
+        if ($model->refreshReuseResponse === RefreshReuseResponse::Unknown) {
+            $model->unknownEnumValues['refresh_reuse_response'] = (string) $data['refresh_reuse_response'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**
@@ -294,6 +328,9 @@ final class TenantSettingsOverride implements \JsonSerializable
         }
         if ($this->passwordHistoryCount !== null) {
             $out['password_history_count'] = $this->passwordHistoryCount;
+        }
+        if ($this->refreshReuseResponse !== null) {
+            $out['refresh_reuse_response'] = ($log ? $this->refreshReuseResponse->value : $this->refreshReuseResponse->toWire());
         }
         if ($this->refreshTokenLifetimeSecs !== null) {
             $out['refresh_token_lifetime_secs'] = $this->refreshTokenLifetimeSecs;

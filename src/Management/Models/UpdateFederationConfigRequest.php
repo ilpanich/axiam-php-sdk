@@ -64,6 +64,8 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
      *     metadata URL. Explicit `null` clears it; omitted leaves it. `null` leaves the member
      *     ABSENT; {@see \Axiam\Sdk\Management\JsonNull::Null} is an explicit JSON `null`, which is
      *     not the same thing (§27.4 rule 5). (optional)
+     * @param NativeLoginTrustRequest|null $nativeLogin the server's `native_login` field
+     *     (optional)
      * @param string|null $provider the server's `provider` field (optional)
      * @param string|\Axiam\Sdk\Management\JsonNull|null $providerSlug Operator-chosen
      *     identifier for a `generic_*` kind. Explicit `null` clears it. `null` leaves the member
@@ -99,6 +101,7 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
         public readonly string|\Axiam\Sdk\Management\JsonNull|null $idpMetadataSigningCertPem = null,
         public readonly string|\Axiam\Sdk\Management\JsonNull|null $idpSigningCertPem = null,
         public readonly string|\Axiam\Sdk\Management\JsonNull|null $metadataUrl = null,
+        public readonly ?NativeLoginTrustRequest $nativeLogin = null,
         public readonly ?string $provider = null,
         public readonly string|\Axiam\Sdk\Management\JsonNull|null $providerSlug = null,
         public readonly ?bool $requirePkce = null,
@@ -131,6 +134,7 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
             array_key_exists('idp_metadata_signing_cert_pem', $data) ? ($data['idp_metadata_signing_cert_pem'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['idp_metadata_signing_cert_pem']) : null,
             array_key_exists('idp_signing_cert_pem', $data) ? ($data['idp_signing_cert_pem'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['idp_signing_cert_pem']) : null,
             array_key_exists('metadata_url', $data) ? ($data['metadata_url'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['metadata_url']) : null,
+            isset($data['native_login']) ? NativeLoginTrustRequest::fromArray((array) $data['native_login']) : null,
             isset($data['provider']) ? (string) $data['provider'] : null,
             array_key_exists('provider_slug', $data) ? ($data['provider_slug'] === null ? \Axiam\Sdk\Management\JsonNull::Null : (string) $data['provider_slug']) : null,
             isset($data['require_pkce']) ? (bool) $data['require_pkce'] : null,
@@ -226,6 +230,9 @@ final class UpdateFederationConfigRequest implements \JsonSerializable
         }
         if ($this->metadataUrl !== null) {
             $out['metadata_url'] = $this->metadataUrl instanceof \Axiam\Sdk\Management\JsonNull ? null : $this->metadataUrl;
+        }
+        if ($this->nativeLogin !== null) {
+            $out['native_login'] = ($log ? $this->nativeLogin->jsonSerialize() : $this->nativeLogin->toArray());
         }
         if ($this->provider !== null) {
             $out['provider'] = $this->provider;

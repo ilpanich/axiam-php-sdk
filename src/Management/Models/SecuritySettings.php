@@ -41,6 +41,8 @@ final class SecuritySettings implements \JsonSerializable
      * @param TokenPolicy $token the server's `token` field
      * @param string $updatedAt the server's `updated_at` field
      * @param WebauthnPolicy $webauthn the server's `webauthn` field
+     * @param OAuth2Policy|null $oauth2 G-C (#818) — `oauth2.refresh_reuse_response`. Defaulted
+     *     so a document written before the field reads as the default. (optional)
      */
     public function __construct(
         public readonly CertificatePolicy $certificate,
@@ -59,6 +61,7 @@ final class SecuritySettings implements \JsonSerializable
         public readonly TokenPolicy $token,
         public readonly string $updatedAt,
         public readonly WebauthnPolicy $webauthn,
+        public readonly ?OAuth2Policy $oauth2 = null,
     ) {
     }
 
@@ -85,6 +88,7 @@ final class SecuritySettings implements \JsonSerializable
             TokenPolicy::fromArray((array) ModelDecode::need($data, 'token', self::class)),
             (string) ModelDecode::need($data, 'updated_at', self::class),
             WebauthnPolicy::fromArray((array) ModelDecode::need($data, 'webauthn', self::class)),
+            isset($data['oauth2']) ? OAuth2Policy::fromArray((array) $data['oauth2']) : null,
         );
         if ($model->scope === SettingsScope::Unknown) {
             $model->unknownEnumValues['scope'] = (string) $data['scope'];
@@ -165,6 +169,9 @@ final class SecuritySettings implements \JsonSerializable
         $out['token'] = ($log ? $this->token->jsonSerialize() : $this->token->toArray());
         $out['updated_at'] = $this->updatedAt;
         $out['webauthn'] = ($log ? $this->webauthn->jsonSerialize() : $this->webauthn->toArray());
+        if ($this->oauth2 !== null) {
+            $out['oauth2'] = ($log ? $this->oauth2->jsonSerialize() : $this->oauth2->toArray());
+        }
 
         return $out;
     }
