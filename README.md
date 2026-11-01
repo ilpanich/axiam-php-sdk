@@ -217,9 +217,9 @@ reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` und
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.64**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
-§15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33
-and §36,
+This SDK conforms to **contract 1.65**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+§15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33,
+§36 and §37,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
 **`PS256` is not shipped**, see [CIBA](#ciba-contractmd-33) below for why — including
 §6.1 mTLS, contract 1.3; §12 OIDC/SSO helpers, contract 1.4; §13 webhook-signature
@@ -281,9 +281,30 @@ change-taking read-modify-write form (§32.2) and settles two rules about reques
 rule 5). Release 1.0.1 was never tagged: this is the first release to carry 1.61 as well, as 1.1.0 (its change log is merged into 1.1.0).
 The first table below says what 1.62 changed here.
 
+Contract 1.65 (the 1.2.0 platform release, §34.9) adds no management operation (202 operations across 29
+namespaces) and brings two things every SDK ports — **native sign-in with a provider ID token** (§37,
+`loginWithProviderIdToken()` and `nativeNonce()`) and the **`idp_hint`** input of `oidcBegin()`/`oidcPar()`
+(§12.1, §26.2 rule 8) — beside server-side changes that need no SDK work. The first table below says what 1.65
+changed here.
+
+**Server floor:** federation-config admin calls (`federation.create_config`, `get_config`, `list_configs`,
+`update_config`) of this 1.2-line SDK need an AXIAM server **1.2.0 or later**: `FederationConfigResponse::$nativeLogin`
+is required from 1.2.0, and a response from an older server fails to decode.
+
 Contract 1.64 (the 1.1.2 release, §34.8) adds no operation (202 operations across 29 namespaces) and records one
-rule SDKs port, one wording relaxation, and server-side changes that need no SDK work. The first table below says
-what 1.64 changed here.
+rule SDKs port, one wording relaxation, and server-side changes that need no SDK work. The table headed
+"Contract 1.64" below says what 1.64 changed here.
+
+### Contract 1.65 — what changed here
+
+| Item (§34.9) | Here |
+|---|---|
+| (a) native sign-in with a provider ID token (§37) | `AxiamClient::loginWithProviderIdToken()` and `nativeNonce()`; see [Native sign-in](#native-sign-in-with-a-provider-id-token-contractmd-37). Tests: `tests/Contract165/NativeSignInTest.php`, the thirteen of §37.9 under the contract's names |
+| (b) `idp_hint` on the authorize-URL builder and on PAR (§12.1, §26.2 rule 8) | `oidcBegin(…, idpHint: …)` emits `axiam_idp_hint` once; `oidcPar(…, idpHint: …)` pushes it in the body (defaulting to the hint the `AuthorizationRequest` was built with) and keeps the redirect to `client_id` and `request_uri`; `tests/Contract165/IdpHintTest.php` |
+| (c) a replayed refresh token ends the session (§9) | No code change. `invalid_grant` on `oidcRefresh()` is an `OAuthProtocolError` that is never retried, and the single-flight guard keeps one burst to one rotation; `tests/Contract165/RefreshReuseConfirmationTest.php` confirms it. This SDK stores no refresh token, so refreshing the same token from two places is the caller's defect to avoid |
+| (d) `client_id` on exchanged tokens, (f) `login.post_auth` on native sign-in | Informative; no SDK change |
+| (e) the handoff redirect carries the spent start `state` | No change. This SDK parses no handoff callback URL: `ssoCompleteHandoff($code)` takes the code, and the bundled Laravel and Symfony controllers handle only the OIDC callback and read `state`, `code` and `error` by name, so an extra `state` is tolerated; nothing here redeems, sends or forwards it |
+| (g), (i), (j) `default_idp`, `refresh_reuse_response`, `native_login` | Regenerated from the registry (§27.8): `default_idp` on the OAuth2 client models, `RefreshReuseResponse` and its member on `OAuth2Policy`, `SetOrgSettings` and `TenantSettingsOverride`, `NativeLoginTrustRequest`/`NativeLoginTrustResponse` on the federation config models. `settings()->setOrg()` is the plain `replace`: this SDK ships no composed read-modify-write form for settings, so pass `refreshReuseResponse` from the `getOrg()` read (`->oauth2->refreshReuseResponse`) when writing back, or an organization on `refuse` is moved to the server default `revoke_session` (the stricter direction). A member added to a generated model is a new constructor parameter, which breaks a *positional* call; name the arguments |
 
 ### Contract 1.64 — what changed here
 
@@ -752,6 +773,56 @@ see [`examples/laravel_app/oidc_routes.php`](examples/laravel_app/oidc_routes.ph
 - Both bridges share ONE framework-agnostic core, `Axiam\Sdk\Oidc\OidcLoginFlow`, so
   the 400/401/503 failure mapping (malformed callback / IdP error / unknown state /
   ID-token or OAuth2 failure / AXIAM unreachable) is byte-identical between them.
+
+## Native sign-in with a provider ID token (CONTRACT.md §37)
+
+A mobile or desktop app that holds the ID token a Google, Apple or Facebook native SDK produced presents it to
+AXIAM's token endpoint and receives this client's ordinary token set. One request, no browser. It is **not**
+token exchange (§15 refuses ID tokens), and neither is a fallback for the other.
+
+```php
+$client = new AxiamClient($baseUrl, $tenant, oidcClientId: 'mobile-app', oidcTenantId: $tenantUuid); // a public client: no secret
+
+// 1. A pair per attempt. Give the provider's SDK `hashed`; keep `raw` for the length of the attempt.
+$nonce = $client->nativeNonce();                   // ProviderNonce { Sensitive $raw, string $hashed }
+$providerIdToken = $googleSdk->signIn(nonce: $nonce->hashed);
+
+// 2. Present the provider's token and the RAW nonce. `provider` is the provider's UUID or its slug.
+$tokens = $client->loginWithProviderIdToken(
+    'corp-google',
+    $providerIdToken,
+    $nonce->raw,
+    scopes: ['openid', 'profile'],                 // optional; none are added for you
+);
+$tokens->accessToken->reveal();                    // an OidcTokenSet, like oidcExchange()'s
+```
+
+- `nonce` is the **raw** value, sent byte for byte; the server hashes it and compares it with the token's claim.
+  Never pass the hash. `provider` is sent exactly as given: a kind name such as `google` works only if the
+  operator also chose it as the slug.
+- No scope is added. An omitted `scopes` is the empty set, so the response has no `id_token` unless `openid` is
+  passed; a returned `id_token` is validated under §12.4 with the raw nonce.
+- It is never retried and `invalid_grant` is never refined: the provider's token is single-use across the whole
+  deployment, and every refusal of it is one generic `OAuthProtocolError`. After any failure, obtain a **fresh**
+  provider token and a **fresh** nonce. A `429` spends nothing and carries `retryAfterMs`.
+- Neither the provider ID token nor the raw nonce is logged, kept, or put in an error message. Hold the raw
+  nonce only for the length of the attempt. An empty `provider`, `idToken` or `nonce`, and a nonce over 512 bytes, are refused
+  with `\InvalidArgumentException` (what an invalid `idpHint` raises; never an `AuthError`), and a client built with no
+  tenant UUID with an `AuthError`, all before any request.
+- `adoptAsCredential: true` is the same opt-in as `loginClientCredentials()` and `deviceLogin()`; the default
+  adopts nothing. This SDK generates no DPoP proofs (§21.9), so a client registered for DPoP is refused by the
+  server as for any token request.
+
+### Choosing the provider for a browser sign-in (`idp_hint`, contract 1.65)
+
+```php
+$request = $client->oidcBegin($config, $redirectUri, idpHint: 'corp-okta'); // a UUID, a provider_slug or `google`, `apple`, …
+$pushed  = $client->oidcPar($request, $redirectUri, $config);              // pushes the same hint in the body
+```
+
+The hint is emitted as `axiam_idp_hint`, once, and only when set; only emptiness and length (256 bytes) are
+checked, with an `\InvalidArgumentException`. An unresolvable hint is ignored by the server. There is no
+`kc_idp_hint`.
 
 ## Device authorization grant (CONTRACT.md §14)
 

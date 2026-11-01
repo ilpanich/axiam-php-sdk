@@ -67,6 +67,10 @@ final class OAuth2ClientResponse implements \JsonSerializable
      *     notification endpoint. (optional)
      * @param CibaDeliveryMode|null $backchannelTokenDeliveryMode the server's
      *     `backchannel_token_delivery_mode` field (optional)
+     * @param string|null $defaultIdp G-B (#817) — the provider this client's sign-in page
+     *     starts with when a request carries no hint; absent for none. Echoed as stored: a value
+     *     whose provider has since been disabled is shown, and ignored at the authorization
+     *     endpoint. (optional)
      * @param string|null $jwks X5.1 — echoed so an operator can confirm which key source is
      *     registered. The document itself is public key material, so returning it leaks nothing; a
      *     `jwks_uri` is likewise public by construction. (optional)
@@ -108,6 +112,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
         public readonly ?CibaRequestSigningAlg $backchannelAuthenticationRequestSigningAlg = null,
         public readonly ?string $backchannelClientNotificationEndpoint = null,
         public readonly ?CibaDeliveryMode $backchannelTokenDeliveryMode = null,
+        public readonly ?string $defaultIdp = null,
         public readonly ?string $jwks = null,
         public readonly ?string $jwksUri = null,
         public readonly ?string $lastAuthorizedAt = null,
@@ -147,6 +152,7 @@ final class OAuth2ClientResponse implements \JsonSerializable
             isset($data['backchannel_authentication_request_signing_alg']) ? CibaRequestSigningAlg::fromWire((string) $data['backchannel_authentication_request_signing_alg']) : null,
             isset($data['backchannel_client_notification_endpoint']) ? (string) $data['backchannel_client_notification_endpoint'] : null,
             isset($data['backchannel_token_delivery_mode']) ? CibaDeliveryMode::fromWire((string) $data['backchannel_token_delivery_mode']) : null,
+            isset($data['default_idp']) ? (string) $data['default_idp'] : null,
             isset($data['jwks']) ? (string) $data['jwks'] : null,
             isset($data['jwks_uri']) ? (string) $data['jwks_uri'] : null,
             isset($data['last_authorized_at']) ? (string) $data['last_authorized_at'] : null,
@@ -260,6 +266,9 @@ final class OAuth2ClientResponse implements \JsonSerializable
         }
         if ($this->backchannelTokenDeliveryMode !== null) {
             $out['backchannel_token_delivery_mode'] = ($log ? $this->backchannelTokenDeliveryMode->value : $this->backchannelTokenDeliveryMode->toWire());
+        }
+        if ($this->defaultIdp !== null) {
+            $out['default_idp'] = $this->defaultIdp;
         }
         if ($this->jwks !== null) {
             $out['jwks'] = $this->jwks;

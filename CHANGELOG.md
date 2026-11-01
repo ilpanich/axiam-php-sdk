@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Contract 1.65 (the AXIAM 1.2.0 platform release, §34.9). `CONTRACT.md` (1.65), `openapi.json` (1.2.0) and
+`management-registry.json` are re-vendored byte for byte from `ilpanich/axiam` `76d35d9`; `proto/` is
+byte-identical at that commit. No release number is chosen here: it is the maintainer's.
+
+### Added
+
+- **Native sign-in with a provider ID token (§37).** `AxiamClient::loginWithProviderIdToken(string $provider,
+  Sensitive|string $idToken, Sensitive|string $nonce, ?array $scopes = null, ?string $resource = null,
+  ?string $tenantId = null, ?OidcConfiguration $configuration = null, bool $adoptAsCredential = false): OidcTokenSet`
+  — one `POST /oauth2/token` with `grant_type=urn:axiam:params:oauth:grant-type:provider-id-token`. The raw nonce
+  and the provider (a UUID or a slug) are sent verbatim; no scope is added (so no `openid`, and no `id_token`
+  unless the caller asks for it); empty inputs and an over-long nonce are refused with `\InvalidArgumentException` (the type `idpHint` uses; never
+  an `AuthError`) and a slug-only client with an `AuthError`, all before any request; the call is never retried and `invalid_grant` is never refined; a returned `id_token` is validated
+  under §12.4 with the raw nonce; neither the provider token nor the nonce is logged, kept or put in an error.
+  Adoption is the same opt-in as `loginClientCredentials()` (`$adoptAsCredential`, default `false`).
+- **`AxiamClient::nativeNonce(): ProviderNonce`** (§37.4) — a network-free pair `{Sensitive $raw, string $hashed}`:
+  32 CSPRNG bytes as unpadded base64url, and its SHA-256 as 64 lower-case hex characters. New class
+  `Axiam\Sdk\Oidc\ProviderNonce`; new constant `OidcClient::PROVIDER_ID_TOKEN_GRANT_TYPE`.
+- **`idp_hint` (§12.1, §26.2 rule 8).** `oidcBegin(…, ?string $idpHint = null)` emits `axiam_idp_hint` exactly once
+  and only when set (an `axiam_idp_hint` in `$extraParams` is dropped then); `oidcPar(…, ?string $idpHint = null)`
+  pushes it in the body and never on the redirect URL, defaulting to the hint the `AuthorizationRequest` was
+  built with (new trailing `AuthorizationRequest::$idpHint`). An empty value or one over 256 bytes raises
+  `\InvalidArgumentException` with no URL built or request sent; nothing else is validated. There is no `kc_idp_hint`.
+- Tests: `tests/Contract165/` — the thirteen of §37.9 (under the contract's names), the five `idp_hint` tests of
+  §12.1/§26.6, and the §9 refresh-reuse confirmation (`invalid_grant` on `oidcRefresh()`: one wire call, six
+  concurrent callers receive that one `OAuthProtocolError`, the spent token never presented again).
+
+### Changed
+
+- **Regenerated §27 management layer** (`scripts/gen_management.py`; 202 operations in 29 namespaces, none new):
+  `default_idp` on `CreateOAuth2ClientRequest`, `UpdateOAuth2ClientRequest` and `OAuth2ClientResponse`;
+  `refresh_reuse_response` (`RefreshReuseResponse`, `revoke_session` | `refuse`) on `OAuth2Policy`, `SetOrgSettings`
+  and `TenantSettingsOverride`, with `SecuritySettings::$oauth2`; `native_login` (`NativeLoginTrustRequest`,
+  `NativeLoginTrustResponse`) on the federation config models. Because generated constructors list their members
+  in the wire's alphabetical order, **a member added to a model is a new constructor parameter that breaks a
+  positional call** (as in 1.1.0); name the arguments. `settings()->setOrg()` is the plain `replace` and this SDK
+  has no composed read-modify-write form for settings: pass `refreshReuseResponse` from the `getOrg()` read when
+  writing back, or an organization on `refuse` is set to the server default.
+- **Behaviour of the server to know about (no SDK change): a replayed refresh token now ends the session.** With
+  the platform default `oauth2.refresh_reuse_response = revoke_session`, presenting an already-rotated refresh token
+  to `oidcRefresh()` is still `400 invalid_grant` and now also invalidates the session and revokes every refresh
+  token under it, the successor included. Treat `invalid_grant` on `oidcRefresh()` as "the session is over";
+  never retry it with the same token. The §9 single-flight guard keeps one burst to one rotation, but it is per
+  client instance: refreshing the same token from two processes is a defect.
+- **Server floor:** federation-config admin calls (`federation.create_config`, `get_config`, `list_configs`,
+  `update_config`) of this 1.2-line SDK need an AXIAM server **1.2.0 or later**: `FederationConfigResponse::$nativeLogin`
+  is required from 1.2.0, and a response from an older server fails to decode (the usual "missing member" `NetworkError`); the one test fixture that played a server
+  response (`tests/Contract160/FederationAndNotificationRulesTest.php`) now carries the block.
+- `README.md` states conformance to contract 1.65 and §37.
+- **No `/oauth2/*` `POST` follows a redirect** (§12.1 rule 3, §37.2 rule 12; C165-14). Guzzle's default would have re-sent the
+  form (client credential, provider token, nonce) to a 307/308 target, cross-host included; `postForm` now sets
+  `allow_redirects => false` and surfaces any `3xx` as a `NetworkError`. AXIAM never redirects these endpoints, so only an
+  intermediary or a wrong base URL triggers it.
+- **`oidcRefresh`, the device poll and the CIBA poll no longer follow a redirect either** (§12.1 rule 3, §37.2 rule 12;
+  C165-22). These three `/oauth2/token` POSTs bypassed `postForm`, so a 307/308 would have re-sent the `refresh_token`,
+  `device_code` or `auth_req_id` and the `client_secret` to the redirect target. Every `/oauth2/*` form POST now takes its
+  options from one helper (`allow_redirects => false`), and a `3xx` is a `NetworkError` that names the status only (not
+  the `Location`) and is not retried by §16.
+- `CONTRACT.md` re-vendored at the amended 1.65 (sha256 `95ee87ba…9529`, `ilpanich/axiam` `d93976b`).
+
 ## [1.1.3] - 2026-10-29
 
 ### Changed

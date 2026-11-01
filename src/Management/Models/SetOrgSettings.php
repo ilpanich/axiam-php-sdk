@@ -18,6 +18,16 @@ namespace Axiam\Sdk\Management\Models;
 final class SetOrgSettings implements \JsonSerializable
 {
     /**
+     * The raw wire string of each open-enum member that decoded to `Unknown`, by wire name;
+     * empty for a model built any other way.
+     *
+     * Set by {@see self::fromArray()} only, read by {@see self::unknownEnumValue()}, never
+     * rendered or sent.
+     * @var array<string,string>
+     */
+    private array $unknownEnumValues = [];
+
+    /**
      * Constructs a SetOrgSettings.
      * @param int $accessTokenLifetimeSecs the server's `access_token_lifetime_secs` field
      * @param bool $adminNotificationsEnabled the server's `admin_notifications_enabled` field
@@ -60,6 +70,11 @@ final class SetOrgSettings implements \JsonSerializable
      * @param string|null $opaqueKsf the server's `opaque_ksf` field (optional)
      * @param string|null $opaqueMode the server's `opaque_mode` field (optional)
      * @param string|null $opaqueSuite the server's `opaque_suite` field (optional)
+     * @param RefreshReuseResponse|null $refreshReuseResponse G-C (#818) — defaulted to
+     *     `revoke_session` (D-N2): an API client written before the field lands on the new
+     *     default. `refuse` restores the 1.1.x behaviour. Because it is defaulted, a `PUT` from a
+     *     client written before 1.2.0 (which omits it) sets an organization on `refuse` back to
+     *     `revoke_session` — the stricter direction (F4-W1-06). (optional)
      * @param bool|null $samlIdpEnabled G-2 / D-20 — defaulted, so an API client written before
      *     the SAML identity provider existed lands on `false`, which is what every deployment did
      *     before (I1). (optional)
@@ -107,6 +122,7 @@ final class SetOrgSettings implements \JsonSerializable
         public readonly ?string $opaqueKsf = null,
         public readonly ?string $opaqueMode = null,
         public readonly ?string $opaqueSuite = null,
+        public readonly ?RefreshReuseResponse $refreshReuseResponse = null,
         public readonly ?bool $samlIdpEnabled = null,
         public readonly ?bool $sensitiveScopesEnabled = null,
         public readonly ?array $serverCertAllowedNames = null,
@@ -121,7 +137,7 @@ final class SetOrgSettings implements \JsonSerializable
      */
     public static function fromArray(array $data): self
     {
-        return new self(
+        $model = new self(
             (int) ModelDecode::need($data, 'access_token_lifetime_secs', self::class),
             (bool) ModelDecode::need($data, 'admin_notifications_enabled', self::class),
             (int) ModelDecode::need($data, 'default_cert_validity_days', self::class),
@@ -154,12 +170,33 @@ final class SetOrgSettings implements \JsonSerializable
             isset($data['opaque_ksf']) ? (string) $data['opaque_ksf'] : null,
             isset($data['opaque_mode']) ? (string) $data['opaque_mode'] : null,
             isset($data['opaque_suite']) ? (string) $data['opaque_suite'] : null,
+            isset($data['refresh_reuse_response']) ? RefreshReuseResponse::fromWire((string) $data['refresh_reuse_response']) : null,
             isset($data['saml_idp_enabled']) ? (bool) $data['saml_idp_enabled'] : null,
             isset($data['sensitive_scopes_enabled']) ? (bool) $data['sensitive_scopes_enabled'] : null,
             isset($data['server_cert_allowed_names']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['server_cert_allowed_names'])) : null,
             isset($data['ssf_enabled']) ? (bool) $data['ssf_enabled'] : null,
             isset($data['webauthn_user_verification']) ? (string) $data['webauthn_user_verification'] : null,
         );
+        if ($model->refreshReuseResponse === RefreshReuseResponse::Unknown) {
+            $model->unknownEnumValues['refresh_reuse_response'] = (string) $data['refresh_reuse_response'];
+        }
+
+        return $model;
+    }
+
+    /**
+     * The string the server sent for an open-enum member this SDK has no name for, or `null`.
+     *
+     * Only a model decoded by {@see self::fromArray()} knows it, and only for a member that
+     * decoded to `Unknown` (CONTRACT.md §27.6.2 item 4, §34.8 (c)): it lets a refusal name the
+     * value. It is for messages -- it is never rendered by {@see self::toArray()} or {@see
+     * self::jsonSerialize()} and so is never sent.
+     * @param string $wire The member's wire name.
+     * @return string|null
+     */
+    public function unknownEnumValue(string $wire): ?string
+    {
+        return $this->unknownEnumValues[$wire] ?? null;
     }
 
     /**
@@ -258,6 +295,9 @@ final class SetOrgSettings implements \JsonSerializable
         }
         if ($this->opaqueSuite !== null) {
             $out['opaque_suite'] = $this->opaqueSuite;
+        }
+        if ($this->refreshReuseResponse !== null) {
+            $out['refresh_reuse_response'] = ($log ? $this->refreshReuseResponse->value : $this->refreshReuseResponse->toWire());
         }
         if ($this->samlIdpEnabled !== null) {
             $out['saml_idp_enabled'] = $this->samlIdpEnabled;

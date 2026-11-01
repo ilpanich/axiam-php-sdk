@@ -47,6 +47,10 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
      *     (optional)
      * @param bool|null $browserSso X7.3 — see [`CreateOAuth2ClientRequest::browser_sso`].
      *     (optional)
+     * @param string|null $defaultIdp G-B (#817) — see
+     *     [`CreateOAuth2ClientRequest::default_idp`]. Omitted leaves it; `null` clears it; an id
+     *     is held to the create rule (`400` unless it names a provider this tenant can sign in
+     *     with). (optional)
      * @param bool|null $dpopBoundAccessTokens the server's `dpop_bound_access_tokens` field
      *     (optional)
      * @param bool|null $dpopRequireNonce the server's `dpop_require_nonce` field (optional)
@@ -86,6 +90,7 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
         public readonly ?string $backchannelTokenDeliveryMode = null,
         public readonly ?bool $backchannelUserCodeParameter = null,
         public readonly ?bool $browserSso = null,
+        public readonly ?string $defaultIdp = null,
         public readonly ?bool $dpopBoundAccessTokens = null,
         public readonly ?bool $dpopRequireNonce = null,
         public readonly ?array $grantTypes = null,
@@ -121,6 +126,7 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
             isset($data['backchannel_token_delivery_mode']) ? (string) $data['backchannel_token_delivery_mode'] : null,
             isset($data['backchannel_user_code_parameter']) ? (bool) $data['backchannel_user_code_parameter'] : null,
             isset($data['browser_sso']) ? (bool) $data['browser_sso'] : null,
+            isset($data['default_idp']) ? (string) $data['default_idp'] : null,
             isset($data['dpop_bound_access_tokens']) ? (bool) $data['dpop_bound_access_tokens'] : null,
             isset($data['dpop_require_nonce']) ? (bool) $data['dpop_require_nonce'] : null,
             isset($data['grant_types']) ? array_values(array_map(static fn (mixed $v): string => (string) $v, (array) $data['grant_types'])) : null,
@@ -231,6 +237,9 @@ final class UpdateOAuth2ClientRequest implements \JsonSerializable
         }
         if ($this->browserSso !== null) {
             $out['browser_sso'] = $this->browserSso;
+        }
+        if ($this->defaultIdp !== null) {
+            $out['default_idp'] = $this->defaultIdp;
         }
         if ($this->dpopBoundAccessTokens !== null) {
             $out['dpop_bound_access_tokens'] = $this->dpopBoundAccessTokens;

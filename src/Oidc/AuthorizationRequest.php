@@ -23,12 +23,14 @@ final class AuthorizationRequest
      * @param string    $state        CSPRNG CSRF value (≥128 bits, base64url unpadded) to compare against the `state` the IdP returns. Not a secret (§12.3 rule 2).
      * @param string    $nonce        CSPRNG replay-protection value (≥128 bits) that must equal the ID token's `nonce` claim. Not a secret (§12.3 rule 2).
      * @param Sensitive $codeVerifier The PKCE verifier, secret for its whole lifetime (§12.5). Pass it back into `oidcExchange`.
+     * @param string|null $idpHint    The `idp_hint` this request was built with (contract 1.65, §12.1), `null` when none. Carried so `oidcPar` pushes the same hint in its body (§26.2 rule 8) without the caller restating it; it is a provider name or id, not a secret.
      */
     public function __construct(
         public readonly string $url,
         public readonly string $state,
         public readonly string $nonce,
         public readonly Sensitive $codeVerifier,
+        public readonly ?string $idpHint = null,
     ) {
     }
 }

@@ -2407,6 +2407,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'browser_sso' => true,
                     'client_id' => 'example',
                     'created_at' => '2026-08-26T00:00:00Z',
+                    'default_idp' => '11111111-1111-4111-8111-111111111111',
                     'dpop_bound_access_tokens' => true,
                     'dpop_require_nonce' => true,
                     'grant_types' => [
@@ -2498,6 +2499,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'browser_sso' => true,
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
+            'default_idp' => '11111111-1111-4111-8111-111111111111',
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
             'grant_types' => [
@@ -2551,6 +2553,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'browser_sso' => true,
             'client_id' => 'example',
             'created_at' => '2026-08-26T00:00:00Z',
+            'default_idp' => '11111111-1111-4111-8111-111111111111',
             'dpop_bound_access_tokens' => true,
             'dpop_require_nonce' => true,
             'grant_types' => [
@@ -2688,6 +2691,13 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
                     'idp_metadata_signing_cert_pem' => 'example',
                     'metadata_url' => 'example',
                     'mints_client_secret' => true,
+                    'native_login' => [
+                        'client_ids' => [
+                            'example',
+                        ],
+                        'enabled' => true,
+                        'max_token_age_secs' => 1,
+                    ],
                     'pkce_required' => true,
                     'protocol' => 'example',
                     'provider' => 'example',
@@ -2756,6 +2766,13 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
+            'native_login' => [
+                'client_ids' => [
+                    'example',
+                ],
+                'enabled' => true,
+                'max_token_age_secs' => 1,
+            ],
             'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
@@ -2816,6 +2833,13 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
+            'native_login' => [
+                'client_ids' => [
+                    'example',
+                ],
+                'enabled' => true,
+                'max_token_age_secs' => 1,
+            ],
             'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
@@ -2876,6 +2900,13 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'idp_metadata_signing_cert_pem' => 'example',
             'metadata_url' => 'example',
             'mints_client_secret' => true,
+            'native_login' => [
+                'client_ids' => [
+                    'example',
+                ],
+                'enabled' => true,
+                'max_token_age_secs' => 1,
+            ],
             'pkce_required' => true,
             'protocol' => 'example',
             'provider' => 'example',
@@ -4657,6 +4688,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'notification' => [
                 'admin_notifications_enabled' => true,
             ],
+            'oauth2' => [
+                'refresh_reuse_response' => 'revoke_session',
+            ],
             'oidc' => [
                 'cimd' => [
                     'allow_http' => true,
@@ -4757,6 +4791,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             ],
             'notification' => [
                 'admin_notifications_enabled' => true,
+            ],
+            'oauth2' => [
+                'refresh_reuse_response' => 'revoke_session',
             ],
             'oidc' => [
                 'cimd' => [
@@ -4859,6 +4896,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'notification' => [
                 'admin_notifications_enabled' => true,
             ],
+            'oauth2' => [
+                'refresh_reuse_response' => 'revoke_session',
+            ],
             'oidc' => [
                 'cimd' => [
                     'allow_http' => true,
@@ -4959,6 +4999,9 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             ],
             'notification' => [
                 'admin_notifications_enabled' => true,
+            ],
+            'oauth2' => [
+                'refresh_reuse_response' => 'revoke_session',
             ],
             'oidc' => [
                 'cimd' => [
@@ -5085,6 +5128,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'opaque_mode' => 'example',
             'opaque_suite' => 'example',
             'password_history_count' => 1,
+            'refresh_reuse_response' => 'revoke_session',
             'refresh_token_lifetime_secs' => 1,
             'require_digits' => true,
             'require_lowercase' => true,
@@ -5161,6 +5205,7 @@ final class ManagementSurfaceGeneratedTest extends ManagementTestCase
             'opaque_mode' => 'example',
             'opaque_suite' => 'example',
             'password_history_count' => 1,
+            'refresh_reuse_response' => 'revoke_session',
             'refresh_token_lifetime_secs' => 1,
             'require_digits' => true,
             'require_lowercase' => true,

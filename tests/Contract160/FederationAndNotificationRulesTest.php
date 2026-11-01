@@ -52,7 +52,8 @@ final class FederationAndNotificationRulesTest extends ManagementRouteTestCase
     }
 
     /**
-     * A SAML configuration as a 1.60 server returns it, or — with `$drop` — as an older one.
+     * A SAML configuration as a 1.60 server returns it (with the `native_login` block every 1.2.0 server adds,
+     * contract 1.65), or — with `$drop` — as an older one.
      *
      * @param array<string,mixed> $extra
      * @param list<string> $drop
@@ -68,6 +69,8 @@ final class FederationAndNotificationRulesTest extends ManagementRouteTestCase
             'effective_scopes' => [], 'scopes' => [], 'has_bundled_mark' => false,
             'mints_client_secret' => false, 'pkce_required' => false,
             'idp_metadata_signing_cert_pem' => null,
+            // Required since contract 1.65 (§34.9 (j)): a 1.2.0 server always returns the block.
+            'native_login' => ['client_ids' => [], 'enabled' => false, 'max_token_age_secs' => 300],
             'token_exchange' => ['enabled' => false, 'accepted_audiences' => [], 'max_lifetime_secs' => 300,
                 'max_token_age_secs' => 300, 'scope_map' => [], 'subject_mapping' => 'link'],
             'created_at' => '2026-10-05T00:00:00Z', 'updated_at' => '2026-10-05T00:00:00Z',
