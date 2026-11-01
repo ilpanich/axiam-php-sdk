@@ -60,6 +60,11 @@ byte-identical at that commit. No release number is chosen here: it is the maint
   form (client credential, provider token, nonce) to a 307/308 target, cross-host included; `postForm` now sets
   `allow_redirects => false` and surfaces any `3xx` as a `NetworkError`. AXIAM never redirects these endpoints, so only an
   intermediary or a wrong base URL triggers it.
+- **`oidcRefresh`, the device poll and the CIBA poll no longer follow a redirect either** (§12.1 rule 3, §37.2 rule 12;
+  C165-22). These three `/oauth2/token` POSTs bypassed `postForm`, so a 307/308 would have re-sent the `refresh_token`,
+  `device_code` or `auth_req_id` and the `client_secret` to the redirect target. Every `/oauth2/*` form POST now takes its
+  options from one helper (`allow_redirects => false`), and a `3xx` is a `NetworkError` that names the status only (not
+  the `Location`) and is not retried by §16.
 - `CONTRACT.md` re-vendored at the amended 1.65 (sha256 `95ee87ba…9529`, `ilpanich/axiam` `d93976b`).
 
 ## [1.1.3] - 2026-10-29

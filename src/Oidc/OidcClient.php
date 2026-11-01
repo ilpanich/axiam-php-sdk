@@ -629,8 +629,11 @@ final class OidcClient
 
             if ($guarded['ran']) {
                 // WE are the leader: this call owns the one wire call, and drives it.
-                /** @var array<string,mixed> $wire */
+                /** @var array<string,mixed>|NetworkError $wire */
                 $wire = $guarded['promise']->wait();
+                if ($wire instanceof NetworkError) {
+                    throw $wire;
+                }
 
                 return $this->toTokenSet($wire, $configuration, null);
             }
@@ -643,8 +646,11 @@ final class OidcClient
                 // leader's in-flight refresh and freeing the guard slot mid-flight —
                 // after which the next caller replays an already-spent single-use
                 // refresh token. See RefreshGuard::join()'s doc comment.
-                /** @var array<string,mixed> $wire */
+                /** @var array<string,mixed>|NetworkError $wire */
                 $wire = RefreshGuard::join($guarded['promise']);
+                if ($wire instanceof NetworkError) {
+                    throw $wire;
+                }
 
                 return $this->toTokenSet($wire, $configuration, null);
             }
@@ -1107,16 +1113,17 @@ final class OidcClient
                 $attempt['n'] = $n;
                 $attempt['status'] = null;
                 try {
-                    $response = $this->http->post($url, [
-                        'form_params' => $form,
-                        'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-                        'http_errors' => false,
-                    ]);
+                    $response = $this->http->post($url, self::oauth2PostOptions($form, ['http_errors' => false]));
                 } catch (GuzzleException $e) {
                     throw $attempt['last'] = NetworkError::fromException($e, 'token request failed');
                 }
                 $status = $response->getStatusCode();
                 $attempt['status'] = $status;
+                // §12.1 rule 3: a 3xx is the poll's decided answer, never §16-retried (not a 5xx, not a
+                // transport failure); the Location is not followed and not carried into the error.
+                if ($status >= 300 && $status < 400) {
+                    throw $attempt['last'] = self::redirectRefused($response, 'token request failed');
+                }
                 if ($status >= 500) {
                     throw $attempt['last'] = NetworkError::fromResponse($response, 'token request failed');
                 }
@@ -2524,15 +2531,15 @@ final class OidcClient
                 $attempt['n'] = $n;
                 $status = null;
                 try {
-                    $response = $this->http->post($url, [
-                        'form_params' => $form,
-                        'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-                        'http_errors' => false,
-                    ]);
+                    $response = $this->http->post($url, self::oauth2PostOptions($form, ['http_errors' => false]));
                 } catch (GuzzleException $e) {
                     throw $attempt['last'] = NetworkError::fromException($e, 'ciba_poll request failed');
                 }
                 $status = $response->getStatusCode();
+                if ($status >= 300 && $status < 400) {
+                    // §12.1 rule 3: refused, not followed, not §16-retried (see the retryable check above).
+                    throw $attempt['last'] = self::redirectRefused($response, 'ciba_poll request failed');
+                }
                 if ($status >= 500) {
                     // §33.4, §33.7 rule 5, §34.2 P8: on ciba_poll a 5xx is transient whatever
                     // its body — AXIAM's own token endpoint answers 500 {"error":"server_error"}
@@ -2658,7 +2665,10 @@ final class OidcClient
      *
      * @param array<string,string> $form
      *
-     * @return PromiseInterface<array<string,mixed>, \Throwable>
+     * @return PromiseInterface<array<string,mixed>|NetworkError, \Throwable> A refused redirect (§12.1 rule 3)
+     *         is a fulfilled {@see NetworkError} VALUE, not a rejection: the refresh guard turns every
+     *         rejection that is not an `AuthError` into one, and the contract wants a `NetworkError`.
+     *         The callers throw it.
      */
     private function postTokenAsync(OidcConfiguration $configuration, array $form, ?string $tenantId): PromiseInterface
     {
@@ -2671,12 +2681,13 @@ final class OidcClient
             $tenantId,
         );
 
-        return $this->http->requestAsync('POST', $url, [
-            'form_params' => $form,
-            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-        ])->then(
-            /** @return array<string,mixed> */
-            function (ResponseInterface $response): array {
+        return $this->http->requestAsync('POST', $url, self::oauth2PostOptions($form))->then(
+            /** @return array<string,mixed>|NetworkError */
+            function (ResponseInterface $response): array|NetworkError {
+                if ($response->getStatusCode() >= 300 && $response->getStatusCode() < 400) {
+                    return self::redirectRefused($response, 'token request failed');
+                }
+
                 return self::decodeJsonObject($response, 'token request: response body is not a JSON object');
             },
             function (\Throwable $reason): never {
@@ -2927,6 +2938,41 @@ final class OidcClient
     }
 
     /**
+     * The request options of every form POST to an `/oauth2/*` endpoint: the form body, its content
+     * type and `allow_redirects => false`. One place, so no OAuth2 POST can omit the refusal
+     * (§12.1 rule 3 / §37.2 rule 12: a 307/308 would re-send `client_secret`, `refresh_token`,
+     * `device_code` or `auth_req_id` to the redirect target — Guzzle strips only `Authorization`
+     * and `Cookie` across hosts).
+     *
+     * @param array<string,string> $form
+     * @param array<string,mixed> $extra
+     *
+     * @return array<string,mixed>
+     */
+    private static function oauth2PostOptions(array $form, array $extra = []): array
+    {
+        return $extra + [
+            'form_params' => $form,
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+            'allow_redirects' => false,
+        ];
+    }
+
+    /** A 3xx from an `/oauth2/*` POST is a {@see NetworkError} (§12.1 rule 3); the `Location` is never followed. */
+    private static function refuseRedirect(ResponseInterface $response, string $context): void
+    {
+        if ($response->getStatusCode() >= 300 && $response->getStatusCode() < 400) {
+            throw self::redirectRefused($response, $context);
+        }
+    }
+
+    /** The error for a refused redirect: the status only, never the `Location` (it is not followed and not echoed). */
+    private static function redirectRefused(ResponseInterface $response, string $context): NetworkError
+    {
+        return NetworkError::fromMessage(sprintf('%s (redirect refused): HTTP %d', $context, $response->getStatusCode()));
+    }
+
+    /**
      * POST a form-encoded body (§12.1 note 1) through the session transport, synchronously.
      *
      * @param array<string,string> $form
@@ -2936,14 +2982,8 @@ final class OidcClient
         try {
             // §12.1 rule 3 / §37.2 rule 12: no redirect is followed from an /oauth2/* POST — a 307/308
             // would re-send the form (provider token, nonce, client_secret) to the redirect target.
-            $response = $this->http->post($url, [
-                'form_params' => $form,
-                'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
-                'allow_redirects' => false,
-            ]);
-            if ($response->getStatusCode() >= 300 && $response->getStatusCode() < 400) {
-                throw NetworkError::fromResponse($response, $context . ' (redirect refused)');
-            }
+            $response = $this->http->post($url, self::oauth2PostOptions($form));
+            self::refuseRedirect($response, $context);
 
             return $response;
         } catch (RequestException $e) {
