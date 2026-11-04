@@ -217,7 +217,7 @@ reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` und
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.65**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.66**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33,
 §36 and §37,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
