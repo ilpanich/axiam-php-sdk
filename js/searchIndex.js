@@ -1316,6 +1316,16 @@ Search.appendIndex(
             "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020\u0060grant_type\u003Dclient_credentials\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.1\u0029\u0020\u2014\nservice\u002Daccount\u0020machine\u002Dto\u002Dmachine\u0020login.\u0020Requests\u0020no\u0020\u0060openid\u0060\u0020scope,\u0020so\u0020the\nresponse\u0020carries\u0020no\u0020\u0060id_token\u0060.\u0020Pass\u0020\u0060\u0024adoptAsCredential\u003A\u0020true\u0060\u0020to\u0020additionally\nadopt\u0020the\u0020returned\u0020access\u0020token\u0020as\u0020this\u0020client\u0027s\u0020bearer\u0020credential\u0020for\nsubsequent\u0020same\u002Dorigin\u0020REST\u0020calls\u0020\u0028\u00A712.1,\u0020an\u0020opt\u002Din\u0020MAY\u0029\u0020\u2014\u0020the\u0020token\u0020is\u0020held\nbehind\u0020\u007B\u0040see\u0020Sensitive\u007D\u0020inside\u0020\u007B\u0040see\u0020Session\u007D\u0020and\u0020is\u0020NEVER\u0020sent\u0020to\u0020\u0060\/oauth2\/\u002A\u0060.",
             "url": "classes/Axiam-Sdk-AxiamClient.html#method_loginClientCredentials"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AloginWithProviderIdToken\u0028\u0029",
+            "name": "loginWithProviderIdToken",
+            "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020the\u0020native\u0020sign\u002Din\u0020grant\u0020\u0028CONTRACT.md\u0020\u00A737,\u0020contract\u00201.65\u0029\u0020\u2014\nsign\u0020a\u0020user\u0020in\u0020with\u0020the\u0020ID\u0020token\u0020a\u0020Google,\u0020Apple\u0020or\u0020Facebook\u0020native\u0020SDK\u0020produced,\u0020and\nget\u0020this\u0020client\u0027s\u0020ordinary\u0020\u007B\u0040see\u0020OidcTokenSet\u007D.\u0020\u002A\u002ANot\u002A\u002A\u0020token\u0020exchange\u003A\u0020\u007B\u0040see\u0020self\u003A\u003AtokenExchange\u0028\u0029\u007D\nrefuses\u0020ID\u0020tokens,\u0020and\u0020neither\u0020is\u0020a\u0020fallback\u0020for\u0020the\u0020other.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_loginWithProviderIdToken"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AnativeNonce\u0028\u0029",
+            "name": "nativeNonce",
+            "summary": "The\u0020nonce\u0020pair\u0020for\u0020\u007B\u0040see\u0020self\u003A\u003AloginWithProviderIdToken\u0028\u0029\u007D\u0020\u0028CONTRACT.md\u0020\u00A737.4\u0029\u0020\u2014\n\u002A\u002Apure\u0020local\u0020computation,\u0020no\u0020network\u0020I\/O\u002A\u002A\u003B\u0020a\u0020fresh\u0020pair\u0020on\u0020every\u0020call,\u0020stored\u0020nowhere.",
+            "url": "classes/Axiam-Sdk-AxiamClient.html#method_nativeNonce"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AxiamClient\u003A\u003AdeviceAuthorize\u0028\u0029",
             "name": "deviceAuthorize",
             "summary": "\u0060POST\u0020\/oauth2\/device_authorization\u0060\u0020\u0028CONTRACT.md\u0020\u00A714.1\u0029\u0020\u2014\u0020start\u0020the\u0020device\u0020grant\nand\u0020obtain\u0020the\u0020code\u0020pair.",
@@ -4831,6 +4841,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_metadataUrl"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024nativeLogin",
+            "name": "nativeLogin",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateFederationConfigRequest.html#property_nativeLogin"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateFederationConfigRequest\u003A\u003A\u0024providerKind",
             "name": "providerKind",
             "summary": "",
@@ -5200,6 +5215,11 @@ Search.appendIndex(
             "name": "browserSso",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_browserSso"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024defaultIdp",
+            "name": "defaultIdp",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-CreateOAuth2ClientRequest.html#property_defaultIdp"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\CreateOAuth2ClientRequest\u003A\u003A\u0024dpopBoundAccessTokens",
             "name": "dpopBoundAccessTokens",
@@ -6580,6 +6600,11 @@ Search.appendIndex(
             "name": "mintsClientSecret",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_mintsClientSecret"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024nativeLogin",
+            "name": "nativeLogin",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-FederationConfigResponse.html#property_nativeLogin"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\FederationConfigResponse\u003A\u003A\u0024pkceRequired",
             "name": "pkceRequired",
@@ -7976,6 +8001,86 @@ Search.appendIndex(
             "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
             "url": "classes/Axiam-Sdk-Management-Models-NameIdFormat.html#enumcase_Unknown"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest",
+            "name": "NativeLoginTrustRequest",
+            "summary": "Native\u0020sign\u002Din\u0020trust\u0020\u0028G\u002DA\u0029\u003A\u0020which\u0020ID\u0020tokens\u0020this\u0020provider\u0020issued\u0020to\u0020an\u0020app\u0020are\u0020accepted\u0020as\u0020a\nsign\u002Din\u0020at\u0020the\u0020token\u0020endpoint.\u0020Mirrors\u0020the\u0020domain\u0020block\u0020on\u0020the\u0020wire,\u0020as\n\u0060TokenExchangeTrustRequest\u0060\u0020does,\u0020so\u0020an\u0020omitted\u0020member\u0020takes\u0020its\u0020documented\u0020default\u0020rather\nthan\u0020failing\u0020deserialization.\u0020Only\u0020an\u0020\u0060OidcConnect\u0060\u0020provider\u0020may\u0020enable\u0020it.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020NativeLoginTrustRequest.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020NativeLoginTrustRequest\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest\u003A\u003A\u0024clientIds",
+            "name": "clientIds",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html#property_clientIds"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustRequest\u003A\u003A\u0024maxTokenAgeSecs",
+            "name": "maxTokenAgeSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustRequest.html#property_maxTokenAgeSecs"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse",
+            "name": "NativeLoginTrustResponse",
+            "summary": "Native\u0020sign\u002Din\u0020trust\u0020as\u0020returned\u0020to\u0020an\u0020administrator.\u0020Nothing\u0020here\u0020is\u0020secret\u003B\u0020it\u0020is\u0020never\npart\u0020of\u0020the\u0020unauthenticated\u0020providers\u0020listing.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020NativeLoginTrustResponse.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020NativeLoginTrustResponse\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse\u003A\u003A\u0024clientIds",
+            "name": "clientIds",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html#property_clientIds"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse\u003A\u003A\u0024enabled",
+            "name": "enabled",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html#property_enabled"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NativeLoginTrustResponse\u003A\u003A\u0024maxTokenAgeSecs",
+            "name": "maxTokenAgeSecs",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-NativeLoginTrustResponse.html#property_maxTokenAgeSecs"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\NetworkPolicyResponse",
             "name": "NetworkPolicyResponse",
             "summary": "The\u0020tenant\u0027s\u0020network\u0020policy,\u0020as\u0020the\u0020management\u0020API\u0020returns\u0020it.",
@@ -8756,6 +8861,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_backchannelTokenDeliveryMode"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024defaultIdp",
+            "name": "defaultIdp",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_defaultIdp"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2ClientResponse\u003A\u003A\u0024jwks",
             "name": "jwks",
             "summary": "",
@@ -8785,6 +8895,41 @@ Search.appendIndex(
             "name": "tlsClientAuthSubjectDn",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-OAuth2ClientResponse.html#property_tlsClientAuthSubjectDn"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2Policy",
+            "name": "OAuth2Policy",
+            "summary": "OAuth\u00202.0\u0020authorization\u002Dserver\u0020behaviour\u0020that\u0020is\u0020a\u0020tenant\u0027s\u0020to\u0020decide\u0020\u0028G\u002DC,\u0020\u0023818\u0029.\u0020A\u0020struct\nof\u0020its\u0020own\u0020rather\u0020than\u0020a\u0020field\u0020on\u0020\u0060TokenPolicy\u0060\u0020because\u0020it\u0020is\u0020not\u0020a\u0020lifetime,\u0020and\u0020so\u0020the\nresolved\u0020setting\u0020reads\u0020by\u0020its\u0020documented\u0020name,\u0020\u0060oauth2.refresh_reuse_response\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2Policy.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2Policy\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "Constructs\u0020a\u0020OAuth2Policy.",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2Policy.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2Policy\u003A\u003AfromArray\u0028\u0029",
+            "name": "fromArray",
+            "summary": "Rebuilds\u0020a\u0020OAuth2Policy\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2Policy.html#method_fromArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2Policy\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2Policy.html#method_unknownEnumValue"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2Policy\u003A\u003AtoArray\u0028\u0029",
+            "name": "toArray",
+            "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2Policy.html#method_toArray"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2Policy\u003A\u003AjsonSerialize\u0028\u0029",
+            "name": "jsonSerialize",
+            "summary": "Renders\u0020this\u0020object\u0020for\u0020\u0060json_encode\u0028\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2Policy.html#method_jsonSerialize"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OAuth2Policy\u003A\u003A\u0024refreshReuseResponse",
+            "name": "refreshReuseResponse",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-OAuth2Policy.html#property_refreshReuseResponse"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\OidcAuthorizeRequest",
             "name": "OidcAuthorizeRequest",
@@ -10090,6 +10235,36 @@ Search.appendIndex(
             "name": "status",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-ReadyResponse.html#property_status"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RefreshReuseResponse",
+            "name": "RefreshReuseResponse",
+            "summary": "What\u0020the\u0020token\u0020endpoint\u0020does\u0020when\u0020a\u0020refresh\u0020token\u0020that\u0020has\u0020already\u0020been\u0020rotated\u0020is\u0020presented\nagain\u0020and\u0020\u002A\u002Arefused\u002A\u002A\u0020\u0028G\u002DC,\u0020\u0023818\u0020\u2014\u0020the\u0020T\u002D254\u0020amendment\u0029.\u0020Two\u0020values,\u0020ordered\u0020by\u0020strictness\u003A\n\u002A\u0020\u0060revoke_session\u0060\u0020\u2014\u0020the\u0020default\u0020\u0028D\u002DN2\u0029.\u0020The\u0020refusal\u0020also\u0020invalidates\u0020the\u0020session\u0020the\nreplayed\u0020token\u0020names\u0020\u0028which\u0020publishes\u0020to\u0020the\u0020revocation\u0020feed\u0029\u0020and\u0020revokes\u0020every\u0020refresh\ntoken\u0020issued\u0020under\u0020that\u0020session\u0020\u2014\u0020whichever\u0020client\u0020it\u0020was\u0020issued\u0020to,\u0020the\u0020console\u0020sign\u002Din\nincluded,\u0020with\u0020no\u0020back\u002Dchannel\u0020logout\u0020sent\u0020\u2014\u0020as\u0020the\u0020authorization\u002Dcode\u0020replay\u0020path\u0020does\u0020for\na\u0020code\u0020\u0028RFC\u00206749\u0020\u00A710.5\u003B\u0020OAuth\u00202.0\u0020Security\u0020BCP\u0020\u00A74.14.2\u0029.\u0020Only\u0020a\u0020presentation\u0020by\u0020the\u0020token\u0027s\nown\u0020client,\u0020passing\u0020the\u0020token\u0027s\u0020sender\u0020constraint,\u0020triggers\u0020it\u0020\u0028\u0023821\u0029.\u0020On\u0020a\u0020client\u0020with\u0020no\ngrace\u0020window\u0020the\u0020honest\u0020holder\u0020of\u0020a\u0020replayed\u0020token\u0020has\u0020nothing\u0020left\u0020to\u0020lose\u0020\u2014\u0020its\u0020token\u0020is\nalready\u0020dead\u0020and\u0020it\u0020never\u0020received\u0020the\u0020successor\u0020\u2014\u0020so\u0020the\u0020revocation\u0020costs\u0020it\u0020nothing\u0020and\ncosts\u0020whoever\u0020holds\u0020the\u0020successor\u0020everything.\u0020\u002A\u0020\u0060refuse\u0060\u0020\u2014\u0020the\u00201.1.x\u0020behaviour\u003A\u0020the\npresentation\u0020is\u0020refused,\u0020marked\u0020on\u0020the\u0020session\u0020and\u0020audited,\u0020and\u0020nothing\u0020else\u0020is\u0020revoked.",
+            "url": "classes/Axiam-Sdk-Management-Models-RefreshReuseResponse.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RefreshReuseResponse\u003A\u003AfromWire\u0028\u0029",
+            "name": "fromWire",
+            "summary": "Parses\u0020a\u0020wire\u0020value\u0020into\u0020a\u0020RefreshReuseResponse,\u0020mapping\u0020an\u0020unrecognised\u0020one\u0020to\u0020\u007B\u0040see\nself\u003A\u003AUnknown\u007D.",
+            "url": "classes/Axiam-Sdk-Management-Models-RefreshReuseResponse.html#method_fromWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RefreshReuseResponse\u003A\u003AtoWire\u0028\u0029",
+            "name": "toWire",
+            "summary": "The\u0020wire\u0020spelling\u0020of\u0020this\u0020case,\u0020for\u0020a\u0020request\u0020body.",
+            "url": "classes/Axiam-Sdk-Management-Models-RefreshReuseResponse.html#method_toWire"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RefreshReuseResponse\u003A\u003ARevokeSession",
+            "name": "RevokeSession",
+            "summary": "The\u0020wire\u0020value\u0020\u0060revoke_session\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-RefreshReuseResponse.html#enumcase_RevokeSession"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RefreshReuseResponse\u003A\u003ARefuse",
+            "name": "Refuse",
+            "summary": "The\u0020wire\u0020value\u0020\u0060refuse\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-RefreshReuseResponse.html#enumcase_Refuse"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RefreshReuseResponse\u003A\u003AUnknown",
+            "name": "Unknown",
+            "summary": "A\u0020value\u0020this\u0020SDK\u0027s\u0020copy\u0020of\u0020the\u0020spec\u0020does\u0020not\u0020list\u003B\u0020see\u0020the\u0020type\u0027s\u0020summary.",
+            "url": "classes/Axiam-Sdk-Management-Models-RefreshReuseResponse.html#enumcase_Unknown"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\RegistrationTokenResponse",
             "name": "RegistrationTokenResponse",
@@ -12046,6 +12221,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#property_webauthn"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SecuritySettings\u003A\u003A\u0024oauth2",
+            "name": "oauth2",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SecuritySettings.html#property_oauth2"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\ServiceAccountCreatedResponse",
             "name": "ServiceAccountCreatedResponse",
             "summary": "Response\u0020for\u0020service\u0020account\u0020creation\u0020\u2014\u0020includes\u0020the\u0020one\u002Dtime\u0020plaintext\u0020secret.",
@@ -12481,6 +12661,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020SetOrgSettings\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -12650,6 +12835,11 @@ Search.appendIndex(
             "name": "opaqueSuite",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_opaqueSuite"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024refreshReuseResponse",
+            "name": "refreshReuseResponse",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-SetOrgSettings.html#property_refreshReuseResponse"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\SetOrgSettings\u003A\u003A\u0024samlIdpEnabled",
             "name": "samlIdpEnabled",
@@ -13541,6 +13731,11 @@ Search.appendIndex(
             "summary": "Rebuilds\u0020a\u0020TenantSettingsOverride\u0020from\u0020one\u0020decoded\u0020JSON\u0020object.",
             "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#method_fromArray"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003AunknownEnumValue\u0028\u0029",
+            "name": "unknownEnumValue",
+            "summary": "The\u0020string\u0020the\u0020server\u0020sent\u0020for\u0020an\u0020open\u002Denum\u0020member\u0020this\u0020SDK\u0020has\u0020no\u0020name\u0020for,\u0020or\u0020\u0060null\u0060.",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#method_unknownEnumValue"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003AtoArray\u0028\u0029",
             "name": "toArray",
             "summary": "Renders\u0020this\u0020object\u0020back\u0020to\u0020its\u0020wire\u0020form.",
@@ -13685,6 +13880,11 @@ Search.appendIndex(
             "name": "passwordHistoryCount",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_passwordHistoryCount"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024refreshReuseResponse",
+            "name": "refreshReuseResponse",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-TenantSettingsOverride.html#property_refreshReuseResponse"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\TenantSettingsOverride\u003A\u003A\u0024refreshTokenLifetimeSecs",
             "name": "refreshTokenLifetimeSecs",
@@ -14156,6 +14356,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_metadataUrl"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024nativeLogin",
+            "name": "nativeLogin",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateFederationConfigRequest.html#property_nativeLogin"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateFederationConfigRequest\u003A\u003A\u0024provider",
             "name": "provider",
             "summary": "",
@@ -14355,6 +14560,11 @@ Search.appendIndex(
             "name": "browserSso",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_browserSso"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024defaultIdp",
+            "name": "defaultIdp",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-UpdateOAuth2ClientRequest.html#property_defaultIdp"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\UpdateOAuth2ClientRequest\u003A\u003A\u0024dpopBoundAccessTokens",
             "name": "dpopBoundAccessTokens",
@@ -16481,6 +16691,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-AuthorizationRequest.html#property_codeVerifier"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\AuthorizationRequest\u003A\u003A\u0024idpHint",
+            "name": "idpHint",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-AuthorizationRequest.html#property_idpHint"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\CibaClock",
             "name": "CibaClock",
             "summary": "The\u0020clock\u0020\u007B\u0040see\u0020OidcClient\u003A\u003AcibaAwait\u0028\u0029\u007D\u0020waits\u0020on\u0020\u2014\u0020injectable\u0020so\u0020the\u0020\u00A733.7\u0020schedule\u0020is\ntestable\u0020without\u0020sleeping.",
@@ -17166,6 +17381,16 @@ Search.appendIndex(
             "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020\u0060grant_type\u003Dclient_credentials\u0060\u0020\u0028\u00A712.1\u0029\u0020\u2014\nservice\u002Daccount\u0020machine\u002Dto\u002Dmachine\u0020login.",
             "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_loginClientCredentials"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AloginWithProviderIdToken\u0028\u0029",
+            "name": "loginWithProviderIdToken",
+            "summary": "\u0060POST\u0020\/oauth2\/token\u0060\u0020with\u0020\u0060grant_type\u003Durn\u003Aaxiam\u003Aparams\u003Aoauth\u003Agrant\u002Dtype\u003Aprovider\u002Did\u002Dtoken\u0060\n\u0028CONTRACT.md\u0020\u00A737\u0029\u0020\u2014\u0020sign\u0020a\u0020user\u0020in\u0020with\u0020the\u0020ID\u0020token\u0020a\u0020Google,\u0020Apple\u0020or\u0020Facebook\u0020native\u0020SDK\nproduced,\u0020and\u0020get\u0020back\u0020this\u0020client\u0027s\u0020ordinary\u0020token\u0020set.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_loginWithProviderIdToken"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AnativeNonce\u0028\u0029",
+            "name": "nativeNonce",
+            "summary": "Generate\u0020the\u0020nonce\u0020pair\u0020a\u0020native\u0020sign\u002Din\u0020needs\u0020\u0028CONTRACT.md\u0020\u00A737.4\u0029\u0020\u2014\u0020\u002A\u002Apure\u0020local\ncomputation,\u0020no\u0020network\u0020I\/O\u002A\u002A,\u0020and\u0020nothing\u0020is\u0020stored.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#method_nativeNonce"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AdeviceAuthorize\u0028\u0029",
             "name": "deviceAuthorize",
             "summary": "\u0060POST\u0020\/oauth2\/device_authorization\u0060\u0020\u0028\u00A714.1\u0029\u0020\u2014\u0020start\u0020the\u0020device\u0020grant\u0020and\u0020obtain\nthe\u0020code\u0020pair.",
@@ -17340,6 +17565,16 @@ Search.appendIndex(
             "name": "MIN_DISCOVERY_TTL_SECONDS",
             "summary": "Minimum\u0020\u2014\u0020and\u0020default\u0020\u2014\u0020discovery\u002Dcache\u0020TTL,\u0020in\u0020seconds.\u0020CONTRACT.md\u0020\u00A712.3\u0020rule\u00206\nsets\u0020a\u0020floor\u0020of\u00205\u0020minutes\u003B\u0020a\u0020smaller\u0020configured\u0020value\u0020is\u0020raised\u0020to\u0020it.",
             "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_MIN_DISCOVERY_TTL_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003APROVIDER_ID_TOKEN_GRANT_TYPE",
+            "name": "PROVIDER_ID_TOKEN_GRANT_TYPE",
+            "summary": "\u0060grant_type\u0060\u0020of\u0020the\u0020native\u0020sign\u002Din\u0020request\u0020\u0028CONTRACT.md\u0020\u00A737.1\u0029.\u0020Not\u0020token\u0020exchange\u0020\u0028\u00A715\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_PROVIDER_ID_TOKEN_GRANT_TYPE"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ANATIVE_NONCE_MAX_BYTES",
+            "name": "NATIVE_NONCE_MAX_BYTES",
+            "summary": "\u00A737.2\u0020rule\u00204\u003A\u0020the\u0020longest\u0020\u0060nonce\u0060\u0020the\u0020server\u0020accepts,\u0020in\u0020bytes.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcClient.html#constant_NATIVE_NONCE_MAX_BYTES"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003ADEVICE_CODE_GRANT_TYPE",
             "name": "DEVICE_CODE_GRANT_TYPE",
@@ -17815,6 +18050,36 @@ Search.appendIndex(
             "name": "CSPRNG_BYTES",
             "summary": "Entropy,\u0020in\u0020bytes,\u0020of\u0020a\u0020generated\u0020\u0060state\u0060\u0020\/\u0020\u0060nonce\u0060\u0020\/\u0020\u0060code_verifier\u0060.",
             "url": "classes/Axiam-Sdk-Oidc-Pkce.html#constant_CSPRNG_BYTES"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ProviderNonce",
+            "name": "ProviderNonce",
+            "summary": "The\u0020pair\u0020a\u0020native\u0020sign\u002Din\u0020needs\u0020\u0028CONTRACT.md\u0020\u00A737.4\u0029\u003A\u0020the\u0020\u002A\u002Araw\u002A\u002A\u0020nonce\u0020AXIAM\u0020wants,\u0020and\nthe\u0020\u002A\u002Ahashed\u002A\u002A\u0020one\u0020the\u0020provider\u0027s\u0020SDK\u0020wants.",
+            "url": "classes/Axiam-Sdk-Oidc-ProviderNonce.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ProviderNonce\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ProviderNonce.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ProviderNonce\u003A\u003Agenerate\u0028\u0029",
+            "name": "generate",
+            "summary": "Generate\u0020a\u0020fresh\u0020pair.\u0020Pure\u0020local\u0020computation\u003A\u0020no\u0020network\u0020I\/O,\u0020and\u0020nothing\u0020is\nstored\u0020anywhere\u0020\u0028\u00A737.4\u0020rule\u00204,\u0020\u00A712.3\u0020rule\u00201\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-ProviderNonce.html#method_generate"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ProviderNonce\u003A\u003Ahash\u0028\u0029",
+            "name": "hash",
+            "summary": "\u0060SHA\u002D256\u0060\u0020of\u0020the\u0020bytes\u0020of\u0020\u0060\u0024raw\u0060\u0020as\u0020sent\u0020\u0028its\u0020ASCII\u0020bytes\u0029,\u0020as\u0020lower\u002Dcase\u0020hexadecimal\n\u0028\u00A737.4\u0020rule\u00202\u0029.\u0020Exposed\u0020for\u0020the\u0020fixed\u002Dvector\u0020test\u0020of\u0020the\u0020hashing\u0020step.",
+            "url": "classes/Axiam-Sdk-Oidc-ProviderNonce.html#method_hash"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ProviderNonce\u003A\u003A\u0024raw",
+            "name": "raw",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ProviderNonce.html#property_raw"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\ProviderNonce\u003A\u003A\u0024hashed",
+            "name": "hashed",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-ProviderNonce.html#property_hashed"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\PushedAuthorizationRequest",
             "name": "PushedAuthorizationRequest",
