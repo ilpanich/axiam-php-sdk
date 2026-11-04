@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 Contract 1.66 (post-1.2.0 sign-in hardening, §34.10). `CONTRACT.md` (1.66), `openapi.json` and
-`management-registry.json` are re-vendored byte for byte from `ilpanich/axiam` `a916544`; `proto/` is unchanged.
+`management-registry.json` are re-vendored byte for byte from `ilpanich/axiam` `5f9d079`; `proto/` is unchanged.
 **No API change**: the registry moves only its `spec_digest`, and `scripts/gen_management.py --check` reports the
 §27 surface current.
 
