@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Contract 1.66 (post-1.2.0 sign-in hardening, §34.10). `CONTRACT.md` (1.66), `openapi.json` and
+`management-registry.json` are re-vendored byte for byte from `ilpanich/axiam` `a916544`; `proto/` is unchanged.
+**No API change**: the registry moves only its `spec_digest`, and `scripts/gen_management.py --check` reports the
+§27 surface current.
+
+- **§12.1 rule 12b confirmation test** (#837, `tests/Contract166/FederatedBindingCookieTest.php`): the
+  `axiam_fed_bind` cookie an `ssoStart()` response sets is presented on the following `ssoComplete()` from the same
+  `AxiamClient`, and absent from a second client's. It passes against the existing §4 `CookieJar`; no code changed.
+  Start and complete one federated sign-in through the same client instance (one jar). The optional
+  `reauthenticate` input (rule 12c) is not exposed.
+- `README.md` states conformance to contract 1.66.
+
 Contract 1.65 (the AXIAM 1.2.0 platform release, §34.9). `CONTRACT.md` (1.65), `openapi.json` (1.2.0) and
 `management-registry.json` are re-vendored byte for byte from `ilpanich/axiam` `76d35d9`; `proto/` is
 byte-identical at that commit. No release number is chosen here: it is the maintainer's.
