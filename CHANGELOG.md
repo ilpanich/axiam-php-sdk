@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-11-04
+
 Contract 1.66 (post-1.2.0 sign-in hardening, §34.10). `CONTRACT.md` (1.66), `openapi.json` and
 `management-registry.json` are re-vendored byte for byte from `ilpanich/axiam` `5f9d079`; `proto/` is unchanged.
 **No API change**: the registry moves only its `spec_digest`, and `scripts/gen_management.py --check` reports the
@@ -46,6 +48,8 @@ byte-identical at that commit. No release number is chosen here: it is the maint
   §12.1/§26.6, and the §9 refresh-reuse confirmation (`invalid_grant` on `oidcRefresh()`: one wire call, six
   concurrent callers receive that one `OAuthProtocolError`, the spent token never presented again).
 
+- Native sign-in with a provider ID token and idp_hint (contract 1.65 §37)
+
 ### Changed
 
 - **Regenerated §27 management layer** (`scripts/gen_management.py`; 202 operations in 29 namespaces, none new):
@@ -78,6 +82,22 @@ byte-identical at that commit. No release number is chosen here: it is the maint
   options from one helper (`allow_redirects => false`), and a `3xx` is a `NetworkError` that names the status only (not
   the `Location`) and is not retried by §16.
 - `CONTRACT.md` re-vendored at the amended 1.65 (sha256 `95ee87ba…9529`, `ilpanich/axiam` `d93976b`).
+
+- re-vendor CONTRACT.md 1.66 as amended at ilpanich/axiam 5f9d079
+
+- re-sync contract 1.66 and openapi.json; confirm the federated sign-in cookie binding (§12.1 rule 12b)
+
+- re-vendor openapi.json and the management registry (logout/reset-mfa 500, D-N44)
+
+- re-vendor openapi.json and the management registry (end_session 500, D-N42)
+
+- re-vendor contract 1.65, openapi 1.2.0 and the management registry
+
+### Fixed
+
+- Contract 1.65 review sweep 2 (C165-22)
+
+- Contract 1.65 review findings (C165-04, C165-05, C165-14)
 
 ## [1.1.3] - 2026-10-29
 
