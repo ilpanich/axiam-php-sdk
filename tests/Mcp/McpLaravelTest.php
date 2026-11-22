@@ -71,7 +71,7 @@ final class McpLaravelTest extends TestCase
     {
         [$secretKey, $kid] = $this->keypair();
 
-        return JWT::encode($claims, base64_encode($secretKey), 'EdDSA', $kid);
+        return JWT::encode($claims, base64_encode($secretKey), 'EdDSA', $kid, ['typ' => 'at+jwt']);
     }
 
     private function validToken(string $aud = self::RESOURCE): string

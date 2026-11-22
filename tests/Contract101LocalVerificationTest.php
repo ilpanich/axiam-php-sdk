@@ -87,7 +87,7 @@ final class Contract101LocalVerificationTest extends TestCase
         [$secretKey, $kid] = $this->keypair();
         $key = $alg === 'EdDSA' ? base64_encode($secretKey) : 'attacker-chosen-hmac-secret-at-least-32-bytes-long';
 
-        return JWT::encode($claims, $key, $alg, $kid);
+        return JWT::encode($claims, $key, $alg, $kid, ['typ' => 'at+jwt']);
     }
 
     /**
@@ -100,7 +100,7 @@ final class Contract101LocalVerificationTest extends TestCase
     private function signRaw(array $claims): string
     {
         [$secretKey, $kid] = $this->keypair();
-        $header = $this->base64url((string) json_encode(['typ' => 'JWT', 'alg' => 'EdDSA', 'kid' => $kid]));
+        $header = $this->base64url((string) json_encode(['typ' => 'at+jwt', 'alg' => 'EdDSA', 'kid' => $kid]));
         $payload = $this->base64url((string) json_encode($claims));
         $signature = sodium_crypto_sign_detached("{$header}.{$payload}", $secretKey);
 

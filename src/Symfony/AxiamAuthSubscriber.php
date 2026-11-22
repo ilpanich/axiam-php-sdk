@@ -17,8 +17,8 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
      * Symfony authentication subscriber (D-02, CONTRACT.md §10): listens to
      * `kernel.request`, extracts the bearer/cookie token, verifies it via
      * {@see AxiamClient::verifyLocally()} — the no-fallback seam mandated by §10.1 rule 8
-     * — and populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles`
-     * on success. Short-circuits the request with a standardized 401 JSON error body on any
+     * — and populates the `axiam_user` request attribute with `user_id`/`tenant_id`/`roles`/`scopes`
+     * on success (`roles` from the token's `roles` claim only, `null` when it has none; `scopes` from `scope`). Short-circuits the request with a standardized 401 JSON error body on any
      * failure (missing token, invalid signature, expired token). Never duplicates
      * JWKS-verify logic itself (D-02 prohibition) — every security-critical decision is
      * made by {@see AxiamClient}.
@@ -207,7 +207,11 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
             $request->attributes->set('axiam_user', [
                 'user_id' => $userId,
                 'tenant_id' => $claimedTenantId,
-                'roles' => $this->rolesFromClaims($claims),
+                // N15 (contract 1.68): `roles` is the token's `roles` claim and nothing else —
+                // `null` when it carries none (every require_role then fails closed) — and
+                // `scopes` is the `scope` claim, read only by require_scope. Never one from the other.
+                'roles' => \Axiam\Sdk\Auth\IdentityClaims::roles($claims),
+                'scopes' => \Axiam\Sdk\Auth\IdentityClaims::scopes($claims),
             ]);
         }
 
@@ -261,23 +265,6 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
             }
 
             return hash_equals($cookie, $header);
-        }
-
-        /**
-         * @param array<string,mixed> $claims
-         * @return list<string>
-         */
-        private function rolesFromClaims(array $claims): array
-        {
-            $rolesClaim = $claims['roles'] ?? $claims['scope'] ?? [];
-            if (is_array($rolesClaim)) {
-                return array_values(array_filter($rolesClaim, 'is_string'));
-            }
-            if (is_string($rolesClaim) && $rolesClaim !== '') {
-                return array_values(array_filter(explode(' ', $rolesClaim)));
-            }
-
-            return [];
         }
 
         private function unauthorized(string $message, bool $credentialPresented): \Symfony\Component\HttpFoundation\JsonResponse

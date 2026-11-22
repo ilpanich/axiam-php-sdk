@@ -51,6 +51,7 @@ final class SymfonyAuthEdgeSubscriberTest extends TestCase
             base64_encode($secretKey),
             'EdDSA',
             $keypair['kid'],
+            ['typ' => 'at+jwt'],
         );
     }
 
@@ -191,7 +192,11 @@ final class SymfonyAuthEdgeSubscriberTest extends TestCase
         self::assertSame(401, $event->getResponse()?->getStatusCode());
     }
 
-    public function testScopeStringClaimIsNormalizedToRolesList(): void
+    /**
+     * N15 (CONTRACT.md §11.2 rule 11, contract 1.68; D-1): used to assert that a `scope` string
+     * became the identity's ROLES. The scope now lands only in `scopes`; `roles` stays `null`.
+     */
+    public function testScopeStringClaimIsNeverTurnedIntoRoles(): void
     {
         $token = $this->signedJwt([
             'sub' => 'user-x',
@@ -206,13 +211,11 @@ final class SymfonyAuthEdgeSubscriberTest extends TestCase
         $subscriber->onKernelRequest($event);
 
         self::assertFalse($event->hasResponse());
-        self::assertSame(
-            ['read', 'write', 'delete'],
-            $request->attributes->get('axiam_user')['roles'],
-        );
+        self::assertNull($request->attributes->get('axiam_user')['roles']);
+        self::assertSame(['read', 'write', 'delete'], $request->attributes->get('axiam_user')['scopes']);
     }
 
-    public function testNonStringRolesClaimNormalizesToEmptyList(): void
+    public function testNonArrayRolesClaimIsUnusableAndFailsClosed(): void
     {
         $token = $this->signedJwt([
             'sub' => 'user-x',
@@ -227,6 +230,6 @@ final class SymfonyAuthEdgeSubscriberTest extends TestCase
         $subscriber->onKernelRequest($event);
 
         self::assertFalse($event->hasResponse());
-        self::assertSame([], $request->attributes->get('axiam_user')['roles']);
+        self::assertNull($request->attributes->get('axiam_user')['roles'], 'a roles claim that is not an array of strings is treated as absent');
     }
 }

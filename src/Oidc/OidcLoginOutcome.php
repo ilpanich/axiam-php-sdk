@@ -27,7 +27,29 @@ final class OidcLoginOutcome
         public readonly ?int $status = null,
         public readonly ?string $error = null,
         public readonly ?string $message = null,
+        /**
+         * A complete `Set-Cookie` header value the controller MUST send with this response,
+         * or `null`. The login redirect carries the browser-binding cookie; EVERY callback
+         * outcome carries its clearing twin (CONTRACT.md §12.8 rule 1 (a), (d)).
+         */
+        public readonly ?string $setCookie = null,
     ) {
+    }
+
+    /** The same outcome carrying `$setCookie` as its `Set-Cookie` header value. */
+    public function withSetCookie(string $setCookie): self
+    {
+        return new self(
+            $this->kind,
+            $this->redirectUrl,
+            $this->authenticated,
+            $this->sub,
+            $this->expiresIn,
+            $this->status,
+            $this->error,
+            $this->message,
+            $setCookie,
+        );
     }
 
     /** Send a 302 to `$url` — the IdP authorization URL, or the post-login destination. */

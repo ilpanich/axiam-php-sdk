@@ -206,7 +206,7 @@ final class SymfonyAuthSubscriberTest extends TestCase
 
         self::assertFalse($event->hasResponse(), 'a valid token must never short-circuit the request');
         self::assertSame(
-            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => []],
+            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => null, 'scopes' => null],
             $request->attributes->get('axiam_user'),
         );
     }
@@ -295,7 +295,7 @@ final class SymfonyAuthSubscriberTest extends TestCase
 
         self::assertFalse($event->hasResponse(), 'a matching CSRF token must never short-circuit the request');
         self::assertSame(
-            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => []],
+            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => null, 'scopes' => null],
             $request->attributes->get('axiam_user'),
         );
     }

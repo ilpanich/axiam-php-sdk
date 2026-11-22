@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
  * {@see LaravelMiddlewareTest}'s primary flows: a non-Bearer `Authorization` header, a
  * cookie-authenticated write missing the `axiam_csrf` cookie, a signature-valid token
  * with a malformed claim shape (empty `sub`), and the two non-array `roles`/`scope`
- * claim shapes {@see AxiamMiddleware::rolesFromClaims()} normalizes. Tokens are re-signed
+ * claim shapes {@see \Axiam\Sdk\Auth\IdentityClaims} reads. Tokens are re-signed
  * with the committed Ed25519 fixture keypair (same approach as {@see JwtVerifyTest}) so
  * they verify against the fixture JWKS while carrying the exact claims under test.
  */
@@ -49,6 +49,7 @@ final class LaravelAuthMiddlewareTest extends TestCase
             base64_encode($secretKey),
             'EdDSA',
             $keypair['kid'],
+            ['typ' => 'at+jwt'],
         );
     }
 
@@ -174,7 +175,14 @@ final class LaravelAuthMiddlewareTest extends TestCase
         self::assertSame(401, $response->getStatusCode());
     }
 
-    public function testScopeStringClaimIsNormalizedToRolesList(): void
+    /**
+     * N15 (CONTRACT.md §11.2 rule 11, contract 1.68; D-1). This test used to assert that a `scope`
+     * string became the identity's ROLES (`['read', 'write', 'delete']`) — the defect: a scope is
+     * chosen by the client and says nothing about what the user holds. The scope now lands only in
+     * `scopes`, and `roles` stays `null` ("the token carries no roles claim"), which fails every
+     * require_role.
+     */
+    public function testScopeStringClaimIsNeverTurnedIntoRoles(): void
     {
         $token = $this->signedJwt([
             'sub' => 'user-x',
@@ -187,13 +195,24 @@ final class LaravelAuthMiddlewareTest extends TestCase
         $request->headers->set('Authorization', 'Bearer ' . $token);
         $middleware->handle($request, $this->passthroughNext());
 
-        self::assertSame(
-            ['read', 'write', 'delete'],
-            $request->attributes->get('axiam_user')['roles'],
-        );
+        self::assertNull($request->attributes->get('axiam_user')['roles']);
+        self::assertSame(['read', 'write', 'delete'], $request->attributes->get('axiam_user')['scopes']);
     }
 
-    public function testNonStringRolesClaimNormalizesToEmptyList(): void
+    public function testRolesClaimArrayBecomesTheIdentitysRolesAndAnEmptyOneStaysDistinctFromAbsent(): void
+    {
+        foreach ([['roles' => ['admin', 'editor']], ['roles' => []]] as $claims) {
+            $token = $this->signedJwt(['sub' => 'user-x', 'tenant_id' => self::FIXTURE_TENANT, 'scope' => 'openid'] + $claims);
+            $middleware = new AxiamMiddleware($this->clientWith($this->jwksQueue()), self::FIXTURE_TENANT);
+            $request = Request::create('/documents/1', 'GET');
+            $request->headers->set('Authorization', 'Bearer ' . $token);
+            $middleware->handle($request, $this->passthroughNext());
+
+            self::assertSame($claims['roles'], $request->attributes->get('axiam_user')['roles']);
+        }
+    }
+
+    public function testNonArrayRolesClaimIsUnusableAndFailsClosed(): void
     {
         $token = $this->signedJwt([
             'sub' => 'user-x',
@@ -206,6 +225,6 @@ final class LaravelAuthMiddlewareTest extends TestCase
         $request->headers->set('Authorization', 'Bearer ' . $token);
         $middleware->handle($request, $this->passthroughNext());
 
-        self::assertSame([], $request->attributes->get('axiam_user')['roles']);
+        self::assertNull($request->attributes->get('axiam_user')['roles'], 'a roles claim that is not an array of strings is treated as absent, never as a role list');
     }
 }

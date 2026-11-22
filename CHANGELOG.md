@@ -7,6 +7,117 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-22
+
+Contract 1.68 (security audit 2026-11-14, Wave 2 and 3). `CONTRACT.md` (1.68), `openapi.json` and
+`management-registry.json` are re-vendored byte for byte from `ilpanich/axiam`; `proto/` is unchanged. The §27
+management layer is regenerated (`scripts/gen_management.py`; 265 files): the only surface change is the new optional
+`AuditLogEntry::$organizationId` (below). `README.md` states conformance to contract 1.68.
+
+**Behaviour changes for integrators (C7, C6, N15, N14, and the Laravel `axiam.access` fix) — read the migration
+notes below before upgrading.** This is a minor release: no class, method or parameter was removed.
+
+### Security
+
+- **C7 — login CSRF in the "Login with AXIAM" glue (CONTRACT.md §12.8 rule 1).** `OidcLoginFlow` kept the in-flight
+  login keyed by `state` alone, so a callback loaded in a browser other than the one that started the login completed
+  it, and `$onSuccess` ran with the attacker's tokens. `begin()` now draws 32 CSPRNG bytes, hands them back as the
+  `__Host-axiam_oidc_bind` cookie (`HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`, no `Domain`; on a plain-HTTP
+  loopback `redirect_uri` — `localhost`, `127.0.0.1`, `[::1]` — `axiam_oidc_bind` without `Secure`) and stores only
+  its SHA-256 on the entry (`OidcStateEntry::$bindingDigest`). `complete()` consumes the entry first, then refuses —
+  with the same `401 authentication_failed` / `unknown, expired, or already-used login state` an unknown state gets,
+  without a token request and without `$onSuccess` — any callback that does not present the matching cookie
+  (constant-time compare). Every callback outcome carries a clearing `Set-Cookie`. The Laravel and Symfony
+  controllers set, read and clear the cookie. There is no switch to turn the binding off.
+- **C6 — open redirect through `?return_to=` (§12.8 rule 3).** `return_to` is honoured only as a same-origin relative
+  path (a single leading `/`; not `//` or `/\`; no backslash; no control character). It is validated when stored (a
+  failing value is dropped, as if none were given) and again before the redirect (a stored value that fails is not
+  followed; the JSON summary is returned). `OidcLoginFlow::__construct(…, ?\Closure $allowReturnTo = null)` is the
+  integrator predicate that may widen the rule, consulted only for values the default rule refuses.
+  `OidcLoginFlow::isSafeReturnTo()` is the shared predicate.
+- **N14 — an MFA-challenge or WebAuthn-state JWT is no longer accepted as an access token (§10.1 rules 10–12).**
+  `JwksVerifier::verify()`/`verifyWithProofs()` (so `verifyLocally()` and both framework guards) now refuse a token whose
+  header `typ`, when present, is not `at+jwt` (ASCII case-insensitive, optional `application/` prefix) and a token whose
+  claim set contains a `purpose` member (whatever its value). A header with no `typ` is still accepted. The ID-token,
+  back-channel-logout and SET paths are unaffected. Rule 12 (a `kid` is required; no single-key fallback) was already
+  enforced and is now pinned by a test.
+- **N15 — `#[RequireRole]` no longer authorizes on OAuth2 scopes (§11.2 rule 11).** The `axiam_user` identity's
+  `roles` was `roles ?? scope`; it is now the token's `roles` claim only — `null` when absent or malformed, `[]` when
+  present and empty — and a new `scopes` member carries the `scope` claim. `AccessEnforcer::enforceRole()` fails
+  closed (403) on `null` and `[]`. Added `Axiam\Sdk\Attributes\RequireScope`, `AccessEnforcer::enforceScope()` and
+  `Axiam\Sdk\Auth\IdentityClaims`; both bridges (`AxiamAccessMiddleware`, `AxiamAccessAttributeListener`) enforce
+  `#[RequireScope]`.
+- **C5 — a forged `kid` no longer costs two outbound requests (§12.4 rule 2).** `JwksVerifier` re-fetched the JWKS
+  (discovery, then `jwks_uri`) for every token naming an unknown `kid`. It now re-fetches at most once per 60 seconds
+  (`JwksVerifier::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS`) while the cache is otherwise fresh, rejecting from the cache
+  in between, and caches the resolved `jwks_uri` for the life of the key cache.
+- **Ride-along — Laravel `AxiamAccessMiddleware` attribute mode fails closed.** When the route action cannot be
+  reflected (a Closure route, an action that does not resolve, no matched route) the middleware returned `$next()`,
+  silently turning the guard off for exactly those routes. It now answers `403 authorization_denied`.
+
+### Added
+
+- **The AMQP authorization requester (§8 "Signed authorization responses"; N2, D-9).** `Axiam\Sdk\Amqp\AuthzRequester`
+  (`check(subjectId, action, resourceId, ?scope)` → `AuthzDecision`) publishes a signed `AuthzRequest` with a fresh
+  unpredictable `correlation_id` and `nonce` and a private exclusive auto-delete broker-named `reply_to` queue, and
+  accepts only a response that parses strictly, verifies (HMAC-SHA256, constant time) under the subkey of its own
+  tenant and the `key_version` it sent over the **received bytes** with the trailing signature member cut out — never
+  re-serialized, and the decision is decoded from those same bytes (C2) — and matches an outstanding request's
+  `tenant_id`, `correlation_id` and `nonce`. Anything else is nacked without requeue, logged without any signature
+  value, never an allow, and does not complete the request. Unsigned responses (a server older than 1.68) are refused
+  unless the explicit `allowUnsignedResponses: true` opt-out is set, which never admits a response carrying a failing
+  signature member. Also `AmqpLibAuthzTransport` (over `php-amqplib`), the `AuthzTransport`/`AuthzDelivery` seams and
+  `StrictJson`. `Consumer` is unchanged.
+- `OidcLoginFlow::complete(…, ?string $bindingCookie = null, mixed $request = null)` and `bindingCookieName()` /
+  `bindingCookieNameFor()`; `OidcLoginOutcome::$setCookie` and `withSetCookie()`; `$onSuccess` receives the request as a
+  third argument (a closure declaring two parameters keeps working) (§12.8 rule 2).
+- `AuthzDecision`, `AuthzRequester::REQUEST_QUEUE`, `AuthzRequester::KEY_VERSION`.
+- `AuditLogEntry::$organizationId` (optional, from the regenerated §27 layer; see Changed).
+- Tests: `tests/Contract168/` — the C5 window and `jwks_uri` cache, the N14 matrix (rules 10–12), the N15 matrix through
+  both framework bridges with signed tokens, the C7/C6 matrix at the flow and at both controllers, the Laravel
+  fail-closed middleware, and the requester (all four §8 vectors, tampered/other-nonce/other-correlation/other-tenant
+  discards, unsigned with and without the opt-out, end to end with a fake channel, the `php-amqplib` adapter).
+
+### Changed
+
+- `tests/Fixtures/ed25519_signed_jwt.txt` and every test fixture that mints an **access** token now carry
+  `typ: at+jwt` (the server types access tokens so); the ID-token fixtures keep `typ: JWT`. Tests that pinned scope-as-roles,
+  the pass-through of an unreflectable Laravel route and the unbound login callback were rewritten to the secure
+  expectation, not removed.
+- **Regenerated §27 management layer.** `AuditLogEntry` gains the optional `organizationId` (after `ipAddress`, before
+  `resourceId`). As the README already advises, construct generated models with **named arguments**: a positional
+  call that passes `resourceId` as the tenth argument moves.
+
+### Migration notes (1.3.x to 1.4.0)
+
+1. **Login glue (C7).** If you use the shipped Laravel/Symfony controllers: **Laravel** — add
+   `__Host-axiam_oidc_bind` and `axiam_oidc_bind` to `EncryptCookies::$except` (Laravel otherwise encrypts the response
+   cookie and the callback cannot read it back), and serve the callback over HTTPS (a `__Host-` cookie is not stored
+   over plain HTTP; only `http://localhost`, `127.0.0.1` and `[::1]` use the fallback name). If you call `OidcLoginFlow`
+   yourself: send `OidcLoginOutcome::$setCookie` on every response and pass the cookie named by `bindingCookieName()` as
+   `bindingCookie:` to `complete()` — a call that passes none has every callback refused. A custom
+   `OidcStateStoreInterface` must persist `OidcStateEntry::$bindingDigest` and return it unchanged. Sign-ins in flight
+   across the upgrade fail once and restart. Two logins started concurrently in one browser: the later replaces the cookie
+   and the earlier callback is refused (§12.8 rule 1 (g)).
+2. **`return_to` (C6).** Only a same-origin relative path survives; a link to the login route carrying an absolute URL
+   now ends on the JSON summary or your `$successRedirect`. If you redirect to other origins of your own, pass
+   `allowReturnTo:` an allow-list predicate.
+3. **`#[RequireRole]` (N15).** Request the `roles` scope (add it to the scope you pass to `oidcBegin`/`oidcPar`/
+   `deviceAuthorize`/CIBA/`loginClientCredentials`, and have your administrator add `roles` to the client's registered
+   scopes); **without it every `#[RequireRole]` is a 403**. The SDK never adds the scope itself. Use `#[RequireScope]`
+   where you were relying on a scope name. The server must emit the `roles` claim (contract 1.68). Code that reads
+   `request->attributes->get('axiam_user')['roles']` now gets `null` for a token with no `roles` claim (it used to get the
+   scope strings) and can read `['scopes']`.
+4. **Access-token `typ` (N14, D-7).** A guard now refuses an access token whose header `typ` is not `at+jwt`. AXIAM servers
+   from contract 1.67 type their access tokens so; **a token minted by an older server carries `typ: JWT` and is refused
+   by this guard**, so upgrade the server first, or accept that holders refresh (at most one access-token lifetime, 15
+   minutes by default) — the server's `AXIAM__AUTH__REQUIRE_ACCESS_TOKEN_TYP=false` relaxes only the server's own check,
+   not this one. A token from any other signer sharing the JWKS must now carry `at+jwt` or no `typ`.
+5. **Laravel `axiam.access` attribute mode (ride-along).** A route whose action cannot be reflected now answers 403. Use the
+   string-parameter form (`->middleware('axiam.access:read')`) on Closure routes.
+6. **AMQP.** Nothing to do unless you adopt `AuthzRequester`; with a pre-1.68 server it needs the one-upgrade opt-out
+   `allowUnsignedResponses: true`.
+
 ## [1.3.1] - 2026-11-11
 
 ### Changed

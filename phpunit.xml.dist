@@ -22,6 +22,10 @@
                  same reasoning as the other framework-bridge exclusions above. -->
             <exclude>tests/LaravelOidcControllerTest.php</exclude>
             <exclude>tests/SymfonyOidcControllerTest.php</exclude>
+            <!-- Contract 1.68 (security audit 2026-11-14): the login-glue and require_role/
+                 require_scope tests that drive the Laravel/Symfony bridges. -->
+            <exclude>tests/Contract168/OidcLoginGlueControllersMiddlewareTest.php</exclude>
+            <exclude>tests/Contract168/RequireRoleScopeBridgesMiddlewareTest.php</exclude>
         </testsuite>
         <!-- Laravel/Symfony bridge tests (wave-5 plans, plus the CONTRACT.md §11
              declarative-authorization listener/middleware) require the dev-only

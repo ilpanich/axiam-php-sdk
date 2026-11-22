@@ -121,7 +121,7 @@ final class LaravelMiddlewareTest extends TestCase
         self::assertInstanceOf(JsonResponse::class, $response);
         self::assertSame(200, $response->getStatusCode(), 'a valid token must reach $next($request)');
         self::assertSame(
-            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => []],
+            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => null, 'scopes' => null],
             $request->attributes->get('axiam_user'),
         );
     }
@@ -201,7 +201,7 @@ final class LaravelMiddlewareTest extends TestCase
         self::assertInstanceOf(JsonResponse::class, $response);
         self::assertSame(200, $response->getStatusCode(), 'a matching CSRF token must reach $next($request)');
         self::assertSame(
-            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => []],
+            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => null, 'scopes' => null],
             $request->attributes->get('axiam_user'),
         );
     }

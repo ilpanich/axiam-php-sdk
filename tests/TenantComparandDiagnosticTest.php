@@ -53,7 +53,7 @@ final class TenantComparandDiagnosticTest extends TestCase
         \assert(\is_array($keypair));
 
         $b64 = static fn (string $raw): string => rtrim(strtr(base64_encode($raw), '+/', '-_'), '=');
-        $header = ['typ' => 'JWT', 'alg' => 'EdDSA', 'kid' => 'axiam-test-key-2026-07-02'];
+        $header = ['typ' => 'at+jwt', 'alg' => 'EdDSA', 'kid' => 'axiam-test-key-2026-07-02'];
         $payload = array_merge([
             'sub' => 'user-1',
             'tenant_id' => self::TENANT_UUID,

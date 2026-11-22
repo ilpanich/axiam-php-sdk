@@ -215,9 +215,52 @@ reads no AMQP queue at all — it consumes neither `axiam.authz.request` nor
 reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` under
 `unavailable`.
 
+### Asking for an authorization decision over AMQP, and trusting the answer (CONTRACT.md §8, contract 1.68)
+
+`Axiam\Sdk\Amqp\AuthzRequester` publishes a signed `AuthzRequest` on `axiam.authz.request` and
+returns the server's answer **only once it verifies as the signed response to that request**. It is
+the requester half of §8's "Signed authorization responses"; the consumer half
+(`Axiam\Sdk\Amqp\Consumer`) is unchanged.
+
+```php
+use Axiam\Sdk\Amqp\AmqpLibAuthzTransport;
+use Axiam\Sdk\Amqp\AuthzRequester;
+
+// $channel is an open PhpAmqpLib\Channel\AMQPChannel (use amqps:// — §8b).
+// $subkey is the tenant's AMQP SUBKEY for key_version 2, as raw bytes, from the AXIAM management API.
+$requester = new AuthzRequester(new AmqpLibAuthzTransport($channel), $tenantUuid, $subkey);
+
+$decision = $requester->check($subjectUuid, 'documents:read', $resourceUuid, scope: 'confidential');
+if ($decision->allowed) { /* … */ }          // AuthzDecision: allowed, reason, reasonCode, unsigned
+```
+
+- **A private `reply_to`.** The requester declares an **exclusive, auto-delete, broker-named** queue
+  (`amq.gen-…`) and names it as every request's `reply_to`, so no other consumer of the tenant is
+  handed the answer, and it never reads the shared `axiam.authz.response`. A reply queue that is empty
+  or named `axiam.…` is refused (the server would answer it on the shared queue instead).
+- **A response is accepted only if** it parses strictly (a JSON object with no duplicate or
+  case-variant keys, `allowed` a JSON boolean, `tenant_id`, `nonce` and `hmac_signature` present, the
+  signature the trailing member); its `HMAC-SHA256` verifies, in constant time, under the subkey of the
+  requester's **own** tenant for the `key_version` it **sent**; and its `tenant_id`, `correlation_id`
+  and `nonce` match a request still outstanding, which is then retired. The signature is checked over
+  the **received bytes** with the trailing member cut out — never over a re-serialization — and the
+  decision is decoded from those same bytes, so what was verified is what is delivered (C2).
+- **Anything else is discarded**: nacked without requeue, logged as a security event (never a signature
+  value), never an allow — and it does **not** complete the request; `check()` keeps waiting for the
+  genuine answer until its timeout, then throws `NetworkError`.
+- **A server older than 1.68** answers unsigned. They are refused by default. For ONE rolling upgrade
+  pass `allowUnsignedResponses: true`: a response with **no** `hmac_signature` member is then accepted
+  on its `correlation_id` alone, flagged `unsigned` and logged as a warning; a response that carries a
+  signature is verified in full whatever this says, and the option never admits one that fails. Remove
+  it once the server is upgraded.
+- **The signature proves "a holder of the tenant subkey", not "the server".** Another service of the
+  same tenant can sign too; if more than one of them publishes authorization requests, each needs its
+  own requester (its own exclusive queue) and the broker should deny SDK principals `read` on
+  `axiam.authz.request` (§8 trust boundary).
+
 ## Contract conformance
 
-This SDK conforms to **contract 1.66**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §14,
+This SDK conforms to **contract 1.68**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §12.8, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33,
 §36 and §37,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
@@ -524,6 +567,9 @@ unparseable, or of the wrong JSON type is a rejection, never a skipped check.
 | 7 | clock skew | `JwksVerifier::CLOCK_SKEW_LEEWAY_SECONDS` — a named 60-second constant applied to rules 2 and 3. Deliberately **not** operator-configurable. |
 | 8 | *(no claim check)* | Not a claim this verifier decodes — §10.1 rule 8, "the guard decides on the CALLER's credential and no other", is a control-flow discipline for whoever calls this class. **Both framework guards call `verifyLocally()`, never `verifyLocallyOrFallback()`**, so a certificate- or DPoP-bound token the guard has no transport evidence for is always refused behind them — a bound token is never silently admitted as a bearer credential (CONTRACT 1.52 N1, C-12). |
 | 9 | `cnf` (contract 1.51) | A token carrying `cnf` is **not a bearer token** and MUST NOT be admitted without evidence satisfying every constraint it names. `verifyLocally()`/`JwksVerifier::verify()` has no transport to ask for that evidence, so it applies this rule with NONE presented — refusing every bound token, admitting every unbound one. `AxiamClient::verifyWithProofs($token, $tenant, PresentedProofs)` / `JwksVerifier::verifyWithProofs()` is the same check with real evidence YOUR OWN connection established. |
+| 10 | `typ` (contract 1.68) | When the header carries `typ` it MUST be `at+jwt` (RFC 9068), compared ASCII case-insensitively, with or without the `application/` prefix. `JWT`, `logout+jwt`, `secevent+jwt` and every `axiam-…+jwt` purpose type are refused; a header with **no** `typ` is not refused by this rule. Checked before any key lookup. |
+| 11 | `purpose` (contract 1.68) | A token whose claim set contains a `purpose` member — whatever its value, `null` included, and whatever `typ` says — is refused. AXIAM signs its MFA challenge, MFA setup and WebAuthn-state tokens with the access-token key; they carry `sub`, `tenant_id` and `exp` and no `aud`, so without this rule a guard with no expected audience admitted them (N14). |
+| 12 | `kid` (contract 1.68) | **Required** and the only way a key is chosen: a token with no `kid` is refused, with no "the only key in the set" fallback. An unknown `kid` costs **at most one** JWKS re-fetch per 60-second window (`JwksVerifier::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS`); inside the window it is rejected from the cache with no network I/O, and the resolved `jwks_uri` is cached rather than re-read from discovery on every re-fetch (C5). A key rotated in just after a re-fetch is therefore picked up within 60 seconds.
 
 **What `firebase/php-jwt` does versus what §10.1 requires.** `JWT::decode()` validates
 `nbf`/`iat`/`exp` and rejects a non-numeric `exp` — but only when the claim is *present*
@@ -559,9 +605,9 @@ return [
 ## Declarative authorization helpers
 
 CONTRACT.md §11 adds a per-endpoint authorization layer on top of the §10
-authentication guard above: three PHP 8 attributes in `Axiam\Sdk\Attributes` —
-`#[RequireAuth]`, `#[RequireAccess(action: ..., resourceParam: ...)]`, and
-`#[RequireRole(...)]` — enforced by a single shared `Axiam\Sdk\AccessEnforcer` that
+authentication guard above: four PHP 8 attributes in `Axiam\Sdk\Attributes` —
+`#[RequireAuth]`, `#[RequireAccess(action: ..., resourceParam: ...)]`,
+`#[RequireRole(...)]` and (contract 1.68) `#[RequireScope(...)]` — enforced by a single shared `Axiam\Sdk\AccessEnforcer` that
 BOTH framework bridges delegate to, so Laravel and Symfony applications get
 byte-identical semantics.
 
@@ -600,6 +646,29 @@ subject — not whatever session the shared `AxiamClient` itself might separatel
 `#[RequireRole(...)]` is a LOCAL, no-server-round-trip check against the verified
 identity's roles — coarser than `#[RequireAccess]` and not a substitute for it. No
 decision is ever cached, and no token material appears in any error output.
+
+**`#[RequireRole]` reads only the `roles` claim; `#[RequireScope]` reads only `scope` (contract 1.68; N15).**
+Through 1.3.x the identity's roles were `roles ?? scope`. A scope is chosen by the *client* and bounded
+only by that client's registration, so any user signing in through a client registered for a scope named
+like one of your roles passed that role's guard, and a genuine role holder whose token lacked the scope
+was refused. Now:
+
+- The `axiam_user` identity carries `roles` (the token's `roles` claim, a list of role **names**, or
+  `null` when the token has none usable) and `scopes` (the `scope` claim split on spaces, or `null`). Neither
+  is ever derived from the other.
+- `#[RequireRole('admin')]` passes only when `roles` contains `admin` (exact, case-sensitive). A token with
+  **no** `roles` claim, one that is not a JSON array of strings, and `roles: []` are all **403** — fail
+  closed. (`null` and `[]` stay distinguishable on the identity: "ask for the scope" versus "the user holds none".)
+- `#[RequireScope('admin')]` passes only when the token's `scope` contains `admin` as a whole entry
+  (`administrator` does not match). No `scope` claim is a 403. Stack the attribute for several scopes.
+- **Your application must request the `roles` scope** — add `roles` to the scope you pass to
+  `oidcBegin`/`oidcPar`/`deviceAuthorize`/CIBA/`loginClientCredentials`, and have your administrator add
+  `roles` to the client's registered scopes — **or every `#[RequireRole]` is a 403**. The SDK never adds it
+  for you. The claim is a snapshot taken when the token is minted (stale for at most one access-token
+  lifetime); `#[RequireAccess]` evaluates the engine live and stays the authoritative check.
+- **Laravel `axiam.access` in attribute mode now denies a route it cannot reflect** (a Closure route, an
+  action that does not resolve, no matched route): it used to pass such a request through as though the
+  route had declared nothing. Use the string-parameter form (`axiam.access:read`) on those routes.
 
 ## OIDC / SSO relying-party helpers (CONTRACT.md §12)
 
@@ -773,6 +842,37 @@ see [`examples/laravel_app/oidc_routes.php`](examples/laravel_app/oidc_routes.ph
 - Both bridges share ONE framework-agnostic core, `Axiam\Sdk\Oidc\OidcLoginFlow`, so
   the 400/401/503 failure mapping (malformed callback / IdP error / unknown state /
   ID-token or OAuth2 failure / AXIAM unreachable) is byte-identical between them.
+
+### The callback is bound to the browser that started the login; `return_to` is a local path (CONTRACT.md §12.8, contract 1.68)
+
+Two defects of the 1.x glue are closed (**behaviour changes — see the 1.4.0 migration notes in the
+[CHANGELOG](CHANGELOG.md)**):
+
+- **Login CSRF (C7).** The in-flight login was keyed by `state` alone, so an attacker could start a login,
+  sign in as themselves, stop before the callback, and have a victim's browser load
+  `callback?state=…&code=…` — the victim's request then finished the attacker's login and your `$onSuccess`
+  ran with the attacker's tokens. The login response now sets a random 32-byte value as the cookie
+  **`__Host-axiam_oidc_bind`** (`HttpOnly; Secure; SameSite=Lax; Path=/`, no `Domain`, `Max-Age=600`) and
+  the state entry keeps only its SHA-256 (`OidcStateEntry::$bindingDigest`). The callback **consumes the
+  entry first**, then refuses — with the same `401` an unknown state gets, no token request, no `$onSuccess` —
+  any request that does not present that cookie. Every callback response clears the cookie. There is no way to
+  switch this off. On a plain-`http://` loopback `redirect_uri` (`localhost`, `127.0.0.1`, `[::1]`) the cookie is
+  `axiam_oidc_bind` without `Secure`, so local development works; it is never selectable elsewhere.
+- **Open redirect (C6).** `return_to` is honoured only as a same-origin relative path: a single leading `/`, not
+  `//` or `/\`, no backslash, no control character. A value that fails is **dropped when stored** and
+  **not followed at the redirect** (the store may be yours). Pass `allowReturnTo:` to `OidcLoginFlow` to
+  widen this for an allow-list of your other origins; it is consulted only for values the default rule
+  refuses, and one that throws accepts nothing.
+- **`$onSuccess` now receives the request.** `complete()` takes `request:` and passes it to
+  `$onSuccess($tokens, $entry, $request)` so you create your session on the request that completed the sign-in. A
+  closure that declares two parameters keeps working.
+- **What you must do.** (1) **Laravel:** add `__Host-axiam_oidc_bind` and `axiam_oidc_bind` to
+  `EncryptCookies::$except` — Laravel encrypts every response cookie otherwise, and the callback would
+  never see the plain value. (2) **A custom `OidcStateStoreInterface`** must persist `bindingDigest` and
+  return it unchanged; a store that drops it refuses every sign-in (loudly, which is the safe failure).
+  (3) **If you call `OidcLoginFlow` yourself**, send `OidcLoginOutcome::$setCookie` with every response
+  and pass `bindingCookie:` (the cookie named by `bindingCookieName()`) to `complete()`; a call that
+  passes none has every callback refused. Sign-ins in flight across the upgrade fail once and restart.
 
 ## Native sign-in with a provider ID token (CONTRACT.md §37)
 

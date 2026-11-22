@@ -233,17 +233,18 @@ final class LaravelAccessMiddlewareTest extends TestCase
     // Attribute-reflection style: ->middleware('axiam.access') with no params
     // ================================================================
 
-    public function testAttributeStyleWithNoRouteIsANoOpPassthrough(): void
+    public function testAttributeStyleWithNoRouteDenies(): void
     {
-        // A plain Symfony Request (no route() method) — the middleware must degrade to
-        // a silent no-op rather than erroring.
+        // A plain Symfony Request (no route() method): the middleware cannot read the
+        // controller's attributes, and "could not read them" is not "there are none". It used to
+        // pass the request through; it now fails closed (403), without erroring.
         $middleware = $this->middlewareWith([]);
         $request = Request::create('/documents/1', 'GET');
         $request->attributes->set('axiam_user', self::IDENTITY);
 
         $response = $middleware->handle($request, $this->passthroughNext());
 
-        self::assertSame(200, $response->getStatusCode());
+        self::assertSame(403, $response->getStatusCode());
     }
 
     public function testAttributeStyleRequireAuthWithNoIdentityReturns401(): void
@@ -313,7 +314,7 @@ final class LaravelAccessMiddlewareTest extends TestCase
         self::assertSame(403, $response->getStatusCode());
     }
 
-    public function testAttributeStyleUnrecognizedControllerClassIsANoOp(): void
+    public function testAttributeStyleUnrecognizedControllerClassDenies(): void
     {
         $middleware = $this->middlewareWith([]);
         $request = FakeLaravelRequest::create('/documents/1', 'GET');
@@ -321,7 +322,7 @@ final class LaravelAccessMiddlewareTest extends TestCase
 
         $response = $middleware->handle($request, $this->passthroughNext());
 
-        self::assertSame(200, $response->getStatusCode());
+        self::assertSame(403, $response->getStatusCode(), 'an action that cannot be reflected is denied, not waved through');
     }
 
     public function testAttributeStyleControllerWithNoAttributesAtAllIsANoOp(): void
@@ -337,17 +338,18 @@ final class LaravelAccessMiddlewareTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
     }
 
-    public function testAttributeStyleActionNameWithoutAtSignIsANoOp(): void
+    public function testAttributeStyleActionNameWithoutAtSignDenies(): void
     {
         // A Closure-based Laravel route reports its action as 'Closure' (no '@'), which
-        // this middleware cannot reflect a controller method from -> no-op passthrough.
+        // this middleware cannot reflect a controller method from. It used to pass the request
+        // through as though the route needed nothing; it now denies (403).
         $middleware = $this->middlewareWith([]);
         $request = FakeLaravelRequest::create('/documents/1', 'GET');
         $request->fakeRoute = new FakeLaravelRoute('Closure', []);
 
         $response = $middleware->handle($request, $this->passthroughNext());
 
-        self::assertSame(200, $response->getStatusCode());
+        self::assertSame(403, $response->getStatusCode());
     }
 
     public function testAttributeStyleClassLevelRequireRoleIsInheritedAndEnforced(): void

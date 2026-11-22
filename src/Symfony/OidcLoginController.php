@@ -39,11 +39,20 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
         /** Shared outcome → HTTP-response translation, reused by {@see OidcCallbackController}. */
         public static function toResponse(OidcLoginOutcome $outcome): \Symfony\Component\HttpFoundation\Response
         {
-            return match ($outcome->kind) {
+            $response = match ($outcome->kind) {
                 OidcLoginOutcome::KIND_REDIRECT => new \Symfony\Component\HttpFoundation\RedirectResponse((string) $outcome->redirectUrl),
                 OidcLoginOutcome::KIND_JSON => new \Symfony\Component\HttpFoundation\JsonResponse($outcome->jsonBody()),
                 default => new \Symfony\Component\HttpFoundation\JsonResponse($outcome->errorBody(), (int) $outcome->status),
             };
+
+            // CONTRACT.md §12.8 rule 1: the login response SETS the browser-binding cookie and
+            // every callback response CLEARS it. The flow builds the whole header, so the two
+            // framework controllers cannot drift on its attributes.
+            if ($outcome->setCookie !== null) {
+                $response->headers->set('Set-Cookie', $outcome->setCookie, false);
+            }
+
+            return $response;
         }
     }
 }

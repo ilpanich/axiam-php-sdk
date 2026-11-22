@@ -218,6 +218,7 @@ final class ManagementModelRoundTripGeneratedTest extends TestCase
             'id' => '11111111-1111-4111-8111-111111111111',
             'ip_address' => 'example',
             'metadata' => [],
+            'organization_id' => '11111111-1111-4111-8111-111111111111',
             'outcome' => 'Success',
             'resource_id' => '11111111-1111-4111-8111-111111111111',
             'tenant_id' => '11111111-1111-4111-8111-111111111111',
