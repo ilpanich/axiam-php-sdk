@@ -58,9 +58,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962  # v2.40.0
         with:
-          # 8.2, not 8.1 — matches sdk-ci-php.yml (the dev-only Laravel/Symfony
-          # bridges require ^8.2).
-          php-version: '8.2'
+          # The floor, 8.3 — matches sdk-ci-php.yml.
+          php-version: '8.3'
           extensions: sodium, sockets
           coverage: none
       - name: Build API docs

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Minimum PHP raised from 8.2 to 8.3.** PHP 8.2 receives its last security fix on 2026-12-31, so the floor moves before that date rather than after it; 8.3 is supported until 2027-12-31. `composer.json` (`php: >=8.3`), `SupportedVersions::MIN_PHP`, the CI matrix and the README support table move together. Applications still on PHP 8.2 can stay on 1.3.1.
+- **PHP 8.6 is the newest tested release.** It went GA on 2026-11-19; the gating matrix is now `['8.3', '8.6']` and `SupportedVersions::NEWEST_TESTED_PHP` is `'8.6'`.
+
 ## [1.3.1] - 2026-11-11
 
 ### Changed

@@ -25,12 +25,12 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      # See sdk-ci-php.yml for why this action is pinned to a tag-derived SHA and
-      # why the test runtime is 8.2 rather than the package minimum of 8.1.
-      - name: Set up PHP 8.2 (with pcov)
+      # See sdk-ci-php.yml for why this action is pinned to a tag-derived SHA.
+      # The coverage run uses the floor, 8.3, like the gating matrix's first leg.
+      - name: Set up PHP 8.3 (with pcov)
         uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962  # v2.40.0
         with:
-          php-version: '8.2'
+          php-version: '8.3'
           extensions: sodium
           coverage: pcov
 

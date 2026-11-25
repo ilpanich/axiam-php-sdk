@@ -67,7 +67,7 @@ final class VersionPolicyTest extends TestCase
     }
 
     /**
-     * The `php: ['8.2', '8.5']` list from the CI build-test matrix, ascending.
+     * The `php: ['8.3', '8.6']` list from the CI build-test matrix, ascending.
      *
      * @return list<array{int, int}>
      */
@@ -122,6 +122,7 @@ final class VersionPolicyTest extends TestCase
         '8.3' => '2027-12-31',
         '8.4' => '2028-12-31',
         '8.5' => '2029-12-31',
+        '8.6' => '2030-12-31',
     ];
 
     /**
