@@ -34,7 +34,7 @@ final class SupportedVersions
      * SDK is compiled and tested against, and the one Composer refuses to
      * install below.
      */
-    public const MIN_PHP = '8.2';
+    public const MIN_PHP = '8.3';
 
     /**
      * The newest PHP version the SDK has a green build against, as `major.minor`.
@@ -43,7 +43,7 @@ final class SupportedVersions
      * expected to work — the SDK uses no version-gated syntax beyond the floor
      * — but is not yet proven by a build.
      */
-    public const NEWEST_TESTED_PHP = '8.5';
+    public const NEWEST_TESTED_PHP = '8.6';
 
     /**
      * Not instantiable: this is a namespace for constants, not a value type.
