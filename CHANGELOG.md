@@ -80,10 +80,11 @@ notes below before upgrading.** This is a minor release: no class, method or par
 
 ### Changed
 
-- `tests/Fixtures/ed25519_signed_jwt.txt` and every test fixture that mints an **access** token now carry
-  `typ: at+jwt` (the server types access tokens so); the ID-token fixtures keep `typ: JWT`. Tests that pinned scope-as-roles,
-  the pass-through of an unreflectable Laravel route and the unbound login callback were rewritten to the secure
+- Every test fixture that mints an **access** token now carries `typ: at+jwt` (the server types access tokens so); the
+  ID-token fixtures keep `typ: JWT`. Tests that pinned scope-as-roles, the pass-through of an unreflectable Laravel route and the unbound login callback were rewritten to the secure
   expectation, not removed.
+- `tests/Fixtures/ed25519_signed_jwt.txt` is gone: the tests that read it now mint the same token, byte for byte, from
+  the committed fixture key at run time, so no signed JWT sits in the tree for secret scanners to flag.
 - **Regenerated §27 management layer.** `AuditLogEntry` gains the optional `organizationId` (after `ipAddress`, before
   `resourceId`). As the README already advises, construct generated models with **named arguments**: a positional
   call that passes `resourceId` as the tenth argument moves.

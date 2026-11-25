@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Axiam\Sdk\Tests\Fixtures\AccessTokenFixtureTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,6 +22,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class JwksVerifierEdgeTest extends TestCase
 {
+    use AccessTokenFixtureTrait;
+
     private const FIXTURES = __DIR__ . '/Fixtures';
     private const FIXTURE_TENANT = 'acme-tenant';
     private const BASE_URL = 'https://api.test';
@@ -36,7 +39,10 @@ final class JwksVerifierEdgeTest extends TestCase
 
     private function fixtureJwt(): string
     {
-        return trim((string) file_get_contents(self::FIXTURES . '/ed25519_signed_jwt.txt'));
+        // Minted at run time from the committed fixture key rather than read from a committed
+        // token file: a signed JWT in the tree reads as a leaked credential to secret scanners.
+        // The fixed iat/exp reproduce the former fixture byte for byte.
+        return $this->mintAccessToken(['iat' => 1751500000, 'exp' => 4102444800]);
     }
 
     /** @param list<Response> $queue */
