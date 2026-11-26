@@ -131,7 +131,7 @@ final class ConsumerReceivedBytesTest extends TestCase
         // while a first-wins reader of the same body sees "evil".
         yield 'a duplicate key placed before the real one' => [str_replace('"action":"read"', '"action":"evil","action":"read"', $genuine)];
         yield 'a duplicate key placed after the real one' => [str_replace('"action":"read"', '"action":"read","action":"evil"', $genuine)];
-        yield 'a duplicate key spelled through an escape' => [str_replace('"action":"read"', '"action":"evil","\u0061ction":"read"', $genuine)];
+        yield 'a duplicate key spelled through an escape' => [self::sign(str_replace('"action":"read"', '"action":"evil","\u0061ction":"read"', $canonical))];
         yield 'a duplicate key signed over its own bytes' => [self::sign(str_replace('"action":"read"', '"action":"read","action":"evil"', $canonical))];
         yield 'a nested duplicate key signed over its own bytes' => [self::sign(str_replace('"action":"read"', '"action":"read","meta":{"k":1,"k":2}', $canonical))];
         yield 'signature not the trailing member' => [str_replace('"nonce":"nonce-1"', '"hmac_signature":"' . $sig . '","nonce":"nonce-1"', $canonical)];
@@ -153,7 +153,7 @@ final class ConsumerReceivedBytesTest extends TestCase
         yield 'members in another order, signature over the canonical bytes' => [self::sign('{"tenant_id":"22222222-2222-2222-2222-222222222222","correlation_id":"11111111-1111-1111-1111-111111111111","subject_id":"33333333-3333-3333-3333-333333333333","action":"read","resource_id":"44444444-4444-4444-4444-444444444444","key_version":2,"nonce":"nonce-1","issued_at":"2027-01-15T08:00:00Z"}')];
         yield 'an extra unsigned-type member, validly signed' => [self::sign(str_replace('"action":"read"', '"action":"read","extra":1', $canonical))];
         yield 'a required member missing, validly signed' => [self::sign(str_replace('"subject_id":"33333333-3333-3333-3333-333333333333",', '', $canonical))];
-        yield 'an AuthzResponse signed with the same tenant subkey' => [self::sign('{"correlation_id":"11111111-1111-1111-1111-111111111111","allowed":true,"reason_code":"allowed","tenant_id":"22222222-2222-2222-2222-222222222222","nonce":"nonce-1"}')];
+        yield 'an AuthzResponse signed with the same tenant subkey' => [self::sign('{"correlation_id":"11111111-1111-1111-1111-111111111111","allowed":true,"reason_code":"allowed","tenant_id":"22222222-2222-2222-2222-222222222222","nonce":"nonce-1","key_version":2,"issued_at":"2027-01-15T08:00:00Z"}')];
     }
 
     /** @dataProvider wrongLayoutBodies */

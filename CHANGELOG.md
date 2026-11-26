@@ -54,6 +54,7 @@ conformance to 1.69. 1.4.0 is unreleased, so the items below amend it.
   controllers. A destination an `allowReturnTo` admitted can no longer put a raw non-ASCII byte or a CR/LF in a header.
 - **N1 — `MemoryOidcStateStore` was unbounded.** It holds at most 10 000 entries
   (`MemoryOidcStateStore::DEFAULT_MAX_ENTRIES`, constructor argument), evicting the oldest.
+- **GLUE-R1-4 — pinned, not a defect.** `testCallbackWithAnotherLoginsCookieIsTheSame401` asserts the state is consumed after a refusal with another browser's cookie (a retry with the right cookie is a 401 and reaches no token endpoint).
 - **#880 — back-channel logout token `kid`.** Not a defect here: `verifyLogoutToken()` already selected the key by
   `kid` and refused a kid-less token as `unknown_kid`. New tests pin the contract-1.69 shape (a token whose header is
   exactly `{"alg":"EdDSA","typ":"logout+jwt","kid":…}`, verified against a two-key JWKS with the signing key not
@@ -123,7 +124,7 @@ notes below before upgrading.** This is a minor release: no class, method or par
   `tenant_id`, `correlation_id` and `nonce`. Anything else is nacked without requeue, logged without any signature
   value, never an allow, and does not complete the request. An unsigned response is discarded too: there is no
   opt-out for it (see "Removed" below). Also `AmqpLibAuthzTransport` (over `php-amqplib`), the `AuthzTransport`/`AuthzDelivery` seams and
-  `StrictJson`. `Consumer` is unchanged.
+  `StrictJson`.
 - `OidcLoginFlow::complete(…, ?string $bindingCookie = null, mixed $request = null)` and `bindingCookieName()` /
   `bindingCookieNameFor()`; `OidcLoginOutcome::$setCookie` and `withSetCookie()`; `$onSuccess` receives the request as a
   third argument (a closure declaring two parameters keeps working) (§12.8 rule 2).

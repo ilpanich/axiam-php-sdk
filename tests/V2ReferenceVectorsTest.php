@@ -23,9 +23,9 @@ use PHPUnit\Framework\TestCase;
  *      the PHP SDK never performs this derivation itself at runtime).
  *   2. HMAC-SHA256(derived_subkey, canonical_signed_json) reproduces
  *      `hmac_signature_hex` byte-for-byte for BOTH message types.
- *   3. The exact consumer decode -> unset(hmac_signature) -> re-encode path
- *      (Hmac::verify's canonicalization) reproduces `canonical_signed_json`
- *      byte-for-byte (Pitfall 5: nonce/issued_at need no special handling).
+ *   3. The received-bytes path (the wire body with its trailing
+ *      `hmac_signature` member cut out, Hmac::verifiedCanonical) yields
+ *      `canonical_signed_json` byte-for-byte, with no re-serialization.
  *   4. Hmac::verify() ACCEPTS the reconstructed wire delivery.
  *   5. ReplayGuard::check() (the NEW-4 gate) also accepts the same
  *      delivery once its clock is pinned to the fixture's `issued_at`.
@@ -125,11 +125,10 @@ final class V2ReferenceVectorsTest extends TestCase
     /**
      * @dataProvider messageTypeProvider
      *
-     * Simulates the real wire delivery (canonical bytes + hmac_signature
-     * appended last, matching field_order's declared placement of
-     * `hmac_signature` after `issued_at`) and proves the consumer's
-     * decode -> unset(hmac_signature) -> re-encode path reproduces
-     * `canonical_signed_json` exactly, and that Hmac::verify() accepts it.
+     * Simulates the real wire delivery (the canonical bytes with
+     * `,"hmac_signature":"<hex>"` appended as the last member, as the server
+     * writes it) and proves Hmac::verifiedCanonical() cuts it back to
+     * `canonical_signed_json` exactly and Hmac::verify() accepts it.
      */
     public function testRoundTripReproducesCanonicalBytesAndHmacVerifyAccepts(string $messageType): void
     {
@@ -139,27 +138,10 @@ final class V2ReferenceVectorsTest extends TestCase
         $subkey = hex2bin($fixture['hkdf']['derived_subkey_hex']);
         self::assertIsString($subkey);
 
-        // Build the simulated wire body: decode the canonical (signed)
-        // bytes -- preserving field order as an ordered PHP assoc array --
-        // then append hmac_signature as the final key (a new PHP array key
-        // is inserted at the end), mirroring the server appending the
-        // signature after signing.
-        $ordered = json_decode($canonical, true);
-        self::assertIsArray($ordered);
-        $ordered['hmac_signature'] = $entry['hmac_signature_hex'];
-        $wireBody = json_encode($ordered, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        self::assertIsString($wireBody);
+        // The wire body: the canonical bytes closed after the signature member (CONTRACT §8 step 2).
+        $wireBody = substr($canonical, 0, -1) . ',"hmac_signature":"' . $entry['hmac_signature_hex'] . '"}';
 
-        // The exact Hmac::verify canonicalization path: decode, unset
-        // hmac_signature, re-encode with the SAME flags used by the SDK
-        // (JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) so canonical
-        // bytes match the server's serde_json output.
-        $decoded = json_decode($wireBody, true);
-        self::assertIsArray($decoded);
-        unset($decoded['hmac_signature']);
-        $reencoded = json_encode($decoded, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-        self::assertSame($canonical, $reencoded, 'decode -> unset(hmac_signature) -> re-encode must reproduce canonical_signed_json byte-for-byte');
+        self::assertSame($canonical, Hmac::verifiedCanonical($subkey, $wireBody), 'the received bytes minus the trailing member are canonical_signed_json byte-for-byte');
 
         self::assertTrue(Hmac::verify($subkey, $wireBody), 'Hmac::verify must ACCEPT the server-signed v2 reference vector');
     }

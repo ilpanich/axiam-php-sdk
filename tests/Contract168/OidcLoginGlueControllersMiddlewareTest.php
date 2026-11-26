@@ -216,6 +216,10 @@ final class OidcLoginGlueControllersMiddlewareTest extends TestCase
         yield 'a backslash an integrator predicate admitted is kept' => ['/a\\b', '/a\\b'];
         yield 'invalid UTF-8 becomes U+FFFD' => ["/a\xffb", '/a%EF%BF%BDb'];
         yield 'a raw 0xFF byte (returnTo=%FF) is U+FFFD, not %FF' => ["/\xff", '/%EF%BF%BD'];
+        yield 'a truncated 3-byte sequence is ONE U+FFFD' => ["/a\xE2\x82b", '/a%EF%BF%BDb'];
+        yield 'a truncated 4-byte sequence is ONE U+FFFD' => ["/a\xF0\x9F\x98b", '/a%EF%BF%BDb'];
+        yield 'an overlong lead is TWO U+FFFD' => ["/\xC0\x80", '/%EF%BF%BD%EF%BF%BD'];
+        yield 'a valid 4-byte character is untouched' => ["/\u{1F600}", '/%F0%9F%98%80'];
         yield 'plain path with query is untouched' => ['/dashboard?tab=1&x=2#top', '/dashboard?tab=1&x=2#top'];
     }
 
@@ -241,5 +245,32 @@ final class OidcLoginGlueControllersMiddlewareTest extends TestCase
             self::assertSame(self::COOKIE, $response->headers->getCookies()[0]->getName());
             self::assertSame(1, $this->tokenRequests(), 'the sign-in completed once');
         }
+    }
+
+    /**
+     * A non-ASCII `successRedirect` (given to `complete()`, which the shipped callback controllers do
+     * not pass) is encoded by the adapter too, and `$onSuccess` runs exactly once.
+     *
+     * @dataProvider frameworks
+     *
+     * @param class-string $login
+     * @param class-string $callback
+     */
+    public function testANonAsciiSuccessRedirectIsEncodedAndOnSuccessRunsOnce(string $login, string $callback): void
+    {
+        $flow = $this->flow();
+        [$state, $value] = self::parseLogin((new $login($flow))(Request::create('/login')));
+        $calls = 0;
+
+        $outcome = $flow->complete($state, 'a-code', null, null, '/café €', static function () use (&$calls): void {
+            ++$calls;
+        }, $value, new Request());
+        $response = $login::toResponse($outcome);
+
+        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame('/caf%C3%A9%20%E2%82%AC', $response->headers->get('Location'));
+        self::assertSame(1, $calls, 'onSuccess ran once');
+        self::assertSame(1, $this->tokenRequests());
+        self::assertSame(self::COOKIE, $response->headers->getCookies()[0]->getName());
     }
 }

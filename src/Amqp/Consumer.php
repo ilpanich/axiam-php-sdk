@@ -154,7 +154,8 @@ final class Consumer
         // §8 step 2c: only the signed shape of an event type; another tenant-signed shape (an
         // AuthzResponse, say) shares the key and must not be taken for one.
         if (!is_array($event) || !Hmac::hasSignedLayout($canonical)) {
-            $this->logger->warning('axiam_sdk_security: AMQP body is not a JSON object; nacking without requeue');
+            // Fact of the refusal only; never the body or any value from it.
+            $this->logger->warning('axiam_sdk_security: AMQP body is not a signed AuthzRequest/AuditEventMessage layout; nacking without requeue');
             $nackNoRequeue();
             return;
         }

@@ -73,8 +73,8 @@ final class OidcLoginOutcome
      *  1. every byte outside `A-Z a-z 0-9 ! # $ % & ' ( ) * + , - . / : ; = ? @ [ \ ] ^ _ | ~` is
      *     written as `%XX` with upper-case hex (UTF-8 bytes of a non-ASCII character each; space
      *     `%20`, CR `%0D`, LF `%0A`, `"` `%22`, `<` `%3C`, `>` `%3E`, `` ` `` `%60`); a backslash is
-     *     KEPT as it is; a byte sequence that is not valid UTF-8 becomes U+FFFD (`%EF%BF%BD`)
-     *     first, never an error;
+     *     KEPT as it is; each maximal subpart of an ill-formed UTF-8 sequence becomes one U+FFFD
+     *     (`%EF%BF%BD`) first, never an error;
      *  2. a `%` that starts a well-formed escape (`%` and two hex digits) is kept, so a value
      *     that is already encoded is not encoded twice; any other `%` becomes `%25`;
      *  3. the result is pure visible ASCII (`0x21`–`0x7E`), so CR/LF can never split the header.
@@ -84,12 +84,7 @@ final class OidcLoginOutcome
      */
     public static function encodeLocation(string $destination): string
     {
-        // Invalid UTF-8 (the PHP counterpart of a lone surrogate) becomes U+FFFD before encoding.
-        $valid = (string) preg_replace(
-            '/(?:[\x00-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})(*SKIP)(*FAIL)|./s',
-            "\xEF\xBF\xBD",
-            $destination,
-        );
+        $valid = self::scrubUtf8($destination);
 
         return (string) preg_replace_callback(
             '/%(?![0-9A-Fa-f]{2})|[^A-Za-z0-9!#$%&\'()*+,\-.\/:;=?@\[\\\\\]^_|~]/',
@@ -103,6 +98,59 @@ final class OidcLoginOutcome
             },
             $valid,
         );
+    }
+
+    /**
+     * Replaces each maximal subpart of an ill-formed UTF-8 sequence by one U+FFFD (the Unicode /
+     * WHATWG substitution, what Node's decoder and Python's `errors='replace'` do): `E2 82` is one
+     * U+FFFD, `FF` one, `C0 80` two. Valid sequences pass through. Never throws.
+     */
+    private static function scrubUtf8(string $s): string
+    {
+        $out = '';
+        $n = strlen($s);
+        for ($i = 0; $i < $n;) {
+            $b = ord($s[$i]);
+            if ($b < 0x80) {
+                $out .= $s[$i++];
+                continue;
+            }
+            // [continuation count, allowed range of the FIRST continuation byte]
+            if ($b >= 0xC2 && $b <= 0xDF) {
+                [$need, $lo, $hi] = [1, 0x80, 0xBF];
+            } elseif ($b === 0xE0) {
+                [$need, $lo, $hi] = [2, 0xA0, 0xBF];
+            } elseif ($b === 0xED) {
+                [$need, $lo, $hi] = [2, 0x80, 0x9F];
+            } elseif ($b >= 0xE1 && $b <= 0xEF) {
+                [$need, $lo, $hi] = [2, 0x80, 0xBF];
+            } elseif ($b === 0xF0) {
+                [$need, $lo, $hi] = [3, 0x90, 0xBF];
+            } elseif ($b >= 0xF1 && $b <= 0xF3) {
+                [$need, $lo, $hi] = [3, 0x80, 0xBF];
+            } elseif ($b === 0xF4) {
+                [$need, $lo, $hi] = [3, 0x80, 0x8F];
+            } else {
+                $out .= "\xEF\xBF\xBD"; // a stray continuation or an invalid lead byte
+                $i++;
+                continue;
+            }
+            $j = $i + 1;
+            $ok = true;
+            for ($k = 0; $k < $need; $k++, $j++) {
+                $c = $j < $n ? ord($s[$j]) : -1;
+                $min = $k === 0 ? $lo : 0x80;
+                $max = $k === 0 ? $hi : 0xBF;
+                if ($c < $min || $c > $max) {
+                    $ok = false;
+                    break;
+                }
+            }
+            $out .= $ok ? substr($s, $i, $need + 1) : "\xEF\xBF\xBD";
+            $i = $j; // on failure: past the consumed prefix (the maximal subpart)
+        }
+
+        return $out;
     }
 
     /** Reply `200` with a token-free login summary — the fallback when no post-login redirect is configured. */

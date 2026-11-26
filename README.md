@@ -891,7 +891,8 @@ Two defects of the 1.x glue are closed (**behaviour changes — see the 1.4.0 mi
   exception's class, never its message. This is a deliberate deviation from "the exception reaches the
   framework's handler": a response from your error handler would carry no clearing cookie. If you want your own
   handler to see a failure of `$onSuccess`, catch it inside the closure and record it there. A token-endpoint
-  refusal that is neither an `AuthError` nor a `NetworkError` (a `403`, say) is the uniform `401`.
+  refusal that is neither an `AuthError` nor a `NetworkError` (a `409`, say, which maps to `AuthzError`; a `403` with an OAuth
+  error body is already an `AuthError`) is the uniform `401`.
 - **The `Location` header is encoded by the SDK.** The shipped controllers write the percent-encoded form of the
   destination (`OidcLoginOutcome::encodeLocation()`: `/a b` → `/a%20b`, `/café` → `/caf%C3%A9`, an existing `%XX`
   kept, any other `%` → `%25`, CR/LF → `%0D%0A`; the result is pure ASCII, so no destination can split the

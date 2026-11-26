@@ -240,7 +240,7 @@ final class OidcLoginGlueBindingTest extends TestCase
 
     public function testCallbackWithAnotherLoginsCookieIsTheSame401(): void
     {
-        [$flow, , , $state] = $this->begun();
+        [$flow, , $rightCookie, $state] = $this->begun();
         $before = count($this->history);
         $called = false;
 
@@ -253,6 +253,12 @@ final class OidcLoginGlueBindingTest extends TestCase
         self::assertSame(self::UNIFORM_MESSAGE, $refused->message);
         self::assertFalse($called);
         self::assertCount($before, $this->history);
+
+        // GLUE-R1-4: the refusal consumed the state, so the browser that DID start the login,
+        // retrying with the right cookie, is refused too and nothing reaches the token endpoint.
+        $retry = $flow->complete($state, 'code', null, null, null, null, $rightCookie);
+        self::assertSame(401, $retry->status);
+        self::assertSame(0, $this->tokenRequests());
     }
 
     public function testTheBindingRefusalIsByteForByteTheUnknownStateRefusal(): void
@@ -381,11 +387,24 @@ final class OidcLoginGlueBindingTest extends TestCase
 
     public function testAnExchangeThatEndsInAnAuthzErrorIsTheUniform401AndClearsTheCookie(): void
     {
+        // A 409 from the token endpoint maps to AuthzError, an AxiamException that is NOT an
+        // AuthError (a 403 OAuth error body maps to OAuthProtocolError, which IS one).
+        $logger = new class () extends AbstractLogger {
+            /** @var list<string> */
+            public array $lines = [];
+
+            public function log(mixed $level, string|\Stringable $message, array $context = []): void
+            {
+                $this->lines[] = $message . ' ' . json_encode($context);
+            }
+        };
         $store = new MemoryOidcStateStore();
         $flow = new OidcLoginFlow(
-            $this->client([$this->discovery(), new Response(403, [], '{"error":"forbidden"}')]),
+            $this->client([$this->discovery(), new Response(409, [], 'conflict')]),
             $store,
             self::REDIRECT,
+            null,
+            $logger,
         );
         $login = $flow->begin();
 
@@ -396,6 +415,8 @@ final class OidcLoginGlueBindingTest extends TestCase
 
         self::assertSame(401, $outcome->status);
         self::assertSame('authentication_failed', $outcome->error);
+        self::assertSame('the token exchange was refused', $outcome->message);
+        self::assertStringContainsString('AuthzError', implode("\n", $logger->lines), 'the exception class is logged');
         self::assertTrue(self::clearsTheCookie($outcome));
         self::assertFalse($called);
     }
