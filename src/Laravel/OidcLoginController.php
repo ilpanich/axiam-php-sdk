@@ -54,7 +54,7 @@ if (class_exists(\Symfony\Component\HttpFoundation\Request::class)) {
         public static function toResponse(OidcLoginOutcome $outcome): \Symfony\Component\HttpFoundation\Response
         {
             $response = match ($outcome->kind) {
-                OidcLoginOutcome::KIND_REDIRECT => new \Symfony\Component\HttpFoundation\RedirectResponse((string) $outcome->redirectUrl),
+                OidcLoginOutcome::KIND_REDIRECT => new \Symfony\Component\HttpFoundation\RedirectResponse(OidcLoginOutcome::encodeLocation((string) $outcome->redirectUrl)),
                 OidcLoginOutcome::KIND_JSON => new \Symfony\Component\HttpFoundation\JsonResponse($outcome->jsonBody()),
                 default => new \Symfony\Component\HttpFoundation\JsonResponse($outcome->errorBody(), (int) $outcome->status),
             };

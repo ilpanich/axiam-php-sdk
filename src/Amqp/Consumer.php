@@ -27,14 +27,20 @@ use Psr\Log\NullLogger;
  *   - Handler throws any other \Throwable  -> nack WITH requeue (transient failure, retry)
  *   - Handler completes successfully       -> ack
  *
+ * The HMAC is verified over the RECEIVED BYTES (the body with its trailing
+ * `hmac_signature` member cut out), never over a re-serialization, and the
+ * handler is given the value parsed from those same verified bytes
+ * (axiam#882, C2) — see {@see Hmac}. A body with a duplicate key, content
+ * after the object, or a signature that is not the trailing member is
+ * nacked without requeue and the handler never runs.
+ *
  * NEW-4 (CONTRACT.md §8 "v2 — Replay Protection", hard cutover): once the
  * HMAC verifies, the delivery is ADDITIONALLY rejected (same nack-without-
  * requeue path) when `key_version < 2`, `issued_at` falls outside the
- * ±skew freshness window, or `nonce` has already been seen. Because
- * Hmac::verify re-serializes the decoded body (minus `hmac_signature`) in
- * insertion order (Pitfall 5), `nonce`/`issued_at` are already covered by
- * the verified HMAC bytes with NO canonicalization change — only the
- * {@see ReplayGuard} gates are new. See ReplayGuard for the full policy.
+ * ±skew freshness window, or `nonce` has already been seen. `nonce` and
+ * `issued_at` are inside the verified bytes, so they are covered by the
+ * HMAC with no canonicalization step — only the {@see ReplayGuard} gates
+ * are new. See ReplayGuard for the full policy.
  */
 final class Consumer
 {
@@ -134,21 +140,30 @@ final class Consumer
     ): void {
         // Verify BEFORE the handler ever sees the message (D-04) — the
         // handler must never run against an unverified/tampered body.
-        if (!Hmac::verify($this->signingKey, $body)) {
+        $canonical = Hmac::verifiedCanonical($this->signingKey, $body);
+        if ($canonical === null) {
             // §8.3: never log the signature value or message body on failure.
             $this->logger->warning('axiam_sdk_security: AMQP HMAC verification failed; nacking without requeue');
             $nackNoRequeue(); // fail closed, no requeue
             return;
         }
 
-        $event = json_decode($body, true);
-        unset($event['hmac_signature']);
+        // The handler's value is parsed from the VERIFIED canonical bytes — the received
+        // bytes with the signature member cut out — not from a second reading of the body.
+        $event = json_decode($canonical, true);
+        // §8 step 2c: only the signed shape of an event type; another tenant-signed shape (an
+        // AuthzResponse, say) shares the key and must not be taken for one.
+        if (!is_array($event) || !Hmac::hasSignedLayout($canonical)) {
+            $this->logger->warning('axiam_sdk_security: AMQP body is not a JSON object; nacking without requeue');
+            $nackNoRequeue();
+            return;
+        }
 
         // NEW-4: only reached once the HMAC has verified. $event was
-        // decoded from the exact wire bytes that were just verified, so
+        // decoded from the exact bytes that were just verified, so
         // nonce/issued_at are already inside the checked HMAC — this is an
         // ADDITIONAL validation gate, not re-verification.
-        $rejectReason = $this->replayGuard->check(is_array($event) ? $event : []);
+        $rejectReason = $this->replayGuard->check($event);
         if ($rejectReason !== null) {
             // §8.4/NEW-4 security event: fact of rejection only, never the
             // nonce/issued_at/HMAC values.

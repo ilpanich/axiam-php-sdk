@@ -68,6 +68,14 @@ final class Contract168Controller
         return 'ok';
     }
 
+    // PHP-R1-1: a route needing several scopes stacks the attribute; every instance must pass.
+    #[RequireScope('documents:read')]
+    #[RequireScope('documents:write')]
+    public function scopeReadAndWrite(): string
+    {
+        return 'ok';
+    }
+
     #[RequireAuth]
     public function authOnly(): string
     {
@@ -102,6 +110,31 @@ final class RequireRoleScopeBridgesMiddlewareTest extends TestCase
         ]);
 
         return new AxiamClient(self::BASE_URL, self::TENANT, transportHandler: $mock);
+    }
+
+    // ---- PHP-R1-1: stacked #[RequireScope] is repeatable and all-must-pass --------------
+
+    public function testStackedRequireScopeIsRepeatable(): void
+    {
+        $attributes = (new \ReflectionMethod(Contract168Controller::class, 'scopeReadAndWrite'))
+            ->getAttributes(RequireScope::class);
+        self::assertCount(2, $attributes);
+        self::assertSame(['documents:read'], $attributes[0]->newInstance()->scopes);
+        self::assertSame(['documents:write'], $attributes[1]->newInstance()->scopes);
+    }
+
+    public function testLaravelStackedRequireScopeNeedsEveryInstance(): void
+    {
+        self::assertSame(200, $this->laravelStatus($this->mintAccessToken(['scope' => 'openid documents:read documents:write']), 'scopeReadAndWrite'));
+        self::assertSame(403, $this->laravelStatus($this->mintAccessToken(['scope' => 'openid documents:read']), 'scopeReadAndWrite'));
+        self::assertSame(403, $this->laravelStatus($this->mintAccessToken(['scope' => 'openid documents:write']), 'scopeReadAndWrite'));
+    }
+
+    public function testSymfonyStackedRequireScopeNeedsEveryInstance(): void
+    {
+        self::assertSame(200, $this->symfonyStatus($this->mintAccessToken(['scope' => 'openid documents:read documents:write']), 'scopeReadAndWrite'));
+        self::assertSame(403, $this->symfonyStatus($this->mintAccessToken(['scope' => 'openid documents:read']), 'scopeReadAndWrite'));
+        self::assertSame(403, $this->symfonyStatus($this->mintAccessToken(['scope' => 'openid documents:write']), 'scopeReadAndWrite'));
     }
 
     // ---- Laravel -------------------------------------------------------------------

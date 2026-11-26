@@ -32,15 +32,19 @@ use Psr\Log\NullLogger;
  *  3. `tenant_id` equals this requester's tenant, and `correlation_id` and `nonce` both match
  *     one request still outstanding, which is then retired.
  *
- * Anything else is nacked without requeue, logged as a security event (never a signature
- * value), is never an allow, and does NOT complete the request: {@see self::check()} keeps
- * waiting for the genuine answer until it times out.
+ * Anything else is nacked without requeue, logged as ONE security event (see
+ * {@see self::handleDelivery()}; never a signature value), is never an allow, and does NOT
+ * complete the request: {@see self::check()} keeps waiting for the genuine answer until it
+ * times out.
  *
- * A response with no `hmac_signature` at all (a server older than 1.68) is refused unless
- * `allowUnsignedResponses` is set — the explicit, named, off-by-default opt-out for one rolling
- * upgrade. It admits only a response that carries NO signature member; one that carries a
- * signature is verified in full whatever the opt-out says, and the opt-out never admits one
- * that fails.
+ * The requester requires an AXIAM server of 1.68 or later (contract 1.68). Such a server signs
+ * every authorization response with the tenant's AMQP subkey and answers on the requester's
+ * private `reply_to` queue. A server older than 1.68 ignores `reply_to` and answers, unsigned,
+ * only on the shared `axiam.authz.response` queue, which this requester never reads: against it
+ * every check times out. There is no option to accept unsigned responses (CONTRACT 1.69 §8): no
+ * AXIAM server sends one to a reply queue, so an unsigned response can only have been published
+ * by someone else, and it is discarded and logged. During a rolling upgrade from a pre-1.68
+ * server, use REST or gRPC authorization until every replica runs 1.68 or later.
  *
  * PHP is single-threaded, so {@see self::check()} blocks while it pumps the transport; several
  * requests can still be outstanding (the pending map is keyed by `correlation_id`) when a
@@ -62,6 +66,13 @@ final class AuthzRequester
 
     /** The prefix of the server's own queues; it does not honour a `reply_to` that starts with it (§8 rule 5). */
     private const SERVER_QUEUE_PREFIX = 'axiam.';
+
+    /** The discard reasons of the security event (CONTRACT §8 consumer obligation 4, contract 1.69). */
+    private const REASON_MALFORMED = 'malformed';
+    private const REASON_UNSIGNED = 'unsigned';
+    private const REASON_SIGNATURE = 'signature';
+    private const REASON_TENANT = 'tenant';
+    private const REASON_UNKNOWN_REQUEST = 'unknown_request';
 
     private const SIGNATURE_MEMBER = ',"hmac_signature":"';
 
@@ -98,11 +109,8 @@ final class AuthzRequester
      *        is accepted for. A UUID.
      * @param string          $signingKey The tenant's AMQP SUBKEY for key_version 2 (§8.1), as raw
      *        bytes, obtained from the AXIAM management API — never the master key.
-     * @param bool            $allowUnsignedResponses The explicit, integrator-set opt-out for
-     *        ONE rolling upgrade against a server older than contract 1.68, whose responses are
-     *        unsigned. Off by default. See the class docblock.
-     * @param LoggerInterface $logger     Receives security events (a discarded response, an
-     *        admitted unsigned one). Never a signature value, never a key.
+     * @param LoggerInterface $logger     Receives the security event of every discarded
+     *        response. Never a signature value, a nonce or a key.
      * @param float           $timeoutSeconds Bounds each {@see self::check()}.
      * @param (\Closure(): string)|null $idGenerator Returns a fresh UUID; `null` draws a random
      *        (v4) one. Used for BOTH the correlation_id and the nonce, which must be
@@ -110,7 +118,7 @@ final class AuthzRequester
      * @param (\Closure(): int)|null $clock Seconds since the epoch for `issued_at`; `null` is `time()`.
      *
      * @throws \InvalidArgumentException when the tenant is not a UUID, the key is empty or the
-     *         timeout is not positive.
+     *         timeout is not a finite, positive number.
      * @throws AxiamException when the broker's reply queue is not a private one: empty, or named
      *         `axiam.…`, which the server would answer on the shared `axiam.authz.response`
      *         queue instead — putting this requester back on the shared queue the contract forbids.
@@ -121,7 +129,6 @@ final class AuthzRequester
         private readonly AuthzTransport $transport,
         string $tenantId,
         private readonly string $signingKey,
-        private readonly bool $allowUnsignedResponses = false,
         private readonly LoggerInterface $logger = new NullLogger(),
         private readonly float $timeoutSeconds = self::DEFAULT_TIMEOUT_SECONDS,
         ?\Closure $idGenerator = null,
@@ -133,9 +140,7 @@ final class AuthzRequester
         if ($signingKey === '') {
             throw new \InvalidArgumentException('axiam: authz requester needs the tenant signing key');
         }
-        if ($timeoutSeconds <= 0.0) {
-            throw new \InvalidArgumentException('axiam: authz requester timeout must be positive');
-        }
+        self::requireUsableTimeout($timeoutSeconds, 'authz requester timeout');
         $this->tenantId = strtolower($tenantId);
         $this->newId = $idGenerator ?? static fn (): string => self::randomUuid();
         $this->clock = $clock ?? static fn (): int => time();
@@ -178,9 +183,11 @@ final class AuthzRequester
      * @param string      $action     The action, e.g. `documents:read`. Valid UTF-8 without U+2028/U+2029.
      * @param string      $resourceId UUID of the resource.
      * @param string|null $scope      Optional single scope narrowing the check.
-     * @param float|null  $timeoutSeconds Overrides the constructor's timeout for this call.
+     * @param float|null  $timeoutSeconds Overrides the constructor's timeout for this call; a
+     *        value that is not finite and positive is refused, never replaced by the default.
      *
-     * @throws \InvalidArgumentException when an id is not a UUID or the action/scope cannot be signed byte-exactly.
+     * @throws \InvalidArgumentException when an id is not a UUID, the action/scope cannot be signed byte-exactly
+     *         or the per-call timeout is not a finite, positive number.
      * @throws NetworkError when the requester is closed, the broker session is lost or no genuine answer arrives in time.
      */
     public function check(
@@ -192,6 +199,9 @@ final class AuthzRequester
     ): AuthzDecision {
         if ($this->closed) {
             throw NetworkError::fromMessage('axiam: authz requester is closed');
+        }
+        if ($timeoutSeconds !== null) {
+            self::requireUsableTimeout($timeoutSeconds, 'authz check timeout');
         }
 
         $correlationId = ($this->newId)();
@@ -207,7 +217,7 @@ final class AuthzRequester
                 throw NetworkError::fromException($e, 'axiam: failed to publish authz request');
             }
 
-            $timeout = $timeoutSeconds !== null && $timeoutSeconds > 0.0 ? $timeoutSeconds : $this->timeoutSeconds;
+            $timeout = $timeoutSeconds ?? $this->timeoutSeconds;
             $deadline = microtime(true) + $timeout;
             while (true) {
                 $decision = $this->decisionFor($correlationId);
@@ -230,6 +240,20 @@ final class AuthzRequester
         }
     }
 
+    /**
+     * A timeout must be a finite, positive number of seconds. `NAN` and `INF` would make the
+     * bounded wait unbounded (`NAN <= 0.0` and `$remaining <= 0.0` are never true), and zero or a
+     * negative value is a mistake to report, not to silently replace with a default.
+     *
+     * @throws \InvalidArgumentException
+     */
+    private static function requireUsableTimeout(float $seconds, string $what): void
+    {
+        if (!is_finite($seconds) || $seconds <= 0.0) {
+            throw new \InvalidArgumentException(sprintf('axiam: %s must be a finite, positive number of seconds', $what));
+        }
+    }
+
     /** The accepted decision for `$correlationId`, once a delivery handler has recorded one. */
     private function decisionFor(string $correlationId): ?AuthzDecision
     {
@@ -238,26 +262,30 @@ final class AuthzRequester
 
     /**
      * Verifies one delivery and completes the matching request, or discards it (nack without
-     * requeue plus a security event). Called by the transport for every delivery on the reply
+     * requeue plus ONE security event). Called by the transport for every delivery on the reply
      * queue.
+     *
+     * The event (CONTRACT §8 consumer obligation 4, contract 1.69) is a warning carrying exactly
+     * `timestamp` (RFC 3339 UTC), `exchange` (`""`, the default exchange the server publishes
+     * every answer on), `routing_key` (this requester's own reply queue), `tenant_id` (this
+     * requester's OWN tenant) and `reason` (`malformed`, `unsigned`, `signature`, `tenant` or
+     * `unknown_request`). Nothing read from the unauthenticated body is in it, and neither is a
+     * signature value, the nonce or a key.
      *
      * @internal
      */
     public function handleDelivery(AuthzDelivery $delivery): void
     {
         $outcome = $this->verifyResponse($delivery->body());
-        if (is_string($outcome)) {
-            // The fact of the failure only — never a signature value (§8 protocol rule 4).
-            $this->logger->warning('axiam_sdk_security: AMQP authz response discarded: ' . $outcome);
-            $delivery->nackNoRequeue();
+        if (!is_array($outcome)) {
+            $this->discard($delivery, $outcome);
 
             return;
         }
 
         [$decision, $correlationId] = $outcome;
         if (!isset($this->pending[$correlationId]) || $this->pending[$correlationId]['decision'] !== null) {
-            $this->logger->warning('axiam_sdk_security: AMQP authz response discarded: no outstanding request');
-            $delivery->nackNoRequeue();
+            $this->discard($delivery, self::REASON_UNKNOWN_REQUEST);
 
             return;
         }
@@ -268,30 +296,50 @@ final class AuthzRequester
         $delivery->ack();
     }
 
+    /** Nacks `$delivery` without requeue and logs the one fixed discard event. */
+    private function discard(AuthzDelivery $delivery, string $reason): void
+    {
+        $this->logger->warning('axiam_sdk_security: AMQP authz response discarded', [
+            'timestamp' => gmdate('Y-m-d\TH:i:s\Z', ($this->clock)()),
+            // The transport seam does not report them per delivery; the server publishes every
+            // answer on the default exchange with the reply queue as routing key, which is also
+            // what this requester consumes from.
+            'exchange' => '',
+            'routing_key' => $this->replyTo,
+            'tenant_id' => $this->tenantId,
+            'reason' => $reason,
+        ]);
+        $delivery->nackNoRequeue();
+    }
+
     /**
-     * Applies the §8 consumer obligations 1–3 to `$body`. Returns `[decision, correlation_id]`, or a
-     * string naming the failure. It never re-serializes: the signature is checked over `$body` minus
-     * its trailing signature member and the decision is decoded from those same bytes.
+     * Applies the §8 consumer obligations 1–3 to `$body`. Returns `[decision, correlation_id]`, or
+     * the discard reason (`malformed`, `unsigned`, `signature`, `tenant`, `unknown_request`). It
+     * never re-serializes: the signature is checked over `$body` minus its trailing signature
+     * member and the decision is decoded from those same bytes.
      *
      * @return array{0: AuthzDecision, 1: string}|string
      */
     private function verifyResponse(string $body): array|string
     {
         if (StrictJson::isAmbiguousObject($body)) {
-            return 'body is not an object with unambiguous keys';
+            return self::REASON_MALFORMED;
         }
         $members = json_decode($body, true);
         if (!is_array($members)) {
-            return 'body is not a JSON object';
+            return self::REASON_MALFORMED;
+        }
+
+        // A response with no `hmac_signature` member at all is unsigned. No AXIAM server sends
+        // one to a reply queue (contract 1.69), so it came from someone else: discarded, and there
+        // is no option to accept it. A `null` member is a member, and falls to `malformed` below.
+        if (!array_key_exists('hmac_signature', $members)) {
+            return self::REASON_UNSIGNED;
         }
 
         // Rule 1 (strict parse) for the member every response carries.
         if (!array_key_exists('allowed', $members) || !is_bool($members['allowed'])) {
-            return 'allowed is missing or not a boolean';
-        }
-
-        if (!array_key_exists('hmac_signature', $members)) {
-            return $this->acceptUnsigned($members);
+            return self::REASON_MALFORMED;
         }
 
         // The canonical bytes: `$body` with the final `,"hmac_signature":"<64 hex>"` taken out of
@@ -299,80 +347,47 @@ final class AuthzRequester
         // repaired by re-serializing.
         $cut = self::cutTrailingSignature($body);
         if ($cut === null) {
-            return 'body does not end in the hmac_signature member';
+            return self::REASON_MALFORMED;
         }
         [$canonical, $sigHex] = $cut;
         if ($members['hmac_signature'] !== $sigHex) {
-            return 'hmac_signature is not the trailing member';
+            return self::REASON_MALFORMED; // the signature is not the trailing top-level member
         }
         $got = hex2bin($sigHex);
         if ($got === false) {
-            return 'hmac_signature is not hex';
+            return self::REASON_MALFORMED;
         }
 
         // Rule 2: HMAC-SHA256 under the requester's own tenant subkey, constant time.
         if (!hash_equals(hash_hmac('sha256', $canonical, $this->signingKey, true), $got)) {
-            return 'signature does not verify';
+            return self::REASON_SIGNATURE;
         }
 
         // Everything below reads the VERIFIED canonical bytes, not $body (C2).
         $resp = json_decode($canonical, true);
-        if (!is_array($resp)) {
-            return 'verified bytes do not decode';
-        }
-        if (!is_bool($resp['allowed'] ?? null)) {
-            return 'allowed is missing or not a boolean';
+        if (!is_array($resp) || !is_bool($resp['allowed'] ?? null)) {
+            return self::REASON_MALFORMED;
         }
         $tenantId = $resp['tenant_id'] ?? null;
         $nonce = $resp['nonce'] ?? null;
         $correlationId = $resp['correlation_id'] ?? null;
         if (!is_string($tenantId) || $tenantId === '' || !is_string($nonce) || $nonce === ''
             || !is_string($correlationId) || $correlationId === '') {
-            return 'tenant_id, nonce or correlation_id is missing';
+            return self::REASON_MALFORMED;
         }
-        $decision = self::decisionFrom($resp, false);
+        $decision = self::decisionFrom($resp);
         if ($decision === null) {
-            return 'reason or reason_code is not a string';
+            return self::REASON_MALFORMED; // reason or reason_code is not a string
         }
 
         // Rule 3: binding to this requester's tenant and to ONE outstanding request.
         if ($tenantId !== $this->tenantId) {
-            return "tenant_id is not the requester's";
+            return self::REASON_TENANT;
         }
         $outstanding = $this->pending[$correlationId] ?? null;
         if ($outstanding === null || $outstanding['decision'] !== null || !hash_equals($outstanding['nonce'], $nonce)) {
-            return 'correlation_id and nonce match no outstanding request';
+            return self::REASON_UNKNOWN_REQUEST;
         }
-
-        return [$decision, $correlationId];
-    }
-
-    /**
-     * A response with no `hmac_signature` member: refused unless `allowUnsignedResponses` is set,
-     * in which case it is accepted on its `correlation_id` alone (a pre-1.68 server answers with
-     * no `tenant_id` or `nonce`) and logged as a warning.
-     *
-     * @param array<string,mixed> $members
-     *
-     * @return array{0: AuthzDecision, 1: string}|string
-     */
-    private function acceptUnsigned(array $members): array|string
-    {
-        if (!$this->allowUnsignedResponses) {
-            return 'response is unsigned';
-        }
-        $correlationId = $members['correlation_id'] ?? null;
-        if (!is_string($correlationId) || $correlationId === '') {
-            return 'unsigned response has no correlation_id';
-        }
-        if (!isset($this->pending[$correlationId]) || $this->pending[$correlationId]['decision'] !== null) {
-            return 'correlation_id matches no outstanding request';
-        }
-        $decision = self::decisionFrom($members, true);
-        if ($decision === null) {
-            return 'reason or reason_code is not a string';
-        }
-        $this->logger->warning('axiam_sdk_security: AMQP authz response accepted UNSIGNED because allowUnsignedResponses is set');
 
         return [$decision, $correlationId];
     }
@@ -380,7 +395,7 @@ final class AuthzRequester
     /**
      * @param array<string,mixed> $resp
      */
-    private static function decisionFrom(array $resp, bool $unsigned): ?AuthzDecision
+    private static function decisionFrom(array $resp): ?AuthzDecision
     {
         $reason = $resp['reason'] ?? null;
         $reasonCode = $resp['reason_code'] ?? null;
@@ -388,7 +403,7 @@ final class AuthzRequester
             return null;
         }
 
-        return new AuthzDecision($resp['allowed'] === true, $reason, $reasonCode, $unsigned);
+        return new AuthzDecision($resp['allowed'] === true, $reason, $reasonCode);
     }
 
     /**

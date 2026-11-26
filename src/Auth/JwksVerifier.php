@@ -837,9 +837,13 @@ final class JwksVerifier
      * `/oauth2/jwks` path on any discovery failure.
      *
      * The answer is CACHED (C5) for as long as the key cache itself lives: a re-fetch then
-     * costs one request, not two. Only an answer discovery actually gave is cached — a
-     * discovery that failed (network error, bad body) yields the fallback for THIS fetch and
-     * is retried on the next, so a transient outage is not pinned for a whole TTL.
+     * costs one request, not two. What is cached is any ANSWER discovery gave (a response that
+     * resolved): a usable `jwks_uri`, or — when the answer's body is not an object, has no
+     * `jwks_uri`, or names one that is not same-origin https — the conventional `/oauth2/jwks`
+     * fallback it resolves to, for the key cache's life. A TRANSPORT failure (the promise is
+     * rejected: a network error, or a 4xx/5xx under Guzzle's `http_errors`) yields the fallback
+     * for THIS fetch only and is retried on the next, so a transient outage is not pinned for a
+     * whole TTL.
      */
     private function resolveJwksUriAsync(): PromiseInterface
     {

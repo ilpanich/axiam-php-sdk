@@ -129,10 +129,10 @@ final class AxiamAccessMiddleware
 
         $requireAuth = $this->findAttribute($method, $class, RequireAuth::class);
         $requireRole = $this->findAttribute($method, $class, RequireRole::class);
-        $requireScope = $this->findAttribute($method, $class, RequireScope::class);
+        $requireScopes = $this->findAttributes($method, $class, RequireScope::class);
         $requireAccess = $this->findAttribute($method, $class, RequireAccess::class);
 
-        if ($requireAuth === null && $requireRole === null && $requireScope === null && $requireAccess === null) {
+        if ($requireAuth === null && $requireRole === null && $requireScopes === [] && $requireAccess === null) {
             return null;
         }
 
@@ -143,7 +143,11 @@ final class AxiamAccessMiddleware
         if ($response === null && $requireRole !== null) {
             $response = $this->enforcer->enforceRole($identity, $requireRole);
         }
-        if ($response === null && $requireScope !== null) {
+        // `#[RequireScope]` is repeatable and the instances are ANDed: every one must pass.
+        foreach ($requireScopes as $requireScope) {
+            if ($response !== null) {
+                break;
+            }
             $response = $this->enforcer->enforceScope($identity, $requireScope);
         }
         if ($response === null && $requireAccess !== null) {
@@ -260,5 +264,33 @@ final class AxiamAccessMiddleware
         }
 
         return null;
+    }
+
+    /**
+     * Reads EVERY instance of a repeatable `$attributeClass` off `$method`, falling back to
+     * `$class` when the method carries none — method-level attributes replace class-level ones,
+     * the same rule {@see self::findAttribute()} applies to the single-instance attributes.
+     *
+     * @template T of object
+     * @param class-string<T> $attributeClass
+     * @param \ReflectionClass<object> $class
+     *
+     * @return list<T>
+     */
+    private function findAttributes(\ReflectionMethod $method, \ReflectionClass $class, string $attributeClass): array
+    {
+        $reflected = $method->getAttributes($attributeClass);
+        if ($reflected === []) {
+            $reflected = $class->getAttributes($attributeClass);
+        }
+
+        $instances = [];
+        foreach ($reflected as $attribute) {
+            /** @var T $instance */
+            $instance = $attribute->newInstance();
+            $instances[] = $instance;
+        }
+
+        return $instances;
     }
 }

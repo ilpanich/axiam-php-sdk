@@ -6,6 +6,7 @@ namespace Axiam\Sdk\Oidc;
 
 use Axiam\Sdk\AxiamClient;
 use Axiam\Sdk\Core\AuthError;
+use Axiam\Sdk\Core\AxiamException;
 use Axiam\Sdk\Core\NetworkError;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -251,7 +252,14 @@ final class OidcLoginFlow
      *   called;
      * - any §12.4 ID-token failure or {@see \Axiam\Sdk\Core\OAuthProtocolError}
      *   (an {@see AuthError} sub-type) → `401 authentication_failed`;
-     * - {@see NetworkError} → `503 oidc_unavailable`, never a silent success.
+     * - {@see NetworkError} → `503 oidc_unavailable`, never a silent success;
+     * - any other {@see AxiamException} of the exchange (an `AuthzError`, say) → `401`;
+     * - ANY other exception — the application's `$onSuccess` throwing, the state store failing,
+     *   a defect → `500 login_failed` (the exception is not rethrown; its class, never its
+     *   message, is logged). The cookie clear is the guarantee here: an exception that left
+     *   `complete()` would reach the framework's error page with no clearing `Set-Cookie`
+     *   (§12.8 rule 1 (d)). An application that wants its own handler to see a failure of
+     *   `$onSuccess` catches it inside the closure and records it there.
      *
      * EVERY outcome carries a clearing `Set-Cookie` for the binding cookie
      * ({@see OidcLoginOutcome::$setCookie}); the controller MUST send it (§12.8 rule 1 (d)).
@@ -287,9 +295,23 @@ final class OidcLoginFlow
         ?string $bindingCookie = null,
         mixed $request = null,
     ): OidcLoginOutcome {
-        return $this->withClearingCookie(
-            $this->completeInner($state, $code, $error, $errorDescription, $successRedirect, $onSuccess, $bindingCookie, $request),
-        );
+        try {
+            $outcome = $this->completeInner($state, $code, $error, $errorDescription, $successRedirect, $onSuccess, $bindingCookie, $request);
+        } catch (\Throwable $e) {
+            // §12.8 rule 1 (d): EVERY callback exit clears the binding cookie, "and any other
+            // error" included. What reaches here is an exception nothing below handles: the
+            // integrator's `$onSuccess` (the sign-in has then NOT been established), a state
+            // store that cannot be read, or a defect. Letting it propagate would hand the
+            // framework's error page a response with no clearing `Set-Cookie`, so it is turned
+            // into an outcome that carries one. Only the exception's CLASS is logged: its message
+            // may quote a token or whatever the application wrote.
+            $this->logger->warning('axiam_sdk.oidc: the login callback ended in an unexpected exception', [
+                'exception' => $e::class,
+            ]);
+            $outcome = OidcLoginOutcome::error(500, 'login_failed', 'the sign-in could not be completed');
+        }
+
+        return $this->withClearingCookie($outcome);
     }
 
     /** Every callback response — success, the uniform 401 and every other error — clears the binding cookie. */
@@ -359,6 +381,13 @@ final class OidcLoginFlow
             $this->logger->debug('axiam_sdk.oidc: token exchange failed', ['reason' => $e->getMessage()]);
 
             return OidcLoginOutcome::error(401, 'authentication_failed', $e->getMessage());
+        } catch (AxiamException $e) {
+            // Any other SDK failure of the exchange (a 403/409 `AuthzError`, a plain
+            // `AxiamException`): the login could not be proven either, and its message is not
+            // shown to the browser.
+            $this->logger->debug('axiam_sdk.oidc: token exchange refused', ['exception' => $e::class]);
+
+            return OidcLoginOutcome::error(401, 'authentication_failed', 'the token exchange was refused');
         }
 
         if ($onSuccess !== null) {

@@ -175,22 +175,40 @@ final class AuthzRequesterTest extends TestCase
             /** @var list<string> */
             public array $lines = [];
 
+            /** @var list<array{level: mixed, message: string, context: array<string,mixed>}> */
+            public array $records = [];
+
             public function log(mixed $level, string|\Stringable $message, array $context = []): void
             {
                 $this->lines[] = (string) $message;
+                $this->records[] = ['level' => $level, 'message' => (string) $message, 'context' => $context];
+            }
+
+            /** Everything one record says, message and context together, as a searchable string. */
+            public function serialized(): string
+            {
+                return (string) json_encode($this->records);
             }
         };
     }
 
     /** A requester whose request ids are the vectors' (the correlation_id, then the nonce). */
-    private function vectorRequester(FakeAuthzTransport $transport, bool $allowUnsigned = false, ?object $logger = null, float $timeout = 2.0): AuthzRequester
+    private function vectorRequester(FakeAuthzTransport $transport, ?object $logger = null, float $timeout = 2.0): AuthzRequester
     {
         $ids = [self::CORRELATION, self::NONCE];
         $generator = static function () use (&$ids): string {
             return array_shift($ids) ?? 'ffffffff-ffff-ffff-ffff-ffffffffffff';
         };
 
-        return new AuthzRequester($transport, self::TENANT, self::subkey(), $allowUnsigned, $logger ?? new \Psr\Log\NullLogger(), $timeout, $generator, static fn (): int => 1_783_684_800);
+        return new AuthzRequester(
+            $transport,
+            self::TENANT,
+            self::subkey(),
+            logger: $logger ?? new \Psr\Log\NullLogger(),
+            timeoutSeconds: $timeout,
+            idGenerator: $generator,
+            clock: static fn (): int => 1_783_684_800,
+        );
     }
 
     private function check(AuthzRequester $requester): AuthzDecision
@@ -226,7 +244,6 @@ final class AuthzRequesterTest extends TestCase
         self::assertSame($vector['allowed'], $decision->allowed);
         self::assertSame($vector['reason'], $decision->reason);
         self::assertSame($vector['code'], $decision->reasonCode);
-        self::assertFalse($decision->unsigned);
         self::assertSame(1, $transport->deliveries[0]->acked, 'an accepted response is acked');
 
         // Retired on acceptance: the same response again is dropped (nacked, no requeue).
@@ -238,10 +255,13 @@ final class AuthzRequesterTest extends TestCase
 
     public function testAResponseSignedOverEscapedBytesVerifiesBecauseTheReceivedBytesAreWhatIsChecked(): void
     {
-        // C2: "é" sent as the escape é. A verifier that decoded and RE-SERIALIZED the body
-        // would produce a raw "é" and fail a genuine signature; this one cuts the signature out of
-        // the received bytes and checks those, then decodes the same bytes.
-        $canonical = '{"correlation_id":"' . self::CORRELATION . '","allowed":false,"reason":"café \/ €","reason_code":"no_grant","tenant_id":"' . self::TENANT . '","nonce":"' . self::NONCE . '"}';
+        // C2: "é" and "€" sent as the escapes \u00e9 and \u20ac (single-quoted PHP, so the backslash
+        // is in the bytes). A verifier that decoded and RE-SERIALIZED the body would produce a raw
+        // "é" or "\u00e9" and fail a genuine signature; this one cuts the signature out of the
+        // received bytes and checks those, then decodes the same bytes.
+        $canonical = '{"correlation_id":"' . self::CORRELATION . '","allowed":false,"reason":"caf\u00e9 \/ \u20ac","reason_code":"no_grant","tenant_id":"' . self::TENANT . '","nonce":"' . self::NONCE . '"}';
+        self::assertStringContainsString('\\u00e9', $canonical, 'the escape is in the bytes that are signed');
+        self::assertStringNotContainsString('é', $canonical, 'and no raw é is');
         $transport = new FakeAuthzTransport();
         $transport->script = [self::signWith(self::subkey(), $canonical)];
 
@@ -293,7 +313,7 @@ final class AuthzRequesterTest extends TestCase
         $transport = new FakeAuthzTransport();
         $transport->script = [$body, self::wire(self::VECTORS[0])];
 
-        $decision = $this->check($this->vectorRequester($transport, false, $logger));
+        $decision = $this->check($this->vectorRequester($transport, $logger));
 
         // The genuine vector 1 (allow) is what completed the request; the bad body never did.
         self::assertTrue($decision->allowed);
@@ -308,6 +328,85 @@ final class AuthzRequesterTest extends TestCase
         }
     }
 
+    // ---- the discard event (contract 1.69, #883; Appendix A.2) --------------------------
+
+    /**
+     * Every discard path logs ONE warning with exactly: timestamp, exchange, routing_key,
+     * tenant_id (the requester's OWN) and reason, and nothing read from the body.
+     *
+     * @return iterable<string, array{string, string}> [body, expected reason]
+     */
+    public static function reasonCases(): iterable
+    {
+        $v1 = self::VECTORS[0];
+        yield 'signature: another tenant\'s subkey' => [self::signWith(self::subkeyFor(self::OTHER_TENANT, 2), $v1['canonical']), 'signature'];
+        yield 'signature: tampered decision' => [str_replace('"allowed":true', '"allowed":false', self::wire($v1)), 'signature'];
+        yield 'tenant: validly signed for another tenant' => [self::signWith(self::subkey(), str_replace(self::TENANT, self::OTHER_TENANT, $v1['canonical'])), 'tenant'];
+        yield 'unsigned: no signature member' => [self::unsigned(), 'unsigned'];
+        yield 'unknown_request: another correlation_id' => [self::signWith(self::subkey(), str_replace(self::CORRELATION, '77777777-7777-7777-7777-777777777777', $v1['canonical'])), 'unknown_request'];
+        yield 'unknown_request: another nonce' => [self::signWith(self::subkey(), str_replace(self::NONCE, '66666666-6666-6666-6666-666666666666', $v1['canonical'])), 'unknown_request'];
+        yield 'malformed: not JSON' => ['not json', 'malformed'];
+        yield 'malformed: not an object' => ['[true]', 'malformed'];
+        yield 'malformed: duplicate keys' => [self::signWith(self::subkey(), str_replace('"allowed":true', '"allowed":false,"allowed":true', $v1['canonical'])), 'malformed'];
+        yield 'malformed: allowed not a boolean' => [str_replace('"allowed":true', '"allowed":"true"', self::wire($v1)), 'malformed'];
+        yield 'malformed: signature not hex' => [str_replace($v1['sig'], str_repeat('z', 64), self::wire($v1)), 'malformed'];
+        yield 'signature: a member inserted into signed bytes' => [str_replace('"allowed":true', '"allowed":true,"x":1', self::wire($v1)), 'signature'];
+        yield 'malformed: signature member not the trailing one' => [str_replace('"nonce":"' . self::NONCE . '"', '"hmac_signature":"' . $v1['sig'] . '","nonce":"' . self::NONCE . '"', $v1['canonical']), 'malformed'];
+        yield 'malformed: validly signed, no nonce' => [self::signWith(self::subkey(), str_replace(',"nonce":"' . self::NONCE . '"', '', $v1['canonical'])), 'malformed'];
+        yield 'malformed: a null signature member' => ['{"correlation_id":"' . self::CORRELATION . '","allowed":true,"hmac_signature":null}', 'malformed'];
+    }
+
+    /** @dataProvider reasonCases */
+    public function testEveryDiscardPathLogsOneEventWithTheRoutingKeyTheOwnTenantAndTheReasonAndNoSecret(string $body, string $reason): void
+    {
+        $logger = $this->logger();
+        $transport = new FakeAuthzTransport();
+        $transport->queue = 'amq.gen-ReplyQ1';
+        $transport->script = [$body, self::wire(self::VECTORS[0])];
+
+        $this->check($this->vectorRequester($transport, $logger));
+
+        self::assertCount(1, $logger->records, 'one event per discard');
+        $record = $logger->records[0];
+        self::assertSame('warning', $record['level']);
+        self::assertSame(
+            ['timestamp', 'exchange', 'routing_key', 'tenant_id', 'reason'],
+            array_keys($record['context']),
+            'exactly the Appendix A.2 members',
+        );
+        self::assertSame($reason, $record['context']['reason']);
+        self::assertSame('amq.gen-ReplyQ1', $record['context']['routing_key'], 'the requester\'s own reply queue');
+        self::assertSame(self::TENANT, $record['context']['tenant_id'], 'the requester\'s own tenant');
+        self::assertSame('', $record['context']['exchange'], 'the default exchange');
+        self::assertSame('2026-07-10T12:00:00Z', $record['context']['timestamp'], 'RFC 3339 UTC');
+
+        // Nothing from the body and no secret anywhere in the event, message included.
+        $event = $logger->serialized();
+        self::assertStringNotContainsString(self::VECTORS[0]['sig'], $event);
+        self::assertStringNotContainsString(self::VECTORS[1]['sig'], $event);
+        self::assertStringNotContainsString(self::NONCE, $event);
+        self::assertStringNotContainsString(self::CORRELATION, $event);
+        self::assertStringNotContainsString(bin2hex(self::subkey()), $event);
+        self::assertStringNotContainsString(self::OTHER_TENANT, $event, 'never the tenant the response claims');
+        if (preg_match('/[0-9a-f]{64}/', $body, $m) === 1) {
+            self::assertStringNotContainsString($m[0], $event, 'the received signature value');
+        }
+    }
+
+    public function testTheSignatureEventNeverCarriesTheComputedSignatureEither(): void
+    {
+        $logger = $this->logger();
+        $transport = new FakeAuthzTransport();
+        $canonical = self::VECTORS[0]['canonical'];
+        $transport->script = [str_replace('"allowed":true', '"allowed":false', self::wire(self::VECTORS[0])), self::wire(self::VECTORS[0])];
+
+        $this->check($this->vectorRequester($transport, $logger));
+
+        $tamperedCanonical = str_replace('"allowed":true', '"allowed":false', $canonical);
+        $computed = hash_hmac('sha256', $tamperedCanonical, self::subkey());
+        self::assertStringNotContainsString($computed, $logger->serialized());
+    }
+
     public function testAForgedAllowAloneNeverCompletesTheRequest(): void
     {
         // A forged allow carrying the right ids and a wrong key, and nothing after it: the
@@ -315,67 +414,56 @@ final class AuthzRequesterTest extends TestCase
         $forged = self::signWith(self::subkeyFor(self::OTHER_TENANT, 2), self::VECTORS[0]['canonical']);
         $transport = new FakeAuthzTransport();
         $transport->script = [$forged];
-        $requester = $this->vectorRequester($transport, false, null, 0.05);
+        $requester = $this->vectorRequester($transport, null, 0.05);
 
         $this->expectException(NetworkError::class);
         $this->check($requester);
     }
 
-    // ---- unsigned ------------------------------------------------------------------
+    // ---- unsigned (contract 1.69, #881: there is no opt-out) -------------------------
 
     private static function unsigned(string $correlationId = self::CORRELATION): string
     {
         return '{"correlation_id":"' . $correlationId . '","allowed":true,"reason_code":"allowed"}';
     }
 
-    public function testAnUnsignedResponseIsRefusedByDefault(): void
-    {
-        $transport = new FakeAuthzTransport();
-        $transport->script = [self::unsigned(), self::wire(self::VECTORS[1])];
-
-        $decision = $this->check($this->vectorRequester($transport));
-
-        self::assertFalse($decision->allowed, 'the unsigned allow was refused and the signed deny is what completed the request');
-        self::assertSame(1, $transport->deliveries[0]->nacked);
-    }
-
-    public function testAnUnsignedResponseIsAcceptedWithTheOptOutFlaggedAndLogged(): void
+    public function testAnUnsignedResponseIsDiscardedWithReasonUnsignedAndTheCheckKeepsWaiting(): void
     {
         $logger = $this->logger();
         $transport = new FakeAuthzTransport();
-        $transport->script = [self::unsigned()];
+        $transport->script = [self::unsigned(), self::wire(self::VECTORS[1])];
 
-        $decision = $this->check($this->vectorRequester($transport, true, $logger));
+        $decision = $this->check($this->vectorRequester($transport, $logger));
 
-        self::assertTrue($decision->allowed);
-        self::assertTrue($decision->unsigned);
-        self::assertSame('allowed', $decision->reasonCode);
-        self::assertSame(1, $transport->deliveries[0]->acked);
-        self::assertNotEmpty($logger->lines, 'admitting an unsigned response is logged as a warning');
+        self::assertFalse($decision->allowed, 'the unsigned allow was refused and the signed deny is what completed the request');
+        self::assertSame(1, $transport->deliveries[0]->nacked);
+        self::assertSame(0, $transport->deliveries[0]->acked);
+        self::assertCount(1, $logger->records, 'one discard event');
+        self::assertSame('unsigned', $logger->records[0]['context']['reason'] ?? null);
     }
 
-    /** @return iterable<string, array{string}> */
-    public static function unsignedBodiesTheOptOutStillRefuses(): iterable
-    {
-        yield 'a correlation_id that is not outstanding' => ['{"correlation_id":"77777777-7777-7777-7777-777777777777","allowed":true}'];
-        yield 'no allowed' => ['{"correlation_id":"' . self::CORRELATION . '"}'];
-        yield 'allowed not a boolean' => ['{"correlation_id":"' . self::CORRELATION . '","allowed":"yes"}'];
-        yield 'no correlation_id' => ['{"allowed":true}'];
-        yield 'a tampered signed response' => [str_replace('"allowed":false', '"allowed":true', self::wire(self::VECTORS[1]))];
-        yield 'a null signature member' => ['{"correlation_id":"' . self::CORRELATION . '","allowed":true,"hmac_signature":null}'];
-    }
-
-    /** @dataProvider unsignedBodiesTheOptOutStillRefuses */
-    public function testTheOptOutNeverAdmitsAnythingButAnUnsignedResponseForAnOutstandingRequest(string $body): void
+    public function testAnUnsignedResponseNeverCompletesARequestEvenWhenItIsTheOnlyAnswer(): void
     {
         $transport = new FakeAuthzTransport();
-        $transport->script = [$body, self::wire(self::VECTORS[1])];
+        $transport->script = [self::unsigned()];
 
-        $decision = $this->check($this->vectorRequester($transport, true));
+        $this->expectException(NetworkError::class);
+        $this->check($this->vectorRequester($transport, null, 0.05));
+    }
 
-        self::assertFalse($decision->allowed, 'only the genuine signed deny completed the request');
-        self::assertFalse($decision->unsigned);
-        self::assertSame(1, $transport->deliveries[0]->nacked);
+    public function testThereIsNoOptOutForUnsignedResponses(): void
+    {
+        $parameters = array_map(
+            static fn (\ReflectionParameter $p): string => $p->getName(),
+            (new \ReflectionMethod(AuthzRequester::class, '__construct'))->getParameters(),
+        );
+        foreach ($parameters as $name) {
+            self::assertStringNotContainsStringIgnoringCase('unsigned', $name, 'AuthzRequester::__construct() must not offer an unsigned-response option');
+        }
+        self::assertFalse(
+            (new \ReflectionClass(AuthzDecision::class))->hasProperty('unsigned'),
+            'a decision is never "unsigned": an unsigned response is not a decision',
+        );
     }
 
     // ---- end to end ----------------------------------------------------------------
@@ -523,6 +611,10 @@ final class AuthzRequesterTest extends TestCase
             fn () => new AuthzRequester(new FakeAuthzTransport(), 'not-a-uuid', 'k'),
             fn () => new AuthzRequester(new FakeAuthzTransport(), self::TENANT, ''),
             fn () => new AuthzRequester(new FakeAuthzTransport(), self::TENANT, 'k', timeoutSeconds: 0.0),
+            fn () => new AuthzRequester(new FakeAuthzTransport(), self::TENANT, 'k', timeoutSeconds: -1.0),
+            fn () => new AuthzRequester(new FakeAuthzTransport(), self::TENANT, 'k', timeoutSeconds: NAN),
+            fn () => new AuthzRequester(new FakeAuthzTransport(), self::TENANT, 'k', timeoutSeconds: INF),
+            fn () => new AuthzRequester(new FakeAuthzTransport(), self::TENANT, 'k', timeoutSeconds: -INF),
         ] as $build) {
             try {
                 $build();
@@ -530,6 +622,49 @@ final class AuthzRequesterTest extends TestCase
             } catch (\InvalidArgumentException) {
                 $this->addToAssertionCount(1);
             }
+        }
+    }
+
+    /** @return iterable<string, array{float}> */
+    public static function badTimeouts(): iterable
+    {
+        yield 'zero' => [0.0];
+        yield 'negative' => [-1.0];
+        yield 'NaN' => [NAN];
+        yield 'infinity' => [INF];
+        yield 'negative infinity' => [-INF];
+    }
+
+    /** @dataProvider badTimeouts */
+    public function testAPerCallTimeoutThatIsNotFinitePositiveIsRefusedNotReplacedAndNothingIsPublished(float $timeout): void
+    {
+        // wait() fails the test loudly instead of blocking: a refused timeout must never reach it.
+        $transport = new class () extends FakeAuthzTransport {
+            public function wait(float $timeoutSeconds): bool
+            {
+                throw new \LogicException('the requester waited although the timeout was refused');
+            }
+        };
+        $requester = new AuthzRequester($transport, self::TENANT, self::subkey(), timeoutSeconds: 0.05);
+
+        try {
+            $requester->check(self::SUBJECT, 'a', self::RESOURCE, null, $timeout);
+            self::fail('a per-call timeout of ' . var_export($timeout, true) . ' must be refused');
+        } catch (\InvalidArgumentException) {
+            self::assertSame([], $transport->published, 'a refused call publishes nothing');
+        }
+    }
+
+    public function testAFinitePositivePerCallTimeoutStillOverridesTheConstructorsAndBoundsTheWait(): void
+    {
+        $requester = new AuthzRequester(new FakeAuthzTransport(), self::TENANT, self::subkey(), timeoutSeconds: 60.0);
+
+        $started = microtime(true);
+        try {
+            $requester->check(self::SUBJECT, 'a', self::RESOURCE, null, 0.03);
+            self::fail('no answer arrives');
+        } catch (NetworkError) {
+            self::assertLessThan(5.0, microtime(true) - $started, 'the per-call bound, not the constructor\'s 60 s, applied');
         }
     }
 
@@ -570,7 +705,9 @@ final class AuthzRequesterTest extends TestCase
         yield 'plain object' => ['{"a":1,"b":{"c":[1,{"d":2}]}}', false];
         yield 'empty object' => ['{}', false];
         yield 'duplicate top-level key' => ['{"a":1,"a":2}', true];
-        yield 'duplicate through an escape' => ['{"a":1,"a":2}', true];
+        // single-quoted: the backslash-u is in the bytes, so the second key is "a" spelled as an escape.
+        yield 'duplicate through an escape' => ['{"a":1,"\\u0061":2}', true];
+        yield 'top-level duplicate through an escape, the decision member' => ['{"allowed":false,"\\u0061llowed":true}', true];
         yield 'duplicate nested key' => ['{"a":{"b":1,"b":2}}', true];
         yield 'duplicate inside an array element' => ['{"a":[{"b":1,"b":2}]}', true];
         yield 'case-variant top-level keys' => ['{"allowed":true,"ALLOWED":false}', true];

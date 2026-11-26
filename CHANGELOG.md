@@ -9,6 +9,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.0] - 2026-11-22
 
+### Contract 1.69 and the open-issues round (axiam#880, #881, #882, #883; axiam-php-sdk#92)
+
+`CONTRACT.md` is re-vendored at contract **1.69** (byte for byte from `ilpanich/axiam`); `README.md` states
+conformance to 1.69. 1.4.0 is unreleased, so the items below amend it.
+
+#### Removed
+
+- **The `AuthzRequester` unsigned-response opt-out** (`allowUnsignedResponses`, added earlier in 1.4.0 and never
+  released) and the `AuthzDecision::$unsigned` flag: no AXIAM server sends an unsigned response to a reply queue, so
+  the option could admit only a forged response (CONTRACT 1.69 §8, server axiam#881). The requester requires a 1.68
+  server; against an older one use REST or gRPC authorization until every replica is upgraded. An unsigned response
+  is discarded with reason `unsigned` and logged.
+
+#### Fixed
+
+- **#882 — the AMQP event consumer verified a re-serialization.** `Hmac::verify()` decoded the body and re-encoded it
+  with `json_encode`, which writes `\u00e9` for `é` and `\/` for `/` unless told otherwise, so a genuine message whose
+  fields carried an escape the encoder spells differently failed verification, and the handler was given a different
+  parse than the one that was verified. `Hmac::verify()` and the new `Hmac::verifiedCanonical()` now verify over the
+  received bytes with the trailing `hmac_signature` member cut out, and `Consumer` hands the handler the value parsed
+  from those same bytes. A body with a duplicate key at any depth, content after the object, or a signature that is not
+  the trailing member is nacked without requeue and the handler never runs. The consumer also checks the signed layout (§8 step 2c): the top-level members must be those of an `AuthzRequest` or `AuditEventMessage` in declaration order (`Hmac::hasSignedLayout()`), so another tenant-signed shape (an `AuthzResponse`) is nacked.
+- **#883 — the requester's security events carried no routing key or tenant.** Every discard of an authorization
+  response logs one warning whose context is exactly `timestamp`, `exchange`, `routing_key` (the requester's reply
+  queue), `tenant_id` (its own) and `reason` (`malformed`, `unsigned`, `signature`, `tenant`, `unknown_request`); never
+  a signature value, a nonce or anything read from the body.
+- **PHP-R1-1 — `#[RequireScope]` could not be stacked** although the docs and CONTRACT §11.2 rule 11 (d) say a route
+  needing several scopes stacks it: a repeated attribute threw `Error` (HTTP 500) in both bridges. It is now
+  `IS_REPEATABLE` and both the Laravel middleware and the Symfony listener enforce every instance (all must pass).
+- **PHP-R1-2, GLUE-R1-5 — the binding cookie was not cleared when the callback ended in an exception.** `complete()`
+  now turns an exception from `$onSuccess`, the state store or the exchange into a `500 login_failed` outcome (a
+  non-`AuthError`/`NetworkError` `AxiamException` of the exchange into the uniform `401`) that carries the clearing
+  `Set-Cookie`; only the exception's class is logged. Documented as a deviation from letting the exception reach the
+  framework's handler.
+- **PHP-R1-4 — a non-finite timeout was accepted and a non-positive per-call one silently replaced.**
+  `AuthzRequester` refuses `NaN`, `INF`, zero and negative timeouts, in the constructor and per call, with
+  `\InvalidArgumentException`.
+- **PHP-R1-5 — two `AuthzRequesterTest` cases tested less than they said.** The lost `\u` escapes are back: the
+  "duplicate through an escape" case and the escaped-non-ASCII C2 case now exercise `StrictJson`'s key normalization
+  and the verify-the-received-bytes rule.
+- **Decision 7 — the callback's `Location` header is percent-encoded by the controllers** (`/a b` → `/a%20b`, `/café`
+  → `/caf%C3%A9`, CR/LF → `%0D%0A`, an existing `%XX` kept): `OidcLoginOutcome::encodeLocation()`, used by both
+  controllers. A destination an `allowReturnTo` admitted can no longer put a raw non-ASCII byte or a CR/LF in a header.
+- **N1 — `MemoryOidcStateStore` was unbounded.** It holds at most 10 000 entries
+  (`MemoryOidcStateStore::DEFAULT_MAX_ENTRIES`, constructor argument), evicting the oldest.
+- **#880 — back-channel logout token `kid`.** Not a defect here: `verifyLogoutToken()` already selected the key by
+  `kid` and refused a kid-less token as `unknown_kid`. New tests pin the contract-1.69 shape (a token whose header is
+  exactly `{"alg":"EdDSA","typ":"logout+jwt","kid":…}`, verified against a two-key JWKS with the signing key not
+  first; kid-less and unknown-`kid` refusals; §10.1 rules 10 and 11 stay off the logout and ID-token paths).
+
+#### Documentation
+
+- PHP-R1-6: the `JwksVerifier::resolveJwksUriAsync()` docblock now says what the code does (an unusable 200 discovery
+  answer caches the fallback; only a transport failure is retried).
+- PHP-R1-7: the `EncryptCookies::$except` instruction is reworded (the real failure is one route inside
+  `EncryptCookies` and one outside); the Laravel example and the Symfony and Laravel example READMEs list `scopes`.
+
 Contract 1.68 (security audit 2026-11-14, Wave 2 and 3). `CONTRACT.md` (1.68), `openapi.json` and
 `management-registry.json` are re-vendored byte for byte from `ilpanich/axiam`; `proto/` is unchanged. The §27
 management layer is regenerated (`scripts/gen_management.py`; 265 files): the only surface change is the new optional
@@ -64,9 +121,8 @@ notes below before upgrading.** This is a minor release: no class, method or par
   tenant and the `key_version` it sent over the **received bytes** with the trailing signature member cut out — never
   re-serialized, and the decision is decoded from those same bytes (C2) — and matches an outstanding request's
   `tenant_id`, `correlation_id` and `nonce`. Anything else is nacked without requeue, logged without any signature
-  value, never an allow, and does not complete the request. Unsigned responses (a server older than 1.68) are refused
-  unless the explicit `allowUnsignedResponses: true` opt-out is set, which never admits a response carrying a failing
-  signature member. Also `AmqpLibAuthzTransport` (over `php-amqplib`), the `AuthzTransport`/`AuthzDelivery` seams and
+  value, never an allow, and does not complete the request. An unsigned response is discarded too: there is no
+  opt-out for it (see "Removed" below). Also `AmqpLibAuthzTransport` (over `php-amqplib`), the `AuthzTransport`/`AuthzDelivery` seams and
   `StrictJson`. `Consumer` is unchanged.
 - `OidcLoginFlow::complete(…, ?string $bindingCookie = null, mixed $request = null)` and `bindingCookieName()` /
   `bindingCookieNameFor()`; `OidcLoginOutcome::$setCookie` and `withSetCookie()`; `$onSuccess` receives the request as a
@@ -76,7 +132,7 @@ notes below before upgrading.** This is a minor release: no class, method or par
 - Tests: `tests/Contract168/` — the C5 window and `jwks_uri` cache, the N14 matrix (rules 10–12), the N15 matrix through
   both framework bridges with signed tokens, the C7/C6 matrix at the flow and at both controllers, the Laravel
   fail-closed middleware, and the requester (all four §8 vectors, tampered/other-nonce/other-correlation/other-tenant
-  discards, unsigned with and without the opt-out, end to end with a fake channel, the `php-amqplib` adapter).
+  discards, unsigned, end to end with a fake channel, the `php-amqplib` adapter).
 
 ### Changed
 
@@ -94,8 +150,9 @@ notes below before upgrading.** This is a minor release: no class, method or par
 ### Migration notes (1.3.x to 1.4.0)
 
 1. **Login glue (C7).** If you use the shipped Laravel/Symfony controllers: **Laravel** — add
-   `__Host-axiam_oidc_bind` and `axiam_oidc_bind` to `EncryptCookies::$except` (Laravel otherwise encrypts the response
-   cookie and the callback cannot read it back), and serve the callback over HTTPS (a `__Host-` cookie is not stored
+   `__Host-axiam_oidc_bind` and `axiam_oidc_bind` to `EncryptCookies::$except`, or make sure the login and callback
+   routes share the same cookie-encryption middleware (with both under `EncryptCookies` the cookie is encrypted and
+   decrypted for you; the failure is one route inside it and one outside), and serve the callback over HTTPS (a `__Host-` cookie is not stored
    over plain HTTP; only `http://localhost`, `127.0.0.1` and `[::1]` use the fallback name). If you call `OidcLoginFlow`
    yourself: send `OidcLoginOutcome::$setCookie` on every response and pass the cookie named by `bindingCookieName()` as
    `bindingCookie:` to `complete()` — a call that passes none has every callback refused. A custom
@@ -118,8 +175,8 @@ notes below before upgrading.** This is a minor release: no class, method or par
    not this one. A token from any other signer sharing the JWKS must now carry `at+jwt` or no `typ`.
 5. **Laravel `axiam.access` attribute mode (ride-along).** A route whose action cannot be reflected now answers 403. Use the
    string-parameter form (`->middleware('axiam.access:read')`) on Closure routes.
-6. **AMQP.** Nothing to do unless you adopt `AuthzRequester`; with a pre-1.68 server it needs the one-upgrade opt-out
-   `allowUnsignedResponses: true`.
+6. **AMQP.** Nothing to do unless you adopt `AuthzRequester`, which requires an AXIAM server of 1.68 or later and has no
+   unsigned-response opt-out; against an older server use REST or gRPC authorization.
 
 ## [1.3.1] - 2026-11-11
 

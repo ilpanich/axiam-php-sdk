@@ -198,7 +198,13 @@ it, token verification and the SSF receiver fail with a typed `AxiamException` n
 - **The AMQP consumer** (`Axiam\Sdk\Amqp\Consumer`, run via
   [`bin/axiam-amqp-worker.php`](bin/axiam-amqp-worker.php)) is a standalone CLI-oriented
   blocking consume loop — **it is not a web-request path at all** and must never be invoked
-  from an FPM worker.
+  from an FPM worker. It verifies each message's HMAC over the **received bytes** (the body with its
+  trailing `hmac_signature` member cut out), never over a re-serialization, and hands your handler
+  the value parsed from those same verified bytes (axiam#882): a genuine message whose fields contain
+  `<`, `>`, `&`, non-ASCII text or `\u` escapes verifies, and a body with a duplicate key, content after
+  the object, or a signature that is not the trailing member is nacked without requeue and your
+  handler never runs; so does a validly signed message whose members are not those of an `AuthzRequest` or
+  `AuditEventMessage` in declaration order (§8 step 2c). `Hmac::verify()` / `Hmac::verifiedCanonical()` follow the same rule.
 
 **Process supervision is your responsibility for the AMQP worker.** `php-amqplib` (unlike
 the Go/C# sibling SDKs' AMQP clients) has **no built-in automatic reconnection** — if the
@@ -222,7 +228,7 @@ reports `profile: minimal` and lists `amqp_authz` and `amqp_audit_ingestion` und
 `Axiam\Sdk\Amqp\AuthzRequester` publishes a signed `AuthzRequest` on `axiam.authz.request` and
 returns the server's answer **only once it verifies as the signed response to that request**. It is
 the requester half of §8's "Signed authorization responses"; the consumer half
-(`Axiam\Sdk\Amqp\Consumer`) is unchanged.
+(`Axiam\Sdk\Amqp\Consumer`) verifies the same way, over the received bytes (below).
 
 ```php
 use Axiam\Sdk\Amqp\AmqpLibAuthzTransport;
@@ -233,7 +239,7 @@ use Axiam\Sdk\Amqp\AuthzRequester;
 $requester = new AuthzRequester(new AmqpLibAuthzTransport($channel), $tenantUuid, $subkey);
 
 $decision = $requester->check($subjectUuid, 'documents:read', $resourceUuid, scope: 'confidential');
-if ($decision->allowed) { /* … */ }          // AuthzDecision: allowed, reason, reasonCode, unsigned
+if ($decision->allowed) { /* … */ }          // AuthzDecision: allowed, reason, reasonCode
 ```
 
 - **A private `reply_to`.** The requester declares an **exclusive, auto-delete, broker-named** queue
@@ -250,11 +256,22 @@ if ($decision->allowed) { /* … */ }          // AuthzDecision: allowed, reason
 - **Anything else is discarded**: nacked without requeue, logged as a security event (never a signature
   value), never an allow — and it does **not** complete the request; `check()` keeps waiting for the
   genuine answer until its timeout, then throws `NetworkError`.
-- **A server older than 1.68** answers unsigned. They are refused by default. For ONE rolling upgrade
-  pass `allowUnsignedResponses: true`: a response with **no** `hmac_signature` member is then accepted
-  on its `correlation_id` alone, flagged `unsigned` and logged as a warning; a response that carries a
-  signature is verified in full whatever this says, and the option never admits one that fails. Remove
-  it once the server is upgraded.
+- **The requester requires an AXIAM server of 1.68 or later** (contract 1.68). Such a server signs every
+  authorization response with the tenant's AMQP subkey and answers on the requester's private `reply_to`
+  queue. A server older than 1.68 ignores `reply_to` and answers, unsigned, only on the shared
+  `axiam.authz.response` queue, which this requester never reads: against it every check times out. There
+  is **no option to accept unsigned responses** (CONTRACT 1.69 §8): no AXIAM server sends one to a reply
+  queue, so an unsigned response can only have been published by someone else, and it is discarded and
+  logged. During a rolling upgrade from a pre-1.68 server, use REST or gRPC authorization until every
+  replica runs 1.68 or later.
+- **The discard event.** Every discarded response logs one warning on the PSR-3 logger you pass, with the
+  context `timestamp` (RFC 3339 UTC), `exchange` (`""`, the default exchange), `routing_key` (the
+  requester's own reply queue), `tenant_id` (the requester's **own** tenant) and `reason`: `malformed`,
+  `unsigned`, `signature`, `tenant` or `unknown_request`. Nothing read from the discarded body, no
+  signature value and no nonce is in it.
+- **Timeouts are finite and positive.** The constructor's `timeoutSeconds` and `check()`'s per-call
+  `$timeoutSeconds` must be finite and greater than zero; `NaN`, `INF`, zero and negative values throw
+  `\InvalidArgumentException` (a per-call value is refused, not replaced by the default).
 - **The signature proves "a holder of the tenant subkey", not "the server".** Another service of the
   same tenant can sign too; if more than one of them publishes authorization requests, each needs its
   own requester (its own exclusive queue) and the broker should deny SDK principals `read` on
@@ -262,7 +279,7 @@ if ($decision->allowed) { /* … */ }          // AuthzDecision: allowed, reason
 
 ## Contract conformance
 
-This SDK conforms to **contract 1.68**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §12.8, §14,
+This SDK conforms to **contract 1.69**: [`CONTRACT.md`](CONTRACT.md) §1–§13 and §12.7, §12.8, §14,
 §15, §17, §19, §20, §21, §22, §23, §24, §25, §26, §27 (§27.6.2 included), §28, §28.12, §29, §30, §31, §32, §33,
 §36 and §37,
 with §32.7 and §33.2 signed (ES256, EdDSA) — the signed form for those two algorithms;
@@ -662,7 +679,10 @@ was refused. Now:
   **no** `roles` claim, one that is not a JSON array of strings, and `roles: []` are all **403** — fail
   closed. (`null` and `[]` stay distinguishable on the identity: "ask for the scope" versus "the user holds none".)
 - `#[RequireScope('admin')]` passes only when the token's `scope` contains `admin` as a whole entry
-  (`administrator` does not match). No `scope` claim is a 403. Stack the attribute for several scopes.
+  (`administrator` does not match). No `scope` claim is a 403. `#[RequireScope]` is **repeatable**: stack it for several scopes
+  (`#[RequireScope('documents:read')] #[RequireScope('documents:write')]`) and the route passes only when
+  **every** instance is satisfied (each by at least one of its own scopes). Instances on a method replace
+  those on its class rather than adding to them.
 - **Your application must request the `roles` scope** — add `roles` to the scope you pass to
   `oidcBegin`/`oidcPar`/`deviceAuthorize`/CIBA/`loginClientCredentials`, and have your administrator add
   `roles` to the client's registered scopes — **or every `#[RequireRole]` is a 403**. The SDK never adds it
@@ -865,12 +885,30 @@ Two defects of the 1.x glue are closed (**behaviour changes — see the 1.4.0 mi
   **not followed at the redirect** (the store may be yours). Pass `allowReturnTo:` to `OidcLoginFlow` to
   widen this for an allow-list of your other origins; it is consulted only for values the default rule
   refuses, and one that throws accepts nothing.
+- **Every exit of the callback clears the cookie — including an exception.** If your `$onSuccess` throws (or the
+  state store, or anything else under `complete()`), `complete()` does **not** rethrow: it returns a
+  `500 login_failed` outcome that carries the clearing `Set-Cookie` (CONTRACT §12.8 rule 1 (d)), and logs the
+  exception's class, never its message. This is a deliberate deviation from "the exception reaches the
+  framework's handler": a response from your error handler would carry no clearing cookie. If you want your own
+  handler to see a failure of `$onSuccess`, catch it inside the closure and record it there. A token-endpoint
+  refusal that is neither an `AuthError` nor a `NetworkError` (a `403`, say) is the uniform `401`.
+- **The `Location` header is encoded by the SDK.** The shipped controllers write the percent-encoded form of the
+  destination (`OidcLoginOutcome::encodeLocation()`: `/a b` → `/a%20b`, `/café` → `/caf%C3%A9`, an existing `%XX`
+  kept, any other `%` → `%25`, CR/LF → `%0D%0A`; the result is pure ASCII, so no destination can split the
+  header). `allowReturnTo` and `$onSuccess` see the raw value; you never encode. If you build your own response from
+  `OidcLoginOutcome::$redirectUrl`, pass it through `encodeLocation()`.
+- **`MemoryOidcStateStore` is bounded** at 10 000 entries (`MemoryOidcStateStore::DEFAULT_MAX_ENTRIES`, or the
+  constructor's second argument); a save beyond it evicts the oldest, so an unauthenticated client cannot grow it
+  without limit.
 - **`$onSuccess` now receives the request.** `complete()` takes `request:` and passes it to
   `$onSuccess($tokens, $entry, $request)` so you create your session on the request that completed the sign-in. A
   closure that declares two parameters keeps working.
 - **What you must do.** (1) **Laravel:** add `__Host-axiam_oidc_bind` and `axiam_oidc_bind` to
-  `EncryptCookies::$except` — Laravel encrypts every response cookie otherwise, and the callback would
-  never see the plain value. (2) **A custom `OidcStateStoreInterface`** must persist `bindingDigest` and
+  `EncryptCookies::$except`, **or** make sure the login route and the callback route share the same
+  cookie-encryption middleware (both inside the `web` group is the usual case). Under `EncryptCookies` the
+  cookie is encrypted on the way out and decrypted on the way in, so the callback reads the plain value either
+  way; what fails is one route inside `EncryptCookies` and the other outside it, and listing the cookie in
+  `$except` removes the question (the value is a random nonce checked against a digest, and `HttpOnly`). (2) **A custom `OidcStateStoreInterface`** must persist `bindingDigest` and
   return it unchanged; a store that drops it refuses every sign-in (loudly, which is the safe failure).
   (3) **If you call `OidcLoginFlow` yourself**, send `OidcLoginOutcome::$setCookie` with every response
   and pass `bindingCookie:` (the cookie named by `bindingCookieName()`) to `complete()`; a call that
@@ -1159,6 +1197,13 @@ you to terminate a session. It checks the signature (same JWKS path and same EdD
 discipline as §12.4), `iss`, `aud`, that `events` carries the back-channel-logout key (**the
 only thing separating a logout token from an ID token**), that `nonce` is *absent* (its
 presence is how an ID token gets replayed as one), that something is named, and freshness.
+
+**The key is selected by `kid` (contract 1.69).** From contract 1.69 the server signs every logout token with the
+header exactly `{"alg":"EdDSA","typ":"logout+jwt","kid":"<kid>"}`, the `kid` `/oauth2/jwks` publishes for the signing
+key. `verifyLogoutToken()` picks the key by it, as §12.4 rule 2 does: a token with **no** `kid` is refused as
+`unknown_kid` (no "the only key" fallback, no trying every key), and an unknown `kid` costs at most one JWKS
+re-fetch per cooldown window. A logout token from a server before 1.69 carries no `kid` and is refused. §10.1 rules
+10 and 11 do not apply on this path (the token's `typ` is `logout+jwt`).
 
 It returns `sid`/`sub`/`jti` rather than a bare `bool`: you have to know *which* session to
 end. **Dedup on `jti` yourself** — delivery is at-least-once, so a valid token legitimately
