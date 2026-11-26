@@ -82,6 +82,22 @@ final class OidcLoginFlowTest extends TestCase
         ]));
     }
 
+    /** The binding-cookie value the entries these tests save directly are bound to (CONTRACT.md §12.8). */
+    private const BINDING = 'binding-cookie-value-of-the-browser-that-started-the-login';
+
+    /** An entry bound to {@see self::BINDING}, as `begin()` would have stored it. */
+    private function boundEntry(string $state, string $nonce, string $verifier, ?string $returnTo = null): OidcStateEntry
+    {
+        return new OidcStateEntry(
+            $state,
+            $nonce,
+            new \Axiam\Sdk\Core\Sensitive($verifier),
+            'https://app.test/callback',
+            $returnTo,
+            hash('sha256', self::BINDING),
+        );
+    }
+
     // ===================================================================================
     // begin()
     // ===================================================================================
@@ -96,6 +112,7 @@ final class OidcLoginFlowTest extends TestCase
         self::assertSame(OidcLoginOutcome::KIND_REDIRECT, $outcome->kind);
         self::assertStringStartsWith(self::BASE_URL . '/oauth2/authorize', (string) $outcome->redirectUrl);
         self::assertSame(1, $store->size());
+        self::assertNotNull($outcome->setCookie, 'the login sets the browser-binding cookie (§12.8)');
     }
 
     public function testBeginFailsClosedWith503WhenAxiamIsUnreachable(): void
@@ -152,18 +169,13 @@ final class OidcLoginFlowTest extends TestCase
     public function testCompleteConsumesStateSingleUse(): void
     {
         $store = new MemoryOidcStateStore();
-        $store->save(new OidcStateEntry(
-            state: 'state-1',
-            nonce: 'nonce-1',
-            codeVerifier: new \Axiam\Sdk\Core\Sensitive('verifier-1'),
-            redirectUri: 'https://app.test/callback',
-        ));
+        $store->save($this->boundEntry('state-1', 'nonce-1', 'verifier-1'));
         $flow = new OidcLoginFlow($this->client([
             $this->discoveryResponse(),
             new Response(400, [], (string) json_encode(['error' => 'invalid_grant', 'error_description' => 'bad code'])),
         ]), $store, 'https://app.test/callback');
 
-        $flow->complete(state: 'state-1', code: 'a-code');
+        $flow->complete(state: 'state-1', code: 'a-code', bindingCookie: self::BINDING);
 
         self::assertSame(0, $store->size(), 'the state must be consumed even though the exchange itself later failed');
     }
@@ -171,13 +183,13 @@ final class OidcLoginFlowTest extends TestCase
     public function testCompleteNetworkErrorMapsTo503(): void
     {
         $store = new MemoryOidcStateStore();
-        $store->save(new OidcStateEntry('state-1', 'nonce-1', new \Axiam\Sdk\Core\Sensitive('verifier-1'), 'https://app.test/callback'));
+        $store->save($this->boundEntry('state-1', 'nonce-1', 'verifier-1'));
         // A raw connection-refused-shaped failure (no HTTP response at all).
         $flow = new OidcLoginFlow($this->client([
             new \GuzzleHttp\Exception\ConnectException('connection refused', new \GuzzleHttp\Psr7\Request('POST', self::BASE_URL)),
         ]), $store, 'https://app.test/callback');
 
-        $outcome = $flow->complete(state: 'state-1', code: 'a-code');
+        $outcome = $flow->complete(state: 'state-1', code: 'a-code', bindingCookie: self::BINDING);
 
         self::assertSame(503, $outcome->status);
         self::assertSame('oidc_unavailable', $outcome->error);
@@ -186,13 +198,13 @@ final class OidcLoginFlowTest extends TestCase
     public function testCompleteOAuthProtocolErrorMapsTo401(): void
     {
         $store = new MemoryOidcStateStore();
-        $store->save(new OidcStateEntry('state-1', 'nonce-1', new \Axiam\Sdk\Core\Sensitive('verifier-1'), 'https://app.test/callback'));
+        $store->save($this->boundEntry('state-1', 'nonce-1', 'verifier-1'));
         $flow = new OidcLoginFlow($this->client([
             $this->discoveryResponse(),
             new Response(400, [], (string) json_encode(['error' => 'invalid_grant', 'error_description' => 'code already used'])),
         ]), $store, 'https://app.test/callback');
 
-        $outcome = $flow->complete(state: 'state-1', code: 'a-code');
+        $outcome = $flow->complete(state: 'state-1', code: 'a-code', bindingCookie: self::BINDING);
 
         self::assertSame(401, $outcome->status);
         self::assertSame('authentication_failed', $outcome->error);
@@ -202,7 +214,7 @@ final class OidcLoginFlowTest extends TestCase
     public function testCompleteSuccessRunsOnSuccessAndRedirectsToConfiguredSuccessRedirect(): void
     {
         $store = new MemoryOidcStateStore();
-        $store->save(new OidcStateEntry('state-1', 'the-nonce', new \Axiam\Sdk\Core\Sensitive('the-verifier'), 'https://app.test/callback', '/return/here'));
+        $store->save($this->boundEntry('state-1', 'the-nonce', 'the-verifier', '/return/here'));
         $flow = new OidcLoginFlow($this->client([
             $this->discoveryResponse(),
             new Response(200, [], (string) json_encode(['access_token' => 'a', 'token_type' => 'Bearer', 'expires_in' => 900])),
@@ -213,6 +225,7 @@ final class OidcLoginFlowTest extends TestCase
             state: 'state-1',
             code: 'a-code',
             successRedirect: '/explicit-destination',
+            bindingCookie: self::BINDING,
             onSuccess: function (OidcTokenSet $tokens, OidcStateEntry $entry) use (&$called): void {
                 $called = true;
                 self::assertSame('a', $tokens->accessToken->reveal());
@@ -229,13 +242,13 @@ final class OidcLoginFlowTest extends TestCase
     public function testCompleteSuccessFallsBackToStoredReturnToWhenNoExplicitRedirect(): void
     {
         $store = new MemoryOidcStateStore();
-        $store->save(new OidcStateEntry('state-1', 'nonce', new \Axiam\Sdk\Core\Sensitive('verifier'), 'https://app.test/callback', '/from-the-store'));
+        $store->save($this->boundEntry('state-1', 'nonce', 'verifier', '/from-the-store'));
         $flow = new OidcLoginFlow($this->client([
             $this->discoveryResponse(),
             new Response(200, [], (string) json_encode(['access_token' => 'a', 'token_type' => 'Bearer', 'expires_in' => 900])),
         ]), $store, 'https://app.test/callback');
 
-        $outcome = $flow->complete(state: 'state-1', code: 'a-code');
+        $outcome = $flow->complete(state: 'state-1', code: 'a-code', bindingCookie: self::BINDING);
 
         self::assertSame(OidcLoginOutcome::KIND_REDIRECT, $outcome->kind);
         self::assertSame('/from-the-store', $outcome->redirectUrl);
@@ -249,7 +262,7 @@ final class OidcLoginFlowTest extends TestCase
             'exp' => time() + 900, 'iat' => time(), 'nonce' => $nonce,
         ]);
         $store = new MemoryOidcStateStore();
-        $store->save(new OidcStateEntry('state-1', $nonce, new \Axiam\Sdk\Core\Sensitive('verifier'), 'https://app.test/callback'));
+        $store->save($this->boundEntry('state-1', $nonce, 'verifier'));
         $flow = new OidcLoginFlow($this->client([
             $this->discoveryResponse(),
             new Response(200, [], (string) json_encode([
@@ -259,7 +272,7 @@ final class OidcLoginFlowTest extends TestCase
             new Response(200, [], (string) json_encode($this->fixtureJwks())),
         ]), $store, 'https://app.test/callback');
 
-        $outcome = $flow->complete(state: 'state-1', code: 'a-code');
+        $outcome = $flow->complete(state: 'state-1', code: 'a-code', bindingCookie: self::BINDING);
 
         self::assertSame(OidcLoginOutcome::KIND_JSON, $outcome->kind);
         $body = $outcome->jsonBody();

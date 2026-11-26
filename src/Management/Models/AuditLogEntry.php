@@ -34,6 +34,15 @@ final class AuditLogEntry implements \JsonSerializable
      * @param string $tenantId the server's `tenant_id` field
      * @param string $timestamp the server's `timestamp` field
      * @param string|null $ipAddress the server's `ip_address` field (optional)
+     * @param string|null $organizationId The organization a **system-partition** row (nil
+     *     `tenant_id`) concerns, recorded only where the server resolved it with certainty (SA-02,
+     *     N1): a deleted tenant's organization, a verified SCIM token's tenant's, or an
+     *     organization or tenant the request's path names and that exists. `GET
+     *     /api/v1/audit-logs/system` returns a row only to an organization principal of this
+     *     organization, and a row without one to nobody. Always `None` on a tenant's own rows,
+     *     whose organization is their tenant's, and on every system row written before the field
+     *     existed. Omitted from the serialized form when `None`, so an existing row's export line
+     *     and dead-letter line are what they were. (optional)
      * @param string|null $resourceId the server's `resource_id` field (optional)
      */
     public function __construct(
@@ -46,6 +55,7 @@ final class AuditLogEntry implements \JsonSerializable
         public readonly string $tenantId,
         public readonly string $timestamp,
         public readonly ?string $ipAddress = null,
+        public readonly ?string $organizationId = null,
         public readonly ?string $resourceId = null,
     ) {
     }
@@ -66,6 +76,7 @@ final class AuditLogEntry implements \JsonSerializable
             (string) ModelDecode::need($data, 'tenant_id', self::class),
             (string) ModelDecode::need($data, 'timestamp', self::class),
             isset($data['ip_address']) ? (string) $data['ip_address'] : null,
+            isset($data['organization_id']) ? (string) $data['organization_id'] : null,
             isset($data['resource_id']) ? (string) $data['resource_id'] : null,
         );
         if ($model->actorType === ActorType::Unknown) {
@@ -144,6 +155,9 @@ final class AuditLogEntry implements \JsonSerializable
         $out['timestamp'] = $this->timestamp;
         if ($this->ipAddress !== null) {
             $out['ip_address'] = $this->ipAddress;
+        }
+        if ($this->organizationId !== null) {
+            $out['organization_id'] = $this->organizationId;
         }
         if ($this->resourceId !== null) {
             $out['resource_id'] = $this->resourceId;

@@ -8,6 +8,7 @@ use Axiam\Sdk\AccessEnforcer;
 use Axiam\Sdk\Attributes\RequireAccess;
 use Axiam\Sdk\Attributes\RequireAuth;
 use Axiam\Sdk\Attributes\RequireRole;
+use Axiam\Sdk\Attributes\RequireScope;
 
 // D-01: the entire class definition is wrapped in an `interface_exists` guard, exactly
 // like {@see AxiamAuthSubscriber} — this file never fatals if `symfony/event-dispatcher`/
@@ -64,7 +65,7 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
          * `#[RequireAccess]` and, when any are present, enforces them via
          * {@see AccessEnforcer} — replacing the controller with a closure returning the
          * error response on the first failing check. Checks are evaluated in the order
-         * auth -> role -> access (each of {@see AccessEnforcer}'s own methods re-checks
+         * auth -> role -> scope -> access (each of {@see AccessEnforcer}'s own methods re-checks
          * authentication internally too, so this ordering only affects which message a
          * caller sees first, never the correctness of the final decision).
          *
@@ -82,15 +83,16 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
 
             $requireAuth = $this->findAttribute($method, $class, RequireAuth::class);
             $requireRole = $this->findAttribute($method, $class, RequireRole::class);
+            $requireScope = $this->findAttribute($method, $class, RequireScope::class);
             $requireAccess = $this->findAttribute($method, $class, RequireAccess::class);
 
-            if ($requireAuth === null && $requireRole === null && $requireAccess === null) {
+            if ($requireAuth === null && $requireRole === null && $requireScope === null && $requireAccess === null) {
                 return;
             }
 
             $request = $event->getRequest();
             $rawIdentity = $request->attributes->get('axiam_user');
-            /** @var array{user_id: string, tenant_id: string, roles: list<string>}|null $identity */
+            /** @var array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity */
             $identity = is_array($rawIdentity) ? $rawIdentity : null;
 
             $response = null;
@@ -99,6 +101,9 @@ if (interface_exists(\Symfony\Component\EventDispatcher\EventSubscriberInterface
             }
             if ($response === null && $requireRole !== null) {
                 $response = $this->enforcer->enforceRole($identity, $requireRole);
+            }
+            if ($response === null && $requireScope !== null) {
+                $response = $this->enforcer->enforceScope($identity, $requireScope);
             }
             if ($response === null && $requireAccess !== null) {
                 $response = $this->enforcer->enforceAccess($identity, $requireAccess, $request->attributes->all());

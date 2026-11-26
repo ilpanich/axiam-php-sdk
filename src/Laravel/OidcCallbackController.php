@@ -30,11 +30,17 @@ if (class_exists(\Symfony\Component\HttpFoundation\Request::class)) {
             $error = $request->query->get('error');
             $errorDescription = $request->query->get('error_description');
 
+            // CONTRACT.md §12.8 rule 1: only the cookie the login set, by the one name this flow
+            // uses — a cookie of the other name is no cookie at all.
+            $bindingCookie = $request->cookies->get($this->flow->bindingCookieName());
+
             $outcome = $this->flow->complete(
                 state: is_string($state) ? $state : null,
                 code: is_string($code) ? $code : null,
                 error: is_string($error) ? $error : null,
                 errorDescription: is_string($errorDescription) ? $errorDescription : null,
+                bindingCookie: is_string($bindingCookie) ? $bindingCookie : null,
+                request: $request,
             );
 
             return OidcLoginController::toResponse($outcome);

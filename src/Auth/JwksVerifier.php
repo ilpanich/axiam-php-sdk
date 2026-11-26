@@ -93,10 +93,31 @@ final class JwksVerifier
      */
     public const CLOCK_SKEW_LEEWAY_SECONDS = 60;
 
+    /**
+     * The cooldown window for a JWKS re-fetch caused by an unknown `kid` (CONTRACT.md §12.4
+     * rule 2, shared by §10.1 rule 12): while the cache is otherwise fresh, a token naming a
+     * `kid` the cache does not hold is rejected FROM THE CACHE, with no network I/O, unless
+     * this many seconds have passed since the last re-fetch an unknown `kid` caused. Without
+     * it an unauthenticated caller could make every forged token cost two outbound requests
+     * (discovery and `jwks_uri`) — security audit 2026-11-14, C5.
+     */
+    public const UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS = 60;
+
     /** @var array<string,\Firebase\JWT\Key>|null */
     private ?array $keysByKid = null;
 
     private int $fetchedAt = 0;
+
+    /** Unix time of the last re-fetch an unknown `kid` caused; 0 = none yet (C5). */
+    private int $lastUnknownKidRefetchAt = 0;
+
+    /** The `jwks_uri` discovery resolved, reused until it is as old as the key cache (C5). */
+    private ?string $resolvedJwksUri = null;
+
+    private int $resolvedJwksUriAt = 0;
+
+    /** @var \Closure(): int Seconds since the epoch; `time()` unless a test supplies one. */
+    private readonly \Closure $clock;
 
     /**
      * Guzzle-promise-based single-flight guard (D-08/D-09, RESEARCH Pitfall 6):
@@ -151,7 +172,18 @@ final class JwksVerifier
          * unreachable or unusable behaves exactly as no feed at all.
          */
         private readonly ?RevocationFeed $revocationFeed = null,
+        /**
+         * The time source, in seconds since the epoch. `null` — the default — is `time()`.
+         * Exists so the unknown-`kid` cooldown and the cache lifetime can be tested without
+         * sleeping; production code never passes it.
+         *
+         * @internal
+         *
+         * @var (\Closure(): int)|null
+         */
+        ?\Closure $clock = null,
     ) {
+        $this->clock = $clock ?? static fn (): int => time();
     }
 
     /**
@@ -245,6 +277,17 @@ final class JwksVerifier
             return null;
         }
 
+        // §10.1 rule 10 (contract 1.68; N14): when the header carries `typ` it MUST be
+        // `at+jwt`. Checked before any key lookup, so a token the server typed as anything
+        // else (an MFA challenge, a WebAuthn state, a logout or security-event token, a
+        // pre-1.67 `JWT`) costs no network I/O.
+        if (!self::isAccessTokenTyp($header)) {
+            return null;
+        }
+
+        // §10.1 rule 12: `kid` is REQUIRED on this path and selects the key. A token with
+        // none is refused outright — there is no "the only key in the set" fallback and no
+        // trying every key (php-jwt's own lookup is by `kid`, so none can creep in here).
         $kid = $header['kid'] ?? null;
         if (!is_string($kid) || $kid === '') {
             return null;
@@ -252,7 +295,7 @@ final class JwksVerifier
 
         $this->ensureFresh($kid);
         if (!isset($this->keysByKid[$kid])) {
-            return null; // unknown kid even after a forced refetch
+            return null; // unknown kid, even after the one re-fetch the cooldown allows
         }
 
         // Pin firebase/php-jwt's public mutable $leeway static to OUR named, bounded
@@ -269,6 +312,14 @@ final class JwksVerifier
             JWT::$leeway = $originalLeeway;
         }
         $claims = (array) $decoded;
+
+        // §10.1 rule 11 (contract 1.68; N14): a token whose claim set contains a `purpose`
+        // member is one of AXIAM's own purpose tokens (MFA challenge, MFA setup, WebAuthn
+        // state), signed with the access-token key. Refused whatever its value (`null`
+        // included) and whatever its `typ` says. Read from the VERIFIED payload itself.
+        if (array_key_exists('purpose', $claims)) {
+            return null;
+        }
 
         if (!$this->applyClaimPolicy($claims, $expectedTenantId)) {
             return null;
@@ -655,6 +706,30 @@ final class JwksVerifier
         return (array) $decoded;
     }
 
+    /**
+     * §10.1 rule 10: true when the header has no `typ`, or its `typ` is `at+jwt` — compared
+     * ASCII case-insensitively, with or without the `application/` prefix (RFC 7515 §4.1.9),
+     * exactly as the server compares it. A `typ` that is not a string is refused.
+     *
+     * @param array<string,mixed> $header
+     */
+    private static function isAccessTokenTyp(array $header): bool
+    {
+        if (!array_key_exists('typ', $header)) {
+            return true;
+        }
+        $typ = $header['typ'];
+        if (!is_string($typ)) {
+            return false;
+        }
+        $typ = strtolower($typ);
+        if (str_starts_with($typ, 'application/')) {
+            $typ = substr($typ, strlen('application/'));
+        }
+
+        return $typ === 'at+jwt';
+    }
+
     /** @return array<string,mixed>|null */
     private function decodeHeader(string $headerSegment): ?array
     {
@@ -699,9 +774,11 @@ final class JwksVerifier
      */
     private function ensureFreshAsync(string $unknownKid): PromiseInterface
     {
-        $expired = (time() - $this->fetchedAt) > $this->cacheTtlSeconds;
+        $now = ($this->clock)();
+        $expired = ($now - $this->fetchedAt) > $this->cacheTtlSeconds;
         $unknown = !isset($this->keysByKid[$unknownKid]);
-        if ($this->keysByKid !== null && !$expired && !$unknown) {
+        $cacheFresh = $this->keysByKid !== null && !$expired;
+        if ($cacheFresh && !$unknown) {
             return Create::promiseFor(null);
         }
 
@@ -711,13 +788,28 @@ final class JwksVerifier
             return $this->inFlightFetch;
         }
 
+        if ($cacheFresh) {
+            // C5 / §12.4 rule 2: an unknown `kid` against an otherwise fresh cache may cost
+            // at most ONE re-fetch per cooldown window. Inside the window the token is
+            // rejected from the cache with no network I/O, so a caller who invents a `kid`
+            // per request cannot turn each forged token into outbound requests. The window
+            // is anchored on the last re-fetch an unknown `kid` CAUSED, so a rotated key is
+            // picked up as soon as the window has passed.
+            if ($this->lastUnknownKidRefetchAt !== 0
+                && ($now - $this->lastUnknownKidRefetchAt) < self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS
+            ) {
+                return Create::promiseFor(null);
+            }
+            $this->lastUnknownKidRefetchAt = $now;
+        }
+
         $fetch = $this->resolveJwksUriAsync()
             ->then(fn (string $jwksUri): PromiseInterface => $this->http->requestAsync('GET', $jwksUri))
             ->then(function (ResponseInterface $response): void {
                 $jwksJson = json_decode((string) $response->getBody(), true);
                 if (is_array($jwksJson)) {
                     $this->keysByKid = JWK::parseKeySet($jwksJson);
-                    $this->fetchedAt = time();
+                    $this->fetchedAt = ($this->clock)();
                 }
             })
             ->otherwise(function (\Throwable $e): void {
@@ -740,25 +832,38 @@ final class JwksVerifier
     }
 
     /**
-     * Resolve `jwks_uri` fresh via OIDC discovery (cheap, avoids a second
-     * hardcoded path constant drifting from the server's actual
-     * configuration), falling back to the conventional `/oauth2/jwks` path on
-     * any discovery failure.
+     * Resolve `jwks_uri` via OIDC discovery (cheap, avoids a second hardcoded path constant
+     * drifting from the server's actual configuration), falling back to the conventional
+     * `/oauth2/jwks` path on any discovery failure.
+     *
+     * The answer is CACHED (C5) for as long as the key cache itself lives: a re-fetch then
+     * costs one request, not two. Only an answer discovery actually gave is cached — a
+     * discovery that failed (network error, bad body) yields the fallback for THIS fetch and
+     * is retried on the next, so a transient outage is not pinned for a whole TTL.
      */
     private function resolveJwksUriAsync(): PromiseInterface
     {
+        if ($this->resolvedJwksUri !== null
+            && (($this->clock)() - $this->resolvedJwksUriAt) <= $this->cacheTtlSeconds
+        ) {
+            return Create::promiseFor($this->resolvedJwksUri);
+        }
+
         return $this->http->requestAsync('GET', '/.well-known/openid-configuration')
             ->then(function (ResponseInterface $response): string {
                 $discovery = json_decode((string) $response->getBody(), true);
+                $uri = $this->baseUrl . '/oauth2/jwks';
                 if (is_array($discovery)
                     && is_string($discovery['jwks_uri'] ?? null)
                     && $discovery['jwks_uri'] !== ''
                     && $this->isSameOriginHttps($discovery['jwks_uri'])
                 ) {
-                    return $discovery['jwks_uri'];
+                    $uri = $discovery['jwks_uri'];
                 }
+                $this->resolvedJwksUri = $uri;
+                $this->resolvedJwksUriAt = ($this->clock)();
 
-                return $this->baseUrl . '/oauth2/jwks';
+                return $uri;
             })
             ->otherwise(fn (): string => $this->baseUrl . '/oauth2/jwks');
     }

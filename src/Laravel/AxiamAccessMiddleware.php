@@ -8,6 +8,7 @@ use Axiam\Sdk\AccessEnforcer;
 use Axiam\Sdk\Attributes\RequireAccess;
 use Axiam\Sdk\Attributes\RequireAuth;
 use Axiam\Sdk\Attributes\RequireRole;
+use Axiam\Sdk\Attributes\RequireScope;
 use Closure;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,7 +31,7 @@ use Symfony\Component\HttpFoundation\Request;
  *   2. **Attribute style** — no middleware params at all
  *      (`->middleware('axiam.access')`), in which case this middleware reflects the
  *      CURRENT ROUTE's resolved controller (via `$request->route()`) for
- *      `#[RequireAuth]`/`#[RequireRole]`/`#[RequireAccess]` (method-level attributes
+ *      `#[RequireAuth]`/`#[RequireRole]`/`#[RequireScope]`/`#[RequireAccess]` (method-level attributes
  *      take precedence over class-level ones), mirroring exactly how
  *      {@see \Axiam\Sdk\Symfony\AxiamAccessAttributeListener} reflects the Symfony
  *      controller callable — so a consuming application can annotate a controller
@@ -49,8 +50,10 @@ use Symfony\Component\HttpFoundation\Request;
  * call), so neither PHPStan (which only knows the declared Symfony type) nor this
  * class's own autoloading ever needs `Illuminate\Http\Request`/`Illuminate\Routing\Route`
  * to exist as concrete, referenceable classes — the attribute-reflection style degrades
- * to a silent no-op on any `Request` implementation that lacks a `route()` method
- * (including a plain Symfony `Request` used directly, e.g. in tests).
+ * to a DENY (403, fail closed) on any `Request` implementation that lacks a `route()`
+ * method, and on a route whose action cannot be reflected (a Closure route, an
+ * unresolvable controller): a middleware that could not read the declaration must not
+ * wave the request through as though there were none.
  */
 final class AxiamAccessMiddleware
 {
@@ -70,7 +73,7 @@ final class AxiamAccessMiddleware
     public function handle(Request $request, Closure $next, string ...$params): mixed
     {
         $rawIdentity = $request->attributes->get('axiam_user');
-        /** @var array{user_id: string, tenant_id: string, roles: list<string>}|null $identity */
+        /** @var array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity */
         $identity = is_array($rawIdentity) ? $rawIdentity : null;
 
         $response = $params !== []
@@ -81,7 +84,7 @@ final class AxiamAccessMiddleware
     }
 
     /**
-     * @param array{user_id: string, tenant_id: string, roles: list<string>}|null $identity
+     * @param array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity
      * @param list<string> $params
      */
     private function enforceFromParams(?array $identity, Request $request, array $params): ?JsonResponse
@@ -101,20 +104,35 @@ final class AxiamAccessMiddleware
         return $this->enforcer->enforceAccess($identity, $attribute, $this->routeParams($request));
     }
 
-    /** @param array{user_id: string, tenant_id: string, roles: list<string>}|null $identity */
+    /** @param array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity */
     private function enforceFromAttributes(?array $identity, Request $request): ?JsonResponse
     {
         $reflected = $this->reflectRouteController($request);
         if ($reflected === null) {
-            return null;
+            // FAIL CLOSED. This middleware was put on the route to enforce the controller's
+            // `#[RequireAuth]`/`#[RequireRole]`/`#[RequireScope]`/`#[RequireAccess]`
+            // attributes; when the action cannot be reflected (a Closure route, no matched
+            // route, a controller that does not resolve) nothing can be read, and "no
+            // attribute found" is not the same as "the route needs none". Letting the request
+            // through would silently turn the guard OFF for exactly the routes it cannot see.
+            // The caller can use the string-parameter form (`axiam.access:action`) on such a
+            // route, which needs no reflection.
+            return new JsonResponse(
+                [
+                    'error' => 'authorization_denied',
+                    'message' => 'the route action cannot be inspected for authorization attributes; use the string-parameter form of this middleware on this route',
+                ],
+                403,
+            );
         }
         [$method, $class] = $reflected;
 
         $requireAuth = $this->findAttribute($method, $class, RequireAuth::class);
         $requireRole = $this->findAttribute($method, $class, RequireRole::class);
+        $requireScope = $this->findAttribute($method, $class, RequireScope::class);
         $requireAccess = $this->findAttribute($method, $class, RequireAccess::class);
 
-        if ($requireAuth === null && $requireRole === null && $requireAccess === null) {
+        if ($requireAuth === null && $requireRole === null && $requireScope === null && $requireAccess === null) {
             return null;
         }
 
@@ -124,6 +142,9 @@ final class AxiamAccessMiddleware
         }
         if ($response === null && $requireRole !== null) {
             $response = $this->enforcer->enforceRole($identity, $requireRole);
+        }
+        if ($response === null && $requireScope !== null) {
+            $response = $this->enforcer->enforceScope($identity, $requireScope);
         }
         if ($response === null && $requireAccess !== null) {
             $response = $this->enforcer->enforceAccess($identity, $requireAccess, $this->routeParams($request));
@@ -138,7 +159,8 @@ final class AxiamAccessMiddleware
      * a plain Symfony `Request` in a unit test), the route has no controller (a
      * `Closure`-based route — PHP forbids `Attribute::TARGET_METHOD`/`TARGET_CLASS`
      * attributes on a `Closure` entirely, so there is nothing to reflect), or the
-     * resolved controller class/method does not actually exist.
+     * resolved controller class/method does not actually exist. The caller treats `null`
+     * as a DENY, never as "nothing to enforce".
      *
      * @return array{0: \ReflectionMethod, 1: \ReflectionClass<object>}|null
      */

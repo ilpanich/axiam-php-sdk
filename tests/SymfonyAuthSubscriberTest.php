@@ -9,6 +9,7 @@ use Axiam\Sdk\Symfony\AxiamAuthSubscriber;
 use Axiam\Sdk\Symfony\AxiamVoter;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
+use Axiam\Sdk\Tests\Fixtures\AccessTokenFixtureTrait;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -31,13 +32,18 @@ use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
  */
 final class SymfonyAuthSubscriberTest extends TestCase
 {
+    use AccessTokenFixtureTrait;
+
     private const FIXTURES = __DIR__ . '/Fixtures';
     private const FIXTURE_TENANT = 'acme-tenant';
     private const BASE_URL = 'https://api.test';
 
     private function fixtureJwt(): string
     {
-        return trim((string) file_get_contents(self::FIXTURES . '/ed25519_signed_jwt.txt'));
+        // Minted at run time from the committed fixture key rather than read from a committed
+        // token file: a signed JWT in the tree reads as a leaked credential to secret scanners.
+        // The fixed iat/exp reproduce the former fixture byte for byte.
+        return $this->mintAccessToken(['iat' => 1751500000, 'exp' => 4102444800]);
     }
 
     /** @return array<string,mixed> */
@@ -206,7 +212,7 @@ final class SymfonyAuthSubscriberTest extends TestCase
 
         self::assertFalse($event->hasResponse(), 'a valid token must never short-circuit the request');
         self::assertSame(
-            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => []],
+            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => null, 'scopes' => null],
             $request->attributes->get('axiam_user'),
         );
     }
@@ -295,7 +301,7 @@ final class SymfonyAuthSubscriberTest extends TestCase
 
         self::assertFalse($event->hasResponse(), 'a matching CSRF token must never short-circuit the request');
         self::assertSame(
-            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => []],
+            ['user_id' => 'user-fixture-0001', 'tenant_id' => self::FIXTURE_TENANT, 'roles' => null, 'scopes' => null],
             $request->attributes->get('axiam_user'),
         );
     }

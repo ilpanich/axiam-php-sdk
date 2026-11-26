@@ -6,6 +6,7 @@ namespace Axiam\Sdk;
 
 use Axiam\Sdk\Attributes\RequireAccess;
 use Axiam\Sdk\Attributes\RequireRole;
+use Axiam\Sdk\Attributes\RequireScope;
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\AuthzError;
 use Axiam\Sdk\Core\AxiamException;
@@ -117,7 +118,7 @@ final class AccessEnforcer
      * identity — nothing more. Pure sugar over the CONTRACT.md §10 guard for a route
      * where that guard is applied per-endpoint rather than globally.
      *
-     * @param array{user_id: string, tenant_id: string, roles: list<string>}|null $identity
+     * @param array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity
      *        The identity the CONTRACT.md §10 guard already injected (the `axiam_user`
      *        request attribute), or `null` when no such identity is present
      *        (unauthenticated, or the §10 guard is not installed on this route).
@@ -141,11 +142,19 @@ final class AccessEnforcer
      * authenticated identity first (a role check needs somewhere to read roles from),
      * so an unauthenticated caller still gets 401, not 403.
      *
-     * Role names are tenant-defined; this check is intentionally coarse and is NOT a
-     * substitute for {@see self::enforceAccess()}, which is the authoritative,
-     * server-verified check (CONTRACT.md §11.2.9).
+     * **It reads only the `roles` claim and fails closed** (§11.2 rule 11, contract 1.68;
+     * N15, D-1). The identity's `roles` is `null` when the token carried no usable `roles`
+     * claim — the application did not request the `roles` scope, or the claim is malformed
+     * — and that is a 403 for every `require_role`, exactly as `[]` ("the user holds none")
+     * is. Role names match by exact, case-sensitive equality. Roles are NEVER derived from
+     * the token's `scope`: use {@see self::enforceScope()} for that.
      *
-     * @param array{user_id: string, tenant_id: string, roles: list<string>}|null $identity
+     * Role names are tenant-defined; the `roles` claim is a snapshot taken when the token was
+     * minted (stale for at most one access-token lifetime), so this check is intentionally
+     * coarse and is NOT a substitute for {@see self::enforceAccess()}, which is the
+     * authoritative, server-verified check (CONTRACT.md §11.2.9).
+     *
+     * @param array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity
      *        The identity the CONTRACT.md §10 guard already injected, or `null`.
      * @param RequireRole $attribute The `#[RequireRole(...)]` attribute instance
      *        carrying the acceptable role list.
@@ -161,10 +170,14 @@ final class AccessEnforcer
             return $authFailure;
         }
 
-        /** @var list<string> $identity — narrowed: enforceAuth() above returned null, so $identity is non-null here. */
-        $roles = is_array($identity['roles'] ?? null) ? $identity['roles'] : [];
-        if (array_intersect($attribute->roles, $roles) === []) {
-            $this->logger->debug('axiam_sdk: require_role denied', ['required_roles' => $attribute->roles]);
+        /** @var array{user_id: string, tenant_id: string, roles?: list<string>|null} $identity — narrowed: enforceAuth() above returned null, so $identity is non-null here. */
+        $roles = $identity['roles'] ?? null;
+        $held = is_array($roles) ? array_values(array_filter($roles, 'is_string')) : [];
+        if ($roles === null || !$this->containsAny($held, $attribute->roles)) {
+            $this->logger->debug('axiam_sdk: require_role denied', [
+                'required_roles' => $attribute->roles,
+                'roles_claim_present' => $roles !== null,
+            ]);
 
             return $this->authorizationDenied(sprintf(
                 'missing required role (one of: %s)',
@@ -176,13 +189,68 @@ final class AccessEnforcer
     }
 
     /**
+     * `require_scope` (CONTRACT.md §11.2 rule 11 (d), contract 1.68; N15): a LOCAL check that
+     * the verified token's `scope` claim contains at least one of
+     * {@see RequireScope::$scopes}. Reads ONLY `scope` — never `roles` — and fails closed: no
+     * `scope` claim, or one that is not a string, is a 403. An unauthenticated caller still
+     * gets 401. Like {@see self::enforceRole()} it is coarser than
+     * {@see self::enforceAccess()}.
+     *
+     * @param array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity
+     *        The identity the CONTRACT.md §10 guard already injected, or `null`.
+     * @param RequireScope $attribute The `#[RequireScope(...)]` attribute instance.
+     *
+     * @return JsonResponse|null `null` when the token carries at least one required scope; a
+     *         401 `authentication_failed` or 403 `authorization_denied` {@see JsonResponse}
+     *         otherwise.
+     */
+    public function enforceScope(?array $identity, RequireScope $attribute): ?JsonResponse
+    {
+        $authFailure = $this->enforceAuth($identity);
+        if ($authFailure !== null) {
+            return $authFailure;
+        }
+
+        /** @var array{user_id: string, tenant_id: string, scopes?: list<string>|null} $identity */
+        $scopes = $identity['scopes'] ?? null;
+        $held = is_array($scopes) ? array_values(array_filter($scopes, 'is_string')) : [];
+        if ($scopes === null || !$this->containsAny($held, $attribute->scopes)) {
+            $this->logger->debug('axiam_sdk: require_scope denied', ['required_scopes' => $attribute->scopes]);
+
+            return $this->authorizationDenied(sprintf(
+                'missing required scope (one of: %s)',
+                implode(', ', $attribute->scopes),
+            ));
+        }
+
+        return null;
+    }
+
+    /**
+     * Exact, case-sensitive, whole-entry membership: true when any of `$wanted` is in `$held`.
+     *
+     * @param list<string> $held
+     * @param list<string> $wanted
+     */
+    private function containsAny(array $held, array $wanted): bool
+    {
+        foreach ($wanted as $candidate) {
+            if (in_array($candidate, $held, true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * `require_access` (CONTRACT.md §11.1): the endpoint requires the authenticated
      * caller to pass an AXIAM authorization check for `$attribute->action` on a
      * resource resolved from the request. This is the ONE codepath both framework
      * bridges call for `#[RequireAccess]` enforcement — see this class's own docblock
      * for the full resource-resolution and error-mapping tables.
      *
-     * @param array{user_id: string, tenant_id: string, roles: list<string>}|null $identity
+     * @param array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null $identity
      *        The identity the CONTRACT.md §10 guard already injected, or `null`.
      * @param RequireAccess        $attribute   The `#[RequireAccess(...)]` attribute instance.
      * @param array<string,mixed>  $routeParams The inbound request's route/path
@@ -216,7 +284,7 @@ final class AccessEnforcer
             return $resource;
         }
 
-        /** @var array{user_id: string, tenant_id: string, roles: list<string>} $identity */
+        /** @var array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null} $identity */
         $subjectId = $identity['user_id'];
 
         try {

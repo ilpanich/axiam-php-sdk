@@ -225,7 +225,7 @@ final class Sec085GuardCredentialSubstitutionTest extends TestCase
         $keypair = json_decode((string) file_get_contents(self::FIXTURES . '/ed25519_keypair.json'), true);
         \assert(\is_array($keypair));
 
-        $header = ['typ' => 'JWT', 'alg' => 'EdDSA', 'kid' => 'axiam-test-key-2026-07-02'];
+        $header = ['typ' => 'at+jwt', 'alg' => 'EdDSA', 'kid' => 'axiam-test-key-2026-07-02'];
         $payload = array_merge([
             'sub' => 'user-fixture-0001',
             'tenant_id' => self::FIXTURE_TENANT,

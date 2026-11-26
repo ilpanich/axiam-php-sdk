@@ -95,6 +95,8 @@ final class SymfonyOidcControllerTest extends TestCase
             nonce: 'nonce-1',
             codeVerifier: new Sensitive('verifier-1'),
             redirectUri: 'https://app.test/callback',
+            // CONTRACT.md §12.8: the entry is bound to the browser that started the login.
+            bindingDigest: hash('sha256', 'binding-cookie-value'),
         ));
         $flow = new OidcLoginFlow($this->client([
             $this->discoveryResponse(),
@@ -102,7 +104,12 @@ final class SymfonyOidcControllerTest extends TestCase
         ]), $store, 'https://app.test/callback');
         $controller = new OidcCallbackController($flow);
 
-        $response = $controller(Request::create('/auth/axiam/callback?state=state-1&code=a-code'));
+        $response = $controller(Request::create(
+            '/auth/axiam/callback?state=state-1&code=a-code',
+            'GET',
+            [],
+            ['__Host-axiam_oidc_bind' => 'binding-cookie-value'],
+        ));
 
         self::assertInstanceOf(JsonResponse::class, $response);
         self::assertSame(200, $response->getStatusCode());

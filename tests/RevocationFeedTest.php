@@ -79,7 +79,7 @@ final class RevocationFeedTest extends TestCase
     {
         [$secretKey, $kid] = $this->keypair();
 
-        return JWT::encode($claims, base64_encode($secretKey), 'EdDSA', $kid);
+        return JWT::encode($claims, base64_encode($secretKey), 'EdDSA', $kid, ['typ' => 'at+jwt']);
     }
 
     /** An AXIAM-shaped access token carrying `$sid` — or none. @return string */
