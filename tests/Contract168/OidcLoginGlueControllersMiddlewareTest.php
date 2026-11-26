@@ -219,6 +219,9 @@ final class OidcLoginGlueControllersMiddlewareTest extends TestCase
         yield 'a truncated 3-byte sequence is ONE U+FFFD' => ["/a\xE2\x82b", '/a%EF%BF%BDb'];
         yield 'a truncated 4-byte sequence is ONE U+FFFD' => ["/a\xF0\x9F\x98b", '/a%EF%BF%BDb'];
         yield 'an overlong lead is TWO U+FFFD' => ["/\xC0\x80", '/%EF%BF%BD%EF%BF%BD'];
+        yield 'a surrogate (ED A0 80) is three U+FFFD' => ["/\xED\xA0\x80", '/%EF%BF%BD%EF%BF%BD%EF%BF%BD'];
+        yield 'above U+10FFFF (F4 90 80 80) is four U+FFFD' => ["/\xF4\x90\x80\x80", '/%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD'];
+        yield 'truncation at the end of the string is ONE U+FFFD' => ["/a\xE2\x82", '/a%EF%BF%BD'];
         yield 'a valid 4-byte character is untouched' => ["/\u{1F600}", '/%F0%9F%98%80'];
         yield 'plain path with query is untouched' => ['/dashboard?tab=1&x=2#top', '/dashboard?tab=1&x=2#top'];
     }
