@@ -39,6 +39,10 @@ final class JwksStaleIfErrorTest extends TestCase
 
     private string $cacheControl = '';
 
+    private string $etagHeader = '"v1"';
+
+    private ?string $body = null;
+
     /** @var list<array<string,mixed>> */
     private array $publishedKeys = [];
 
@@ -48,12 +52,14 @@ final class JwksStaleIfErrorTest extends TestCase
         $this->now = self::T0;
         $this->jwksRequests = [];
         $this->cacheControl = '';
+        $this->etagHeader = '"v1"';
+        $this->body = null;
         $jwks = json_decode((string) file_get_contents(__DIR__ . '/../Fixtures/ed25519_jwks.json'), true);
         self::assertIsArray($jwks);
         $this->publishedKeys = $jwks['keys'];
     }
 
-    private function verifier(int $ttl = self::TTL): JwksVerifier
+    private function verifier(?int $ttl = self::TTL): JwksVerifier
     {
         $handler = function (RequestInterface $request) {
             $path = $request->getUri()->getPath();
@@ -64,10 +70,10 @@ final class JwksStaleIfErrorTest extends TestCase
                 return new FulfilledPromise(new Response(404));
             }
             $this->jwksRequests[] = $request;
-            $headers = ['ETag' => '"v1"'] + ($this->cacheControl !== '' ? ['Cache-Control' => $this->cacheControl] : []);
+            $headers = ($this->etagHeader !== '' ? ['ETag' => $this->etagHeader] : []) + ($this->cacheControl !== '' ? ['Cache-Control' => $this->cacheControl] : []);
 
             return match ($this->mode) {
-                'ok' => new FulfilledPromise(new Response(200, $headers, (string) json_encode(['keys' => $this->publishedKeys]))),
+                'ok' => new FulfilledPromise(new Response(200, $headers, $this->body ?? (string) json_encode(['keys' => $this->publishedKeys]))),
                 'empty' => new FulfilledPromise(new Response(200, $headers, '{"keys":[]}')),
                 'status500' => new FulfilledPromise(new Response(500, [], '{"keys":[]}')),
                 'status204' => new FulfilledPromise(new Response(204)),
@@ -198,7 +204,7 @@ final class JwksStaleIfErrorTest extends TestCase
     public function testAnAdvertisedMaxAgeAboveThreeHundredIsClampedAndASmallerOneHonoured(): void
     {
         $this->cacheControl = 'public, max-age=86400';
-        $v = $this->verifier();
+        $v = $this->verifier(null);
         self::assertTrue($this->accepts($v));
         $fetches = count($this->jwksRequests);
         $this->now = self::T0 + 301;
@@ -251,5 +257,114 @@ final class JwksStaleIfErrorTest extends TestCase
         self::assertSame('3600', $events[0]->requested);
         self::assertSame('300', $events[0]->effective);
         self::assertSame('§12.4 rule 2', $events[0]->contractReference);
+    }
+
+    public function testAConfiguredTtlWinsOverAnAdvertisedMaxAge(): void
+    {
+        $this->cacheControl = 'max-age=100';
+        $v = $this->verifier(200);
+        self::assertTrue($this->accepts($v));
+        $fetches = count($this->jwksRequests);
+        $this->now = self::T0 + 150;
+        self::assertTrue($this->accepts($v));
+        self::assertSame($fetches, count($this->jwksRequests), 'configured 200 s wins over max-age=100');
+    }
+
+    public function testTwentyTokensOnAColdCacheWithAFailingEndpointCostOneFetch(): void
+    {
+        $this->mode = 'transport';
+        $v = $this->verifier();
+        for ($i = 0; $i < 20; $i++) {
+            self::assertFalse($this->accepts($v, $i % 2 === 0 ? null : $this->unknownKidToken()));
+        }
+        self::assertSame(1, count($this->jwksRequests));
+
+        $this->mode = 'ok';
+        $this->now += 61;
+        self::assertTrue($this->accepts($v), 'after the window a fetch is tried again');
+    }
+
+    public function testAClockMovingBackwardsMeansRefreshDueNeverFresh(): void
+    {
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v));
+        $fetches = count($this->jwksRequests);
+
+        $this->now = self::T0 - 100_000;
+        $this->mode = 'transport';
+        self::assertFalse($this->accepts($v), 'held keys are not trusted while the age is negative');
+        self::assertGreaterThan($fetches, count($this->jwksRequests), 'a refresh was attempted');
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function badEtags(): iterable
+    {
+        yield 'too long' => ['"' . str_repeat('a', 300) . '"'];
+        yield 'non-ASCII' => ["\"caf\xc3\xa9\""];
+    }
+
+    /** @dataProvider badEtags */
+    public function testAnUnusableEtagIsNeverEchoed(string $etag): void
+    {
+        $this->etagHeader = $etag;
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v));
+        $this->now = self::T0 + self::TTL + 10;
+        self::assertTrue($this->accepts($v));
+        $last = end($this->jwksRequests);
+        self::assertInstanceOf(RequestInterface::class, $last);
+        self::assertFalse($last->hasHeader('If-None-Match'), 'an unconditional request');
+    }
+
+    public function testAWeakEtagIsEchoed(): void
+    {
+        $this->etagHeader = 'W/"abc"';
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v));
+        $this->now = self::T0 + self::TTL + 10;
+        self::assertTrue($this->accepts($v));
+        $last = end($this->jwksRequests);
+        self::assertSame('W/"abc"', $last->getHeaderLine('If-None-Match'));
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function notJwksBodies(): iterable
+    {
+        yield 'object entry empty' => ['{"keys":[{}]}'];
+        yield 'integer entry' => ['{"keys":[0]}'];
+        yield 'null entry' => ['{"keys":[null]}'];
+        yield 'kty not a string' => ['{"keys":[{"kty":5}]}'];
+    }
+
+    /** @dataProvider notJwksBodies */
+    public function testABodyWithNoJwkObjectIsAFailedRefresh(string $body): void
+    {
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v));
+        $this->body = $body;
+        $this->now = self::T0 + self::TTL + 10;
+        self::assertTrue($this->accepts($v), 'held keys kept');
+        $this->now = self::T0 + self::TTL + 301;
+        self::assertFalse($this->accepts($v), 'anchor unmoved');
+    }
+
+    public function testAnRsaEntryWithoutAlgNextToAnEd25519KeyDoesNotRefuseTheSet(): void
+    {
+        $this->publishedKeys[] = ['kty' => 'RSA', 'kid' => 'rsa-1', 'n' => 'AQAB', 'e' => 'AQAB'];
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v), 'the Ed25519 key is usable; the RSA entry is skipped');
+    }
+
+    public function testAnRsaOnlySetIsASuccessThatLeavesNoUsableKey(): void
+    {
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v));
+        $this->body = '{"keys":[{"kty":"RSA","kid":"rsa-1","n":"AQAB","e":"AQAB"}]}';
+        $this->now = self::T0 + self::TTL + 10;
+        self::assertFalse($this->accepts($v), 'a successful fetch replaces the held set with the usable keys (none)');
+        // The success replaced the set: restoring the endpoint, the Ed25519 kid is accepted again after a fetch.
+        $this->body = null;
+        $this->now = self::T0 + self::TTL + 400;
+        self::assertTrue($this->accepts($v));
     }
 }

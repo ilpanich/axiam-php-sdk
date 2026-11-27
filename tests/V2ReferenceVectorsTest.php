@@ -208,6 +208,8 @@ final class V2ReferenceVectorsTest extends TestCase
                 static function () use (&$nacked): void {
                     ++$nacked;
                 },
+                '',
+                'axiam.queue',
             );
 
         self::assertSame(1, $acked);

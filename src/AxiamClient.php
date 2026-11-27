@@ -255,7 +255,7 @@ final class AxiamClient
      *        `true` when `$grpcTarget` is not supplied (there would be nothing to connect the
      *        gRPC transport to) and `false` otherwise — an explicit `true`/`false` always wins.
      *        REST authz ALWAYS works regardless of this setting (D-03).
-     * @param int $cacheTtlSeconds {@see JwksVerifier}'s local JWKS TTL cache lifetime.
+     * @param int|null $cacheTtlSeconds {@see JwksVerifier}'s local JWKS TTL cache lifetime; when set it wins over an advertised `Cache-Control: max-age` and is clamped to 300 s. `null` (the default) means 300 s, or the response's `max-age` when it is smaller.
      * @param string|null $grpcTarget gRPC target host:port (e.g. `api.axiam.example:9443`),
      *        required only to actually use the gRPC authz transport.
      * @param callable|null $transportHandler Test-only seam (NOT part of the public API
@@ -318,7 +318,7 @@ final class AxiamClient
         ?string $clientKey = null,
         ?LoggerInterface $logger = null,
         ?bool $restOnly = null,
-        int $cacheTtlSeconds = 300,
+        ?int $cacheTtlSeconds = null,
         ?string $grpcTarget = null,
         ?callable $transportHandler = null,
         ?string $oidcClientId = null,

@@ -138,7 +138,7 @@ final class Consumer
                     // What the broker reported; a transport that reports neither is read from the
                     // queue this consumer was started on, through the default exchange.
                     exchange: (string) ($msg->getExchange() ?? ''),
-                    routingKey: (string) ($msg->getRoutingKey() ?: $queue),
+                    routingKey: (string) ($msg->getRoutingKey() ?? $queue),
                 );
             }
         );
@@ -171,8 +171,8 @@ final class Consumer
         callable $ack,
         callable $nackNoRequeue,
         callable $nackRequeue,
-        string $exchange = '',
-        string $routingKey = '',
+        string $exchange,
+        string $routingKey,
     ): void {
         try {
             $outcome = $this->admit($body);
@@ -280,31 +280,32 @@ final class Consumer
                 return false;
             }
         }
-        if (array_key_exists('metadata', $event) && !is_array($event['metadata'])) {
+        if (array_key_exists('metadata', $event) && (!is_array($event['metadata']) || array_is_list($event['metadata']) && $event['metadata'] !== [])) {
             return false;
         }
 
         return is_int($event['key_version'] ?? null)
             && is_string($event['issued_at'] ?? null)
-            && preg_match('/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(Z|[+-]\d\d:\d\d)$/', $event['issued_at']) === 1
+            && preg_match('/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d+)?(Z|[+-]\d\d:\d\d)$/D', $event['issued_at']) === 1
             && self::parsesAsDate($event['issued_at']);
     }
 
+    /** A real calendar date and time: the date part survives a round trip (no Feb 30, no hour 25). */
     private static function parsesAsDate(string $value): bool
     {
         try {
-            new \DateTimeImmutable($value);
+            $dt = new \DateTimeImmutable($value);
         } catch (\Exception) {
             return false;
         }
 
-        return true;
+        return $dt->format('Y-m-d') === substr($value, 0, 10) && (int) substr($value, 11, 2) < 24;
     }
 
     private static function isUuid(mixed $value): bool
     {
         return is_string($value)
-            && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $value) === 1;
+            && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iD', $value) === 1;
     }
 
     /**

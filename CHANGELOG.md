@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the canonical bytes against that one type's layout only (`Hmac::hasLayout()` replaces `Hmac::hasSignedLayout()`), so
   a genuine signed body of the other type is refused as `malformed` before the HMAC and is never handed to the
   handler. `bin/axiam-amqp-worker.php` reads `AXIAM_AMQP_TENANT_ID` and `AXIAM_AMQP_EVENT_TYPE`.
+- **`Consumer::verifyAndDispatch()` takes `$exchange` and `$routingKey` as required parameters** (as the broker reported them; `""` is a valid routing key, so `consume()` falls back to the queue name only when the broker reports none).
+- **`JwksVerifier`/`AxiamClient` `$cacheTtlSeconds` is now nullable and defaults to `null`**: a configured value wins over an advertised `max-age` (clamped to 300 s); with none set the TTL is 300 s or the smaller `max-age`.
 - **`JwksVerifier` gains an optional trailing `$telemetry` argument** (the §19 dispatcher), used for `config_clamped`.
 
 #### Fixed
@@ -35,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   successful fetch (a `200` with at least one key, or a `304` to a conditional request, `If-None-Match` with the held
   `ETag`). A failed refresh (transport error, other status, non-JWKS body, an empty key set) no longer replaces the
   held keys or moves the anchor; held keys verify until TTL + 300 s after the anchor and every token is refused after
-  it until a fetch succeeds; a failed attempt counts toward the one-fetch-per-60-s window. The §10 access-token and
+  it until a fetch succeeds; a failed attempt (a failed first fetch included) counts toward the one-fetch-per-60-s window; a clock that moves backwards means refresh due, never fresh; entries are parsed one by one (an RSA key without `alg` is skipped, not a failed refresh; a `keys` array with no JWK object is a failed one); an `ETag` is echoed only if at most 256 printable ASCII bytes. The §10 access-token and
   §12.4 ID-token paths share it.
 
 ## [1.4.0] - 2026-11-22

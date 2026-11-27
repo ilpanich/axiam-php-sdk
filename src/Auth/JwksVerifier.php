@@ -186,7 +186,7 @@ final class JwksVerifier
     public function __construct(
         private readonly ClientInterface $http,
         private readonly string $baseUrl,
-        private readonly int $cacheTtlSeconds = 300,
+        private readonly ?int $cacheTtlSeconds = null,
         private readonly ?string $expectedIssuer = null,
         private readonly ?string $expectedAudience = null,
         /**
@@ -211,8 +211,8 @@ final class JwksVerifier
         ?TelemetryDispatcher $telemetry = null,
     ) {
         $this->clock = $clock ?? static fn (): int => time();
-        $this->ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds));
-        if ($this->cacheTtlSeconds > self::MAX_TTL_SECONDS && $telemetry !== null && $telemetry->installed()) {
+        $this->ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds ?? self::MAX_TTL_SECONDS));
+        if ($this->cacheTtlSeconds !== null && $this->cacheTtlSeconds > self::MAX_TTL_SECONDS && $telemetry !== null && $telemetry->installed()) {
             // §12.4 rule 2 / §19 rule 6: a caller-supplied value the contract clamps is reported once.
             $telemetry->emit(new ConfigClampedEvent(
                 'cacheTtlSeconds',
@@ -798,8 +798,9 @@ final class JwksVerifier
         if ($this->keysByKid === null) {
             return [];
         }
-        if ((($this->clock)() - $this->fetchedAt) > $this->ttl + self::STALE_WINDOW_SECONDS) {
-            return [];
+        $age = ($this->clock)() - $this->fetchedAt;
+        if ($age < 0 || $age > $this->ttl + self::STALE_WINDOW_SECONDS) {
+            return []; // a clock that moved backwards is never "fresh"
         }
 
         return $this->keysByKid;
@@ -833,7 +834,7 @@ final class JwksVerifier
     private function ensureFreshAsync(string $unknownKid): PromiseInterface
     {
         $now = ($this->clock)();
-        $expired = ($now - $this->fetchedAt) > $this->ttl;
+        $expired = ($now - $this->fetchedAt) > $this->ttl || $now < $this->fetchedAt;
         $unknown = !isset($this->keysByKid[$unknownKid]);
         $cacheFresh = $this->keysByKid !== null && !$expired;
         if ($cacheFresh && !$unknown) {
@@ -846,12 +847,13 @@ final class JwksVerifier
             return $this->inFlightFetch;
         }
 
-        if (!$cacheFresh && $this->keysByKid !== null
+        if (!$cacheFresh
             && $this->lastFailedRefreshAt !== 0
+            && $now >= $this->lastFailedRefreshAt
             && ($now - $this->lastFailedRefreshAt) < self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS
         ) {
-            // A refresh that failed counts toward the window: a failing endpoint costs one fetch
-            // per window, not one per token. The held keys keep verifying (usableKeys()) until the
+            // A refresh that failed (a failed first fetch included) counts toward the window: a
+            // failing endpoint costs one fetch per window, not one per token. The held keys keep verifying (usableKeys()) until the
             // stale bound.
             return Create::promiseFor(null);
         }
@@ -929,20 +931,41 @@ final class JwksVerifier
         }
 
         $jwksJson = json_decode((string) $response->getBody(), true);
-        if (!is_array($jwksJson) || !is_array($jwksJson['keys'] ?? null) || $jwksJson['keys'] === []) {
+        if (!is_array($jwksJson) || !is_array($jwksJson['keys'] ?? null)) {
             return false;
         }
-        $keys = JWK::parseKeySet($jwksJson);
-        if ($keys === []) {
+        // "A JWKS document holding at least one key": at least one entry is a JWK object with a
+        // string `kty`, even if this SDK cannot use it. Entries are parsed one by one, so an unusable
+        // one (an RSA key without `alg`, say) is skipped rather than refusing the set.
+        $holdsAKey = false;
+        $keys = [];
+        foreach ($jwksJson['keys'] as $entry) {
+            if (!is_array($entry) || !is_string($entry['kty'] ?? null)) {
+                continue;
+            }
+            $holdsAKey = true;
+            try {
+                $keys += JWK::parseKeySet(['keys' => [$entry]]);
+            } catch (\Throwable) {
+                // unusable here: skipped
+            }
+        }
+        if (!$holdsAKey) {
             return false;
         }
 
         $this->keysByKid = $keys;
         $etag = $response->getHeaderLine('ETag');
-        $this->etag = $etag !== '' ? $etag : null;
+        $this->etag = self::usableEtag($etag) ? $etag : null;
         $this->confirm($response);
 
         return true;
+    }
+
+    /** An ETag that is safe to echo as `If-None-Match`: at most 256 bytes of printable ASCII (0x21-0x7E). */
+    private static function usableEtag(string $etag): bool
+    {
+        return $etag !== '' && strlen($etag) <= 256 && preg_match('/^[\x21-\x7e]+$/D', $etag) === 1;
     }
 
     /** Moves the anchor to now and takes the lifetime from the response (clamped, default the configured TTL). */
@@ -950,8 +973,9 @@ final class JwksVerifier
     {
         $this->fetchedAt = ($this->clock)();
         $this->lastFailedRefreshAt = 0;
-        $ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds));
-        if (preg_match('/(?:^|[\s,])max-age\s*=\s*"?(\d{1,10})"?/i', $response->getHeaderLine('Cache-Control'), $m) === 1) {
+        // A CONFIGURED TTL wins (clamped to 300 s); an advertised max-age is used only when none is set.
+        $ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds ?? self::MAX_TTL_SECONDS));
+        if ($this->cacheTtlSeconds === null && preg_match('/(?:^|[\s,])max-age\s*=\s*"?(\d{1,10})"?/i', $response->getHeaderLine('Cache-Control'), $m) === 1) {
             $ttl = min(self::MAX_TTL_SECONDS, (int) $m[1]);
         }
         $this->ttl = $ttl;

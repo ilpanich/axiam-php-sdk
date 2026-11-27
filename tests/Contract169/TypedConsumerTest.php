@@ -191,6 +191,7 @@ final class TypedConsumerTest extends TestCase
 
         self::assertSame('unsigned', $logger->records[0]['context']['reason']);
         self::assertSame(self::TENANT, $logger->records[0]['context']['tenant_id']);
+        self::assertFullEvent($logger->records[0], 'unsigned');
     }
 
     public function testASignatureThatDoesNotVerifyIsSignature(): void
@@ -200,6 +201,21 @@ final class TypedConsumerTest extends TestCase
         self::deliver($consumer, self::withChangedSignatureDigit(self::fixture()['audit_event']['wire_json']));
 
         self::assertSame('signature', $logger->records[0]['context']['reason']);
+        self::assertFullEvent($logger->records[0], 'signature');
+    }
+
+    /** @param array{level: mixed, message: string, context: array<string,mixed>} $record */
+    private static function assertFullEvent(array $record, string $reason): void
+    {
+        self::assertSame('warning', $record['level']);
+        self::assertSame(['timestamp', 'exchange', 'routing_key', 'tenant_id', 'reason'], array_keys($record['context']));
+        self::assertSame(self::EXCHANGE, $record['context']['exchange']);
+        self::assertSame(self::ROUTING_KEY, $record['context']['routing_key']);
+        self::assertSame(self::TENANT, $record['context']['tenant_id']);
+        self::assertSame($reason, $record['context']['reason']);
+        $all = (string) json_encode($record);
+        self::assertStringNotContainsString('c87056dfa96bf060', $all);
+        self::assertStringNotContainsString('88888888-8888-8888-8888-888888888888', $all);
     }
 
     /** @dataProvider ownTypeProvider */
@@ -241,7 +257,7 @@ final class TypedConsumerTest extends TestCase
         self::assertSame('malformed', $logger->records[0]['context']['reason']);
     }
 
-    public function testAVerifiedBodyThatDoesNotDecodeIsMalformedAndLeavesNoNonce(): void
+    public function testARefusedBodyLeavesNoNonceBehind(): void
     {
         // Genuinely signed, right layout, but `nonce` is not a UUID: step 2f cannot decode it.
         $canonical = str_replace('"nonce":"55555555-5555-5555-5555-555555555555"', '"nonce":"not-a-uuid"', substr(self::fixture()['authz_request']['canonical_signed_json'], 0));
@@ -269,5 +285,42 @@ final class TypedConsumerTest extends TestCase
 
         $reasons = array_map(static fn (array $r): string => $r['context']['reason'], $logger->records);
         self::assertSame(['key_version', 'stale', 'replay'], $reasons);
+    }
+
+    public function testANonceOfARefusedMessageIsStillAcceptedOnAValidOne(): void
+    {
+        $sign = static fn (string $c): string => substr($c, 0, -1) . ',"hmac_signature":"' . hash_hmac('sha256', $c, self::subkey()) . '"}';
+        $base = self::fixture()['authz_request']['canonical_signed_json'];
+        [$consumer, $logger] = self::consumer(SignedEventType::AuthzRequest);
+
+        self::deliver($consumer, $sign(str_replace('"key_version":2', '"key_version":1', $base)));
+        self::deliver($consumer, $sign(str_replace('2026-07-10T12:00:00Z', '2026-07-10T11:00:00Z', $base)));
+        $valid = self::deliver($consumer, $sign($base));
+
+        self::assertSame(['key_version', 'stale'], array_map(static fn (array $r): string => $r['context']['reason'], $logger->records));
+        self::assertSame(1, $valid['acked'], 'the same nonce was not recorded by the refused messages');
+    }
+
+    /** @return iterable<string, array{string, string}> */
+    public static function undecodable(): iterable
+    {
+        yield 'a non-calendar date' => ['2026-07-10T12:00:00Z', '2026-02-30T12:00:00Z'];
+        yield 'metadata a JSON array' => ['"outcome":"Success"', '"outcome":"Success","metadata":[1]'];
+        yield 'nonce with a trailing newline' => ['"nonce":"88888888-8888-8888-8888-888888888888"', "\"nonce\":\"88888888-8888-8888-8888-888888888888\\n\""];
+    }
+
+    /** @dataProvider undecodable */
+    public function testIllFormedMembersAreMalformed(string $from, string $to): void
+    {
+        $canonical = str_replace($from, $to, self::fixture()['audit_event']['canonical_signed_json']);
+        if ($from === '"outcome":"Success"') {
+            $canonical = str_replace('"outcome":"Success","ip_address":"203.0.113.7","metadata":{"method":"password"}', '"outcome":"Success","ip_address":"203.0.113.7","metadata":[1]', self::fixture()['audit_event']['canonical_signed_json']);
+        }
+        $wire = substr($canonical, 0, -1) . ',"hmac_signature":"' . hash_hmac('sha256', $canonical, self::subkey()) . '"}';
+        [$consumer, $logger] = self::consumer(SignedEventType::AuditEventMessage);
+
+        self::deliver($consumer, $wire);
+
+        self::assertSame('malformed', $logger->records[0]['context']['reason']);
     }
 }

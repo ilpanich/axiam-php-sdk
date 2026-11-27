@@ -59,6 +59,8 @@ final class ConsumerReceivedBytesTest extends TestCase
             nackRequeue: static function () use (&$result): void {
                 ++$result['nackedRequeue'];
             },
+            exchange: '',
+            routingKey: 'axiam.authz.request',
         );
 
         return $result;
