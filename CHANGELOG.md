@@ -7,123 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Typed consume, discard events, BOM refusal, bounded JWKS stale-if-error (OI-34; axiam#883, owner decisions D-8, D-9, D-10)
-
-#### Changed (API; 1.4.0 is unreleased)
-
-- **`Consumer` is typed and takes its tenant** (CONTRACT 1.69 §8 step 2c, D-9): the constructor is now
-  `new Consumer($signingKey, $tenantId, SignedEventType::AuthzRequest|AuditEventMessage, ...)`. The consumer checks
-  the canonical bytes against that one type's layout only (`Hmac::hasLayout()` replaces `Hmac::hasSignedLayout()`), so
-  a genuine signed body of the other type is refused as `malformed` before the HMAC and is never handed to the
-  handler. `bin/axiam-amqp-worker.php` reads `AXIAM_AMQP_TENANT_ID` and `AXIAM_AMQP_EVENT_TYPE`.
-- **`Consumer::verifyAndDispatch()` takes `$exchange` and `$routingKey` as required parameters** (as the broker reported them; `""` is a valid routing key, so `consume()` falls back to the queue name only when the broker reports none).
-- **`JwksVerifier`/`AxiamClient` `$cacheTtlSeconds` is now nullable and defaults to `null`**: a configured value wins over an advertised `max-age` (clamped to 300 s); with none set the TTL is 300 s or the smaller `max-age`.
-- **`JwksVerifier` gains an optional trailing `$telemetry` argument** (the §19 dispatcher), used for `config_clamped`.
-
-#### Changed (JWKS fetch, follow-up readings 8 to 10)
-
-- **JWKS and discovery requests carry a total deadline and follow no redirect.** Both pass `timeout` 10 s (one 10 s deadline for discovery plus JWKS together; a discovery that spends it leaves no second connection), `connect_timeout` 5 s and `allow_redirects => false` (a 3xx could otherwise bypass the `jwks_uri` same-origin check, https to http included). A header-dripping server now costs one connection and about 10 s.
-- **Every TTL-driven refresh respects the 60 s window.** `max-age=0` or a configured TTL under 60 s no longer refetches on every verification while keys are held; discovery stays cached at least 60 s. A window that started more than one window in the future (clock stepped back) is over.
-
-- **`ext-curl` is now required, and a `JwksVerifier` over a StreamHandler client is refused.** The `timeout` option is a total deadline only under the cURL handler; under the stream handler it is an idle timeout checked after the headers, so a header-dripping host held a verification for tens of seconds. The constructor throws `AxiamException` for a client built on `StreamHandler` (the default when ext-curl is absent).
-- **A backward clock step of up to one window refreshes once.** A negative age makes a refresh due and bypasses the attempt window once, so a healthy endpoint is asked and the token accepted.
-- **JWKS requests also set `stream => false`**, overriding a client-level streaming default; a client whose handler is itself a `StreamHandler` is refused, and when the base handler cannot be recognised and `curl_multi_exec` is missing the verifier refuses too. A closure that wraps a `StreamHandler` cannot be detected. A successful fetch resets the one-refresh-per-backward-step latch, so consecutive backward steps each refresh.
-- **Synchronous PHP:** the one verification that triggers a due refresh waits for it, bounded by the 10 s deadline; other callers see the held set only in a separate process or coroutine. This SDK does not claim the cross-caller non-blocking of cross-SDK reading 8.
-
-#### Fixed
-
-- **D-8: every event-consumer discard logs the fixed security event.** One warning per discard with exactly
-  `timestamp`, `exchange`, `routing_key`, `tenant_id` (the consumer's own, never read from the body) and `reason`
-  (`malformed`, `unsigned`, `signature`, `key_version`, `stale`, `replay`), in the normative reason order (1)-(8); the
-  body is decoded from the verified bytes before the v2 gates (a non-UUID `nonce`, an ill-typed member or a bad
-  `issued_at` is `malformed`) and the nonce is recorded only after every gate passes. `verifyAndDispatch()` takes the
-  delivery's `exchange` and `routingKey`, which `consume()` reads from the broker's delivery.
-- **D-10: a byte-order mark or any prefix is refused, never stripped, and nothing escapes the delivery loop.**
-  `StrictJson::isAmbiguousObject()` now requires the first byte to be `{` (it tolerated leading whitespace, so a body
-  signed over a leading space verified); the event consumer and the `AuthzRequester` catch anything a check throws
-  and discard the body as `malformed`.
-- **D-10: the JWKS cache is stale-if-error, bounded** (§12.4 rule 2). TTL is the configured value or `Cache-Control:
-  max-age`, clamped to 300 s (a clamped configured value emits `ConfigClampedEvent`); the age runs from the last
-  successful fetch (a `200` with at least one key, or a `304` to a conditional request, `If-None-Match` with the held
-  `ETag`). A failed refresh (transport error, other status, non-JWKS body, an empty key set) no longer replaces the
-  held keys or moves the anchor; held keys verify until TTL + 300 s after the anchor and every token is refused after
-  it until a fetch succeeds; a failed attempt (a failed first fetch included) counts toward the one-fetch-per-60-s window; a clock that moves backwards means refresh due, never fresh; entries are parsed one by one (an RSA key without `alg` is skipped, not a failed refresh; a `keys` array with no JWK object is a failed one); an `ETag` is echoed only if at most 256 printable ASCII bytes. The §10 access-token and
-  §12.4 ID-token paths share it.
-
-## [1.4.0] - 2026-11-22
-
-### Contract 1.69 and the open-issues round (axiam#880, #881, #882, #883; axiam-php-sdk#92)
-
 `CONTRACT.md` is re-vendored at contract **1.69** (byte for byte from `ilpanich/axiam`); `README.md` states
-conformance to 1.69. 1.4.0 is unreleased, so the items below amend it.
-
-#### Removed
-
-- **The `AuthzRequester` unsigned-response opt-out** (`allowUnsignedResponses`, added earlier in 1.4.0 and never
-  released) and the `AuthzDecision::$unsigned` flag: no AXIAM server sends an unsigned response to a reply queue, so
-  the option could admit only a forged response (CONTRACT 1.69 §8, server axiam#881). The requester requires a 1.68
-  server; against an older one use REST or gRPC authorization until every replica is upgraded. An unsigned response
-  is discarded with reason `unsigned` and logged.
-
-#### Fixed
-
-- **#882 — the AMQP event consumer verified a re-serialization.** `Hmac::verify()` decoded the body and re-encoded it
-  with `json_encode`, which writes `\u00e9` for `é` and `\/` for `/` unless told otherwise, so a genuine message whose
-  fields carried an escape the encoder spells differently failed verification, and the handler was given a different
-  parse than the one that was verified. `Hmac::verify()` and the new `Hmac::verifiedCanonical()` now verify over the
-  received bytes with the trailing `hmac_signature` member cut out, and `Consumer` hands the handler the value parsed
-  from those same bytes. A body with a duplicate key at any depth, content after the object, or a signature that is not
-  the trailing member is nacked without requeue and the handler never runs. The consumer also checks the signed layout (§8 step 2c): the top-level members must be those of an `AuthzRequest` or `AuditEventMessage` in declaration order (`Hmac::hasSignedLayout()`), so another tenant-signed shape (an `AuthzResponse`) is nacked.
-- **#883 — the requester's security events carried no routing key or tenant.** Every discard of an authorization
-  response logs one warning whose context is exactly `timestamp`, `exchange`, `routing_key` (the requester's reply
-  queue), `tenant_id` (its own) and `reason` (`malformed`, `unsigned`, `signature`, `tenant`, `unknown_request`); never
-  a signature value, a nonce or anything read from the body.
-- **Contract 1.69 §8 alignment (the corrected text; axiam#882, #883).** The `AuthzRequester` discard reason is now the
-  first that applies in the contract's normative order: a missing or ill-typed `allowed`, `tenant_id`, `nonce` or
-  `correlation_id` is `malformed` before the HMAC is checked (it was reported as `signature` when the HMAC also
-  failed), after `unsigned` (no `hmac_signature` member) and before `signature`, `tenant` and `unknown_request`. An
-  answer delivered after `close()` is no longer decoded: it is nacked without requeue and logs no discard event. The
-  reference-vector tests now feed the fixture's `wire_json` to the consumer and compare the producer's request with it
-  byte for byte; the consumer already conformed to steps 2a–2g and rule 3 (no lenient mode exists).
-- **PHP-R1-1 — `#[RequireScope]` could not be stacked** although the docs and CONTRACT §11.2 rule 11 (d) say a route
-  needing several scopes stacks it: a repeated attribute threw `Error` (HTTP 500) in both bridges. It is now
-  `IS_REPEATABLE` and both the Laravel middleware and the Symfony listener enforce every instance (all must pass).
-- **PHP-R1-2, GLUE-R1-5 — the binding cookie was not cleared when the callback ended in an exception.** `complete()`
-  now turns an exception from `$onSuccess`, the state store or the exchange into a `500 login_failed` outcome (a
-  non-`AuthError`/`NetworkError` `AxiamException` of the exchange into the uniform `401`) that carries the clearing
-  `Set-Cookie`; only the exception's class is logged. Documented as a deviation from letting the exception reach the
-  framework's handler.
-- **PHP-R1-4 — a non-finite timeout was accepted and a non-positive per-call one silently replaced.**
-  `AuthzRequester` refuses `NaN`, `INF`, zero and negative timeouts, in the constructor and per call, with
-  `\InvalidArgumentException`.
-- **PHP-R1-5 — two `AuthzRequesterTest` cases tested less than they said.** The lost `\u` escapes are back: the
-  "duplicate through an escape" case and the escaped-non-ASCII C2 case now exercise `StrictJson`'s key normalization
-  and the verify-the-received-bytes rule.
-- **Decision 7 — the callback's `Location` header is percent-encoded by the controllers** (`/a b` → `/a%20b`, `/café`
-  → `/caf%C3%A9`, CR/LF → `%0D%0A`, an existing `%XX` kept): `OidcLoginOutcome::encodeLocation()`, used by both
-  controllers. A destination an `allowReturnTo` admitted can no longer put a raw non-ASCII byte or a CR/LF in a header.
-- **N1 — `MemoryOidcStateStore` was unbounded.** It holds at most 10 000 entries
-  (`MemoryOidcStateStore::DEFAULT_MAX_ENTRIES`, constructor argument), evicting the oldest.
-- **GLUE-R1-4 — pinned, not a defect.** `testCallbackWithAnotherLoginsCookieIsTheSame401` asserts the state is consumed after a refusal with another browser's cookie (a retry with the right cookie is a 401 and reaches no token endpoint).
-- **#880 — back-channel logout token `kid`.** Not a defect here: `verifyLogoutToken()` already selected the key by
-  `kid` and refused a kid-less token as `unknown_kid`. New tests pin the contract-1.69 shape (a token whose header is
-  exactly `{"alg":"EdDSA","typ":"logout+jwt","kid":…}`, verified against a two-key JWKS with the signing key not
-  first; kid-less and unknown-`kid` refusals; §10.1 rules 10 and 11 stay off the logout and ID-token paths).
-
-#### Documentation
-
-- PHP-R1-6: the `JwksVerifier::resolveJwksUriAsync()` docblock now says what the code does (an unusable 200 discovery
-  answer caches the fallback; only a transport failure is retried).
-- PHP-R1-7: the `EncryptCookies::$except` instruction is reworded (the real failure is one route inside
-  `EncryptCookies` and one outside); the Laravel example and the Symfony and Laravel example READMEs list `scopes`.
-
-Contract 1.68 (security audit 2026-11-14, Wave 2 and 3). `CONTRACT.md` (1.68), `openapi.json` and
-`management-registry.json` are re-vendored byte for byte from `ilpanich/axiam`; `proto/` is unchanged. The §27
-management layer is regenerated (`scripts/gen_management.py`; 265 files): the only surface change is the new optional
-`AuditLogEntry::$organizationId` (below). `README.md` states conformance to contract 1.68.
-
-**Behaviour changes for integrators (C7, C6, N15, N14, and the Laravel `axiam.access` fix) — read the migration
-notes below before upgrading.** This is a minor release: no class, method or parameter was removed.
+conformance to 1.69.
 
 ### Security
 
@@ -187,6 +72,23 @@ notes below before upgrading.** This is a minor release: no class, method or par
 
 ### Changed
 
+- **`Consumer` is typed and takes its tenant** (CONTRACT 1.69 §8 step 2c, D-9): the constructor is now
+  `new Consumer($signingKey, $tenantId, SignedEventType::AuthzRequest|AuditEventMessage, ...)`. The consumer checks
+  the canonical bytes against that one type's layout only (`Hmac::hasLayout()` replaces `Hmac::hasSignedLayout()`), so
+  a genuine signed body of the other type is refused as `malformed` before the HMAC and is never handed to the
+  handler. `bin/axiam-amqp-worker.php` reads `AXIAM_AMQP_TENANT_ID` and `AXIAM_AMQP_EVENT_TYPE`.
+- **`Consumer::verifyAndDispatch()` takes `$exchange` and `$routingKey` as required parameters** (as the broker reported them; `""` is a valid routing key, so `consume()` falls back to the queue name only when the broker reports none).
+- **`JwksVerifier`/`AxiamClient` `$cacheTtlSeconds` is now nullable and defaults to `null`**: a configured value wins over an advertised `max-age` (clamped to 300 s); with none set the TTL is 300 s or the smaller `max-age`.
+- **`JwksVerifier` gains an optional trailing `$telemetry` argument** (the §19 dispatcher), used for `config_clamped`.
+
+- **JWKS and discovery requests carry a total deadline and follow no redirect.** Both pass `timeout` 10 s (one 10 s deadline for discovery plus JWKS together; a discovery that spends it leaves no second connection), `connect_timeout` 5 s and `allow_redirects => false` (a 3xx could otherwise bypass the `jwks_uri` same-origin check, https to http included). A header-dripping server now costs one connection and about 10 s.
+- **Every TTL-driven refresh respects the 60 s window.** `max-age=0` or a configured TTL under 60 s no longer refetches on every verification while keys are held; discovery stays cached at least 60 s. A window that started more than one window in the future (clock stepped back) is over.
+
+- **`ext-curl` is now required, and a `JwksVerifier` over a StreamHandler client is refused.** The `timeout` option is a total deadline only under the cURL handler; under the stream handler it is an idle timeout checked after the headers, so a header-dripping host held a verification for tens of seconds. The constructor throws `AxiamException` for a client built on `StreamHandler` (the default when ext-curl is absent).
+- **A backward clock step of up to one window refreshes once.** A negative age makes a refresh due and bypasses the attempt window once, so a healthy endpoint is asked and the token accepted.
+- **JWKS requests also set `stream => false`**, overriding a client-level streaming default; a client whose handler is itself a `StreamHandler` is refused, and when the base handler cannot be recognised and `curl_multi_exec` is missing the verifier refuses too. A closure that wraps a `StreamHandler` cannot be detected. A successful fetch resets the one-refresh-per-backward-step latch, so consecutive backward steps each refresh.
+- **Synchronous PHP:** the one verification that triggers a due refresh waits for it, bounded by the 10 s deadline; other callers see the held set only in a separate process or coroutine. This SDK does not claim the cross-caller non-blocking of cross-SDK reading 8.
+
 - **Minimum PHP raised from 8.2 to 8.3.** PHP 8.2 receives its last security fix on 2026-12-31, so the floor moves before that date rather than after it; 8.3 is supported until 2027-12-31. `composer.json` (`php: >=8.3`), `SupportedVersions::MIN_PHP`, the CI matrix and the README support table move together. Applications still on PHP 8.2 can stay on 1.3.1.
 - **PHP 8.6 is the newest tested release.** It went GA on 2026-11-19; the gating matrix is now `['8.3', '8.6']` and `SupportedVersions::NEWEST_TESTED_PHP` is `'8.6'`.
 - Every test fixture that mints an **access** token now carries `typ: at+jwt` (the server types access tokens so); the
@@ -198,7 +100,93 @@ notes below before upgrading.** This is a minor release: no class, method or par
   `resourceId`). As the README already advises, construct generated models with **named arguments**: a positional
   call that passes `resourceId` as the tenth argument moves.
 
-### Migration notes (1.3.x to 1.4.0)
+### Removed
+
+- **The `AuthzRequester` unsigned-response opt-out** (`allowUnsignedResponses`, added earlier in this release cycle and never
+  released) and the `AuthzDecision::$unsigned` flag: no AXIAM server sends an unsigned response to a reply queue, so
+  the option could admit only a forged response (CONTRACT 1.69 §8, server axiam#881). The requester requires a 1.68
+  server; against an older one use REST or gRPC authorization until every replica is upgraded. An unsigned response
+  is discarded with reason `unsigned` and logged.
+
+### Fixed
+
+- **D-8: every event-consumer discard logs the fixed security event.** One warning per discard with exactly
+  `timestamp`, `exchange`, `routing_key`, `tenant_id` (the consumer's own, never read from the body) and `reason`
+  (`malformed`, `unsigned`, `signature`, `key_version`, `stale`, `replay`), in the normative reason order (1)-(8); the
+  body is decoded from the verified bytes before the v2 gates (a non-UUID `nonce`, an ill-typed member or a bad
+  `issued_at` is `malformed`) and the nonce is recorded only after every gate passes. `verifyAndDispatch()` takes the
+  delivery's `exchange` and `routingKey`, which `consume()` reads from the broker's delivery.
+- **D-10: a byte-order mark or any prefix is refused, never stripped, and nothing escapes the delivery loop.**
+  `StrictJson::isAmbiguousObject()` now requires the first byte to be `{` (it tolerated leading whitespace, so a body
+  signed over a leading space verified); the event consumer and the `AuthzRequester` catch anything a check throws
+  and discard the body as `malformed`.
+- **D-10: the JWKS cache is stale-if-error, bounded** (§12.4 rule 2). TTL is the configured value or `Cache-Control:
+  max-age`, clamped to 300 s (a clamped configured value emits `ConfigClampedEvent`); the age runs from the last
+  successful fetch (a `200` with at least one key, or a `304` to a conditional request, `If-None-Match` with the held
+  `ETag`). A failed refresh (transport error, other status, non-JWKS body, an empty key set) no longer replaces the
+  held keys or moves the anchor; held keys verify until TTL + 300 s after the anchor and every token is refused after
+  it until a fetch succeeds; a failed attempt (a failed first fetch included) counts toward the one-fetch-per-60-s window; a clock that moves backwards means refresh due, never fresh; entries are parsed one by one (an RSA key without `alg` is skipped, not a failed refresh; a `keys` array with no JWK object is a failed one); an `ETag` is echoed only if at most 256 printable ASCII bytes. The §10 access-token and
+  §12.4 ID-token paths share it.
+
+- **#882 — the AMQP event consumer verified a re-serialization.** `Hmac::verify()` decoded the body and re-encoded it
+  with `json_encode`, which writes `\u00e9` for `é` and `\/` for `/` unless told otherwise, so a genuine message whose
+  fields carried an escape the encoder spells differently failed verification, and the handler was given a different
+  parse than the one that was verified. `Hmac::verify()` and the new `Hmac::verifiedCanonical()` now verify over the
+  received bytes with the trailing `hmac_signature` member cut out, and `Consumer` hands the handler the value parsed
+  from those same bytes. A body with a duplicate key at any depth, content after the object, or a signature that is not
+  the trailing member is nacked without requeue and the handler never runs. The consumer also checks the signed layout (§8 step 2c): the top-level members must be those of an `AuthzRequest` or `AuditEventMessage` in declaration order (`Hmac::hasSignedLayout()`), so another tenant-signed shape (an `AuthzResponse`) is nacked.
+- **#883 — the requester's security events carried no routing key or tenant.** Every discard of an authorization
+  response logs one warning whose context is exactly `timestamp`, `exchange`, `routing_key` (the requester's reply
+  queue), `tenant_id` (its own) and `reason` (`malformed`, `unsigned`, `signature`, `tenant`, `unknown_request`); never
+  a signature value, a nonce or anything read from the body.
+- **Contract 1.69 §8 alignment (the corrected text; axiam#882, #883).** The `AuthzRequester` discard reason is now the
+  first that applies in the contract's normative order: a missing or ill-typed `allowed`, `tenant_id`, `nonce` or
+  `correlation_id` is `malformed` before the HMAC is checked (it was reported as `signature` when the HMAC also
+  failed), after `unsigned` (no `hmac_signature` member) and before `signature`, `tenant` and `unknown_request`. An
+  answer delivered after `close()` is no longer decoded: it is nacked without requeue and logs no discard event. The
+  reference-vector tests now feed the fixture's `wire_json` to the consumer and compare the producer's request with it
+  byte for byte; the consumer already conformed to steps 2a–2g and rule 3 (no lenient mode exists).
+- **PHP-R1-1 — `#[RequireScope]` could not be stacked** although the docs and CONTRACT §11.2 rule 11 (d) say a route
+  needing several scopes stacks it: a repeated attribute threw `Error` (HTTP 500) in both bridges. It is now
+  `IS_REPEATABLE` and both the Laravel middleware and the Symfony listener enforce every instance (all must pass).
+- **PHP-R1-2, GLUE-R1-5 — the binding cookie was not cleared when the callback ended in an exception.** `complete()`
+  now turns an exception from `$onSuccess`, the state store or the exchange into a `500 login_failed` outcome (a
+  non-`AuthError`/`NetworkError` `AxiamException` of the exchange into the uniform `401`) that carries the clearing
+  `Set-Cookie`; only the exception's class is logged. Documented as a deviation from letting the exception reach the
+  framework's handler.
+- **PHP-R1-4 — a non-finite timeout was accepted and a non-positive per-call one silently replaced.**
+  `AuthzRequester` refuses `NaN`, `INF`, zero and negative timeouts, in the constructor and per call, with
+  `\InvalidArgumentException`.
+- **PHP-R1-5 — two `AuthzRequesterTest` cases tested less than they said.** The lost `\u` escapes are back: the
+  "duplicate through an escape" case and the escaped-non-ASCII C2 case now exercise `StrictJson`'s key normalization
+  and the verify-the-received-bytes rule.
+- **Decision 7 — the callback's `Location` header is percent-encoded by the controllers** (`/a b` → `/a%20b`, `/café`
+  → `/caf%C3%A9`, CR/LF → `%0D%0A`, an existing `%XX` kept): `OidcLoginOutcome::encodeLocation()`, used by both
+  controllers. A destination an `allowReturnTo` admitted can no longer put a raw non-ASCII byte or a CR/LF in a header.
+- **N1 — `MemoryOidcStateStore` was unbounded.** It holds at most 10 000 entries
+  (`MemoryOidcStateStore::DEFAULT_MAX_ENTRIES`, constructor argument), evicting the oldest.
+- **GLUE-R1-4 — pinned, not a defect.** `testCallbackWithAnotherLoginsCookieIsTheSame401` asserts the state is consumed after a refusal with another browser's cookie (a retry with the right cookie is a 401 and reaches no token endpoint).
+- **#880 — back-channel logout token `kid`.** Not a defect here: `verifyLogoutToken()` already selected the key by
+  `kid` and refused a kid-less token as `unknown_kid`. New tests pin the contract-1.69 shape (a token whose header is
+  exactly `{"alg":"EdDSA","typ":"logout+jwt","kid":…}`, verified against a two-key JWKS with the signing key not
+  first; kid-less and unknown-`kid` refusals; §10.1 rules 10 and 11 stay off the logout and ID-token paths).
+
+### Documentation
+
+- PHP-R1-6: the `JwksVerifier::resolveJwksUriAsync()` docblock now says what the code does (an unusable 200 discovery
+  answer caches the fallback; only a transport failure is retried).
+- PHP-R1-7: the `EncryptCookies::$except` instruction is reworded (the real failure is one route inside
+  `EncryptCookies` and one outside); the Laravel example and the Symfony and Laravel example READMEs list `scopes`.
+
+Contract 1.68 (security audit 2026-11-14, Wave 2 and 3). `CONTRACT.md` (1.68), `openapi.json` and
+`management-registry.json` are re-vendored byte for byte from `ilpanich/axiam`; `proto/` is unchanged. The §27
+management layer is regenerated (`scripts/gen_management.py`; 265 files): the only surface change is the new optional
+`AuditLogEntry::$organizationId` (below). `README.md` states conformance to contract 1.68.
+
+**Behaviour changes for integrators (C7, C6, N15, N14, and the Laravel `axiam.access` fix) — read the migration
+notes below before upgrading.** This is a minor release: no class, method or parameter was removed.
+
+### Migration notes (since 1.3.1)
 
 1. **Login glue (C7).** If you use the shipped Laravel/Symfony controllers: **Laravel** — add
    `__Host-axiam_oidc_bind` and `axiam_oidc_bind` to `EncryptCookies::$except`, or make sure the login and callback
