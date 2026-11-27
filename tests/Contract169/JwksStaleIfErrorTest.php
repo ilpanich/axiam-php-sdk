@@ -43,6 +43,9 @@ final class JwksStaleIfErrorTest extends TestCase
 
     private ?string $body = null;
 
+    /** @var list<array{string, array<string,mixed>}> */
+    private array $options = [];
+
     /** @var list<array<string,mixed>> */
     private array $publishedKeys = [];
 
@@ -54,6 +57,7 @@ final class JwksStaleIfErrorTest extends TestCase
         $this->cacheControl = '';
         $this->etagHeader = '"v1"';
         $this->body = null;
+        $this->options = [];
         $jwks = json_decode((string) file_get_contents(__DIR__ . '/../Fixtures/ed25519_jwks.json'), true);
         self::assertIsArray($jwks);
         $this->publishedKeys = $jwks['keys'];
@@ -61,7 +65,8 @@ final class JwksStaleIfErrorTest extends TestCase
 
     private function verifier(?int $ttl = self::TTL): JwksVerifier
     {
-        $handler = function (RequestInterface $request) {
+        $handler = function (RequestInterface $request, array $options = []) {
+            $this->options[] = [$request->getUri()->getPath(), $options];
             $path = $request->getUri()->getPath();
             if ($path === '/.well-known/openid-configuration') {
                 return new FulfilledPromise(new Response(200, [], (string) json_encode(['jwks_uri' => self::BASE_URL . '/oauth2/jwks'])));
@@ -386,5 +391,83 @@ final class JwksStaleIfErrorTest extends TestCase
         $this->publishedKeys = [$noKid, $good];
         $v = $this->verifier();
         self::assertTrue($this->accepts($v), 'the kid-less entry is skipped, the keyed one is used');
+    }
+
+    public function testBothRequestsCarryDeadlinesAndNeverFollowRedirects(): void
+    {
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v));
+        $this->now = self::T0 + self::TTL + 10;
+        self::assertTrue($this->accepts($v));
+
+        $seen = [];
+        foreach ($this->options as [$path, $o]) {
+            $seen[$path][] = $o;
+            self::assertSame(10, $o['timeout'] ?? null, $path . ' total timeout');
+            self::assertSame(5, $o['connect_timeout'] ?? null, $path . ' connect timeout');
+            self::assertFalse($o['allow_redirects'] ?? null, $path . ' follows no redirect');
+        }
+        self::assertArrayHasKey('/oauth2/jwks', $seen);
+        self::assertArrayHasKey('/.well-known/openid-configuration', $seen);
+        $last = end($this->jwksRequests);
+        self::assertSame('"v1"', $last->getHeaderLine('If-None-Match'), 'merged with the conditional header');
+    }
+
+    public function testMaxAgeZeroNeverMeansOneFetchPerVerification(): void
+    {
+        $this->cacheControl = 'max-age=0';
+        $v = $this->verifier(null);
+        self::assertTrue($this->accepts($v));
+        $fetches = count($this->jwksRequests);
+        $discoveries = count(array_filter($this->options, static fn (array $o): bool => $o[0] === '/.well-known/openid-configuration'));
+
+        foreach ([1, 20, 59] as $dt) {
+            $this->now = self::T0 + $dt;
+            self::assertTrue($this->accepts($v));
+        }
+        self::assertSame($fetches, count($this->jwksRequests), 'no refetch inside the 60 s window');
+        self::assertSame($discoveries, count(array_filter($this->options, static fn (array $o): bool => $o[0] === '/.well-known/openid-configuration')));
+
+        $this->now = self::T0 + 61;
+        self::assertTrue($this->accepts($v));
+        self::assertSame($fetches + 1, count($this->jwksRequests), 'one fetch once the window is over');
+    }
+
+    public function testAConfiguredTtlUnderSixtySecondsStillFetchesOncePerWindow(): void
+    {
+        $v = $this->verifier(10);
+        self::assertTrue($this->accepts($v));
+        $fetches = count($this->jwksRequests);
+        foreach ([20, 40, 59] as $dt) {
+            $this->now = self::T0 + $dt;
+            self::assertTrue($this->accepts($v));
+        }
+        self::assertSame($fetches, count($this->jwksRequests));
+    }
+
+    public function testAHeaderDrippingServerCostsOneConnectionAndAboutTenSeconds(): void
+    {
+        $probe = stream_socket_server('tcp://127.0.0.1:0');
+        self::assertNotFalse($probe);
+        $port = (int) substr((string) stream_socket_get_name($probe, false), (int) strrpos((string) stream_socket_get_name($probe, false), ':') + 1);
+        fclose($probe);
+        $counter = sys_get_temp_dir() . '/axiam-drip-' . getmypid();
+        @unlink($counter);
+        $proc = proc_open([PHP_BINARY, __DIR__ . '/../Fixtures/header_drip_server.php', (string) $port, $counter], [], $pipes);
+        self::assertIsResource($proc);
+        try {
+            usleep(500000);
+            $v = new JwksVerifier(new Client(['base_uri' => 'http://127.0.0.1:' . $port]), 'http://127.0.0.1:' . $port);
+            $t = microtime(true);
+            self::assertFalse($this->accepts($v));
+            $elapsed = microtime(true) - $t;
+
+            self::assertLessThan(14.0, $elapsed, 'one total deadline, not one per request');
+            self::assertSame('1', (string) @file_get_contents($counter), 'one connection');
+        } finally {
+            proc_terminate($proc);
+            proc_close($proc);
+            @unlink($counter);
+        }
     }
 }

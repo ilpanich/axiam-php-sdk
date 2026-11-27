@@ -131,6 +131,16 @@ final class JwksVerifier
     /** The held set's `ETag`, sent as `If-None-Match` on the next refresh. */
     private ?string $etag = null;
 
+    /** Unix time the last fetch attempt STARTED, successful or not; 0 = none. Every TTL-driven refresh respects the 60 s window (a `max-age=0` is not one fetch per verification). */
+    private int $lastFetchAttemptAt = 0;
+
+    /** Wall-clock (microtime) instant by which the fetch in flight must have settled: one total deadline for discovery plus JWKS. */
+    private float $fetchDeadline = 0.0;
+
+    /** Total deadline for one fetch, discovery and JWKS together, and the connect deadline of each request (seconds). */
+    public const FETCH_TIMEOUT_SECONDS = 10;
+    public const CONNECT_TIMEOUT_SECONDS = 5;
+
     /** Unix time of the last FAILED refresh attempt; 0 = none. Counts toward the one-fetch-per-window rule. */
     private int $lastFailedRefreshAt = 0;
 
@@ -847,11 +857,13 @@ final class JwksVerifier
             return $this->inFlightFetch;
         }
 
-        if (!$cacheFresh
-            && $this->lastFailedRefreshAt !== 0
-            && $now >= $this->lastFailedRefreshAt
-            && ($now - $this->lastFailedRefreshAt) < self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS
-        ) {
+        if (!$cacheFresh && $this->keysByKid !== null && self::inWindow($this->lastFetchAttemptAt, $now)) {
+            // Every TTL-driven refresh, successful or not, respects the window: a `max-age=0` or a
+            // configured TTL under 60 s is not one fetch per verification. The held set verifies.
+            return Create::promiseFor(null);
+        }
+
+        if (!$cacheFresh && self::inWindow($this->lastFailedRefreshAt, $now)) {
             // A refresh that failed (a failed first fetch included) counts toward the window: a
             // failing endpoint costs one fetch per window, not one per token. The held keys keep verifying (usableKeys()) until the
             // stale bound.
@@ -865,21 +877,27 @@ final class JwksVerifier
             // per request cannot turn each forged token into outbound requests. The window
             // is anchored on the last re-fetch an unknown `kid` CAUSED, so a rotated key is
             // picked up as soon as the window has passed.
-            if ($this->lastUnknownKidRefetchAt !== 0
-                && ($now - $this->lastUnknownKidRefetchAt) < self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS
-            ) {
+            if (self::inWindow($this->lastUnknownKidRefetchAt, $now)) {
                 return Create::promiseFor(null);
             }
             $this->lastUnknownKidRefetchAt = $now;
         }
 
+        $this->lastFetchAttemptAt = $now;
+        $this->fetchDeadline = microtime(true) + self::FETCH_TIMEOUT_SECONDS;
         $fetch = $this->resolveJwksUriAsync()
             ->then(function (string $jwksUri): PromiseInterface {
                 // A conditional request when a set is held (its ETag, which the server sends): a 304
                 // re-confirms it and moves the anchor.
-                $options = $this->keysByKid !== null && $this->etag !== null
-                    ? ['headers' => ['If-None-Match' => $this->etag]]
-                    : [];
+                $remaining = $this->fetchDeadline - microtime(true);
+                if ($remaining <= 0.0) {
+                    // Discovery spent the whole deadline: no second connection.
+                    return Create::rejectionFor(new \RuntimeException('JWKS fetch deadline exceeded'));
+                }
+                $options = $this->requestOptions($remaining);
+                if ($this->keysByKid !== null && $this->etag !== null) {
+                    $options['headers'] = ['If-None-Match' => $this->etag];
+                }
 
                 return $this->http->requestAsync('GET', $jwksUri, $options);
             })
@@ -906,6 +924,34 @@ final class JwksVerifier
         });
 
         return $this->inFlightFetch;
+    }
+
+    /**
+     * The per-request options of a JWKS or discovery fetch: a total timeout (the smaller of the
+     * fetch deadline's remainder and 10 s), a connect timeout, and NO redirect following — a 3xx
+     * would otherwise carry the request past the same-origin check on `jwks_uri` (https to http
+     * included). The HTTP client used here adds no retry, so one window costs one attempt.
+     *
+     * @return array<string,mixed>
+     */
+    private function requestOptions(float $remaining): array
+    {
+        return [
+            'timeout' => (int) max(1, min(self::FETCH_TIMEOUT_SECONDS, (int) ceil($remaining))),
+            'connect_timeout' => self::CONNECT_TIMEOUT_SECONDS,
+            'allow_redirects' => false,
+        ];
+    }
+
+    /**
+     * True when a window started at `$start` is still running at `$now`. A start more than one
+     * window in the FUTURE means the wall clock stepped back: that window is over.
+     */
+    private static function inWindow(int $start, int $now): bool
+    {
+        return $start !== 0
+            && $start <= $now + self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS
+            && ($now - $start) < self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS;
     }
 
     /**
@@ -1003,12 +1049,13 @@ final class JwksVerifier
     private function resolveJwksUriAsync(): PromiseInterface
     {
         if ($this->resolvedJwksUri !== null
-            && (($this->clock)() - $this->resolvedJwksUriAt) <= $this->ttl
+            && (($this->clock)() - $this->resolvedJwksUriAt) >= 0
+            && (($this->clock)() - $this->resolvedJwksUriAt) <= max($this->ttl, self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS)
         ) {
             return Create::promiseFor($this->resolvedJwksUri);
         }
 
-        return $this->http->requestAsync('GET', '/.well-known/openid-configuration')
+        return $this->http->requestAsync('GET', '/.well-known/openid-configuration', $this->requestOptions(self::FETCH_TIMEOUT_SECONDS))
             ->then(function (ResponseInterface $response): string {
                 $discovery = json_decode((string) $response->getBody(), true);
                 $uri = $this->baseUrl . '/oauth2/jwks';

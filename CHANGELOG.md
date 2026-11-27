@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`JwksVerifier`/`AxiamClient` `$cacheTtlSeconds` is now nullable and defaults to `null`**: a configured value wins over an advertised `max-age` (clamped to 300 s); with none set the TTL is 300 s or the smaller `max-age`.
 - **`JwksVerifier` gains an optional trailing `$telemetry` argument** (the §19 dispatcher), used for `config_clamped`.
 
+#### Changed (JWKS fetch, follow-up readings 8 to 10)
+
+- **JWKS and discovery requests carry a total deadline and follow no redirect.** Both pass `timeout` 10 s (one 10 s deadline for discovery plus JWKS together; a discovery that spends it leaves no second connection), `connect_timeout` 5 s and `allow_redirects => false` (a 3xx could otherwise bypass the `jwks_uri` same-origin check, https to http included). A header-dripping server now costs one connection and about 10 s.
+- **Every TTL-driven refresh respects the 60 s window.** `max-age=0` or a configured TTL under 60 s no longer refetches on every verification while keys are held; discovery stays cached at least 60 s. A window that started more than one window in the future (clock stepped back) is over.
+
 #### Fixed
 
 - **D-8: every event-consumer discard logs the fixed security event.** One warning per discard with exactly
