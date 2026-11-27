@@ -589,7 +589,7 @@ final class OidcClient
      * {@see Session::REFRESH_KIND_OIDC}, so at most one refresh is ever in flight per
      * token:
      *
-     *   - The single-flight is keyed per refresh token (SHA-256 digest of tenant and
+     *   - The single-flight is keyed per refresh token (SHA-256 digest of resolved tenant and
      *     token, see {@see self::refreshFlightKey()}). If the guard is busy with ANOTHER
      *     `oidcRefresh` call presenting the SAME token, this call does **not** issue its
      *     own wire call — it awaits and reuses that one leader's outcome (CONTRACT.md §9
@@ -622,10 +622,14 @@ final class OidcClient
             $form['scope'] = $scope;
         }
 
+        // Resolve and normalise the tenant BEFORE the guard: an invalid or missing tenant
+        // fails before any slot exists, and the key and the request use the one value.
+        $tenant = strtolower($this->resolveTenantId($tenantId));
+
         $guarded = $this->session->refreshGuard(
-            fn (): PromiseInterface => $this->postTokenAsync($configuration, $form, $tenantId),
+            fn (): PromiseInterface => $this->postTokenAsync($configuration, $form, $tenant),
             kind: Session::REFRESH_KIND_OIDC,
-            key: self::refreshFlightKey($refreshToken, $tenantId),
+            key: self::refreshFlightKey($refreshToken, $tenant),
         );
 
         if ($guarded['ran']) {
@@ -652,15 +656,16 @@ final class OidcClient
 
     /**
      * The §9 single-flight key of an `oidc_refresh` call: the lowercase hex SHA-256 of
-     * the tenant (empty when none is given), a NUL separator and the refresh token. Only
-     * callers presenting the same token (for the same tenant) share a flight; the raw
+     * the RESOLVED, lower-cased tenant UUID, a NUL separator and the refresh token. Callers
+     * presenting the same token for the same effective tenant share a flight, however the
+     * tenant was spelled or whether it was passed at all; the raw
      * token is never a map key, never logged and never in an error.
      *
      * @internal
      */
-    public static function refreshFlightKey(Sensitive|string $refreshToken, ?string $tenantId): string
+    public static function refreshFlightKey(Sensitive|string $refreshToken, string $tenantId): string
     {
-        return hash('sha256', ($tenantId ?? '') . "\0" . self::exposeSecret($refreshToken));
+        return hash('sha256', strtolower($tenantId) . "\0" . self::exposeSecret($refreshToken));
     }
 
     // -------------------------------------------------------------------------

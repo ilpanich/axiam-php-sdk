@@ -13,7 +13,7 @@ use GuzzleHttp\Promise\Utils;
  *
  * {@see self::settle()} wraps a refresh call's raw `PromiseInterface` so that,
  * regardless of success or failure, the caller's `$onClear` closure runs exactly
- * once — clearing the caller's own stored promise slot (e.g. `Session::$refreshPromise`)
+ * once — clearing the caller's own stored promise slot (e.g. an entry of `Session::$refreshSlots`)
  * so the NEXT 401 always starts a brand-new refresh attempt (§9.3: no retry loop; a
  * failed refresh is never cached for the next caller, mirroring the C# sibling
  * `Axiam.Sdk.Auth.RefreshGuard`'s "never cache a faulted refresh" invariant).

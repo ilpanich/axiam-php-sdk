@@ -28,6 +28,8 @@ final class OidcRefreshPerTokenTest extends TestCase
     private const BASE_URL = 'https://api.test';
     private const TOKEN_A = 'refresh-token-AAAA-raw-secret';
     private const TOKEN_B = 'refresh-token-BBBB-raw-secret';
+    private const TENANT_UUID = '22222222-2222-2222-2222-222222222222';
+    private const OTHER_TENANT_UUID = '33333333-3333-3333-3333-333333333333';
 
     private function configuration(): OidcConfiguration
     {
@@ -103,13 +105,13 @@ final class OidcRefreshPerTokenTest extends TestCase
     }
 
     /** @param array<string,string> $out */
-    private function fiber(AxiamClient $client, string $token, array &$out): \Fiber
+    private function fiber(AxiamClient $client, string $token, array &$out, ?string $tenantId = null): \Fiber
     {
         $configuration = $this->configuration();
 
-        return new \Fiber(function () use ($client, $token, $configuration, &$out): void {
+        return new \Fiber(function () use ($client, $token, $configuration, $tenantId, &$out): void {
             try {
-                $out[$token] = $client->oidcRefresh($token, configuration: $configuration)->accessToken->reveal();
+                $out[$token] = $client->oidcRefresh($token, tenantId: $tenantId, configuration: $configuration)->accessToken->reveal();
             } catch (\Throwable $e) {
                 $out[$token] = 'ERROR ' . $e::class;
             }
@@ -237,7 +239,7 @@ final class OidcRefreshPerTokenTest extends TestCase
         self::assertStringNotContainsString(self::TOKEN_B, $inFlight);
         foreach ([self::TOKEN_A, self::TOKEN_B] as $token) {
             self::assertStringContainsString(
-                hash('sha256', "\0" . $token),
+                hash('sha256', self::TENANT_UUID . "\0" . $token),
                 $inFlight,
                 'each live OIDC flight is keyed by the SHA-256 digest of (tenant NUL token)',
             );
@@ -246,5 +248,84 @@ final class OidcRefreshPerTokenTest extends TestCase
         self::drive([$a, $b]);
         $vacated = $dump();
         self::assertStringNotContainsString('oidc', $vacated, 'every OIDC slot is removed once vacated');
+    }
+
+    /**
+     * @param list<string|null> $tenants the tenant each caller passes (null = omitted)
+     * @return array{wire: int, out: array<int,string>}
+     */
+    private function tenantBurst(array $tenants): array
+    {
+        $wire = [];
+        $client = $this->client($wire, suspendAfterResolve: false);
+        $fibers = [];
+        $outs = [];
+        foreach ($tenants as $i => $tenant) {
+            $outs[$i] = [];
+            $fibers[$i] = $this->fiber($client, self::TOKEN_A, $outs[$i], $tenant);
+        }
+        foreach ($fibers as $fiber) {
+            $fiber->start(); // the first is held on the wire while the rest arrive
+        }
+        self::drive($fibers);
+
+        return ['wire' => \count($wire), 'out' => array_map(static fn (array $o): string => (string) reset($o), $outs)];
+    }
+
+    /** Omitted vs explicit default vs upper-case spelling of the same tenant: ONE flight. */
+    public function testSameTokenAndEffectiveTenantShareOneFlightHoweverTheTenantIsSpelled(): void
+    {
+        $result = $this->tenantBurst([null, self::TENANT_UUID, strtoupper(self::TENANT_UUID)]);
+
+        self::assertSame(1, $result['wire'], 'omitted, explicit and upper-case default tenant are one flight');
+        self::assertSame([self::accessFor(self::TOKEN_A)], array_values(array_unique($result['out'])));
+    }
+
+    /** The same token for a different resolved tenant is a separate flight. */
+    public function testSameTokenForADifferentTenantIsASeparateFlight(): void
+    {
+        $result = $this->tenantBurst([null, self::OTHER_TENANT_UUID]);
+
+        self::assertSame(2, $result['wire']);
+    }
+
+    /** An invalid tenant fails before any slot exists. */
+    public function testAnInvalidTenantFailsBeforeAnyGuardSlotIsCreated(): void
+    {
+        $wire = [];
+        $client = $this->client($wire, suspendAfterResolve: false);
+        $out = [];
+        $fiber = $this->fiber($client, self::TOKEN_A, $out, 'not-a-uuid');
+        $fiber->start();
+
+        self::assertTrue($fiber->isTerminated());
+        self::assertSame([], $wire);
+        $session = (new \ReflectionProperty(AxiamClient::class, 'session'))->getValue($client);
+        self::assertSame([], (new \ReflectionProperty(Session::class, 'refreshSlots'))->getValue($session));
+    }
+
+    /** A failed burst's error never carries the raw refresh token. */
+    public function testAFailedRefreshNeverCarriesTheRawTokenInItsMessage(): void
+    {
+        $client = new AxiamClient(
+            self::BASE_URL,
+            'acme-tenant',
+            oidcClientId: 'my-app',
+            oidcClientSecret: 's3cr3t',
+            oidcTenantId: self::TENANT_UUID,
+            transportHandler: HandlerStack::create(new \GuzzleHttp\Handler\MockHandler([
+                new Response(400, ['Content-Type' => 'application/json'], (string) json_encode([
+                    'error' => 'invalid_grant', 'error_description' => 'refresh token is expired',
+                ])),
+            ])),
+        );
+
+        try {
+            $client->oidcRefresh(self::TOKEN_A, configuration: $this->configuration());
+            self::fail('expected a failure');
+        } catch (\Throwable $e) {
+            self::assertStringNotContainsString(self::TOKEN_A, $e->getMessage());
+            self::assertStringNotContainsString(self::TOKEN_A, (string) $e->getPrevious()?->getMessage());
+        }
     }
 }

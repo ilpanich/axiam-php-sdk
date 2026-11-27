@@ -253,7 +253,7 @@ final class OidcTokenOpsTest extends TestCase
         $leader = $session->refreshGuard(
             static fn () => \GuzzleHttp\Promise\Create::promiseFor($leaderWire),
             kind: \Axiam\Sdk\Session::REFRESH_KIND_OIDC,
-            key: \Axiam\Sdk\Oidc\OidcClient::refreshFlightKey('the-refresh-token', null),
+            key: \Axiam\Sdk\Oidc\OidcClient::refreshFlightKey('the-refresh-token', self::TENANT_UUID),
         );
         self::assertTrue($leader['ran'], 'the leader oidcRefresh must itself acquire the guard first');
 
