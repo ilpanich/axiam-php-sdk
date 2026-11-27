@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`ext-curl` is now required, and a `JwksVerifier` over a StreamHandler client is refused.** The `timeout` option is a total deadline only under the cURL handler; under the stream handler it is an idle timeout checked after the headers, so a header-dripping host held a verification for tens of seconds. The constructor throws `AxiamException` for a client built on `StreamHandler` (the default when ext-curl is absent).
 - **A backward clock step of up to one window refreshes once.** A negative age makes a refresh due and bypasses the attempt window once, so a healthy endpoint is asked and the token accepted.
+- **JWKS requests also set `stream => false`**, overriding a client-level streaming default; a client whose handler is itself a `StreamHandler` is refused, and when the base handler cannot be recognised and `curl_multi_exec` is missing the verifier refuses too. A closure that wraps a `StreamHandler` cannot be detected. A successful fetch resets the one-refresh-per-backward-step latch, so consecutive backward steps each refresh.
 - **Synchronous PHP:** the one verification that triggers a due refresh waits for it, bounded by the 10 s deadline; other callers see the held set only in a separate process or coroutine. This SDK does not claim the cross-caller non-blocking of cross-SDK reading 8.
 
 #### Fixed

@@ -545,4 +545,59 @@ final class JwksStaleIfErrorTest extends TestCase
             @unlink($log);
         }
     }
+
+    public function testTwoBackwardStepsInARowEachGetOneFetchAndAcceptance(): void
+    {
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v)); // T0
+        $before = count($this->jwksRequests);
+
+        $this->now = self::T0 - 5;
+        self::assertTrue($this->accepts($v));
+        self::assertSame($before + 1, count($this->jwksRequests));
+
+        $this->now = self::T0 - 40; // a second step back, no call in between
+        self::assertTrue($this->accepts($v));
+        self::assertSame($before + 2, count($this->jwksRequests), 'the second step gets its own refresh');
+    }
+
+    public function testARawStreamHandlerAsTheClientHandlerIsRefused(): void
+    {
+        $this->expectException(\Axiam\Sdk\Core\AxiamException::class);
+
+        new JwksVerifier(new Client(['handler' => new \GuzzleHttp\Handler\StreamHandler()]), self::BASE_URL);
+    }
+
+    public function testRequestsOverrideAClientLevelStreamDefault(): void
+    {
+        $v = $this->verifier();
+        $this->accepts($v);
+        foreach ($this->options as [$path, $o]) {
+            self::assertFalse($o['stream'] ?? null, $path . ' is never routed to the stream handler');
+        }
+    }
+
+    public function testAClientThatDefaultsToStreamingStillGetsTheTenSecondDeadline(): void
+    {
+        $probe = stream_socket_server('tcp://127.0.0.1:0');
+        self::assertNotFalse($probe);
+        $name = (string) stream_socket_get_name($probe, false);
+        $port = (int) substr($name, (int) strrpos($name, ':') + 1);
+        fclose($probe);
+        $counter = sys_get_temp_dir() . '/axiam-drip2-' . getmypid();
+        @unlink($counter);
+        $proc = proc_open([PHP_BINARY, __DIR__ . '/../Fixtures/header_drip_server.php', (string) $port, $counter], [], $pipes);
+        self::assertIsResource($proc);
+        try {
+            usleep(500000);
+            $v = new JwksVerifier(new Client(['base_uri' => 'http://127.0.0.1:' . $port, 'stream' => true]), 'http://127.0.0.1:' . $port);
+            $t = microtime(true);
+            self::assertFalse($this->accepts($v));
+            self::assertLessThan(14.0, microtime(true) - $t);
+        } finally {
+            proc_terminate($proc);
+            proc_close($proc);
+            @unlink($counter);
+        }
+    }
 }

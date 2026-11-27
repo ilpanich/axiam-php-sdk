@@ -957,6 +957,9 @@ final class JwksVerifier
             'timeout' => max(0.001, min((float) self::FETCH_TIMEOUT_SECONDS, $remaining)),
             'connect_timeout' => self::CONNECT_TIMEOUT_SECONDS,
             'allow_redirects' => false,
+            // A client-level `stream => true` default would route to the StreamHandler, which cannot
+            // bound the header phase.
+            'stream' => false,
         ];
     }
 
@@ -971,16 +974,20 @@ final class JwksVerifier
      */
     private static function requireDeadlineCapableTransport(ClientInterface $http): void
     {
-        $stack = method_exists($http, 'getConfig') ? $http->getConfig('handler') : null;
-        $base = null;
-        if ($stack instanceof \GuzzleHttp\HandlerStack) {
+        $base = method_exists($http, 'getConfig') ? $http->getConfig('handler') : null;
+        if ($base instanceof \GuzzleHttp\HandlerStack) {
             try {
-                $base = (new \ReflectionProperty($stack, 'handler'))->getValue($stack);
+                $base = (new \ReflectionProperty($base, 'handler'))->getValue($base);
             } catch (\ReflectionException) {
-                $base = null; // an unknown stack shape is not a StreamHandler we can recognise
+                $base = null;
             }
         }
-        if ($base instanceof \GuzzleHttp\Handler\StreamHandler) {
+        // A closure (or other callable) that wraps a StreamHandler cannot be detected. When the base
+        // handler is not recognisably cURL-based either, cURL's own presence is the only signal left.
+        $recognised = $base instanceof \GuzzleHttp\Handler\CurlHandler
+            || $base instanceof \GuzzleHttp\Handler\CurlMultiHandler;
+        if ($base instanceof \GuzzleHttp\Handler\StreamHandler
+            || (!$recognised && !function_exists('curl_multi_exec'))) {
             throw new AxiamException(
                 'JwksVerifier needs the cURL HTTP handler (ext-curl): the PHP stream handler cannot bound '
                 . 'a header-dripping JWKS host with a total deadline (CONTRACT.md §12.4 rule 2)'
@@ -1069,6 +1076,7 @@ final class JwksVerifier
     {
         $this->fetchedAt = ($this->clock)();
         $this->lastFailedRefreshAt = 0;
+        $this->stepBackRefreshed = false; // the next backward step gets its own refresh
         // A CONFIGURED TTL wins (clamped to 300 s); an advertised max-age is used only when none is set.
         $ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds ?? self::MAX_TTL_SECONDS));
         if ($this->cacheTtlSeconds === null && preg_match('/(?:^|[\s,])max-age\s*=\s*"?(\d{1,10})"?/i', $response->getHeaderLine('Cache-Control'), $m) === 1) {
