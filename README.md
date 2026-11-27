@@ -163,6 +163,8 @@ organization identifier being optional rather than blank.
 
 ## Runtime requirements — read this before using gRPC or the AMQP worker (SC#3)
 
+`ext-curl` is required (alongside `ext-sodium`): the JWKS and discovery fetches carry a 10 s total deadline that only the cURL handler enforces, and `JwksVerifier` refuses a client built on Guzzle's `StreamHandler`. In synchronous PHP the one verification that triggers a due key refresh waits for it, bounded by that deadline.
+
 **The REST transport (login/MFA/refresh/logout/`checkAccess`/`can`/`batchCheck` over HTTP)
 works on any PHP runtime, including standard PHP-FPM.** This is the default and requires
 no special deployment.

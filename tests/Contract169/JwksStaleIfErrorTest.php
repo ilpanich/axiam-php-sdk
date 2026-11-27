@@ -403,7 +403,8 @@ final class JwksStaleIfErrorTest extends TestCase
         $seen = [];
         foreach ($this->options as [$path, $o]) {
             $seen[$path][] = $o;
-            self::assertSame(10, $o['timeout'] ?? null, $path . ' total timeout');
+            self::assertGreaterThan(0.0, (float) ($o['timeout'] ?? 0), $path . ' total timeout');
+            self::assertLessThanOrEqual(10.0, (float) $o['timeout']);
             self::assertSame(5, $o['connect_timeout'] ?? null, $path . ' connect timeout');
             self::assertFalse($o['allow_redirects'] ?? null, $path . ' follows no redirect');
         }
@@ -468,6 +469,80 @@ final class JwksStaleIfErrorTest extends TestCase
             proc_terminate($proc);
             proc_close($proc);
             @unlink($counter);
+        }
+    }
+
+    public function testABackwardStepOfAFewSecondsStillRefreshesOnceAndAccepts(): void
+    {
+        foreach ([5, 59] as $back) {
+            $this->jwksRequests = [];
+            $v = $this->verifier();
+            self::assertTrue($this->accepts($v));
+            $before = count($this->jwksRequests);
+
+            $this->now = self::T0 - $back;
+            self::assertTrue($this->accepts($v), "stepped back $back s: refreshed and accepted");
+            self::assertSame($before + 1, count($this->jwksRequests), 'exactly one fetch');
+            self::assertTrue($this->accepts($v));
+            self::assertSame($before + 1, count($this->jwksRequests));
+            $this->now = self::T0;
+        }
+    }
+
+    public function testAnUnknownKidWindowStartedMoreThanAWindowAheadIsOverAfterTheClockSteppedBack(): void
+    {
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v)); // T0, TTL 300
+
+        $this->mode = 'transport';
+        $this->now = self::T0 + 200;
+        self::assertFalse($this->accepts($v, $this->unknownKidToken())); // fails; the window starts at T0+200
+        $before = count($this->jwksRequests);
+
+        $this->now = self::T0 + 100; // stepped back 100 s: that window started more than a window ahead
+        self::assertFalse($this->accepts($v, $this->unknownKidToken()));
+        self::assertSame($before + 1, count($this->jwksRequests), 'the window is over: one new fetch');
+    }
+
+    public function testAVerifierOverAStreamHandlerClientIsRefusedBecauseItCannotBoundTheHeaderPhase(): void
+    {
+        $this->expectException(\Axiam\Sdk\Core\AxiamException::class);
+        $this->expectExceptionMessageMatches('/cURL/');
+
+        new JwksVerifier(new Client(['handler' => \GuzzleHttp\HandlerStack::create(new \GuzzleHttp\Handler\StreamHandler())]), self::BASE_URL);
+    }
+
+    public function testARealRedirectIsNeverFollowed(): void
+    {
+        $log = sys_get_temp_dir() . '/axiam-redirect-' . getmypid();
+        @unlink($log);
+        $probe = stream_socket_server('tcp://127.0.0.1:0');
+        self::assertNotFalse($probe);
+        $name = (string) stream_socket_get_name($probe, false);
+        $port = (int) substr($name, (int) strrpos($name, ':') + 1);
+        fclose($probe);
+        $proc = proc_open(
+            [PHP_BINARY, '-S', '127.0.0.1:' . $port, __DIR__ . '/../Fixtures/redirect_router.php'],
+            [1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']],
+            $pipes,
+            null,
+            ['AXIAM_TEST_LOG' => $log, 'PATH' => (string) getenv('PATH')],
+        );
+        self::assertIsResource($proc);
+        try {
+            for ($i = 0; $i < 50 && @fsockopen('127.0.0.1', $port) === false; $i++) {
+                usleep(100000);
+            }
+            $v = new JwksVerifier(new Client(['base_uri' => 'http://127.0.0.1:' . $port]), 'http://127.0.0.1:' . $port);
+            self::assertFalse($this->accepts($v));
+
+            $seen = (string) @file_get_contents($log);
+            self::assertStringContainsString('/oauth2/jwks', $seen, 'the fallback JWKS path was requested');
+            self::assertStringNotContainsString('/redirect-target', $seen, 'the Location target was never requested');
+        } finally {
+            proc_terminate($proc);
+            proc_close($proc);
+            @unlink($log);
         }
     }
 }

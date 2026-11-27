@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **JWKS and discovery requests carry a total deadline and follow no redirect.** Both pass `timeout` 10 s (one 10 s deadline for discovery plus JWKS together; a discovery that spends it leaves no second connection), `connect_timeout` 5 s and `allow_redirects => false` (a 3xx could otherwise bypass the `jwks_uri` same-origin check, https to http included). A header-dripping server now costs one connection and about 10 s.
 - **Every TTL-driven refresh respects the 60 s window.** `max-age=0` or a configured TTL under 60 s no longer refetches on every verification while keys are held; discovery stays cached at least 60 s. A window that started more than one window in the future (clock stepped back) is over.
 
+- **`ext-curl` is now required, and a `JwksVerifier` over a StreamHandler client is refused.** The `timeout` option is a total deadline only under the cURL handler; under the stream handler it is an idle timeout checked after the headers, so a header-dripping host held a verification for tens of seconds. The constructor throws `AxiamException` for a client built on `StreamHandler` (the default when ext-curl is absent).
+- **A backward clock step of up to one window refreshes once.** A negative age makes a refresh due and bypasses the attempt window once, so a healthy endpoint is asked and the token accepted.
+- **Synchronous PHP:** the one verification that triggers a due refresh waits for it, bounded by the 10 s deadline; other callers see the held set only in a separate process or coroutine. This SDK does not claim the cross-caller non-blocking of cross-SDK reading 8.
+
 #### Fixed
 
 - **D-8: every event-consumer discard logs the fixed security event.** One warning per discard with exactly

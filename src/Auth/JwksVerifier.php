@@ -137,9 +137,14 @@ final class JwksVerifier
     /** Wall-clock (microtime) instant by which the fetch in flight must have settled: one total deadline for discovery plus JWKS. */
     private float $fetchDeadline = 0.0;
 
-    /** Total deadline for one fetch, discovery and JWKS together, and the connect deadline of each request (seconds). */
+    /** Total deadline, in seconds, for one fetch: discovery and JWKS together. */
     public const FETCH_TIMEOUT_SECONDS = 10;
+
+    /** Connect deadline, in seconds, of each JWKS or discovery request. */
     public const CONNECT_TIMEOUT_SECONDS = 5;
+
+    /** True once a refresh has been made for the current backward step of the clock (a negative age bypasses the window once). */
+    private bool $stepBackRefreshed = false;
 
     /** Unix time of the last FAILED refresh attempt; 0 = none. Counts toward the one-fetch-per-window rule. */
     private int $lastFailedRefreshAt = 0;
@@ -221,6 +226,7 @@ final class JwksVerifier
         ?TelemetryDispatcher $telemetry = null,
     ) {
         $this->clock = $clock ?? static fn (): int => time();
+        self::requireDeadlineCapableTransport($this->http);
         $this->ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds ?? self::MAX_TTL_SECONDS));
         if ($this->cacheTtlSeconds !== null && $this->cacheTtlSeconds > self::MAX_TTL_SECONDS && $telemetry !== null && $telemetry->installed()) {
             // §12.4 rule 2 / §19 rule 6: a caller-supplied value the contract clamps is reported once.
@@ -857,13 +863,24 @@ final class JwksVerifier
             return $this->inFlightFetch;
         }
 
-        if (!$cacheFresh && $this->keysByKid !== null && self::inWindow($this->lastFetchAttemptAt, $now)) {
+        // A clock stepped back (negative age) makes a refresh due once: the window it would hit
+        // started "in the future" of this clock and must not keep a healthy endpoint from being asked.
+        $stepBack = $this->keysByKid !== null && $now < $this->fetchedAt;
+        $bypassWindow = false;
+        if ($stepBack && !$this->stepBackRefreshed) {
+            $bypassWindow = true;
+            $this->stepBackRefreshed = true;
+        } elseif (!$stepBack) {
+            $this->stepBackRefreshed = false;
+        }
+
+        if (!$bypassWindow && !$cacheFresh && $this->keysByKid !== null && self::inWindow($this->lastFetchAttemptAt, $now)) {
             // Every TTL-driven refresh, successful or not, respects the window: a `max-age=0` or a
             // configured TTL under 60 s is not one fetch per verification. The held set verifies.
             return Create::promiseFor(null);
         }
 
-        if (!$cacheFresh && self::inWindow($this->lastFailedRefreshAt, $now)) {
+        if (!$bypassWindow && !$cacheFresh && self::inWindow($this->lastFailedRefreshAt, $now)) {
             // A refresh that failed (a failed first fetch included) counts toward the window: a
             // failing endpoint costs one fetch per window, not one per token. The held keys keep verifying (usableKeys()) until the
             // stale bound.
@@ -937,10 +954,38 @@ final class JwksVerifier
     private function requestOptions(float $remaining): array
     {
         return [
-            'timeout' => (int) max(1, min(self::FETCH_TIMEOUT_SECONDS, (int) ceil($remaining))),
+            'timeout' => max(0.001, min((float) self::FETCH_TIMEOUT_SECONDS, $remaining)),
             'connect_timeout' => self::CONNECT_TIMEOUT_SECONDS,
             'allow_redirects' => false,
         ];
+    }
+
+    /**
+     * The `timeout` option is a TOTAL deadline only under the cURL handler. Under Guzzle's
+     * StreamHandler it is the http wrapper's idle timeout and is checked after the headers, so a
+     * host that drips header bytes holds a synchronous `verify()` indefinitely. A client built on a
+     * StreamHandler (the default one when ext-curl is absent) is therefore refused here, at
+     * construction, rather than allowed to hang a request later.
+     *
+     * @throws AxiamException
+     */
+    private static function requireDeadlineCapableTransport(ClientInterface $http): void
+    {
+        $stack = method_exists($http, 'getConfig') ? $http->getConfig('handler') : null;
+        $base = null;
+        if ($stack instanceof \GuzzleHttp\HandlerStack) {
+            try {
+                $base = (new \ReflectionProperty($stack, 'handler'))->getValue($stack);
+            } catch (\ReflectionException) {
+                $base = null; // an unknown stack shape is not a StreamHandler we can recognise
+            }
+        }
+        if ($base instanceof \GuzzleHttp\Handler\StreamHandler) {
+            throw new AxiamException(
+                'JwksVerifier needs the cURL HTTP handler (ext-curl): the PHP stream handler cannot bound '
+                . 'a header-dripping JWKS host with a total deadline (CONTRACT.md §12.4 rule 2)'
+            );
+        }
     }
 
     /**
