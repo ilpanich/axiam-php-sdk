@@ -110,6 +110,13 @@ conformance to 1.69.
 
 ### Fixed
 
+- **#96: the `oidc_refresh` single-flight is keyed per refresh token (CONTRACT.md §9).** `OidcClient::oidcRefresh()` joined
+  whatever `oidc_refresh` flight was in the air, whatever token it carried, so a call with token B during (or just
+  after the publish of) token A's flight returned A's token set and never sent B. `Session::refreshGuard()` now keeps
+  one slot per flight identity (kind plus an optional `key`); `oidcRefresh()` keys its flight by the SHA-256 digest of
+  tenant and refresh token (`OidcClient::refreshFlightKey()`, the raw token is never a key). Callers presenting the same
+  token still form one burst; a different token gets its own wire call and result; a slot is removed once vacated
+  (identity-checked). The §1 cookie-session refresh keeps its own slot and behaves as before.
 - **D-8: every event-consumer discard logs the fixed security event.** One warning per discard with exactly
   `timestamp`, `exchange`, `routing_key`, `tenant_id` (the consumer's own, never read from the body) and `reason`
   (`malformed`, `unsigned`, `signature`, `key_version`, `stale`, `replay`), in the normative reason order (1)-(8); the

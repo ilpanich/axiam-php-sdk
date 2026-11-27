@@ -584,19 +584,20 @@ final class OidcClient
      *
      * This is a **distinct operation** from `AxiamClient::refresh()`, which drives the
      * cookie/opaque-token session path at `POST /api/v1/auth/refresh`. The two are
-     * never merged or aliased and neither falls back to the other (§12.1). They DO
-     * share {@see Session}'s single §9 guard slot, tagged with
-     * {@see Session::REFRESH_KIND_OIDC}, so at most one refresh of either kind is ever
-     * in flight for a session:
+     * never merged or aliased and neither falls back to the other (§12.1). They go
+     * through the same {@see Session::refreshGuard()} primitive, this one tagged with
+     * {@see Session::REFRESH_KIND_OIDC}, so at most one refresh is ever in flight per
+     * token:
      *
-     *   - If the guard is busy with ANOTHER `oidcRefresh` call (same kind), this call
-     *     does **not** issue its own wire call — it awaits and reuses that one leader's
-     *     outcome (CONTRACT.md §9 rule 2, F-06). Refresh tokens are single-use with
-     *     rotation, so a second wire call here would replay an already-consumed token
-     *     and fail `invalid_grant`; sharing the result is the whole point of the guard.
-     *   - If the guard is busy with a cookie-session refresh (different kind, which
-     *     cannot produce an `OidcTokenSet`), this call retries (bounded, 3 attempts)
-     *     once that refresh settles, rather than returning a stale/foreign result.
+     *   - The single-flight is keyed per refresh token (SHA-256 digest of tenant and
+     *     token, see {@see self::refreshFlightKey()}). If the guard is busy with ANOTHER
+     *     `oidcRefresh` call presenting the SAME token, this call does **not** issue its
+     *     own wire call — it awaits and reuses that one leader's outcome (CONTRACT.md §9
+     *     rule 2, F-06). Refresh tokens are single-use with rotation, so a second wire
+     *     call here would replay an already-consumed token and fail `invalid_grant`.
+     *   - A call presenting a DIFFERENT token never joins that flight and never receives
+     *     its outcome: it has its own slot, its own wire call and its own result.
+     *   - The §1 cookie-session refresh has its own slot and is unaffected.
      *
      * An `id_token` in the response is validated against §12.4 rules 1–5 and 7; rule 6
      * (nonce) is skipped, since OIDC Core §12.2 does not require a nonce in a
@@ -621,54 +622,45 @@ final class OidcClient
             $form['scope'] = $scope;
         }
 
-        for ($attempt = 0; $attempt < 3; $attempt++) {
-            $guarded = $this->session->refreshGuard(
-                fn (): PromiseInterface => $this->postTokenAsync($configuration, $form, $tenantId),
-                kind: Session::REFRESH_KIND_OIDC,
-            );
+        $guarded = $this->session->refreshGuard(
+            fn (): PromiseInterface => $this->postTokenAsync($configuration, $form, $tenantId),
+            kind: Session::REFRESH_KIND_OIDC,
+            key: self::refreshFlightKey($refreshToken, $tenantId),
+        );
 
-            if ($guarded['ran']) {
-                // WE are the leader: this call owns the one wire call, and drives it.
-                /** @var array<string,mixed>|NetworkError $wire */
-                $wire = $guarded['promise']->wait();
-                if ($wire instanceof NetworkError) {
-                    throw $wire;
-                }
-
-                return $this->toTokenSet($wire, $configuration, null);
-            }
-
-            if ($guarded['kind'] === Session::REFRESH_KIND_OIDC) {
-                // Another concurrent oidcRefresh already started the one wire call —
-                // JOIN it and use its outcome (CONTRACT.md §9 rule 2 / rule 5, F-06).
-                // RefreshGuard::join(), never PromiseInterface::wait(): wait() would
-                // seize a wait function the leader has already consumed, killing the
-                // leader's in-flight refresh and freeing the guard slot mid-flight —
-                // after which the next caller replays an already-spent single-use
-                // refresh token. See RefreshGuard::join()'s doc comment.
-                /** @var array<string,mixed>|NetworkError $wire */
-                $wire = RefreshGuard::join($guarded['promise']);
-                if ($wire instanceof NetworkError) {
-                    throw $wire;
-                }
-
-                return $this->toTokenSet($wire, $configuration, null);
-            }
-
-            // The guard was busy with a DIFFERENT KIND of refresh (the §1
-            // cookie-session path, which cannot produce an OidcTokenSet) — wait for
-            // it to settle (we don't care whether IT succeeded or failed) and try to
-            // acquire the guard again.
-            try {
-                RefreshGuard::join($guarded['promise']);
-            } catch (\Throwable) {
-                // Not our call — ignore and retry acquiring the guard for our own.
-            }
+        if ($guarded['ran']) {
+            // WE are the leader: this call owns the one wire call, and drives it.
+            /** @var array<string,mixed>|NetworkError $wire */
+            $wire = $guarded['promise']->wait();
+        } else {
+            // Another concurrent oidcRefresh with the SAME refresh token already started
+            // the one wire call — JOIN it and use its outcome (CONTRACT.md §9 rule 2 /
+            // rule 5, F-06). RefreshGuard::join(), never PromiseInterface::wait(): wait()
+            // would seize a wait function the leader has already consumed, killing the
+            // leader's in-flight refresh and freeing the slot mid-flight — after which the
+            // next caller replays an already-spent single-use refresh token.
+            /** @var array<string,mixed>|NetworkError $wire */
+            $wire = RefreshGuard::join($guarded['promise']);
         }
 
-        throw new AuthError(
-            'oidcRefresh could not acquire the single-flight refresh guard (CONTRACT.md §9); another refresh kept it busy.',
-        );
+        if ($wire instanceof NetworkError) {
+            throw $wire;
+        }
+
+        return $this->toTokenSet($wire, $configuration, null);
+    }
+
+    /**
+     * The §9 single-flight key of an `oidc_refresh` call: the lowercase hex SHA-256 of
+     * the tenant (empty when none is given), a NUL separator and the refresh token. Only
+     * callers presenting the same token (for the same tenant) share a flight; the raw
+     * token is never a map key, never logged and never in an error.
+     *
+     * @internal
+     */
+    public static function refreshFlightKey(Sensitive|string $refreshToken, ?string $tenantId): string
+    {
+        return hash('sha256', ($tenantId ?? '') . "\0" . self::exposeSecret($refreshToken));
     }
 
     // -------------------------------------------------------------------------

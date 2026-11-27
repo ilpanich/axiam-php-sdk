@@ -190,12 +190,12 @@ final class OidcTokenOpsTest extends TestCase
     }
 
     /**
-     * §9/§12.1: `oidcRefresh` shares Session's single guard slot with the cookie-session
-     * refresh path. If that slot is already occupied by a DIFFERENT refresh when
-     * `oidcRefresh` is called, it must wait for it to settle and retry — never return a
-     * stale/foreign result — succeeding once the guard frees up.
+     * §9/§12.1: `oidcRefresh` goes through the same guard primitive as the cookie-session
+     * refresh path but in its own slot. A cookie-session refresh in flight must neither be
+     * joined nor be waited on: `oidcRefresh` makes its own wire call and returns its own
+     * result — never the foreign one.
      */
-    public function testOidcRefreshRetriesWhenTheGuardIsBusyWithACookieSessionRefresh(): void
+    public function testOidcRefreshIsNotBlockedByACookieSessionRefresh(): void
     {
         $client = $this->client([
             new Response(200, [], (string) json_encode([
@@ -226,8 +226,8 @@ final class OidcTokenOpsTest extends TestCase
 
     /**
      * §9 rule 2 / rule 5 (CONTRACT.md 1.5, F-06): if the guard is already busy with
-     * ANOTHER `oidcRefresh` call (same `Session::REFRESH_KIND_OIDC` kind), a second
-     * concurrent caller must NOT issue its own wire call — it must share the first
+     * ANOTHER `oidcRefresh` call presenting the SAME refresh token (same
+     * `Session::REFRESH_KIND_OIDC` kind and key), a second concurrent caller must NOT issue its own wire call — it must share the first
      * call's single outcome. AXIAM refresh tokens are opaque, server-stored, and
      * single-use with rotation, so a second wire call here would replay an
      * already-consumed token and fail `invalid_grant`; the mock queue is left EMPTY
@@ -253,10 +253,11 @@ final class OidcTokenOpsTest extends TestCase
         $leader = $session->refreshGuard(
             static fn () => \GuzzleHttp\Promise\Create::promiseFor($leaderWire),
             kind: \Axiam\Sdk\Session::REFRESH_KIND_OIDC,
+            key: \Axiam\Sdk\Oidc\OidcClient::refreshFlightKey('the-refresh-token', null),
         );
         self::assertTrue($leader['ran'], 'the leader oidcRefresh must itself acquire the guard first');
 
-        $tokens = $client->oidcRefresh('a-different-refresh-token', configuration: $this->configuration());
+        $tokens = $client->oidcRefresh('the-refresh-token', configuration: $this->configuration());
 
         self::assertSame(
             'leader-access',
