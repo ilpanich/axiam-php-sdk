@@ -31,6 +31,11 @@ final class StrictJson
      */
     public static function isAmbiguousObject(string $body): bool
     {
+        // §8 step 2a: the first byte is the opening `{`. A byte-order mark, whitespace or any other
+        // prefix is refused here, never stripped (json_decode itself tolerates leading whitespace).
+        if ($body === '' || $body[0] !== '{') {
+            return true;
+        }
         try {
             $decoded = json_decode($body, false, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {

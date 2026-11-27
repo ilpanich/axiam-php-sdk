@@ -7,6 +7,7 @@ namespace Axiam\Sdk\Tests;
 use Axiam\Sdk\Amqp\AmqpDropMessage;
 use Axiam\Sdk\Amqp\Consumer;
 use Axiam\Sdk\Amqp\ReplayGuard;
+use Axiam\Sdk\Amqp\SignedEventType;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -78,7 +79,7 @@ final class ConsumerReplayProtectionTest extends TestCase
     {
         $now = 1_800_000_000;
         $guard = new ReplayGuard(300, static fn (): int => $now);
-        $consumer = new Consumer(self::SIGNING_KEY, replayGuard: $guard);
+        $consumer = new Consumer(self::SIGNING_KEY, '22222222-2222-2222-2222-222222222222', SignedEventType::AuthzRequest, replayGuard: $guard);
 
         $body = self::signedWireBody([
             'correlation_id' => '11111111-1111-1111-1111-111111111111',
@@ -87,7 +88,7 @@ final class ConsumerReplayProtectionTest extends TestCase
             'action' => 'read',
             'resource_id' => '44444444-4444-4444-4444-444444444444',
             'key_version' => 2,
-            'nonce' => 'accept-nonce-1',
+            'nonce' => '00000001-0000-4000-8000-000000000000',
             'issued_at' => self::isoAt($now),
         ]);
 
@@ -104,7 +105,7 @@ final class ConsumerReplayProtectionTest extends TestCase
     public function testHmacVerificationFailureNacksWithoutRequeueAndNeverInvokesHandler(): void
     {
         $guard = new ReplayGuard(300, static fn (): int => 1_800_000_000);
-        $consumer = new Consumer(self::SIGNING_KEY, replayGuard: $guard);
+        $consumer = new Consumer(self::SIGNING_KEY, '22222222-2222-2222-2222-222222222222', SignedEventType::AuthzRequest, replayGuard: $guard);
 
         // Signed with the WRONG key -> HMAC verification fails before the
         // replay gate is ever reached.
@@ -115,7 +116,7 @@ final class ConsumerReplayProtectionTest extends TestCase
             'action' => 'read',
             'resource_id' => '44444444-4444-4444-4444-444444444444',
             'key_version' => 2,
-            'nonce' => 'wrong-key-nonce',
+            'nonce' => '00000002-0000-4000-8000-000000000000',
             'issued_at' => self::isoAt(1_800_000_000),
         ], key: 'a-completely-different-key');
 
@@ -131,7 +132,7 @@ final class ConsumerReplayProtectionTest extends TestCase
     {
         $now = 1_800_000_000;
         $guard = new ReplayGuard(300, static fn (): int => $now);
-        $consumer = new Consumer(self::SIGNING_KEY, replayGuard: $guard);
+        $consumer = new Consumer(self::SIGNING_KEY, '22222222-2222-2222-2222-222222222222', SignedEventType::AuthzRequest, replayGuard: $guard);
 
         // A validly HMAC-signed v1 body (no replay-protection fields) --
         // proves the HMAC gate passes and the key_version gate is what
@@ -143,7 +144,7 @@ final class ConsumerReplayProtectionTest extends TestCase
             'action' => 'read',
             'resource_id' => '44444444-4444-4444-4444-444444444444',
             'key_version' => 1,
-            'nonce' => 'v1-nonce',
+            'nonce' => '00000003-0000-4000-8000-000000000000',
             'issued_at' => self::isoAt($now),
         ]);
 
@@ -159,7 +160,7 @@ final class ConsumerReplayProtectionTest extends TestCase
     {
         $now = 1_800_000_000;
         $guard = new ReplayGuard(300, static fn (): int => $now);
-        $consumer = new Consumer(self::SIGNING_KEY, replayGuard: $guard);
+        $consumer = new Consumer(self::SIGNING_KEY, '22222222-2222-2222-2222-222222222222', SignedEventType::AuthzRequest, replayGuard: $guard);
 
         $body = self::signedWireBody([
             'correlation_id' => '11111111-1111-1111-1111-111111111111',
@@ -168,7 +169,7 @@ final class ConsumerReplayProtectionTest extends TestCase
             'action' => 'read',
             'resource_id' => '44444444-4444-4444-4444-444444444444',
             'key_version' => 2,
-            'nonce' => 'stale-nonce',
+            'nonce' => '00000004-0000-4000-8000-000000000000',
             'issued_at' => self::isoAt($now - 3600), // 1 hour stale, default skew is 300s
         ]);
 
@@ -184,7 +185,7 @@ final class ConsumerReplayProtectionTest extends TestCase
     {
         $now = 1_800_000_000;
         $guard = new ReplayGuard(300, static fn (): int => $now);
-        $consumer = new Consumer(self::SIGNING_KEY, replayGuard: $guard);
+        $consumer = new Consumer(self::SIGNING_KEY, '22222222-2222-2222-2222-222222222222', SignedEventType::AuthzRequest, replayGuard: $guard);
 
         $bodyFields = [
             'correlation_id' => '11111111-1111-1111-1111-111111111111',
@@ -193,7 +194,7 @@ final class ConsumerReplayProtectionTest extends TestCase
             'action' => 'read',
             'resource_id' => '44444444-4444-4444-4444-444444444444',
             'key_version' => 2,
-            'nonce' => 'duplicate-nonce',
+            'nonce' => '00000005-0000-4000-8000-000000000000',
             'issued_at' => self::isoAt($now),
         ];
         $body = self::signedWireBody($bodyFields);
@@ -219,7 +220,7 @@ final class ConsumerReplayProtectionTest extends TestCase
     {
         $now = 1_800_000_000;
         $guard = new ReplayGuard(300, static fn (): int => $now);
-        $consumer = new Consumer(self::SIGNING_KEY, replayGuard: $guard);
+        $consumer = new Consumer(self::SIGNING_KEY, '22222222-2222-2222-2222-222222222222', SignedEventType::AuthzRequest, replayGuard: $guard);
 
         $body = self::signedWireBody([
             'correlation_id' => '11111111-1111-1111-1111-111111111111',
@@ -228,7 +229,7 @@ final class ConsumerReplayProtectionTest extends TestCase
             'action' => 'read',
             'resource_id' => '44444444-4444-4444-4444-444444444444',
             'key_version' => 2,
-            'nonce' => 'poison-nonce',
+            'nonce' => '00000006-0000-4000-8000-000000000000',
             'issued_at' => self::isoAt($now),
         ]);
 
@@ -245,7 +246,7 @@ final class ConsumerReplayProtectionTest extends TestCase
     {
         $now = 1_800_000_000;
         $guard = new ReplayGuard(300, static fn (): int => $now);
-        $consumer = new Consumer(self::SIGNING_KEY, replayGuard: $guard);
+        $consumer = new Consumer(self::SIGNING_KEY, '22222222-2222-2222-2222-222222222222', SignedEventType::AuthzRequest, replayGuard: $guard);
 
         $body = self::signedWireBody([
             'correlation_id' => '11111111-1111-1111-1111-111111111111',
@@ -254,7 +255,7 @@ final class ConsumerReplayProtectionTest extends TestCase
             'action' => 'read',
             'resource_id' => '44444444-4444-4444-4444-444444444444',
             'key_version' => 2,
-            'nonce' => 'transient-nonce',
+            'nonce' => '00000007-0000-4000-8000-000000000000',
             'issued_at' => self::isoAt($now),
         ]);
 

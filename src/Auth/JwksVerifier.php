@@ -6,6 +6,8 @@ namespace Axiam\Sdk\Auth;
 
 use Axiam\Sdk\Core\AuthError;
 use Axiam\Sdk\Core\AxiamException;
+use Axiam\Sdk\Core\ConfigClampedEvent;
+use Axiam\Sdk\Core\TelemetryDispatcher;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
 use GuzzleHttp\ClientInterface;
@@ -103,10 +105,34 @@ final class JwksVerifier
      */
     public const UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS = 60;
 
+    /**
+     * The longest a fetched key set lives before a refresh is due, and the extra time the held keys
+     * may keep verifying while every refresh fails (CONTRACT.md §12.4 rule 2 "Stale-if-error,
+     * bounded", contract 1.69, D-10): both 300 s. A larger configured or advertised lifetime is
+     * clamped down to this, never honoured.
+     */
+    public const MAX_TTL_SECONDS = 300;
+
+    /** The stale window beyond the TTL: held keys verify until TTL + this after the last successful fetch. */
+    public const STALE_WINDOW_SECONDS = 300;
+
     /** @var array<string,\Firebase\JWT\Key>|null */
     private ?array $keysByKid = null;
 
+    /**
+     * The anchor of the cache's age: when the last SUCCESSFUL fetch (a 200 with at least one key,
+     * or a 304 to a conditional request) completed. A failed refresh never moves it.
+     */
     private int $fetchedAt = 0;
+
+    /** The lifetime in force for the held set: the configured TTL, or the response's `max-age`, clamped to 300 s. */
+    private int $ttl;
+
+    /** The held set's `ETag`, sent as `If-None-Match` on the next refresh. */
+    private ?string $etag = null;
+
+    /** Unix time of the last FAILED refresh attempt; 0 = none. Counts toward the one-fetch-per-window rule. */
+    private int $lastFailedRefreshAt = 0;
 
     /** Unix time of the last re-fetch an unknown `kid` caused; 0 = none yet (C5). */
     private int $lastUnknownKidRefetchAt = 0;
@@ -182,8 +208,19 @@ final class JwksVerifier
          * @var (\Closure(): int)|null
          */
         ?\Closure $clock = null,
+        ?TelemetryDispatcher $telemetry = null,
     ) {
         $this->clock = $clock ?? static fn (): int => time();
+        $this->ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds));
+        if ($this->cacheTtlSeconds > self::MAX_TTL_SECONDS && $telemetry !== null && $telemetry->installed()) {
+            // §12.4 rule 2 / §19 rule 6: a caller-supplied value the contract clamps is reported once.
+            $telemetry->emit(new ConfigClampedEvent(
+                'cacheTtlSeconds',
+                (string) $this->cacheTtlSeconds,
+                (string) self::MAX_TTL_SECONDS,
+                '§12.4 rule 2',
+            ));
+        }
     }
 
     /**
@@ -294,7 +331,8 @@ final class JwksVerifier
         }
 
         $this->ensureFresh($kid);
-        if (!isset($this->keysByKid[$kid])) {
+        $keys = $this->usableKeys();
+        if (!isset($keys[$kid])) {
             return null; // unknown kid, even after the one re-fetch the cooldown allows
         }
 
@@ -305,7 +343,7 @@ final class JwksVerifier
         $originalLeeway = JWT::$leeway;
         JWT::$leeway = self::CLOCK_SKEW_LEEWAY_SECONDS;
         try {
-            $decoded = JWT::decode($jwt, $this->keysByKid);
+            $decoded = JWT::decode($jwt, $keys);
         } catch (\Throwable) {
             return null;
         } finally {
@@ -671,7 +709,8 @@ final class JwksVerifier
         }
 
         $this->ensureFresh($kid);
-        if (!isset($this->keysByKid[$kid])) {
+        $keys = $this->usableKeys();
+        if (!isset($keys[$kid])) {
             throw new AuthError(
                 sprintf('id_token kid "%s" is unknown, even after a JWKS refetch', $kid),
                 reason: 'unknown_kid',
@@ -693,7 +732,7 @@ final class JwksVerifier
         $originalLeeway = JWT::$leeway;
         JWT::$leeway = PHP_INT_MAX >> 2;
         try {
-            $decoded = JWT::decode($jwt, $this->keysByKid);
+            $decoded = JWT::decode($jwt, $keys);
         } catch (\Throwable $e) {
             throw new AuthError(
                 'id_token signature verification failed: ' . $e->getMessage(),
@@ -748,6 +787,25 @@ final class JwksVerifier
     }
 
     /**
+     * The keys that may verify a token now: the held set while it is within TTL + 300 s of the last
+     * successful fetch, none after (CONTRACT.md §12.4 rule 2, "Stale-if-error, bounded"). Held keys
+     * are never used past the bound, whatever the cause and however many attempts failed.
+     *
+     * @return array<string,\Firebase\JWT\Key>
+     */
+    private function usableKeys(): array
+    {
+        if ($this->keysByKid === null) {
+            return [];
+        }
+        if ((($this->clock)() - $this->fetchedAt) > $this->ttl + self::STALE_WINDOW_SECONDS) {
+            return [];
+        }
+
+        return $this->keysByKid;
+    }
+
+    /**
      * Synchronous entry point used by {@see verify()} — waits on the same
      * in-flight guard {@see ensureFreshAsync()} builds, so a burst of
      * synchronous `verify()` calls sharing one event loop (e.g. Guzzle's
@@ -775,7 +833,7 @@ final class JwksVerifier
     private function ensureFreshAsync(string $unknownKid): PromiseInterface
     {
         $now = ($this->clock)();
-        $expired = ($now - $this->fetchedAt) > $this->cacheTtlSeconds;
+        $expired = ($now - $this->fetchedAt) > $this->ttl;
         $unknown = !isset($this->keysByKid[$unknownKid]);
         $cacheFresh = $this->keysByKid !== null && !$expired;
         if ($cacheFresh && !$unknown) {
@@ -786,6 +844,16 @@ final class JwksVerifier
             // A fetch triggered by a concurrent caller is already underway —
             // join it instead of issuing a new discovery+JWKS request.
             return $this->inFlightFetch;
+        }
+
+        if (!$cacheFresh && $this->keysByKid !== null
+            && $this->lastFailedRefreshAt !== 0
+            && ($now - $this->lastFailedRefreshAt) < self::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS
+        ) {
+            // A refresh that failed counts toward the window: a failing endpoint costs one fetch
+            // per window, not one per token. The held keys keep verifying (usableKeys()) until the
+            // stale bound.
+            return Create::promiseFor(null);
         }
 
         if ($cacheFresh) {
@@ -804,18 +872,25 @@ final class JwksVerifier
         }
 
         $fetch = $this->resolveJwksUriAsync()
-            ->then(fn (string $jwksUri): PromiseInterface => $this->http->requestAsync('GET', $jwksUri))
+            ->then(function (string $jwksUri): PromiseInterface {
+                // A conditional request when a set is held (its ETag, which the server sends): a 304
+                // re-confirms it and moves the anchor.
+                $options = $this->keysByKid !== null && $this->etag !== null
+                    ? ['headers' => ['If-None-Match' => $this->etag]]
+                    : [];
+
+                return $this->http->requestAsync('GET', $jwksUri, $options);
+            })
             ->then(function (ResponseInterface $response): void {
-                $jwksJson = json_decode((string) $response->getBody(), true);
-                if (is_array($jwksJson)) {
-                    $this->keysByKid = JWK::parseKeySet($jwksJson);
-                    $this->fetchedAt = ($this->clock)();
+                if (!$this->adopt($response)) {
+                    $this->lastFailedRefreshAt = ($this->clock)();
                 }
             })
             ->otherwise(function (\Throwable $e): void {
-                // Fetch/parse failure (network, JSON, or key-parse) — leave
-                // the existing cache (if any) untouched; verify() will fail
-                // closed on a still-unknown kid.
+                // Transport failure, or a body/key-parse failure — the held set (if any) is left
+                // untouched, the anchor does not move, and verify() fails closed on a still-unknown
+                // kid or once the stale bound passes.
+                $this->lastFailedRefreshAt = ($this->clock)();
             });
 
         // Reset the guard once settled so the NEXT cache-miss burst starts a
@@ -829,6 +904,57 @@ final class JwksVerifier
         });
 
         return $this->inFlightFetch;
+    }
+
+    /**
+     * Adopts a JWKS response when it is a SUCCESSFUL fetch (CONTRACT.md §12.4 rule 2): a `200`
+     * whose body is a JWKS document with at least one key replaces the held set; a `304` to a
+     * conditional request re-confirms it. Either moves the anchor and re-reads the lifetime from
+     * `Cache-Control: max-age` (clamped to 300 s). Anything else — another status, a body that is
+     * not a JWKS document, an EMPTY key set — is a failure, and changes nothing.
+     */
+    private function adopt(ResponseInterface $response): bool
+    {
+        $status = $response->getStatusCode();
+        if ($status === 304) {
+            if ($this->keysByKid === null || $this->etag === null) {
+                return false; // not an answer to a conditional request
+            }
+            $this->confirm($response);
+
+            return true;
+        }
+        if ($status !== 200) {
+            return false;
+        }
+
+        $jwksJson = json_decode((string) $response->getBody(), true);
+        if (!is_array($jwksJson) || !is_array($jwksJson['keys'] ?? null) || $jwksJson['keys'] === []) {
+            return false;
+        }
+        $keys = JWK::parseKeySet($jwksJson);
+        if ($keys === []) {
+            return false;
+        }
+
+        $this->keysByKid = $keys;
+        $etag = $response->getHeaderLine('ETag');
+        $this->etag = $etag !== '' ? $etag : null;
+        $this->confirm($response);
+
+        return true;
+    }
+
+    /** Moves the anchor to now and takes the lifetime from the response (clamped, default the configured TTL). */
+    private function confirm(ResponseInterface $response): void
+    {
+        $this->fetchedAt = ($this->clock)();
+        $this->lastFailedRefreshAt = 0;
+        $ttl = max(0, min(self::MAX_TTL_SECONDS, $this->cacheTtlSeconds));
+        if (preg_match('/(?:^|[\s,])max-age\s*=\s*"?(\d{1,10})"?/i', $response->getHeaderLine('Cache-Control'), $m) === 1) {
+            $ttl = min(self::MAX_TTL_SECONDS, (int) $m[1]);
+        }
+        $this->ttl = $ttl;
     }
 
     /**
@@ -848,7 +974,7 @@ final class JwksVerifier
     private function resolveJwksUriAsync(): PromiseInterface
     {
         if ($this->resolvedJwksUri !== null
-            && (($this->clock)() - $this->resolvedJwksUriAt) <= $this->cacheTtlSeconds
+            && (($this->clock)() - $this->resolvedJwksUriAt) <= $this->ttl
         ) {
             return Create::promiseFor($this->resolvedJwksUri);
         }

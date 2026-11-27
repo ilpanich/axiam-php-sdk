@@ -41,7 +41,7 @@ final class Hmac
     private const SIGNATURE_HEX_LENGTH = 64;
 
     /**
-     * The signed event shapes an SDK consumer accepts (CONTRACT §8 "Exact signed field order"):
+     * The signed event shapes an SDK consumer can be configured for ({@see SignedEventType}) (CONTRACT §8 "Exact signed field order"):
      * member name => whether it is optional (omitted, never `null`), in declaration order.
      *
      * @var array<string, array<string, bool>>
@@ -80,86 +80,103 @@ final class Hmac
      */
     public static function verifiedCanonical(string $signingKey, string $body): ?string
     {
-        // Refuses non-objects, malformed JSON, trailing content and a key repeated at any depth.
-        if (StrictJson::isAmbiguousObject($body)) {
-            return null;
-        }
-
-        $cut = self::cutTrailingSignature($body);
+        $cut = self::cut($body);
         if ($cut === null) {
             return null;
         }
         [$canonical, $sigHex] = $cut;
 
-        // The signature the body CLAIMS (its top-level member) must be the one that was cut out:
-        // a nested or decoy `hmac_signature` earlier in the body must not stand in for it.
-        $members = json_decode($body, true);
-        if (!is_array($members) || ($members['hmac_signature'] ?? null) !== $sigHex) {
-            return null;
-        }
-
-        $expected = hex2bin($sigHex);
-        if ($expected === false) {
-            return null;
-        }
-
-        return hash_equals($expected, hash_hmac('sha256', $canonical, $signingKey, true)) ? $canonical : null;
+        return self::signatureMatches($signingKey, $canonical, $sigHex) ? $canonical : null;
     }
 
     /**
-     * True when `$canonical` (the verified bytes {@see self::verifiedCanonical()} returned) has
-     * the top-level members of a signed event type, in that type's declaration order, each
-     * optional member present in its place or absent, and no other member (contract 1.69, §8
-     * step 2c). Every tenant-subkey-signed shape shares the key — `AuthzResponse`, the reactor
-     * messages, the cache-invalidation broadcast — so a validly signed message of ANOTHER shape
-     * must not be accepted as an `AuthzRequest` or an `AuditEventMessage`.
+     * True when `$canonical` (the bytes the signature covers, the trailing `hmac_signature`
+     * member already cut) has the top-level members of `$type`, in that type's declaration order,
+     * each optional member present in its place or absent, and no other member (contract 1.69, §8
+     * step 2c, "Typed: one configured type"). Only the configured type's layout is consulted:
+     * every tenant-subkey-signed shape shares the key (`AuthzResponse`, the other event type, the
+     * reactor messages, the cache-invalidation broadcast), so a validly signed message of ANOTHER
+     * shape must not be accepted. Needs no signature and no decode, so it runs before the HMAC.
      */
-    public static function hasSignedLayout(string $canonical): bool
+    public static function hasLayout(string $canonical, SignedEventType $type): bool
     {
         $members = json_decode($canonical, true);
         if (!is_array($members)) {
             return false;
         }
-        $names = array_map('strval', array_keys($members));
-
-        foreach (self::LAYOUTS as $layout) {
-            $position = 0;
-            $matches = true;
-            foreach ($names as $name) {
-                // Advance through the layout to this member; skipped members must be optional.
-                $found = false;
-                $keys = array_keys($layout);
-                for (; $position < count($keys); $position++) {
-                    if ($keys[$position] === $name) {
-                        $found = true;
-                        $position++;
-                        break;
-                    }
-                    if (!$layout[$keys[$position]]) {
-                        break;
-                    }
-                }
-                if (!$found) {
-                    $matches = false;
+        $layout = self::LAYOUTS[$type->value];
+        $keys = array_keys($layout);
+        $position = 0;
+        foreach (array_keys($members) as $name) {
+            $name = (string) $name;
+            // Advance through the layout to this member; skipped members must be optional.
+            $found = false;
+            for (; $position < count($keys); $position++) {
+                if ($keys[$position] === $name) {
+                    $found = true;
+                    $position++;
                     break;
                 }
-            }
-            if ($matches) {
-                // Every required member after the last matched one must be absent from the layout's tail.
-                $keys = array_keys($layout);
-                for (; $position < count($keys); $position++) {
-                    if (!$layout[$keys[$position]]) {
-                        $matches = false;
-                        break;
-                    }
+                if (!$layout[$keys[$position]]) {
+                    return false;
                 }
             }
-            if ($matches) {
-                return true;
+            if (!$found) {
+                return false;
+            }
+        }
+        // Every member of the layout after the last one present must be optional.
+        for (; $position < count($keys); $position++) {
+            if (!$layout[$keys[$position]]) {
+                return false;
             }
         }
 
-        return false;
+        return true;
+    }
+
+    /**
+     * Cuts the trailing signature from `$body` without computing anything (§8 step 2b): the
+     * canonical bytes and the signature hex, or `null` when `$body` is not one JSON object whose
+     * first byte is `{` (a byte-order mark, whitespace or any other prefix is refused, never
+     * stripped), is ambiguous, or does not end in the trailing signature member.
+     *
+     * @return array{0: string, 1: string}|null
+     */
+    public static function cut(string $body): ?array
+    {
+        if (!self::startsWithBrace($body) || StrictJson::isAmbiguousObject($body)) {
+            return null;
+        }
+        $cut = self::cutTrailingSignature($body);
+        if ($cut === null) {
+            return null;
+        }
+        // The signature the body CLAIMS (its top-level member) must be the one that was cut out:
+        // a nested or decoy `hmac_signature` earlier in the body must not stand in for it.
+        $members = json_decode($body, true);
+        if (!is_array($members) || ($members['hmac_signature'] ?? null) !== $cut[1]) {
+            return null;
+        }
+
+        return $cut;
+    }
+
+    /** §8 step 2a: the first byte is the object's opening brace; nothing precedes it. */
+    public static function startsWithBrace(string $body): bool
+    {
+        return $body !== '' && $body[0] === '{';
+    }
+
+    /**
+     * True when `$canonical` matches `$signature` (hex, 64 digits) under `$signingKey`, in constant
+     * time.
+     */
+    public static function signatureMatches(string $signingKey, string $canonical, string $signatureHex): bool
+    {
+        $expected = hex2bin($signatureHex);
+
+        return $expected !== false && hash_equals($expected, hash_hmac('sha256', $canonical, $signingKey, true));
     }
 
     /**

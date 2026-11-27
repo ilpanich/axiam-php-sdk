@@ -482,6 +482,7 @@ final class AxiamClient
             // value can never be mistaken for "expect the empty string".
             ($expectedIssuer ?? '') !== '' ? $expectedIssuer : null,
             ($expectedAudience ?? '') !== '' ? $expectedAudience : null,
+            telemetry: $this->telemetry,
         );
 
         $resolvedRestOnly = $restOnly ?? ($grpcTarget === null);

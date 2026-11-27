@@ -285,7 +285,14 @@ final class AuthzRequester
             return;
         }
 
-        $outcome = $this->verifyResponse($delivery->body());
+        try {
+            $outcome = $this->verifyResponse($delivery->body());
+        } catch (\Throwable) {
+            // No body escapes the requester (contract 1.69, §8 "No body escapes the consumer"):
+            // whatever made the checks throw, it is a body to discard, never an error out of the
+            // delivery loop.
+            $outcome = self::REASON_MALFORMED;
+        }
         if (!is_array($outcome)) {
             $this->discard($delivery, $outcome);
 

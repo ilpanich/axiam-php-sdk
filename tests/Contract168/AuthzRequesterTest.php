@@ -363,6 +363,11 @@ final class AuthzRequesterTest extends TestCase
         yield 'malformed: bad HMAC and a non-string nonce' => [str_replace('"nonce":"' . self::NONCE . '"', '"nonce":5', self::wire($v1)), 'malformed'];
         yield 'signature: well-formed, bad HMAC, another tenant (HMAC before tenant)' => [str_replace(self::TENANT, self::OTHER_TENANT, self::wire($v1)), 'signature'];
         yield 'tenant: good HMAC, another tenant and unknown request (tenant before unknown_request)' => [self::signWith(self::subkey(), str_replace([self::TENANT, self::CORRELATION], [self::OTHER_TENANT, '77777777-7777-7777-7777-777777777777'], $v1['canonical'])), 'tenant'];
+        // Contract 1.69 §8 step 2a (D-10): the first byte must be `{`; a byte-order mark or any
+        // prefix is refused, never stripped, and the request keeps waiting for the genuine answer.
+        yield 'malformed: a byte-order mark before the object' => ["\xEF\xBB\xBF" . self::wire($v1), 'malformed'];
+        yield 'malformed: leading whitespace, signed over it' => [self::signWith(self::subkey(), ' ' . $v1['canonical']), 'malformed'];
+        yield 'malformed: not UTF-8' => ["\xff\xfe\x00{", 'malformed'];
         yield 'malformed: a null signature member' => ['{"correlation_id":"' . self::CORRELATION . '","allowed":true,"hmac_signature":null}', 'malformed'];
     }
 

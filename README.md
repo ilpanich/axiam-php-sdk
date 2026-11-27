@@ -205,6 +205,14 @@ it, token verification and the SSF receiver fail with a typed `AxiamException` n
   the object, or a signature that is not the trailing member is nacked without requeue and your
   handler never runs; so does a validly signed message whose members are not those of an `AuthzRequest` or
   `AuditEventMessage` in declaration order (§8 step 2c). `Hmac::verify()` / `Hmac::verifiedCanonical()` follow the same rule.
+  A consumer is **typed** (contract 1.69, D-9): `new Consumer($subkey, $tenantId, SignedEventType::AuthzRequest)` takes the
+  tenant the subkey belongs to and the **one** signed type it consumes, and checks that type's layout only, before the
+  HMAC; a genuine, validly signed body of the other type is refused as `malformed` and never reaches your handler (run
+  two consumers to consume both). Every discard logs one warning on the PSR-3 logger whose context is exactly
+  `timestamp`, `exchange`, `routing_key`, `tenant_id` (your configured tenant, never one read from the body) and
+  `reason` (`malformed`, `unsigned`, `signature`, `key_version`, `stale`, `replay`, the first that applies in §8
+  rule 4's order), never a signature, a nonce, a key or the body. A body whose first byte is not `{` (a byte-order
+  mark included) is refused, never stripped, and no body raises out of the delivery loop.
 
 **Process supervision is your responsibility for the AMQP worker.** `php-amqplib` (unlike
 the Go/C# sibling SDKs' AMQP clients) has **no built-in automatic reconnection** — if the
@@ -594,7 +602,7 @@ unparseable, or of the wrong JSON type is a rejection, never a skipped check.
 | 9 | `cnf` (contract 1.51) | A token carrying `cnf` is **not a bearer token** and MUST NOT be admitted without evidence satisfying every constraint it names. `verifyLocally()`/`JwksVerifier::verify()` has no transport to ask for that evidence, so it applies this rule with NONE presented — refusing every bound token, admitting every unbound one. `AxiamClient::verifyWithProofs($token, $tenant, PresentedProofs)` / `JwksVerifier::verifyWithProofs()` is the same check with real evidence YOUR OWN connection established. |
 | 10 | `typ` (contract 1.68) | When the header carries `typ` it MUST be `at+jwt` (RFC 9068), compared ASCII case-insensitively, with or without the `application/` prefix. `JWT`, `logout+jwt`, `secevent+jwt` and every `axiam-…+jwt` purpose type are refused; a header with **no** `typ` is not refused by this rule. Checked before any key lookup. |
 | 11 | `purpose` (contract 1.68) | A token whose claim set contains a `purpose` member — whatever its value, `null` included, and whatever `typ` says — is refused. AXIAM signs its MFA challenge, MFA setup and WebAuthn-state tokens with the access-token key; they carry `sub`, `tenant_id` and `exp` and no `aud`, so without this rule a guard with no expected audience admitted them (N14). |
-| 12 | `kid` (contract 1.68) | **Required** and the only way a key is chosen: a token with no `kid` is refused, with no "the only key in the set" fallback. An unknown `kid` costs **at most one** JWKS re-fetch per 60-second window (`JwksVerifier::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS`); inside the window it is rejected from the cache with no network I/O, and the resolved `jwks_uri` is cached rather than re-read from discovery on every re-fetch (C5). A key rotated in just after a re-fetch is therefore picked up within 60 seconds.
+| 12 | `kid` (contract 1.68) | **Required** and the only way a key is chosen: a token with no `kid` is refused, with no "the only key in the set" fallback. An unknown `kid` costs **at most one** JWKS re-fetch per 60-second window (`JwksVerifier::UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS`); inside the window it is rejected from the cache with no network I/O, and the resolved `jwks_uri` is cached rather than re-read from discovery on every re-fetch (C5). A key rotated in just after a re-fetch is therefore picked up within 60 seconds. The key cache lives for the configured TTL or the response's `Cache-Control: max-age`, **at most 300 s** (a larger value is clamped, and a clamped configured one emits a `ConfigClampedEvent`); its age runs from the last **successful** fetch (a `200` with at least one key, or a `304` to the conditional request). A failed refresh (transport error, other status, a non-JWKS body, an empty key set) keeps the held keys and does not move that anchor, and the held keys verify until exactly TTL + 300 s after it, then every token is refused until a fetch succeeds (§12.4 rule 2, D-10).
 
 **What `firebase/php-jwt` does versus what §10.1 requires.** `JWT::decode()` validates
 `nbf`/`iat`/`exp` and rejects a non-numeric `exp` — but only when the claim is *present*

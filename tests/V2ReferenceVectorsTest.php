@@ -7,6 +7,7 @@ namespace Axiam\Sdk\Tests;
 use Axiam\Sdk\Amqp\Consumer;
 use Axiam\Sdk\Amqp\Hmac;
 use Axiam\Sdk\Amqp\ReplayGuard;
+use Axiam\Sdk\Amqp\SignedEventType;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -185,14 +186,14 @@ final class V2ReferenceVectorsTest extends TestCase
         self::assertIsString($subkey);
 
         self::assertSame($entry['canonical_signed_json'], Hmac::verifiedCanonical($subkey, $entry['wire_json']));
-        self::assertTrue(Hmac::hasSignedLayout($entry['canonical_signed_json']));
+        self::assertTrue(Hmac::hasLayout($entry['canonical_signed_json'], SignedEventType::from($messageType === 'audit_event' ? 'AuditEventMessage' : 'AuthzRequest')));
 
         $ordered = json_decode($entry['canonical_signed_json'], true);
         $fixedNow = (new \DateTimeImmutable($ordered['issued_at']))->getTimestamp();
         $acked = 0;
         $nacked = 0;
         $seen = [];
-        (new Consumer($subkey, replayGuard: new ReplayGuard(ReplayGuard::DEFAULT_SKEW_SECONDS, static fn (): int => $fixedNow)))
+        (new Consumer($subkey, $fixture['tenant_id'], SignedEventType::from($messageType === 'audit_event' ? 'AuditEventMessage' : 'AuthzRequest'), replayGuard: new ReplayGuard(ReplayGuard::DEFAULT_SKEW_SECONDS, static fn (): int => $fixedNow)))
             ->verifyAndDispatch(
                 $entry['wire_json'],
                 static function (array $event) use (&$seen): void {

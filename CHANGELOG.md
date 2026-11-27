@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Typed consume, discard events, BOM refusal, bounded JWKS stale-if-error (OI-34; axiam#883, owner decisions D-8, D-9, D-10)
+
+#### Changed (API; 1.4.0 is unreleased)
+
+- **`Consumer` is typed and takes its tenant** (CONTRACT 1.69 §8 step 2c, D-9): the constructor is now
+  `new Consumer($signingKey, $tenantId, SignedEventType::AuthzRequest|AuditEventMessage, ...)`. The consumer checks
+  the canonical bytes against that one type's layout only (`Hmac::hasLayout()` replaces `Hmac::hasSignedLayout()`), so
+  a genuine signed body of the other type is refused as `malformed` before the HMAC and is never handed to the
+  handler. `bin/axiam-amqp-worker.php` reads `AXIAM_AMQP_TENANT_ID` and `AXIAM_AMQP_EVENT_TYPE`.
+- **`JwksVerifier` gains an optional trailing `$telemetry` argument** (the §19 dispatcher), used for `config_clamped`.
+
+#### Fixed
+
+- **D-8: every event-consumer discard logs the fixed security event.** One warning per discard with exactly
+  `timestamp`, `exchange`, `routing_key`, `tenant_id` (the consumer's own, never read from the body) and `reason`
+  (`malformed`, `unsigned`, `signature`, `key_version`, `stale`, `replay`), in the normative reason order (1)-(8); the
+  body is decoded from the verified bytes before the v2 gates (a non-UUID `nonce`, an ill-typed member or a bad
+  `issued_at` is `malformed`) and the nonce is recorded only after every gate passes. `verifyAndDispatch()` takes the
+  delivery's `exchange` and `routingKey`, which `consume()` reads from the broker's delivery.
+- **D-10: a byte-order mark or any prefix is refused, never stripped, and nothing escapes the delivery loop.**
+  `StrictJson::isAmbiguousObject()` now requires the first byte to be `{` (it tolerated leading whitespace, so a body
+  signed over a leading space verified); the event consumer and the `AuthzRequester` catch anything a check throws
+  and discard the body as `malformed`.
+- **D-10: the JWKS cache is stale-if-error, bounded** (§12.4 rule 2). TTL is the configured value or `Cache-Control:
+  max-age`, clamped to 300 s (a clamped configured value emits `ConfigClampedEvent`); the age runs from the last
+  successful fetch (a `200` with at least one key, or a `304` to a conditional request, `If-None-Match` with the held
+  `ETag`). A failed refresh (transport error, other status, non-JWKS body, an empty key set) no longer replaces the
+  held keys or moves the anchor; held keys verify until TTL + 300 s after the anchor and every token is refused after
+  it until a fetch succeeds; a failed attempt counts toward the one-fetch-per-60-s window. The §10 access-token and
+  §12.4 ID-token paths share it.
+
 ## [1.4.0] - 2026-11-22
 
 ### Contract 1.69 and the open-issues round (axiam#880, #881, #882, #883; axiam-php-sdk#92)
