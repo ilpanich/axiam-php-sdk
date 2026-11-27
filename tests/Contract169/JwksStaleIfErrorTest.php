@@ -333,6 +333,7 @@ final class JwksStaleIfErrorTest extends TestCase
         yield 'object entry empty' => ['{"keys":[{}]}'];
         yield 'integer entry' => ['{"keys":[0]}'];
         yield 'null entry' => ['{"keys":[null]}'];
+        yield 'keys an object, not a list' => ['{"keys":{"a":{"kty":"OKP","kid":"x"}}}'];
         yield 'kty not a string' => ['{"keys":[{"kty":5}]}'];
     }
 
@@ -366,5 +367,24 @@ final class JwksStaleIfErrorTest extends TestCase
         $this->body = null;
         $this->now = self::T0 + self::TTL + 400;
         self::assertTrue($this->accepts($v));
+    }
+
+    public function testAWellFormedKtyThatIsUnusableIsASuccessWithNoUsableKey(): void
+    {
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v));
+        $this->body = '{"keys":[{"kty":"OKP"}]}';
+        $this->now = self::T0 + self::TTL + 10;
+        self::assertFalse($this->accepts($v), 'a success: the held set is replaced by the usable keys (none)');
+    }
+
+    public function testAnEntryWithoutAStringKidIsSkippedAndTheFirstDuplicateKidWins(): void
+    {
+        $good = $this->publishedKeys[0];
+        $noKid = $good;
+        unset($noKid['kid']);
+        $this->publishedKeys = [$noKid, $good];
+        $v = $this->verifier();
+        self::assertTrue($this->accepts($v), 'the kid-less entry is skipped, the keyed one is used');
     }
 }

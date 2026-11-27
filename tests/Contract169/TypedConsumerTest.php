@@ -304,6 +304,9 @@ final class TypedConsumerTest extends TestCase
     /** @return iterable<string, array{string, string}> */
     public static function undecodable(): iterable
     {
+        yield 'minute 60' => ['2026-07-10T12:00:00Z', '2026-07-10T12:60:00Z'];
+        yield 'second 61' => ['2026-07-10T12:00:00Z', '2026-07-10T12:00:61Z'];
+        yield 'hour 24' => ['2026-07-10T12:00:00Z', '2026-07-10T24:00:00Z'];
         yield 'a non-calendar date' => ['2026-07-10T12:00:00Z', '2026-02-30T12:00:00Z'];
         yield 'metadata a JSON array' => ['"outcome":"Success"', '"outcome":"Success","metadata":[1]'];
         yield 'nonce with a trailing newline' => ['"nonce":"88888888-8888-8888-8888-888888888888"', "\"nonce\":\"88888888-8888-8888-8888-888888888888\\n\""];

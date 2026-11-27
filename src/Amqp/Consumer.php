@@ -299,7 +299,10 @@ final class Consumer
             return false;
         }
 
-        return $dt->format('Y-m-d') === substr($value, 0, 10) && (int) substr($value, 11, 2) < 24;
+        return $dt->format('Y-m-d') === substr($value, 0, 10)
+            && (int) substr($value, 11, 2) < 24
+            && (int) substr($value, 14, 2) < 60
+            && (int) substr($value, 17, 2) < 61;
     }
 
     private static function isUuid(mixed $value): bool

@@ -931,8 +931,9 @@ final class JwksVerifier
         }
 
         $jwksJson = json_decode((string) $response->getBody(), true);
-        if (!is_array($jwksJson) || !is_array($jwksJson['keys'] ?? null)) {
-            return false;
+        if (!is_array($jwksJson) || !is_array($jwksJson['keys'] ?? null)
+            || !array_is_list($jwksJson['keys'])) {
+            return false; // `keys` must be a JSON array
         }
         // "A JWKS document holding at least one key": at least one entry is a JWK object with a
         // string `kty`, even if this SDK cannot use it. Entries are parsed one by one, so an unusable
@@ -944,7 +945,11 @@ final class JwksVerifier
                 continue;
             }
             $holdsAKey = true;
+            if (!is_string($entry['kid'] ?? null) || $entry['kid'] === '') {
+                continue; // §10.1 rule 12: a key is chosen by `kid`; one without it can never be selected
+            }
             try {
+                // `+=`: the FIRST entry for a duplicate `kid` wins.
                 $keys += JWK::parseKeySet(['keys' => [$entry]]);
             } catch (\Throwable) {
                 // unusable here: skipped
