@@ -30,6 +30,11 @@ final class OidcRefreshPerTokenTest extends TestCase
     private const TOKEN_B = 'refresh-token-BBBB-raw-secret';
     private const TENANT_UUID = '22222222-2222-2222-2222-222222222222';
     private const OTHER_TENANT_UUID = '33333333-3333-3333-3333-333333333333';
+    /** A tenant with hex letters, so upper-casing it is not a no-op. */
+    private const HEX_TENANT_UUID = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
+
+    /** @var list<string> tenant_id query value of every wire call, as sent */
+    private array $wireTenants = [];
 
     private function configuration(): OidcConfiguration
     {
@@ -60,15 +65,19 @@ final class OidcRefreshPerTokenTest extends TestCase
      *
      * @param list<string> $wireTokens refresh token of every wire call, in order (by reference)
      */
-    private function client(array &$wireTokens, bool $suspendAfterResolve): AxiamClient
+    private function client(array &$wireTokens, bool $suspendAfterResolve, string $defaultTenant = self::TENANT_UUID): AxiamClient
     {
+        $this->wireTenants = [];
         $handler = function (RequestInterface $request, array $options) use (&$wireTokens, $suspendAfterResolve): PromiseInterface {
             parse_str((string) $request->getBody(), $form);
             $presented = (string) ($form['refresh_token'] ?? '');
             $wireTokens[] = $presented;
+            parse_str($request->getUri()->getQuery(), $query);
+            $sentTenant = (string) ($query['tenant_id'] ?? '');
+            $this->wireTenants[] = $sentTenant;
 
             $response = new Response(200, [], (string) json_encode([
-                'access_token' => 'access-for-' . substr(hash('sha256', $presented), 0, 8),
+                'access_token' => self::accessFor($presented, $sentTenant),
                 'token_type' => 'Bearer',
                 'expires_in' => 900,
             ]));
@@ -94,14 +103,14 @@ final class OidcRefreshPerTokenTest extends TestCase
             'acme-tenant',
             oidcClientId: 'my-app',
             oidcClientSecret: 's3cr3t',
-            oidcTenantId: '22222222-2222-2222-2222-222222222222',
+            oidcTenantId: $defaultTenant,
             transportHandler: HandlerStack::create($handler),
         );
     }
 
-    private static function accessFor(string $refreshToken): string
+    private static function accessFor(string $refreshToken, string $tenant = self::TENANT_UUID): string
     {
-        return 'access-for-' . substr(hash('sha256', $refreshToken), 0, 8);
+        return 'access-for-' . substr(hash('sha256', $tenant . '|' . $refreshToken), 0, 8);
     }
 
     /** @param array<string,string> $out */
@@ -254,10 +263,10 @@ final class OidcRefreshPerTokenTest extends TestCase
      * @param list<string|null> $tenants the tenant each caller passes (null = omitted)
      * @return array{wire: int, out: array<int,string>}
      */
-    private function tenantBurst(array $tenants): array
+    private function tenantBurst(array $tenants, string $defaultTenant = self::TENANT_UUID): array
     {
         $wire = [];
-        $client = $this->client($wire, suspendAfterResolve: false);
+        $client = $this->client($wire, suspendAfterResolve: false, defaultTenant: $defaultTenant);
         $fibers = [];
         $outs = [];
         foreach ($tenants as $i => $tenant) {
@@ -275,18 +284,27 @@ final class OidcRefreshPerTokenTest extends TestCase
     /** Omitted vs explicit default vs upper-case spelling of the same tenant: ONE flight. */
     public function testSameTokenAndEffectiveTenantShareOneFlightHoweverTheTenantIsSpelled(): void
     {
-        $result = $this->tenantBurst([null, self::TENANT_UUID, strtoupper(self::TENANT_UUID)]);
+        $default = self::HEX_TENANT_UUID;
+        self::assertNotSame($default, strtoupper($default), 'the tenant must have hex letters');
+
+        $result = $this->tenantBurst([strtoupper($default), null, $default], $default);
 
         self::assertSame(1, $result['wire'], 'omitted, explicit and upper-case default tenant are one flight');
-        self::assertSame([self::accessFor(self::TOKEN_A)], array_values(array_unique($result['out'])));
+        self::assertSame([$default], $this->wireTenants, 'the wire carries the canonical lower-case tenant_id');
+        self::assertSame([self::accessFor(self::TOKEN_A, $default)], array_values(array_unique($result['out'])));
     }
 
-    /** The same token for a different resolved tenant is a separate flight. */
+    /** The same token for a different resolved tenant is a separate flight with its own tenant_id and result. */
     public function testSameTokenForADifferentTenantIsASeparateFlight(): void
     {
-        $result = $this->tenantBurst([null, self::OTHER_TENANT_UUID]);
+        $default = self::HEX_TENANT_UUID;
+        $other = self::OTHER_TENANT_UUID;
+        $result = $this->tenantBurst([null, $other], $default);
 
         self::assertSame(2, $result['wire']);
+        self::assertEqualsCanonicalizing([$default, $other], $this->wireTenants, 'each call carries its own tenant_id');
+        self::assertSame(self::accessFor(self::TOKEN_A, $default), $result['out'][0]);
+        self::assertSame(self::accessFor(self::TOKEN_A, $other), $result['out'][1], 'the other tenant gets its own result');
     }
 
     /** An invalid tenant fails before any slot exists. */
