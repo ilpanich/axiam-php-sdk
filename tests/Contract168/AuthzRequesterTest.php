@@ -353,6 +353,16 @@ final class AuthzRequesterTest extends TestCase
         yield 'signature: a member inserted into signed bytes' => [str_replace('"allowed":true', '"allowed":true,"x":1', self::wire($v1)), 'signature'];
         yield 'malformed: signature member not the trailing one' => [str_replace('"nonce":"' . self::NONCE . '"', '"hmac_signature":"' . $v1['sig'] . '","nonce":"' . self::NONCE . '"', $v1['canonical']), 'malformed'];
         yield 'malformed: validly signed, no nonce' => [self::signWith(self::subkey(), str_replace(',"nonce":"' . self::NONCE . '"', '', $v1['canonical'])), 'malformed'];
+        // Contract 1.69 §8 normative order: (2) no signature member is unsigned whatever else is missing;
+        // (3) a missing/ill-typed allowed, tenant_id, nonce or correlation_id is malformed BEFORE the HMAC (4).
+        yield 'unsigned: neither hmac_signature nor allowed' => ['{"correlation_id":"' . self::CORRELATION . '"}', 'unsigned'];
+        yield 'unsigned: only a stray member' => ['{"x":1}', 'unsigned'];
+        yield 'malformed: bad HMAC and no nonce' => [str_replace(',"nonce":"' . self::NONCE . '"', '', self::wire($v1)), 'malformed'];
+        yield 'malformed: bad HMAC and no tenant_id' => [str_replace('"tenant_id":"' . self::TENANT . '",', '', self::wire($v1)), 'malformed'];
+        yield 'malformed: bad HMAC and no correlation_id' => [str_replace('"correlation_id":"' . self::CORRELATION . '",', '', self::wire($v1)), 'malformed'];
+        yield 'malformed: bad HMAC and a non-string nonce' => [str_replace('"nonce":"' . self::NONCE . '"', '"nonce":5', self::wire($v1)), 'malformed'];
+        yield 'signature: well-formed, bad HMAC, another tenant (HMAC before tenant)' => [str_replace(self::TENANT, self::OTHER_TENANT, self::wire($v1)), 'signature'];
+        yield 'tenant: good HMAC, another tenant and unknown request (tenant before unknown_request)' => [self::signWith(self::subkey(), str_replace([self::TENANT, self::CORRELATION], [self::OTHER_TENANT, '77777777-7777-7777-7777-777777777777'], $v1['canonical'])), 'tenant'];
         yield 'malformed: a null signature member' => ['{"correlation_id":"' . self::CORRELATION . '","allowed":true,"hmac_signature":null}', 'malformed'];
     }
 
@@ -517,6 +527,39 @@ final class AuthzRequesterTest extends TestCase
         self::assertSame(1, preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $body['nonce']), 'a random v4 UUID');
     }
 
+    /** Contract 1.69 §8 "Canonical reference vectors": the producer emits exactly the fixture's `wire_json`. */
+    public function testTheProducerEmitsTheReferenceVectorsWireJsonByteForByte(): void
+    {
+        $fixture = json_decode((string) file_get_contents(__DIR__ . '/../Fixtures/v2_reference_vectors.json'), true);
+        self::assertIsArray($fixture);
+        $subkey = hex2bin($fixture['hkdf']['derived_subkey_hex']);
+        self::assertIsString($subkey);
+
+        $transport = new FakeAuthzTransport();
+        $requester = new AuthzRequester(
+            $transport,
+            self::TENANT,
+            $subkey,
+            timeoutSeconds: 0.03,
+            idGenerator: (static function (): \Closure {
+                $ids = [self::CORRELATION, self::NONCE];
+
+                return static function () use (&$ids): string {
+                    return array_shift($ids) ?? 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+                };
+            })(),
+            clock: static fn (): int => 1_783_684_800,
+        );
+        try {
+            $requester->check(self::SUBJECT, 'documents:read', self::RESOURCE, 'confidential');
+        } catch (NetworkError) {
+            // nobody answers; only the published body matters
+        }
+
+        self::assertCount(1, $transport->published);
+        self::assertSame($fixture['authz_request']['wire_json'], $transport->published[0]['body']);
+    }
+
     public function testAForgedResponseWithTheRightIdsIsDiscardedAndTheGenuineOneCompletesTheCheck(): void
     {
         $transport = new FakeAuthzTransport();
@@ -551,6 +594,28 @@ final class AuthzRequesterTest extends TestCase
         $late = new FakeAuthzDelivery(self::signWith(self::subkey(), '{"correlation_id":"' . $published['correlationId'] . '","allowed":true,"tenant_id":"' . self::TENANT . '","nonce":"' . json_decode($published['body'], true)['nonce'] . '"}'));
         $requester->handleDelivery($late);
         self::assertSame(1, $late->nacked);
+    }
+
+    public function testAnAnswerArrivingAfterCloseIsNackedWithoutDecodingAndWithoutAnEvent(): void
+    {
+        $logger = $this->logger();
+        $transport = new FakeAuthzTransport();
+        $requester = $this->vectorRequester($transport, $logger, 0.03);
+        try {
+            $this->check($requester);
+        } catch (NetworkError) {
+            // no answer: the request is abandoned
+        }
+        $requester->close();
+
+        // A delivery whose body would otherwise be discarded with an event (or accepted).
+        foreach ([self::wire(self::VECTORS[0]), 'not json', self::unsigned()] as $body) {
+            $late = new FakeAuthzDelivery($body);
+            $requester->handleDelivery($late);
+            self::assertSame(1, $late->nacked, 'nacked without requeue');
+            self::assertSame(0, $late->acked);
+        }
+        self::assertSame([], $logger->records, 'no discard event after close');
     }
 
     public function testCloseReleasesTheTransportAndRefusesFurtherChecks(): void

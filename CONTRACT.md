@@ -1387,7 +1387,13 @@ answer:
 
    `unsigned` is the reason only when the body has **no** `hmac_signature` member; one that is
    present but is not a trailing 64-hex string (`null`, a number, not the last member) is
-   `malformed`. A response arriving after the requester was closed matches no request: it is not
+   `malformed`. **The reason is the first that applies, in this order (normative):**
+   (1) the body is not one JSON object → `malformed`; (2) it has no `hmac_signature` member →
+   `unsigned`, whatever else it lacks (a body with neither `hmac_signature` nor `allowed` is
+   `unsigned`); (3) `hmac_signature` is not a trailing 64-hex string, or `allowed`, `tenant_id`,
+   `nonce` or `correlation_id` is missing or ill-typed → `malformed`; (4) the HMAC does not
+   verify → `signature`; (5) `tenant_id` is not the requester's → `tenant`; (6) no outstanding
+   request has this `correlation_id` and `nonce` → `unknown_request`. A response arriving after the requester was closed matches no request: it is not
    decoded or dispatched, it is nacked without requeue (or goes with the exclusive queue), and
    no discard event is required for it.
 

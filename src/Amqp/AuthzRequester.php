@@ -276,6 +276,15 @@ final class AuthzRequester
      */
     public function handleDelivery(AuthzDelivery $delivery): void
     {
+        // After close() the requester has no outstanding request to match: the answer is not
+        // decoded or dispatched, only nacked without requeue, and there is no discard event
+        // (contract 1.69, §8 consumer obligation 4).
+        if ($this->closed) {
+            $delivery->nackNoRequeue();
+
+            return;
+        }
+
         $outcome = $this->verifyResponse($delivery->body());
         if (!is_array($outcome)) {
             $this->discard($delivery, $outcome);
@@ -337,8 +346,16 @@ final class AuthzRequester
             return self::REASON_UNSIGNED;
         }
 
-        // Rule 1 (strict parse) for the member every response carries.
-        if (!array_key_exists('allowed', $members) || !is_bool($members['allowed'])) {
+        // Reason order (contract 1.69, normative): a `hmac_signature` that is not the trailing
+        // 64-hex member, or an `allowed`, `tenant_id`, `nonce` or `correlation_id` that is missing
+        // or ill-typed, is `malformed` — decided BEFORE the HMAC, so a body that is both
+        // incomplete and wrongly signed is `malformed`, not `signature`. These are the members
+        // of the unverified body, used here only for that decision; the decision itself is read
+        // from the verified canonical bytes below.
+        if (!is_bool($members['allowed'] ?? null)
+            || !self::isNonEmptyString($members['tenant_id'] ?? null)
+            || !self::isNonEmptyString($members['nonce'] ?? null)
+            || !self::isNonEmptyString($members['correlation_id'] ?? null)) {
             return self::REASON_MALFORMED;
         }
 
@@ -390,6 +407,11 @@ final class AuthzRequester
         }
 
         return [$decision, $correlationId];
+    }
+
+    private static function isNonEmptyString(mixed $value): bool
+    {
+        return is_string($value) && $value !== '';
     }
 
     /**

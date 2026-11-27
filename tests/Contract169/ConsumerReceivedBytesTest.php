@@ -105,6 +105,18 @@ final class ConsumerReceivedBytesTest extends TestCase
         self::assertSame(json_decode($canonical, true), $result['calls'][0]);
     }
 
+    public function testAnAuditEventWithNonAsciiAndAnEscapeInItsMetadataVerifies(): void
+    {
+        $canonical = '{"tenant_id":"22222222-2222-2222-2222-222222222222","actor_id":"u1","actor_type":"user","action":"a<b>&c",'
+            . '"outcome":"success","metadata":{"a":"caf\u00e9 \u0041","b":"€ <&>"},"key_version":2,"nonce":"nonce-3","issued_at":"'
+            . (new \DateTimeImmutable('@' . self::NOW))->format('Y-m-d\TH:i:s\Z') . '"}';
+
+        $result = self::deliver(self::sign($canonical));
+
+        self::assertSame(1, $result['acked']);
+        self::assertSame(['a' => 'café A', 'b' => '€ <&>'], $result['calls'][0]['metadata']);
+    }
+
     public function testTheHandlerValueIsExactlyWhatTheVerifiedBytesDecodeTo(): void
     {
         $canonical = self::canonical('"caf\u00e9 <&>"');
@@ -153,6 +165,8 @@ final class ConsumerReceivedBytesTest extends TestCase
         yield 'members in another order, signature over the canonical bytes' => [self::sign('{"tenant_id":"22222222-2222-2222-2222-222222222222","correlation_id":"11111111-1111-1111-1111-111111111111","subject_id":"33333333-3333-3333-3333-333333333333","action":"read","resource_id":"44444444-4444-4444-4444-444444444444","key_version":2,"nonce":"nonce-1","issued_at":"2027-01-15T08:00:00Z"}')];
         yield 'an extra unsigned-type member, validly signed' => [self::sign(str_replace('"action":"read"', '"action":"read","extra":1', $canonical))];
         yield 'a required member missing, validly signed' => [self::sign(str_replace('"subject_id":"33333333-3333-3333-3333-333333333333",', '', $canonical))];
+        yield 'a cache-invalidation-shaped message signed with the same tenant subkey' => [self::sign('{"type":"cache_invalidation","tenant_id":"22222222-2222-2222-2222-222222222222","scope":"roles","key_version":2,"nonce":"nonce-1","issued_at":"2027-01-15T08:00:00Z"}')];
+        yield 'an AuthzRequest layout with a metadata member (audit-only), validly signed' => [self::sign(str_replace('"key_version"', '"metadata":{},"key_version"', $canonical))];
         yield 'an AuthzResponse signed with the same tenant subkey' => [self::sign('{"correlation_id":"11111111-1111-1111-1111-111111111111","allowed":true,"reason_code":"allowed","tenant_id":"22222222-2222-2222-2222-222222222222","nonce":"nonce-1","key_version":2,"issued_at":"2027-01-15T08:00:00Z"}')];
     }
 

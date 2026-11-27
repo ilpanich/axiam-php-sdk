@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Axiam\Sdk\Tests;
 
+use Axiam\Sdk\Amqp\Consumer;
 use Axiam\Sdk\Amqp\Hmac;
 use Axiam\Sdk\Amqp\ReplayGuard;
 use PHPUnit\Framework\TestCase;
@@ -166,5 +167,65 @@ final class V2ReferenceVectorsTest extends TestCase
         $guard = new ReplayGuard(ReplayGuard::DEFAULT_SKEW_SECONDS, static fn (): int => $fixedNow);
 
         self::assertNull($guard->check($ordered));
+    }
+
+    /**
+     * @dataProvider messageTypeProvider
+     *
+     * Contract 1.69: the vector's `wire_json` is the exact delivered body. The received-bytes
+     * verifier cuts it to exactly `canonical_signed_json`, verifies it, the layout check accepts it
+     * and the consumer dispatches it.
+     */
+    public function testWireJsonCutsToTheCanonicalBytesVerifiesAndDispatches(string $messageType): void
+    {
+        $fixture = self::loadFixture();
+        $entry = $fixture[$messageType];
+        self::assertIsString($entry['wire_json']);
+        $subkey = hex2bin($fixture['hkdf']['derived_subkey_hex']);
+        self::assertIsString($subkey);
+
+        self::assertSame($entry['canonical_signed_json'], Hmac::verifiedCanonical($subkey, $entry['wire_json']));
+        self::assertTrue(Hmac::hasSignedLayout($entry['canonical_signed_json']));
+
+        $ordered = json_decode($entry['canonical_signed_json'], true);
+        $fixedNow = (new \DateTimeImmutable($ordered['issued_at']))->getTimestamp();
+        $acked = 0;
+        $nacked = 0;
+        $seen = [];
+        (new Consumer($subkey, replayGuard: new ReplayGuard(ReplayGuard::DEFAULT_SKEW_SECONDS, static fn (): int => $fixedNow)))
+            ->verifyAndDispatch(
+                $entry['wire_json'],
+                static function (array $event) use (&$seen): void {
+                    $seen[] = $event;
+                },
+                static function () use (&$acked): void {
+                    ++$acked;
+                },
+                static function () use (&$nacked): void {
+                    ++$nacked;
+                },
+                static function () use (&$nacked): void {
+                    ++$nacked;
+                },
+            );
+
+        self::assertSame(1, $acked);
+        self::assertSame(0, $nacked);
+        self::assertSame([$ordered], $seen, 'the handler gets the value decoded from the verified canonical bytes');
+    }
+
+    /**
+     * The `message` member is for reading: key-sorted, signature in the middle. It is not wire
+     * bytes, and a conforming consumer refuses it.
+     *
+     * @dataProvider messageTypeProvider
+     */
+    public function testTheMessageMemberIsNotWireBytesAndIsRefused(string $messageType): void
+    {
+        $fixture = self::loadFixture();
+        $subkey = hex2bin($fixture['hkdf']['derived_subkey_hex']);
+        self::assertIsString($subkey);
+
+        self::assertNull(Hmac::verifiedCanonical($subkey, (string) json_encode($fixture[$messageType]['message'])));
     }
 }

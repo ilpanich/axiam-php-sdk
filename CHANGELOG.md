@@ -35,6 +35,13 @@ conformance to 1.69. 1.4.0 is unreleased, so the items below amend it.
   response logs one warning whose context is exactly `timestamp`, `exchange`, `routing_key` (the requester's reply
   queue), `tenant_id` (its own) and `reason` (`malformed`, `unsigned`, `signature`, `tenant`, `unknown_request`); never
   a signature value, a nonce or anything read from the body.
+- **Contract 1.69 §8 alignment (the corrected text; axiam#882, #883).** The `AuthzRequester` discard reason is now the
+  first that applies in the contract's normative order: a missing or ill-typed `allowed`, `tenant_id`, `nonce` or
+  `correlation_id` is `malformed` before the HMAC is checked (it was reported as `signature` when the HMAC also
+  failed), after `unsigned` (no `hmac_signature` member) and before `signature`, `tenant` and `unknown_request`. An
+  answer delivered after `close()` is no longer decoded: it is nacked without requeue and logs no discard event. The
+  reference-vector tests now feed the fixture's `wire_json` to the consumer and compare the producer's request with it
+  byte for byte; the consumer already conformed to steps 2a–2g and rule 3 (no lenient mode exists).
 - **PHP-R1-1 — `#[RequireScope]` could not be stacked** although the docs and CONTRACT §11.2 rule 11 (d) say a route
   needing several scopes stacks it: a repeated attribute threw `Error` (HTTP 500) in both bridges. It is now
   `IS_REPEATABLE` and both the Laravel middleware and the Symfony listener enforce every instance (all must pass).

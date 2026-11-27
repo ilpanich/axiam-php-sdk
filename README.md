@@ -269,6 +269,12 @@ if ($decision->allowed) { /* … */ }          // AuthzDecision: allowed, reason
   requester's own reply queue), `tenant_id` (the requester's **own** tenant) and `reason`: `malformed`,
   `unsigned`, `signature`, `tenant` or `unknown_request`. Nothing read from the discarded body, no
   signature value and no nonce is in it.
+  The reason is the first that applies, in this order (CONTRACT 1.69 §8, normative): not one JSON object
+  is `malformed`; no `hmac_signature` member is `unsigned`, whatever else is missing; a signature that is
+  not a trailing 64-hex string, or an `allowed`, `tenant_id`, `nonce` or `correlation_id` that is missing
+  or ill-typed, is `malformed`; a failed HMAC is `signature`; another tenant is `tenant`; no outstanding
+  request with that `correlation_id` and `nonce` is `unknown_request`. An answer that arrives after
+  `close()` is not decoded or dispatched: it is nacked without requeue and logs no event.
 - **Timeouts are finite and positive.** The constructor's `timeoutSeconds` and `check()`'s per-call
   `$timeoutSeconds` must be finite and greater than zero; `NaN`, `INF`, zero and negative values throw
   `\InvalidArgumentException` (a per-call value is refused, not replaced by the default).
