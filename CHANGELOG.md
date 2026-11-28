@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-28
+
 `CONTRACT.md` is re-vendored at contract **1.69** (byte for byte from `ilpanich/axiam`); `README.md` states
 conformance to 1.69.
 
@@ -100,6 +102,22 @@ conformance to 1.69.
   `resourceId`). As the README already advises, construct generated models with **named arguments**: a positional
   call that passes `resourceId` as the tenth argument moves.
 
+- Use a hex-letter tenant in the refresh-key case test (#96)
+
+- re-vendor CONTRACT.md 1.69 (§9 rule 7: oidc_refresh single-flight per tenant and token)
+
+- re-vendor CONTRACT.md after the server merged ilpanich/axiam#893
+
+- re-vendor CONTRACT.md 1.69 (typed consume, BOM refusal, bounded JWKS stale-if-error; axiam#883)
+
+- re-vendor CONTRACT.md 1.69 wire-form clarification (axiam#883)
+
+- re-vendor CONTRACT.md, openapi.json and the management registry
+
+- Mint the fixture access token at run time instead of committing it
+
+- Raise the PHP floor to 8.3 and test PHP 8.6 (monthly update 2026-11)
+
 ### Removed
 
 - **The `AuthzRequester` unsigned-response opt-out** (`allowUnsignedResponses`, added earlier in this release cycle and never
@@ -179,6 +197,32 @@ conformance to 1.69.
   `kid` and refused a kid-less token as `unknown_kid`. New tests pin the contract-1.69 shape (a token whose header is
   exactly `{"alg":"EdDSA","typ":"logout+jwt","kid":…}`, verified against a two-key JWKS with the signing key not
   first; kid-less and unknown-`kid` refusals; §10.1 rules 10 and 11 stay off the logout and ID-token paths).
+
+- Key the refresh flight on the resolved, normalised tenant (#96)
+
+- Key the oidc_refresh single-flight per refresh token (#96)
+
+- OI-34 follow-up round 3 (axiam#883)
+
+- OI-34 follow-up round 2 (axiam#883)
+
+- OI-34 follow-up, readings 8 to 10 (axiam#883)
+
+- OI-34 review round 2 (axiam#883)
+
+- OI-34 review round 1 (axiam#883)
+
+- Typed consume, discard event fields, BOM refusal, bounded JWKS stale-if-error (OI-34, axiam#883)
+
+- Align with contract 1.69 §8 (OI-12 alignment, axiam#882, axiam#883)
+
+- Add surrogate, above-U+10FFFF and truncation rows to the redirect matrix (OI wave B, round 2)
+
+- Reach the AxiamException branch, pin GLUE-R1-4, tighten consumer and redirect tests (OI wave B, round 1)
+
+- received-bytes consumer, no unsigned opt-out, discard event, glue fixes (OI-12, #92, axiam#880, axiam#881, axiam#882, axiam#883)
+
+- JWKS refetch window, bound login glue, safe return_to, access-token rules, roles claim, authz requester (SA-22, C5/C6/C7/N14/N15/N2)
 
 ### Documentation
 
