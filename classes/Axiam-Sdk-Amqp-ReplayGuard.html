@@ -133,9 +133,9 @@ gates, checked ONLY AFTER a delivery&#039;s HMAC signature has already
 verified (see Hmac::verify / Consumer::verifyAndDispatch).</p>
 
 
-    <section class="phpdocumentor-description"><p>Because Hmac::verify re-serializes the parsed body (minus
-<code class="prettyprint">hmac_signature</code>) in its original insertion order, <code class="prettyprint">nonce</code> and
-<code class="prettyprint">issued_at</code> are already covered by the verified HMAC bytes — this class
+    <section class="phpdocumentor-description"><p><code class="prettyprint">nonce</code> and <code class="prettyprint">issued_at</code> are inside the received bytes Hmac::verify
+checks (the body minus its trailing <code class="prettyprint">hmac_signature</code> member), so they
+are already covered by the verified HMAC — this class
 adds no canonicalization logic of its own. It only enforces the three
 ADDITIONAL gates the server also enforces (crates/axiam-amqp/src/messages.rs):</p>
 <p>(a) <code class="prettyprint">key_version</code> must be &gt;= <abbr title="\Axiam\Sdk\Amqp\self::MIN_KEY_VERSION">self::MIN_KEY_VERSION</abbr> (2) — a v1

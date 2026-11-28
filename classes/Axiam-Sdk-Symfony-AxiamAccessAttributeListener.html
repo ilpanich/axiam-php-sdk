@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAccessAttributeListener.php"><a href="files/src-symfony-axiamaccessattributelistener.html"><abbr title="src/Symfony/AxiamAccessAttributeListener.php">AxiamAccessAttributeListener.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">50</span>
+    <span class="phpdocumentor-element-found-in__line">51</span>
 
     </aside>
 
@@ -216,7 +216,7 @@ app's own <code class="prettyprint">config/services.yaml</code> — see <code cl
 `#[RequireAccess]` and, when any are present, enforces them via
 {@see AccessEnforcer} — replacing the controller with a closure returning the
 error response on the first failing check. Checks are evaluated in the order
-auth -&gt; role -&gt; access (each of {@see AccessEnforcer}&#039;s own methods re-checks
+auth -&gt; role -&gt; scope -&gt; access (each of {@see AccessEnforcer}&#039;s own methods re-checks
 authentication internally too, so this ordering only affects which message a
 caller sees first, never the correctness of the final decision).</dd>
 
@@ -248,7 +248,7 @@ caller sees first, never the correctness of the final decision).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAccessAttributeListener.php"><a href="files/src-symfony-axiamaccessattributelistener.html"><abbr title="src/Symfony/AxiamAccessAttributeListener.php">AxiamAccessAttributeListener.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">52</span>
+    <span class="phpdocumentor-element-found-in__line">53</span>
 
     </aside>
 
@@ -292,7 +292,7 @@ caller sees first, never the correctness of the final decision).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAccessAttributeListener.php"><a href="files/src-symfony-axiamaccessattributelistener.html"><abbr title="src/Symfony/AxiamAccessAttributeListener.php">AxiamAccessAttributeListener.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -330,7 +330,7 @@ caller sees first, never the correctness of the final decision).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Symfony/AxiamAccessAttributeListener.php"><a href="files/src-symfony-axiamaccessattributelistener.html"><abbr title="src/Symfony/AxiamAccessAttributeListener.php">AxiamAccessAttributeListener.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">76</span>
 
     </aside>
 
@@ -338,7 +338,7 @@ caller sees first, never the correctness of the final decision).</dd>
 `#[RequireAccess]` and, when any are present, enforces them via
 {@see AccessEnforcer} — replacing the controller with a closure returning the
 error response on the first failing check. Checks are evaluated in the order
-auth -&gt; role -&gt; access (each of {@see AccessEnforcer}&#039;s own methods re-checks
+auth -&gt; role -&gt; scope -&gt; access (each of {@see AccessEnforcer}&#039;s own methods re-checks
 authentication internally too, so this ordering only affects which message a
 caller sees first, never the correctness of the final decision).</p>
 

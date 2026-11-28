@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Hmac.php"><a href="files/src-amqp-hmac.html"><abbr title="src/Amqp/Hmac.php">Hmac.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">29</span>
+    <span class="phpdocumentor-element-found-in__line">36</span>
 
     </aside>
 
@@ -132,21 +132,29 @@
 (CONTRACT.md §8).</p>
 
 
-    <section class="phpdocumentor-description"><p>Byte-for-byte port of crates/axiam-amqp/src/messages.rs::verify_payload.
-Never throws — malformed input verifies as false (strict-mode default, §8.3).</p>
-<p>CRITICAL: json_decode($body, true) into a PHP associative array preserves the
-EXACT insertion/wire order the message arrived in (PHP arrays are ordered maps)
-— this matches the server's serde_json struct-field-declaration order WITHOUT
-any extra sorting logic. Do NOT alphabetize or otherwise reorder the decoded
-array's keys before canonicalization — that reorders fields and breaks 100%
-of verifications against the server's real signatures (same fix class as
-every sibling SDK's discovery that the canonical bytes are wire order, not
-alphabetical).</p>
-<p>THE PHP-SPECIFIC TRAP: json_encode() escapes forward slashes (&quot;/&quot; -&gt; &quot;/&quot;) and
-non-ASCII characters (-&gt; &quot;\uXXXX&quot;) BY DEFAULT. serde_json::to_vec does neither.
-Omitting JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE produces a byte
-sequence that will NEVER match the server's signature for any payload
-containing a slash or non-ASCII text (Pitfall 1).</p>
+    <section class="phpdocumentor-description"><p><strong>Verify the received bytes, and hand the handler the same bytes (axiam#882, C2).</strong> The server
+writes a signed message as a compact JSON object whose LAST member is
+<code class="prettyprint">&quot;hmac_signature&quot;:&quot;&lt;hex&gt;&quot;</code>, signed over the bytes before it (the object closed with <code class="prettyprint">}</code>). This
+class cuts that trailing member out of the body exactly as it was delivered and computes the
+HMAC over what is left. It never rebuilds the signed bytes by decoding and re-encoding the
+body: encoders disagree on string escaping (PHP's <code class="prettyprint">json_encode</code> writes <code class="prettyprint">é</code> for <code class="prettyprint">é</code> unless
+told otherwise and <code class="prettyprint">\/</code> for <code class="prettyprint">/</code>; Go's escapes <code class="prettyprint">&lt;</code>, <code class="prettyprint">&gt;</code> and <code class="prettyprint">&amp;</code>; serde_json writes all of them
+raw), so a re-serialization fails to verify a genuine message whenever a field contains a
+character the two encoders spell differently, and — worse — a body can verify as one thing
+while a reader of the original bytes sees another.</p>
+<p>What is refused, all as <code class="prettyprint">false</code> / <code class="prettyprint">null</code>, never an exception (§8.3 strict mode):</p>
+<ul>
+<li>a body that is not a JSON object, or that repeats a key at any depth (a duplicate is read
+one way by <code class="prettyprint">json_decode</code>, which keeps the last, and another way by a parser that keeps the
+first), or that has any content after the closing brace;</li>
+<li>a body that does not END in exactly <code class="prettyprint">,&quot;hmac_signature&quot;:&quot;</code> + 64 hex digits + <code class="prettyprint">&quot;}</code> (a message
+the server did not write, or one re-encoded on the way, or one with whitespace added), or
+whose top-level <code class="prettyprint">hmac_signature</code> is not that trailing member;</li>
+<li>a signature that does not match, compared in constant time.</li>
+</ul>
+<p><abbr title="\Axiam\Sdk\Amqp\self::verifiedCanonical()">self::verifiedCanonical()</abbr> returns the bytes the HMAC covered; the caller builds its view
+of the message from THOSE bytes (<code class="prettyprint">json_decode()</code> of them), which is what
+<a href="classes/Axiam-Sdk-Amqp-Consumer.html#method_verifyAndDispatch"><abbr title="\Axiam\Sdk\Amqp\Consumer::verifyAndDispatch()">Consumer::verifyAndDispatch()</abbr></a> does.</p>
 </section>
 
 
@@ -175,13 +183,61 @@ containing a slash or non-ASCII text (Pitfall 1).</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Amqp-Hmac.html#method_cut">cut()</a>
+    <span>
+                                &nbsp;: array{0: string, 1: string}|null    </span>
+</dt>
+<dd>Cuts the trailing signature from `$body` without computing anything (§8 step 2b): the
+canonical bytes and the signature hex, or `null` when `$body` is not one JSON object whose
+first byte is `{` (a byte-order mark, whitespace or any other prefix is refused, never
+stripped), is ambiguous, or does not end in the trailing signature member.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Amqp-Hmac.html#method_hasLayout">hasLayout()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>True when `$canonical` (the bytes the signature covers, the trailing `hmac_signature`
+member already cut) has the top-level members of `$type`, in that type&#039;s declaration order,
+each optional member present in its place or absent, and no other member (contract 1.69, §8
+step 2c, &quot;Typed: one configured type&quot;). Only the configured type&#039;s layout is consulted:
+every tenant-subkey-signed shape shares the key (`AuthzResponse`, the other event type, the
+reactor messages, the cache-invalidation broadcast), so a validly signed message of ANOTHER
+shape must not be accepted. Needs no signature and no decode, so it runs before the HMAC.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Amqp-Hmac.html#method_signatureMatches">signatureMatches()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>True when `$canonical` matches `$signature` (hex, 64 digits) under `$signingKey`, in constant
+time.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Amqp-Hmac.html#method_startsWithBrace">startsWithBrace()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>§8 step 2a: the first byte is the object&#039;s opening brace; nothing precedes it.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Amqp-Hmac.html#method_verifiedCanonical">verifiedCanonical()</a>
+    <span>
+                                &nbsp;: string|null    </span>
+</dt>
+<dd>Verifies `$body` and returns the canonical bytes the HMAC covered — the received bytes with
+the trailing signature member removed — or `null` when it does not verify. The one byte
+sequence a caller may build its view of the message from: what is delivered is what was
+signed (C2).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Amqp-Hmac.html#method_verify">verify()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
-<dd>Returns true iff $body&#039;s `hmac_signature` field matches
-HMAC-SHA256($signingKey, canonical_json_of(body_without_hmac_signature)),
-computed via a constant-time comparison.</dd>
+<dd>Returns true iff `$body` carries a trailing `hmac_signature` member that matches
+HMAC-SHA256(`$signingKey`, the received bytes with that member cut out), compared in constant
+time.</dd>
 
     </dl>
 
@@ -203,6 +259,292 @@ computed via a constant-time comparison.</dd>
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_cut">
+        cut()
+        <a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_cut" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Hmac.php"><a href="files/src-amqp-hmac.html"><abbr title="src/Amqp/Hmac.php">Hmac.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">146</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Cuts the trailing signature from `$body` without computing anything (§8 step 2b): the
+canonical bytes and the signature hex, or `null` when `$body` is not one JSON object whose
+first byte is `{` (a byte-order mark, whitespace or any other prefix is refused, never
+stripped), is ambiguous, or does not end in the trailing signature member.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">cut</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">array{0: string, 1: string}|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">array{0: string, 1: string}|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_hasLayout">
+        hasLayout()
+        <a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_hasLayout" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Hmac.php"><a href="files/src-amqp-hmac.html"><abbr title="src/Amqp/Hmac.php">Hmac.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">101</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">True when `$canonical` (the bytes the signature covers, the trailing `hmac_signature`
+member already cut) has the top-level members of `$type`, in that type&#039;s declaration order,
+each optional member present in its place or absent, and no other member (contract 1.69, §8
+step 2c, &quot;Typed: one configured type&quot;). Only the configured type&#039;s layout is consulted:
+every tenant-subkey-signed shape shares the key (`AuthzResponse`, the other event type, the
+reactor messages, the cache-invalidation broadcast), so a validly signed message of ANOTHER
+shape must not be accepted. Needs no signature and no decode, so it runs before the HMAC.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">hasLayout</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$canonical</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Amqp-SignedEventType.html"><abbr title="\Axiam\Sdk\Amqp\SignedEventType">SignedEventType</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$type</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$canonical</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$type</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Amqp-SignedEventType.html"><abbr title="\Axiam\Sdk\Amqp\SignedEventType">SignedEventType</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_signatureMatches">
+        signatureMatches()
+        <a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_signatureMatches" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Hmac.php"><a href="files/src-amqp-hmac.html"><abbr title="src/Amqp/Hmac.php">Hmac.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">175</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">True when `$canonical` matches `$signature` (hex, 64 digits) under `$signingKey`, in constant
+time.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">signatureMatches</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signingKey</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$canonical</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signatureHex</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$signingKey</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$canonical</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$signatureHex</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_startsWithBrace">
+        startsWithBrace()
+        <a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_startsWithBrace" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Hmac.php"><a href="files/src-amqp-hmac.html"><abbr title="src/Amqp/Hmac.php">Hmac.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">166</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">§8 step 2a: the first byte is the object&#039;s opening brace; nothing precedes it.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">startsWithBrace</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_verifiedCanonical">
+        verifiedCanonical()
+        <a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_verifiedCanonical" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Hmac.php"><a href="files/src-amqp-hmac.html"><abbr title="src/Amqp/Hmac.php">Hmac.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">81</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Verifies `$body` and returns the canonical bytes the HMAC covered — the received bytes with
+the trailing signature member removed — or `null` when it does not verify. The one byte
+sequence a caller may build its view of the message from: what is delivered is what was
+signed (C2).</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">verifiedCanonical</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signingKey</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$signingKey</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$body</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_verify">
         verify()
         <a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_verify" class="headerlink"><i class="fas fa-link"></i></a>
@@ -211,13 +553,13 @@ computed via a constant-time comparison.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Hmac.php"><a href="files/src-amqp-hmac.html"><abbr title="src/Amqp/Hmac.php">Hmac.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">41</span>
+    <span class="phpdocumentor-element-found-in__line">70</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Returns true iff $body&#039;s `hmac_signature` field matches
-HMAC-SHA256($signingKey, canonical_json_of(body_without_hmac_signature)),
-computed via a constant-time comparison.</p>
+        <p class="phpdocumentor-summary">Returns true iff `$body` carries a trailing `hmac_signature` member that matches
+HMAC-SHA256(`$signingKey`, the received bytes with that member cut out), compared in constant
+time.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -226,10 +568,9 @@ computed via a constant-time comparison.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Never throws: malformed JSON, a non-object body, a missing/non-string
-signature, non-hex signature text, or a wrong-length signature all
-verify as false — matching §8.3's strict-mode default that rejects
-(rather than silently accepts) an unparseable or absent signature.</p>
+        <section class="phpdocumentor-description"><p>Never throws: malformed JSON, a non-object body, a duplicate key, trailing content, a
+missing/non-string/non-hex/wrong-length signature, or a signature that is not the trailing
+member all verify as false.</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -282,6 +623,11 @@ verify as false — matching §8.3's strict-mode default that rejects
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_cut">cut()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_hasLayout">hasLayout()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_signatureMatches">signatureMatches()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_startsWithBrace">startsWithBrace()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_verifiedCanonical">verifiedCanonical()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Amqp-Hmac.html#method_verify">verify()</a></li>
                                     </ul>
             </li>

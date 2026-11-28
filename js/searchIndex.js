@@ -21,6 +21,11 @@ Search.appendIndex(
             "summary": "\u0060require_role\u0060\u0020\u0028CONTRACT.md\u0020\u00A711.1,\u0020MAY\u002Dlevel\u0029\u003A\u0020a\u0020LOCAL\u0020check\u0020\u0028no\u0020server\nround\u002Dtrip,\u0020CONTRACT.md\u0020\u00A711.2.9\u0029\u0020that\u0020the\u0020identity\u0027s\u0020already\u002Dverified\u0020\u0060roles\u0060\nintersect\u0020with\u0020at\u0020least\u0020one\u0020of\u0020\u007B\u0040see\u0020RequireRole\u003A\u003A\u0024roles\u007D.\u0020Requires\u0020an\nauthenticated\u0020identity\u0020first\u0020\u0028a\u0020role\u0020check\u0020needs\u0020somewhere\u0020to\u0020read\u0020roles\u0020from\u0029,\nso\u0020an\u0020unauthenticated\u0020caller\u0020still\u0020gets\u0020401,\u0020not\u0020403.",
             "url": "classes/Axiam-Sdk-AccessEnforcer.html#method_enforceRole"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceScope\u0028\u0029",
+            "name": "enforceScope",
+            "summary": "\u0060require_scope\u0060\u0020\u0028CONTRACT.md\u0020\u00A711.2\u0020rule\u002011\u0020\u0028d\u0029,\u0020contract\u00201.68\u003B\u0020N15\u0029\u003A\u0020a\u0020LOCAL\u0020check\u0020that\nthe\u0020verified\u0020token\u0027s\u0020\u0060scope\u0060\u0020claim\u0020contains\u0020at\u0020least\u0020one\u0020of\n\u007B\u0040see\u0020RequireScope\u003A\u003A\u0024scopes\u007D.\u0020Reads\u0020ONLY\u0020\u0060scope\u0060\u0020\u2014\u0020never\u0020\u0060roles\u0060\u0020\u2014\u0020and\u0020fails\u0020closed\u003A\u0020no\n\u0060scope\u0060\u0020claim,\u0020or\u0020one\u0020that\u0020is\u0020not\u0020a\u0020string,\u0020is\u0020a\u0020403.\u0020An\u0020unauthenticated\u0020caller\u0020still\ngets\u0020401.\u0020Like\u0020\u007B\u0040see\u0020self\u003A\u003AenforceRole\u0028\u0029\u007D\u0020it\u0020is\u0020coarser\u0020than\n\u007B\u0040see\u0020self\u003A\u003AenforceAccess\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-AccessEnforcer.html#method_enforceScope"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\AccessEnforcer\u003A\u003AenforceAccess\u0028\u0029",
             "name": "enforceAccess",
             "summary": "\u0060require_access\u0060\u0020\u0028CONTRACT.md\u0020\u00A711.1\u0029\u003A\u0020the\u0020endpoint\u0020requires\u0020the\u0020authenticated\ncaller\u0020to\u0020pass\u0020an\u0020AXIAM\u0020authorization\u0020check\u0020for\u0020\u0060\u0024attribute\u002D\u003Eaction\u0060\u0020on\u0020a\nresource\u0020resolved\u0020from\u0020the\u0020request.\u0020This\u0020is\u0020the\u0020ONE\u0020codepath\u0020both\u0020framework\nbridges\u0020call\u0020for\u0020\u0060\u0023\u005BRequireAccess\u005D\u0060\u0020enforcement\u0020\u2014\u0020see\u0020this\u0020class\u0027s\u0020own\u0020docblock\nfor\u0020the\u0020full\u0020resource\u002Dresolution\u0020and\u0020error\u002Dmapping\u0020tables.",
@@ -126,6 +131,166 @@ Search.appendIndex(
             "summary": "Poison\u002Dmessage\u0020sentinel.\u0020Application\u0020handlers\u0020throw\u0020this\u0020to\u0020signal\u0020that\u0020a\nmessage\u0020is\u0020unprocessable\u0020and\u0020must\u0020NOT\u0020be\u0020requeued\u0020\u0028e.g.\u0020a\u0020permanently\nmalformed\u0020or\u0020unsupported\u0020event\u0029\u0020\u2014\u0020distinct\u0020from\u0020a\u0020transient\u0020failure,\u0020which\nshould\u0020be\u0020requeued\u0020for\u0020retry.",
             "url": "classes/Axiam-Sdk-Amqp-AmqpDropMessage.html"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzDelivery",
+            "name": "AmqpLibAuthzDelivery",
+            "summary": "Adapts\u0020a\u0020\u0060php\u002Damqplib\u0060\u0020\u007B\u0040see\u0020AMQPMessage\u007D\u0020to\u0020\u007B\u0040see\u0020AuthzDelivery\u007D.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzDelivery.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzDelivery\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzDelivery.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzDelivery\u003A\u003Abody\u0028\u0029",
+            "name": "body",
+            "summary": "The\u0020delivery\u0020body,\u0020byte\u0020for\u0020byte\u0020as\u0020the\u0020broker\u0020handed\u0020it\u0020over.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzDelivery.html#method_body"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzDelivery\u003A\u003Aack\u0028\u0029",
+            "name": "ack",
+            "summary": "Acknowledges\u0020the\u0020delivery.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzDelivery.html#method_ack"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzDelivery\u003A\u003AnackNoRequeue\u0028\u0029",
+            "name": "nackNoRequeue",
+            "summary": "Rejects\u0020the\u0020delivery\u0020without\u0020requeue.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzDelivery.html#method_nackNoRequeue"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzTransport",
+            "name": "AmqpLibAuthzTransport",
+            "summary": "\u007B\u0040see\u0020AuthzTransport\u007D\u0020over\u0020a\u0020\u0060php\u002Damqplib\u0060\u0020channel\u0020\u2014\u0020the\u0020same\u0020library\u0020the\u0020SDK\u0027s\u0020\u00A78\n\u007B\u0040see\u0020Consumer\u007D\u0020and\u0020\u00A722\u0020reactor\u0020transport\u0020use.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzTransport.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzTransport\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzTransport.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzTransport\u003A\u003AdeclareReplyQueue\u0028\u0029",
+            "name": "declareReplyQueue",
+            "summary": "Declares\u0020the\u0020private,\u0020exclusive,\u0020auto\u002Ddelete,\u0020broker\u002Dnamed\u0020reply\u0020queue\u0020and\u0020consumes\u0020it\u0020with\u0020manual\u0020ack.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzTransport.html#method_declareReplyQueue"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzTransport\u003A\u003ApublishRequest\u0028\u0029",
+            "name": "publishRequest",
+            "summary": "Publishes\u0020on\u0020the\u0020default\u0020exchange\u0020with\u0020the\u0020given\u0020\u0060reply_to\u0060\u0020and\u0020\u0060correlation_id\u0060.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzTransport.html#method_publishRequest"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzTransport\u003A\u003Await\u0028\u0029",
+            "name": "wait",
+            "summary": "Pumps\u0020the\u0020channel\u0020for\u0020at\u0020most\u0020\u0060\u0024timeoutSeconds\u0060\u003B\u0020\u0060false\u0060\u0020once\u0020the\u0020session\u0020is\u0020gone.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzTransport.html#method_wait"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AmqpLibAuthzTransport\u003A\u003Aclose\u0028\u0029",
+            "name": "close",
+            "summary": "Closes\u0020the\u0020channel\u0020\u0028idempotent\u0029\u003B\u0020the\u0020connection\u0020stays\u0020the\u0020caller\u0027s.",
+            "url": "classes/Axiam-Sdk-Amqp-AmqpLibAuthzTransport.html#method_close"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDecision",
+            "name": "AuthzDecision",
+            "summary": "A\u0020VERIFIED\u0020answer\u0020to\u0020one\u0020\u007B\u0040see\u0020AuthzRequester\u003A\u003Acheck\u0028\u0029\u007D\u0020\u0028CONTRACT.md\u0020\u00A78\u0029.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDecision.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDecision\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDecision.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDecision\u003A\u003A\u0024allowed",
+            "name": "allowed",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDecision.html#property_allowed"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDecision\u003A\u003A\u0024reason",
+            "name": "reason",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDecision.html#property_reason"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDecision\u003A\u003A\u0024reasonCode",
+            "name": "reasonCode",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDecision.html#property_reasonCode"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDelivery",
+            "name": "AuthzDelivery",
+            "summary": "One\u0020message\u0020read\u0020from\u0020the\u0020authorization\u0020requester\u0027s\u0020private\u0020reply\u0020queue,\u0020with\u0020the\u0020two\nways\u0020a\u0020consumer\u0020can\u0020settle\u0020it\u0020\u0028CONTRACT.md\u0020\u00A78\u0020\u0022Signed\u0020authorization\u0020responses\u0022\u0029.\u0020A\u0020seam\nso\u0020\u007B\u0040see\u0020AuthzRequester\u007D\u0020can\u0020be\u0020driven\u0020without\u0020a\u0020broker.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDelivery.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDelivery\u003A\u003Abody\u0028\u0029",
+            "name": "body",
+            "summary": "The\u0020delivery\u0020body,\u0020byte\u0020for\u0020byte\u0020as\u0020the\u0020broker\u0020handed\u0020it\u0020over.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDelivery.html#method_body"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDelivery\u003A\u003Aack\u0028\u0029",
+            "name": "ack",
+            "summary": "Acknowledges\u0020the\u0020delivery\u0020\u0028an\u0020accepted,\u0020verified\u0020response\u0029.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDelivery.html#method_ack"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzDelivery\u003A\u003AnackNoRequeue\u0028\u0029",
+            "name": "nackNoRequeue",
+            "summary": "Rejects\u0020the\u0020delivery\u0020WITHOUT\u0020requeue\u0020\u0028a\u0020response\u0020that\u0020failed\u0020verification\u0020or\u0020binding\u0029.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzDelivery.html#method_nackNoRequeue"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzRequester",
+            "name": "AuthzRequester",
+            "summary": "The\u0020AMQP\u0020authorization\u0020requester\u0020\u0028CONTRACT.md\u0020\u00A78\u0020\u0022Signed\u0020authorization\u0020responses\u0022,\ncontract\u00201.68\u003B\u0020N2,\u0020D\u002D9\u0029.\u0020It\u0020publishes\u0020a\u0020signed\u0020\u0060AuthzRequest\u0060\u0020on\u0020\u0060axiam.authz.request\u0060\u0020with\u0020a\nprivate,\u0020exclusive,\u0020broker\u002Dnamed\u0020\u0060reply_to\u0060\u0020queue,\u0020and\u0020accepts\u0020an\u0020answer\u0020only\u0020when\u0020it\nverifies\u0020as\u0020the\u0020server\u0027s\u0020signed\u0020response\u0020to\u0020THAT\u0020request.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzRequester.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzRequester\u003A\u003AreplyTo\u0028\u0029",
+            "name": "replyTo",
+            "summary": "The\u0020private\u0020reply\u0020queue\u0020requests\u0020name\u0020in\u0020their\u0020\u0060reply_to\u0060.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzRequester.html#method_replyTo"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzRequester\u003A\u003Aclose\u0028\u0029",
+            "name": "close",
+            "summary": "Stops\u0020accepting\u0020answers\u0020and\u0020releases\u0020the\u0020transport.\u0020Idempotent\u003B\u0020the\u0020exclusive\u0020auto\u002Ddelete\u0020queue\u0020goes\u0020with\u0020it.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzRequester.html#method_close"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzRequester\u003A\u003Acheck\u0028\u0029",
+            "name": "check",
+            "summary": "Asks\u0020the\u0020server\u0020whether\u0020\u0060\u0024subjectId\u0060\u0020may\u0020perform\u0020\u0060\u0024action\u0060\u0020on\u0020\u0060\u0024resourceId\u0060\u0020\u0028optionally\nnarrowed\u0020by\u0020\u0060\u0024scope\u0060\u0029\u0020and\u0020waits\u0020for\u0020the\u0020VERIFIED\u0020answer.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzRequester.html#method_check"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzRequester\u003A\u003AREQUEST_QUEUE",
+            "name": "REQUEST_QUEUE",
+            "summary": "The\u0020queue\u0020the\u0020server\u0020consumes\u0020\u0060AuthzRequest\u0060\u0020from.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzRequester.html#constant_REQUEST_QUEUE"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzRequester\u003A\u003AKEY_VERSION",
+            "name": "KEY_VERSION",
+            "summary": "The\u0020signing\u002Dkey\u0020version\u0020this\u0020requester\u0020sends.\u0020The\u0020caller\u0020supplies\u0020the\u0020tenant\u0020subkey\u0020for\nit\u0020\u0028\u00A78.1\u0029\u003B\u0020the\u0020response\u0020carries\u0020no\u0020\u0060key_version\u0060,\u0020so\u0020the\u0020requester\u0020uses\u0020the\u0020one\u0020it\u0020sent.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzRequester.html#constant_KEY_VERSION"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzRequester\u003A\u003ADEFAULT_TIMEOUT_SECONDS",
+            "name": "DEFAULT_TIMEOUT_SECONDS",
+            "summary": "Bounds\u0020one\u0020\u007B\u0040see\u0020self\u003A\u003Acheck\u0028\u0029\u007D\u0020when\u0020the\u0020caller\u0020does\u0020not\u0020pass\u0020a\u0020timeout.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzRequester.html#constant_DEFAULT_TIMEOUT_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzTransport",
+            "name": "AuthzTransport",
+            "summary": "The\u0020seam\u0020between\u0020\u007B\u0040see\u0020AuthzRequester\u007D\u0020and\u0020a\u0020broker\u003A\u0020it\u0020declares\u0020the\u0020requester\u0027s\u0020private\nreply\u0020queue,\u0020publishes\u0020requests,\u0020and\u0020pumps\u0020deliveries.\u0020\u007B\u0040see\u0020AmqpLibAuthzTransport\u007D\u0020is\u0020the\n\u0060php\u002Damqplib\u0060\u0020implementation\u003B\u0020tests\u0020supply\u0020a\u0020fake.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzTransport.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzTransport\u003A\u003AdeclareReplyQueue\u0028\u0029",
+            "name": "declareReplyQueue",
+            "summary": "Declares\u0020an\u0020EXCLUSIVE,\u0020auto\u002Ddelete,\u0020broker\u002Dnamed\u0020queue\u0020only\u0020this\u0020requester\u0020consumes\u0020\u0028an\n\u0060amq.gen\u002D\u2026\u0060\u0020queue\u0029\u0020and\u0020starts\u0020consuming\u0020it\u0020with\u0020manual\u0020acknowledgement,\u0020handing\u0020every\ndelivery\u0020to\u0020\u0060\u0024onDelivery\u0060.\u0020Returns\u0020the\u0020queue\u0027s\u0020name.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzTransport.html#method_declareReplyQueue"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzTransport\u003A\u003ApublishRequest\u0028\u0029",
+            "name": "publishRequest",
+            "summary": "Publishes\u0020\u0060\u0024body\u0060\u0020on\u0020the\u0020DEFAULT\u0020exchange\u0020with\u0020routing\u0020key\u0020\u0060\u0024queue\u0060,\u0020AMQP\u0020\u0060reply_to\u0060\u0020\u003D\n\u0060\u0024replyTo\u0060\u0020and\u0020\u0060correlation_id\u0060\u0020\u003D\u0020\u0060\u0024correlationId\u0060.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzTransport.html#method_publishRequest"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzTransport\u003A\u003Await\u0028\u0029",
+            "name": "wait",
+            "summary": "Blocks\u0020until\u0020at\u0020least\u0020one\u0020delivery\u0020has\u0020been\u0020dispatched\u0020to\u0020the\u0020callback\u0020given\u0020to\n\u007B\u0040see\u0020self\u003A\u003AdeclareReplyQueue\u0028\u0029\u007D,\u0020or\u0020\u0060\u0024timeoutSeconds\u0060\u0020elapses\u0020\u0028a\u0020timeout\u0020returns\n\u0060true\u0060\u003A\u0020an\u0020idle\u0020tick,\u0020not\u0020an\u0020end\u0029.\u0020Returns\u0020\u0060false\u0060\u0020once\u0020the\u0020session\u0020has\u0020gone\u0020away.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzTransport.html#method_wait"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\AuthzTransport\u003A\u003Aclose\u0028\u0029",
+            "name": "close",
+            "summary": "Releases\u0020the\u0020session.\u0020Idempotent.",
+            "url": "classes/Axiam-Sdk-Amqp-AuthzTransport.html#method_close"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Amqp\\Consumer",
             "name": "Consumer",
             "summary": "php\u002Damqplib\u0020blocking\u0020consume\u0020loop\u0020with\u0020HMAC\u0020verify\u002Dbefore\u002Dhandler\n\u0028CONTRACT.md\u0020\u00A78,\u0020D\u002D04\u0029.",
@@ -153,8 +318,33 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Amqp\\Hmac\u003A\u003Averify\u0028\u0029",
             "name": "verify",
-            "summary": "Returns\u0020true\u0020iff\u0020\u0024body\u0027s\u0020\u0060hmac_signature\u0060\u0020field\u0020matches\nHMAC\u002DSHA256\u0028\u0024signingKey,\u0020canonical_json_of\u0028body_without_hmac_signature\u0029\u0029,\ncomputed\u0020via\u0020a\u0020constant\u002Dtime\u0020comparison.",
+            "summary": "Returns\u0020true\u0020iff\u0020\u0060\u0024body\u0060\u0020carries\u0020a\u0020trailing\u0020\u0060hmac_signature\u0060\u0020member\u0020that\u0020matches\nHMAC\u002DSHA256\u0028\u0060\u0024signingKey\u0060,\u0020the\u0020received\u0020bytes\u0020with\u0020that\u0020member\u0020cut\u0020out\u0029,\u0020compared\u0020in\u0020constant\ntime.",
             "url": "classes/Axiam-Sdk-Amqp-Hmac.html#method_verify"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\Hmac\u003A\u003AverifiedCanonical\u0028\u0029",
+            "name": "verifiedCanonical",
+            "summary": "Verifies\u0020\u0060\u0024body\u0060\u0020and\u0020returns\u0020the\u0020canonical\u0020bytes\u0020the\u0020HMAC\u0020covered\u0020\u2014\u0020the\u0020received\u0020bytes\u0020with\nthe\u0020trailing\u0020signature\u0020member\u0020removed\u0020\u2014\u0020or\u0020\u0060null\u0060\u0020when\u0020it\u0020does\u0020not\u0020verify.\u0020The\u0020one\u0020byte\nsequence\u0020a\u0020caller\u0020may\u0020build\u0020its\u0020view\u0020of\u0020the\u0020message\u0020from\u003A\u0020what\u0020is\u0020delivered\u0020is\u0020what\u0020was\nsigned\u0020\u0028C2\u0029.",
+            "url": "classes/Axiam-Sdk-Amqp-Hmac.html#method_verifiedCanonical"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\Hmac\u003A\u003AhasLayout\u0028\u0029",
+            "name": "hasLayout",
+            "summary": "True\u0020when\u0020\u0060\u0024canonical\u0060\u0020\u0028the\u0020bytes\u0020the\u0020signature\u0020covers,\u0020the\u0020trailing\u0020\u0060hmac_signature\u0060\nmember\u0020already\u0020cut\u0029\u0020has\u0020the\u0020top\u002Dlevel\u0020members\u0020of\u0020\u0060\u0024type\u0060,\u0020in\u0020that\u0020type\u0027s\u0020declaration\u0020order,\neach\u0020optional\u0020member\u0020present\u0020in\u0020its\u0020place\u0020or\u0020absent,\u0020and\u0020no\u0020other\u0020member\u0020\u0028contract\u00201.69,\u0020\u00A78\nstep\u00202c,\u0020\u0022Typed\u003A\u0020one\u0020configured\u0020type\u0022\u0029.\u0020Only\u0020the\u0020configured\u0020type\u0027s\u0020layout\u0020is\u0020consulted\u003A\nevery\u0020tenant\u002Dsubkey\u002Dsigned\u0020shape\u0020shares\u0020the\u0020key\u0020\u0028\u0060AuthzResponse\u0060,\u0020the\u0020other\u0020event\u0020type,\u0020the\nreactor\u0020messages,\u0020the\u0020cache\u002Dinvalidation\u0020broadcast\u0029,\u0020so\u0020a\u0020validly\u0020signed\u0020message\u0020of\u0020ANOTHER\nshape\u0020must\u0020not\u0020be\u0020accepted.\u0020Needs\u0020no\u0020signature\u0020and\u0020no\u0020decode,\u0020so\u0020it\u0020runs\u0020before\u0020the\u0020HMAC.",
+            "url": "classes/Axiam-Sdk-Amqp-Hmac.html#method_hasLayout"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\Hmac\u003A\u003Acut\u0028\u0029",
+            "name": "cut",
+            "summary": "Cuts\u0020the\u0020trailing\u0020signature\u0020from\u0020\u0060\u0024body\u0060\u0020without\u0020computing\u0020anything\u0020\u0028\u00A78\u0020step\u00202b\u0029\u003A\u0020the\ncanonical\u0020bytes\u0020and\u0020the\u0020signature\u0020hex,\u0020or\u0020\u0060null\u0060\u0020when\u0020\u0060\u0024body\u0060\u0020is\u0020not\u0020one\u0020JSON\u0020object\u0020whose\nfirst\u0020byte\u0020is\u0020\u0060\u007B\u0060\u0020\u0028a\u0020byte\u002Dorder\u0020mark,\u0020whitespace\u0020or\u0020any\u0020other\u0020prefix\u0020is\u0020refused,\u0020never\nstripped\u0029,\u0020is\u0020ambiguous,\u0020or\u0020does\u0020not\u0020end\u0020in\u0020the\u0020trailing\u0020signature\u0020member.",
+            "url": "classes/Axiam-Sdk-Amqp-Hmac.html#method_cut"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\Hmac\u003A\u003AstartsWithBrace\u0028\u0029",
+            "name": "startsWithBrace",
+            "summary": "\u00A78\u0020step\u00202a\u003A\u0020the\u0020first\u0020byte\u0020is\u0020the\u0020object\u0027s\u0020opening\u0020brace\u003B\u0020nothing\u0020precedes\u0020it.",
+            "url": "classes/Axiam-Sdk-Amqp-Hmac.html#method_startsWithBrace"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\Hmac\u003A\u003AsignatureMatches\u0028\u0029",
+            "name": "signatureMatches",
+            "summary": "True\u0020when\u0020\u0060\u0024canonical\u0060\u0020matches\u0020\u0060\u0024signature\u0060\u0020\u0028hex,\u002064\u0020digits\u0029\u0020under\u0020\u0060\u0024signingKey\u0060,\u0020in\u0020constant\ntime.",
+            "url": "classes/Axiam-Sdk-Amqp-Hmac.html#method_signatureMatches"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Amqp\\ReplayGuard",
             "name": "ReplayGuard",
@@ -185,6 +375,21 @@ Search.appendIndex(
             "name": "DEFAULT_SKEW_SECONDS",
             "summary": "Default\u0020freshness\u0020window\u0020\u0028seconds\u0029\u0020applied\u0020to\u0020\u0060issued_at\u0060,\u0020matching\nthe\u0020server\u0027s\u0020DEFAULT_FRESHNESS_SKEW_SECS\u0020\u003D\u0020300\u0020\/\nAXIAM__AMQP__REPLAY_SKEW_SECS\u0020\u0028CONTRACT.md\u0020\u00A78\u0020v2\u0029.",
             "url": "classes/Axiam-Sdk-Amqp-ReplayGuard.html#constant_DEFAULT_SKEW_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\SignedEventType",
+            "name": "SignedEventType",
+            "summary": "The\u0020one\u0020signed\u0020AMQP\u0020event\u0020type\u0020a\u0020\u007B\u0040see\u0020Consumer\u007D\u0020is\u0020configured\u0020for\u0020\u0028CONTRACT.md\u0020\u00A78\u0020step\u00202c,\ncontract\u00201.69\u0020\u0022Typed\u003A\u0020one\u0020configured\u0020type\u0022\u0029.\u0020A\u0020consumer\u0020checks\u0020the\u0020canonical\u0020bytes\u0020against\u0020this\ntype\u0027s\u0020layout\u0020only\u003B\u0020an\u0020application\u0020that\u0020consumes\u0020both\u0020types\u0020runs\u0020two\u0020consumers.",
+            "url": "classes/Axiam-Sdk-Amqp-SignedEventType.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\SignedEventType\u003A\u003AAuthzRequest",
+            "name": "AuthzRequest",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-SignedEventType.html#enumcase_AuthzRequest"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Amqp\\SignedEventType\u003A\u003AAuditEventMessage",
+            "name": "AuditEventMessage",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Amqp-SignedEventType.html#enumcase_AuditEventMessage"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Attributes\\ManagedGroup",
             "name": "ManagedGroup",
@@ -381,6 +586,21 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Attributes-RequireRole.html#property_roles"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireScope",
+            "name": "RequireScope",
+            "summary": "Declarative\u0020local\u0020OAuth2\u002Dscope\u0020check\u0020\u0028CONTRACT.md\u0020\u00A711.2\u0020rule\u002011\u0020\u0028d\u0029,\u0020contract\u00201.68\u003B\u0020N15\u0029\u0020\u2014\nthe\u0020canonical\u0020\u0060require_scope\u0028scope...\u0029\u0060.",
+            "url": "classes/Axiam-Sdk-Attributes-RequireScope.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireScope\u003A\u003A__construct\u0028\u0029",
+            "name": "__construct",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireScope.html#method___construct"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Attributes\\RequireScope\u003A\u003A\u0024scopes",
+            "name": "scopes",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Attributes-RequireScope.html#property_scopes"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\DeviceToken",
             "name": "DeviceToken",
             "summary": "The\u0020result\u0020of\u0020\u0060AxiamClient\u003A\u003AauthenticateDevice\u0028\u0029\u0060\u0020\u2014\u0020the\u0020mTLS\u0020device\u0020login\n\u0028CONTRACT.md\u0020\u00A76.1\u0020rules\u00206\u002D10,\u0020contract\u00201.51\u0029.",
@@ -481,6 +701,21 @@ Search.appendIndex(
             "summary": "\u00A721.7.2\u0020check\u00207\u0020\u2014\u0020the\u0020\u0060iat\u0060\u0020acceptance\u0020window,\u0020applied\u0020in\u0020\u002A\u002Aboth\u002A\u002A\u0020directions.",
             "url": "classes/Axiam-Sdk-Auth-DpopVerifier.html#constant_IAT_LEEWAY_SECONDS"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\IdentityClaims",
+            "name": "IdentityClaims",
+            "summary": "Reads\u0020the\u0020two\u0020claims\u0020a\u0020local\u0020role\u0020or\u0020scope\u0020guard\u0020decides\u0020on,\u0020from\u0020verified\u0020claims\n\u0028CONTRACT.md\u0020\u00A711.2\u0020rule\u002011,\u0020contract\u00201.68\u003B\u0020N15,\u0020D\u002D1\u0029\u0020\u2014\u0020the\u0020ONE\u0020place\u0020both\u0020framework\nbridges\u0020\u0028\u007B\u0040see\u0020\\Axiam\\Sdk\\Laravel\\AxiamMiddleware\u007D,\u0020\u007B\u0040see\u0020\\Axiam\\Sdk\\Symfony\\AxiamAuthSubscriber\u007D\u0029\nget\u0020them\u0020from,\u0020so\u0020Laravel\u0020and\u0020Symfony\u0020cannot\u0020drift.",
+            "url": "classes/Axiam-Sdk-Auth-IdentityClaims.html"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\IdentityClaims\u003A\u003Aroles\u0028\u0029",
+            "name": "roles",
+            "summary": "The\u0020\u0060roles\u0060\u0020claim,\u0020or\u0020\u0060null\u0060\u0020when\u0020the\u0020token\u0020has\u0020none\u0020usable.",
+            "url": "classes/Axiam-Sdk-Auth-IdentityClaims.html#method_roles"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\IdentityClaims\u003A\u003Ascopes\u0028\u0029",
+            "name": "scopes",
+            "summary": "The\u0020\u0060scope\u0060\u0020claim\u0020as\u0020a\u0020list\u003A\u0020the\u0020space\u002Dseparated\u0020string\u0020of\u0020RFC\u00206749\u0020\u00A73.3,\u0020split\u0020on\u0020single\nspaces,\u0020empty\u0020entries\u0020dropped.\u0020\u0060null\u0060\u0020when\u0020the\u0020claim\u0020is\u0020absent\u0020or\u0020not\u0020a\u0020string.",
+            "url": "classes/Axiam-Sdk-Auth-IdentityClaims.html#method_scopes"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\InMemoryJtiStore",
             "name": "InMemoryJtiStore",
             "summary": "A\u0020\u007B\u0040see\u0020JtiStore\u007D\u0020for\u0020a\u0020single\u0020PHP\u0020process.",
@@ -550,6 +785,31 @@ Search.appendIndex(
             "name": "CLOCK_SKEW_LEEWAY_SECONDS",
             "summary": "The\u0020single,\u0020named,\u0020bounded\u0020clock\u002Dskew\u0020allowance\u0020applied\u0020to\u0020the\u0020\u0060exp\u0060\u0020and\u0020\u0060nbf\u0060\nchecks\u0020\u0028CONTRACT.md\u0020\u00A710.1\u0020rule\u00207\u0020\u2014\u0020RECOMMENDED\u002060\u0020s\u0029.",
             "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_CLOCK_SKEW_LEEWAY_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003AUNKNOWN_KID_REFETCH_COOLDOWN_SECONDS",
+            "name": "UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS",
+            "summary": "The\u0020cooldown\u0020window\u0020for\u0020a\u0020JWKS\u0020re\u002Dfetch\u0020caused\u0020by\u0020an\u0020unknown\u0020\u0060kid\u0060\u0020\u0028CONTRACT.md\u0020\u00A712.4\nrule\u00202,\u0020shared\u0020by\u0020\u00A710.1\u0020rule\u002012\u0029\u003A\u0020while\u0020the\u0020cache\u0020is\u0020otherwise\u0020fresh,\u0020a\u0020token\u0020naming\u0020a\n\u0060kid\u0060\u0020the\u0020cache\u0020does\u0020not\u0020hold\u0020is\u0020rejected\u0020FROM\u0020THE\u0020CACHE,\u0020with\u0020no\u0020network\u0020I\/O,\u0020unless\nthis\u0020many\u0020seconds\u0020have\u0020passed\u0020since\u0020the\u0020last\u0020re\u002Dfetch\u0020an\u0020unknown\u0020\u0060kid\u0060\u0020caused.\u0020Without\nit\u0020an\u0020unauthenticated\u0020caller\u0020could\u0020make\u0020every\u0020forged\u0020token\u0020cost\u0020two\u0020outbound\u0020requests\n\u0028discovery\u0020and\u0020\u0060jwks_uri\u0060\u0029\u0020\u2014\u0020security\u0020audit\u00202026\u002D11\u002D14,\u0020C5.",
+            "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_UNKNOWN_KID_REFETCH_COOLDOWN_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003AMAX_TTL_SECONDS",
+            "name": "MAX_TTL_SECONDS",
+            "summary": "The\u0020longest\u0020a\u0020fetched\u0020key\u0020set\u0020lives\u0020before\u0020a\u0020refresh\u0020is\u0020due,\u0020and\u0020the\u0020extra\u0020time\u0020the\u0020held\u0020keys\nmay\u0020keep\u0020verifying\u0020while\u0020every\u0020refresh\u0020fails\u0020\u0028CONTRACT.md\u0020\u00A712.4\u0020rule\u00202\u0020\u0022Stale\u002Dif\u002Derror,\nbounded\u0022,\u0020contract\u00201.69,\u0020D\u002D10\u0029\u003A\u0020both\u0020300\u0020s.\u0020A\u0020larger\u0020configured\u0020or\u0020advertised\u0020lifetime\u0020is\nclamped\u0020down\u0020to\u0020this,\u0020never\u0020honoured.",
+            "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_MAX_TTL_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003ASTALE_WINDOW_SECONDS",
+            "name": "STALE_WINDOW_SECONDS",
+            "summary": "The\u0020stale\u0020window\u0020beyond\u0020the\u0020TTL\u003A\u0020held\u0020keys\u0020verify\u0020until\u0020TTL\u0020\u002B\u0020this\u0020after\u0020the\u0020last\u0020successful\u0020fetch.",
+            "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_STALE_WINDOW_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003AFETCH_TIMEOUT_SECONDS",
+            "name": "FETCH_TIMEOUT_SECONDS",
+            "summary": "Total\u0020deadline,\u0020in\u0020seconds,\u0020for\u0020one\u0020fetch\u003A\u0020discovery\u0020and\u0020JWKS\u0020together.",
+            "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_FETCH_TIMEOUT_SECONDS"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Auth\\JwksVerifier\u003A\u003ACONNECT_TIMEOUT_SECONDS",
+            "name": "CONNECT_TIMEOUT_SECONDS",
+            "summary": "Connect\u0020deadline,\u0020in\u0020seconds,\u0020of\u0020each\u0020JWKS\u0020or\u0020discovery\u0020request.",
+            "url": "classes/Axiam-Sdk-Auth-JwksVerifier.html#constant_CONNECT_TIMEOUT_SECONDS"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Auth\\LoginResult",
             "name": "LoginResult",
@@ -2183,7 +2443,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamMiddleware",
             "name": "AxiamMiddleware",
-            "summary": "Laravel\u0020authentication\u0020middleware\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020extracts\u0020the\u0020bearer\/cookie\ntoken,\u0020verifies\u0020it\u0020via\u0020\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocally\u0028\u0029\u007D\u0020\u2014\u0020the\u0020no\u002Dfallback\u0020seam\nmandated\u0020by\u0020\u00A710.1\u0020rule\u00208\u0020\u2014\u0020and\u0020populates\u0020the\u0020\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\n\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\u0020on\u0020success.\u0020Returns\u0020a\u0020standardized\u0020401\u0020JSON\u0020error\u0020body\u0020on\nany\u0020failure\u0020\u0028missing\u0020token,\u0020invalid\u0020signature,\u0020expired\u0020token\u0029.\u0020Never\u0020duplicates\nJWKS\u002Dverify\u0020logic\u0020itself\u0020\u0028D\u002D02\u0020prohibition\u0029\u0020\u2014\u0020every\u0020security\u002Dcritical\u0020decision\u0020is\u0020made\nby\u0020\u007B\u0040see\u0020AxiamClient\u007D.",
+            "summary": "Laravel\u0020authentication\u0020middleware\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020extracts\u0020the\u0020bearer\/cookie\ntoken,\u0020verifies\u0020it\u0020via\u0020\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocally\u0028\u0029\u007D\u0020\u2014\u0020the\u0020no\u002Dfallback\u0020seam\nmandated\u0020by\u0020\u00A710.1\u0020rule\u00208\u0020\u2014\u0020and\u0020populates\u0020the\u0020\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\n\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\/\u0060scopes\u0060\u0020on\u0020success\u0020\u0028\u0060roles\u0060\u0020from\u0020the\u0020token\u0027s\u0020\u0060roles\u0060\u0020claim\u0020only,\u0020\u0060null\u0060\u0020when\u0020it\u0020has\u0020none\u003B\u0020\u0060scopes\u0060\u0020from\u0020\u0060scope\u0060\u0029.\u0020Returns\u0020a\u0020standardized\u0020401\u0020JSON\u0020error\u0020body\u0020on\nany\u0020failure\u0020\u0028missing\u0020token,\u0020invalid\u0020signature,\u0020expired\u0020token\u0029.\u0020Never\u0020duplicates\nJWKS\u002Dverify\u0020logic\u0020itself\u0020\u0028D\u002D02\u0020prohibition\u0029\u0020\u2014\u0020every\u0020security\u002Dcritical\u0020decision\u0020is\u0020made\nby\u0020\u007B\u0040see\u0020AxiamClient\u007D.",
             "url": "classes/Axiam-Sdk-Laravel-AxiamMiddleware.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Laravel\\AxiamMiddleware\u003A\u003A__construct\u0028\u0029",
@@ -3805,6 +4065,11 @@ Search.appendIndex(
             "name": "ipAddress",
             "summary": "",
             "url": "classes/Axiam-Sdk-Management-Models-AuditLogEntry.html#property_ipAddress"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuditLogEntry\u003A\u003A\u0024organizationId",
+            "name": "organizationId",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Management-Models-AuditLogEntry.html#property_organizationId"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Management\\Models\\AuditLogEntry\u003A\u003A\u0024resourceId",
             "name": "resourceId",
@@ -17281,6 +17546,11 @@ Search.appendIndex(
             "summary": "The\u0020contract\u002Dmandated\u0020TTL\u0020for\u0020stored\u0020login\u0020state\u003A\u002010\u0020minutes,\u0020matching\u0020the\nserver\u0027s\u0020\u0060federation_login_state\u0060\u0020row\u0020lifetime\u0020\u0028\u00A712.3\u0020rule\u00201\u0029.",
             "url": "classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_TTL_SECONDS"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\MemoryOidcStateStore\u003A\u003ADEFAULT_MAX_ENTRIES",
+            "name": "DEFAULT_MAX_ENTRIES",
+            "summary": "The\u0020most\u0020entries\u0020held\u0020at\u0020once\u0020unless\u0020the\u0020constructor\u0020says\u0020otherwise.\u0020Ten\u0020thousand\nin\u002Dflight\u0020logins\u0020is\u0020far\u0020beyond\u0020any\u0020legitimate\u0020single\u002Dprocess\u0020load.",
+            "url": "classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_DEFAULT_MAX_ENTRIES"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\MtlsEndpointAliases",
             "name": "MtlsEndpointAliases",
             "summary": "RFC\u00208705\u0020\u00A75\u0020\u0060mtls_endpoint_aliases\u0060\u0020\u2014\u0020the\u0020seven\u0020endpoints\u0020re\u002Dbased\u0020on\u0020the\u0020host\u0020that\nperforms\u0020the\u0020mutual\u002DTLS\u0020handshake\u0020\u0028wire\u0020schema\u0020\u0060MtlsEndpointAliases\u0060,\u0020contract\u00201.40\u003B\nthe\u0020seventh,\u0020CIBA\u0027s\u0020\u0060backchannel_authentication_endpoint\u0060,\u0020contract\u00201.58\u0020\u2014\u0020CONTRACT.md\u0020\u00A721.3.1\nas\u0020amended\u0020by\u0020\u00A733\u0029.",
@@ -17831,6 +18101,21 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method___construct"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow\u003A\u003AbindingCookieNameFor\u0028\u0029",
+            "name": "bindingCookieNameFor",
+            "summary": "The\u0020name\u0020of\u0020the\u0020binding\u0020cookie\u0020for\u0020a\u0020flow\u0020whose\u0020callback\u0020is\u0020\u0060\u0024redirectUri\u0060\u0020\u2014\u0020a\u0020pure\nfunction\u0020of\u0020that\u0020URI\u0020\u0028\u00A712.8\u0020rule\u00201\u0020\u0028b\u0029\u0029\u003A\u0020\u0060axiam_oidc_bind\u0060\u0020when\u0020it\u0020is\u0020\u0060http\u003A\u0060\u0020on\n\u0060localhost\u0060,\u0020\u0060127.0.0.1\u0060\u0020or\u0020\u0060\u005B\u003A\u003A1\u005D\u0060,\u0020and\u0020\u0060__Host\u002Daxiam_oidc_bind\u0060\u0020for\u0020everything\u0020else,\nevery\u0020\u0060https\u003A\u0060\u0020URI\u0020and\u0020plain\u0020HTTP\u0020to\u0020any\u0020other\u0020host\u0020included\u0020\u0028on\u0020which\u0020the\u0020browser\u0020drops\nthe\u0020cookie\u0020and\u0020every\u0020callback\u0020fails\u0020closed\u0029.\u0020The\u0020fallback\u0020is\u0020never\u0020selectable\u0020off\nloopback,\u0020by\u0020configuration\u0020or\u0020otherwise.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieNameFor"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow\u003A\u003AbindingCookieName\u0028\u0029",
+            "name": "bindingCookieName",
+            "summary": "The\u0020cookie\u0020name\u0020THIS\u0020flow\u0020sets\u0020at\u0020login\u0020and\u0020reads\u0020at\u0020the\u0020callback\u0020\u2014\u0020and\u0020ONLY\u0020this\u0020one\u003A\na\u0020cookie\u0020of\u0020the\u0020other\u0020name\u0020is\u0020no\u0020cookie\u0020at\u0020all.\u0020Controllers\u0020read\u0020exactly\u0020this\u0020name\u0020from\nthe\u0020callback\u0020request\u0020and\u0020pass\u0020its\u0020value\u0020to\u0020\u007B\u0040see\u0020self\u003A\u003Acomplete\u0028\u0029\u007D.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieName"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow\u003A\u003AisSafeReturnTo\u0028\u0029",
+            "name": "isSafeReturnTo",
+            "summary": "\u00A712.8\u0020rule\u00203\u003A\u0020true\u0020when\u0020\u0060\u0024returnTo\u0060\u0020is\u0020a\u0020same\u002Dorigin\u0020relative\u0020path\u0020\u2014\u0020it\u0020starts\u0020with\u0020a\nsingle\u0020\u0060\/\u0060,\u0020does\u0020not\u0020start\u0020with\u0020\u0060\/\/\u0060\u0020or\u0020\u0060\/\\\u0060,\u0020and\u0020contains\u0020no\u0020\u0060\\\u0060\u0020anywhere\u0020and\u0020no\ncontrol\u0020character\u0020\u0028U\u002B0000\u2013U\u002B001F,\u0020U\u002B007F\u0029.\u0020An\u0020absolute\u0020URL,\u0020a\u0020scheme\u002Drelative\u0020one,\u0020a\nbackslash\u0020form\u0020and\u0020a\u0020value\u0020with\u0020a\u0020control\u0020character\u0020are\u0020never\u0020honoured.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_isSafeReturnTo"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow\u003A\u003Abegin\u0028\u0029",
             "name": "begin",
             "summary": "Step\u00201\u0020\u2014\u0020build\u0020the\u0020authorization\u0020request,\u0020park\u0020its\u0020state,\u0020and\u0020hand\u0020back\u0020the\nredirect\u0020\u0028CONTRACT.md\u0020\u00A712.1\u0020\u0060oidc_begin\u0060\u0029.",
@@ -17838,18 +18123,38 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow\u003A\u003Acomplete\u0028\u0029",
             "name": "complete",
-            "summary": "Step\u00202\u0020\u2014\u0020validate\u0020the\u0020callback,\u0020consume\u0020the\u0020stored\u0020state,\u0020exchange\u0020the\u0020code,\u0020and\nhand\u0020back\u0020the\u0020post\u002Dlogin\u0020response\u0020\u0028CONTRACT.md\u0020\u00A712.1\u0020\u0060oidc_exchange\u0060\u0029.",
+            "summary": "Step\u00202\u0020\u2014\u0020validate\u0020the\u0020callback,\u0020consume\u0020the\u0020stored\u0020state,\u0020check\u0020it\u0020is\u0020the\u0020browser\u0020that\nstarted\u0020the\u0020login,\u0020exchange\u0020the\u0020code,\u0020and\u0020hand\u0020back\u0020the\u0020post\u002Dlogin\u0020response\n\u0028CONTRACT.md\u0020\u00A712.1\u0020\u0060oidc_exchange\u0060,\u0020\u00A712.8\u0029.",
             "url": "classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_complete"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow\u003A\u003ABINDING_COOKIE_NAME",
+            "name": "BINDING_COOKIE_NAME",
+            "summary": "The\u0020browser\u002Dbinding\u0020cookie\u0027s\u0020name\u0020\u0028\u00A712.8\u0020rule\u00201\u0020\u0028a\u0029\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_NAME"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginFlow\u003A\u003ABINDING_COOKIE_LOOPBACK_NAME",
+            "name": "BINDING_COOKIE_LOOPBACK_NAME",
+            "summary": "The\u0020name\u0020used\u0020ONLY\u0020where\u0020the\u0020flow\u0027s\u0020own\u0020\u0060redirect_uri\u0060\u0020is\u0020plain\u002DHTTP\u0020on\u0020a\u0020loopback\u0020host\n\u0028\u00A712.8\u0020rule\u00201\u0020\u0028b\u0029\u0029,\u0020where\u0020a\u0020browser\u0020will\u0020not\u0020store\u0020a\u0020\u0060Secure\u0060\u0020cookie.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_LOOPBACK_NAME"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginOutcome",
             "name": "OidcLoginOutcome",
             "summary": "What\u0020a\u0020login\/callback\u0020handler\u0020should\u0020do\u0020next\u0020\u2014\u0020one\u0020shape\u0020per\u0020outcome\u0020kind.\u0020Framework\ncontrollers\u0020\u0028\u007B\u0040see\u0020\\Axiam\\Sdk\\Laravel\\OidcLoginController\u007D\/\u0060OidcCallbackController\u0060,\n\u007B\u0040see\u0020\\Axiam\\Sdk\\Symfony\\OidcLoginController\u007D\/\u0060OidcCallbackController\u0060\u0029\u0020translate\u0020this\ninto\u0020their\u0020own\u0020framework\u0027s\u0020redirect\/JSON\u0020response\u0020and\u0020add\u0020nothing\u0020of\u0020their\u0020own,\u0020so\nLaravel\u0020and\u0020Symfony\u0020cannot\u0020drift\u0020\u0028mirrors\u0020the\u0020TypeScript\u0020reference\u0027s\n\u0060OidcLoginOutcome\u0060\u0020discriminated\u0020union\u0029.",
             "url": "classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginOutcome\u003A\u003AwithSetCookie\u0028\u0029",
+            "name": "withSetCookie",
+            "summary": "The\u0020same\u0020outcome\u0020carrying\u0020\u0060\u0024setCookie\u0060\u0020as\u0020its\u0020\u0060Set\u002DCookie\u0060\u0020header\u0020value.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_withSetCookie"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginOutcome\u003A\u003Aredirect\u0028\u0029",
             "name": "redirect",
             "summary": "Send\u0020a\u0020302\u0020to\u0020\u0060\u0024url\u0060\u0020\u2014\u0020the\u0020IdP\u0020authorization\u0020URL,\u0020or\u0020the\u0020post\u002Dlogin\u0020destination.",
             "url": "classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_redirect"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginOutcome\u003A\u003AencodeLocation\u0028\u0029",
+            "name": "encodeLocation",
+            "summary": "The\u0020value\u0020a\u0020controller\u0020writes\u0020into\u0020the\u0020\u0060Location\u0060\u0020header\u0020for\u0020a\u0020redirect\u0020to\u0020\u0060\u0024destination\u0060\u003A\nits\u0020percent\u002Dencoded\u0020form\u0020\u0028login\u002Dglue\u0020Decision\u00207,\u0020\u00A712.8\u0020rule\u00203\u0029.\u0020The\u0020ADAPTER\u0020encodes,\u0020at\u0020the\npoint\u0020where\u0020it\u0020writes\u0020the\u0020header\u003B\u0020the\u0020application\u0020is\u0020never\u0020asked\u0020to,\u0020and\u0020its\u0020hooks\n\u0028\u0060allowReturnTo\u0060,\u0020\u0060\u0024onSuccess\u0060\u0029\u0020see\u0020the\u0020raw\u0020value.\u0020The\u0020core\u0020keeps\u0020returning\u0020the\u0020raw\ndestination\u0020in\u0020\u007B\u0040see\u0020self\u003A\u003A\u0024redirectUrl\u007D.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_encodeLocation"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginOutcome\u003A\u003Ajson\u0028\u0029",
             "name": "json",
@@ -17921,6 +18226,11 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_message"
         },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcLoginOutcome\u003A\u003A\u0024setCookie",
+            "name": "setCookie",
+            "summary": "A\u0020complete\u0020\u0060Set\u002DCookie\u0060\u0020header\u0020value\u0020the\u0020controller\u0020MUST\u0020send\u0020with\u0020this\u0020response,\nor\u0020\u0060null\u0060.\u0020The\u0020login\u0020redirect\u0020carries\u0020the\u0020browser\u002Dbinding\u0020cookie\u003B\u0020EVERY\u0020callback\noutcome\u0020carries\u0020its\u0020clearing\u0020twin\u0020\u0028CONTRACT.md\u0020\u00A712.8\u0020rule\u00201\u0020\u0028a\u0029,\u0020\u0028d\u0029\u0029.",
+            "url": "classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_setCookie"
+        },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcStateEntry",
             "name": "OidcStateEntry",
             "summary": "The\u0020tuple\u0020an\u0020\u007B\u0040see\u0020OidcStateStoreInterface\u007D\u0020holds\u0020for\u0020one\u0020in\u002Dflight\u0020login.",
@@ -17955,6 +18265,11 @@ Search.appendIndex(
             "name": "returnTo",
             "summary": "",
             "url": "classes/Axiam-Sdk-Oidc-OidcStateEntry.html#property_returnTo"
+        },                {
+            "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcStateEntry\u003A\u003A\u0024bindingDigest",
+            "name": "bindingDigest",
+            "summary": "",
+            "url": "classes/Axiam-Sdk-Oidc-OidcStateEntry.html#property_bindingDigest"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Oidc\\OidcStateStoreInterface",
             "name": "OidcStateStoreInterface",
@@ -19623,7 +19938,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Session\u003A\u003ArefreshGuard\u0028\u0029",
             "name": "refreshGuard",
-            "summary": "The\u0020generic\u0020single\u002Dflight\u0020primitive\u0020behind\u0020\u007B\u0040see\u0020self\u003A\u003ArefreshIfNeeded\u0028\u0029\u007D\n\u0028CONTRACT.md\u0020\u00A79\u0029\u0020\u2014\u0020and,\u0020additively,\u0020behind\u0020\u0060oidc_refresh\u0060\u0027s\u0020own\u0020single\u002Dflight\nrequirement\u0020\u0028\u00A712.1\u003A\u0020\u0022\u0060oidc_refresh\u0060\u0020MUST\u0020be\u0020governed\u0020by\u0020a\u0020\u00A79\u002Dconformant\nsingle\u002Dflight\u0020guard\u0022\u0029.\u0020Both\u0020share\u0020the\u0020SAME\u0020\u0060\u0024refreshPromise\u0060\u0020slot,\u0020so\u0020a\ncookie\u002Dsession\u0020refresh\u0020and\u0020an\u0020\u0060oidcRefresh\u0028\u0029\u0060\u0020call\u0020can\u0020never\u0020race\u0020each\u0020other\nindependently\u0020\u2014\u0020whichever\u0020gets\u0020here\u0020first\u0020\u0022owns\u0022\u0020the\u0020slot\u0020until\u0020it\u0020settles.",
+            "summary": "The\u0020generic\u0020single\u002Dflight\u0020primitive\u0020behind\u0020\u007B\u0040see\u0020self\u003A\u003ArefreshIfNeeded\u0028\u0029\u007D\n\u0028CONTRACT.md\u0020\u00A79\u0029\u0020\u2014\u0020and,\u0020additively,\u0020behind\u0020\u0060oidc_refresh\u0060\u0027s\u0020own\u0020single\u002Dflight\nrequirement\u0020\u0028\u00A712.1\u003A\u0020\u0022\u0060oidc_refresh\u0060\u0020MUST\u0020be\u0020governed\u0020by\u0020a\u0020\u00A79\u002Dconformant\nsingle\u002Dflight\u0020guard\u0022\u0029.",
             "url": "classes/Axiam-Sdk-Session.html#method_refreshGuard"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Session\u003A\u003AREFRESH_KIND_SESSION",
@@ -19633,7 +19948,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Session\u003A\u003AREFRESH_KIND_OIDC",
             "name": "REFRESH_KIND_OIDC",
-            "summary": "Guard\u002Dslot\u0020kind\u0020for\u0020the\u0020\u00A712\u0020\u0060oidc_refresh\u0060\u0020OAuth2\u0020token\u002Dendpoint\u0020path\n\u0028CONTRACT.md\u0020\u00A79\u0020rule\u00205\u0020\/\u0020F\u002D06\u0029.\u0020Used\u0020by\u0020\u007B\u0040see\u0020\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AoidcRefresh\u0028\u0029\u007D\nso\u0020a\u0020second\u0020concurrent\u0020\u0060oidcRefresh\u0060\u0020caller\u0020can\u0020recognise\u0020the\u0020guard\u0020is\u0020busy\u0020with\nANOTHER\u0020\u0060oidcRefresh\u0060\u0020\u0028same\u0020kind\u0029\u0020and\u0020share\u0020its\u0020single\u0020outcome,\u0020instead\u0020of\nre\u002Dacquiring\u0020the\u0020guard\u0020and\u0020issuing\u0020its\u0020own\u0020wire\u0020call\u0020that\u0020would\u0020replay\u0020an\nalready\u002Dconsumed\u0020\u0028single\u002Duse,\u0020rotating\u0029\u0020refresh\u0020token.",
+            "summary": "Guard\u002Dslot\u0020kind\u0020for\u0020the\u0020\u00A712\u0020\u0060oidc_refresh\u0060\u0020OAuth2\u0020token\u002Dendpoint\u0020path\n\u0028CONTRACT.md\u0020\u00A79\u0020rule\u00205\u0020\/\u0020F\u002D06\u0029.\u0020Used\u0020by\u0020\u007B\u0040see\u0020\\Axiam\\Sdk\\Oidc\\OidcClient\u003A\u003AoidcRefresh\u0028\u0029\u007D\ntogether\u0020with\u0020a\u0020per\u002Drefresh\u002Dtoken\u0020key,\u0020so\u0020a\u0020second\u0020concurrent\u0020caller\u0020presenting\u0020the\nSAME\u0020token\u0020shares\u0020the\u0020one\u0020wire\u0020call\u0027s\u0020outcome\u0020instead\u0020of\u0020replaying\u0020an\u0020already\u002Dconsumed\n\u0028single\u002Duse,\u0020rotating\u0029\u0020token,\u0020while\u0020a\u0020caller\u0020with\u0020a\u0020different\u0020token\u0020has\u0020its\u0020own\u0020flight.",
             "url": "classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_OIDC"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Ssf\\InMemoryReplayStore",
@@ -20008,12 +20323,12 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAccessAttributeListener\u003A\u003AonKernelController\u0028\u0029",
             "name": "onKernelController",
-            "summary": "Reflects\u0020the\u0020resolved\u0020controller\u0020for\u0020\u0060\u0023\u005BRequireAuth\u005D\u0060\/\u0060\u0023\u005BRequireRole\u005D\u0060\/\n\u0060\u0023\u005BRequireAccess\u005D\u0060\u0020and,\u0020when\u0020any\u0020are\u0020present,\u0020enforces\u0020them\u0020via\n\u007B\u0040see\u0020AccessEnforcer\u007D\u0020\u2014\u0020replacing\u0020the\u0020controller\u0020with\u0020a\u0020closure\u0020returning\u0020the\nerror\u0020response\u0020on\u0020the\u0020first\u0020failing\u0020check.\u0020Checks\u0020are\u0020evaluated\u0020in\u0020the\u0020order\nauth\u0020\u002D\u003E\u0020role\u0020\u002D\u003E\u0020access\u0020\u0028each\u0020of\u0020\u007B\u0040see\u0020AccessEnforcer\u007D\u0027s\u0020own\u0020methods\u0020re\u002Dchecks\nauthentication\u0020internally\u0020too,\u0020so\u0020this\u0020ordering\u0020only\u0020affects\u0020which\u0020message\u0020a\ncaller\u0020sees\u0020first,\u0020never\u0020the\u0020correctness\u0020of\u0020the\u0020final\u0020decision\u0029.",
+            "summary": "Reflects\u0020the\u0020resolved\u0020controller\u0020for\u0020\u0060\u0023\u005BRequireAuth\u005D\u0060\/\u0060\u0023\u005BRequireRole\u005D\u0060\/\n\u0060\u0023\u005BRequireAccess\u005D\u0060\u0020and,\u0020when\u0020any\u0020are\u0020present,\u0020enforces\u0020them\u0020via\n\u007B\u0040see\u0020AccessEnforcer\u007D\u0020\u2014\u0020replacing\u0020the\u0020controller\u0020with\u0020a\u0020closure\u0020returning\u0020the\nerror\u0020response\u0020on\u0020the\u0020first\u0020failing\u0020check.\u0020Checks\u0020are\u0020evaluated\u0020in\u0020the\u0020order\nauth\u0020\u002D\u003E\u0020role\u0020\u002D\u003E\u0020scope\u0020\u002D\u003E\u0020access\u0020\u0028each\u0020of\u0020\u007B\u0040see\u0020AccessEnforcer\u007D\u0027s\u0020own\u0020methods\u0020re\u002Dchecks\nauthentication\u0020internally\u0020too,\u0020so\u0020this\u0020ordering\u0020only\u0020affects\u0020which\u0020message\u0020a\ncaller\u0020sees\u0020first,\u0020never\u0020the\u0020correctness\u0020of\u0020the\u0020final\u0020decision\u0029.",
             "url": "classes/Axiam-Sdk-Symfony-AxiamAccessAttributeListener.html#method_onKernelController"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAuthSubscriber",
             "name": "AxiamAuthSubscriber",
-            "summary": "Symfony\u0020authentication\u0020subscriber\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020listens\u0020to\n\u0060kernel.request\u0060,\u0020extracts\u0020the\u0020bearer\/cookie\u0020token,\u0020verifies\u0020it\u0020via\n\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocally\u0028\u0029\u007D\u0020\u2014\u0020the\u0020no\u002Dfallback\u0020seam\u0020mandated\u0020by\u0020\u00A710.1\u0020rule\u00208\n\u2014\u0020and\u0020populates\u0020the\u0020\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\u0020\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\non\u0020success.\u0020Short\u002Dcircuits\u0020the\u0020request\u0020with\u0020a\u0020standardized\u0020401\u0020JSON\u0020error\u0020body\u0020on\u0020any\nfailure\u0020\u0028missing\u0020token,\u0020invalid\u0020signature,\u0020expired\u0020token\u0029.\u0020Never\u0020duplicates\nJWKS\u002Dverify\u0020logic\u0020itself\u0020\u0028D\u002D02\u0020prohibition\u0029\u0020\u2014\u0020every\u0020security\u002Dcritical\u0020decision\u0020is\nmade\u0020by\u0020\u007B\u0040see\u0020AxiamClient\u007D.",
+            "summary": "Symfony\u0020authentication\u0020subscriber\u0020\u0028D\u002D02,\u0020CONTRACT.md\u0020\u00A710\u0029\u003A\u0020listens\u0020to\n\u0060kernel.request\u0060,\u0020extracts\u0020the\u0020bearer\/cookie\u0020token,\u0020verifies\u0020it\u0020via\n\u007B\u0040see\u0020AxiamClient\u003A\u003AverifyLocally\u0028\u0029\u007D\u0020\u2014\u0020the\u0020no\u002Dfallback\u0020seam\u0020mandated\u0020by\u0020\u00A710.1\u0020rule\u00208\n\u2014\u0020and\u0020populates\u0020the\u0020\u0060axiam_user\u0060\u0020request\u0020attribute\u0020with\u0020\u0060user_id\u0060\/\u0060tenant_id\u0060\/\u0060roles\u0060\/\u0060scopes\u0060\non\u0020success\u0020\u0028\u0060roles\u0060\u0020from\u0020the\u0020token\u0027s\u0020\u0060roles\u0060\u0020claim\u0020only,\u0020\u0060null\u0060\u0020when\u0020it\u0020has\u0020none\u003B\u0020\u0060scopes\u0060\u0020from\u0020\u0060scope\u0060\u0029.\u0020Short\u002Dcircuits\u0020the\u0020request\u0020with\u0020a\u0020standardized\u0020401\u0020JSON\u0020error\u0020body\u0020on\u0020any\nfailure\u0020\u0028missing\u0020token,\u0020invalid\u0020signature,\u0020expired\u0020token\u0029.\u0020Never\u0020duplicates\nJWKS\u002Dverify\u0020logic\u0020itself\u0020\u0028D\u002D02\u0020prohibition\u0029\u0020\u2014\u0020every\u0020security\u002Dcritical\u0020decision\u0020is\nmade\u0020by\u0020\u007B\u0040see\u0020AxiamClient\u007D.",
             "url": "classes/Axiam-Sdk-Symfony-AxiamAuthSubscriber.html"
         },                {
             "fqsen": "\\Axiam\\Sdk\\Symfony\\AxiamAuthSubscriber\u003A\u003A__construct\u0028\u0029",

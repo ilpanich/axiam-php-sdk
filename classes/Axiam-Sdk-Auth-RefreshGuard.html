@@ -133,7 +133,7 @@
 
     <section class="phpdocumentor-description"><p><abbr title="\Axiam\Sdk\Auth\self::settle()">self::settle()</abbr> wraps a refresh call's raw <code class="prettyprint">PromiseInterface</code> so that,
 regardless of success or failure, the caller's <code class="prettyprint">$onClear</code> closure runs exactly
-once — clearing the caller's own stored promise slot (e.g. <code class="prettyprint">Session::$refreshPromise</code>)
+once — clearing the caller's own stored promise slot (e.g. an entry of <code class="prettyprint">Session::$refreshSlots</code>)
 so the NEXT 401 always starts a brand-new refresh attempt (§9.3: no retry loop; a
 failed refresh is never cached for the next caller, mirroring the C# sibling
 <code class="prettyprint">Axiam.Sdk.Auth.RefreshGuard</code>'s &quot;never cache a faulted refresh&quot; invariant).</p>

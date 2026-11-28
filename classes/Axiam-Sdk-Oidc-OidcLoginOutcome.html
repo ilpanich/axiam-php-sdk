@@ -223,6 +223,15 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_setCookie">$setCookie</a>
+    <span>
+                        &nbsp;: string|null            </span>
+</dt>
+<dd>A complete `Set-Cookie` header value the controller MUST send with this response,
+or `null`. The login redirect carries the browser-binding cookie; EVERY callback
+outcome carries its clearing twin (CONTRACT.md §12.8 rule 1 (a), (d)).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_status">$status</a>
     <span>
                         &nbsp;: int|null            </span>
@@ -242,6 +251,17 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_encodeLocation">encodeLocation()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>The value a controller writes into the `Location` header for a redirect to `$destination`:
+its percent-encoded form (login-glue Decision 7, §12.8 rule 3). The ADAPTER encodes, at the
+point where it writes the header; the application is never asked to, and its hooks
+(`allowReturnTo`, `$onSuccess`) see the raw value. The core keeps returning the raw
+destination in {@see self::$redirectUrl}.</dd>
+
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_error">error()</a>
     <span>
@@ -274,6 +294,13 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
                                 &nbsp;: self    </span>
 </dt>
 <dd>Send a 302 to `$url` — the IdP authorization URL, or the post-login destination.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_withSetCookie">withSetCookie()</a>
+    <span>
+                                &nbsp;: self    </span>
+</dt>
+<dd>The same outcome carrying `$setCookie` as its `Set-Cookie` header value.</dd>
 
     </dl>
 
@@ -614,6 +641,46 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
             -public
                                                 -read-only                    "
 >
+    <h4 class="phpdocumentor-element__name" id="property_setCookie">
+        $setCookie
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_setCookie" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                        <small class="phpdocumentor-element__modifier">read-only</small>                    </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">35</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">A complete `Set-Cookie` header value the controller MUST send with this response,
+or `null`. The login redirect carries the browser-binding cookie; EVERY callback
+outcome carries its clearing twin (CONTRACT.md §12.8 rule 1 (a), (d)).</p>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">string|null</span>
+    <span class="phpdocumentor-signature__name">$setCookie</span>
+     = <span class="phpdocumentor-signature__default-value">null</span></code>
+
+    
+    
+    
+
+        
+        
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                -read-only                    "
+>
     <h4 class="phpdocumentor-element__name" id="property_status">
         $status
         <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_status" class="headerlink"><i class="fas fa-link"></i></a>
@@ -695,6 +762,76 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
             -public
                                     -static                    "
 >
+    <h4 class="phpdocumentor-element__name" id="method_encodeLocation">
+        encodeLocation()
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_encodeLocation" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">85</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The value a controller writes into the `Location` header for a redirect to `$destination`:
+its percent-encoded form (login-glue Decision 7, §12.8 rule 3). The ADAPTER encodes, at the
+point where it writes the header; the application is never asked to, and its hooks
+(`allowReturnTo`, `$onSuccess`) see the raw value. The core keeps returning the raw
+destination in {@see self::$redirectUrl}.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">encodeLocation</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$destination</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>Why it is needed: <code class="prettyprint">return_to</code> is accepted raw (the framework has already percent-decoded the
+query parameter), so <code class="prettyprint">/a b</code>, <code class="prettyprint">/café</code> and, for an integrator whose <code class="prettyprint">allowReturnTo</code> admits
+it, CR/LF are all valid stored values, while a header may hold only visible ASCII. The
+rules, those of <code class="prettyprint">encodeurl</code>:</p>
+<ol>
+<li>every byte outside <code class="prettyprint">A-Z a-z 0-9 ! # $ % &amp; ' ( ) * + , - . / : ; = ? @ [ \ ] ^ _ | ~</code> is
+written as <code class="prettyprint">%XX</code> with upper-case hex (UTF-8 bytes of a non-ASCII character each; space
+<code class="prettyprint">%20</code>, CR <code class="prettyprint">%0D</code>, LF <code class="prettyprint">%0A</code>, <code class="prettyprint">&quot;</code> <code class="prettyprint">%22</code>, <code class="prettyprint">&lt;</code> <code class="prettyprint">%3C</code>, <code class="prettyprint">&gt;</code> <code class="prettyprint">%3E</code>, <code class="prettyprint">`</code> <code class="prettyprint">%60</code>); a backslash is
+KEPT as it is; each maximal subpart of an ill-formed UTF-8 sequence becomes one U+FFFD
+(<code class="prettyprint">%EF%BF%BD</code>) first, never an error;</li>
+<li>a <code class="prettyprint">%</code> that starts a well-formed escape (<code class="prettyprint">%</code> and two hex digits) is kept, so a value
+that is already encoded is not encoded twice; any other <code class="prettyprint">%</code> becomes <code class="prettyprint">%25</code>;</li>
+<li>the result is pure visible ASCII (<code class="prettyprint">0x21</code>–<code class="prettyprint">0x7E</code>), so CR/LF can never split the header.</li>
+</ol>
+<p>Applying it to a value that is already in this form changes nothing, so the IdP
+authorization URL of the login redirect passes through it unchanged.</p>
+</section>
+
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$destination</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
     <h4 class="phpdocumentor-element__name" id="method_error">
         error()
         <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_error" class="headerlink"><i class="fas fa-link"></i></a>
@@ -703,7 +840,7 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">46</span>
+    <span class="phpdocumentor-element-found-in__line">163</span>
 
     </aside>
 
@@ -766,7 +903,7 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">52</span>
+    <span class="phpdocumentor-element-found-in__line">169</span>
 
     </aside>
 
@@ -804,7 +941,7 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">40</span>
+    <span class="phpdocumentor-element-found-in__line">157</span>
 
     </aside>
 
@@ -860,7 +997,7 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">60</span>
+    <span class="phpdocumentor-element-found-in__line">177</span>
 
     </aside>
 
@@ -898,7 +1035,7 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">56</span>
 
     </aside>
 
@@ -916,6 +1053,55 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$url</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">self</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_withSetCookie">
+        withSetCookie()
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_withSetCookie" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginOutcome.php"><a href="files/src-oidc-oidcloginoutcome.html"><abbr title="src/Oidc/OidcLoginOutcome.php">OidcLoginOutcome.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">40</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The same outcome carrying `$setCookie` as its `Set-Cookie` header value.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">withSetCookie</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$setCookie</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">self</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$setCookie</span>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
@@ -970,6 +1156,7 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_kind">$kind</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_message">$message</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_redirectUrl">$redirectUrl</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_setCookie">$setCookie</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_status">$status</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_sub">$sub</a></li>
                                             </ul>
@@ -978,11 +1165,13 @@ Laravel and Symfony cannot drift (mirrors the TypeScript reference&#039;s
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_encodeLocation">encodeLocation()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_error">error()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_errorBody">errorBody()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_json">json()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_jsonBody">jsonBody()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_redirect">redirect()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#method_withSetCookie">withSetCookie()</a></li>
                                     </ul>
             </li>
                     </ul>

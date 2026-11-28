@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">56</span>
 
     </aside>
 
@@ -139,8 +139,22 @@ bridges in this SDK).</p>
 
     <section class="phpdocumentor-description"><p>Framework-agnostic on purpose: it takes plain values in and returns a discriminated
 <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a> out, so each framework controller only has to translate an
-outcome into that framework's redirect/JSON response. It performs no cookie/session
-writing of its own and touches no framework request/response object.</p>
+outcome into that framework's redirect/JSON response. It writes no session of its own
+and touches no framework request/response object: the one cookie it needs — the
+browser-binding cookie of CONTRACT.md §12.8 (contract 1.68; C7) — is handed to the
+controller as a finished <code class="prettyprint">Set-Cookie</code> value (<a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_setCookie"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome::$setCookie">OidcLoginOutcome::$setCookie</abbr></a>) and
+read back from the request by the controller, which passes its value to
+<abbr title="\Axiam\Sdk\Oidc\self::complete()">self::complete()</abbr>.</p>
+<p><strong>Browser binding (§12.8 rule 1; C7).</strong> <code class="prettyprint">begin()</code> draws a fresh random value, stores its
+SHA-256 on the state entry and hands the value back as the
+<code class="prettyprint">__Host-axiam_oidc_bind</code> cookie; <code class="prettyprint">complete()</code> consumes the entry FIRST and then refuses,
+with the same <code class="prettyprint">401</code> an unknown state gets, any callback that does not present the cookie
+whose digest the entry holds — before any token request and before <code class="prettyprint">$onSuccess</code>. Without
+it, knowing a live <code class="prettyprint">state</code> was treated as proof that the callback came from the browser
+that started the login, so an attacker could finish THEIR login in a victim's browser.
+There is no way to switch the binding off.</p>
+<p><strong><code class="prettyprint">return_to</code> (§12.8 rule 3; C6).</strong> Only a same-origin relative path is ever stored or
+followed (<abbr title="\Axiam\Sdk\Oidc\self::isSafeReturnTo()">self::isSafeReturnTo()</abbr>).</p>
 <p>The state store is what makes the two HTTP requests of a redirect flow into one
 login: <code class="prettyprint">oidcBegin</code> produces <code class="prettyprint">state</code>/<code class="prettyprint">nonce</code>/<code class="prettyprint">code_verifier</code> on the login request, and
 only <code class="prettyprint">state</code> survives the round trip through the IdP, so the other two must be parked
@@ -169,6 +183,28 @@ in <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html"><abbr title="\A
 
 
 
+<h4 id="toc-constants">
+    Constants
+    <a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#toc-constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_LOOPBACK_NAME">BINDING_COOKIE_LOOPBACK_NAME</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;axiam_oidc_bind&#039;                            </span>
+</dt>
+<dd>The name used ONLY where the flow&#039;s own `redirect_uri` is plain-HTTP on a loopback host
+(§12.8 rule 1 (b)), where a browser will not store a `Secure` cookie.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_NAME">BINDING_COOKIE_NAME</a>
+    <span>
+        &nbsp;: mixed&nbsp;= &#039;__Host-axiam_oidc_bind&#039;                            </span>
+</dt>
+<dd>The browser-binding cookie&#039;s name (§12.8 rule 1 (a)).</dd>
+
+    </dl>
 
 
 
@@ -193,18 +229,120 @@ in <a href="classes/Axiam-Sdk-Laravel-AxiamServiceProvider.html"><abbr title="\A
 redirect (CONTRACT.md §12.1 `oidc_begin`).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieName">bindingCookieName()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>The cookie name THIS flow sets at login and reads at the callback — and ONLY this one:
+a cookie of the other name is no cookie at all. Controllers read exactly this name from
+the callback request and pass its value to {@see self::complete()}.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieNameFor">bindingCookieNameFor()</a>
+    <span>
+                                &nbsp;: string    </span>
+</dt>
+<dd>The name of the binding cookie for a flow whose callback is `$redirectUri` — a pure
+function of that URI (§12.8 rule 1 (b)): `axiam_oidc_bind` when it is `http:` on
+`localhost`, `127.0.0.1` or `[::1]`, and `__Host-axiam_oidc_bind` for everything else,
+every `https:` URI and plain HTTP to any other host included (on which the browser drops
+the cookie and every callback fails closed). The fallback is never selectable off
+loopback, by configuration or otherwise.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_complete">complete()</a>
     <span>
                                 &nbsp;: <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a>    </span>
 </dt>
-<dd>Step 2 — validate the callback, consume the stored state, exchange the code, and
-hand back the post-login response (CONTRACT.md §12.1 `oidc_exchange`).</dd>
+<dd>Step 2 — validate the callback, consume the stored state, check it is the browser that
+started the login, exchange the code, and hand back the post-login response
+(CONTRACT.md §12.1 `oidc_exchange`, §12.8).</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_isSafeReturnTo">isSafeReturnTo()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>§12.8 rule 3: true when `$returnTo` is a same-origin relative path — it starts with a
+single `/`, does not start with `//` or `/\`, and contains no `\` anywhere and no
+control character (U+0000–U+001F, U+007F). An absolute URL, a scheme-relative one, a
+backslash form and a value with a control character are never honoured.</dd>
 
     </dl>
 
 
 
         
+    <section class="phpdocumentor-constants">
+        <h3 class="phpdocumentor-elements__header" id="constants">
+            Constants
+            <a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constants" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_BINDING_COOKIE_LOOPBACK_NAME">
+        BINDING_COOKIE_LOOPBACK_NAME
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_LOOPBACK_NAME" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">65</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The name used ONLY where the flow&#039;s own `redirect_uri` is plain-HTTP on a loopback host
+(§12.8 rule 1 (b)), where a browser will not store a `Secure` cookie.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">BINDING_COOKIE_LOOPBACK_NAME</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;axiam_oidc_bind&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_BINDING_COOKIE_NAME">
+        BINDING_COOKIE_NAME
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_NAME" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">59</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The browser-binding cookie&#039;s name (§12.8 rule 1 (a)).</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">BINDING_COOKIE_NAME</span>
+    = <span class="phpdocumentor-signature__default-value">&#039;__Host-axiam_oidc_bind&#039;</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+            </section>
 
         
 
@@ -228,14 +366,14 @@ hand back the post-login response (CONTRACT.md §12.1 `oidc_exchange`).</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">93</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$client</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateStoreInterface">OidcStateStoreInterface</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$store</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$redirectUri</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">new <abbr title="\Psr\Log\NullLogger">NullLogger</abbr>()</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-AxiamClient.html"><abbr title="\Axiam\Sdk\AxiamClient">AxiamClient</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$client</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Oidc-OidcStateStoreInterface.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateStoreInterface">OidcStateStoreInterface</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$store</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$redirectUri</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|array&lt;int, string&gt;|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$scope</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">new <abbr title="\Psr\Log\NullLogger">NullLogger</abbr>()</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(string): bool|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$allowReturnTo</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -292,8 +430,23 @@ automatically when absent (§12.1 rule 4).</p>
                  = <span class="phpdocumentor-argument-list__argument__default-value">new <abbr title="\Psr\Log\NullLogger">NullLogger</abbr>()</span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Debug-only logger. Receives failure reasons, never
-token material, <code class="prettyprint">state</code>, <code class="prettyprint">nonce</code>, or the verifier. Defaults to a silent
-<abbr title="\Psr\Log\NullLogger">NullLogger</abbr>.</p>
+token material, <code class="prettyprint">state</code>, <code class="prettyprint">nonce</code>, the verifier or the binding-cookie value.
+Defaults to a silent <abbr title="\Psr\Log\NullLogger">NullLogger</abbr>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$allowReturnTo</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(string): bool|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>OPTIONAL integrator predicate that
+MAY widen the <code class="prettyprint">return_to</code> rule (§12.8 rule 3) — for example to an allowlist of the
+application's other origins. It is consulted, at login and again before the
+redirect, ONLY for a value the default same-origin-relative-path rule refuses, and
+the value is honoured only when it returns <code class="prettyprint">true</code>; a predicate that throws accepts
+nothing. <code class="prettyprint">null</code> (the default) leaves the default rule alone in charge. The SDK
+ships no predicate that accepts absolute URLs.</p>
 </section>
 
             </dd>
@@ -319,7 +472,7 @@ token material, <code class="prettyprint">state</code>, <code class="prettyprint
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">78</span>
+    <span class="phpdocumentor-element-found-in__line">203</span>
 
     </aside>
 
@@ -347,7 +500,10 @@ discovery endpoint (§12.3 rule 6).</p>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Optional application destination to restore after
 login; stored with the state entry and used as the post-login redirect
-when no explicit <code class="prettyprint">$successRedirect</code> is given to <abbr title="\Axiam\Sdk\Oidc\self::complete()">self::complete()</abbr>.</p>
+when no explicit <code class="prettyprint">$successRedirect</code> is given to <abbr title="\Axiam\Sdk\Oidc\self::complete()">self::complete()</abbr>.
+Only a same-origin relative path is stored (<abbr title="\Axiam\Sdk\Oidc\self::isSafeReturnTo()">self::isSafeReturnTo()</abbr>);
+anything else is DROPPED and the login proceeds as though none was given
+(§12.8 rule 3).</p>
 </section>
 
             </dd>
@@ -360,6 +516,106 @@ when no explicit <code class="prettyprint">$successRedirect</code> is given to <
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a></span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p>A redirect to the IdP whose <a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_setCookie"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome::$setCookie">OidcLoginOutcome::$setCookie</abbr></a>
+is the binding cookie the controller MUST send with it.</p>
+</section>
+
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_bindingCookieName">
+        bindingCookieName()
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieName" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">130</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The cookie name THIS flow sets at login and reads at the callback — and ONLY this one:
+a cookie of the other name is no cookie at all. Controllers read exactly this name from
+the callback request and pass its value to {@see self::complete()}.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">bindingCookieName</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_bindingCookieNameFor">
+        bindingCookieNameFor()
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieNameFor" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">111</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The name of the binding cookie for a flow whose callback is `$redirectUri` — a pure
+function of that URI (§12.8 rule 1 (b)): `axiam_oidc_bind` when it is `http:` on
+`localhost`, `127.0.0.1` or `[::1]`, and `__Host-axiam_oidc_bind` for everything else,
+every `https:` URI and plain HTTP to any other host included (on which the browser drops
+the cookie and every callback fails closed). The fallback is never selectable off
+loopback, by configuration or otherwise.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">bindingCookieNameFor</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$redirectUri</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">string</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$redirectUri</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">string</span>
             </section>
 
 </article>
@@ -377,36 +633,59 @@ when no explicit <code class="prettyprint">$successRedirect</code> is given to <
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">125</span>
+    <span class="phpdocumentor-element-found-in__line">288</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Step 2 — validate the callback, consume the stored state, exchange the code, and
-hand back the post-login response (CONTRACT.md §12.1 `oidc_exchange`).</p>
+        <p class="phpdocumentor-summary">Step 2 — validate the callback, consume the stored state, check it is the browser that
+started the login, exchange the code, and hand back the post-login response
+(CONTRACT.md §12.1 `oidc_exchange`, §12.8).</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">complete</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$state</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$code</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$error</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$errorDescription</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$successRedirect</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(<a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a>, <a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>): void|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$onSuccess</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a></span></code>
+                    <span class="phpdocumentor-signature__name">complete</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$state</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$code</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$error</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$errorDescription</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$successRedirect</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(<a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a>, <a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>, mixed): void|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$onSuccess</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$bindingCookie</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$request</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Failure mapping (port-brief addendum item 19):</p>
+        <section class="phpdocumentor-description"><p>Order (§12.8 rule 1 (c)): the IdP <code class="prettyprint">error</code>, then missing <code class="prettyprint">state</code>/<code class="prettyprint">code</code>, then
+<strong>consume the entry</strong>, then the binding check, then the exchange, then <code class="prettyprint">$onSuccess</code>.
+Consuming comes first so the <code class="prettyprint">state</code> is single-use whatever happens next.</p>
+<p>Failure mapping (port-brief addendum item 19):</p>
 <ul>
 <li>IdP returned <code class="prettyprint">$error</code> instead of a code → <code class="prettyprint">401 authentication_failed</code>;</li>
 <li><code class="prettyprint">$state</code> or <code class="prettyprint">$code</code> missing → <code class="prettyprint">400 invalid_request</code>;</li>
-<li><code class="prettyprint">$state</code> unknown, already consumed, or expired → <code class="prettyprint">401 authentication_failed</code>
-(all three are deliberately indistinguishable to the client);</li>
+<li><code class="prettyprint">$state</code> unknown, already consumed, or expired → <code class="prettyprint">401 authentication_failed</code>;</li>
+<li><code class="prettyprint">$bindingCookie</code> missing, the entry carries no <code class="prettyprint">bindingDigest</code>, or the digest of the
+cookie differs (compared in constant time) → the SAME <code class="prettyprint">401 authentication_failed</code>,
+with the SAME message, so the refusal does not say which check failed. The code is
+NOT exchanged (no request reaches the token endpoint) and <code class="prettyprint">$onSuccess</code> is NOT
+called;</li>
 <li>any §12.4 ID-token failure or <a href="classes/Axiam-Sdk-Core-OAuthProtocolError.html"><abbr title="\Axiam\Sdk\Core\OAuthProtocolError">OAuthProtocolError</abbr></a>
 (an <a href="classes/Axiam-Sdk-Core-AuthError.html"><abbr title="\Axiam\Sdk\Core\AuthError">AuthError</abbr></a> sub-type) → <code class="prettyprint">401 authentication_failed</code>;</li>
-<li><a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a> → <code class="prettyprint">503 oidc_unavailable</code>, never a silent success.</li>
+<li><a href="classes/Axiam-Sdk-Core-NetworkError.html"><abbr title="\Axiam\Sdk\Core\NetworkError">NetworkError</abbr></a> → <code class="prettyprint">503 oidc_unavailable</code>, never a silent success;</li>
+<li>any other <a href="classes/Axiam-Sdk-Core-AxiamException.html"><abbr title="\Axiam\Sdk\Core\AxiamException">AxiamException</abbr></a> of the exchange (an <code class="prettyprint">AuthzError</code>, say) → <code class="prettyprint">401</code>;</li>
+<li>ANY other exception — the application's <code class="prettyprint">$onSuccess</code> throwing, the state store failing,
+a defect → <code class="prettyprint">500 login_failed</code> (the exception is not rethrown; its class, never its
+message, is logged). The cookie clear is the guarantee here: an exception that left
+<code class="prettyprint">complete()</code> would reach the framework's error page with no clearing <code class="prettyprint">Set-Cookie</code>
+(§12.8 rule 1 (d)). An application that wants its own handler to see a failure of
+<code class="prettyprint">$onSuccess</code> catches it inside the closure and records it there.</li>
 </ul>
-<p><code class="prettyprint">$onSuccess</code>, when given, runs with the validated <a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a> and the
-consumed <a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a> — the hook where an application establishes its
-OWN session (sign a cookie, write a session row, …). This SDK deliberately does
-NOT do this for you: what a session means is the application's decision.
-<code class="prettyprint">$returnTo</code> is stored but is explicitly the caller's own open-redirect
-responsibility (port-brief addendum item 19) — this class never validates it.</p>
+<p>EVERY outcome carries a clearing <code class="prettyprint">Set-Cookie</code> for the binding cookie
+(<a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html#property_setCookie"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome::$setCookie">OidcLoginOutcome::$setCookie</abbr></a>); the controller MUST send it (§12.8 rule 1 (d)).</p>
+<p><code class="prettyprint">$onSuccess</code>, when given, runs with the validated <a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a>, the consumed
+<a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a> and — third — <code class="prettyprint">$request</code>, the framework request that completed the
+sign-in, exactly as the controller handed it over (§12.8 rule 2). It is where an
+application establishes its OWN session (sign a cookie, write a session row, …) on THAT
+request, with no ambient request context needed. This SDK deliberately does NOT do this
+for you: what a session means is the application's decision. A two-parameter closure
+keeps working: PHP ignores the extra argument.</p>
+<p>The post-login destination is <code class="prettyprint">$successRedirect</code> when given, else the stored
+<code class="prettyprint">return_to</code> — but only if it is still a same-origin relative path
+(<abbr title="\Axiam\Sdk\Oidc\self::isSafeReturnTo()">self::isSafeReturnTo()</abbr>); one that is not (an entry from a caller-supplied
+store, or older glue) is not followed, and the JSON summary is returned instead
+(§12.8 rule 3).</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -448,8 +727,81 @@ responsibility (port-brief addendum item 19) — this class never validates it.<
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$onSuccess</span>
-                : <span class="phpdocumentor-argument-list__argument__type">callable(<a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a>, <a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>): void|null</span>
+                : <span class="phpdocumentor-argument-list__argument__type">callable(<a href="classes/Axiam-Sdk-Oidc-OidcTokenSet.html"><abbr title="\Axiam\Sdk\Oidc\OidcTokenSet">OidcTokenSet</abbr></a>, <a href="classes/Axiam-Sdk-Oidc-OidcStateEntry.html"><abbr title="\Axiam\Sdk\Oidc\OidcStateEntry">OidcStateEntry</abbr></a>, mixed): void|null</span>
                  = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$bindingCookie</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The value of the cookie named
+<abbr title="\Axiam\Sdk\Oidc\self::bindingCookieName()">self::bindingCookieName()</abbr> on the callback request, or <code class="prettyprint">null</code> when the
+request has none. A caller that passes none has every callback refused: there is
+no &quot;binding disabled&quot; mode.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$request</span>
+                : <span class="phpdocumentor-argument-list__argument__type">mixed</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The framework request object, passed through to <code class="prettyprint">$onSuccess</code>.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_isSafeReturnTo">
+        isSafeReturnTo()
+        <a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_isSafeReturnTo" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/OidcLoginFlow.php"><a href="files/src-oidc-oidcloginflow.html"><abbr title="src/Oidc/OidcLoginFlow.php">OidcLoginFlow.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">141</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">§12.8 rule 3: true when `$returnTo` is a same-origin relative path — it starts with a
+single `/`, does not start with `//` or `/\`, and contains no `\` anywhere and no
+control character (U+0000–U+001F, U+007F). An absolute URL, a scheme-relative one, a
+backslash form and a value with a control character are never honoured.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">isSafeReturnTo</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$returnTo</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$returnTo</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
             </dd>
@@ -461,7 +813,7 @@ responsibility (port-brief addendum item 19) — this class never validates it.<
     
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type"><a href="classes/Axiam-Sdk-Oidc-OidcLoginOutcome.html"><abbr title="\Axiam\Sdk\Oidc\OidcLoginOutcome">OidcLoginOutcome</abbr></a></span>
+        <span class="phpdocumentor-signature__response_type">bool</span>
             </section>
 
 </article>
@@ -479,9 +831,17 @@ responsibility (port-brief addendum item 19) — this class never validates it.<
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
+                                        <li><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#toc-constants">Constants</a></li>
                                                                                 <li><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#toc-methods">Methods</a></li>
                                     </ul>
             </li>
+                            <li class="phpdocumentor-on-this-page-section__title">Constants</li>
+                <li>
+                    <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_LOOPBACK_NAME">BINDING_COOKIE_LOOPBACK_NAME</a></li>
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#constant_BINDING_COOKIE_NAME">BINDING_COOKIE_NAME</a></li>
+                                            </ul>
+                </li>
             
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
@@ -489,7 +849,10 @@ responsibility (port-brief addendum item 19) — this class never validates it.<
                 <ul class="phpdocumentor-list -clean">
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method___construct">__construct()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_begin">begin()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieName">bindingCookieName()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_bindingCookieNameFor">bindingCookieNameFor()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_complete">complete()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-Oidc-OidcLoginFlow.html#method_isSafeReturnTo">isSafeReturnTo()</a></li>
                                     </ul>
             </li>
                     </ul>

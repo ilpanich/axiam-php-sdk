@@ -127,7 +127,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MemoryOidcStateStore.php"><a href="files/src-oidc-memoryoidcstatestore.html"><abbr title="src/Oidc/MemoryOidcStateStore.php">MemoryOidcStateStore.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">28</span>
+    <span class="phpdocumentor-element-found-in__line">31</span>
 
     </aside>
 
@@ -135,7 +135,10 @@
 §12.3 rule 1).</p>
 
 
-    <section class="phpdocumentor-description"><p>Per-instance (never process/static-global), single-use, 10-minute TTL. Expired
+    <section class="phpdocumentor-description"><p>Per-instance (never process/static-global), single-use, 10-minute TTL, and bounded at
+<abbr title="\Axiam\Sdk\Oidc\self::DEFAULT_MAX_ENTRIES">self::DEFAULT_MAX_ENTRIES</abbr> entries: every login request saves one, whoever sent it, so an
+unbounded map is memory an unauthenticated client can grow. At the bound a save evicts the
+oldest entry (that login, if still in flight, restarts). Expired
 entries are dropped lazily on <abbr title="\Axiam\Sdk\Oidc\self::consume()">self::consume()</abbr> and swept opportunistically on
 <abbr title="\Axiam\Sdk\Oidc\self::save()">self::save()</abbr> — never a background timer/thread, since a library must not keep
 a long-running worker (Swoole/RoadRunner) process alive on its own.</p>
@@ -192,6 +195,14 @@ $again = $store-&gt;consume($state);   // null — single-use
 
 </h4>
 <dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -constant -public">
+    <a class="" href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_DEFAULT_MAX_ENTRIES">DEFAULT_MAX_ENTRIES</a>
+    <span>
+        &nbsp;: mixed&nbsp;= 10000                            </span>
+</dt>
+<dd>The most entries held at once unless the constructor says otherwise. Ten thousand
+in-flight logins is far beyond any legitimate single-process load.</dd>
+
             <dt class="phpdocumentor-table-of-contents__entry -constant -public">
     <a class="" href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_TTL_SECONDS">TTL_SECONDS</a>
     <span>
@@ -254,6 +265,38 @@ store backed by real concurrency (e.g. Redis) must use an atomic primitive such 
 
         </h3>
                     <article class="phpdocumentor-element -constant -public ">
+    <h4 class="phpdocumentor-element__name" id="constant_DEFAULT_MAX_ENTRIES">
+        DEFAULT_MAX_ENTRIES
+        <a href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_DEFAULT_MAX_ENTRIES" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MemoryOidcStateStore.php"><a href="files/src-oidc-memoryoidcstatestore.html"><abbr title="src/Oidc/MemoryOidcStateStore.php">MemoryOidcStateStore.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">43</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">The most entries held at once unless the constructor says otherwise. Ten thousand
+in-flight logins is far beyond any legitimate single-process load.</p>
+
+    
+    <code class="phpdocumentor-signature phpdocumentor-code ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">DEFAULT_MAX_ENTRIES</span>
+    = <span class="phpdocumentor-signature__default-value">10000</span>
+</code>
+
+
+    
+    
+    
+
+        
+    </article>
+                    <article class="phpdocumentor-element -constant -public ">
     <h4 class="phpdocumentor-element__name" id="constant_TTL_SECONDS">
         TTL_SECONDS
         <a href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_TTL_SECONDS" class="headerlink"><i class="fas fa-link"></i></a>
@@ -263,7 +306,7 @@ store backed by real concurrency (e.g. Redis) must use an atomic primitive such 
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MemoryOidcStateStore.php"><a href="files/src-oidc-memoryoidcstatestore.html"><abbr title="src/Oidc/MemoryOidcStateStore.php">MemoryOidcStateStore.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">34</span>
+    <span class="phpdocumentor-element-found-in__line">37</span>
 
     </aside>
 
@@ -309,14 +352,14 @@ server&#039;s `federation_login_state` row lifetime (§12.3 rule 1).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MemoryOidcStateStore.php"><a href="files/src-oidc-memoryoidcstatestore.html"><abbr title="src/Oidc/MemoryOidcStateStore.php">MemoryOidcStateStore.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">47</span>
+    <span class="phpdocumentor-element-found-in__line">63</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$ttlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::TTL_SECONDS">self::TTL_SECONDS</abbr></span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span>[</span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$ttlSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::TTL_SECONDS">self::TTL_SECONDS</abbr></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$maxEntries</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::DEFAULT_MAX_ENTRIES">self::DEFAULT_MAX_ENTRIES</abbr></span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -336,9 +379,36 @@ honoured (useful in tests), a longer one is reduced, because
 </section>
 
             </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$maxEntries</span>
+                : <span class="phpdocumentor-argument-list__argument__type">int</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value"><abbr title="\self::DEFAULT_MAX_ENTRIES">self::DEFAULT_MAX_ENTRIES</abbr></span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The most entries held at once (default
+<abbr title="\Axiam\Sdk\Oidc\self::DEFAULT_MAX_ENTRIES">self::DEFAULT_MAX_ENTRIES</abbr>); saving beyond it evicts the
+oldest. Must be at least 1.</p>
+</section>
+
+            </dd>
             </dl>
 
     
+    <h5 class="phpdocumentor-tag-list__heading" id="method___construct_tags">
+        Tags
+        <a href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#method___construct_tags" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h5>
+    <dl class="phpdocumentor-tag-list">
+                    <dt class="phpdocumentor-tag-list__entry">
+                <span class="phpdocumentor-tag__name">throws</span>
+            </dt>
+                            <dd class="phpdocumentor-tag-list__definition">
+                                                                <span class="phpdocumentor-tag-link"><abbr title="\InvalidArgumentException">InvalidArgumentException</abbr></span>
+                                                                                        <section class="phpdocumentor-description"><p>when <code class="prettyprint">$maxEntries</code> is less than 1.</p>
+</section>
+
+                                    </dd>
+                        </dl>
 
         
     
@@ -358,7 +428,7 @@ honoured (useful in tests), a longer one is reduced, because
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MemoryOidcStateStore.php"><a href="files/src-oidc-memoryoidcstatestore.html"><abbr title="src/Oidc/MemoryOidcStateStore.php">MemoryOidcStateStore.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">101</span>
 
     </aside>
 
@@ -412,7 +482,7 @@ store backed by real concurrency (e.g. Redis) must use an atomic primitive such 
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MemoryOidcStateStore.php"><a href="files/src-oidc-memoryoidcstatestore.html"><abbr title="src/Oidc/MemoryOidcStateStore.php">MemoryOidcStateStore.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">61</span>
+    <span class="phpdocumentor-element-found-in__line">81</span>
 
     </aside>
 
@@ -457,7 +527,7 @@ store backed by real concurrency (e.g. Redis) must use an atomic primitive such 
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Oidc/MemoryOidcStateStore.php"><a href="files/src-oidc-memoryoidcstatestore.html"><abbr title="src/Oidc/MemoryOidcStateStore.php">MemoryOidcStateStore.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">53</span>
+    <span class="phpdocumentor-element-found-in__line">73</span>
 
     </aside>
 
@@ -503,6 +573,7 @@ store backed by real concurrency (e.g. Redis) must use an atomic primitive such 
                             <li class="phpdocumentor-on-this-page-section__title">Constants</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
+                                                    <li class=""><a href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_DEFAULT_MAX_ENTRIES">DEFAULT_MAX_ENTRIES</a></li>
                                                     <li class=""><a href="classes/Axiam-Sdk-Oidc-MemoryOidcStateStore.html#constant_TTL_SECONDS">TTL_SECONDS</a></li>
                                             </ul>
                 </li>

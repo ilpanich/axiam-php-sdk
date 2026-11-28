@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamAccessMiddleware.php"><a href="files/src-laravel-axiamaccessmiddleware.html"><abbr title="src/Laravel/AxiamAccessMiddleware.php">AxiamAccessMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">55</span>
+    <span class="phpdocumentor-element-found-in__line">58</span>
 
     </aside>
 
@@ -147,7 +147,7 @@ declaration for that route.</li>
 <li><strong>Attribute style</strong> — no middleware params at all
 (<code class="prettyprint">-&gt;middleware('axiam.access')</code>), in which case this middleware reflects the
 CURRENT ROUTE's resolved controller (via <code class="prettyprint">$request-&gt;route()</code>) for
-<code class="prettyprint">#[RequireAuth]</code>/<code class="prettyprint">#[RequireRole]</code>/<code class="prettyprint">#[RequireAccess]</code> (method-level attributes
+<code class="prettyprint">#[RequireAuth]</code>/<code class="prettyprint">#[RequireRole]</code>/<code class="prettyprint">#[RequireScope]</code>/<code class="prettyprint">#[RequireAccess]</code> (method-level attributes
 take precedence over class-level ones), mirroring exactly how
 <a href="classes/Axiam-Sdk-Symfony-AxiamAccessAttributeListener.html"><abbr title="\Axiam\Sdk\Symfony\AxiamAccessAttributeListener">AxiamAccessAttributeListener</abbr></a> reflects the Symfony
 controller callable — so a consuming application can annotate a controller
@@ -166,8 +166,10 @@ guard followed by a variable-method-name call (not a literal <code class="pretty
 call), so neither PHPStan (which only knows the declared Symfony type) nor this
 class's own autoloading ever needs <code class="prettyprint">Illuminate\Http\Request</code>/<code class="prettyprint">Illuminate\Routing\Route</code>
 to exist as concrete, referenceable classes — the attribute-reflection style degrades
-to a silent no-op on any <code class="prettyprint">Request</code> implementation that lacks a <code class="prettyprint">route()</code> method
-(including a plain Symfony <code class="prettyprint">Request</code> used directly, e.g. in tests).</p>
+to a DENY (403, fail closed) on any <code class="prettyprint">Request</code> implementation that lacks a <code class="prettyprint">route()</code>
+method, and on a route whose action cannot be reflected (a Closure route, an
+unresolvable controller): a middleware that could not read the declaration must not
+wave the request through as though there were none.</p>
 </section>
 
 
@@ -235,7 +237,7 @@ to a silent no-op on any <code class="prettyprint">Request</code> implementation
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamAccessMiddleware.php"><a href="files/src-laravel-axiamaccessmiddleware.html"><abbr title="src/Laravel/AxiamAccessMiddleware.php">AxiamAccessMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">57</span>
+    <span class="phpdocumentor-element-found-in__line">60</span>
 
     </aside>
 
@@ -279,7 +281,7 @@ to a silent no-op on any <code class="prettyprint">Request</code> implementation
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Laravel/AxiamAccessMiddleware.php"><a href="files/src-laravel-axiamaccessmiddleware.html"><abbr title="src/Laravel/AxiamAccessMiddleware.php">AxiamAccessMiddleware.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">70</span>
+    <span class="phpdocumentor-element-found-in__line">73</span>
 
     </aside>
 

@@ -124,7 +124,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Consumer.php"><a href="files/src-amqp-consumer.html"><abbr title="src/Amqp/Consumer.php">Consumer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">39</span>
+    <span class="phpdocumentor-element-found-in__line">59</span>
 
     </aside>
 
@@ -137,22 +137,39 @@ for the lifetime of the process. It is meant to run on a long-running
 runtime (a dedicated CLI worker process), restarted by a process
 supervisor on exit (see bin/axiam-amqp-worker.php — no in-SDK
 auto-reconnect loop, Pitfall 6).</p>
+<p>A consumer is TYPED (contract 1.69, §8 step 2c, D-9): it is configured with the ONE signed
+type it consumes (<a href="classes/Axiam-Sdk-Amqp-SignedEventType.html"><abbr title="\Axiam\Sdk\Amqp\SignedEventType">SignedEventType</abbr></a>) and the tenant whose subkey <code class="prettyprint">$signingKey</code> is, and
+checks the canonical bytes against that type's layout only — before the HMAC and before any
+decode. A validly signed body of another type (every tenant-signed shape shares the key) is
+refused as <code class="prettyprint">malformed</code> and never reaches the application; run two consumers to consume both.</p>
+<p>Every discard (§8 rule 4, &quot;Every SDK consumer, field by field&quot;, D-8) logs exactly one warning
+whose context is <code class="prettyprint">timestamp</code>, <code class="prettyprint">exchange</code>, <code class="prettyprint">routing_key</code>, <code class="prettyprint">tenant_id</code> (the consumer's OWN
+configured tenant, never one read from the body) and <code class="prettyprint">reason</code>, the first that applies in the
+contract's order: <code class="prettyprint">malformed</code>, <code class="prettyprint">unsigned</code>, <code class="prettyprint">signature</code>, <code class="prettyprint">key_version</code>, <code class="prettyprint">stale</code>, <code class="prettyprint">replay</code>. It
+never carries a signature, a nonce, a key or any part of the body. No body escapes the
+consumer (D-10): empty, BOM-prefixed, not UTF-8, deeply nested or truncated bodies are
+discarded as <code class="prettyprint">malformed</code> and the loop goes on to the next delivery.</p>
 <p>Ack/nack semantics (verifyAndDispatch):</p>
 <ul>
-<li>HMAC verification failure           -&gt; nack WITHOUT requeue (fail closed, poison-loop risk)</li>
-<li>NEW-4 replay-protection gate failure -&gt; nack WITHOUT requeue (fail closed, same as HMAC failure)</li>
+<li>any discard (malformed, unsigned, signature, key_version, stale, replay) -&gt; nack WITHOUT
+requeue (fail closed, poison-loop risk)</li>
 <li>Handler throws AmqpDropMessage       -&gt; nack WITHOUT requeue (application-declared poison message)</li>
 <li>Handler throws any other \Throwable  -&gt; nack WITH requeue (transient failure, retry)</li>
 <li>Handler completes successfully       -&gt; ack</li>
 </ul>
+<p>The HMAC is verified over the RECEIVED BYTES (the body with its trailing
+<code class="prettyprint">hmac_signature</code> member cut out), never over a re-serialization, and the
+handler is given the value parsed from those same verified bytes
+(axiam#882, C2) — see <a href="classes/Axiam-Sdk-Amqp-Hmac.html"><abbr title="\Axiam\Sdk\Amqp\Hmac">Hmac</abbr></a>. A body with a duplicate key, content
+after the object, or a signature that is not the trailing member is
+nacked without requeue and the handler never runs.</p>
 <p>NEW-4 (CONTRACT.md §8 &quot;v2 — Replay Protection&quot;, hard cutover): once the
 HMAC verifies, the delivery is ADDITIONALLY rejected (same nack-without-
 requeue path) when <code class="prettyprint">key_version &lt; 2</code>, <code class="prettyprint">issued_at</code> falls outside the
-±skew freshness window, or <code class="prettyprint">nonce</code> has already been seen. Because
-Hmac::verify re-serializes the decoded body (minus <code class="prettyprint">hmac_signature</code>) in
-insertion order (Pitfall 5), <code class="prettyprint">nonce</code>/<code class="prettyprint">issued_at</code> are already covered by
-the verified HMAC bytes with NO canonicalization change — only the
-<a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard">ReplayGuard</abbr></a> gates are new. See ReplayGuard for the full policy.</p>
+±skew freshness window, or <code class="prettyprint">nonce</code> has already been seen. <code class="prettyprint">nonce</code> and
+<code class="prettyprint">issued_at</code> are inside the verified bytes, so they are covered by the
+HMAC with no canonicalization step — only the <a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard">ReplayGuard</abbr></a> gates
+are new. See ReplayGuard for the full policy.</p>
 </section>
 
 
@@ -229,14 +246,14 @@ maps the outcome to the ack/nack matrix documented on the class.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Consumer.php"><a href="files/src-amqp-consumer.html"><abbr title="src/Amqp/Consumer.php">Consumer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">62</span>
+    <span class="phpdocumentor-element-found-in__line">93</span>
 
     </aside>
 
     
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signingKey</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">new <abbr title="\Psr\Log\NullLogger">NullLogger</abbr>()</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$skewSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html#constant_DEFAULT_SKEW_SECONDS"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard::DEFAULT_SKEW_SECONDS">ReplayGuard::DEFAULT_SKEW_SECONDS</abbr></a></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard">ReplayGuard</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$replayGuard</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+                    <span class="phpdocumentor-signature__name">__construct</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$signingKey</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$tenantId</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Amqp-SignedEventType.html"><abbr title="\Axiam\Sdk\Amqp\SignedEventType">SignedEventType</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$type</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><abbr title="\Psr\Log\LoggerInterface">LoggerInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$logger</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">new <abbr title="\Psr\Log\NullLogger">NullLogger</abbr>()</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">int&nbsp;</span><span class="phpdocumentor-signature__argument__name">$skewSeconds</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html#constant_DEFAULT_SKEW_SECONDS"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard::DEFAULT_SKEW_SECONDS">ReplayGuard::DEFAULT_SKEW_SECONDS</abbr></a></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard">ReplayGuard</abbr></a>|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$replayGuard</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -249,7 +266,28 @@ maps the outcome to the ack/nack matrix documented on the class.</dd>
                 : <span class="phpdocumentor-argument-list__argument__type">string</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
-                
+                    <section class="phpdocumentor-description"><p>The tenant's AMQP subkey (§8 rule 1).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$tenantId</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The tenant that subkey belongs to. It is what every discard event
+reports as <code class="prettyprint">tenant_id</code>; a <code class="prettyprint">tenant_id</code> read from a message body is never used.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$type</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Amqp-SignedEventType.html"><abbr title="\Axiam\Sdk\Amqp\SignedEventType">SignedEventType</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The one signed type this consumer consumes (§8 step 2c).</p>
+</section>
+
             </dd>
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$logger</span>
@@ -305,7 +343,7 @@ guard is constructed from $skewSeconds.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Consumer.php"><a href="files/src-amqp-consumer.html"><abbr title="src/Amqp/Consumer.php">Consumer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">108</span>
 
     </aside>
 
@@ -394,7 +432,7 @@ for poison messages that must never be requeued.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Amqp/Consumer.php"><a href="files/src-amqp-consumer.html"><abbr title="src/Amqp/Consumer.php">Consumer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">128</span>
+    <span class="phpdocumentor-element-found-in__line">168</span>
 
     </aside>
 
@@ -404,7 +442,7 @@ maps the outcome to the ack/nack matrix documented on the class.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">verifyAndDispatch</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(array&lt;string, mixed&gt;): void&nbsp;</span><span class="phpdocumentor-signature__argument__name">$handler</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$ack</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nackNoRequeue</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nackRequeue</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
+                    <span class="phpdocumentor-signature__name">verifyAndDispatch</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$body</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(array&lt;string, mixed&gt;): void&nbsp;</span><span class="phpdocumentor-signature__argument__name">$handler</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$ack</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nackNoRequeue</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$nackRequeue</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$exchange</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$routingKey</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">void</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -450,6 +488,25 @@ without a live broker or AMQPMessage.</p>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                 
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$exchange</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The delivery's exchange as the broker reported it (<code class="prettyprint">&quot;&quot;</code> for the
+default exchange); reported in the discard event.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$routingKey</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The delivery's routing key as the broker reported it.</p>
+</section>
+
             </dd>
             </dl>
 

@@ -123,7 +123,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">75</span>
+    <span class="phpdocumentor-element-found-in__line">76</span>
 
     </aside>
 
@@ -244,6 +244,18 @@ intersect with at least one of {@see RequireRole::$roles}. Requires an
 authenticated identity first (a role check needs somewhere to read roles from),
 so an unauthenticated caller still gets 401, not 403.</dd>
 
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Axiam-Sdk-AccessEnforcer.html#method_enforceScope">enforceScope()</a>
+    <span>
+                                &nbsp;: <abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null    </span>
+</dt>
+<dd>`require_scope` (CONTRACT.md §11.2 rule 11 (d), contract 1.68; N15): a LOCAL check that
+the verified token&#039;s `scope` claim contains at least one of
+{@see RequireScope::$scopes}. Reads ONLY `scope` — never `roles` — and fails closed: no
+`scope` claim, or one that is not a string, is a 403. An unauthenticated caller still
+gets 401. Like {@see self::enforceRole()} it is coarser than
+{@see self::enforceAccess()}.</dd>
+
     </dl>
 
 
@@ -272,7 +284,7 @@ so an unauthenticated caller still gets 401, not 403.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">103</span>
+    <span class="phpdocumentor-element-found-in__line">104</span>
 
     </aside>
 
@@ -359,7 +371,7 @@ hint) — <abbr title="\Axiam\Sdk\self::withChallenge()">self::withChallenge()</
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">203</span>
+    <span class="phpdocumentor-element-found-in__line">271</span>
 
     </aside>
 
@@ -371,7 +383,7 @@ for the full resource-resolution and error-mapping tables.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">enforceAccess</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{user_id: string, tenant_id: string, roles: list<string>}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$identity</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Attributes-RequireAccess.html"><abbr title="\Axiam\Sdk\Attributes\RequireAccess">RequireAccess</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$routeParams</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): Array|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resolver</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span></code>
+                    <span class="phpdocumentor-signature__name">enforceAccess</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$identity</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Attributes-RequireAccess.html"><abbr title="\Axiam\Sdk\Attributes\RequireAccess">RequireAccess</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">array&lt;string, mixed&gt;&nbsp;</span><span class="phpdocumentor-signature__argument__name">$routeParams</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">[]</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(): Array|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$resolver</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -381,7 +393,7 @@ for the full resource-resolution and error-mapping tables.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$identity</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array{user_id: string, tenant_id: string, roles: list<string>}|null</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The identity the CONTRACT.md §10 guard already injected, or <code class="prettyprint">null</code>.</p>
@@ -455,7 +467,7 @@ for the exact mapping).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">128</span>
+    <span class="phpdocumentor-element-found-in__line">129</span>
 
     </aside>
 
@@ -465,7 +477,7 @@ where that guard is applied per-endpoint rather than globally.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">enforceAuth</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{user_id: string, tenant_id: string, roles: list<string>}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$identity</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span></code>
+                    <span class="phpdocumentor-signature__name">enforceAuth</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$identity</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
@@ -475,7 +487,7 @@ where that guard is applied per-endpoint rather than globally.</p>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$identity</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array{user_id: string, tenant_id: string, roles: list<string>}|null</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The identity the CONTRACT.md §10 guard already injected (the <code class="prettyprint">axiam_user</code>
@@ -515,7 +527,7 @@ request attribute), or <code class="prettyprint">null</code> when no such identi
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">157</span>
+    <span class="phpdocumentor-element-found-in__line">166</span>
 
     </aside>
 
@@ -527,21 +539,28 @@ so an unauthenticated caller still gets 401, not 403.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">enforceRole</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{user_id: string, tenant_id: string, roles: list<string>}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$identity</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Attributes-RequireRole.html"><abbr title="\Axiam\Sdk\Attributes\RequireRole">RequireRole</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span></code>
+                    <span class="phpdocumentor-signature__name">enforceRole</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$identity</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Attributes-RequireRole.html"><abbr title="\Axiam\Sdk\Attributes\RequireRole">RequireRole</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>Role names are tenant-defined; this check is intentionally coarse and is NOT a
-substitute for <abbr title="\Axiam\Sdk\self::enforceAccess()">self::enforceAccess()</abbr>, which is the authoritative,
-server-verified check (CONTRACT.md §11.2.9).</p>
+        <section class="phpdocumentor-description"><p><strong>It reads only the <code class="prettyprint">roles</code> claim and fails closed</strong> (§11.2 rule 11, contract 1.68;
+N15, D-1). The identity's <code class="prettyprint">roles</code> is <code class="prettyprint">null</code> when the token carried no usable <code class="prettyprint">roles</code>
+claim — the application did not request the <code class="prettyprint">roles</code> scope, or the claim is malformed
+— and that is a 403 for every <code class="prettyprint">require_role</code>, exactly as <code class="prettyprint">[]</code> (&quot;the user holds none&quot;)
+is. Role names match by exact, case-sensitive equality. Roles are NEVER derived from
+the token's <code class="prettyprint">scope</code>: use <abbr title="\Axiam\Sdk\self::enforceScope()">self::enforceScope()</abbr> for that.</p>
+<p>Role names are tenant-defined; the <code class="prettyprint">roles</code> claim is a snapshot taken when the token was
+minted (stale for at most one access-token lifetime), so this check is intentionally
+coarse and is NOT a substitute for <abbr title="\Axiam\Sdk\self::enforceAccess()">self::enforceAccess()</abbr>, which is the
+authoritative, server-verified check (CONTRACT.md §11.2.9).</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
                 <span class="phpdocumentor-argument-list__argument__name">$identity</span>
-                : <span class="phpdocumentor-argument-list__argument__type">array{user_id: string, tenant_id: string, roles: list<string>}|null</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null</span>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>The identity the CONTRACT.md §10 guard already injected, or <code class="prettyprint">null</code>.</p>
@@ -576,6 +595,77 @@ required roles (caller proceeds); a 401 <code class="prettyprint">authentication
             </section>
 
 </article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_enforceScope">
+        enforceScope()
+        <a href="classes/Axiam-Sdk-AccessEnforcer.html#method_enforceScope" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="src/AccessEnforcer.php"><a href="files/src-accessenforcer.html"><abbr title="src/AccessEnforcer.php">AccessEnforcer.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">207</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">`require_scope` (CONTRACT.md §11.2 rule 11 (d), contract 1.68; N15): a LOCAL check that
+the verified token&#039;s `scope` claim contains at least one of
+{@see RequireScope::$scopes}. Reads ONLY `scope` — never `roles` — and fails closed: no
+`scope` claim, or one that is not a string, is a 403. An unauthenticated caller still
+gets 401. Like {@see self::enforceRole()} it is coarser than
+{@see self::enforceAccess()}.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">enforceScope</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$identity</span></span><span class="phpdocumentor-signature__argument"><span>, </span><span class="phpdocumentor-signature__argument__type"><a href="classes/Axiam-Sdk-Attributes-RequireScope.html"><abbr title="\Axiam\Sdk\Attributes\RequireScope">RequireScope</abbr></a>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$attribute</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$identity</span>
+                : <span class="phpdocumentor-argument-list__argument__type">array{user_id: string, tenant_id: string, roles?: list<string>|null, scopes?: list<string>|null}|null</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The identity the CONTRACT.md §10 guard already injected, or <code class="prettyprint">null</code>.</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$attribute</span>
+                : <span class="phpdocumentor-argument-list__argument__type"><a href="classes/Axiam-Sdk-Attributes-RequireScope.html"><abbr title="\Axiam\Sdk\Attributes\RequireScope">RequireScope</abbr></a></span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>The <code class="prettyprint">#[RequireScope(...)]</code> attribute instance.</p>
+</section>
+
+            </dd>
+            </dl>
+
+    
+
+        
+    
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>|null</span>
+                    &mdash;
+                <section class="phpdocumentor-description"><p><code class="prettyprint">null</code> when the token carries at least one required scope; a
+401 <code class="prettyprint">authentication_failed</code> or 403 <code class="prettyprint">authorization_denied</code> <abbr title="\Symfony\Component\HttpFoundation\JsonResponse">JsonResponse</abbr>
+otherwise.</p>
+</section>
+
+            </section>
+
+</article>
             </section>
 
         
@@ -602,6 +692,7 @@ required roles (caller proceeds); a 401 <code class="prettyprint">authentication
                                             <li class=""><a href="classes/Axiam-Sdk-AccessEnforcer.html#method_enforceAccess">enforceAccess()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AccessEnforcer.html#method_enforceAuth">enforceAuth()</a></li>
                                             <li class=""><a href="classes/Axiam-Sdk-AccessEnforcer.html#method_enforceRole">enforceRole()</a></li>
+                                            <li class=""><a href="classes/Axiam-Sdk-AccessEnforcer.html#method_enforceScope">enforceScope()</a></li>
                                     </ul>
             </li>
                     </ul>

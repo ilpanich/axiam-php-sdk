@@ -177,10 +177,9 @@ not need to solve that wiring, only provide the guard itself.</p>
 </dt>
 <dd>Guard-slot kind for the §12 `oidc_refresh` OAuth2 token-endpoint path
 (CONTRACT.md §9 rule 5 / F-06). Used by {@see \Axiam\Sdk\Oidc\OidcClient::oidcRefresh()}
-so a second concurrent `oidcRefresh` caller can recognise the guard is busy with
-ANOTHER `oidcRefresh` (same kind) and share its single outcome, instead of
-re-acquiring the guard and issuing its own wire call that would replay an
-already-consumed (single-use, rotating) refresh token.</dd>
+together with a per-refresh-token key, so a second concurrent caller presenting the
+SAME token shares the one wire call&#039;s outcome instead of replaying an already-consumed
+(single-use, rotating) token, while a caller with a different token has its own flight.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -constant -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#constant_REFRESH_KIND_SESSION">REFRESH_KIND_SESSION</a>
@@ -323,9 +322,7 @@ reported about the principal&#039;s reach (§5.2/§5.2.3).</dd>
 <dd>The generic single-flight primitive behind {@see self::refreshIfNeeded()}
 (CONTRACT.md §9) — and, additively, behind `oidc_refresh`&#039;s own single-flight
 requirement (§12.1: &quot;`oidc_refresh` MUST be governed by a §9-conformant
-single-flight guard&quot;). Both share the SAME `$refreshPromise` slot, so a
-cookie-session refresh and an `oidcRefresh()` call can never race each other
-independently — whichever gets here first &quot;owns&quot; the slot until it settles.</dd>
+single-flight guard&quot;).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a class="" href="classes/Axiam-Sdk-Session.html#method_refreshIfNeeded">refreshIfNeeded()</a>
@@ -399,16 +396,15 @@ responsible for validating `$tenantId` as a UUID first — this setter trusts it
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">54</span>
+    <span class="phpdocumentor-element-found-in__line">53</span>
 
     </aside>
 
         <p class="phpdocumentor-summary">Guard-slot kind for the §12 `oidc_refresh` OAuth2 token-endpoint path
 (CONTRACT.md §9 rule 5 / F-06). Used by {@see \Axiam\Sdk\Oidc\OidcClient::oidcRefresh()}
-so a second concurrent `oidcRefresh` caller can recognise the guard is busy with
-ANOTHER `oidcRefresh` (same kind) and share its single outcome, instead of
-re-acquiring the guard and issuing its own wire call that would replay an
-already-consumed (single-use, rotating) refresh token.</p>
+together with a per-refresh-token key, so a second concurrent caller presenting the
+SAME token shares the one wire call&#039;s outcome instead of replaying an already-consumed
+(single-use, rotating) token, while a caller with a different token has its own flight.</p>
 
     
     <code class="phpdocumentor-signature phpdocumentor-code ">
@@ -1053,53 +1049,40 @@ reported about the principal&#039;s reach (§5.2/§5.2.3).</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="src/Session.php"><a href="files/src-session.html"><abbr title="src/Session.php">Session.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">395</span>
+    <span class="phpdocumentor-element-found-in__line">385</span>
 
     </aside>
 
         <p class="phpdocumentor-summary">The generic single-flight primitive behind {@see self::refreshIfNeeded()}
 (CONTRACT.md §9) — and, additively, behind `oidc_refresh`&#039;s own single-flight
 requirement (§12.1: &quot;`oidc_refresh` MUST be governed by a §9-conformant
-single-flight guard&quot;). Both share the SAME `$refreshPromise` slot, so a
-cookie-session refresh and an `oidcRefresh()` call can never race each other
-independently — whichever gets here first &quot;owns&quot; the slot until it settles.</p>
+single-flight guard&quot;).</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">refreshGuard</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">callable(): <abbr title="\GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$startRefresh</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(mixed): mixed|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$onSuccess</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$kind</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::REFRESH_KIND_SESSION">self::REFRESH_KIND_SESSION</abbr></span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="array{ran: bool, promise: \GuzzleHttp\Promise\PromiseInterface, kind: string}">PromiseInterface, kind: string}</abbr></span></code>
+                    <span class="phpdocumentor-signature__name">refreshGuard</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__type">callable(): <abbr title="\GuzzleHttp\Promise\PromiseInterface">PromiseInterface</abbr>&nbsp;</span><span class="phpdocumentor-signature__argument__name">$startRefresh</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">callable(mixed): mixed|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$onSuccess</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string&nbsp;</span><span class="phpdocumentor-signature__argument__name">$kind</span><span> = </span><span class="phpdocumentor-signature__argument__default-value"><abbr title="\self::REFRESH_KIND_SESSION">self::REFRESH_KIND_SESSION</abbr></span><span> ]</span></span><span class="phpdocumentor-signature__argument"><span>[</span><span>, </span><span class="phpdocumentor-signature__argument__type">string|null&nbsp;</span><span class="phpdocumentor-signature__argument__name">$key</span><span> = </span><span class="phpdocumentor-signature__argument__default-value">null</span><span> ]</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><abbr title="array{ran: bool, promise: \GuzzleHttp\Promise\PromiseInterface, kind: string}">PromiseInterface, kind: string}</abbr></span></code>
 
     <div class="phpdocumentor-label-line">
         </div>
     
-        <section class="phpdocumentor-description"><p>If no refresh is currently in flight, invokes <code class="prettyprint">$startRefresh</code> (which must return
-the wire-call <code class="prettyprint">PromiseInterface</code>) as THIS refresh, publishing it into the shared
-slot together with <code class="prettyprint">$kind</code>. If a refresh is already in flight, <code class="prettyprint">$startRefresh</code> is
-NOT invoked at all and the existing promise is returned instead, tagged with the
-kind that started it.</p>
-<p><strong>Result sharing across same-kind callers (CONTRACT.md §9 rule 2, F-06).</strong> The
-caller distinguishes three cases via the returned <code class="prettyprint">ran</code>/<code class="prettyprint">kind</code> pair:</p>
-<ul>
-<li><code class="prettyprint">ran === true</code>: this call itself started the refresh — its own outcome IS
-the shared outcome.</li>
-<li><code class="prettyprint">ran === false</code> and <code class="prettyprint">kind</code> equals the kind THIS caller passed in: the guard
-is busy with ANOTHER caller of the SAME operation (e.g. two concurrent
-<code class="prettyprint">oidcRefresh()</code> calls). The returned <code class="prettyprint">promise</code> resolves to that one leader's
-exact outcome — the caller MUST await and reuse it rather than re-acquiring
-the guard and issuing its own wire call. This matters because AXIAM refresh
-tokens are opaque, server-stored, and single-use with rotation: a second wire
-call would replay an already-consumed token and fail <code class="prettyprint">invalid_grant</code>.
-Await it with <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join"><abbr title="\Axiam\Sdk\Auth\RefreshGuard::join()">RefreshGuard::join()</abbr></a>, <strong>never</strong> with
-<code class="prettyprint">PromiseInterface::wait()</code>: only the leader — the <code class="prettyprint">ran === true</code> caller — may
-<code class="prettyprint">wait()</code>, because <code class="prettyprint">wait()</code> consumes the promise's wait function and drives the
-call rather than observing it, so a second <code class="prettyprint">wait()</code> from a concurrent
-fiber/coroutine destroys the leader's in-flight refresh (F-06).</li>
-<li><code class="prettyprint">ran === false</code> and <code class="prettyprint">kind</code> differs from THIS caller's kind: the guard is busy
-with a DIFFERENT operation (e.g. the §1 cookie-session refresh occupying the
-slot while an <code class="prettyprint">oidcRefresh()</code> call arrives). The existing promise's resolved
-value cannot satisfy this caller (a PSR-7 <code class="prettyprint">ResponseInterface</code> is not an OAuth2
-token array, or vice versa), so the caller should wait for it to settle and
-then retry acquiring the guard for its own kind.</li>
-</ul>
+        <section class="phpdocumentor-description"><p>Flights are identified by <code class="prettyprint">$kind</code> plus the optional <code class="prettyprint">$key</code>. The §1 cookie-session
+refresh passes no key (its token is the session's own, so one slot per session);
+<code class="prettyprint">oidc_refresh</code> passes a key derived from the refresh token it was called with, so
+only callers presenting the SAME token share a flight (§9, per-token keying).</p>
+<p>If no refresh is currently in flight for that identity, invokes <code class="prettyprint">$startRefresh</code>
+(which must return the wire-call <code class="prettyprint">PromiseInterface</code>) as THIS refresh and publishes
+it into its own slot. If one is already in flight, <code class="prettyprint">$startRefresh</code> is NOT invoked
+and the existing promise is returned instead.</p>
+<p><strong>Result sharing (CONTRACT.md §9 rule 2, F-06).</strong> <code class="prettyprint">ran === true</code> means this call
+started the refresh — its own outcome IS the shared outcome, and only it may
+<code class="prettyprint">wait()</code> on the promise. <code class="prettyprint">ran === false</code> means the guard is busy with a flight of
+the SAME identity: the returned <code class="prettyprint">promise</code> resolves to that one leader's exact
+outcome, and the caller MUST await it with <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#method_join"><abbr title="\Axiam\Sdk\Auth\RefreshGuard::join()">RefreshGuard::join()</abbr></a>, <strong>never</strong>
+with <code class="prettyprint">PromiseInterface::wait()</code> (which would consume the leader's wait function and
+destroy its in-flight refresh, F-06), and reuse it rather than issuing its own wire
+call: refresh tokens are single-use with rotation, so a second call would replay an
+already-consumed token. A caller with a different <code class="prettyprint">$key</code> never lands here — it gets
+its own slot and its own wire call (rule 6d: never another grant's outcome).</p>
 </section>
 
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
@@ -1110,7 +1093,7 @@ then retry acquiring the guard for its own kind.</li>
                             </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>Produces the wire-call promise
-for THIS refresh attempt. Invoked only when the guard is free.</p>
+for THIS refresh attempt. Invoked only when the identity's slot is free.</p>
 </section>
 
             </dd>
@@ -1131,8 +1114,18 @@ capture) — same contract as <a href="classes/Axiam-Sdk-Auth-RefreshGuard.html#
                  = <span class="phpdocumentor-argument-list__argument__default-value"><abbr title="\self::REFRESH_KIND_SESSION">self::REFRESH_KIND_SESSION</abbr></span>            </dt>
             <dd class="phpdocumentor-argument-list__definition">
                     <section class="phpdocumentor-description"><p>One of <abbr title="\Axiam\Sdk\self::REFRESH_KIND_SESSION">self::REFRESH_KIND_SESSION</abbr> /
-<abbr title="\Axiam\Sdk\self::REFRESH_KIND_OIDC">self::REFRESH_KIND_OIDC</abbr> (or a future operation-specific kind),
-identifying which operation this call is performing/waiting for.</p>
+<abbr title="\Axiam\Sdk\self::REFRESH_KIND_OIDC">self::REFRESH_KIND_OIDC</abbr> (or a future operation-specific kind).</p>
+</section>
+
+            </dd>
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-argument-list__argument__name">$key</span>
+                : <span class="phpdocumentor-argument-list__argument__type">string|null</span>
+                 = <span class="phpdocumentor-argument-list__argument__default-value">null</span>            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                    <section class="phpdocumentor-description"><p>Flight discriminator within the kind — a digest, never a raw
+secret (see <abbr title="\Axiam\Sdk\Oidc\OidcClient::refreshFlightKey()">OidcClient::refreshFlightKey()</abbr>); <code class="prettyprint">null</code>
+for a kind with a single flight per session.</p>
 </section>
 
             </dd>
@@ -1148,9 +1141,7 @@ identifying which operation this call is performing/waiting for.</p>
                     &mdash;
                 <section class="phpdocumentor-description"><p><code class="prettyprint">ran</code> is
 <code class="prettyprint">true</code> only when <code class="prettyprint">$startRefresh</code> was actually invoked by THIS call;
-<code class="prettyprint">kind</code> is always the kind that OWNS the returned <code class="prettyprint">promise</code> (THIS call's
-<code class="prettyprint">$kind</code> when <code class="prettyprint">ran</code> is <code class="prettyprint">true</code>, otherwise whichever kind is already
-in flight).</p>
+<code class="prettyprint">kind</code> is the kind that owns the returned <code class="prettyprint">promise</code>.</p>
 </section>
 
             </section>

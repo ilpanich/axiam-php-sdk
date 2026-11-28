@@ -110,6 +110,17 @@
 
 
 
+    <h4 id="toc-interfaces">
+        Interfaces
+        <a href="namespaces/axiam-sdk-amqp.html#toc-interfaces" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <dl class="phpdocumentor-table-of-contents">
+                    <dt class="phpdocumentor-table-of-contents__entry -interface"><a href="classes/Axiam-Sdk-Amqp-AuthzDelivery.html"><abbr title="\Axiam\Sdk\Amqp\AuthzDelivery">AuthzDelivery</abbr></a></dt><dd>One message read from the authorization requester&#039;s private reply queue, with the two
+ways a consumer can settle it (CONTRACT.md §8 &quot;Signed authorization responses&quot;). A seam
+so {@see AuthzRequester} can be driven without a broker.</dd>            <dt class="phpdocumentor-table-of-contents__entry -interface"><a href="classes/Axiam-Sdk-Amqp-AuthzTransport.html"><abbr title="\Axiam\Sdk\Amqp\AuthzTransport">AuthzTransport</abbr></a></dt><dd>The seam between {@see AuthzRequester} and a broker: it declares the requester&#039;s private
+reply queue, publishes requests, and pumps deliveries. {@see AmqpLibAuthzTransport} is the
+`php-amqplib` implementation; tests supply a fake.</dd>    </dl>
 
     <h4 id="toc-classes">
         Classes
@@ -120,13 +131,26 @@
                     <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-AmqpDropMessage.html"><abbr title="\Axiam\Sdk\Amqp\AmqpDropMessage">AmqpDropMessage</abbr></a></dt><dd>Poison-message sentinel. Application handlers throw this to signal that a
 message is unprocessable and must NOT be requeued (e.g. a permanently
 malformed or unsupported event) — distinct from a transient failure, which
-should be requeued for retry.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-Consumer.html"><abbr title="\Axiam\Sdk\Amqp\Consumer">Consumer</abbr></a></dt><dd>php-amqplib blocking consume loop with HMAC verify-before-handler
+should be requeued for retry.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-AmqpLibAuthzDelivery.html"><abbr title="\Axiam\Sdk\Amqp\AmqpLibAuthzDelivery">AmqpLibAuthzDelivery</abbr></a></dt><dd>Adapts a `php-amqplib` {@see AMQPMessage} to {@see AuthzDelivery}.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-AmqpLibAuthzTransport.html"><abbr title="\Axiam\Sdk\Amqp\AmqpLibAuthzTransport">AmqpLibAuthzTransport</abbr></a></dt><dd>{@see AuthzTransport} over a `php-amqplib` channel — the same library the SDK&#039;s §8
+{@see Consumer} and §22 reactor transport use.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-AuthzDecision.html"><abbr title="\Axiam\Sdk\Amqp\AuthzDecision">AuthzDecision</abbr></a></dt><dd>A VERIFIED answer to one {@see AuthzRequester::check()} (CONTRACT.md §8).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-AuthzRequester.html"><abbr title="\Axiam\Sdk\Amqp\AuthzRequester">AuthzRequester</abbr></a></dt><dd>The AMQP authorization requester (CONTRACT.md §8 &quot;Signed authorization responses&quot;,
+contract 1.68; N2, D-9). It publishes a signed `AuthzRequest` on `axiam.authz.request` with a
+private, exclusive, broker-named `reply_to` queue, and accepts an answer only when it
+verifies as the server&#039;s signed response to THAT request.</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-Consumer.html"><abbr title="\Axiam\Sdk\Amqp\Consumer">Consumer</abbr></a></dt><dd>php-amqplib blocking consume loop with HMAC verify-before-handler
 (CONTRACT.md §8, D-04).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-Hmac.html"><abbr title="\Axiam\Sdk\Amqp\Hmac">Hmac</abbr></a></dt><dd>HMAC-SHA256 verify-before-handler primitive for inbound AMQP messages
 (CONTRACT.md §8).</dd>            <dt class="phpdocumentor-table-of-contents__entry -class"><a href="classes/Axiam-Sdk-Amqp-ReplayGuard.html"><abbr title="\Axiam\Sdk\Amqp\ReplayGuard">ReplayGuard</abbr></a></dt><dd>NEW-4 (CONTRACT.md §8 &quot;v2 — Replay Protection&quot;, hard cutover) validation
 gates, checked ONLY AFTER a delivery&#039;s HMAC signature has already
 verified (see Hmac::verify / Consumer::verifyAndDispatch).</dd>    </dl>
 
 
+    <h4 id="toc-enums">
+        Enums
+        <a href="namespaces/axiam-sdk-amqp.html#toc-enums" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -enum"><a href="classes/Axiam-Sdk-Amqp-SignedEventType.html"><abbr title="\Axiam\Sdk\Amqp\SignedEventType">SignedEventType</abbr></a></dt><dd>The one signed AMQP event type a {@see Consumer} is configured for (CONTRACT.md §8 step 2c,
+contract 1.69 &quot;Typed: one configured type&quot;). A consumer checks the canonical bytes against this
+type&#039;s layout only; an application that consumes both types runs two consumers.</dd></dl>
 
 
 
@@ -148,8 +172,10 @@ verified (see Hmac::verify / Consumer::verifyAndDispatch).</dd>    </dl>
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                                                    <li><a href="namespaces/axiam-sdk-amqp.html#toc-classes">Classes</a></li>
-                                                                                                                    </ul>
+                                                                                <li><a href="namespaces/axiam-sdk-amqp.html#toc-interfaces">Interfaces</a></li>
+                                                            <li><a href="namespaces/axiam-sdk-amqp.html#toc-classes">Classes</a></li>
+                                                                                <li><a href="namespaces/axiam-sdk-amqp.html#toc-enums">Enums</a></li>
+                                                                            </ul>
             </li>
 
             
