@@ -14,6 +14,9 @@ declare(strict_types=1);
  *
  * Required environment variables:
  *   AXIAM_AMQP_SIGNING_KEY  - per-tenant AMQP HMAC signing secret
+ *   AXIAM_AMQP_TENANT_ID    - the tenant that secret belongs to (reported in discard events)
+ *   AXIAM_AMQP_EVENT_TYPE   - the ONE signed type this worker consumes: AuthzRequest or
+ *                             AuditEventMessage (run one worker per type)
  *   AMQP_HOST               - RabbitMQ host
  *   AMQP_PORT               - RabbitMQ port (default 5672)
  *   AMQP_USER               - RabbitMQ username
@@ -26,10 +29,22 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Axiam\Sdk\Amqp\AmqpDropMessage;
 use Axiam\Sdk\Amqp\Consumer;
+use Axiam\Sdk\Amqp\SignedEventType;
 
 $signingKey = getenv('AXIAM_AMQP_SIGNING_KEY');
 if ($signingKey === false || $signingKey === '') {
     fwrite(STDERR, "axiam-amqp-worker: AXIAM_AMQP_SIGNING_KEY is required\n");
+    exit(1);
+}
+
+$tenantId = getenv('AXIAM_AMQP_TENANT_ID');
+if ($tenantId === false || $tenantId === '') {
+    fwrite(STDERR, "axiam-amqp-worker: AXIAM_AMQP_TENANT_ID is required\n");
+    exit(1);
+}
+$type = SignedEventType::tryFrom((string) getenv('AXIAM_AMQP_EVENT_TYPE'));
+if ($type === null) {
+    fwrite(STDERR, "axiam-amqp-worker: AXIAM_AMQP_EVENT_TYPE must be AuthzRequest or AuditEventMessage\n");
     exit(1);
 }
 
@@ -44,7 +59,7 @@ if ($queue === false || $queue === '') {
     exit(1);
 }
 
-$consumer = new Consumer(signingKey: $signingKey);
+$consumer = new Consumer(signingKey: $signingKey, tenantId: $tenantId, type: $type);
 
 try {
     $consumer->consume(

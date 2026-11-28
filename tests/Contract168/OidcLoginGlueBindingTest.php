@@ -240,7 +240,7 @@ final class OidcLoginGlueBindingTest extends TestCase
 
     public function testCallbackWithAnotherLoginsCookieIsTheSame401(): void
     {
-        [$flow, , , $state] = $this->begun();
+        [$flow, , $rightCookie, $state] = $this->begun();
         $before = count($this->history);
         $called = false;
 
@@ -253,6 +253,12 @@ final class OidcLoginGlueBindingTest extends TestCase
         self::assertSame(self::UNIFORM_MESSAGE, $refused->message);
         self::assertFalse($called);
         self::assertCount($before, $this->history);
+
+        // GLUE-R1-4: the refusal consumed the state, so the browser that DID start the login,
+        // retrying with the right cookie, is refused too and nothing reaches the token endpoint.
+        $retry = $flow->complete($state, 'code', null, null, null, null, $rightCookie);
+        self::assertSame(401, $retry->status);
+        self::assertSame(0, $this->tokenRequests());
     }
 
     public function testTheBindingRefusalIsByteForByteTheUnknownStateRefusal(): void
@@ -332,6 +338,131 @@ final class OidcLoginGlueBindingTest extends TestCase
         self::assertTrue($clears($flow->complete(null, 'code', null, null, null, null, $cookie)), 'missing state');
         self::assertTrue($clears($flow->complete('never-issued', 'code', null, null, null, null, $cookie)), 'unknown state');
         self::assertTrue($clears($flow->complete($state, 'code', null, null, null, null, null)), 'binding refusal');
+    }
+
+    // ----------------------------------------------------------------------------------
+    // PHP-R1-2 / GLUE-R1-5: EVERY exit of the callback clears the binding cookie (§12.8 rule 1 (d))
+    // ----------------------------------------------------------------------------------
+
+    private static function clearsTheCookie(OidcLoginOutcome $outcome): bool
+    {
+        $header = (string) ($outcome->setCookie ?? '');
+
+        return str_starts_with($header, self::HOST_COOKIE . '=;') && str_contains($header, 'Max-Age=0');
+    }
+
+    public function testAThrowingOnSuccessStillClearsTheBindingCookie(): void
+    {
+        [$flow, , $cookie, $state] = $this->begun();
+
+        $outcome = $flow->complete($state, 'a-code', null, null, null, static function (): void {
+            throw new \RuntimeException('the application could not write its session');
+        }, $cookie, new \stdClass());
+
+        self::assertSame(OidcLoginOutcome::KIND_ERROR, $outcome->kind);
+        self::assertSame(500, $outcome->status);
+        self::assertTrue(self::clearsTheCookie($outcome), 'the error response must carry the clearing Set-Cookie');
+        self::assertStringNotContainsString('session', (string) $outcome->message, 'the application\'s exception text is not echoed');
+    }
+
+    public function testAStoreThatThrowsOnConsumeStillClearsTheBindingCookie(): void
+    {
+        $store = new class () implements OidcStateStoreInterface {
+            public function save(OidcStateEntry $entry): void
+            {
+            }
+
+            public function consume(string $state): ?OidcStateEntry
+            {
+                throw new \RuntimeException('store down');
+            }
+        };
+        $flow = new OidcLoginFlow($this->client([$this->discovery()]), $store, self::REDIRECT);
+
+        $outcome = $flow->complete('state', 'code', null, null, null, null, 'cookie');
+
+        self::assertSame(500, $outcome->status);
+        self::assertTrue(self::clearsTheCookie($outcome));
+    }
+
+    public function testAnExchangeThatEndsInAnAuthzErrorIsTheUniform401AndClearsTheCookie(): void
+    {
+        // A 409 from the token endpoint maps to AuthzError, an AxiamException that is NOT an
+        // AuthError (a 403 OAuth error body maps to OAuthProtocolError, which IS one).
+        $logger = new class () extends AbstractLogger {
+            /** @var list<string> */
+            public array $lines = [];
+
+            public function log(mixed $level, string|\Stringable $message, array $context = []): void
+            {
+                $this->lines[] = $message . ' ' . json_encode($context);
+            }
+        };
+        $store = new MemoryOidcStateStore();
+        $flow = new OidcLoginFlow(
+            $this->client([$this->discovery(), new Response(409, [], 'conflict')]),
+            $store,
+            self::REDIRECT,
+            null,
+            $logger,
+        );
+        $login = $flow->begin();
+
+        $called = false;
+        $outcome = $flow->complete(self::stateOf($login), 'code', null, null, null, function () use (&$called): void {
+            $called = true;
+        }, self::cookieValue($login));
+
+        self::assertSame(401, $outcome->status);
+        self::assertSame('authentication_failed', $outcome->error);
+        self::assertSame('the token exchange was refused', $outcome->message);
+        self::assertStringContainsString('AuthzError', implode("\n", $logger->lines), 'the exception class is logged');
+        self::assertTrue(self::clearsTheCookie($outcome));
+        self::assertFalse($called);
+    }
+
+    public function testNoExceptionTextOrTokenReachesTheLogWhenOnSuccessThrows(): void
+    {
+        $logger = new class () extends AbstractLogger {
+            /** @var list<string> */
+            public array $lines = [];
+
+            public function log(mixed $level, string|\Stringable $message, array $context = []): void
+            {
+                $this->lines[] = $message . ' ' . json_encode($context);
+            }
+        };
+        $flow = new OidcLoginFlow($this->client([$this->discovery(), $this->tokenResponse()]), new MemoryOidcStateStore(), self::REDIRECT, null, $logger);
+        $login = $flow->begin();
+
+        $flow->complete(self::stateOf($login), 'code', null, null, null, static function (): void {
+            throw new \RuntimeException('secret-exception-text');
+        }, self::cookieValue($login));
+
+        self::assertStringNotContainsString('secret-exception-text', implode("\n", $logger->lines));
+    }
+
+    // ----------------------------------------------------------------------------------
+    // N1: the in-memory state store is bounded
+    // ----------------------------------------------------------------------------------
+
+    public function testTheInMemoryStateStoreHoldsAtMostItsBoundAndEvictsTheOldest(): void
+    {
+        $store = new MemoryOidcStateStore(MemoryOidcStateStore::TTL_SECONDS, 3);
+        foreach (['s1', 's2', 's3', 's4'] as $state) {
+            $store->save(new OidcStateEntry($state, 'n', new Sensitive('v'), self::REDIRECT));
+        }
+
+        self::assertSame(3, $store->size());
+        self::assertNull($store->consume('s1'), 'the oldest entry was evicted');
+        self::assertNotNull($store->consume('s4'));
+        self::assertSame(10_000, MemoryOidcStateStore::DEFAULT_MAX_ENTRIES);
+    }
+
+    public function testTheStateStoreRefusesANonPositiveBound(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new MemoryOidcStateStore(MemoryOidcStateStore::TTL_SECONDS, 0);
     }
 
     public function testTheCookieValueAndItsDigestAreNeverLogged(): void

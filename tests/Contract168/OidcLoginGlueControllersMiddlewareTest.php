@@ -45,7 +45,7 @@ final class OidcLoginGlueControllersMiddlewareTest extends TestCase
         yield 'Symfony' => [SymfonyLogin::class, SymfonyCallback::class];
     }
 
-    private function flow(): OidcLoginFlow
+    private function flow(?\Closure $allowReturnTo = null): OidcLoginFlow
     {
         $discovery = new PsrResponse(200, [], (string) json_encode([
             'issuer' => self::BASE_URL,
@@ -69,7 +69,7 @@ final class OidcLoginGlueControllersMiddlewareTest extends TestCase
         $stack->push(Middleware::history($this->history));
         $client = new AxiamClient(self::BASE_URL, 'acme-tenant', oidcClientId: 'my-app', oidcTenantId: '55555555-5555-5555-5555-555555555555', transportHandler: $stack);
 
-        return new OidcLoginFlow($client, new MemoryOidcStateStore(), self::REDIRECT);
+        return new OidcLoginFlow($client, new MemoryOidcStateStore(), self::REDIRECT, null, new \Psr\Log\NullLogger(), $allowReturnTo);
     }
 
     private function tokenRequests(): int
@@ -192,5 +192,88 @@ final class OidcLoginGlueControllersMiddlewareTest extends TestCase
         self::assertInstanceOf(JsonResponse::class, $response, 'no redirect: the JSON summary');
         self::assertSame(200, $response->getStatusCode());
         self::assertStringNotContainsString('evil.example', (string) $response->headers->get('Location'));
+    }
+
+    /**
+     * Decision 7 (login-glue-binding.md, TYP-R3-1): the `Location` of the callback's redirect
+     * carries the percent-encoded form of the destination, produced by the adapter where it
+     * writes the header, whatever the application's `allowReturnTo` admitted. The destination
+     * reaches the flow DECODED (the framework already decoded the `return_to` query parameter).
+     *
+     * @return iterable<string, array{string, string}> [raw return_to, expected Location]
+     */
+    public static function redirectTargets(): iterable
+    {
+        yield 'a space' => ['/a b', '/a%20b'];
+        yield 'a non-ASCII character' => ['/café', '/caf%C3%A9'];
+        yield 'a three-byte character' => ['/€', '/%E2%82%AC'];
+        yield 'an existing escape is kept' => ['/a%20b', '/a%20b'];
+        yield 'a percent that starts no escape' => ['/100%', '/100%25'];
+        yield 'a CR/LF an integrator predicate admitted' => ["/a\r\nSet-Cookie: x=y", '/a%0D%0ASet-Cookie:%20x=y'];
+        yield 'quote, angle brackets and backtick' => ['/a"<>`', '/a%22%3C%3E%60'];
+        yield 'a percent before a percent-escape' => ['/%%41', '/%25%41'];
+        yield 'a truncated escape' => ['/a%2', '/a%252'];
+        yield 'a backslash an integrator predicate admitted is kept' => ['/a\\b', '/a\\b'];
+        yield 'invalid UTF-8 becomes U+FFFD' => ["/a\xffb", '/a%EF%BF%BDb'];
+        yield 'a raw 0xFF byte (returnTo=%FF) is U+FFFD, not %FF' => ["/\xff", '/%EF%BF%BD'];
+        yield 'a truncated 3-byte sequence is ONE U+FFFD' => ["/a\xE2\x82b", '/a%EF%BF%BDb'];
+        yield 'a truncated 4-byte sequence is ONE U+FFFD' => ["/a\xF0\x9F\x98b", '/a%EF%BF%BDb'];
+        yield 'an overlong lead is TWO U+FFFD' => ["/\xC0\x80", '/%EF%BF%BD%EF%BF%BD'];
+        yield 'a surrogate (ED A0 80) is three U+FFFD' => ["/\xED\xA0\x80", '/%EF%BF%BD%EF%BF%BD%EF%BF%BD'];
+        yield 'above U+10FFFF (F4 90 80 80) is four U+FFFD' => ["/\xF4\x90\x80\x80", '/%EF%BF%BD%EF%BF%BD%EF%BF%BD%EF%BF%BD'];
+        yield 'truncation at the end of the string is ONE U+FFFD' => ["/a\xE2\x82", '/a%EF%BF%BD'];
+        yield 'a valid 4-byte character is untouched' => ["/\u{1F600}", '/%F0%9F%98%80'];
+        yield 'plain path with query is untouched' => ['/dashboard?tab=1&x=2#top', '/dashboard?tab=1&x=2#top'];
+    }
+
+    /**
+     * @dataProvider redirectTargets
+     */
+    public function testTheCallbackRedirectLocationIsPercentEncodedAsciiInBothFrameworks(string $returnTo, string $expected): void
+    {
+        foreach ([[LaravelLogin::class, LaravelCallback::class], [SymfonyLogin::class, SymfonyCallback::class]] as [$login, $callback]) {
+            // A predicate that admits everything, standing in for an integrator who widened the rule.
+            $flow = $this->flow(static fn (string $candidate): bool => true);
+            $loginRequest = Request::create('/login');
+            $loginRequest->query->set('return_to', $returnTo);
+            [$state, $value] = self::parseLogin((new $login($flow))($loginRequest));
+
+            $response = (new $callback($flow))(Request::create('/callback?state=' . $state . '&code=a-code', 'GET', [], [self::COOKIE => $value]));
+
+            self::assertInstanceOf(RedirectResponse::class, $response, $login);
+            $location = (string) $response->headers->get('Location');
+            self::assertSame($expected, $location, $callback);
+            self::assertSame(1, preg_match('/^[\x21-\x7e]*$/', $location), 'pure visible ASCII: no space, CR, LF or byte above 0x7e');
+            self::assertCount(1, $response->headers->getCookies(), 'no header was injected; only the clearing cookie is set');
+            self::assertSame(self::COOKIE, $response->headers->getCookies()[0]->getName());
+            self::assertSame(1, $this->tokenRequests(), 'the sign-in completed once');
+        }
+    }
+
+    /**
+     * A non-ASCII `successRedirect` (given to `complete()`, which the shipped callback controllers do
+     * not pass) is encoded by the adapter too, and `$onSuccess` runs exactly once.
+     *
+     * @dataProvider frameworks
+     *
+     * @param class-string $login
+     * @param class-string $callback
+     */
+    public function testANonAsciiSuccessRedirectIsEncodedAndOnSuccessRunsOnce(string $login, string $callback): void
+    {
+        $flow = $this->flow();
+        [$state, $value] = self::parseLogin((new $login($flow))(Request::create('/login')));
+        $calls = 0;
+
+        $outcome = $flow->complete($state, 'a-code', null, null, '/café €', static function () use (&$calls): void {
+            ++$calls;
+        }, $value, new Request());
+        $response = $login::toResponse($outcome);
+
+        self::assertInstanceOf(RedirectResponse::class, $response);
+        self::assertSame('/caf%C3%A9%20%E2%82%AC', $response->headers->get('Location'));
+        self::assertSame(1, $calls, 'onSuccess ran once');
+        self::assertSame(1, $this->tokenRequests());
+        self::assertSame(self::COOKIE, $response->headers->getCookies()[0]->getName());
     }
 }

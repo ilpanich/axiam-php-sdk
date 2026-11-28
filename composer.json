@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "require": {
     "php": ">=8.3",
+    "ext-curl": "*",
     "ext-sodium": "*",
     "guzzlehttp/guzzle": "^7.16 || ^8.3",
     "php-amqplib/php-amqplib": "^3.7.5",

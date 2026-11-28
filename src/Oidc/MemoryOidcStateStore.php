@@ -8,7 +8,10 @@ namespace Axiam\Sdk\Oidc;
  * In-memory reference implementation of {@see OidcStateStoreInterface} (CONTRACT.md
  * §12.3 rule 1).
  *
- * Per-instance (never process/static-global), single-use, 10-minute TTL. Expired
+ * Per-instance (never process/static-global), single-use, 10-minute TTL, and bounded at
+ * {@see self::DEFAULT_MAX_ENTRIES} entries: every login request saves one, whoever sent it, so an
+ * unbounded map is memory an unauthenticated client can grow. At the bound a save evicts the
+ * oldest entry (that login, if still in flight, restarts). Expired
  * entries are dropped lazily on {@see self::consume()} and swept opportunistically on
  * {@see self::save()} — never a background timer/thread, since a library must not keep
  * a long-running worker (Swoole/RoadRunner) process alive on its own.
@@ -33,20 +36,37 @@ final class MemoryOidcStateStore implements OidcStateStoreInterface
      */
     public const TTL_SECONDS = 600;
 
+    /**
+     * The most entries held at once unless the constructor says otherwise. Ten thousand
+     * in-flight logins is far beyond any legitimate single-process load.
+     */
+    public const DEFAULT_MAX_ENTRIES = 10_000;
+
     /** @var array<string,array{entry: OidcStateEntry, expiresAt: int}> */
     private array $entries = [];
 
     private readonly int $ttlSeconds;
+
+    private readonly int $maxEntries;
 
     /**
      * @param int $ttlSeconds Entry lifetime in seconds. Defaults to {@see self::TTL_SECONDS}
      *                        (10 minutes) and is **clamped to it**: a shorter TTL is
      *                        honoured (useful in tests), a longer one is reduced, because
      *                        §12.3 rule 1 fixes 10 minutes as the maximum.
+     * @param int $maxEntries The most entries held at once (default
+     *                        {@see self::DEFAULT_MAX_ENTRIES}); saving beyond it evicts the
+     *                        oldest. Must be at least 1.
+     *
+     * @throws \InvalidArgumentException when `$maxEntries` is less than 1.
      */
-    public function __construct(int $ttlSeconds = self::TTL_SECONDS)
+    public function __construct(int $ttlSeconds = self::TTL_SECONDS, int $maxEntries = self::DEFAULT_MAX_ENTRIES)
     {
+        if ($maxEntries < 1) {
+            throw new \InvalidArgumentException('MemoryOidcStateStore maxEntries must be at least 1');
+        }
         $this->ttlSeconds = min($ttlSeconds, self::TTL_SECONDS);
+        $this->maxEntries = $maxEntries;
     }
 
     /** Number of unexpired entries currently held. Intended for tests and metrics. */
@@ -61,6 +81,12 @@ final class MemoryOidcStateStore implements OidcStateStoreInterface
     public function save(OidcStateEntry $entry): void
     {
         $this->sweep();
+        // Re-saving a state replaces it and makes it the newest.
+        unset($this->entries[$entry->state]);
+        // A PHP array iterates in insertion order, so the first key is the oldest entry.
+        while (count($this->entries) >= $this->maxEntries) {
+            unset($this->entries[array_key_first($this->entries)]);
+        }
         $this->entries[$entry->state] = ['entry' => $entry, 'expiresAt' => time() + $this->ttlSeconds];
     }
 

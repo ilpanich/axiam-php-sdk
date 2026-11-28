@@ -9,9 +9,9 @@ namespace Axiam\Sdk\Amqp;
  * gates, checked ONLY AFTER a delivery's HMAC signature has already
  * verified (see Hmac::verify / Consumer::verifyAndDispatch).
  *
- * Because Hmac::verify re-serializes the parsed body (minus
- * `hmac_signature`) in its original insertion order, `nonce` and
- * `issued_at` are already covered by the verified HMAC bytes — this class
+ * `nonce` and `issued_at` are inside the received bytes Hmac::verify
+ * checks (the body minus its trailing `hmac_signature` member), so they
+ * are already covered by the verified HMAC — this class
  * adds no canonicalization logic of its own. It only enforces the three
  * ADDITIONAL gates the server also enforces (crates/axiam-amqp/src/messages.rs):
  *

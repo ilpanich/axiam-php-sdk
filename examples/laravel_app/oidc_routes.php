@@ -29,6 +29,12 @@ declare(strict_types=1);
  *   AXIAM_OIDC_REDIRECT_URI    - MUST be this app's own public callback URL
  *   AXIAM_OIDC_SCOPE           - optional, defaults to "openid"
  *
+ * Binding cookie (§12.8): the login route sets `__Host-axiam_oidc_bind` (`axiam_oidc_bind`
+ * on a plain-HTTP loopback `redirect_uri`) and the callback reads it back. Put both routes
+ * under the same cookie-encryption middleware (the `web` group does), or list both cookie
+ * names in `EncryptCookies::$except`: the failure is one route inside `EncryptCookies` and
+ * the other outside it.
+ *
  * The default `Axiam\Sdk\Oidc\OidcStateStoreInterface` binding is
  * `Axiam\Sdk\Oidc\MemoryOidcStateStore` (single-process only) — override that binding
  * in your own `AppServiceProvider` with a Redis/database-backed implementation for a

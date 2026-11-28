@@ -17,7 +17,12 @@ use Attribute;
  * verified token's `scope` claim (the space-separated list of RFC 6749 §3.3) and never makes a
  * server round-trip. It passes when the token's scopes contain at least one of
  * {@see self::$scopes} (whole entries, exact and case-sensitive — `administrator` does not
- * satisfy `admin`); a route that needs several scopes stacks the attribute.
+ * satisfy `admin`). A route that needs several scopes stacks the attribute (the attribute is
+ * repeatable): the instances are ANDed, so the route passes only when EVERY instance is
+ * satisfied, each by at least one of its own scopes —
+ * `#[RequireScope('documents:read')] #[RequireScope('documents:write')]` needs both. Stacking
+ * works on a method and on a class; as with the other attributes, instances on the method
+ * replace those on the class rather than adding to them.
  *
  * It reads ONLY `scope`. A scope says what the *client* was authorised to ask for, not what
  * the *user* holds: it is coarser than {@see RequireAccess}, which is the authoritative check,
@@ -26,7 +31,7 @@ use Attribute;
  * An unauthenticated request is a 401; a token with no `scope` claim, or one that is not a
  * string, or whose scopes do not contain any required scope, is a 403.
  */
-#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
 final class RequireScope
 {
     /** @var list<string> */

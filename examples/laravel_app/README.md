@@ -51,7 +51,7 @@ config file to get started:
   `AxiamClient::verifyLocally()` — the no-fallback seam §10.1 rule 8 requires of a request
   guard, so the decision is always about the *caller's* credential and never the
   application's own session (SEC-085) — populates the `axiam_user` request attribute
-  (`user_id`/`tenant_id`/`roles`), and returns a standardized `401` JSON error body on any
+  (`user_id`/`tenant_id`/`roles`/`scopes`), and returns a standardized `401` JSON error body on any
   failure. This bridge never re-implements JWKS/refresh logic — every security decision
   is made by `AxiamClient` itself.
 - The **`axiam`** Gate ability (authorization, D-02): `can:axiam,<resource>,<action>`
